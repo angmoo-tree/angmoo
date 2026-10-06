@@ -450,5 +450,6 @@
   "대화 한도를 확인해 주세요.": "Check the conversation limit.",
   "대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.": "Could not start the conversation. Try again later.",
   "{{value0}}의 관계망 열기": "Open {{value0}} relationships",
-  "프로필 통계를 불러오지 못했어요.": "Could not load profile statistics."
+  "프로필 통계를 불러오지 못했어요.": "Could not load profile statistics.",
+  "현재 설치 · 로컬 세션": "Current installation · Local session"
 }

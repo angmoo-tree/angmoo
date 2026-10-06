@@ -4,7 +4,12 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
   let embedding = { scope: { world_id: worldId, subject_world_character_id: subjectId }, enabled: false,
     provider: "google", model: "gemini-embedding-2", credential_id: null as string | null,
     profile: "fixture-profile", version: 0, ready: false, reason_code: "memory_embedding_disabled" as string | null,
-    runtime_status: "ready", available_credentials: [{ id: "fixture-google-key", label: "기존 Google 설정" }] };
+    runtime_status: "ready", available_credentials: [], preparation_state: "needs_preparation", preparation_revision: 0 };
+  const keys = {
+    consolidation: {provider:"google",model:"gemini-3.1-flash-lite",thinking_level:"high",has_key:false,fingerprint:null as string|null,revision:0,configuration_revision:0},
+    embedding: {provider:"google",model:"gemini-embedding-2",thinking_level:null as string|null,has_key:false,fingerprint:null as string|null,revision:0,configuration_revision:0},
+  };
+  let preparationRequests = 0;
   let manualPolls = 0;
   let manualRequests = 0;
   let manualKey: string | null = null;
@@ -14,7 +19,7 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     scope: { world_id: worldId, subject_world_character_id: subjectId }, version: 0,
     ai_enabled: false, shutdown_enabled: true, schedule_enabled: false,
     local_time: "22:30", timezone: "Asia/Seoul", next_due_at: null as string | null,
-    model_id: null as string | null, thinking_level: "high", profile_version: 0, pending_count: 32,
+    model_id: "gemini-3.1-flash-lite" as string | null, thinking_level: "high", profile_version: 0, pending_count: 32,
     status: "disabled", last_code: null as string | null, last_completed_at: null as string | null,
     available_models: ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"],
     stored_count: 4, storage_limit: 100000, capacity_blocked: false, can_run: true, retryable: true,
@@ -23,6 +28,26 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
   const handle = async (route: Route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    if (/\/credentials\/(consolidation|embedding)$/.test(path)) {
+      const purpose = path.split("/").at(-1) as keyof typeof keys;
+      if (request.method() === "PUT") {
+        const body = request.postDataJSON();
+        expect(body.credential_id).toBeUndefined(); expect(body.expected_revision).toBe(keys[purpose].revision);
+        keys[purpose] = {...keys[purpose],provider:body.provider,model:body.model,thinking_level:body.thinking_level,
+          has_key:keys[purpose].has_key || Boolean(body.api_key),fingerprint:"synthetic-fingerprint",revision:keys[purpose].revision+1};
+        if (purpose === "consolidation") {
+          saved = {...saved,model_id:body.model,thinking_level:body.thinking_level,profile_version:saved.profile_version+1};
+          keys[purpose].configuration_revision=saved.profile_version;
+        }
+      }
+      await route.fulfill({json:keys[purpose]}); return true;
+    }
+    if (path.endsWith("/memory/embedding-preparation")) {
+      expect(request.method()).toBe("POST"); expect(++preparationRequests).toBe(1);
+      expect(request.postDataJSON().expected_revision).toBe(embedding.preparation_revision);
+      embedding={...embedding,preparation_state:"ready",preparation_revision:embedding.preparation_revision+1};
+      await route.fulfill({status:202,json:embedding}); return true;
+    }
     const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
       accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
       saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null, workflow_version: 1, followup: "relationships",
@@ -52,7 +77,7 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
         const body = request.postDataJSON();
         expect(body.expected_version).toBe(embedding.version);
         embedding = { ...embedding, enabled: body.enabled, credential_id: body.credential_id,
-          version: embedding.version + 1, ready: body.enabled, reason_code: body.enabled ? null : "memory_embedding_disabled" };
+          version: embedding.version + 1, ready: body.enabled && keys.embedding.has_key, reason_code: body.enabled ? null : "memory_embedding_disabled" };
       }
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(embedding) });
       return true;
@@ -93,16 +118,22 @@ export async function verifyMemoryBatchControls(page: Page) {
   await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
   await embedding.getByLabel("의미 검색 사용", { exact: true }).check();
   await expect(embedding.getByRole("button", { name: "의미 검색 설정 저장" })).toBeDisabled();
-  await expect(embedding.getByLabel("임베딩 모델", { exact: true })).toBeDisabled();
-  await embedding.getByLabel("의미 검색용 API 설정", { exact: true }).selectOption("fixture-google-key");
+  await expect(embedding.getByText("Gemini Embedding 2",{exact:true})).toBeVisible();
+  await expect(embedding.getByLabel("의미 검색용 API 설정",{exact:true})).toHaveCount(0);
+  await embedding.getByLabel("새 API key", {exact:true}).fill("own-synthetic-embedding-key");
+  await embedding.getByRole("button",{name:"키·모델 저장",exact:true}).click();
+  await expect(embedding.getByLabel("새 API key",{exact:true})).toHaveValue("");
   await embedding.getByRole("button", { name: "의미 검색 설정 저장" }).click();
   await expect(embedding.getByText("의미 검색 설정을 저장했어요.", { exact: true })).toBeVisible();
   await expect(embedding.getByText("의미 검색 설정됨", { exact: true })).toBeVisible();
+  await expect(embedding.getByText("검색 자료 준비 필요",{exact:true})).toBeVisible();
+  await embedding.getByRole("button",{name:"검색 자료 준비 시작",exact:true}).click();
+  await expect(embedding.getByText("검색 자료 준비됨",{exact:true})).toBeVisible();
   await embedding.getByLabel("의미 검색 사용", { exact: true }).uncheck();
   await embedding.getByRole("button", { name: "의미 검색 설정 저장" }).click();
   await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
-  await expect(embedding.getByLabel("의미 검색용 API 설정", { exact: true })).toHaveValue("fixture-google-key");
-  const region = page.getByRole("region", { name: "기억 정리 예약" });
+  await expect(embedding.getByText("API key 저장됨",{exact:false})).toBeVisible();
+  const region = page.getByRole("region", { name: "기억·관계 정리", exact:true });
   await expect(region.getByText("AI 기억 정리 사용 안 함", { exact: false })).toBeVisible();
   await region.getByLabel("AI 선별·정리 사용", { exact: true }).check();
   await expect(region.getByRole("button", { name: "정리 설정 저장" })).toBeDisabled();
@@ -110,14 +141,17 @@ export async function verifyMemoryBatchControls(page: Page) {
     "Gemini 3.5 Flash-Lite (high)", "Gemini 3.5 Flash-Lite (medium)",
     "Gemini 3.1 Flash-Lite (high)", "Gemini 3.1 Flash-Lite (medium)",
   ]);
-  await region.getByRole("combobox").selectOption("gemini-3.1-flash-lite:medium");
+  await region.getByRole("combobox").selectOption("google:gemini-3.1-flash-lite:medium");
+  await region.getByLabel("새 API key",{exact:true}).fill("own-synthetic-consolidation-key");
+  await region.getByRole("button",{name:"키·모델 저장",exact:true}).click();
+  await expect(region.getByLabel("새 API key",{exact:true})).toHaveValue("");
   await region.getByLabel("선택한 모델로 경험의 발췌가 전송되고 API 비용이 발생할 수 있음에 동의합니다.").check();
   await region.getByLabel("매일 정해진 시각에 정리").check();
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
   await region.getByRole("button", { name: "정리 설정 저장" }).click();
   await expect(region.getByText("기억 정리 설정을 저장했어요. 저장만으로 AI를 호출하지 않습니다.")).toBeVisible();
   await expect(region.getByLabel("예약 시각 · Asia/Seoul")).toHaveValue("23:15");
-  await expect(region.getByRole("combobox")).toHaveValue("gemini-3.1-flash-lite:medium");
+  await expect(region.getByRole("combobox")).toHaveValue("google:gemini-3.1-flash-lite:medium");
   await expect(region.getByText("예약 또는 종료를 기다리고 있어요", { exact: false })).toBeVisible();
   await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toBeVisible();
   await region.getByRole("button", { name: "실패한 정리 다시 시도" }).click();

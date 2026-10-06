@@ -1,4 +1,6 @@
 "use client";
+
+import { PersonaStatusCard, ActivitySummaryStatusCard } from "@/components/ui/status-cards";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 
@@ -585,36 +587,12 @@ export function StateMeta({ label, value }: { label: string; value: string }) {
 
 export function ActivitySummaryCard({ agent }: { agent: AgentDetailRead }) {
   const uiText = useUiText("characters");
-  return (
-    <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("활동 요약")}</h2>
-        <div className="shrink-0 text-right">
-          <span className="block text-[15px] font-bold text-[#667085]">
-            {agent.activity_summary.within_active_hours ? uiText("활동 시간대") : uiText("쉬는 시간대")}
-          </span>
-          <span className="mt-1 block text-[13px] font-bold text-[#98a2b3]">
-            {formatActiveHours(agent)}
-          </span>
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Metric
-          label={uiText("오늘 게시글 작성")}
-          value={`${agent.activity_summary.today_post_count}/${agent.activity_summary.max_posts_per_day}`}
-        />
-        <Metric
-          label={uiText("오늘 리플 작성")}
-          value={`${agent.activity_summary.today_comment_count}/${agent.activity_summary.max_comments_per_day}`}
-        />
-        <Metric label={uiText("오늘 좋아요")} value={uiText("{{value0}}회", {value0: agent.activity_summary.today_like_count})} />
-        <Metric
-          label={uiText("가능한 행동")}
-          value={formatActionList(agent.activity_summary.allowed_actions)}
-        />
-      </div>
-    </section>
-  );
+  return <ActivitySummaryStatusCard title={uiText("활동 요약")} time={<>{uiText(agent.activity_summary.within_active_hours ? "활동 시간대" : "쉬는 시간대")}<br />{formatActiveHours(agent)}</>} metrics={[
+    { label: uiText("오늘 게시글 작성"), value: `${agent.activity_summary.today_post_count}/${agent.activity_summary.max_posts_per_day}` },
+    { label: uiText("오늘 리플 작성"), value: `${agent.activity_summary.today_comment_count}/${agent.activity_summary.max_comments_per_day}` },
+    { label: uiText("오늘 좋아요"), value: uiText("{{value0}}회", { value0: agent.activity_summary.today_like_count }) },
+    { label: uiText("가능한 행동"), value: formatActionList(agent.activity_summary.allowed_actions) },
+  ]} />;
 }
 
 export function StatusPersonaSections({ agent }: { agent: AgentDetailRead }) {
@@ -632,27 +610,7 @@ export function StatusPersonaSections({ agent }: { agent: AgentDetailRead }) {
       ? sections
       : [{ label: uiText("페르소나 요약"), value: agent.character.persona_summary }];
 
-  return (
-    <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
-      <h2 className="mb-4 text-[24px] font-extrabold text-[#101828]">
-        {uiText("앵무 페르소나")}</h2>
-      <div className="grid gap-3">
-        {visibleSections.map((section) => (
-          <article
-            key={section.label}
-            className="rounded-[22px] border border-[#eaedf2] bg-[#f9fafb] px-5 py-4"
-          >
-            <h3 className="mb-2 text-[13px] font-bold text-[#98a2b3]">
-              {section.label}
-            </h3>
-            <p className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words pr-1 text-[15px] font-medium leading-6 text-[#475467]">
-              {section.value}
-            </p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+  return <PersonaStatusCard title={uiText("앵무 페르소나")} sections={visibleSections} />;
 }
 
 export function PromotionUsageSettings({

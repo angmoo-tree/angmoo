@@ -10,13 +10,14 @@ import { getCatalog, getGeneration, saveGeneration, getComfySample } from "../ap
 import type { Catalog, GenerationSettings, GenerationWrite, Provider, Workflow, Connection } from "../types/media";
 import { ImagePicker } from "./image-picker";
 import styles from "./media-settings.module.css";
+import { NovelOptionsEditor, NovelReferenceEditor, novelDefaults } from "./novel-options-editor";
 
 const labels: Record<string, string> = { "nai-diffusion-4-5-full": "NovelAI V4.5 Full", "krea-v2/turbo": "Krea 2 Turbo", "z-image-turbo": "Z-Image Turbo", "nano-banana-2": "Nano Banana 2", "krea/krea-2-medium-turbo": "Krea 2 Medium Turbo", "google/gemini-3.1-flash-image": "Nano Banana 2", "openai/gpt-image-2.5-flare": "GPT Image 2.5 Flare" };
-const novelDefaults = { mode: "opus_free", width: 1024, height: 1024, steps: 28, scale: 5, sampler: "k_euler_ancestral", noise_schedule: "karras", seed: -1, cfg_rescale: 0, decrisper: false, variety_boost: false, reference_strength: 1, reference_fidelity: 1, reference_type: "character&style" };
+
 function initial(saved: GenerationSettings): GenerationWrite {
   const provider = saved.provider ?? "novelai";
-  return { expected_revision: saved.revision, installation_expected_revision: saved.installation_revision, provider, model: saved.model ?? "nai-diffusion-4-5-full", auto_enabled: saved.auto_enabled,
-    daily_limit: saved.daily_limit, installation_daily_limit: saved.installation_daily_limit, appearance: saved.appearance,
+  return { expected_revision: saved.revision, provider, model: saved.model ?? "nai-diffusion-4-5-full", auto_enabled: saved.auto_enabled,
+    daily_limit: saved.daily_limit, appearance: saved.appearance,
     style: saved.style, negative: saved.negative, reference_enabled: saved.active_profile.reference_initialized === false ? null : saved.active_profile.reference_enabled ?? false,
     reference_asset_id: saved.reference_asset_id, options: saved.active_profile.options ?? novelDefaults };
 }
@@ -54,26 +55,13 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
   const referenceSupported = value.provider === "comfyui" ? Boolean(connection?.reference_supported) : model?.reference_supported;
   const promptUnverified = value.provider === "novelai" && model?.prompt_validation?.exact_verified === false;
   const promptUnavailable = value.provider === "novelai" && model?.prompt_validation?.generation_available === false;
-  const setOption = (name: string, next: unknown) => {
-    const options = { ...value.options, [name]: next };
-    if (free && ["width", "height"].includes(name)) {
-      const other = name === "width" ? "height" : "width";
-      options[other] = Math.min(Number(options[other]), Math.floor(1048576 / Math.max(64, Number(next)) / 64) * 64);
-    }
-    setValue({ ...value, options });
-  };
   return <section className={styles.panel} aria-label={uiText("SNS 이미지 생성 설정")}><h3>{uiText("SNS 게시글 이미지 생성")}</h3>
     <p>{uiText("새 Routine 게시글의 이번 장면을 외형·스타일과 합쳐 이미지 1장을 생성합니다. 기존 게시글은 자동 생성하지 않습니다.")}</p>
     <div className={styles.row}>
       <label>{uiText("이미지 서비스")}<select disabled={busy} value={value.provider} onChange={e => { const provider = e.target.value as Provider; const first = catalog.models.find(m => m.provider === provider); choose(provider, first?.id ?? "workflow", provider === "novelai" ? "opus_free" : ""); }}><option value="novelai">NovelAI</option><option value="comfyui">ComfyUI</option><option value="nanogpt">NanoGPT</option><option value="openrouter">OpenRouter</option></select></label>
       {value.provider !== "comfyui" ? <label>{uiText("이미지 모델")}<select disabled={busy} value={value.model} onChange={e => choose(value.provider, e.target.value, value.provider === "novelai" ? String(value.options.mode) : "")}>{catalog.models.filter(m => m.provider === value.provider).map(m => <option key={m.id} value={m.id}>{labels[m.id] ?? m.id}</option>)}</select></label> : <p>{uiText("workflow에 등록된 모델을 사용합니다.")}</p>}
     </div>
-    {value.provider === "novelai" ? <><label>{uiText("비용 모드")}<select disabled={busy} value={String(value.options.mode)} onChange={e => choose("novelai", value.model, e.target.value)}><option value="opus_free">{uiText("Anlas 사용 안 함 — Opus 전용")}</option><option value="allow_anlas">{uiText("Anlas 사용 허용")}</option></select></label>
-      <p className={styles.note}>{free ? uiText("활성 Opus 혜택을 확인해야 합니다. Steps 28 이하·면적 1,048,576픽셀 이하·1장으로 제한하며 참조 이미지를 보내지 않습니다.") : uiText("설정에 따른 Anlas 사용을 허용합니다. 참조 이미지 1장당 생성 1장마다 5 Anlas가 추가됩니다. 실제 사용량이 0일 수도 있습니다.")}</p>
-      <div className={styles.row}>{(["width", "height", "steps", "scale", "cfg_rescale", "seed"] as const).map(name => <label key={name}>{{ width: uiText("가로"), height: uiText("세로"), steps: "Steps", scale: "CFG scale", cfg_rescale: "CFG rescale", seed: uiText("Seed (-1: 무작위)") }[name]}<input type="number" disabled={busy} value={Number(value.options[name])} min={name === "seed" ? -1 : name === "width" || name === "height" ? 64 : name === "steps" ? 1 : 0} max={name === "steps" ? free ? 28 : 50 : name === "scale" ? 10 : name === "cfg_rescale" ? 1 : undefined} step={name === "width" || name === "height" ? 64 : name === "scale" || name === "cfg_rescale" ? .1 : 1} onChange={e => setOption(name, Number(e.target.value))} /></label>)}</div>
-      <div className={styles.row}><label>Sampler<select value={String(value.options.sampler)} onChange={e => setOption("sampler", e.target.value)}>{["k_euler", "k_euler_ancestral", "k_dpmpp_2s_ancestral", "k_dpmpp_2m", "k_dpmpp_sde", "ddim_v3"].map(item => <option key={item}>{item}</option>)}</select></label><label>Noise schedule<select value={String(value.options.noise_schedule)} onChange={e => setOption("noise_schedule", e.target.value)}>{["native", "karras", "exponential", "polyexponential"].map(item => <option key={item}>{item}</option>)}</select></label></div>
-      {(["decrisper", "variety_boost"] as const).map(name => <label className={styles.toggle} key={name}><input type="checkbox" checked={Boolean(value.options[name])} onChange={e => setOption(name, e.target.checked)} />{name === "decrisper" ? "Decrisper" : "Variety Boost"}</label>)}<p className={styles.note}>{uiText("V4.5 Full에는 SMEA 옵션을 적용하지 않습니다. 로컬 T5 길이 검사는 예비 검사이며 서비스의 정확한 계산과 일치하는지는 미확인입니다. 자동 번역하지 않습니다.")}</p>
-    </> : null}
+    {value.provider === "novelai" ? <NovelOptionsEditor options={value.options} disabled={busy} onChange={options => setValue({ ...value, options })} onModeChange={mode => choose("novelai", value.model, mode)} /> : null}
     {value.provider === "nanogpt" || value.provider === "openrouter" ? <>
       <div className={styles.row}>{Object.entries(model?.parameters ?? {}).filter(([name]) => ["resolution", "aspect_ratio", "quality", "background", "seed", "output_compression"].includes(name)).map(([name, parameter]) => <label key={name}>{name}{parameter.values ? <select value={String(value.options[name] ?? "")} onChange={e => { const next = { ...value.options }; if (e.target.value) next[name] = e.target.value; else delete next[name]; setValue({ ...value, options: next }); }}><option value="">{uiText("서비스 기본값")}</option>{parameter.values.map(item => <option key={item} value={item}>{item}</option>)}</select> : <input type="number" min={parameter.min ?? 0} max={parameter.max} value={String(value.options[name] ?? "")} onChange={e => { const next = { ...value.options }; if (e.target.value) next[name] = Number(e.target.value); else delete next[name]; setValue({ ...value, options: next }); }} />}</label>)}</div>
       <p className={styles.note}>{uiText("모델마다 지원하는 입력이 다릅니다. 가격이 확인되지 않은 항목은 무료로 표시하지 않습니다. 다른 서비스나 모델로 자동 전환하지 않습니다.")}</p>
@@ -87,15 +75,15 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
     <label className={styles.toggle}><input type="checkbox" disabled={free || !referenceSupported || busy} checked={!free && Boolean(value.reference_enabled)} onChange={e => setValue({ ...value, reference_enabled: e.target.checked })} />{uiText("참조 이미지 사용")}</label>
     <p className={styles.note}>{free ? uiText("Opus 무차감 모드에서는 참조를 강제로 제외합니다. 등록한 사진은 유지됩니다.") : !referenceSupported ? uiText("참조를 지원하는 모델 또는 검증된 workflow가 필요합니다.") : uiText("직접 지정 → 캐릭터 카드 PNG → 프로필 사진 순으로 사용합니다. 사진이 없으면 텍스트 경로를 사용합니다.")}</p>
     <ImagePicker scopeKind="character" scopeId={characterId} value={value.reference_asset_id ? { id: value.reference_asset_id, url: `/api/v1/media/assets/${value.reference_asset_id}/content`, allowed: true } : null} onChange={asset => setValue({ ...value, reference_asset_id: asset?.id ?? null })} disabled={busy} onBusyChange={setUploading} />
-    {value.provider === "novelai" && !free && value.reference_enabled ? <div className={styles.row}><label>{uiText("참조 종류")}<select value={String(value.options.reference_type)} onChange={e => setOption("reference_type", e.target.value)}>{["character", "style", "character&style"].map(item => <option key={item}>{item}</option>)}</select></label>{["reference_strength", "reference_fidelity"].map(name => <label key={name}>{name === "reference_strength" ? "Strength" : "Fidelity"}<input type="number" min={0} max={1} step={.05} value={Number(value.options[name])} onChange={e => setOption(name, Number(e.target.value))} /></label>)}</div> : null}
+    {value.provider === "novelai" && !free && value.reference_enabled ? <NovelReferenceEditor options={value.options} disabled={busy} onChange={options => setValue({ ...value, options })} /> : null}
     <label>{uiText("이미지 API 키")}{value.provider === "comfyui" ? uiText("(서버 인증이 있을 때만)") : ""}<input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={saved?.has_api_key ? uiText("선택된 서비스에 저장된 키가 있습니다") : uiText("API 키를 입력해 주세요")} /></label>
     {value.provider === "comfyui" ? <>
-      <label className={styles.toggle}><input type="checkbox" checked={Boolean(value.options.partner_auth)} disabled={busy} onChange={e => setOption("partner_auth", e.target.checked)} />{uiText("Comfy Partner 계정 인증 사용")}</label>
+      <label className={styles.toggle}><input type="checkbox" checked={Boolean(value.options.partner_auth)} disabled={busy} onChange={e => setValue({ ...value, options: { ...value.options, partner_auth: e.target.checked } })} />{uiText("Comfy Partner 계정 인증 사용")}</label>
       <label>{uiText("Comfy 계정 API 키")}<input type="password" autoComplete="off" value={partnerKey} onChange={e => setPartnerKey(e.target.value)} placeholder={saved?.has_partner_api_key ? uiText("Comfy 계정 키가 저장되어 있습니다") : uiText("Partner 노드를 사용할 계정 키")} /></label>
       <p className={styles.note}>{uiText("Partner 노드의 Comfy Credits를 사용합니다. 서버 접속 키와 별도로 저장하며 workflow에는 키를 넣지 않습니다.")}</p>
       <Button type="button" variant="ghost" disabled={busy || !saved?.has_partner_api_key} onClick={async () => { if (!value) return; setBusy(true); try { const next = await saveGeneration(characterId, { ...value, auto_enabled: false, clear_partner_api_key: true }); setSaved(next); setValue(initial(next)); setPartnerKey(""); setNotice(uiText("Comfy 계정 키를 삭제했습니다.")); } catch (reason) { setError(reason instanceof Error ? uiText(reason.message) : uiText("계정 키를 삭제하지 못했습니다.")); } finally { setBusy(false); } }}>{uiText("Comfy 계정 키 삭제")}</Button>
     </> : null}
-    <div className={styles.row}><label>{uiText("캐릭터 일일 생성 시도 상한")}<input type="number" min={1} max={10000} value={value.daily_limit ?? ""} onChange={e => setValue({ ...value, daily_limit: e.target.value ? Number(e.target.value) : null })} /></label><label>{uiText("설치 전체 일일 생성 시도 상한")}<input type="number" min={1} max={10000} value={value.installation_daily_limit ?? ""} onChange={e => setValue({ ...value, installation_daily_limit: e.target.value ? Number(e.target.value) : null })} /></label></div>
+    <div className={styles.row}><label>{uiText("캐릭터 일일 생성 시도 상한")}<input type="number" min={1} max={10000} value={value.daily_limit ?? ""} onChange={e => setValue({ ...value, daily_limit: e.target.value ? Number(e.target.value) : null })} /></label></div>
     {saved?.reference_state ? <div aria-label={uiText("저장된 참조 적용 상태")}><p role="status">{uiText("저장된 참조 선호:")}{saved.reference_state.preferred ? "ON" : "OFF"} {uiText("· 실제 출처:")}{{ override: uiText("사용자 지정 이미지"), card: uiText("캐릭터 카드 이미지"), profile: uiText("프로필 이미지"), none: uiText("없음") }[saved.reference_state.source]}</p>
       <p className={styles.note}>{saved.reference_state.status === "available" ? uiText("저장된 설정의 참조 출처입니다. 실제 생성에는 생성 활성화와 입력 검증도 필요합니다.") : saved.reference_state.status === "forced_off" ? saved.reference_state.reason === "opus_free" ? uiText("Opus 전용 Anlas 사용 안 함 모드에서는 참조를 보내지 않습니다.") : uiText("선택한 모델은 참조 이미지를 지원하지 않습니다.") : saved.reference_state.status === "off" ? uiText("참조 사용이 꺼져 있습니다.") : saved.reference_state.status === "invalid" ? uiText("참조 이미지를 확인할 수 없습니다. 이미지를 교체하거나 설정을 확인해 주세요.") : saved.reference_state.generation_path === "unavailable" ? uiText("참조 선호는 ON이지만 사용할 이미지와 텍스트 경로가 없습니다.") : uiText("참조 선호는 ON이지만 사용할 이미지가 없어 텍스트 경로를 사용합니다.")}</p>
       {saved.reference_state.scene_only ? <p className={styles.note}>{uiText("저장된 참조 사진과 외형·스타일이 없어 이번 게시글의 장면만으로 생성합니다.")}</p> : null}
@@ -110,7 +98,7 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
 }
 
 const roles = ["positive", "negative", "width", "height", "steps", "cfg", "sampler", "scheduler", "seed", "denoise", "model", "vae", "clip_skip", "reference"];
-function ComfyEditor({ options, connection, onChange }: { options: Record<string, unknown>; connection?: Connection | null; onChange: (options: Record<string, unknown>) => void }) {
+export function ComfyEditor({ options, connection, onChange }: { options: Record<string, unknown>; connection?: Connection | null; onChange: (options: Record<string, unknown>) => void }) {
   const uiText = useUiText("media");
   const [path, setPath] = useState<"workflow" | "text_workflow">("workflow");
   const workflow = options[path] as Workflow | undefined;

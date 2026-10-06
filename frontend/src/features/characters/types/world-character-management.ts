@@ -32,6 +32,9 @@ export type WorldCharacterSettingsValues = {
   activity_interval_minutes: number;
   max_posts_per_day: number;
   max_comments_per_day: number;
+  allow_post: boolean;
+  allow_reply: boolean;
+  allow_like: boolean;
   generation_model?: string | null;
   image_model?: string | null;
   image_style?: string | null;

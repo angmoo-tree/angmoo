@@ -10,6 +10,8 @@ export type MemoryEmbeddingSetting = {
   reason_code: string | null;
   runtime_status: "unknown" | "stopped" | "ready" | "recovering" | "degraded" | "vector_unavailable";
   available_credentials: { id: string; label: string }[];
+  preparation_state?: "needs_preparation" | "running" | "ready" | "error";
+  preparation_revision?: number;
 };
 
 export type MemoryEmbeddingUpdate = Pick<MemoryEmbeddingSetting, "enabled" | "provider" | "model" | "credential_id"> & { expected_version: number };

@@ -99,6 +99,9 @@ export async function apiRequest<T>(
   });
 
   const text = await response.text();
+  if (rest.signal?.aborted || (!anonymous && !isCurrentAuthRequestScope(scope))) {
+    throw new DOMException("Request scope changed", "AbortError");
+  }
   let payload: unknown = null;
   try {
     payload = text ? JSON.parse(text) : null;

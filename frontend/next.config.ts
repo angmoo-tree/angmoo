@@ -45,6 +45,8 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Isolate contributor previews/builds from an existing local server.
+  distDir: process.env.ANGMOO_NEXT_DIST_DIR ?? ".next",
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   output: "standalone",
   async headers() {

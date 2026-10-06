@@ -11,6 +11,7 @@ export type WorldCharacterPublicProfile = {
   banner_url: string | null;
   intro: string;
   role_key: string | null;
+  role_name?: string | null;
   control_mode: "autonomous" | "owner_controlled";
   status: "active";
   profile_capability: WorldCharacterProfileCapability;

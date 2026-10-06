@@ -131,7 +131,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-settings.tsx",
-      "sha256": "f05527f0f77521efab21efe1a89f9a17fa6f8a3474cb6d2ef2b0d1ea75ec61ad"
+      "sha256": "1ac49423a55e072e20f10c36e836b14c61e15f177df7ad7da968f1fe1a6ba95d"
     },
     {
       "classifications": [
@@ -145,7 +145,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/image-picker.tsx",
-      "sha256": "d7d8a1b83338f4b9120ae8070fa51bce3bce418d504e36f1fecd44b7edff4efd"
+      "sha256": "e02f9d30bc87ad0bc3ada280ac27f5275aab35d131e0db341624afe9ab341429"
     },
     {
       "classifications": [
@@ -159,7 +159,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/media-settings.module.css",
-      "sha256": "0731cba0e46b9a21284fd54e39f22b62075d2b5a1b1ba9c473face41e3b1301d"
+      "sha256": "302098505cd1473b2abfff51818ae070317d7ba37e8e16dcc5ebb47e75be7938"
     },
     {
       "classifications": [
@@ -173,14 +173,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "09455a225cd33190599d9f8b7e6821b2dcb3b1fc67ba018003078dd82be6c8c4"
+      "sha256": "00dd29fab37d0069ab4fc451865830f8277c6dfebd233b61dced8403b9c048ef"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-      "sha256": "22d2693fbf587b3f392cbbf31b8aa85351e15d8c028458b8999d0d67cc31f4e3"
+      "sha256": "2f296e4aee36827d9a3caf1bcd6cb55f346a75f6673e33fbede4aa482d7951b6"
     },
     {
       "classifications": [
@@ -257,7 +257,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "fab6085f280bf8e69e2e6f4d9821cf49925497b200be25819e2de4dd24cfb299"
+        "sha256": "1dc07910ac33800fc84f3071c7254f11161daba6c5afbb43896db7fa1bc1e828"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -265,7 +265,7 @@
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
-        "sha256": "c70c19aad13546a992bf23358b87d393f8fefe2acb1c3b072be8c191cea55c69"
+        "sha256": "f1f1fe4a325a69bb013b9e55d6a4b85defc0cfbdca858e5e2b031973335e7d11"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -273,7 +273,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c85522747c6e20854bc7332aba5370fa50af1e5ba993aa4aa3271df84551cdd6"
+        "sha256": "1ac7781b4b589f293972e79d1b3a6181f864e4f521947f437197eb879a621fc6"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -382,8 +382,8 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 36,
-    "occurrences": 1215,
+    "files": 35,
+    "occurrences": 1183,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
@@ -395,8 +395,8 @@
         "occurrences": 2
       },
       ".tsx": {
-        "files": 34,
-        "occurrences": 1175
+        "files": 33,
+        "occurrences": 1143
       }
     },
     "per_file": [
@@ -554,16 +554,16 @@
         }
       },
       {
-        "occurrences": 237,
+        "occurrences": 227,
         "path": "frontend/src/features/characters/components/agent-detail-parts.tsx",
         "values": {
           "#027a48": 1,
-          "#101828": 26,
+          "#101828": 24,
           "#344054": 29,
-          "#475467": 4,
+          "#475467": 3,
           "#52610f": 1,
-          "#667085": 36,
-          "#98a2b3": 9,
+          "#667085": 35,
+          "#98a2b3": 7,
           "#9a3412": 1,
           "#b22f2f": 1,
           "#b45309": 2,
@@ -572,13 +572,13 @@
           "#d92d20": 1,
           "#d9e0ea": 4,
           "#e1e5eb": 15,
-          "#eaedf2": 8,
+          "#eaedf2": 7,
           "#ecfdf3": 1,
-          "#eef1f5": 14,
+          "#eef1f5": 12,
           "#f2f4f7": 8,
           "#f2f8df": 1,
           "#f6f7f9": 12,
-          "#f9fafb": 9,
+          "#f9fafb": 8,
           "#fbfcfd": 2,
           "#ff5252": 2,
           "#ff6b6b": 22,
@@ -648,23 +648,6 @@
           "#eaedf2": 1,
           "#f2f4f7": 2,
           "#f9fafb": 1
-        }
-      },
-      {
-        "occurrences": 22,
-        "path": "frontend/src/features/characters/components/profile-media-uploader.tsx",
-        "values": {
-          "#101828": 3,
-          "#344054": 4,
-          "#667085": 2,
-          "#98a2b3": 1,
-          "#c24141": 1,
-          "#e1e5eb": 2,
-          "#eaedf2": 1,
-          "#eef1f5": 1,
-          "#f2f4f7": 2,
-          "#f9fafb": 2,
-          "#ff6b6b": 3
         }
       },
       {
@@ -1104,24 +1087,24 @@
       "#027a48": 5,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 165,
+      "#101828": 160,
       "#12b76a": 1,
       "#147a45": 3,
       "#175cd3": 1,
       "#1d2939": 3,
       "#1f2330": 1,
       "#1f2937": 1,
-      "#344054": 74,
+      "#344054": 70,
       "#3b82f6": 1,
-      "#475467": 32,
+      "#475467": 31,
       "#52610f": 1,
-      "#667085": 157,
+      "#667085": 154,
       "#6941c6": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
       "#7a808b": 1,
       "#8a5a00": 1,
-      "#98a2b3": 49,
+      "#98a2b3": 46,
       "#9a3412": 1,
       "#9a5b13": 1,
       "#a93636": 2,
@@ -1132,7 +1115,7 @@
       "#b45309": 3,
       "#b54708": 4,
       "#b7ebcd": 1,
-      "#c24141": 35,
+      "#c24141": 34,
       "#c7933d": 2,
       "#c7d7fe": 1,
       "#c9ced6": 3,
@@ -1147,22 +1130,22 @@
       "#d9f2e5": 3,
       "#dc6803": 1,
       "#dfe3e8": 2,
-      "#e1e5eb": 70,
+      "#e1e5eb": 68,
       "#e4a0a0": 2,
       "#e4e8de": 1,
       "#e5c91e": 1,
       "#e6c91f": 1,
       "#e7bd54": 1,
       "#eaecf0": 1,
-      "#eaedf2": 63,
+      "#eaedf2": 61,
       "#ecfdf3": 4,
       "#edf0f4": 1,
-      "#eef1f5": 51,
+      "#eef1f5": 48,
       "#ef9a74": 1,
       "#eff8ff": 1,
       "#f0fbf5": 3,
       "#f0fff6": 1,
-      "#f2f4f7": 31,
+      "#f2f4f7": 29,
       "#f2f8df": 1,
       "#f3f4f6": 5,
       "#f4ddad": 1,
@@ -1177,7 +1160,7 @@
       "#f7faf6": 1,
       "#f8fafc": 1,
       "#f9df9b": 1,
-      "#f9fafb": 64,
+      "#f9fafb": 61,
       "#face": 1,
       "#fbfcfd": 3,
       "#fda29b": 1,
@@ -1185,7 +1168,7 @@
       "#fedf89": 1,
       "#ff5252": 12,
       "#ff5a32": 2,
-      "#ff6b6b": 120,
+      "#ff6b6b": 117,
       "#ff8a8a": 4,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
@@ -1444,7 +1427,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 36,
+      "expected_screenshot_call_count": 40,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1565,8 +1548,8 @@
         }
       ]
     },
-    "screenshot_call_count": 36,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK. Responsive viewport adds three LOCAL diagnostic capture sites (21 calls total), separate from canonical pinned-Linux snapshot review and native USER CHECK. World feed unification adds two LOCAL responsive/focus capture sites (23 calls total). Only the user-approved World composer canonical PNG is updated after exact pinned-Linux review; the other ten PNGs, corpus, screenshot count (11) and tolerances remain unchanged. Operating Docker source sync and direct USER CHECK are separate. World UI/output integration adds one LOCAL ko/en reply, profile, Chat and feed capture site (24 calls total); the existing World composer PNG alone is reviewed and updated for adjacent photo/Send and authoritative viewer reactions, without changing the corpus or tolerances. World post/Chat/character management adds twelve LOCAL diagnostic capture sites (36 calls total): detail widths/200-percent, centered memory Dialog/room actions, World cards/profile/status/settings, graph avatars, and actual S0/L0 copy/run/media integration. The 11 canonical PNGs, pinned Linux environment, thresholds and direct USER CHECK remain unchanged.",
+    "screenshot_call_count": 40,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK. Responsive viewport adds three LOCAL diagnostic capture sites (21 calls total), separate from canonical pinned-Linux snapshot review and native USER CHECK. World feed unification adds two LOCAL responsive/focus capture sites (23 calls total). Only the user-approved World composer canonical PNG is updated after exact pinned-Linux review; the other ten PNGs, corpus, screenshot count (11) and tolerances remain unchanged. Operating Docker source sync and direct USER CHECK are separate. World UI/output integration adds one LOCAL ko/en reply, profile, Chat and feed capture site (24 calls total); the existing World composer PNG alone is reviewed and updated for adjacent photo/Send and authoritative viewer reactions, without changing the corpus or tolerances. World post/Chat/character management adds twelve LOCAL diagnostic capture sites (36 calls total): detail widths/200-percent, centered memory Dialog/room actions, World cards/profile/status/settings, graph avatars, and actual S0/L0 copy/run/media integration. The 11 canonical PNGs, pinned Linux environment, thresholds and direct USER CHECK remain unchanged. The World UI and memory batch32 integration adds four LOCAL diagnostic capture sites for ko/en World cards, sticky status and long-name relationship maps (40 calls total). The eleven canonical PNGs, pinned Linux environment and diff thresholds remain unchanged; native USER CHECK is separate.",
     "target_viewports": [
       "360x800",
       "390x844",

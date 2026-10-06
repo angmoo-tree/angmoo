@@ -23,7 +23,7 @@ function latestWorldActivity(item: WorldCharacterDashboardItem) {
   return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
-export function presentWorldCharacterState(item: WorldCharacterDashboardItem): { label: string; tone: StatusChipTone } {
+export function presentWorldCharacterState(item: Pick<WorldCharacterDashboardItem, "autonomous_enabled" | "status" | "next_activity_at"> & { profile: Pick<WorldCharacterDashboardItem["profile"], "control_mode"> }): { label: string; tone: StatusChipTone } {
   if (item.profile.control_mode === "owner_controlled") return { label: "World 사용자 표시", tone: "neutral" };
   if (!item.autonomous_enabled) return { label: "자율활동 꺼짐", tone: "disabled" };
   if (["running", "busy", "working"].includes(item.status.state)) return { label: "ON · 활동 중", tone: "running" };

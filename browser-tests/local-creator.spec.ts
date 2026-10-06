@@ -14,14 +14,14 @@ test("explicit draft cancellation returns to creation and survives reload", asyn
   expect(writes.some(item => item.body?.status === "cancelled")).toBe(false);
   await page.getByRole("button", { name: "이 초안 취소", exact: true }).click();
   await page.getByRole("button", { name: "초안 취소 확인", exact: true }).click();
-  await expect(page.getByLabel("만드는 방법")).toBeVisible();
+  await expect(page.getByRole("group", { name: "만드는 방법", exact: true })).toBeVisible();
   expect(writes.some(item => item.body?.status === "cancelled")).toBe(true);
   await page.reload();
-  await expect(page.getByLabel("만드는 방법")).toBeVisible();
+  await expect(page.getByRole("group", { name: "만드는 방법", exact: true })).toBeVisible();
   expect(writes.filter(item => item.path.endsWith("/complete"))).toHaveLength(0);
 });
 
-async function fixture(page: Page) {
+async function fixture(page: Page, language: "ko" | "en" = "ko") {
   const writes: { path: string; body: any }[] = [];
   let cardRawReads = 0, cardMetadataReads = 0;
   const cardSource: CharacterCardSourceRead = {
@@ -50,7 +50,7 @@ async function fixture(page: Page) {
     const method = route.request().method();
     const body = route.request().postDataJSON();
     const reply = (json: unknown, status = 200) => route.fulfill({ status, contentType: "application/json", json });
-    if (path === "/auth/me") return reply(owner);
+    if (path === "/auth/me") return reply({ ...owner, ui_language: language });
     if (path === "/agents" && method === "GET") return reply([{ character: { id: "source", name: "복사 원본", execution_mode: "llm" } }]);
     if (method !== "GET") writes.push({ path, body });
     if (path === "/worlds/world-test/creator-context") return reply(context());
@@ -84,6 +84,13 @@ async function fixture(page: Page) {
     }
     if (path === "/agents/drafts/draft/copy-settings") {
       expect(body.character_id).toBe("source"); draft = { ...draft, revision: draft.revision + 1, source_kind: "copy", name: "복사 원본", personality: "차분함" }; return reply(draft);
+    }
+    if (path === "/agents/drafts/draft/media" && method === "POST") {
+      expect(body.revision).toBe(draft.revision);
+      expect(body.content_type).toBe("image/webp");
+      expect(Buffer.from(body.data_base64, "base64").subarray(0, 4).toString()).toBe("RIFF");
+      draft = { ...draft, revision: draft.revision + 1, [`${body.media_type}_temp_url`]: `/media/synthetic-${body.media_type}.webp` };
+      return reply(draft);
     }
     if (path === "/agents/drafts/draft/card-source") {
       expect(method).toBe("GET");
@@ -129,10 +136,76 @@ for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436
   });
 }
 
+test("English five-step creation keeps authored Unicode and no AI side effects", async ({ page }) => {
+  const state = await fixture(page, "en");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/agents/new");
+  await expect(page.getByRole("heading", { name: "Create character", exact: true })).toBeVisible();
+  const steps = page.getByRole("list", { name: "Creation steps" });
+  await expect(steps.getByRole("listitem")).toHaveCount(5);
+  await expect(page.getByRole("group", { name: "Creation method", exact: true })).toBeVisible();
+  const next = () => page.getByRole("button", { name: "Save and continue", exact: true }).click();
+  await next();
+  const name = "영문 모드 👨‍👩‍👦 Character";
+  const description = "Original persona 한국어 and English {{char}}.";
+  await page.getByRole("textbox", { name: "Name", exact: true }).fill(name);
+  await next();
+  await page.getByRole("textbox", { name: "Character description", exact: true }).fill(description);
+  await next();
+  await expect(page.getByRole("heading", { name: "Profile", exact: true })).toBeVisible();
+  await next();
+  await expect(steps.locator('[aria-current="step"]')).toContainText("5.");
+  await expect(page.getByText(description, { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Register with autonomous activity OFF", exact: true }).click();
+  await expect(page.getByRole("heading", { name: `${name} Registration complete`, exact: true })).toBeVisible();
+  expect(state.getDraft().name).toBe(name);
+  expect(state.getDraft().worldview).toBe(description);
+  expect(state.getDraft().status).toBe("completed");
+  expect(state.writes.filter(row => row.path.endsWith("/complete"))).toHaveLength(1);
+  expect(state.writes.some(row => /generate|enhance|credential|setup|activate/.test(row.path))).toBe(false);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test("Profile avatar and banner retain real crop, cancel, save and draft reload", async ({ page }) => {
+  const state = await fixture(page);
+  await page.goto("/agents/new");
+  await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+  await page.getByRole("textbox", { name: "이름", exact: true }).fill("Crop fixture");
+  await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+  await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill("Original crop fixture persona");
+  await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+  const png = Buffer.from(await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 8; canvas.height = 8;
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = "#ff6666"; context.fillRect(0, 0, 8, 8);
+    return canvas.toDataURL("image/png").split(",")[1];
+  }), "base64");
+  for (const label of ["아바타", "배너"]) {
+    const trigger = page.getByRole("button", { name: `${label} 업로드`, exact: true });
+    const inputId = await trigger.evaluate(element => (element.nextElementSibling as HTMLInputElement).id);
+    const input = page.locator(`[id="${inputId}"]`);
+    await input.setInputFiles({ name: "synthetic.png", mimeType: "image/png", buffer: png });
+    const dialog = page.getByRole("dialog", { name: `${label} 자르기`, exact: true });
+    await expect(dialog.locator("canvas")).toBeVisible();
+    await dialog.getByRole("button", { name: "취소", exact: true }).click();
+    expect(state.writes.filter(row => row.path.endsWith("/media"))).toHaveLength(label === "아바타" ? 0 : 1);
+    await input.setInputFiles({ name: "synthetic.png", mimeType: "image/png", buffer: png });
+    await dialog.getByRole("button", { name: "저장", exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+  }
+  expect(state.writes.filter(row => row.path.endsWith("/media"))).toHaveLength(2);
+  await page.reload();
+  expect(state.getDraft().avatar_temp_url).toBe("/media/synthetic-avatar.webp");
+  expect(state.getDraft().banner_temp_url).toBe("/media/synthetic-banner.webp");
+  expect(state.getDraft().worldview).toBe("Original crop fixture persona");
+  expect(state.writes.some(row => /generate|enhance|credential|activate/.test(row.path))).toBe(false);
+});
+
 test("card review, manual correction, refresh and World target", async ({ page }) => {
   const state = await fixture(page);
   await page.goto("/agents/new?worldId=world-test");
-  await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+  await page.getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기", exact: true }).check();
   await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles({ name: "card.json", mimeType: "application/json", buffer: Buffer.from("{}") });
   await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue("Seraphina");
   await page.getByText("카드 원본과 반영 범위 확인", { exact: true }).click();

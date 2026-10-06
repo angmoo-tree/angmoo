@@ -31,7 +31,7 @@ export class ImageUploadInputError extends Error {
   }
 }
 
-export async function uploadImage(file: File, scopeKind: "character" | "thread" | "world", scopeId: string, signal?: AbortSignal) {
+export async function uploadImage(file: File, scopeKind: "character" | "thread" | "world" | "world_character", scopeId: string, signal?: AbortSignal) {
   if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) throw new ImageUploadInputError("image_file_unsupported");
   const data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

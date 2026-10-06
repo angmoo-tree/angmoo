@@ -14,3 +14,17 @@
 .fileLabel input { width: 100%; max-width: 100%; min-width: 0; }
 .preview { display: block; max-width: 100%; width: auto; height: auto; max-height: 360px; object-fit: contain; border: 1px solid var(--color-border-default); border-radius: var(--radius-control); }
 .binding { padding: .75rem 0; border-bottom: 1px solid var(--color-border-default); }
+.fileInput {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.fileInput::file-selector-button {
+  min-height: 44px;
+  padding: 0 var(--spacing-control);
+  color: var(--color-text-strong);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}

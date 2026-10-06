@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserEnvironment } from "@/hooks/use-user-environment";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/surfaces";
+import { SettingsCard } from "@/components/ui/settings-card";
+import { Languages } from "lucide-react";
 import { InlineError } from "@/components/ui/feedback";
 import { storeUser } from "@/lib/auth/browser-session";
 import { saveUiLanguage } from "@/features/identity/api/environment";
@@ -23,9 +24,7 @@ export function LanguageSettings() {
     catch { setFailed(true); }
     finally { setSaving(false); }
   }
-  return <Card as="section" data-language-settings="true">
-    <h2>{t("languageTitle")}</h2>
-    <p>{t("languageHelp")}</p>
+  return <SettingsCard title={t("languageTitle")} description={t("languageHelp")} icon={<Languages size={20} />}>
     <div role="group" aria-label={t("languageTitle")}>
       <Button type="button" disabled={saving || status !== "authenticated"} aria-pressed={i18n.language === "ko"} onClick={() => void select("ko")}>{t("korean")}</Button>
       <Button type="button" disabled={saving || status !== "authenticated"} aria-pressed={i18n.language === "en"} onClick={() => void select("en")}>{t("english")}</Button>
@@ -33,7 +32,8 @@ export function LanguageSettings() {
     {saving ? <p role="status">{t("saving")}</p> : null}
     {failed ? <InlineError>{t("languageSaveFailed")}</InlineError> : null}
     {errorCode ? <InlineError>{t("detectionFailed")}</InlineError> : null}
+    <details><summary>{t("detectionHelp")}</summary>
     {ready && environment ? <><p>{t("detectedLanguage", { language: environment.memory_search_locale })}</p><p>{t("detectedTimezone", { zone: environment.timezone })}</p></> : <p>{t("detectionPending")}</p>}
-    <p>{t("detectionHelp")}</p>
-  </Card>;
+    </details>
+  </SettingsCard>;
 }

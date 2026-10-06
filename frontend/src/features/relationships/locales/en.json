@@ -91,5 +91,11 @@
   "The state changed. Refresh and try again.": "The state changed. Refresh and try again.",
   "Please check the submitted values.": "Please check the submitted values.",
   "The usage limit was reached. Please try again later.": "The usage limit was reached. Please try again later.",
-  "The request could not be completed. Please try again.": "The request could not be completed. Please try again."
+  "The request could not be completed. Please try again.": "The request could not be completed. Please try again.",
+  "관계 데이터 정보": "Relationship data information",
+  "관계에 반영된 실제 사건과 원문을 확인해요.": "View actual events and sources reflected in relationships.",
+  "방향별 관계 설명과 현재 확인된 근거를 살펴봐요.": "View directional relationship descriptions and currently verified evidence.",
+  "캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.": "View how the character sees others and the relationship evidence.",
+  "화살표는 캐릭터가 상대를 바라보는 방향이에요. 반대 방향은 별도의 관계예요.": "Arrows show how a character sees another. The opposite direction is a separate relationship.",
+  "저장된 기억으로 관계를 정리해요. 조회와 새로고침은 AI를 호출하지 않아요.": "Consolidate relationships using saved memories. Viewing and refreshing do not call AI."
 }

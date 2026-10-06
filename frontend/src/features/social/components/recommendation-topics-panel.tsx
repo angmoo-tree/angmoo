@@ -1,4 +1,6 @@
 "use client";
+import { SettingsCard } from "@/components/ui/settings-card";
+import { Tags } from "lucide-react";
 import { useUiText } from "@/hooks/use-ui-text";
 
 
@@ -58,9 +60,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
   }
   const current = data?.world_id === worldId && data?.world_character_id === (characterId ?? null) ? data : null;
   const currentReadError = readError?.scope === `${worldId}:${characterId ?? "world"}` ? readError.message : undefined;
-  return <section className="space-y-4 rounded-2xl border border-border-default bg-surface p-5" aria-busy={busy}>
-    <h3 className="font-bold text-text-strong">{characterId ? uiText("캐릭터 관심 주제") : uiText("World 추천 주제")}</h3>
-    <p className="text-sm text-text-secondary">{uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")}</p>
+  return <SettingsCard title={uiText(characterId ? "캐릭터 관심 주제" : "World 추천 주제")} description={uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20} />}>
     <p role="status" className="text-sm text-text-default">{current ? uiText(labels[current.state]) : uiText("주제 확인 중")}</p>
     {current && <ul className="flex flex-wrap gap-2" aria-label={uiText("현재 주제 목록")}>{current.topics.map(topic => <li key={topic.id} className="rounded-full bg-surface-muted px-3 py-1 text-sm text-text-default">{topic.name}</li>)}</ul>}
     {current && current.topics.length === 0 && <p className="text-sm text-text-secondary">{uiText("등록된 주제가 없습니다.")}</p>}
@@ -76,9 +76,9 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
     {currentReadError && <InlineError>{currentReadError}</InlineError>}
     <div className="flex flex-wrap gap-2">
       <Button loading={busy} disabled={!current || current.approval_required || (!characterId && !current.key_world_character_id)} onClick={() => void mutate("generate")}>{characterId ? uiText("캐릭터 주제 다시 만들기") : uiText("World 주제 다시 만들기")}</Button>
-      <Button variant="ghost" disabled={busy} onClick={() => { setData(null); setReadError(null); setReload(value => value + 1); }}>{uiText("상태 새로고침")}</Button>
+      <Button variant="ghost" disabled={busy} onClick={() => { setReadError(null); setReload(value => value + 1); }}>{uiText("상태 새로고침")}</Button>
     </div>
     {characterId && current && !currentReadError && <FeedStatusPanel status={current.feed_status} />}
     {characterId && <RecommendationHistory deliveries={current?.recent_deliveries} loading={!current} error={currentReadError} />}
-  </section>;
+  </SettingsCard>;
 }

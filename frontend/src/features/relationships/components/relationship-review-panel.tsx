@@ -1,4 +1,6 @@
 "use client";
+import { SettingsCard } from "@/components/ui/settings-card";
+import { History } from "lucide-react";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
@@ -25,14 +27,13 @@ export function RelationshipReviewPanel({ characterId, worldId, revision, authen
   useEffect(() => {
     if (!authenticated) return;
     let current = true;
-    getRelationshipReview(characterId, worldId).then((value) => {
+    const controller = new AbortController();
+    getRelationshipReview(characterId, worldId, controller.signal).then((value) => {
       if (current) { setData(value); setError(false); }
     }).catch(() => { if (current) setError(true); });
-    return () => { current = false; };
+    return () => { current = false; controller.abort(); };
   }, [characterId, worldId, revision, authenticated]);
-  return <section aria-label={uiText("하루 관계 정리 상태")} className="rounded-2xl border border-outline-variant bg-surface-container-lowest p-5">
-    <h2 className="font-bold">{uiText("하루 관계 정리")}</h2>
-    <p className="mt-2 text-sm text-on-surface-variant">{uiText("저장된 에피소드 기억을 상대별로 검토합니다. 새로고침은 상태만 조회하며 AI를 실행하지 않습니다.")}</p>
+  return <SettingsCard title={uiText("하루 관계 정리")} description={uiText("저장된 기억으로 관계를 정리해요. 조회와 새로고침은 AI를 호출하지 않아요.")} icon={<History size={20} />}>
     {error ? <p role="alert" className="mt-2 text-sm">{uiText("정리 상태를 불러오지 못했습니다. 기존 관계는 보존됩니다.")}</p> : !data ? <p className="mt-2 text-sm">{uiText("상태 확인 중…")}</p> : <>
       <p className="mt-2 text-sm">{data.mode === "interpreted" ? uiText("개인화 관계 적용 중") : uiText("관계 정책 전환 대기")} · {uiText(labels[data.configuration.status] ?? data.configuration.status)}</p>
       {data.configuration.manual_available ? <p className="text-sm text-on-surface-variant">{uiText("기억 화면의 ‘지금 기억·관계 정리’로 예약 시간과 관계없이 실행할 수 있습니다.")}</p> : null}
@@ -49,5 +50,5 @@ export function RelationshipReviewPanel({ characterId, worldId, revision, authen
       </details> : null}
       {Object.keys(data.excluded_counts).length ? <p className="mt-2 text-sm text-on-surface-variant">{uiText("상대 또는 근거를 확정하지 못해 제외한 기억")}{Object.values(data.excluded_counts).reduce((a, b) => a + b, 0)}{uiText("개. 원래 기억은 보존됩니다.")}</p> : null}
     </>}
-  </section>;
+  </SettingsCard>;
 }

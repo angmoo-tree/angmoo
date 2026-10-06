@@ -1,0 +1,12 @@
+.card { padding: var(--spacing-section); min-width: 0; }
+.card h2 { font-size: var(--text-section-title); font-weight: 800; color: var(--color-text-strong); margin-bottom: var(--spacing-phone); }
+.stack { display: grid; gap: var(--spacing-control); }
+.tile { border: 1px solid var(--color-border-default); border-radius: var(--radius-reference-card); background: var(--color-surface-subtle); padding: var(--spacing-phone) var(--spacing-dense); min-width: 0; }
+.tile h3, .tile dt { font-size: var(--text-label); font-weight: 700; color: var(--color-text-muted); margin-bottom: var(--spacing-compact); }
+.body { max-height: 160px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--color-text-default); line-height: 1.6; }
+.header { display: flex; justify-content: space-between; gap: var(--spacing-phone); }
+.header > div { color: var(--color-text-secondary); text-align: right; overflow-wrap: anywhere; }
+.metrics { display: grid; gap: var(--spacing-phone); }
+.metrics .tile { background: var(--color-surface-muted); border-color: transparent; }
+.metrics dd { font-weight: 800; color: var(--color-text-strong); overflow-wrap: anywhere; }
+@media (min-width: 480px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

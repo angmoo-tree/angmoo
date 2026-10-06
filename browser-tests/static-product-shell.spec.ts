@@ -1534,12 +1534,12 @@ test("static local creation stays available beyond the former hosted count cap",
   await expect(page.getByText("한도 도달")).toHaveCount(0);
   await expect(page.getByText("3/3")).toHaveCount(0);
 
-  const llmMode = page.getByRole("option", { name: "새 캐릭터 직접 만들기" });
-  const localMode = page.getByRole("option", { name: "외부 실행기 연결용 캐릭터" });
+  const llmMode = page.getByRole("radio", { name: "새 캐릭터 직접 만들기" });
+  const localMode = page.getByRole("radio", { name: "외부 실행기 연결용 캐릭터" });
   await expect(llmMode).toBeEnabled();
   await expect(localMode).toBeEnabled();
-  await page.getByLabel("만드는 방법", { exact: true }).selectOption("external");
-  await expect(page.getByLabel("만드는 방법", { exact: true })).toHaveValue("external");
+  await localMode.check();
+  await expect(localMode).toBeChecked();
   await expect(page.getByRole("button", { name: "저장하고 다음" })).toBeEnabled();
   expect(pageErrors).toEqual([]);
 });
@@ -2724,7 +2724,7 @@ test("P8-L-R static Memory route controls exact-scope owner state and keeps narr
     `/worlds/${worldId}/posts/post-p8-l-q-static/`,
   );
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
-  await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
+  await expect(page.getByText("검증된 경험을 기억하고 이후 대화에서 회상해요.", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "기억 켜기" }).click();
   await verifyMemoryBatchControls(page);
   await page.getByRole("button", { name: "고정", exact: true }).click();
@@ -3529,6 +3529,7 @@ test("static installed relationship route ignores provider overrides and request
   await page.goto(
     "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=neo4j",
   );
+  await page.getByText("관계 데이터 정보", { exact: true }).click();
   await expect(page.getByText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")).toBeVisible();
   await expect(page.getByText("관계망 최신 상태")).toBeVisible();
   await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();

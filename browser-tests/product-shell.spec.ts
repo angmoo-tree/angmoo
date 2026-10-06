@@ -1475,7 +1475,7 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await page.goto(`/memory?world=${worldId}&subject=${subjectId}&memory=${memoryId}`);
   await expect(page.getByRole("heading", { name: "기억", exact: true })).toBeVisible();
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
-  await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
+  await expect(page.getByText("검증된 경험을 기억하고 이후 대화에서 회상해요.", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
   await expect(page.getByRole("heading", { name: "상황에 연결된 원문과 생각" })).toBeVisible();
   await expect(page.getByText("우리 연습은 다음 주로 바뀌었어.", { exact: false })).toBeVisible();

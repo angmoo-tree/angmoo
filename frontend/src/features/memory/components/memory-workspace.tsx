@@ -5,6 +5,7 @@ import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
 
+import { SettingsCard } from "@/components/ui/settings-card";
 import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 import {
@@ -438,18 +439,14 @@ export function MemoryWorkspace({
       {phase === "ready" && list ? (
         <div className={styles.workspace}>
           <section className={styles.listPane} aria-label={uiText("저장된 기억 목록")}>
-            <div className={styles.scopeNotice} data-memory-enabled={setting?.enabled ?? false}>
-              <ShieldCheck aria-hidden="true" size={18} />
-              <div className={styles.scopeNoticeCopy}>
-                <strong>{setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")}</strong>
-                <p>{setting?.enabled ? uiText("검증된 새 기억을 만들고 이후 대화에서 회상합니다.") : uiText("새 장기 기억 생성과 회상은 중단되지만 기존 기억은 관리할 수 있습니다. 현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.")}</p>
-              </div>
+            <SettingsCard title={setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")} description={uiText("검증된 경험을 기억하고 이후 대화에서 회상해요.")} icon={<ShieldCheck size={20} />} data-memory-enabled={setting?.enabled ?? false}>
+              <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-text-secondary">{uiText("기억을 꺼도 저장된 기억은 관리할 수 있어요.")}</p>
               <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
                 {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
-              </Button>
-            </div>
+              </Button></div>
+            </SettingsCard>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
             <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">
@@ -533,8 +530,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
   const uiText = useUiText("memory");
   const active = detail.lifecycle === "active";
   return (
-    <article className={styles.detail}>
-      <p className={styles.kind}>{uiText(memoryKindLabel(detail.memory_kind))}</p>
+    <SettingsCard title={uiText(memoryKindLabel(detail.memory_kind))} description={uiText("기억 내용과 연결된 원문, 생각, 보존 상태를 확인해요.")} icon={<BookOpenText size={20} />} className={styles.detail}>
       <h2>{detail.summary}</h2>
       {active ? (
         <div className={styles.ownerActions} aria-label={uiText("기억 관리")}>
@@ -567,7 +563,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
           </ol>
         )}
       </section>
-    </article>
+    </SettingsCard>
   );
 }
 

@@ -1,4 +1,4 @@
-import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { captureAuthRequestScope, isCurrentAuthRequestScope, clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 import type { MemoryEmbeddingSetting, MemoryEmbeddingUpdate } from "@/features/memory/types/memory-embedding-contract";
@@ -8,9 +8,15 @@ export function getMemoryEmbeddingSetting(worldId: string, subjectId: string, si
     .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
 }
 
-export function saveMemoryEmbeddingSetting(worldId: string, subjectId: string, data: MemoryEmbeddingUpdate) {
-  return requestMemoryMutation<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { method: "PUT", body: JSON.stringify(data) })
+export function saveMemoryEmbeddingSetting(worldId: string, subjectId: string, data: MemoryEmbeddingUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { method: "PUT", body: JSON.stringify(data), signal })
     .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
+}
+
+export function startMemoryEmbeddingPreparation(worldId: string, subjectId: string, expectedRevision: number, signal?: AbortSignal) {
+  return requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/embedding-preparation`, {
+    method: "POST", body: JSON.stringify({ expected_revision: expectedRevision }), signal,
+  });
 }
 
 function validateEmbeddingSetting(value: MemoryEmbeddingSetting, worldId: string, subjectId: string) {
@@ -34,8 +40,8 @@ export function getMemoryBatchSetting(worldId: string, subjectId: string, signal
     .then((value) => validateBatchSetting(value, worldId, subjectId));
 }
 
-export function saveMemoryBatchSetting(worldId: string, subjectId: string, data: MemoryBatchUpdate) {
-  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { method: "PUT", body: JSON.stringify(data) })
+export function saveMemoryBatchSetting(worldId: string, subjectId: string, data: MemoryBatchUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { method: "PUT", body: JSON.stringify(data), signal })
     .then((value) => validateBatchSetting(value, worldId, subjectId));
 }
 
@@ -58,7 +64,7 @@ function validateBatchSetting(value: MemoryBatchSetting, worldId: string, subjec
     typeof value.timezone !== "string" ||
     !["disabled", "paused", "waiting", "running", "pending", "attention", "completed", "capacity_blocked"].includes(value.status) ||
     !Array.isArray(value.available_models) || value.available_models.some((model) => typeof model !== "string") ||
-    (value.model_id !== null && !value.available_models.includes(value.model_id)) ||
+    (value.model_id !== null && (typeof value.model_id !== "string" || value.model_id.length > 200)) ||
     [value.next_due_at, value.last_completed_at].some((time) => time !== null && (typeof time !== "string" || !Number.isFinite(Date.parse(time))))) {
     throw new MemoryApiError(502, "memory_batch_contract_invalid");
   }
@@ -307,6 +313,7 @@ async function requestMemoryApi<T>(
   path: string,
   options: { signal?: AbortSignal },
 ): Promise<T> {
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     cache: "no-store",
     credentials: "same-origin",
@@ -314,6 +321,7 @@ async function requestMemoryApi<T>(
     signal: options.signal,
   });
   const payload = (await response.json().catch(() => null)) as unknown;
+  if (options.signal?.aborted || !isCurrentAuthRequestScope(scope)) throw new DOMException("Request scope changed", "AbortError");
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredUser();
@@ -325,6 +333,7 @@ async function requestMemoryApi<T>(
 }
 
 async function requestMemoryMutation<T>(path: string, init: RequestInit): Promise<T> {
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...init,
     cache: "no-store",
@@ -336,6 +345,7 @@ async function requestMemoryMutation<T>(path: string, init: RequestInit): Promis
     },
   });
   const payload = (await response.json().catch(() => null)) as unknown;
+  if (init.signal?.aborted || !isCurrentAuthRequestScope(scope)) throw new DOMException("Request scope changed", "AbortError");
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredUser();

@@ -85,7 +85,7 @@ export function ActiveHoursControl({
                   : "border-border-control bg-surface text-text-secondary hover:border-brand-soft-border hover:bg-surface-subtle hover:text-text-strong"
               }`}
             >
-              {preset.label}
+              {uiText(preset.label)}
             </button>
           );
         })}

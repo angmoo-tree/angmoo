@@ -1,18 +1,12 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
 
-import { InterpretationSettingsPanel } from "@/features/media/components/interpretation-settings";
-import { ImageUsageSettingsPanel } from "@/features/media/components/usage-settings";
 import { LanguageSettings } from "@/features/identity/components/language-settings";
 
-import { generationProfileValue } from "@/config/generation-profiles";
 import {
   AlertTriangle,
   Database,
-  KeyRound,
   LogOut,
-  Save,
-  Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -20,23 +14,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/surfaces";
-import { Field, Input, Select } from "@/components/ui/form-controls";
-import { InlineError, Toast } from "@/components/ui/feedback";
+import { InlineError } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/navigation";
 import { StatusChip } from "@/components/ui/status";
-import { DEFAULT_MESSAGE_GOOGLE_MODEL, MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
-import { getMessageSettings, updateMessageSettings } from "@/features/chat/api/chat-client";
-import { type MessageCredentialSource, type MessageGoogleGeminiModel, type MessageSettingsRead } from "@/features/chat/types/chat-contract";
 import { clearAuth } from "@/lib/auth/browser-session";
 import { getLocalBootstrapStatus, logoutCurrentSession } from "@/features/identity/api/identity";
 import { type LocalBootstrapRead } from "@/features/identity/types/identity";
-import { safeSettingsReturnTo } from "@/utils/safe-navigation";
 
 import styles from "./settings-client.module.css";
-
-function asMessageGoogleModel(value: string | undefined, thinking = "high"): MessageGoogleGeminiModel {
-  return generationProfileValue(value, thinking);
-}
 
 export function SettingsClient() {
   const uiText = useUiText("shell");
@@ -45,18 +30,6 @@ export function SettingsClient() {
   const [installation, setInstallation] = useState<LocalBootstrapRead | null>(null);
   const [installationLoading, setInstallationLoading] = useState(true);
   const [installationError, setInstallationError] = useState<string | null>(null);
-  const [messageSettings, setMessageSettings] = useState<MessageSettingsRead | null>(null);
-  const [messageSource, setMessageSource] = useState<MessageCredentialSource>("message_key");
-  const [messageModel, setMessageModel] = useState<MessageGoogleGeminiModel>(
-    DEFAULT_MESSAGE_GOOGLE_MODEL,
-  );
-  const [sourceCharacterId, setSourceCharacterId] = useState("");
-  const [messageApiKey, setMessageApiKey] = useState("");
-  const [messageLoading, setMessageLoading] = useState(true);
-  const [messageSaving, setMessageSaving] = useState(false);
-  const [messageError, setMessageError] = useState<string | null>(null);
-  const [messageSaved, setMessageSaved] = useState(false);
-  const [messageCleared, setMessageCleared] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
 
   const installationStatus = installationLoading
@@ -112,34 +85,6 @@ export function SettingsClient() {
     };
   }, [authStatus, uiText]);
 
-  useEffect(() => {
-    if (authStatus !== "authenticated") return;
-    let active = true;
-    getMessageSettings()
-      .then((settings) => {
-        if (!active) return;
-        setMessageSettings(settings);
-        setMessageSource(settings.credential_source);
-        setMessageModel(asMessageGoogleModel(settings.default_model, settings.default_thinking_level));
-        setSourceCharacterId(settings.source_character_id ?? "");
-      })
-      .catch((error) => {
-        if (active) {
-          setMessageError(
-            error instanceof Error
-              ? uiText(error.message)
-              : uiText("쪽지용 API key 설정을 불러오지 못했습니다."),
-          );
-        }
-      })
-      .finally(() => {
-        if (active) setMessageLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [authStatus, uiText]);
-
   async function handleLogout() {
     if (logoutPending) return;
     setLogoutPending(true);
@@ -154,70 +99,9 @@ export function SettingsClient() {
     }
   }
 
-  async function handleSaveMessageSettings() {
-    setMessageSaving(true);
-    setMessageError(null);
-    setMessageSaved(false);
-    setMessageCleared(false);
-    try {
-      const next = await updateMessageSettings({
-        credential_source: messageSource,
-        source_character_id: messageSource === "agent_key" ? sourceCharacterId : null,
-        default_model: messageModel,
-        api_key: messageApiKey.trim() || undefined,
-      });
-      setMessageSettings(next);
-      setMessageSource(next.credential_source);
-      setMessageModel(asMessageGoogleModel(next.default_model, next.default_thinking_level));
-      setSourceCharacterId(next.source_character_id ?? "");
-      setMessageApiKey("");
-      setMessageSaved(true);
-      const params =
-        typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search)
-          : new URLSearchParams();
-      const returnTo = safeSettingsReturnTo(params.get("returnTo"));
-      if (params.get("messageKey") === "1" && returnTo && next.has_usable_key) {
-        router.push(returnTo);
-      }
-    } catch (error) {
-      setMessageError(
-        error instanceof Error
-          ? uiText(error.message)
-          : uiText("쪽지용 API key 설정을 저장하지 못했습니다."),
-      );
-    } finally {
-      setMessageSaving(false);
-    }
-  }
-
-  async function handleClearMessageKey() {
-    setMessageSaving(true);
-    setMessageError(null);
-    setMessageSaved(false);
-    setMessageCleared(false);
-    try {
-      const next = await updateMessageSettings({ clear_message_key: true });
-      setMessageSettings(next);
-      setMessageSource(next.credential_source);
-      setMessageModel(asMessageGoogleModel(next.default_model, next.default_thinking_level));
-      setSourceCharacterId(next.source_character_id ?? "");
-      setMessageApiKey("");
-      setMessageCleared(true);
-    } catch (error) {
-      setMessageError(
-        error instanceof Error
-          ? uiText(error.message)
-          : uiText("쪽지용 API key를 삭제하지 못했습니다."),
-      );
-    } finally {
-      setMessageSaving(false);
-    }
-  }
-
   return (
     <section className={styles.page} data-local-settings-surface="true">
-      <PageHeader title={uiText("설정")} subtitle={uiText("현재 설치 · 로컬 세션 · API key")} />
+      <PageHeader title={uiText("설정")} subtitle={uiText("현재 설치 · 로컬 세션")} />
 
       <div className={styles.content}>
         <LanguageSettings />
@@ -287,157 +171,10 @@ export function SettingsClient() {
           </div>
         </Card>
 
-        <Card as="section" className={styles.sectionCard}>
-          <div className={styles.sectionHeading}>
-            <span className={styles.sectionIcon} aria-hidden="true">
-              <KeyRound />
-            </span>
-            <div>
-              <h2>{uiText("쪽지용 API key")}</h2>
-              <p>
-                {uiText("이 설치에서 현재 owner의 쪽지 응답을 생성할 때 사용할 Google API key를 선택합니다.")}</p>
-            </div>
-          </div>
 
-          {messageLoading ? (
-            <div className={styles.statusLine} role="status">
-              <StatusChip label={uiText("API key 설정 확인 중")} tone="waiting" />
-            </div>
-          ) : null}
 
-          <div className={styles.formStack}>
-            <Field id="message-default-model" label={uiText("기본 모델")}>
-              {(controlProps) => (
-                <Select
-                  {...controlProps}
-                  value={messageModel}
-                  disabled={messageLoading || messageSaving}
-                  onChange={(event) =>
-                    setMessageModel(event.target.value as MessageGoogleGeminiModel)
-                  }
-                >
-                  <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
-                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </Field>
 
-            <fieldset className={styles.choiceFieldset}>
-              <legend>{uiText("API key 출처")}</legend>
-              <div className={styles.choiceGrid}>
-                <label
-                  className={styles.choiceCard}
-                  data-selected={messageSource === "message_key" || undefined}
-                >
-                  <input
-                    type="radio"
-                    name="message-credential-source"
-                    checked={messageSource === "message_key"}
-                    disabled={messageLoading || messageSaving}
-                    onChange={() => setMessageSource("message_key")}
-                  />
-                  <span>
-                    <strong>{uiText("쪽지 전용 key 사용")}</strong>
-                    <small>
-                      {messageSettings?.message_key_fingerprint
-                        ? uiText("저장됨: {{value0}}", {value0: messageSettings.message_key_fingerprint})
-                        : uiText("아직 저장된 key가 없습니다.")}
-                    </small>
-                  </span>
-                </label>
-                <label
-                  className={styles.choiceCard}
-                  data-selected={messageSource === "agent_key" || undefined}
-                >
-                  <input
-                    type="radio"
-                    name="message-credential-source"
-                    checked={messageSource === "agent_key"}
-                    disabled={messageLoading || messageSaving}
-                    onChange={() => setMessageSource("agent_key")}
-                  />
-                  <span>
-                    <strong>{uiText("내 앵무 key 참조")}</strong>
-                    <small>{uiText("raw key를 복제하지 않고 이 설치의 기존 credential을 참조합니다.")}</small>
-                  </span>
-                </label>
-              </div>
-            </fieldset>
 
-            {messageSource === "message_key" ? (
-              <Field
-                id="message-google-api-key"
-                label="Google API key"
-                helperText={uiText("새 key를 저장하거나 기존 key를 교체할 때만 입력하세요.")}
-              >
-                {(controlProps) => (
-                  <Input
-                    {...controlProps}
-                    type="password"
-                    autoComplete="off"
-                    value={messageApiKey}
-                    disabled={messageLoading || messageSaving}
-                    onChange={(event) => setMessageApiKey(event.target.value)}
-                    placeholder={uiText("새 key 입력")}
-                  />
-                )}
-              </Field>
-            ) : (
-              <Field id="message-source-character" label={uiText("사용할 내 앵무")}>
-                {(controlProps) => (
-                  <Select
-                    {...controlProps}
-                    value={sourceCharacterId}
-                    disabled={messageLoading || messageSaving}
-                    onChange={(event) => setSourceCharacterId(event.target.value)}
-                  >
-                    <option value="">{uiText("앵무 선택")}</option>
-                    {(messageSettings?.owned_agents ?? []).map((agent) => (
-                      <option key={agent.id} value={agent.id}>
-                        {agent.display_name}
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              </Field>
-            )}
-          </div>
-
-          {messageError ? <InlineError className={styles.feedback}>{messageError}</InlineError> : null}
-          {messageSaved ? <Toast tone="success">{uiText("쪽지용 API key 설정을 저장했습니다.")}</Toast> : null}
-          {messageCleared ? <Toast tone="success">{uiText("저장된 쪽지용 API key를 삭제했습니다.")}</Toast> : null}
-
-          <div className={styles.buttonRow}>
-            <Button
-              variant="primary"
-              onClick={() => void handleSaveMessageSettings()}
-              loading={messageSaving}
-              loadingLabel={uiText("저장 중")}
-              disabled={
-                messageLoading ||
-                (messageSource === "agent_key" && !sourceCharacterId)
-              }
-            >
-              <Save size={17} aria-hidden="true" />
-              {uiText("저장")}</Button>
-            {messageSettings?.message_key_fingerprint ? (
-              <Button
-                variant="danger"
-                onClick={() => void handleClearMessageKey()}
-                disabled={messageSaving}
-              >
-                <Trash2 size={17} aria-hidden="true" />
-                {uiText("저장된 key 삭제")}</Button>
-            ) : null}
-          </div>
-        </Card>
-
-      <ImageUsageSettingsPanel />
-      <InterpretationSettingsPanel />
         <Card as="section" className={`${styles.sectionCard} ${styles.dangerCard}`}>
           <div className={styles.sectionHeading}>
             <span className={`${styles.sectionIcon} ${styles.dangerIcon}`} aria-hidden="true">

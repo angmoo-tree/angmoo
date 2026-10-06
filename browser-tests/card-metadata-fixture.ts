@@ -77,7 +77,7 @@ export function cardMetadataTests() {
     await expect(page.getByText("현재 편집 내용을 이 카드의 설정으로 교체할까요?", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "취소", exact: true }).click();
     expect(imports).toBe(0);
-    await page.getByLabel("만드는 방법", { exact: true }).selectOption("direct");
+    await page.getByRole("group", { name: "만드는 방법", exact: true }).getByRole("radio", { name: "새 캐릭터 직접 만들기", exact: true }).check();
     await expect(notice).toHaveCount(0);
     await expect(page.locator("pre")).toHaveCount(0);
     await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
@@ -121,16 +121,16 @@ export function cardMetadataTests() {
     await expect(notice).toBeVisible();
     expect(imports).toBe(1);
     await page.getByRole("button", { name: "취소", exact: true }).click();
-    await page.getByLabel("만드는 방법", { exact: true }).selectOption("direct");
+    await page.getByRole("group", { name: "만드는 방법", exact: true }).getByRole("radio", { name: "새 캐릭터 직접 만들기", exact: true }).check();
     await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
     await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue("실패 후에도 유지할 이름");
     delaySummary = true;
     await page.getByRole("button", { name: "이전", exact: true }).click();
-    await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+    await page.getByRole("group", { name: "만드는 방법", exact: true }).getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기", exact: true }).check();
     await expect.poll(() => pendingSummary).toBe(true);
     try {
       await page.goto("/agents/new?worldId=world-new-card-target");
-      await expect(page.getByLabel("만드는 방법", { exact: true })).toBeVisible();
+      await expect(page.getByRole("group", { name: "만드는 방법", exact: true })).toBeVisible();
       releaseSummary();
       await expect(notice).toHaveCount(0);
       await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveCount(0);

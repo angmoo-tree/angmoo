@@ -11,7 +11,7 @@ import styles from "./media-settings.module.css";
 
 type Selection = { id: string; url: string; allowed: boolean };
 export function ImagePicker({ scopeKind, scopeId, value, onChange, disabled = false, requireRecognition = false, onBusyChange, renderLayout }: {
-  scopeKind: "character" | "thread" | "world"; scopeId: string; value: Selection | null;
+  scopeKind: "character" | "thread" | "world" | "world_character"; scopeId: string; value: Selection | null;
   onChange: (value: Selection | null) => void; disabled?: boolean; requireRecognition?: boolean; onBusyChange?: (value: boolean) => void;
   renderLayout?: (slots: { trigger: ReactNode; preview: ReactNode; feedback: ReactNode }) => ReactNode;
 }) {
@@ -45,7 +45,7 @@ export function ImagePicker({ scopeKind, scopeId, value, onChange, disabled = fa
       if (input.current) input.current.value = "";
     }
   }
-  const fileInput = <input aria-label={uiText("첨부 이미지 선택")} ref={input} type="file" accept="image/png,image/jpeg,image/webp" hidden={Boolean(renderLayout)} disabled={disabled || busy} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); }} />;
+  const fileInput = <input className={styles.fileInput} aria-label={uiText("첨부 이미지 선택")} ref={input} type="file" accept="image/png,image/jpeg,image/webp" hidden={Boolean(renderLayout)} disabled={disabled || busy} onChange={event => { const file = event.target.files?.[0]; if (file) void choose(file); }} />;
   const preview = <>
     {/* Authenticated object URLs must preserve pixels in Next and static runtimes. */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
