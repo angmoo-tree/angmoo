@@ -187,6 +187,30 @@ def _product_change_module():
     return changes
 
 
+def validate_message_settings_retirement(path, original_source, current_source, matches):
+    """Permit only the proved native-World retirement of the shared key write.
+
+    The original HTTP frame and every other endpoint remain exact. The one
+    changed body must be the specified 410 response AND have independently
+    validated committed pre/post AST evidence; an approved arbitrary body,
+    changed dependency, import, argument, or decorator remains invalid.
+    """
+    original = ast.parse(original_source)
+    current = ast.parse(current_source)
+    before = [node for node in original.body if isinstance(node, ast.FunctionDef)
+              and node.name == "update_message_settings"]
+    after = [node for node in current.body if isinstance(node, ast.FunctionDef)
+             and node.name == "update_message_settings"]
+    retired = ast.parse('raise HTTPException(410, detail="world_character_settings_required")').body
+    if (len(before) == len(after) == 1
+            and dump(ast.Module(body=after[0].body, type_ignores=[]))
+            == dump(ast.Module(body=retired, type_ignores=[]))
+            and matches(path, "update_message_settings", before[0], after[0])):
+        before[0].body = after[0].body
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
+
+
 def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if enabled is False or enabled is None:
         return None
@@ -295,7 +319,13 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
                 # world_generation forwarding proof above; no other alias is allowed.
                 if not (route.endswith("/world_chat_response.py") and node.module == "app.runtime.chat" and [(a.name, a.asname) for a in node.names] == [("world_generation", "chat_service")]):
                     raise ValueError("Chat historical route facade binding changed")
-        if dump(ast.parse(before(actual_route))) != dump(ast.parse((root / actual_route).read_text(encoding="utf-8-sig"))):
+        original_route = before(actual_route)
+        current_route = (root / actual_route).read_text(encoding="utf-8-sig")
+        if actual_route == "backend/app/domains/chat/router/messages.py":
+            validate_message_settings_retirement(
+                actual_route, original_route, current_route, matches,
+            )
+        elif dump(ast.parse(original_route)) != dump(ast.parse(current_route)):
             raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
     dependency = "backend/app/domains/chat/dependencies.py"
     if dump(ast.parse(before(dependency))) != dump(ast.parse((root / dependency).read_text(encoding="utf-8-sig"))):
