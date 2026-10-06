@@ -233,24 +233,7 @@ def update_message_settings(
     user: User = Depends(get_current_user),
     settings_service: MessageSettingsService = Depends(get_settings_service),
 ) -> chat.MessageSettingsRead:
-    try:
-        return settings_service.update_user_settings(db, user, data)
-    except errors.MessageCredentialRequiredError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
-        ) from exc
-    except errors.MessageForbiddenError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        ) from exc
-    except errors.MessageNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
-    except errors.MessageValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
-        ) from exc
+    raise HTTPException(410, detail="world_character_settings_required")
 
 
 @router.get(

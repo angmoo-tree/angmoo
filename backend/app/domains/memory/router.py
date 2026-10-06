@@ -41,6 +41,18 @@ router = APIRouter(prefix="/worlds/{world_id}/world-characters/{subject_id}", ta
 
 from app.domains.memory.schemas.embedding import MemoryEmbeddingRead, MemoryEmbeddingUpdate
 from app.domains.memory.service import embedding_management
+from app.domains.memory.schemas.embedding import MemoryPreparationStart
+
+
+@router.post("/memory/embedding-preparation")
+def start_memory_embedding_preparation(world_id: str, subject_id: str, data: MemoryPreparationStart,
+    request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return embedding_management.start_preparation(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
 
 
 @router.get("/memory/embedding-settings", response_model=MemoryEmbeddingRead)

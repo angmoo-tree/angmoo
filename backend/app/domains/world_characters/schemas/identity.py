@@ -213,6 +213,7 @@ class WorldCharacterProfileRead(BaseModel):
     banner_url: str | None
     intro: str
     role_key: str | None
+    role_name: str | None = None
     control_mode: Literal["autonomous", "owner_controlled"]
     status: Literal["active"]
     profile_capability: Literal["available"]

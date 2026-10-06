@@ -5,7 +5,7 @@ from app.domains.routines.exceptions import ActivityRuntimeValidationError
 from app.runtime.world_configuration.effective_values import configured_setting
 from app.domains.world_characters.models import CharacterActiveWorld, WorldCharacter
 from app.domains.world_characters.service.configuration import configuration_for_actor
-from app.domains.identity.models import LlmCredential
+from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.characters.models import Character
 from app.domains.worlds.models import World, WorldMembership
 
@@ -15,17 +15,14 @@ def _configuration_for_settings_read(db, *, character_id):
     # Legacy pre-World schemas remain supported by the existing non-World path.
     if not inspect(db.connection()).has_table(WorldCharacter.__tablename__):
         return None
-    roles = list(db.scalars(select(WorldCharacter).where(WorldCharacter.character_id == character_id).limit(2)))
-    if not roles:
-        return None
-    if len(roles) != 1:
-        raise ActivityRuntimeValidationError("world_character_binding_ambiguous")
-    role = roles[0]
-    if role.status != "active":
-        raise ActivityRuntimeValidationError("world_character_inactive")
     binding = db.get(CharacterActiveWorld, character_id)
-    if binding is None or binding.world_character_id != role.id:
-        raise ActivityRuntimeValidationError("world_character_binding_invalid")
+    if binding is None:
+        if db.scalar(select(WorldCharacter.id).where(WorldCharacter.character_id == character_id).limit(1)):
+            raise ActivityRuntimeValidationError("world_character_binding_invalid")
+        return None
+    role = db.get(WorldCharacter, binding.world_character_id)
+    if role is None or role.character_id != character_id or role.status != "active":
+        raise ActivityRuntimeValidationError("world_character_inactive")
     character = db.get(Character, character_id)
     membership = db.get(WorldMembership, role.membership_id)
     world = db.get(World, role.world_id)
@@ -60,14 +57,15 @@ def capture_activity_input(db, *, character_id):
     configuration = _configuration_for_admission(db, character_id=character_id)
     if configuration is None:
         return None
-    credential = db.execute(select(LlmCredential.model, LlmCredential.thinking_level).where(
-        LlmCredential.character_id == character_id, LlmCredential.purpose == "agent")).first()
-    metadata = {"_world_configuration": configuration.request_snapshot()}
-    model = configuration.settings.generation_model or (credential.model if credential else None)
-    if model:
-        metadata["_generation_model"] = model
-        metadata["_generation_thinking_level"] = (credential.thinking_level if credential else None) or "high"
-    return metadata
+    from app.runtime.world_credential_binding import capture
+    character = db.get(Character, character_id)
+    try:
+        binding = capture(db, owner_id=character.owner_id, world_id=configuration.world_id,
+            actor_id=configuration.world_character_id, purpose="sns")
+    except CredentialResolutionError as exc:
+        raise ActivityRuntimeValidationError("world_credential_required") from exc
+    return {"_world_configuration": configuration.request_snapshot(), "_world_credential": binding,
+        "_generation_model": binding["model"], "_generation_thinking_level": binding["thinking_level"]}
 
 
 def read_effective_setting(db, *, character_id, setting):

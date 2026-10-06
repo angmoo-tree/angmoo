@@ -53,10 +53,13 @@ class SqlAlchemyEpisodeHybridReader:
                 matching = set(db.scalars(select(MemoryItemEvidence.memory_item_id).where(
                     MemoryItemEvidence.memory_item_id.in_(rows), MemoryItemEvidence.source_type.in_(types))))
             result, seen = [], set()
+            from app.domains.memory.repository.episode_privacy import currently_accessible
+            privacy_reader = self.details(db)
             for ranked in candidates:
                 candidate = ranked.candidate
                 item = rows.get(candidate.memory_item_id)
                 if (item is None or not _item_retrievable(item, now) or _item_scope(item) != request.scope
+                    or not currently_accessible(db, privacy_reader, request.scope, item, now)
                     or candidate.kind is not RecallDocumentKind.MEMORY_ITEM
                     or RecallDocumentKind.MEMORY_ITEM not in request.kinds
                     or candidate.document_id != f"memory-item:{item.id}" or candidate.canonical_source_id != item.id
@@ -106,7 +109,7 @@ class SqlAlchemyEpisodeHybridReader:
             ids = tuple(row.memory_item_id for row in records if row.memory_item_id in snapshots
                 and str(snapshots[row.memory_item_id].version) == row.metadata.get("item_version")
                 and snapshots[row.memory_item_id].summary == row.text)
-            candidate_reader = SqlAlchemyEpisodeCandidates(db)
+            candidate_reader = SqlAlchemyEpisodeCandidates(db, source_reader=self.details(db))
             updates = candidate_reader.collect_followups(scope=request.scope, seed_ids=ids, now=now)
             packets = SqlAlchemyEpisodePackets(db, detail_reader=self.details(db)).read(
                 scope=request.scope, item_ids=updates.item_ids, now=now)

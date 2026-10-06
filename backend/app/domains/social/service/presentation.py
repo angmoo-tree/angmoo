@@ -295,6 +295,8 @@ def _post_author_identity(db: Session, post: models.Post, *, world_profiles=None
                 # while an unavailable role never borrows a live local profile.
                 profile = (world_profiles or {}).get(post.author_world_character_id)
                 if profile is not None and profile.world_id == post.world_id and profile.character_id == post.author_character_id:
+                    if profile.deleted:
+                        return {"name": DELETED_CHARACTER_NAME, "deleted": True, "handle": None, "avatar_url": None}
                     return {"name": profile.display_name, "handle": profile.handle, "avatar_url": profile.avatar_url}
                 return {"name": post.author_name, "handle": None, "avatar_url": None}
             return {

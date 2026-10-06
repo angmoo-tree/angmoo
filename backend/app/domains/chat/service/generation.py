@@ -222,7 +222,7 @@ class GenerationService:
         prior_metadata = json.loads(prior.node_state_json)
         # Retry the admitted input, including historical namespaces. Current
         # World edits must not replace a saved name or introduce a new snapshot.
-        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding")
+        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential")
             if key in prior_metadata}
         if "_world_configuration" in prior_metadata:
             self._request_configuration(thread, prior_metadata)
@@ -321,6 +321,8 @@ class GenerationService:
             actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id),
             "_environment": snapshot(db, user.id).to_dict()}
         metadata["_world_configuration"] = configuration.request_snapshot()
+        metadata["_world_credential"] = self.workflows.capture_credential(db, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -549,9 +551,8 @@ class GenerationService:
                 yield event
             return
         try:
-            _credential, base_material = (
-                self.settings_service.resolve_message_credential_material(db, user)
-            )
+            base_material = self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
+                world_id=thread.world_id, actor_id=thread.responding_world_character_id)
         except MessageCredentialRequiredError:
             async for event in self._fail_before_workflow(
                 db,
@@ -669,6 +670,8 @@ class GenerationService:
 
     def _validate_request_input(self, db, user, thread, record, message_id, evidence):
         self._mutation_thread(db, user, thread.world_id, thread.id)
+        self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
         self._validate_request_names(db, user, thread, record)
         if self.images:
             self.images.assert_current(db, user.id, thread.id, message_id, evidence)

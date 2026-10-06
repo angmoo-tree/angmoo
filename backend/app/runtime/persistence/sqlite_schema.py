@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 29
-SOURCE_ALEMBIC_REVISION = "20261005_0106"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 105
-EXPECTED_CANONICAL_TABLE_COUNT = 153
+SQLITE_SCHEMA_VERSION = 30
+SOURCE_ALEMBIC_REVISION = "20261006_0107"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 106
+EXPECTED_CANONICAL_TABLE_COUNT = 160
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 
@@ -316,6 +316,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -728,11 +729,30 @@ def build_sqlite_v26_metadata() -> MetaData:
 
 def build_sqlite_v27_metadata() -> MetaData:
     """The frozen pre-World-configuration schema; previous manifests stay fixed."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v29_metadata()
     for name in WORLD_CONFIGURATION_V28_TABLES:
         metadata.remove(metadata.tables[name])
     _remove_world_admission_columns(metadata)
     return metadata
+
+
+def build_sqlite_v29_metadata() -> MetaData:
+    """Frozen v29 shape, including the attested final v28 admission columns."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_world_activity_schema(metadata)
+    return metadata
+
+
+def _remove_world_activity_schema(metadata):
+    for name in ("world_credential_revisions", "world_credentials", "world_image_policies", "world_image_attempts",
+                 "memory_subject_profiles", "memory_index_preparations", "memory_episode_restrictions"):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    table = metadata.tables.get("memory_batch_runs")
+    if table is not None:
+        for column in ("credential_id", "credential_revision"):
+            if column in table.c:
+                table._columns.remove(table.c[column])
 
 
 def _remove_world_admission_columns(metadata):

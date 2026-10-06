@@ -8,7 +8,8 @@ from sqlalchemy.orm import aliased
 from app.core.ids import uuid7_string
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
-from app.domains.memory.models.batch import MemoryBatchProfile, MemoryBatchSetting
+from app.domains.memory.models.batch import MemoryBatchSetting
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.episode import MemoryEpisodeInfo
 from app.domains.memory.service.items import memory_evidence_blocked_code
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
@@ -32,6 +33,10 @@ def resolve_memory_batch(db, *, scope, items, activation, now):
     sources = RuntimeEpisodeDetailReader(db).read_sources(scope=scope, identities=identities)
     resolved = []
     for item in items:
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        if not currently_accessible(db, RuntimeEpisodeDetailReader(db), scope, item, now):
+            resolved.append((None, {"memory_id": item.id}, "source_unavailable_or_changed"))
+            continue
         rows = by_item[item.id]
         counterpart_ids = set()
         reason = None
@@ -118,6 +123,8 @@ class ReviewMemoryReferences:
 
     def revalidate(self, work):
         base = work.manifest["base"]
+        from app.runtime.relationships.review_credentials import validate
+        validate(self.db, work, base)
         from app.runtime.relationships.review_identity import review_identity_context
         identity = review_identity_context(self.db, owner_id=base["owner_id"], world_id=work.world_id,
             actor_id=work.actor_world_character_id, target_id=work.target_world_character_id)
@@ -125,7 +132,7 @@ class ReviewMemoryReferences:
             raise ValueError("relationship_review_identity_changed")
         setting = self.db.get(MemoryScopeSettingModel, base["setting_id"], populate_existing=True)
         batch = self.db.get(MemoryBatchSetting, base["setting_id"], populate_existing=True)
-        profile = self.db.get(MemoryBatchProfile, base["owner_id"], populate_existing=True)
+        profile = self.db.get(MemorySubjectProfile, base["setting_id"], populate_existing=True)
         policy = interpreted_policy(self.db, work.world_id)
         actor = self.db.get(WorldCharacter, work.actor_world_character_id)
         if (setting is None or not setting.enabled or batch is None or not batch.ai_enabled or not batch.consent_version

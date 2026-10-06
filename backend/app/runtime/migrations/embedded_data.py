@@ -58,9 +58,11 @@ class EmbeddedDataUpgradeCoordinator:
         with EmbeddedUpgradeLock(
             self._paths.runtime / "embedded-data-migration.lock"
         ):
+            from app.domains.identity.service.migration_secrets import MigrationSecretInterpreter
             canonical = SqliteCanonicalUpgradeCoordinator(
                 self._data_paths,
                 fallback_generation=self._fallback_generation,
+                secret_interpreter=MigrationSecretInterpreter(),
             ).upgrade()
             engine = create_database_engine(
                 "sqlite+pysqlite:///" + canonical.database_path.resolve().as_posix()

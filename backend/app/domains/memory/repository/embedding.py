@@ -26,8 +26,8 @@ class MemoryEmbeddingRepository:
     def save(self, scope, *, expected_version, enabled, provider, model, credential_id):
         if (provider, model) != (EMBEDDING_PROVIDER, EMBEDDING_MODEL):
             raise MemoryValidationError("memory_embedding_model_unsupported")
-        if enabled and not credential_id:
-            raise MemoryValidationError("memory_embedding_credential_required")
+        if credential_id is not None:
+            raise MemoryValidationError("memory_embedding_direct_key_required")
         setting = self.memory.get_or_create_scope_setting(scope)
         self.session.execute(update(MemoryScopeSettingModel).where(
             MemoryScopeSettingModel.id == setting.id).values(id=setting.id))
@@ -42,6 +42,8 @@ class MemoryEmbeddingRepository:
         row.credential_id, row.profile = credential_id, EMBEDDING_PROFILE
         row.version += 1
         row.updated_at = datetime.now(UTC)
+        from app.domains.memory.repository.index_preparation import mark_needed
+        mark_needed(self.session, setting, row.profile)
         self.session.flush()
         return self.read(scope)
 

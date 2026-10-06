@@ -20,6 +20,8 @@ def _create_tables(engine) -> None:
     from app.domains.characters.models import AgentImageGenerationSetting
     from app.domains.routines.models import AgentActivitySetting
     from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+    from app.domains.media.models_world_policy import WorldImagePolicy
+    from app.domains.identity.models_world_credentials import WorldCredential, WorldCredentialRevision
     for table in (
         models.User.__table__,
         models.InstallationIdentity.__table__,
@@ -35,6 +37,9 @@ def _create_tables(engine) -> None:
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
         WorldCharacterConfiguration.__table__,
+        WorldImagePolicy.__table__,
+        WorldCredential.__table__,
+        WorldCredentialRevision.__table__,
         models.WorldCharacterBlock.__table__,
         models.UserMessagePreference.__table__,
         models.MessageThread.__table__,
@@ -973,8 +978,12 @@ def test_world_chat_first_preference_unique_conflict_retries_once(
 
         assert created.outcome == "created"
         assert created.thread is not None
-        assert calls == 2
-        assert db.scalar(select(func.count(models.UserMessagePreference.user_id))) == 1
+        # Native World Chat never creates or inherits the retired shared
+        # preference. Even its injected legacy conflict must remain untouched.
+        assert calls == 0
+        assert db.scalar(select(func.count(models.UserMessagePreference.user_id))) == 0
+        assert created.thread.selected_model == "gemini-3.1-flash-lite"
+        assert created.thread.selected_thinking_level == "high"
         assert db.scalar(select(func.count(models.MessageThread.id))) == 1
 
 

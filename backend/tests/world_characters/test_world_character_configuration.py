@@ -408,6 +408,11 @@ def test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_a
         role = db.get(WorldCharacter, "config-role-a")
         role.autonomous_enabled = True
         role.activity_runtime_mode = "legacy_resident_v1"
+        from app.domains.identity.service import world_credentials
+        from app.domains.identity.schemas import WorldCredentialWrite
+        key_scope = dict(owner_id=owner.id, world_id=role.world_id, world_character_id=role.id, purpose="sns")
+        world_credentials.save(db, **key_scope, data=WorldCredentialWrite(expected_revision=0, provider="google",
+            model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-dashboard-key"))
         stored = db.get(WorldCharacterConfiguration, role.id)
         stored.settings = {**stored.settings, "active_hours_start": "09:00", "active_hours_end": "02:00"}
         db.commit()
@@ -437,6 +442,6 @@ def test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_a
         stored.settings = {**stored.settings, "active_hours_start": "00:00", "active_hours_end": "00:30"}
         db.commit()
         state("outside_hours")
-        db.get(LlmCredential, "config-credential-a").enabled = False
+        world_credentials.delete(db, **key_scope, expected_revision=1)
         db.commit()
         assert state("not_ready").status.reason == "credential_required"

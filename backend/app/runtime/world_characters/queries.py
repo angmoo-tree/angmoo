@@ -34,6 +34,10 @@ def _active_profile_statement(world_id: str):
 
 
 class SqlAlchemyWorldCharacterQueries:
+    def role_names(self, db, world_id):
+        from app.domains.worlds.models import WorldRole
+        return dict(db.execute(select(WorldRole.role_key, WorldRole.name).where(WorldRole.world_id == world_id)).all())
+
     def public_profile_rows(self, db, world_id):
         return db.execute(_active_profile_statement(world_id)).all()
 

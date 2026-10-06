@@ -83,6 +83,14 @@ def chat_delete_fixture(tmp_path):
     app.dependency_overrides[get_db] = database
     app.dependency_overrides[get_current_user] = user
     owner, outsider, responding_id = _seed(engine, principal)
+    # Response/deletion tests exercise their own World Chat binding; the
+    # retired installation-wide message credential is never a substitute.
+    from app.domains.identity.service import world_credentials
+    from identity.test_world_credentials import write
+    with Session(engine) as db:
+        world_credentials.save(db, owner_id=owner.id, world_id="world-a",
+            world_character_id=responding_id, purpose="chat", data=write(key="synthetic-delete-chat-key"))
+        db.commit()
     with TestClient(app, base_url="http://127.0.0.1:3000") as client:
         created = client.post("/api/v1/worlds/world-a/chat/threads", headers=FRONTEND_HEADERS,
                               json={"responding_world_character_id": responding_id})

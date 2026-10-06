@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from dataclasses import asdict
 
 from app.domains.memory.contracts.episode import (
     EpisodeBundle, EpisodeSourceUnit, MAX_NEW_CHAT_TURNS, MAX_CONTEXT_CHAT_TURNS,
@@ -14,7 +15,7 @@ from app.domains.memory.policies.episode_prompt import episode_prompt_payload
 def bundle_manifest_hash(bundle: EpisodeBundle) -> str:
     """Cover all inputs, including context/skipped candidates and the cutoff."""
     manifest = {
-        "policy": "episode-selection.v1",
+        "policy": bundle.policy_version,
         "scope": [bundle.scope.owner_id, bundle.scope.world_id, bundle.scope.subject_world_character_id],
         "epoch": bundle.activation_epoch, "cutoff": bundle.cutoff_sequence,
         "sources": [(ref, unit.unit_key, unit.unit_revision, unit.thread_id,
@@ -27,6 +28,12 @@ def bundle_manifest_hash(bundle: EpisodeBundle) -> str:
     }
     if bundle.environment is not None:
         manifest["environment"] = bundle.environment.to_dict()
+    if bundle.activities:
+        manifest["activities"] = [asdict(a) for a in bundle.activities]
+        manifest["excerpts"] = [{"unit": u.unit_key, "members": [
+            {"segments": m.segments, "omitted": m.omitted_characters,
+             "policy": m.excerpt_policy, "whole_hash": m.whole_hash} for m in u.members]}
+            for u in (*bundle.new_units, *bundle.context_units)]
     return hashlib.sha256(json.dumps(manifest, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 

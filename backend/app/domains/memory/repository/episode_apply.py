@@ -27,16 +27,17 @@ from app.domains.memory.repository.capacity import require_new_slot
 from app.domains.memory.repository.recall_records import _item_retrievable
 from app.domains.memory.repository.vector_eligibility import register_content
 from app.domains.memory.service.items import memory_evidence_blocked_code
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION, private_thread_intersection
 
 
 class SqlAlchemyEpisodeApply:
-    def __init__(self, session: Session, memory: SqlAlchemyMemoryRepository):
-        self.session, self.memory = session, memory
+    def __init__(self, session: Session, memory: SqlAlchemyMemoryRepository, *, source_reader=None):
+        self.session, self.memory, self.source_reader = session, memory, source_reader
 
     def apply(self, *, bundle: EpisodeBundle, selection: EpisodeSelection,
               setting: MemoryScopeSetting, now: datetime,
               revalidate: Callable[[EpisodeBundle], Mapping[tuple[str, str], CanonicalMemoryEvidence]],
-              job_fence: Callable[[], None]) -> tuple[str, ...]:
+              job_fence: Callable[[], None], access_bundle: EpisodeBundle | None = None) -> tuple[str, ...]:
         """Flush only; caller commits receipt and queue progress together.
 
         revalidate must freshly check all source revisions, raw ranges and thought
@@ -64,7 +65,7 @@ class SqlAlchemyEpisodeApply:
                 raise MemoryConflictError("episode_apply_memory_disabled")
             prior_receipt = self.session.scalar(select(MemoryEpisodeBundle).where(
                 MemoryEpisodeBundle.scope_setting_id == setting.id,
-                MemoryEpisodeBundle.policy_version == EPISODE_VERSION,
+                MemoryEpisodeBundle.policy_version == bundle.policy_version,
                 MemoryEpisodeBundle.activation_epoch == bundle.activation_epoch,
                 MemoryEpisodeBundle.manifest_hash == manifest_hash,
             ))
@@ -73,20 +74,27 @@ class SqlAlchemyEpisodeApply:
                     raise MemoryConflictError("episode_apply_result_conflict")
                 return tuple(self.session.scalars(select(MemoryEpisodeInfo.memory_item_id).where(
                     MemoryEpisodeInfo.bundle_id == prior_receipt.id).order_by(MemoryEpisodeInfo.memory_item_id)))
-            evidence = revalidate(bundle)
-            for unit in bundle.source_refs().values():
+            access_bundle = access_bundle or bundle
+            evidence = revalidate(access_bundle)
+            for unit in access_bundle.source_refs().values():
                 for member in unit.members:
                     row = evidence.get((member.source_type, member.source_id))
                     blocked = memory_evidence_blocked_code(scope=bundle.scope, source_type=MemorySourceTypeV1(member.source_type), source_id=member.source_id, evidence=row)
                     if blocked or row is None or row.source_digest != member.source_digest:
                         raise MemoryConflictError("episode_apply_source_changed")
-            for candidate in bundle.prior_episodes:
+            input_thread = private_thread_intersection(tuple(u.thread_id for u in access_bundle.source_refs().values())) if bundle.policy_version == ACTIVITY_POLICY_VERSION else bundle.new_units[0].thread_id
+            for candidate in access_bundle.prior_episodes:
                 prior = self.session.get(MemoryItem, candidate.item_id, populate_existing=True)
+                from app.domains.memory.repository.episode_privacy import currently_accessible
+                current_privacy = bundle.policy_version != ACTIVITY_POLICY_VERSION or (
+                    self.source_reader is not None and prior is not None and
+                    currently_accessible(self.session, self.source_reader, bundle.scope, prior, now)
+                )
                 if (prior is None or prior.owner_id != bundle.scope.owner_id or prior.world_id != bundle.scope.world_id
                     or prior.subject_world_character_id != bundle.scope.subject_world_character_id
                     or prior.version != candidate.item_version or prior.summary != candidate.summary
-                    or not _item_retrievable(prior, now)
-                    or (prior.thread_id is not None and prior.thread_id != bundle.new_units[0].thread_id)):
+                    or not _item_retrievable(prior, now) or not current_privacy
+                    or (prior.thread_id is not None and prior.thread_id != input_thread)):
                     raise MemoryConflictError("episode_apply_prior_changed")
             sources = bundle.source_refs()
             manifest = {ref: {"unit_key": u.unit_key, "unit_revision": u.unit_revision, "coverage": u.coverage,
@@ -94,7 +102,7 @@ class SqlAlchemyEpisodeApply:
                               "thought_reference": u.thought_reference} for ref, u in sources.items()}
             if prior_receipt is None:
                 receipt = MemoryEpisodeBundle(id=str(uuid4()), scope_setting_id=setting.id,
-                    policy_version=EPISODE_VERSION, activation_epoch=bundle.activation_epoch,
+                    policy_version=bundle.policy_version, activation_epoch=bundle.activation_epoch,
                     cutoff_sequence=bundle.cutoff_sequence, manifest_hash=manifest_hash,
                     manifest_json=json.dumps(manifest, ensure_ascii=False, sort_keys=True), result_hash=result_hash, created_at=now)
                 self.session.add(receipt)
@@ -113,6 +121,7 @@ class SqlAlchemyEpisodeApply:
             self.session.flush()
             item_ids = []
             used = set()
+            private_thread = private_thread_intersection(tuple(u.thread_id for u in sources.values()))
             for proposal in selection.episodes:
                 require_new_slot(self.session, setting, now=now)
                 selected = [sources[ref] for ref in proposal.source_refs]
@@ -124,9 +133,15 @@ class SqlAlchemyEpisodeApply:
                     valid_until=now + timedelta(days=setting.retention_days))
                 counterparts = {evidence[(m.source_type, m.source_id)].counterpart_world_character_id for u in selected for m in u.members}
                 item.counterpart_world_character_id = next(iter(counterparts)) if len(counterparts) == 1 else None
+                if bundle.policy_version == ACTIVITY_POLICY_VERSION:
+                    # A skipped private source still restricts the complete input.
+                    item.thread_id = input_thread
                 self.session.add(item)
                 self.session.flush()
-                self.session.add(MemoryEpisodeInfo(memory_item_id=item.id, bundle_id=receipt.id, policy_version=EPISODE_VERSION))
+                self.session.add(MemoryEpisodeInfo(memory_item_id=item.id, bundle_id=receipt.id, policy_version=bundle.policy_version))
+                if bundle.policy_version == ACTIVITY_POLICY_VERSION:
+                    from app.domains.memory.repository.episode_privacy import new_restriction
+                    self.session.add(new_restriction(item.id, access_bundle, thread_id=input_thread))
                 evidence_rows = {}
                 for ordinal, unit in enumerate(selected):
                     ref = unit.thought_reference or ""
@@ -145,8 +160,10 @@ class SqlAlchemyEpisodeApply:
                             evidence_rows[key] = self.memory._new_evidence(item.id, evidence[key])
                             self.session.add(evidence_rows[key])
                             self.session.flush()
-                        self.session.add(MemoryEpisodeUnitEvidence(unit_id=unit_row.id, evidence_id=evidence_rows[key].id,
-                            start_offset=member.start_offset, end_offset=member.start_offset + len(member.text), role=member.role, ordinal=position))
+                        ranges = member.segments or ((member.start_offset, member.start_offset + len(member.text)),)
+                        for segment, (start, end) in enumerate(ranges):
+                            self.session.add(MemoryEpisodeUnitEvidence(unit_id=unit_row.id, evidence_id=evidence_rows[key].id,
+                                start_offset=start, end_offset=end, role=member.role, ordinal=position * 2 + segment if member.segments else position))
                 for ref in proposal.follows_episode_refs:
                     prior = bundle.prior_episodes[int(ref[1:]) - 1]
                     self.session.add(MemoryEpisodeLink(prior_item_id=prior.item_id, following_item_id=item.id, created_at=now))
@@ -157,7 +174,7 @@ class SqlAlchemyEpisodeApply:
             for ref, unit in sources.items():
                 if ref.startswith("S"):
                     self.session.add(MemoryEpisodeProcessedUnit(id=str(uuid4()), bundle_id=receipt.id,
-                        scope_setting_id=setting.id, policy_version=EPISODE_VERSION, activation_epoch=bundle.activation_epoch,
+                        scope_setting_id=setting.id, policy_version=bundle.policy_version, activation_epoch=bundle.activation_epoch,
                         unit_key=unit.unit_key, unit_revision=unit.unit_revision, decision="used" if ref in used else "skipped"))
             if item_ids:
                 self.memory._invalidate_hot_briefs(setting.id, now=now)

@@ -33,7 +33,7 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
             or any(not isinstance(value, str) or not value for value in
                    (*snapshot["seed_memory_ids"], *snapshot["hydrated_memory_ids"]))):
         raise ValueError("activity_memory_validation_unavailable")
-    updates = SqlAlchemyEpisodeCandidates(db).collect_followups(scope=scope,
+    updates = SqlAlchemyEpisodeCandidates(db, source_reader=RuntimeEpisodeDetailReader(db)).collect_followups(scope=scope,
         seed_ids=tuple(snapshot["seed_memory_ids"]), now=now,
         limit=snapshot["traversal_limit"], depth_limit=snapshot["depth_limit"])
     if (updates.item_ids != tuple(snapshot["hydrated_memory_ids"])
@@ -98,7 +98,7 @@ def assert_memories_current(db, *, owner_id, world_id, actor_id, memories, valid
         ids = tuple(result.get("ranked_memory_ids", ()))
         if not ids or not result.get("packets"):
             continue
-        linked = SqlAlchemyEpisodeCandidates(db).followups(scope=scope, item_ids=ids, now=now, limit=12)
+        linked = SqlAlchemyEpisodeCandidates(db, source_reader=RuntimeEpisodeDetailReader(db)).followups(scope=scope, item_ids=ids, now=now, limit=12)
         # Hydration already bounded the follow-up graph. Re-running traversal
         # with hydrated rows as roots can discover pre-existing omitted rows;
         # that is not a concurrent correction. New links/items still invalidate.

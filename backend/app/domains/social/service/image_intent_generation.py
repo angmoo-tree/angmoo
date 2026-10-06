@@ -25,7 +25,7 @@ def source_revision(post):
     return hashlib.sha256(f"{post.title}\n{post.body}".encode()).hexdigest()
 
 
-def admit(db, *, post, owner_id, character_id, scene, scene_error, prepare, quota_day):
+def admit(db, *, post, owner_id, character_id, scene, scene_error, prepare, quota_day, reserve=reserve_attempt):
     """Called inside publication's transaction. No Provider call or implicit commit."""
     prepared = prepare(db, owner_id, character_id, scene, scene_error)
     if prepared is None:
@@ -49,7 +49,7 @@ def admit(db, *, post, owner_id, character_id, scene, scene_error, prepare, quot
     db.add(job)
     db.flush()
     try:
-        reserve_attempt(db, job_id=job.id, owner_id=owner_id, character_id=character_id,
+        reserve(db, job_id=job.id, owner_id=owner_id, character_id=character_id,
             character_limit=limit, quota_day=quota_day)
     except ImagePreparationError as exc:
         # A cap never turns today's blocked posts into tomorrow's backlog.
@@ -101,6 +101,11 @@ class GenerationWorker:
             "cancellable": job.status in {"queued", "running", "result_pending", "result_ready"},
             "retryable": job.status in {"failed", "result_pending", "result_ready"} or (job.status == "outcome_unknown" and bool(job.provider_receipt))}
 
+    def _transition_attempt(self, db, attempt):
+        transition = getattr(self.execution, "transition_attempt", None)
+        if transition is not None:
+            transition(db, attempt.id, attempt.status)
+
     def cancel(self, db, owner_id, post_id):
         job = self.owned_job(db, owner_id, post_id)
         if job.status == "cancelled":
@@ -117,6 +122,7 @@ class GenerationWorker:
         for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job.id,
             ImageGenerationAttempt.status == "reserved")):
             attempt.status = "released"
+            self._transition_attempt(db, attempt)
         db.refresh(job)
         return self.view(job)
 
@@ -143,7 +149,7 @@ class GenerationWorker:
         if changed.rowcount != 1:
             raise ImagePreparationError("image_job_changed")
         if job.status == "queued":
-            reserve_attempt(db, job_id=job.id, owner_id=owner_id, character_id=job.character_id,
+            self.execution.reserve_attempt(db, job_id=job.id, owner_id=owner_id, character_id=job.character_id,
                 character_limit=self.execution.character_limit(db, job.character_id), quota_day=quota_day)
         job.failure_class = None
         intent = db.get(ImageIntent, job.intent_id)
@@ -251,7 +257,7 @@ class GenerationWorker:
                 except (OSError, ValueError, RuntimeError, SQLAlchemyError):
                     db.rollback()
                     current = db.get(PostImageGenerationJob, job_id)
-                    if current.lease_token == token:
+                    if current and current.lease_token == token:
                         current.status, current.lease_until = "result_pending", self.clock()
                         current.failure_class = "local_result_persistence_pending"
                         db.commit()
@@ -299,6 +305,7 @@ class GenerationWorker:
                 if reserved is None:
                     raise ImagePreparationError("generation_reservation_missing")
                 reserved.status = "submitted"
+                self._transition_attempt(submit_db, reserved)
                 current.attempt_count += 1
                 submit_db.commit()
         async def receipt_received(receipt):
@@ -316,26 +323,30 @@ class GenerationWorker:
         received_receipt = None
         try:
             result = await self.execution.submit(execution, on_receipt=receipt_received, on_submit=submission_started)
-            self.received_results[job_id] = result
-            while len(self.received_results) > 4:
-                self.received_results.popitem(last=False)
             with self.sessions() as received_db:
                 current = received_db.get(PostImageGenerationJob, job_id)
-                if current and current.lease_token == token:
-                    current.status = "result_pending"
-                    current.provider_receipt = result.receipt or current.provider_receipt
-                    for attempt in received_db.scalars(select(ImageGenerationAttempt).where(
-                        ImageGenerationAttempt.job_id == job_id, ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
-                        attempt.status = "result_received"
-                    received_db.commit()
-            metadata = self._write_received(job_id, result)
-            with self.sessions() as db:
-                current = db.get(PostImageGenerationJob, job_id)
-                if current and current.lease_token == token:
-                    self._persist_result(db, current, result.content, metadata)
-                elif current and current.status == "cancelled":
+                claimed = received_db.execute(update(PostImageGenerationJob).where(
+                    PostImageGenerationJob.id == job_id, PostImageGenerationJob.status == "running",
+                    PostImageGenerationJob.lease_token == token).values(status="result_pending"))
+                if current is None or claimed.rowcount != 1:
+                    self.received_results.pop(job_id, None)
                     pixels_path.unlink(missing_ok=True)
                     manifest_path.unlink(missing_ok=True)
+                    return
+                # Hold only a local writer transaction while fencing and
+                # spooling. A deletion cannot finish and then be followed by
+                # a late provider response recreating its private files.
+                self.execution.prepare(received_db, current, received_db.get(ImageIntent, current.intent_id))
+                self.received_results[job_id] = result
+                while len(self.received_results) > 4:
+                    self.received_results.popitem(last=False)
+                current.provider_receipt = result.receipt or current.provider_receipt
+                for attempt in received_db.scalars(select(ImageGenerationAttempt).where(
+                    ImageGenerationAttempt.job_id == job_id, ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
+                    attempt.status = "result_received"
+                    self._transition_attempt(received_db, attempt)
+                metadata = self._write_received(job_id, result)
+                self._persist_result(received_db, current, result.content, metadata)
             self.received_results.pop(job_id, None)
         except asyncio.CancelledError:
             raise  # A submitted job stays recoverable; cancellation never refunds it.
@@ -343,7 +354,16 @@ class GenerationWorker:
             with self.sessions() as db:
                 current = db.get(PostImageGenerationJob, job_id)
                 if current and current.lease_token == token:
-                    if result is not None or manifest_path.is_file():
+                    if isinstance(exc, ImagePreparationError):
+                        self.received_results.pop(job_id, None)
+                        for path in self._spool_paths(job_id):
+                            path.unlink(missing_ok=True)
+                        self._fail(db, current, str(exc))
+                    elif result is not None or manifest_path.is_file():
+                        for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
+                            ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
+                            attempt.status = "result_received"
+                            self._transition_attempt(db, attempt)
                         current.status = "result_pending"
                         current.lease_until = self.clock()
                         current.failure_class = "local_result_persistence_pending"
@@ -353,6 +373,10 @@ class GenerationWorker:
                         code = str(exc) if isinstance(exc, (ImagePreparationError, ImageSubmissionError)) else "generation_submission_failed"
                         self._fail(db, current, code, unknown=getattr(exc, "outcome_unknown", False) or (received_receipt is not None and not isinstance(exc, ImageSubmissionError)),
                             release=isinstance(exc, ImagePreparationError) and received_receipt is None)
+                elif current is None or current.status in {"cancelled", "failed", "skipped"}:
+                    self.received_results.pop(job_id, None)
+                    for path in self._spool_paths(job_id):
+                        path.unlink(missing_ok=True)
 
     def _persist_result(self, db, job, content, metadata):
         try:
@@ -377,6 +401,7 @@ class GenerationWorker:
         for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job.id,
             ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown", "result_received")))):
             attempt.status, attempt.usage_json = "succeeded", json.dumps(metadata.get("usage"))
+            self._transition_attempt(db, attempt)
         db.commit()
         for path in self._spool_paths(job.id):
             path.unlink(missing_ok=True)
@@ -419,4 +444,5 @@ class GenerationWorker:
         for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job.id)):
             if attempt.status in {"reserved", "submitted", "outcome_unknown"}:
                 attempt.status = "released" if attempt.status == "reserved" else "outcome_unknown" if unknown else "failed"
+                self._transition_attempt(db, attempt)
         db.commit()

@@ -6,7 +6,8 @@ import json
 from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.domains.memory.contracts.episode import EpisodeBundle, MAX_EPISODE_OUTPUT_TOKENS
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.policies.episode_prompt import EPISODE_PROMPT, episode_prompt_payload
+from app.domains.memory.policies.episode_prompt import episode_system_prompt, episode_prompt_payload
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION, MAX_ACTIVITY_OUTPUT_TOKENS
 from app.domains.memory.policies.episode_selection import parse_episode_selection
 from app.providers.contracts import ProviderRequest
 from app.providers.generation_profiles import validate_generation_profile
@@ -16,7 +17,7 @@ from app.providers.registry import get_provider_adapter
 
 class DirectLlmEpisodeSelectionProvider:
     def __init__(self, material: CredentialMaterial, *, validate_credential: Callable[[], None] | None = None):
-        if material.purpose is not CredentialPurpose.MESSAGE_LLM:
+        if material.purpose not in {CredentialPurpose.MESSAGE_LLM, CredentialPurpose.MEMORY_CONSOLIDATION}:
             raise MemoryValidationError("episode_credential_purpose_invalid")
         self.phase_observer = None
         self.material = material
@@ -29,6 +30,9 @@ class DirectLlmEpisodeSelectionProvider:
         self.retryable = False
 
     def validate_bundle(self, bundle: EpisodeBundle):
+        expected = CredentialPurpose.MEMORY_CONSOLIDATION if bundle.policy_version == ACTIVITY_POLICY_VERSION else CredentialPurpose.MESSAGE_LLM
+        if self.material.purpose is not expected:
+            raise MemoryValidationError("episode_credential_purpose_invalid")
         return episode_prompt_payload(bundle)
 
     async def select(self, bundle: EpisodeBundle, *, timeout: float):
@@ -45,8 +49,8 @@ class DirectLlmEpisodeSelectionProvider:
         adapter = get_provider_adapter(self.material.provider, self.material.model)
         request = ProviderRequest(
             api_key=self.material.reveal(), model=self.material.model,
-            system_prompt=EPISODE_PROMPT, user_prompt=prompt,
-            max_output_tokens=MAX_EPISODE_OUTPUT_TOKENS, timeout_seconds=timeout,
+            system_prompt=episode_system_prompt(bundle), user_prompt=prompt,
+            max_output_tokens=MAX_ACTIVITY_OUTPUT_TOKENS if bundle.policy_version == ACTIVITY_POLICY_VERSION else MAX_EPISODE_OUTPUT_TOKENS, timeout_seconds=timeout,
             response_schema=schema, response_mime_type="application/json",
             thinking_level=self.material.thinking_level, sdk_attempts=1,
         )

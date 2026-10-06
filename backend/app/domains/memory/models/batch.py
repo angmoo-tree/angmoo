@@ -195,6 +195,10 @@ class MemoryBatchRun(Base):
     )
 
 
+    credential_id: Mapped[str | None] = mapped_column(String(64))
+    credential_revision: Mapped[int | None] = mapped_column(Integer)
+
+
 class MemorySelectionDecisionModel(Base):
     __tablename__ = "memory_selection_decisions"
     __table_args__ = (

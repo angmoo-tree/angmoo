@@ -13,7 +13,7 @@ from app.domains.routines.service.tick_schedule import tick_interval_seconds, in
 from app.domains.routines.exceptions import AgentSlotUnavailableError, ActivityRuntimeValidationError
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
-from app.runtime.routines.configuration_reads import read_effective_setting
+from app.runtime.routines.configuration_reads import read_effective_setting, capture_activity_input
 
 
 def reconcile_world_autonomy(db, *, workflows, limit=32, allowed_character_ids=None):
@@ -70,11 +70,11 @@ def reconcile_world_autonomy(db, *, workflows, limit=32, allowed_character_ids=N
             continue
         character = db.get(Character, role.character_id)
         user = db.get(User, character.owner_id)
-        credential = workflows.get_credential(db, role.character_id)
         setting = db.get(AgentActivitySetting, role.character_id)
-        if credential is None or not credential.enabled or setting is None:
+        if setting is None:
             continue
         try:
+            capture_activity_input(db, character_id=role.character_id)
             effective = read_effective_setting(db, character_id=role.character_id, setting=setting)
             if not effective.auto_enabled:
                 continue
@@ -86,10 +86,7 @@ def reconcile_world_autonomy(db, *, workflows, limit=32, allowed_character_ids=N
                 continue
             with db.begin_nested():
                 slot = workflows.assign_slot(db, user_id=user.id, character_id=role.character_id,
-                    credential_id=credential.id, heartbeat_interval_seconds=tick_interval_seconds(effective), commit=False)
-                if workflows.sync_enabled():
-                    workflows.bind_profile(slot, user_id=user.id, character=character, credential=credential)
-                    workflows.reload_secrets()
+                    credential_id=None, heartbeat_interval_seconds=tick_interval_seconds(effective), commit=False)
         except (ActivityRuntimeValidationError, AgentSlotUnavailableError):
             continue
         counts[role.world_id] = counts.get(role.world_id, 0) + 1

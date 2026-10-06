@@ -71,6 +71,10 @@ class _SourceQueries:
 class RuntimeEpisodeDetailReader:
     def __init__(self, session): self.session = session
 
+    def read_evidence(self, *, scope, source_type, source_id):
+        from app.runtime.memory.source_composition import source_evidence_reader
+        return source_evidence_reader(self.session).read_evidence(scope=scope, source_type=source_type, source_id=source_id)
+
     def read_sources(self, *, scope, identities):
         if len(identities) > 10_000:
             raise ValueError("episode_source_manifest_limit")

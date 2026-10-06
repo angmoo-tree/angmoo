@@ -5,12 +5,15 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select, or_, case, update
 
 from app.domains.memory.models.items import MemoryScopeSettingModel
-from app.domains.memory.models.batch import MemoryBatchSetting, MemoryBatchProfile
+from app.domains.memory.models.batch import MemoryBatchSetting
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.relationships.models.personalization import RelationshipReviewWork, RelationshipPolicy
 from app.domains.relationships.service.daily_review import plan_review, run_review_step, apply_review
 from app.runtime.relationships.review_memories import collect_new_review_memories, ReviewMemoryReferences
 from app.runtime.relationships.review_refresh import refresh_review_inputs
 from app.runtime.relationships.review_identity import review_identity_context
+from app.runtime.relationships.review_credentials import snapshot as credential_snapshot
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 class RelationshipReviewRuntime:
@@ -23,12 +26,16 @@ class RelationshipReviewRuntime:
         with self.session_factory() as db:
             from app.domains.identity.service.environment import snapshot, lock_environment_admission
             lock_environment_admission(db)
-            settings = db.execute(select(MemoryScopeSettingModel, MemoryBatchSetting, MemoryBatchProfile).join(
+            settings = db.execute(select(MemoryScopeSettingModel, MemoryBatchSetting, MemorySubjectProfile).join(
                 MemoryBatchSetting, MemoryBatchSetting.scope_setting_id == MemoryScopeSettingModel.id).join(
-                MemoryBatchProfile, MemoryBatchProfile.owner_id == MemoryScopeSettingModel.owner_id).where(
+                MemorySubjectProfile, MemorySubjectProfile.scope_setting_id == MemoryScopeSettingModel.id).where(
                 MemoryScopeSettingModel.enabled.is_(True), MemoryBatchSetting.ai_enabled.is_(True),
                 MemoryBatchSetting.consent_version.is_not(None), MemoryBatchSetting.schedule_enabled.is_(True))).all()
             for setting, batch, profile in settings:
+                try:
+                    credential = credential_snapshot(db, MemoryScope(setting.owner_id, setting.world_id, setting.subject_world_character_id), profile)
+                except ValueError:
+                    continue
                 environment = snapshot(db, setting.owner_id)
                 local = now.astimezone(ZoneInfo(environment.timezone))
                 if local.strftime("%H:%M") < batch.local_time:
@@ -50,7 +57,7 @@ class RelationshipReviewRuntime:
                         continue
                     plan_review(db, world_id=setting.world_id, actor_id=setting.subject_world_character_id,
                         target_id=target, period_key=period, memories=memories,
-                        base={"identity": identity, "environment": environment.to_dict(),
+                        base={**credential, "identity": identity, "environment": environment.to_dict(),
                               "owner_id": setting.owner_id, "setting_id": setting.id, "profile_version": profile.version,
                               "model_id": profile.model_id, "thinking_level": profile.thinking_level})
             db.commit()

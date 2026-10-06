@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import os
 import socket
 from collections.abc import Iterator
 
@@ -10,6 +11,14 @@ import pytest
 
 class ExternalNetworkBlocked(RuntimeError):
     pass
+
+
+@pytest.fixture(autouse=True)
+def requested_network_isolation(request):
+    """Allow offline regression runs through pytest's normal spawn-safe CLI."""
+    if os.environ.get("ANGMOO_DENY_EXTERNAL_NETWORK") == "1":
+        request.getfixturevalue("deny_external_network")
+    yield
 
 
 def _is_loopback_host(host: object) -> bool:

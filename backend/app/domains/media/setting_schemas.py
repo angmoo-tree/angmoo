@@ -35,7 +35,7 @@ class InterpretationSettingsWrite(StrictInput):
 
 
 class AssetUpload(StrictInput):
-    scope_kind: Literal["character", "world", "thread"]
+    scope_kind: Literal["character", "world", "thread", "world_character"]
     scope_id: str = Field(min_length=1, max_length=64)
     content_type: Literal["image/png", "image/jpeg", "image/webp"]
     data_base64: str = Field(min_length=1, max_length=13981016)

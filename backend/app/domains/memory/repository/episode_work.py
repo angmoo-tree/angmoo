@@ -19,6 +19,7 @@ from app.domains.memory.exceptions import MemoryConflictError, MemoryValidationE
 from app.domains.memory.models.episode import MemoryEpisodeBundle
 from app.domains.memory.policies.episode_bundles import bundle_manifest_hash
 from app.domains.memory.service.episode_manifest import episode_input_manifest
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION, ACTIVITY_WORK_VERSION, MemoryActivity
 
 WORK_VERSION = "episode-work.v1"
 MAX_JOB_BUNDLES = 256
@@ -65,11 +66,13 @@ class SqlAlchemyEpisodeWork:
         for ordinal, bundle in enumerate(bundles):
             if bundle.scope != setting.scope or not bundle.activation_epoch:
                 raise MemoryValidationError("episode_work_scope_invalid")
-            manifest = {"version": WORK_VERSION, "job_id": job_id,
+            modern = bundle.policy_version == ACTIVITY_POLICY_VERSION
+            manifest = {"version": ACTIVITY_WORK_VERSION if modern else WORK_VERSION, "job_id": job_id,
+                **({"lineage_root": f"{job_id}:{ordinal:03d}"} if modern else {}),
                 "input": episode_input_manifest(bundle), "state": "pending", "calls": [],
                 "depth": 0, "candidate_ids": list(candidate_ids), "last_code": None}
             self.session.add(MemoryEpisodeBundle(id=f"{job_id}:{ordinal:03d}", scope_setting_id=setting.id,
-                policy_version=EPISODE_VERSION, activation_epoch=bundle.activation_epoch,
+                policy_version=bundle.policy_version, activation_epoch=bundle.activation_epoch,
                 cutoff_sequence=bundle.cutoff_sequence, manifest_hash=bundle_manifest_hash(bundle),
                 manifest_json=json.dumps(manifest, ensure_ascii=False, sort_keys=True), result_hash="", created_at=now))
         self.session.flush()
@@ -81,7 +84,7 @@ class SqlAlchemyEpisodeWork:
         rows = self.session.scalars(select(MemoryEpisodeBundle).where(
             MemoryEpisodeBundle.scope_setting_id == setting.id,
             MemoryEpisodeBundle.id.startswith(job_id + ":"),
-            MemoryEpisodeBundle.policy_version == EPISODE_VERSION,
+            MemoryEpisodeBundle.policy_version.in_((EPISODE_VERSION, ACTIVITY_POLICY_VERSION)),
         ).order_by(MemoryEpisodeBundle.id).limit(MAX_JOB_BUNDLES + 1)).all()
         if len(rows) > MAX_JOB_BUNDLES:
             raise MemoryValidationError("episode_work_limit")
@@ -99,7 +102,10 @@ class SqlAlchemyEpisodeWork:
         row = self.session.get(MemoryEpisodeBundle, work.id, populate_existing=True)
         value = self._read(row)
         allowance = MAX_BUNDLE_ATTEMPTS * (1 + len(value.get("retry_grants", ())))
-        if value["state"] not in {"pending", "running"} or len(value["calls"]) >= allowance:
+        calls = len(value["calls"])
+        if value["version"] == ACTIVITY_WORK_VERSION:
+            calls = self._lineage_calls(value, setting_id=row.scope_setting_id)
+        if value["state"] not in {"pending", "running"} or calls >= allowance:
             raise MemoryConflictError("episode_work_attempts_exhausted")
         value["calls"].append({"model_id": model_id, "thinking_level": thinking_level,
             "profile_version": profile_version, "started_at": now.isoformat(), "outcome": "in_flight"})
@@ -158,16 +164,29 @@ class SqlAlchemyEpisodeWork:
         if len(existing) + 2 > MAX_JOB_BUNDLES:
             raise MemoryConflictError("episode_work_limit")
         middle = len(bundle.new_units) // 2
+        modern = bundle.policy_version == ACTIVITY_POLICY_VERSION
+        if modern and len(bundle.activities) > 1:
+            middle = sum(len(a.unit_keys) for a in bundle.activities[:len(bundle.activities) // 2])
         left, right = bundle.new_units[:middle], bundle.new_units[middle:]
         context = (*bundle.context_units, *left)[-5:] if left[0].kind == "chat_turn" else ()
-        children = (replace(bundle, bundle_ref=bundle.bundle_ref + ".1", new_units=left),
-                    replace(bundle, bundle_ref=bundle.bundle_ref + ".2", new_units=right, context_units=context))
+        def child(values, suffix, preceding):
+            if not modern:
+                return replace(bundle, bundle_ref=bundle.bundle_ref + suffix, new_units=values, context_units=preceding)
+            keys = {u.unit_key for u in values}
+            known = {u.unit_key: u for u in (*bundle.context_units, *bundle.new_units)}
+            activities = tuple(replace(a, unit_keys=tuple(k for k in a.unit_keys if k in keys))
+                for a in bundle.activities if set(a.unit_keys) & keys)
+            references = {k for a in activities for k in a.context_keys} - keys
+            return replace(bundle, bundle_ref=bundle.bundle_ref + suffix, new_units=values,
+                context_units=tuple(known[k] for k in sorted(references)), activities=activities)
+        children = (child(left, ".1", bundle.context_units), child(right, ".2", context))
         for index, child in enumerate(children, 1):
-            child_value = {"version": WORK_VERSION, "job_id": value["job_id"], "input": episode_input_manifest(child),
+            child_value = {"version": value["version"], "job_id": value["job_id"], "input": episode_input_manifest(child),
+                **({"lineage_root": value["lineage_root"]} if modern else {}),
                 "state": "pending", "calls": [], "depth": value["depth"] + 1,
                 "candidate_ids": value["candidate_ids"], "last_code": None}
             self.session.add(MemoryEpisodeBundle(id=f"{work.id}.{index}", scope_setting_id=setting.id,
-                policy_version=EPISODE_VERSION, activation_epoch=child.activation_epoch,
+                policy_version=child.policy_version, activation_epoch=child.activation_epoch,
                 cutoff_sequence=child.cutoff_sequence, manifest_hash=bundle_manifest_hash(child),
                 manifest_json=json.dumps(child_value, ensure_ascii=False, sort_keys=True), result_hash="", created_at=now))
         value["state"], value["last_code"] = "split", "episode_needs_split"
@@ -180,7 +199,7 @@ class SqlAlchemyEpisodeWork:
             raise MemoryConflictError("episode_work_missing")
         try:
             value = json.loads(row.manifest_json)
-            if (value["version"] != WORK_VERSION or value["state"] not in {"pending", "running", "completed", "split", "failed"}
+            if (value["version"] not in {WORK_VERSION, ACTIVITY_WORK_VERSION} or value["state"] not in {"pending", "running", "completed", "split", "failed"}
                 or not isinstance(value["calls"], list)
                 or len(value["calls"]) > MAX_BUNDLE_ATTEMPTS * (1 + len(value.get("retry_grants", ())))
                 or value["input"]["manifest_hash"] != row.manifest_hash):
@@ -188,3 +207,33 @@ class SqlAlchemyEpisodeWork:
             return value
         except (ValueError, KeyError, TypeError):
             raise MemoryValidationError("episode_work_receipt_invalid") from None
+
+    def access_manifest(self, work, *, setting):
+        """Every split leaf retains the admitted root's access intersection."""
+        row = self.session.get(MemoryEpisodeBundle, work.id)
+        value = self._read(row)
+        if value["version"] != ACTIVITY_WORK_VERSION:
+            return value["input"]
+        root = self.session.get(MemoryEpisodeBundle, value["lineage_root"])
+        if root is None or root.scope_setting_id != setting.id or root.policy_version != ACTIVITY_POLICY_VERSION:
+            raise MemoryConflictError("episode_access_root_unavailable")
+        parent = self._read(root)
+        if parent["job_id"] != value["job_id"] or parent.get("lineage_root") != root.id:
+            raise MemoryConflictError("episode_access_root_unavailable")
+        return parent["input"]
+
+    def _lineage_calls(self, value, *, setting_id):
+        root = value.get("lineage_root")
+        if not isinstance(root, str) or not root.startswith(value["job_id"] + ":"):
+            raise MemoryValidationError("episode_work_lineage_invalid")
+        rows = self.session.scalars(select(MemoryEpisodeBundle).where(
+            MemoryEpisodeBundle.scope_setting_id == setting_id,
+            MemoryEpisodeBundle.policy_version == ACTIVITY_POLICY_VERSION,
+            (MemoryEpisodeBundle.id == root) | MemoryEpisodeBundle.id.startswith(root + ".")))
+        calls = 0
+        for row in rows:
+            child = self._read(row)
+            if child.get("lineage_root") != root:
+                raise MemoryValidationError("episode_work_lineage_invalid")
+            calls += len(child["calls"])
+        return calls

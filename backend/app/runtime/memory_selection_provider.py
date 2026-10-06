@@ -14,6 +14,32 @@ from app.providers.generation_profiles import validate_generation_profile
 from app.runtime.chat.message_composition import settings_service
 
 
+def subject_memory_provider(session_factory, scope, *, model, thinking_level,
+                            credential_id=None, credential_revision=None, relationship=False):
+    """Resolve only this subject's consolidation key, without a provider call."""
+    from app.domains.identity.service.world_credentials import resolve
+    from app.runtime.memory.scope_queries import read_consolidation_binding
+    with session_factory() as session:
+        binding = read_consolidation_binding(session, scope, credential_id, credential_revision)
+        if binding is None or (binding.model, binding.thinking_level) != (model, thinking_level):
+            raise MemoryValidationError("memory_selection_settings_required")
+        if credential_id is not None and (binding.credential_id, binding.revision) != (credential_id, credential_revision):
+            raise MemoryValidationError("memory_selection_credential_changed")
+        material = resolve(session, owner_id=scope.owner_id, world_id=scope.world_id,
+            world_character_id=scope.subject_world_character_id, purpose="consolidation", revision=binding.revision)
+
+    def validate_credential():
+        with session_factory() as session:
+            current = read_consolidation_binding(session, scope, binding.credential_id, binding.revision)
+            if current != binding:
+                raise MemoryValidationError("memory_selection_credential_changed")
+    if relationship:
+        from app.integrations.llm.relationship_review import DirectRelationshipReviewProvider
+        return DirectRelationshipReviewProvider(material, validate_credential=validate_credential)
+    from app.integrations.llm.episode_selection import DirectLlmEpisodeSelectionProvider
+    return DirectLlmEpisodeSelectionProvider(material, validate_credential=validate_credential)
+
+
 def memory_provider(session_factory, owner_id: str, model: str, thinking_level: str = "high", *, episode=False, relationship=False):
     try:
         validate_generation_profile(model, thinking_level)

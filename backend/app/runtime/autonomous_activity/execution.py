@@ -121,6 +121,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
 
     def validate_claim():
         """Read-only claim fence; also runs inside each fresh writer boundary."""
+        from app.runtime.autonomous_activity.llm_context import world_material
+        world_material(ctx)
         active = ctx.db.get(CharacterActiveWorld, ctx.character.id, populate_existing=True)
         current_actor = ctx.db.get(WorldCharacter, actor.id, populate_existing=True)
         world = ctx.db.get(World, actor.world_id, populate_existing=True)

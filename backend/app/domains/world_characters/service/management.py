@@ -32,6 +32,7 @@ class WorldCharacterManagementService:
         configs = {item.world_character_id: item for item in self.db.scalars(select(WorldCharacterConfiguration).where(
             WorldCharacterConfiguration.world_character_id.in_([role.id for role, _ in rows])))}
         managed_world = world.owner_user_id == user.id and is_claimed_local_owner(self.db, user.id)
+        role_names = self.queries.role_names(self.db, world_id)
         items = []
         for role, character in rows:
             stored = configs.get(role.id)
@@ -51,6 +52,7 @@ class WorldCharacterManagementService:
             profile = WorldCharacterProfileRead(world_id=world_id, world_character_id=role.id, character_id=character.id,
                 **value.profile.model_dump(), role_key=role.role_key, control_mode=role.control_mode,
                 status="active", profile_capability="available")
+            profile.role_name = role_names.get(role.role_key)
             if user_role:
                 status, activity = schemas.DashboardStatus(state="user"), None
             else:
@@ -108,6 +110,17 @@ class WorldCharacterManagementService:
             revision=role.version, profile=value.profile, settings=value.settings, capabilities=item.capabilities,
             supported_generation_models=self.references.generation_model_options(),
             supported_image_models=self.references.image_model_options(self.db, character_id=role.character_id))
+
+    def authorize_credentials(self, *, world_id, world_character_id, user, mutation=False):
+        """Public authorization boundary for purpose settings and privacy writes."""
+        role, character = self._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
+        if mutation:
+            changed = self.db.execute(update(WorldCharacter).where(WorldCharacter.id == role.id,
+                WorldCharacter.world_id == world_id, WorldCharacter.status == "active")
+                .values(version=WorldCharacter.version))
+            if changed.rowcount != 1:
+                raise WorldManagementError("world_character_not_found", 404)
+        return role, character
 
     def _claim(self, role, expected_revision):
         claimed = self.db.execute(update(WorldCharacter).where(WorldCharacter.id == role.id,

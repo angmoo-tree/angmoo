@@ -13,6 +13,8 @@ from app.domains.memory.models.batch import MemorySourceDelivery
 from app.domains.memory.policies.episode_bundles import partition_episode_units
 from app.domains.memory.policies.episode_prompt import episode_prompt_payload
 from app.domains.memory.policies.episode_ranges import split_source_unit
+from app.domains.memory.policies.activity_bundles import partition_activity_units
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION, private_thread_intersection
 from app.domains.memory.repository.episode_candidates import SqlAlchemyEpisodeCandidates
 from app.domains.memory.service.items import memory_evidence_blocked_code
 from app.runtime.memory.episode_chat_sources import read_episode_chat_page
@@ -53,14 +55,30 @@ def build_episode_job_inputs(session, batch, *, now, prior_search=None):
         actor_ids=(detail.evidence.actor_world_character_id for detail in details.values()))
     for thread, ids in threads.items():
         assistant_ids = tuple(int(identifier) for kind, identifier in ids if kind == "CHAT_MESSAGE" and identifier.isdigit())
-        page = read_episode_chat_page(session, scope=scope, thread_id=thread, cutoff=max(assistant_ids, default=0),
-            after=min(assistant_ids, default=1) - 1, assistant_ids=assistant_ids)
-        groups[thread].extend(page.new_units)
-        context[thread] = page.context_units
-        paired = {(m.source_type, m.source_id) for unit in page.new_units for m in unit.members}
+        after = min(assistant_ids, default=1) - 1
+        fresh = []
+        while True:
+            page = read_episode_chat_page(session, scope=scope, thread_id=thread, cutoff=max(assistant_ids, default=0),
+                after=after, assistant_ids=assistant_ids)
+            if page.rejected_request_ids:
+                raise MemoryConflictError("episode_job_source_changed")
+            if thread not in context:
+                context[thread] = page.context_units
+            fresh.extend(page.new_units)
+            if page.through_sequence <= after or not page.new_units:
+                break
+            after = page.through_sequence
+            if batch.policy_version != ACTIVITY_POLICY_VERSION:
+                break
+        groups[thread].extend(fresh)
+        paired = {(m.source_type, m.source_id) for unit in fresh for m in unit.members}
         for identity in ids:
             if identity in paired:
                 continue
+            if batch.policy_version == ACTIVITY_POLICY_VERSION:
+                # New activities are committed user/assistant pairs. Keep the
+                # raw legacy message untouched instead of inventing a turn.
+                raise MemoryConflictError("episode_chat_turn_uncommitted")
             # Older messages can lack a durable request/response association.
             # Keep only that verified source as partial; never guess its pair.
             detail = details[identity]
@@ -79,7 +97,20 @@ def build_episode_job_inputs(session, batch, *, now, prior_search=None):
         for value in values.inputs:
             groups[value.group_key].append(value.unit)
     result = []
-    candidate_reader = SqlAlchemyEpisodeCandidates(session)
+    candidate_reader = SqlAlchemyEpisodeCandidates(session, source_reader=RuntimeEpisodeDetailReader(session))
+    if batch.policy_version == ACTIVITY_POLICY_VERSION:
+        parts = partition_activity_units(tuple(unit for values in groups.values() for unit in values),
+            previous_context=tuple(unit for values in context.values() for unit in values),
+            activation_epoch=epoch, cutoff_sequence=cutoff, environment=batch.environment)
+        for part in parts:
+            thread = private_thread_intersection(tuple(u.thread_id for u in part.source_refs().values()))
+            priors = candidate_reader.priors(scope=scope, now=now, thread_id=thread,
+                source_identities=tuple(dict.fromkeys((m.source_type, m.source_id) for u in part.new_units for m in u.members)),
+                ranked_fts_ids=() if prior_search is None else prior_search(part), allow_paged_sources=True)
+            current = replace(part, prior_episodes=priors)
+            episode_prompt_payload(current)
+            result.append(current)
+        return tuple(result)
     for group, units in groups.items():
         def ordering(unit):
             sequence = max((int(m.source_id) for m in unit.members if m.source_type == "CHAT_MESSAGE" and m.source_id.isdigit()), default=0)

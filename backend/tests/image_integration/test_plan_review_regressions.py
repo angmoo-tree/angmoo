@@ -17,6 +17,7 @@ from app.domains.social.models.image_intents import ImageGenerationAttempt, Imag
 from app.domains.media.generation_contracts import ImageSubmissionError
 from app.domains.media.setting_schemas import GenerationSettingsWrite
 from app.domains.identity.models import User
+from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.models import InterpretationSetting, InterpretationAttempt
 from app.domains.chat.schemas import WorldChatMessageCreate
 from app.integrations.comfy_images import ComfyImageClient
@@ -122,7 +123,7 @@ def test_chat_acceptance_reserves_analysis_budget_before_returning(tmp_path):
     chat = synthetic_chat(tmp_path, FakeInterpreter())
     try:
         asset_id = upload(chat)
-        chat.db.get(InterpretationSetting, chat.owner.id).daily_limit = 1
+        chat.db.get(WorldImagePolicy, "p-responding").vision_limit = 1
         chat.db.commit()
         chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,
             WorldChatMessageCreate(content="", attachment_asset_id=asset_id, idempotency_key="review-admission-0001"))

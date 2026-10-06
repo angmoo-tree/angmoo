@@ -54,6 +54,10 @@ def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) ->
                 responding_character=responder,
                 suffix="direct",
             )
+            from app.domains.identity.service import world_credentials
+            from identity.test_world_credentials import write
+            world_credentials.save(db, owner_id=owner.id, world_id="direct-world",
+                world_character_id=responding.id, purpose="chat", data=write(key="synthetic-durable-chat-key"))
             db.commit()
             result = thread_service.create_or_get_world_thread(
                 db,

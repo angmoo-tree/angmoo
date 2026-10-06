@@ -9,33 +9,28 @@ from sqlalchemy.orm import Session
 
 from app.models import Base
 from app.domains.memory.contracts.scope import MemoryScope
+from app.runtime.subject_scope import read_scope_presence
 
 
-def read_scope_presence(session: Session, scope: MemoryScope) -> tuple[str | None, str | None, str | None]:
-    users = Base.metadata.tables["users"]
-    worlds = Base.metadata.tables["worlds"]
-    world_characters = Base.metadata.tables["world_characters"]
-    owner_exists = session.scalar(
-        select(users.c.id).where(
-            users.c.id == scope.owner_id,
-            users.c.deleted_at.is_(None),
-        )
-    )
-    world_exists = session.scalar(
-        select(worlds.c.id).where(
-            worlds.c.id == scope.world_id,
-            worlds.c.owner_user_id == scope.owner_id,
-            worlds.c.archived_at.is_(None),
-        )
-    )
-    subject_exists = session.scalar(
-        select(world_characters.c.id).where(
-            world_characters.c.id == scope.subject_world_character_id,
-            world_characters.c.world_id == scope.world_id,
-            world_characters.c.status == "active",
-        )
-    )
-    return owner_exists, world_exists, subject_exists
+def read_consolidation_binding(session, scope, credential_id=None, revision=None):
+    from app.domains.identity.service.world_credentials import find, find_revision, validate_profile
+    from app.domains.identity.exceptions import CredentialResolutionError
+    from app.domains.memory.contracts.scope_references import ConsolidationBinding
+    if any(value is None for value in read_scope_presence(session, scope)):
+        return None
+    row = find(session, owner_id=scope.owner_id, world_id=scope.world_id,
+        world_character_id=scope.subject_world_character_id, purpose="consolidation")
+    if credential_id is not None:
+        try:
+            row = find_revision(session, owner_id=scope.owner_id, world_id=scope.world_id,
+                world_character_id=scope.subject_world_character_id, purpose="consolidation",
+                credential_id=credential_id, revision=revision)
+        except CredentialResolutionError:
+            return None
+    if row is None or not row.encrypted_secret:
+        return None
+    validate_profile("consolidation", row.provider, row.model, row.thinking_level)
+    return ConsolidationBinding(getattr(row, "credential_id", None) or row.id, row.revision, row.model, row.thinking_level)
 
 
 def read_scope_timezone(session: Session, scope: MemoryScope) -> str | None:

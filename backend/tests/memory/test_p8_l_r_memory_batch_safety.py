@@ -40,8 +40,16 @@ from memory.test_p8_l_r_memory_batch_runtime import Selector, batch_stack
 
 
 def _save(repo, scope, *, now=None, **overrides):
+    from app.domains.identity.service.world_credentials import find, save
+    from app.domains.identity.schemas import WorldCredentialWrite
+    identity = dict(owner_id=scope.owner_id, world_id=scope.world_id,
+        world_character_id=scope.subject_world_character_id, purpose="consolidation")
+    if find(repo.session, **identity) is None:
+        save(repo.session, **identity, data=WorldCredentialWrite(expected_revision=0,
+            provider="google", model="gemini-3.1-flash-lite", thinking_level="high",
+            api_key="synthetic-own-consolidation-never-sent"))
     saved = repo.settings(scope)
-    return repo.save_settings(
+    result = repo.save_settings(
         scope,
         **{
             "expected_version": saved.version,
@@ -57,6 +65,10 @@ def _save(repo, scope, *, now=None, **overrides):
             **overrides,
         },
     )
+    # These regressions exercise accepted batch.v2/episode.v1 work after rollout.
+    from memory.legacy_profiles import retain_legacy_profile
+    retain_legacy_profile(repo, scope, result)
+    return result
 
 
 def _post(session, scope, identity, *, created_at=None):
@@ -82,7 +94,7 @@ def test_complete_source_schedule_selection_brief_and_reopen_are_causal(memory_s
     memory_session.commit()
     factory = sessionmaker(bind=memory_session.bind)
     selector = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector, generation_policy="legacy")
     install_memory_delivery(factory)
     try:
         with factory() as db:
@@ -105,7 +117,7 @@ def test_complete_source_schedule_selection_brief_and_reopen_are_causal(memory_s
             )
             evidence = db.scalar(select(models.MemoryItemEvidence))
             assert evidence.source_id == "actual-causal-source"
-        reopened = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
+        reopened = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector, generation_policy="legacy")
         assert asyncio.run(reopened.tick(shutdown=True)) == "memory_batch_queue_empty"
         assert selector.calls == 1
     finally:
@@ -126,7 +138,7 @@ def test_two_characters_at_same_daily_time_complete_without_mixing_sources(memor
     memory_session.commit()
     factory = sessionmaker(bind=memory_session.bind)
     selector = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector, generation_policy="legacy")
     install_memory_delivery(factory)
     try:
         for index, current in enumerate((scope, other)):
@@ -663,7 +675,7 @@ def test_shutdown_skip_is_idempotent_and_does_not_start_ai(memory_session):
     _stack(memory_session)
     factory = sessionmaker(bind=memory_session.bind)
     provider = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: provider)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: provider, generation_policy="legacy")
 
     async def run():
         coordinator = MemoryShutdownCoordinator(runtime, budget_seconds=0.1)
@@ -709,7 +721,7 @@ def test_shutdown_deadline_cancels_late_provider_and_preserves_candidates(
         async def select(self, sources, *, timeout, environment=None):
             await asyncio.sleep(10)
 
-    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: Slow())
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: Slow(), generation_policy="legacy")
 
     # Use the fixture evidence source while keeping the real durable queue.
     async def tick(**kwargs):

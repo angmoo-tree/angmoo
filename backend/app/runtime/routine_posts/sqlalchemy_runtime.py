@@ -566,7 +566,7 @@ async def _run_routine_post_runtime(
     try:
         generation = validate_routine_generation(
             await (provider or DirectRoutinePostProvider(thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1",
-                image_enabled=image_output_enabled(db, resident_context.character.id))).generate(
+                image_enabled=image_output_enabled(db, resident_context.character.id, input_snapshot=resident_context.input_snapshot))).generate(
                 resident_context=resident_context,
                 routine_context=context,
                 beat=beat,

@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 from sqlalchemy import select, or_
-from app.domains.memory.models.batch import MemoryBatchProfile
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.items import MemoryItem
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.relationships.models.personalization import RelationshipReviewWork, RelationshipReviewMemoryReceipt
@@ -16,6 +16,11 @@ from app.runtime.relationships.review_identity import review_identity_context
 
 def refresh_review_inputs(db, root):
     base = root.manifest['base']
+    from app.runtime.relationships.review_credentials import validate
+    validate(db, root, base)
+    profile = db.get(MemorySubjectProfile, base['setting_id'])
+    if profile is None or profile.version != base['profile_version']:
+        raise ValueError("relationship_review_profile_changed")
     policy = interpreted_policy(db, root.world_id)
     if policy is None:
         return
@@ -86,7 +91,7 @@ def refresh_review_inputs(db, root):
         if not retained:
             for row in descendants:
                 row.status, row.error_code = 'stale', 'relationship_review_no_eligible_memory'
-    profile = db.get(MemoryBatchProfile, base['owner_id'])
+    profile = db.get(MemorySubjectProfile, base['setting_id'])
     identity = review_identity_context(db, owner_id=base['owner_id'], world_id=root.world_id,
         actor_id=root.actor_world_character_id, target_id=root.target_world_character_id)
     if profile and (profile.version != base['profile_version'] or identity != base.get('identity')) and retained:

@@ -29,3 +29,10 @@ class MemoryEmbeddingRead(BaseModel):
     reason_code: str | None
     available_credentials: list[MemoryEmbeddingCredentialOption] = Field(default_factory=list)
     runtime_status: Literal["unknown", "stopped", "ready", "recovering", "degraded", "vector_unavailable"] = "unknown"
+    preparation_state: Literal["needs_preparation", "running", "ready", "error"] = "needs_preparation"
+    preparation_revision: int = 0
+
+
+class MemoryPreparationStart(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)

@@ -54,6 +54,8 @@ class MemorySelectionBatch:
     policy_version: str = "memory-batch.v2"
     cutoff_sequence: int = 0
     environment: EnvironmentSnapshot | None = None
+    credential_id: str | None = None
+    credential_revision: int | None = None
 
 
 class MemorySelectionProviderPort(Protocol):

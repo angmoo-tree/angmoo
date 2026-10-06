@@ -49,10 +49,7 @@ def usage(request: Request, db: Session = Depends(get_db), user=Depends(get_curr
 
 @router.put("/media/usage-settings", dependencies=[Depends(require_local_frontend_request)])
 def save_usage(data: InstallationUsageWrite, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    ensure_demo_user_mutable(user)
-    guarded(lambda: runtime(request).limits.write(db, data.daily_limit, expected_revision=data.expected_revision), db)
-    db.commit()
-    return runtime(request).usage(db, user.id)
+    raise HTTPException(410, detail="world_character_settings_required")
 
 
 @router.get("/agents/{character_id}/generation-settings")
@@ -94,10 +91,7 @@ def read_interpretation(db: Session = Depends(get_db), user=Depends(get_current_
 
 @router.put("/media/interpretation-settings", dependencies=[Depends(require_local_frontend_request)])
 def save_interpretation(data: InterpretationSettingsWrite, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    ensure_demo_user_mutable(user)
-    value = guarded(lambda: write_interpretation_settings(db, user.id, data), db)
-    db.commit()
-    return value
+    raise HTTPException(410, detail="world_character_settings_required")
 
 
 @router.post("/media/assets", dependencies=[Depends(require_local_frontend_request)], status_code=201)

@@ -34,3 +34,6 @@ def enrich_post_authors(*, references: PostAuthorReferences, views):
             item.author_name = profile.display_name
             item.author_handle = profile.handle
             item.author_avatar_url = profile.avatar_url
+            if profile.deleted:
+                from app.domains.social.constants import DELETED_CHARACTER_NAME
+                item.author_name, item.author_handle, item.author_avatar_url, item.author_deleted = DELETED_CHARACTER_NAME, None, None, True

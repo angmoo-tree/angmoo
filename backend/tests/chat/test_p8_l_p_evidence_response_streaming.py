@@ -234,6 +234,12 @@ def response_session() -> Session:
     from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     for character, role in ((requester_character, requester), (responding_character, responding)):
         initialize_created_world_character(session, character=character, world_character=role)
+    # New World Chat admissions bind the responding actor's own purpose key.
+    # The legacy shared preference below remains only to test model isolation.
+    from app.domains.identity.service import world_credentials
+    from identity.test_world_credentials import write
+    world_credentials.save(session, owner_id=owner.id, world_id=world.id,
+        world_character_id=responding.id, purpose="chat", data=write(key="synthetic-response-chat-key"))
     session.add(
         models.UserMessagePreference(
             user_id=owner.id,

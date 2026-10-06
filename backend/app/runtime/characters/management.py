@@ -1221,7 +1221,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetai
     )
 
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
-    from app.runtime.routines.configuration_reads import read_effective_setting
+    from app.runtime.routines.configuration_reads import read_effective_setting, capture_activity_input
     return ManualActivityWorkflows(
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
@@ -1249,6 +1249,7 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
         execution_mode_error=AgentExecutionModeError,
         credential_required_error=CredentialRequiredError,
         resolve_activity_setting=read_effective_setting,
+        capture_activity_input=capture_activity_input,
     )
 
 def build_feed_cue_workflows() -> FeedCueWorkflows:

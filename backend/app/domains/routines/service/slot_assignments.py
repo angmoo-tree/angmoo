@@ -27,7 +27,7 @@ def release_temporary_resident_slot_assignment(
     agent_id: str,
     user_id: str,
     character_id: str,
-    credential_id: str,
+    credential_id: str | None,
     autonomy_reader=None,
 ) -> models.AgentSlot | None:
     """Return an exact manual lease to the pool without disabling autonomy."""
@@ -119,7 +119,7 @@ def assign_resident_slot(
     agent_ids: list[str],
     user_id: str,
     character_id: str,
-    credential_id: str,
+    credential_id: str | None,
     heartbeat_interval_seconds: int,
     next_tick_at: datetime,
     commit: bool = True,
@@ -193,6 +193,10 @@ def assign_resident_slot(
             slot.assigned_user_id = user_id
             slot.assigned_character_id = character_id
             slot.assigned_credential_id = credential_id
+            # Validate the assignment, but freeze its input only when a real
+            # automatic/manual lease is admitted. Idle assignment is no job.
+            references.capture_activity_input(character_id)
+            slot.admission_metadata = None
             slot.heartbeat_interval_seconds = heartbeat_interval_seconds
             slot.next_tick_at = next_tick_at
             slot.locked_by_run_id = None
@@ -221,7 +225,7 @@ def claim_temporary_resident_slot_assignment(
     agent_ids: list[str],
     user_id: str,
     character_id: str,
-    credential_id: str,
+    credential_id: str | None,
     heartbeat_interval_seconds: int,
     lease_seconds: int,
     references: SlotReferences,

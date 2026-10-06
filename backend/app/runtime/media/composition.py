@@ -50,6 +50,12 @@ def authorize_scope(db, owner_id, kind, scope_id):
         valid = thread is not None and thread.requester_id == owner_id and thread.deleted_at is None and thread.world_scope_status == "resolved"
         if valid:
             authorize_scope(db, owner_id, "world", thread.world_id)
+    elif kind == "world_character":
+        from app.domains.world_characters.models import WorldCharacter
+        actor = db.get(WorldCharacter, scope_id)
+        valid = actor is not None and actor.status == "active"
+        if valid:
+            authorize_scope(db, owner_id, "world", actor.world_id)
     else:
         valid = False
     if not valid:
@@ -74,7 +80,8 @@ class MediaRuntime:
         root = settings.media_root_path / "private-image-assets"
         self.assets = assets or AssetService(root, authorize_scope)
         self.clients = clients or {"novelai": NovelImageClient(), "nanogpt": ImageApiClient("nanogpt"), "openrouter": ImageApiClient("openrouter")}
-        self.interpretation = InterpretationService(sessions, self.assets, interpreter or GeminiImageInterpreter(), quota_day=quota_day)
+        from app.runtime.media.world_vision import WorldVisionPolicies
+        self.interpretation = InterpretationService(sessions, self.assets, interpreter or GeminiImageInterpreter(), quota_day=quota_day, policies=WorldVisionPolicies())
         self.worker = GenerationWorker(sessions, self.assets, self, spool=root / "received-results")
         self._maintenance_task = None
 
@@ -183,6 +190,7 @@ class MediaRuntime:
         if self._maintenance_task is not None:
             return
         binding.register(self)
+        self.cleanup_deleted_assets()
         with self.sessions() as db:
             self.assets.expire_drafts(db, datetime.now(timezone.utc))
         self.interpretation.recover_elapsed()
@@ -196,6 +204,7 @@ class MediaRuntime:
                 with self.sessions() as db:
                     self.assets.expire_drafts(db, datetime.now(timezone.utc))
                 self.interpretation.recover_elapsed()
+                self.cleanup_deleted_assets()
             except Exception as exc:
                 logging.getLogger(__name__).warning("image_maintenance_failed type=%s", type(exc).__name__)
 
@@ -210,6 +219,10 @@ class MediaRuntime:
         await self.worker.stop()
         await self.interpretation.close()
         binding.unregister(self)
+
+    def cleanup_deleted_assets(self):
+        from app.runtime.media.erasure import cleanup
+        return cleanup(self)
 
     def _reference(self, db, owner_id, character, setting, preferred, *, materialize=True, prefer_profile=False):
         # Forced OFF does not even inspect card/profile files.
@@ -249,21 +262,25 @@ class MediaRuntime:
                 source="profile", materialize=materialize)
         return EffectiveReference(True, reason="source_missing")
 
-    def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize):
+    def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize, actor_id=None):
         prepared = prepare_asset_image(mime, content, max_bytes=10 * 1024 * 1024)
         pixels = prepared.content
         digest = hashlib.sha256(pixels).hexdigest()
-        row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == "character",
-            MediaAsset.scope_id == character_id, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
+        kind, scope = ("world_character", actor_id) if actor_id else ("character", character_id)
+        row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == kind,
+            MediaAsset.scope_id == scope, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
         if row:
             self.assets.read(db, owner_id=owner_id, asset_id=row.id, digest=digest)
         elif materialize:
-            row = self.assets.upload(db, owner_id=owner_id, scope_kind="character", scope_id=character_id,
+            row = self.assets.upload(db, owner_id=owner_id, scope_kind=kind, scope_id=scope,
                 content_type=prepared.info.content_type, content=pixels, draft=False)
         return EffectiveReference(True, source, row.id if row else None, digest, revision=row.revision if row else None)
 
     def prepare_intent(self, db, owner_id, character_id, scene, scene_error, *, configuration=None):
         from app.domains.media.generation_contracts import compose_positive
+        if configuration is not None:
+            from app.runtime.media.world_generation import prepare_intent
+            return prepare_intent(self, db, owner_id, character_id, scene, scene_error, configuration)
         row = db.get(AgentImageGenerationSetting, character_id)
         if row is None or not row.generation_auto_enabled:
             return None
@@ -354,7 +371,7 @@ class MediaRuntime:
         return admit(db, post=post, owner_id=owner_id, character_id=character_id,
             scene=draft._image_prompt, scene_error=draft._image_error,
             prepare=partial(self.prepare_intent, configuration=configuration),
-            quota_day=accounting_period(db, owner_id, "day").key)
+            quota_day=accounting_period(db, owner_id, "day").key, reserve=self.reserve_attempt)
 
     def authorize_job(self, db, job):
         from app.domains.social.models.posts import Post
@@ -388,6 +405,14 @@ class MediaRuntime:
         authorize_scope(db, job.user_id, "world", post.world_id)
         if post.author_character_id != job.character_id:
             raise ImagePreparationError("generation_post_author_changed")
+        value = json.loads(intent.request_json)
+        request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        if request.credential_binding:
+            from app.runtime.media.world_generation import prepare_execution
+            key, partner, reference = prepare_execution(self, db, job, intent, request)
+            return PreparedExecution(request, key, reference, job.provider_receipt, partner)
+        if request.world_character_id:
+            raise ImagePreparationError("generation_binding_unproven")
         row = db.get(AgentImageGenerationSetting, job.character_id)
         if row is None or not row.generation_auto_enabled or row.generation_revision != intent.settings_revision:
             raise ImagePreparationError("generation_settings_changed")
@@ -421,6 +446,18 @@ class MediaRuntime:
                 character_id=job.character_id, provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE,
                 revision=request.partner_credential_revision).reveal()
         return PreparedExecution(request, material.reveal() if material else None, reference, job.provider_receipt, partner_key)
+
+    def reserve_attempt(self, db, **values):
+        from app.runtime.media.world_generation import reserve_attempt
+        return reserve_attempt(self, db, **values)
+
+    def transition_attempt(self, db, attempt_id, status):
+        from sqlalchemy import update
+        from app.domains.media.models_world_policy import WorldImageAttempt
+        state = {"reserved": "reserved", "submitted": "submitted", "outcome_unknown": "unknown",
+            "result_received": "completed", "succeeded": "completed", "failed": "failed", "released": "released"}[status]
+        db.execute(update(WorldImageAttempt).where(WorldImageAttempt.purpose == "image",
+            WorldImageAttempt.request_key == attempt_id).values(state=state))
 
     async def submit(self, execution, *, on_receipt, on_submit=None):
         request = execution.request
@@ -486,7 +523,14 @@ class MediaRuntime:
             "checked_at": datetime.now(timezone.utc).isoformat()}
 
 
-def image_output_enabled(db, character_id):
+def image_output_enabled(db, character_id, *, input_snapshot=None):
+    configuration = (input_snapshot or {}).get("_world_configuration")
+    if configuration:
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        from app.domains.media.models_world_policy import WorldImagePolicy
+        saved = configuration_for_input(input_snapshot, character_id=character_id)
+        row = db.get(WorldImagePolicy, saved.world_character_id)
+        return bool(row and row.generation_enabled)
     row = db.get(AgentImageGenerationSetting, character_id)
     return bool(row and row.generation_auto_enabled)
 

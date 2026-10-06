@@ -2,7 +2,7 @@
 from datetime import UTC, datetime
 from sqlalchemy import select, func
 from app.domains.characters.models import Character
-from app.domains.identity.models import LlmCredential
+from app.domains.identity.models_world_credentials import WorldCredential
 from app.domains.identity.service.environment import snapshot
 from app.domains.routines.models import AgentActivitySetting, AgentActivityLog, AgentSlot, AgentRun
 from app.domains.social.models.posts import Post
@@ -26,7 +26,11 @@ class SqlAlchemyWorldManagementReferences:
         characters = list(db.scalars(select(Character).where(Character.id.in_(character_ids))))
         activity = {s.character_id: s for s in db.scalars(select(AgentActivitySetting).where(AgentActivitySetting.character_id.in_(character_ids)))}
         readiness = evaluate_many(db, characters=characters, activity_settings=activity, world_id=world_id)
-        credential_ids = set(db.scalars(select(LlmCredential.character_id).where(LlmCredential.character_id.in_(character_ids), LlmCredential.enabled.is_(True))))
+        credential_ids = set(db.scalars(select(WorldCharacter.character_id).join(WorldCredential,
+            WorldCredential.world_character_id == WorldCharacter.id).where(
+            WorldCharacter.world_id == world_id, WorldCharacter.character_id.in_(character_ids),
+            WorldCredential.owner_id == world.owner_user_id, WorldCredential.world_id == world_id,
+            WorldCredential.purpose == "sns", WorldCredential.encrypted_secret.is_not(None))))
         all_slots = list(db.scalars(select(AgentSlot)))
         slots = {s.assigned_character_id: s for s in all_slots if s.assigned_character_id in character_ids}
         # A legacy global log without a scoped post cannot establish a World.
@@ -129,7 +133,7 @@ class SqlAlchemyWorldManagementReferences:
         return available_world_image_models(db.get(AgentImageGenerationSetting, character_id))
 
     def ensure_ready(self, db, *, character_id, world_id, user):
-        from app.domains.identity.repository.credentials import get_character_credential
+        from app.runtime.routines.configuration_reads import capture_activity_input
         character = db.get(Character, character_id)
         setting = db.get(AgentActivitySetting, character_id)
         if character is None or setting is None or character.execution_mode != "llm":
@@ -137,9 +141,13 @@ class SqlAlchemyWorldManagementReferences:
         ready = evaluate(db, character=character, setting=setting)
         if not ready.ready or ready.world_id != world_id:
             raise WorldManagementError(ready.reason_code or "world_activity_not_ready")
-        credential = get_character_credential(db, character_id)
-        if credential is None or not credential.enabled:
-            raise WorldManagementError("credential_required")
+        try:
+            capture_activity_input(db, character_id=character_id)
+        except Exception as exc:
+            from app.domains.routines.exceptions import ActivityRuntimeValidationError
+            if isinstance(exc, ActivityRuntimeValidationError):
+                raise WorldManagementError(exc.reason_code) from exc
+            raise
         from app.domains.operations.service import maintenance as maintenance_service
         maintenance_service.ensure_auto_ticks_available(db)
 

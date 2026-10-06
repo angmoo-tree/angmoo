@@ -8,8 +8,11 @@ from app.domains.memory.models.embedding import MemoryEmbeddingSetting
 from app.domains.memory.models.items import MemoryItem, MemoryScopeSettingModel
 from app.providers.contracts import MeasuredEmbeddingResponse, ProviderUsage
 from app.runtime.memory import vector_projection
+from app.domains.identity.schemas import WorldCredentialWrite
+from app.domains.identity.service import world_credentials
+from app.domains.memory.repository.vector_eligibility import register_content
 from memory.test_p8_l_h_canonical_recall import runtime_factory, _accept_chat_memory
-from memory.test_sqlite_vec1 import index, A
+from memory.projection_fixture import index, A
 
 
 def setup_projection_scope(runtime_factory, monkeypatch):
@@ -18,10 +21,15 @@ def setup_projection_scope(runtime_factory, monkeypatch):
         setting = session.scalar(select(MemoryScopeSettingModel))
         session.add(MemoryEmbeddingSetting(scope_setting_id=setting.id, enabled=True, provider="google",
             model="gemini-embedding-2", profile=EMBEDDING_PROFILE, version=1))
+        world_credentials.save(session, owner_id=scope.owner_id, world_id=scope.world_id,
+            world_character_id=scope.subject_world_character_id, purpose="embedding",
+            data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-embedding-2",
+                api_key="synthetic-embedding-one"))
+        session.flush()
+        register_content(session, session.get(MemoryItem, item_id), now=datetime.now(UTC))
         session.commit()
-    material = CredentialMaterial("fixture", "google", "gemini-embedding-2", "revision-1",
-        CredentialPurpose.MEMORY_EMBEDDING, "unused-fixture-secret")
-    monkeypatch.setattr(vector_projection, "embedding_material", lambda *a: material)
+        material = world_credentials.resolve(session, owner_id=scope.owner_id, world_id=scope.world_id,
+            world_character_id=scope.subject_world_character_id, purpose="embedding")
     return item_id, material
 
 
@@ -47,7 +55,13 @@ def test_retry_budget_survives_restart_and_new_credential_can_retry(runtime_fact
     restarted = vector_projection.MemoryVectorProjection(runtime_factory, index, provider=provider)
     assert asyncio.run(restarted.sync_item(item_id)) == "attempts_exhausted"
     assert provider.calls == 3
-    monkeypatch.setattr(vector_projection, "embedding_material", lambda *a: replace(material, fingerprint="revision-2"))
+    with runtime_factory() as session:
+        setting = session.scalar(select(MemoryScopeSettingModel))
+        world_credentials.save(session, owner_id=setting.owner_id, world_id=setting.world_id,
+            world_character_id=setting.subject_world_character_id, purpose="embedding",
+            data=WorldCredentialWrite(expected_revision=1, provider="google", model="gemini-embedding-2",
+                api_key="synthetic-embedding-two"))
+        session.commit()
     assert asyncio.run(restarted.sync_item(item_id)) == "failed"
     assert provider.calls == 4
 
@@ -67,15 +81,7 @@ def test_deleted_item_during_embedding_cannot_install_late_vector(runtime_factor
 
 
 def test_restart_pin_off_and_deleted_source_do_not_reembed_existing_content(runtime_factory, index, monkeypatch):
-    scope, _, _, _, item_id = _accept_chat_memory(runtime_factory)
-    with runtime_factory() as session:
-        setting = session.scalar(select(MemoryScopeSettingModel))
-        session.add(MemoryEmbeddingSetting(scope_setting_id=setting.id, enabled=True, provider="google",
-            model="gemini-embedding-2", profile=EMBEDDING_PROFILE, version=1))
-        session.commit()
-    material = CredentialMaterial("fixture", "google", "gemini-embedding-2", "fixture",
-        CredentialPurpose.MEMORY_EMBEDDING, "unused-fixture-secret")
-    monkeypatch.setattr(vector_projection, "embedding_material", lambda *a: material)
+    item_id, _ = setup_projection_scope(runtime_factory, monkeypatch)
     class Provider:
         calls = 0
         async def embed_measured(self, request, *, timeout_seconds):

@@ -4,6 +4,10 @@ import pytest
 from sqlalchemy import select
 from app.runtime.media import binding, social_context
 from app.domains.media.interpretation_contracts import parse_analysis
+from app.domains.media.models_world_policy import WorldImagePolicy
+from app.domains.identity.service import world_credentials
+from app.domains.identity.schemas import WorldCredentialWrite
+from app.domains.world_characters.models import WorldCharacter
 from app.domains.media.setting_schemas import InterpretationSettingsWrite
 from app.domains.media.service.interpretation import write_interpretation_settings
 from app.domains.social.models.posts import PostMedia
@@ -28,6 +32,12 @@ def scene(tmp_path):
     media.interpretation.interpreter = analyst
     with sessions() as db:
         write_interpretation_settings(db, OWNER, InterpretationSettingsWrite(expected_revision=0, enabled=True, api_key="fake", daily_limit=3))
+        actor = db.scalar(select(WorldCharacter).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous"))
+        assert actor is not None
+        world_credentials.save(db, owner_id=OWNER, world_id=actor.world_id, world_character_id=actor.id,
+            purpose="vision", data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite", thinking_level="medium", api_key="fake-own-vision"))
+        db.merge(WorldImagePolicy(world_character_id=actor.id, generation_limit=20, vision_limit=3,
+            generation_enabled=False, vision_enabled=True, generation_settings={}, revision=1, provenance="test"))
         db.commit()
     binding.register(media)
     yield sessions, media, analyst
@@ -48,7 +58,7 @@ def test_generated_intent_in_candidate_does_not_analyze_or_rewrite_valid_selecto
     identity = admit(sessions, media)
     asyncio.run(media.worker.process(identity))
     with sessions() as db:
-        candidate = {"images": social_context.snapshots(db, OWNER, [POST])}
+        candidate = {"images": social_context.snapshots(db, OWNER, [POST], actor_id=db.scalar(select(WorldCharacter.id).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous")))}
         social_context.allocate([candidate])
         assert candidate["images"][0]["source"] == "generation_intent"
         images = asyncio.run(social_context.prepare_selected(db, OWNER, candidate))
@@ -60,7 +70,7 @@ def test_uploaded_candidate_is_lazy_b_and_c_share_one_analysis_then_freeze_once(
     sessions, _, analyst = scene
     uploaded(scene)
     with sessions() as db:
-        candidate = {"images": social_context.snapshots(db, OWNER, [POST])}
+        candidate = {"images": social_context.snapshots(db, OWNER, [POST], actor_id=db.scalar(select(WorldCharacter.id).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous")))}
         assert candidate["images"][0]["source"] == "unrecognized" and analyst.calls == 0
     async def run():
         with sessions() as b, sessions() as c:
@@ -71,10 +81,10 @@ def test_uploaded_candidate_is_lazy_b_and_c_share_one_analysis_then_freeze_once(
     assert frozen["final_query"]["query"] == "어제 읽었던 파란 물체 책상"
     assert social_context.freeze_query({"query": "", "origin": "fallback"}, b)["final_query"]["query"] == ""
     with sessions() as db:
-        shown = {"images": social_context.snapshots(db, OWNER, [POST])}
+        shown = {"images": social_context.snapshots(db, OWNER, [POST], actor_id=db.scalar(select(WorldCharacter.id).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous")))}
         social_context.allocate([shown])
         assert social_context.freeze_query({"query": "어제 읽었던", "origin": "selector"}, shown["images"])["image_hint"] == ""
-        omitted = {"images": social_context.snapshots(db, OWNER, [POST])}
+        omitted = {"images": social_context.snapshots(db, OWNER, [POST], actor_id=db.scalar(select(WorldCharacter.id).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous")))}
         social_context.allocate([omitted], budget=1)
         assert omitted["images"][0]["omission_reason"] == "selector_image_budget"
         images = asyncio.run(social_context.prepare_selected(db, OWNER, omitted))
@@ -86,7 +96,7 @@ def test_mutated_pixels_fail_before_selected_use(scene):
     sessions, media, _ = scene
     identity = uploaded(scene)
     with sessions() as db:
-        candidate = {"images": social_context.snapshots(db, OWNER, [POST])}
+        candidate = {"images": social_context.snapshots(db, OWNER, [POST], actor_id=db.scalar(select(WorldCharacter.id).where(WorldCharacter.world_id == "social-uow-world", WorldCharacter.control_mode == "autonomous")))}
         asset = media.assets.owned(db, owner_id=OWNER, asset_id=identity)
         media.assets.path(asset).write_bytes(b"changed")
         with pytest.raises(Exception, match="content_changed"):

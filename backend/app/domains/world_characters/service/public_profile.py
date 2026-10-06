@@ -33,7 +33,8 @@ class WorldCharacterProfileService:
         rows = self.queries.public_profile_rows(self.db, world_id)
         values = self.queries.effective_profiles(self.db, world_id=world_id,
             world_character_ids=[role.id for role, _ in rows])
-        return tuple(self._snapshot(world_character, character, profile=values[world_character.id]) for world_character, character in rows)
+        names = self.queries.role_names(self.db, world_id)
+        return tuple(self._snapshot(world_character, character, profile=values[world_character.id], role_names=names) for world_character, character in rows)
 
     def get_for_world(
         self,
@@ -47,7 +48,7 @@ class WorldCharacterProfileService:
         if row is None:
             raise WorldCharacterProfileNotFoundError()
         values = self.queries.effective_profiles(self.db, world_id=world_id, world_character_ids=[world_character_id])
-        return self._snapshot(row[0], row[1], profile=values[world_character_id])
+        return self._snapshot(row[0], row[1], profile=values[world_character_id], role_names=self.queries.role_names(self.db, world_id))
 
     def _require_world_access(self, world_id: str, current_user_id: str) -> None:
         world_service.require_world_read_access(
@@ -56,11 +57,11 @@ class WorldCharacterProfileService:
             user=_CurrentUser(current_user_id),
         )
 
-    @staticmethod
     def _snapshot(
+        self,
         world_character: WorldCharacter,
         character: CharacterProfileRecord,
-        *, profile,
+        *, profile, role_names,
     ) -> WorldCharacterPublicProfile:
         display_name, avatar_value, banner_value, intro = profile.display_name, profile.avatar_url, profile.banner_url, profile.intro
         return WorldCharacterPublicProfile(
@@ -74,6 +75,7 @@ class WorldCharacterProfileService:
             intro=intro,
             role_key=world_character.role_key,
             control_mode=world_character.control_mode,
+            role_name=role_names.get(world_character.role_key),
         )
 
 

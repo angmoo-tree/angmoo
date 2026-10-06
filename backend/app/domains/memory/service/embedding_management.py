@@ -10,9 +10,9 @@ def _repository(db, workflows):
 
 
 def _validate(db, workflows, scope, credential_id):
-    if not credential_id or workflows.validate_embedding_credential is None:
+    if credential_id is not None or workflows.validate_embedding_credential is None:
         raise MemoryValidationError("memory_embedding_credential_unavailable")
-    workflows.validate_embedding_credential(db, scope.owner_id, credential_id)
+    workflows.validate_embedding_credential(db, scope)
 
 
 def read(*, scope, db, workflows):
@@ -20,16 +20,33 @@ def read(*, scope, db, workflows):
     ready, reason = False, "memory_embedding_disabled"
     if value.enabled:
         try:
-            _validate(db, workflows, scope, value.credential_id)
+            _validate(db, workflows, scope, None)
             ready, reason = True, None
         except MemoryValidationError:
             reason = "memory_embedding_credential_unavailable"
-    return MemoryEmbeddingRead(**asdict(value),
+    from app.domains.memory.repository.index_preparation import status
+    setting = workflows.batch_repository(db).memory.get_scope_setting(scope)
+    preparation = status(db, None if setting is None else setting.id)
+    return MemoryEmbeddingRead(**{**asdict(value), "credential_id": None},
         scope={"world_id": scope.world_id, "subject_world_character_id": scope.subject_world_character_id},
         ready=ready, reason_code=reason,
         runtime_status=workflows.embedding_runtime_status() if workflows.embedding_runtime_status else "unknown",
-        available_credentials=(workflows.embedding_credential_options(db, scope.owner_id, value.credential_id)
-            if workflows.embedding_credential_options is not None else []))
+        available_credentials=[], preparation_state=preparation["state"], preparation_revision=preparation["revision"])
+
+
+def start_preparation(*, scope, db, workflows, data):
+    from datetime import UTC, datetime
+    from app.domains.memory.repository.index_preparation import start
+    try:
+        material = workflows.validate_embedding_credential(db, scope)
+        result = start(db, workflows.batch_repository(db).memory, scope,
+            expected_revision=data.expected_revision, credential_revision=material,
+            now=datetime.now(UTC))
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
 
 
 def save(*, scope, db, workflows, data):

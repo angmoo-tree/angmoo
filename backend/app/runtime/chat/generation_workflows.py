@@ -2,6 +2,25 @@
 
 from __future__ import annotations
 
+from app.domains.chat.exceptions import MessageCredentialInvalidError, MessageCredentialRequiredError
+from app.domains.identity.exceptions import CredentialResolutionError
+from app.runtime import world_credential_binding
+
+
+def capture_credential(db, *, owner_id, world_id, actor_id):
+    try:
+        return world_credential_binding.capture(db, owner_id=owner_id, world_id=world_id, actor_id=actor_id, purpose="chat")
+    except CredentialResolutionError:
+        raise MessageCredentialRequiredError("world_chat_credential_required") from None
+
+
+def resolve_credential(db, metadata, *, owner_id, world_id, actor_id):
+    try:
+        return world_credential_binding.resolve(db, metadata.get("_world_credential"), owner_id=owner_id,
+            world_id=world_id, actor_id=actor_id, purpose="chat")
+    except CredentialResolutionError:
+        raise MessageCredentialInvalidError("world_chat_credential_changed") from None
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

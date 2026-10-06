@@ -9,6 +9,7 @@ from app.domains.memory.contracts.recall import (
 )
 from app.domains.memory.contracts.provenance import MemoryItemStatus, MemorySourceTypeV1
 from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.policies.retrievability import item_retrievable as _item_retrievable
 from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence, MemorySourceEvidenceReaderPort
 
 
@@ -108,23 +109,22 @@ def _item_scope(item: MemoryItem) -> MemoryScope:
 
 
 
-def _item_retrievable(item: MemoryItem, now: datetime) -> bool:
-    return (
-        item.status == MemoryItemStatus.ACTIVE.value
-        and item.deleted_at is None
-        and item.superseded_by_id is None
-        and _as_utc(item.valid_from) <= now
-        and (item.valid_until is None or _as_utc(item.valid_until) > now)
-    )
-
-
-
 def _current_evidence(
     reader: MemorySourceEvidenceReaderPort,
     scope: MemoryScope,
     item: MemoryItem,
     evidence: MemoryItemEvidence,
+    *, session=None, now=None,
 ) -> CanonicalMemoryEvidence | None:
+    modern = False
+    if session is not None:
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        from app.domains.memory.models.episode import MemoryEpisodeInfo
+        from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
+        info = session.get(MemoryEpisodeInfo, item.id)
+        modern = info is not None and info.policy_version == ACTIVITY_POLICY_VERSION
+        if not currently_accessible(session, reader, scope, item, now):
+            return None
     try:
         source_type = MemorySourceTypeV1(evidence.source_type)
     except ValueError:
@@ -149,12 +149,12 @@ def _current_evidence(
     ):
         return None
     if (
-        item.counterpart_world_character_id is not None
+        not modern and item.counterpart_world_character_id is not None
         and canonical.counterpart_world_character_id
         != item.counterpart_world_character_id
     ):
         return None
-    if item.thread_id is not None and canonical.thread_id != item.thread_id:
+    if item.thread_id is not None and canonical.thread_id != item.thread_id and not (modern and canonical.thread_id is None):
         return None
     return canonical
 

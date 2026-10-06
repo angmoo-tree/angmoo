@@ -7,6 +7,7 @@ from sqlalchemy import func, or_, select, update
 from app.domains.memory.contracts.items import normalize_memory_idempotency_key
 from app.domains.memory.exceptions import MemoryConflictError, MemoryNotFoundError, MemoryValidationError
 from app.domains.memory.models.batch import MemoryBatchProfile, MemoryBatchSetting, MemoryBatchRun, MemorySourceDelivery, MemorySelectionDecisionModel
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.items import MemoryCandidate, MemoryMaintenanceJob, MemoryScopeSettingModel
 from app.domains.memory.models.episode import MemoryEpisodeBundle, MemoryEpisodeInfo
 from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest as Request, MemoryConsolidationJob as Link
@@ -25,7 +26,7 @@ def admit(session, *, setting, kind, key, now, digest="", scheduled_for=None, co
         return old, "reused"
     setting = session.get(MemoryScopeSettingModel, setting.id)
     config = session.get(MemoryBatchSetting, setting.id)
-    profile = session.get(MemoryBatchProfile, setting.owner_id)
+    profile = session.get(MemorySubjectProfile, setting.id)
     active = None
     if coalesce:
         for candidate in session.scalars(select(Request).where(Request.scope_setting_id == setting.id,
@@ -62,7 +63,7 @@ def manual(session, *, repository, scope, data, now):
             raise MemoryConflictError("memory_request_replay_conflict")
         return old, "reused"
     config = session.get(MemoryBatchSetting, setting.id)
-    profile = session.get(MemoryBatchProfile, scope.owner_id)
+    profile = session.get(MemorySubjectProfile, setting.id)
     if config is None or profile is None or not setting.enabled or not config.ai_enabled or config.consent_version != "memory-selection-consent.v1":
         raise MemoryValidationError("memory_selection_consent_required")
     if (data.expected_version, data.expected_profile_version, data.expected_scope_version) != (config.version, profile.version, setting.version):

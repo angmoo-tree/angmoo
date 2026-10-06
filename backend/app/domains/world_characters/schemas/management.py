@@ -117,6 +117,9 @@ class WorldEditableSettings(BaseModel):
     activity_interval_minutes: int | None = Field(default=None, ge=30, le=1440)
     max_posts_per_day: int | None = Field(default=None, ge=0, le=1000)
     max_comments_per_day: int | None = Field(default=None, ge=0, le=1000)
+    allow_post: bool | None = None
+    allow_reply: bool | None = None
+    allow_like: bool | None = None
     generation_model: str | None = None
     image_model: str | None = None
     image_style: str | None = Field(default=None, max_length=10000)

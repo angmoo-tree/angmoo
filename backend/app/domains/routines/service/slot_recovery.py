@@ -27,7 +27,7 @@ def recover_expired_resident_slot_runs(
                 models.AgentSlot.status == SLOT_STATUS_RUNNING,
                 models.AgentSlot.assigned_user_id.is_not(None),
                 models.AgentSlot.assigned_character_id.is_not(None),
-                models.AgentSlot.assigned_credential_id.is_not(None),
+
                 models.AgentSlot.locked_by_run_id.is_not(None),
                 models.AgentSlot.lease_expires_at.is_not(None),
                 models.AgentSlot.lease_expires_at <= now,

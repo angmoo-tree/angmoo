@@ -34,7 +34,9 @@ class SqlAlchemyEpisodePackets:
                 MemoryItem.world_id == scope.world_id,
                 MemoryItem.subject_world_character_id == scope.subject_world_character_id,
                 MemoryScopeSettingModel.enabled.is_(True) if require_enabled else True)).all()
-        items = {row.id: row for row in rows if _item_retrievable(row, now)}
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        items = {row.id: row for row in rows if _item_retrievable(row, now) and (
+            not require_enabled or currently_accessible(self.session, self.reader, scope, row, now))}
         if not items:
             return ()
         evidence_rows = self.session.scalars(select(MemoryItemEvidence).where(

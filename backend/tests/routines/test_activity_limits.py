@@ -50,6 +50,8 @@ def _create_autonomy_capacity_tables(engine) -> None:
     from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
     from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot
     from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+    from app.domains.identity.models_world_credentials import WorldCredential, WorldCredentialRevision
+    from app.domains.media.models_world_policy import WorldImagePolicy
     for table in (
         models.User.__table__,
         InstallationIdentity.__table__,
@@ -62,6 +64,9 @@ def _create_autonomy_capacity_tables(engine) -> None:
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
         WorldCharacterConfiguration.__table__,
+        WorldImagePolicy.__table__,
+        WorldCredential.__table__,
+        WorldCredentialRevision.__table__,
         models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
         models.Post.__table__,
@@ -239,6 +244,10 @@ def _add_active_routine_world_character(
     db.flush()
     from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     initialize_created_world_character(db, character=character, world_character=world_character)
+    from app.domains.identity.service import world_credentials
+    from identity.test_world_credentials import write
+    world_credentials.save(db, owner_id=character.owner_id, world_id=world_id,
+        world_character_id=identifier, purpose="sns", data=write(key=f"synthetic-sns-{identifier}"))
     return world_character
 
 

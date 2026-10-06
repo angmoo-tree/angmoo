@@ -87,9 +87,8 @@ def enqueue_scope(
             or 0
         )
     # Filter assigned entries before the cap; failed heads cannot starve tails.
-    rows = (
-        session.scalars(
-            select(MemoryCandidate)
+    statement = (
+            select(MemoryCandidate, MemorySourceDelivery.sequence)
             .join(
                 MemorySourceDelivery,
                 MemorySourceDelivery.candidate_id == MemoryCandidate.id,
@@ -107,16 +106,26 @@ def enqueue_scope(
             )
             .order_by(MemorySourceDelivery.sequence)
             .limit(128)
-        )
-        .unique()
-        .all()
     )
+    rows, seen, after = [], set(), 0
+    while True:
+        page = session.execute(statement.where(MemorySourceDelivery.sequence > after)).all()
+        if not page:
+            break
+        for candidate, sequence in page:
+            after = sequence
+            if candidate.id not in seen:
+                seen.add(candidate.id)
+                rows.append(candidate)
+        if dependencies.generation_policy != "activity32" or len(page) < 128:
+            break
     scope = MemoryScope(
         setting.owner_id, setting.world_id, setting.subject_world_character_id
     )
     reader = dependencies.source_reader(session)
     groups = defaultdict(list)
-    episode = dependencies.generation_policy == "episode_v1"
+    modern = dependencies.generation_policy == "activity32"
+    episode = dependencies.generation_policy in {"episode_v1", "activity32"}
     epochs = dict(session.execute(select(MemorySourceDelivery.candidate_id, MemorySourceDelivery.epoch_id).where(
         MemorySourceDelivery.candidate_id.in_([row.id for row in rows]))).all()) if episode else {}
     for candidate in rows:
@@ -135,12 +144,12 @@ def enqueue_scope(
             )
         )
         thread = None if evidence is None else evidence.thread_id
-        groups[(thread, epochs.get(candidate.id)) if episode else thread].append(
+        groups[epochs.get(candidate.id) if modern else (thread, epochs.get(candidate.id)) if episode else thread].append(
             (candidate.id, size)
         )
     jobs = 0
     for key, group in groups.items():
-        maximum = (50 if key[0] is not None else 20) if episode else MAX_SELECTION_CANDIDATES
+        maximum = 960 if modern else (50 if key[0] is not None else 20) if episode else MAX_SELECTION_CANDIDATES
         chunks, chunk, size = [], [], 0
         for candidate_id, candidate_size in group:
             if chunk and (
@@ -162,7 +171,7 @@ def enqueue_scope(
                     trigger=trigger,
                     **({"request_id": request_id} if request_id else {}),
                     now=now,
-                    **({"generation_policy": "episode_v1"} if episode else {}),
+                    **({"generation_policy": dependencies.generation_policy} if episode else {}),
                 )
                 is not None
             )

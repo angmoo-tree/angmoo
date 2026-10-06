@@ -22,6 +22,8 @@ def prepare(db):
     repo.save_settings(scope, expected_version=0, expected_profile_version=0, ai_enabled=True,
         shutdown_enabled=True, schedule_enabled=False, local_time="22:30", consent_version=MEMORY_CONSENT_VERSION,
         model_id="gemini-3.1-flash-lite", idempotency_key="episode-test-settings", now=now)
+    from memory.legacy_profiles import retain_legacy_profile
+    retain_legacy_profile(repo, scope, repo.settings(scope))
     source_id = str(done.committed_assistant_message_id)
     candidate = MemoryWriteLifecycleService(memory, source_evidence_reader(db)).propose_candidate(
         scope=scope, source_type=MemorySourceTypeV1.CHAT_MESSAGE, source_id=source_id,

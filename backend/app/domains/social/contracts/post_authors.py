@@ -11,6 +11,7 @@ class WorldPostAuthor:
     display_name: str
     handle: str
     avatar_url: str | None
+    deleted: bool = False
 
 
 class PostAuthorReferences(Protocol):

@@ -29,6 +29,8 @@ class GenerationExecution:
 
 
 class GenerationWorkflows(Protocol):
+    def capture_credential(self, db: Session, *, owner_id: str, world_id: str, actor_id: str) -> dict: ...
+    def resolve_credential(self, db: Session, metadata: dict, *, owner_id: str, world_id: str, actor_id: str) -> CredentialMaterial: ...
     def build(
         self,
         db: Session,

@@ -272,6 +272,7 @@ def test_profile_and_social_author_use_exact_world_character_identity() -> None:
         "banner_url": "/media/friend-banner.png",
         "intro": "같은 World에서 활동하는 친구",
         "role_key": "mentor",
+        "role_name": None,
         "control_mode": "autonomous",
         "status": "active",
         "profile_capability": "available",

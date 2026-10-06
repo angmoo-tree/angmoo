@@ -250,13 +250,17 @@ def create_app(
         if runtime_config is not None:
             composition = compose_runtime(runtime_config, base_settings=settings)
             from app.runtime.memory.batch_runtime import MemoryBatchRuntime
-            from app.runtime.memory_selection_provider import memory_provider
+            from app.runtime.memory_selection_provider import memory_provider, subject_memory_provider
             from app.runtime.memory.episode_prior_search import episode_prior_search
 
             from app.runtime.relationships.review_runtime import RelationshipReviewRuntime
+            from app.domains.memory.contracts.scope import MemoryScope
             relationship_review = RelationshipReviewRuntime(composition.session_factory,
-                lambda material: memory_provider(composition.session_factory, material["owner_id"],
-                    material["model_id"], material["thinking_level"], relationship=True))
+                lambda material: subject_memory_provider(composition.session_factory,
+                    MemoryScope(material["owner_id"], material["credential_binding"]["world_id"], material["credential_binding"]["actor_id"]),
+                    model=material["model_id"], thinking_level=material["thinking_level"],
+                    credential_id=material["credential_binding"]["credential_id"],
+                    credential_revision=material["credential_binding"]["revision"], relationship=True))
             memory_runtime = MemoryBatchRuntime(
                 composition.session_factory,
                 lambda owner, model, thinking: memory_provider(
@@ -265,6 +269,10 @@ def create_app(
                 generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
                 episode_provider_factory=lambda owner, model, thinking: memory_provider(
                     composition.session_factory, owner, model, thinking, episode=True),
+                activity_provider_factory=lambda batch: subject_memory_provider(
+                    composition.session_factory, batch.setting.scope, model=batch.model_id,
+                    thinking_level=batch.thinking_level, credential_id=batch.credential_id,
+                    credential_revision=batch.credential_revision),
                 episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
                 idle_work=relationship_review.tick,
             )

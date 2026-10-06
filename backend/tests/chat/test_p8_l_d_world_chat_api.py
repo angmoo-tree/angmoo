@@ -90,7 +90,7 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     return client, engine, principal
 
 
-def _seed(engine, principal) -> tuple[models.User, models.User, str]:
+def _seed(engine, principal, *, existing_identity=False) -> tuple[models.User, models.User, str]:
     owner = _user("owner")
     outsider = _user("outsider")
     responder_owner = _user("responder-owner")
@@ -160,7 +160,7 @@ def _seed(engine, principal) -> tuple[models.User, models.User, str]:
     with Session(engine, expire_on_commit=False) as db:
         db.add_all([owner, outsider, responder_owner])
         db.flush()
-        db.add(
+        identity = (
             models.InstallationIdentity(
                 singleton_key="local-installation",
                 installation_id="p8-l-d-api-fixture",
@@ -170,6 +170,12 @@ def _seed(engine, principal) -> tuple[models.User, models.User, str]:
                 claimed_at=now,
             )
         )
+        if existing_identity:
+            existing = db.get(models.InstallationIdentity, "local-installation")
+            assert existing is not None and existing.owner_user_id is None
+            existing.owner_user_id, existing.bootstrap_state, existing.claimed_at = owner.id, "claimed", now
+        else:
+            db.add(identity)
         db.add_all([requester_character, responding_character, world])
         db.flush()
         db.add_all([owner_membership, responder_membership])

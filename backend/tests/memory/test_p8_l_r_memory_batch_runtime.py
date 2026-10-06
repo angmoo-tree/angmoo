@@ -64,7 +64,7 @@ def batch_stack(session, *, provider=None):
     session.commit()
     repo = SqlAlchemyMemoryBatchRepository(session)
     now = datetime.now(UTC)
-    repo.save_settings(
+    saved = repo.save_settings(
         scope,
         expected_version=0,
         expected_profile_version=0,
@@ -77,6 +77,8 @@ def batch_stack(session, *, provider=None):
         idempotency_key="batch-setup",
         now=now,
     )
+    from memory.legacy_profiles import retain_legacy_profile
+    retain_legacy_profile(repo, scope, saved)
     ids = tuple(session.scalars(select(MemoryCandidate.id)).all())
     job = repo.enqueue(
         scope_setting_id=setting.id,

@@ -13,17 +13,22 @@ from app.runtime.world_configuration.effective_values import configuration_for_i
 def batch_world_post_authors(db, *, world_id, author_ids):
     if not author_ids:
         return {}
-    roles = db.execute(select(WorldCharacter.id, WorldCharacter.character_id).join(
+    roles = db.execute(select(WorldCharacter.id, WorldCharacter.character_id, WorldCharacter.local_profile).join(
         Character, Character.id == WorldCharacter.character_id).join(
         WorldMembership, WorldMembership.id == WorldCharacter.membership_id).where(
         WorldCharacter.world_id == world_id, WorldCharacter.id.in_(author_ids),
-        WorldCharacter.status == "active", WorldMembership.world_id == world_id,
+        WorldCharacter.status.in_(("active", "left")), WorldMembership.world_id == world_id,
         WorldMembership.status == "active", Character.deleted_at.is_(None),
         Character.moderation_status == "active")).all()
-    profiles = batch_effective_profiles(db, world_id=world_id, world_character_ids=[role_id for role_id, _ in roles])
-    return {role_id: WorldPostAuthor(world_id, role_id, character_id,
-        profile.display_name, profile.handle, profile.avatar_url)
-        for role_id, character_id in roles if (profile := profiles.get(role_id)) is not None}
+    profiles = batch_effective_profiles(db, world_id=world_id,
+        world_character_ids=[role_id for role_id, _, local in roles if not (local or {}).get("deleted")])
+    result = {}
+    for role_id, character_id, local in roles:
+        if (local or {}).get("deleted"):
+            result[role_id] = WorldPostAuthor(world_id, role_id, character_id, "", "", None, deleted=True)
+        elif (profile := profiles.get(role_id)) is not None:
+            result[role_id] = WorldPostAuthor(world_id, role_id, character_id, profile.display_name, profile.handle, profile.avatar_url)
+    return result
 
 
 def world_post_author_for_write(db, *, character_id, world_id=None, world_character_id=None, input_snapshot=None):

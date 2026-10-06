@@ -103,6 +103,13 @@ def test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_vers
         ).status_code
         == 422
     )
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service.world_credentials import save as save_key
+    with Session(engine) as db:
+        save_key(db, owner_id=principal["user"].id, world_id="q-world", world_character_id="q-responding", purpose="consolidation",
+            data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite",
+                thinking_level="high", api_key="synthetic-own-memory-key"))
+        db.commit()
     saved = client.put(path, headers=FRONTEND_HEADERS, json=body)
     assert saved.status_code == 200, saved.text
     assert saved.json()["version"] == 1
@@ -138,7 +145,7 @@ def test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_vers
             )
             == 0
         )
-    assert calls  # credential readiness only, the fake has no generate method
+    assert calls == []  # Ordinary save validates local purpose metadata without resolving a provider.
 
 
 @pytest.mark.parametrize(

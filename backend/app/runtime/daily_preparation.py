@@ -15,6 +15,8 @@ from app.domains.characters.service.prompt_persona import model_persona, PERSONA
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service.credential_resolution import CredentialResolver
 from app.domains.identity.service.world_character_credentials import find_world_character_credential
+from app.runtime.world_credential_binding import capture as capture_key, resolve as resolve_key
+from app.runtime.world_configuration.persona import world_persona
 from app.domains.routines.client import generate_daily_preparation
 from app.domains.routines.models.preparation import ActivityPreparationJob
 from app.domains.routines.models.resident import AgentActivitySetting
@@ -62,21 +64,21 @@ def _topics(db, scope):
 def _automatic_eligible(db, scope, now):
     wc = scope.world_character
     setting = db.get(AgentActivitySetting, scope.character.id)
+    from app.runtime.routines.configuration_reads import read_effective_setting
+    setting = read_effective_setting(db, character_id=scope.character.id, setting=setting)
     if (wc.status != "active" or wc.activity_runtime_mode != "routine_resident_v1"
-        or not wc.autonomous_enabled or not setting or not setting.auto_enabled):
+        or not wc.autonomous_enabled or not setting):
         return False
     from app.domains.world_characters.models import CharacterActiveWorld
     from app.domains.operations.service import maintenance
     active = db.get(CharacterActiveWorld, scope.character.id)
-    credential = find_world_character_credential(db, character_id=scope.character.id)
+    from app.domains.identity.service.world_credentials import find
+    credential = find(db, owner_id=scope.character.owner_id, world_id=scope.world.id, world_character_id=wc.id, purpose="sns")
     if (not active or active.world_character_id != wc.id
         or getattr(scope.character, "moderation_status", None) == "suspended"
-        or not credential or not credential.enabled):
+        or not credential or not credential.encrypted_secret):
         return False
     if maintenance.agent_activity_blocks_auto_ticks(db) and scope.character.id not in maintenance.agent_activity_auto_tick_allowed_character_ids():
-        return False
-    cooldown = credential.cooldown_until
-    if cooldown and cooldown.replace(tzinfo=UTC) > now:
         return False
     local = now.astimezone(ZoneInfo(scope.environment.timezone))
     start, end = active_hours_minutes(setting.active_hours_start, setting.active_hours_end)
@@ -124,7 +126,7 @@ def _source(db, scope, now, *, generation_contract=GENERATION_CONTRACT):
                         "item_id": row.linked_daily_activity_plan_item_id, "episode_id": row.linked_activity_episode_id,
                         "status": row.participation_status} for row in participants])
             reservations.append(reservation)
-    source = {"persona": {**model_persona(scope.character), "interpretation": PERSONA_INTERPRETATION},
+    source = {"persona": {**world_persona(db, scope.world_character.id), "interpretation": PERSONA_INTERPRETATION},
               "world": world, "role_key": scope.world_character.role_key,
               "local_date": local.date().isoformat(), "local_now": local.isoformat(),
               "timezone": scope.environment.timezone, "allowed_places": {k: sorted(v) for k, v in allowed.items()},
@@ -259,16 +261,16 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
         raise store.PreparationConflict("daily_plan_version_conflict")
     if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and not initial:
         return status  # All directions preserved, usable Topics: no credential or provider request.
-    credential = find_world_character_credential(db, character_id=character_id)
-    material = CredentialResolver.resolve_llm_credential(credential, purpose=CredentialPurpose.WORLD_CHARACTER_SETUP_LLM,
-                                                       owner_id=user.id, character_id=character_id)
+    binding = prior_job.input_snapshot.get("credential_binding") if prior_job else capture_key(db,
+        owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
+    material = resolve_key(db, binding, owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
     from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
     from app.domains.world_characters.service.name_binding import resolve_name_binding, validate_name_binding
     from app.contracts.name_binding import read_name_binding, NameBindingError
     from app.domains.characters.service.prompt_persona import render_persona
     new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
     source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict(),
-        "environment": scope.environment.to_dict()}
+        "environment": scope.environment.to_dict(), "credential_binding": binding}
     job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
         timezone=scope.environment.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
         request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
@@ -333,9 +335,8 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
             scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), db.get(ActivityPreparationJob, job_id))
             if not manual and not _automatic_eligible(db, scope, admitted_at):
                 raise store.PreparationConflict("preparation_scope_changed")
-            current_credential = find_world_character_credential(db, character_id=character_id)
-            current_material = CredentialResolver.resolve_llm_credential(current_credential,
-                purpose=CredentialPurpose.WORLD_CHARACTER_SETUP_LLM, owner_id=user.id, character_id=character_id)
+            current_material = resolve_key(db, source.get("credential_binding"), owner_id=user.id,
+                world_id=world_id, actor_id=wc_id, purpose="sns")
             if (current_material.credential_id, current_material.fingerprint, current_material.model, current_material.thinking_level) != (material.credential_id, material.fingerprint, material.model, material.thinking_level):
                 raise store.PreparationConflict("preparation_credential_changed")
             fresh, current_digest, _, current_allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)

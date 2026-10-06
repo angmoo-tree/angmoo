@@ -12,6 +12,14 @@ def complete_episode_candidates(repository, batch, works, *, now):
         raise MemoryConflictError("episode_work_incomplete")
     repository.fence(batch, now=now)
     db = repository.session
+    from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
+    if batch.policy_version == ACTIVITY_POLICY_VERSION:
+        # EpisodeWork already exposes the immutable input, rather than the
+        # storage envelope surrounding it. Include skipped units in coverage.
+        leaf_inputs = [source for work in works if work.state == "completed" for source in work.manifest["new"]]
+        covered = {(m["source_type"], m["source_id"]) for unit in leaf_inputs for m in unit.get("members", ())}
+        if any((c.source_type.value, c.source_id) not in covered for c in batch.candidates):
+            raise MemoryConflictError("episode_candidate_coverage_incomplete")
     links = db.execute(select(MemoryItemEvidence.source_type, MemoryItemEvidence.source_id,
         MemoryItemEvidence.memory_item_id).join(MemoryEpisodeInfo,
             MemoryEpisodeInfo.memory_item_id == MemoryItemEvidence.memory_item_id).where(

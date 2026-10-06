@@ -34,7 +34,7 @@ class SqlAlchemyChatMemoryTurns:
                   latest: bool = False, assistant_ids: tuple[int, ...] | None = None) -> tuple[CommittedMemoryTurn, ...]:
         if not 1 <= limit <= 55 or after < 0 or cutoff < 0:
             raise ValueError("memory_turn_page_invalid")
-        if assistant_ids is not None and len(assistant_ids) > 50:
+        if assistant_ids is not None and len(assistant_ids) > 960:
             raise ValueError("memory_turn_id_limit")
         user, assistant = aliased(MessageMessage), aliased(MessageMessage)
         rows = self.session.execute(select(ChatResponseRequest, user, assistant, ChatMessageThought)

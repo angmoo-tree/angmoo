@@ -18,7 +18,7 @@ def submit(*, scope, db, workflows, data):
             if disposition == "accepted" and row.coalesced_to_request_id:
                 disposition = "already_active"
         if disposition == "accepted" and not row.coalesced_to_request_id:
-            workflows.validate_provider(db, scope.owner_id, preparation.profile_model(db, scope.owner_id))
+            workflows.validate_provider(db, scope, preparation.profile_model(db, row.scope_setting_id))
         db.commit()
         value = receipts.progress(db, row)
         if followup:
@@ -109,9 +109,10 @@ def retry(*, scope, db, workflows, request_id, key):
         repo.retry_failed(scope, idempotency_key=key, now=datetime.now(UTC), request_job_ids=jobs)
         if root.state == "paused":
             # Re-admit the same frozen cutoff against explicitly confirmed current settings.
-            from app.domains.memory.models.batch import MemoryBatchSetting, MemoryBatchProfile
+            from app.domains.memory.models.batch import MemoryBatchSetting
+            from app.domains.memory.models.activity_configuration import MemorySubjectProfile
             config = db.get(MemoryBatchSetting, setting.id)
-            profile = db.get(MemoryBatchProfile, setting.owner_id)
+            profile = db.get(MemorySubjectProfile, setting.id)
             root.scope_version, root.settings_version, root.profile_version = setting.version, config.execution_version, profile.version
             root.state, root.last_code = "preparing", None
         if workflows.consolidation_followup:

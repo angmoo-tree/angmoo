@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 
 from app.domains.memory.exceptions import MemoryDomainError, MemoryConflictError, MemoryCapacityReached
 from app.domains.memory.models.batch import MemoryBatchProfile
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
 from app.domains.memory.repository.episode_apply import SqlAlchemyEpisodeApply
 from app.domains.memory.repository.episode_completion import complete_episode_candidates
 from app.domains.memory.repository.episode_work import SqlAlchemyEpisodeWork
@@ -20,9 +22,10 @@ async def run_episode_batch(repository, batch, *, provider_factory, timeout, clo
     db = repository.session
     def fence():
         repository.fence(batch, now=clock())
-        profile = db.get(MemoryBatchProfile, batch.setting.scope.owner_id)
-        if (profile.version != batch.profile_version or profile.model_id != batch.model_id
-            or profile.thinking_level != batch.thinking_level):
+        profile = db.get(MemorySubjectProfile, batch.setting.id) if batch.credential_id is not None else db.get(MemoryBatchProfile, batch.setting.scope.owner_id)
+        if (profile is None or (batch.credential_id is None and
+            (profile.version != batch.profile_version or profile.model_id != batch.model_id
+            or profile.thinking_level != batch.thinking_level))):
             raise MemoryConflictError("episode_profile_changed")
     try:
         works = SqlAlchemyEpisodeWork(db)
@@ -32,7 +35,8 @@ async def run_episode_batch(repository, batch, *, provider_factory, timeout, clo
             pending = works.plan(job_id=batch.job_id, setting=batch.setting, bundles=bundles,
                 candidate_ids=tuple(c.id for c in batch.candidates), now=clock(), job_fence=fence)
             repository.commit()
-        service = EpisodeSelectionService(works=works, applier=SqlAlchemyEpisodeApply(db, repository.memory),
+        from app.runtime.memory.source_composition import source_evidence_reader
+        service = EpisodeSelectionService(works=works, applier=SqlAlchemyEpisodeApply(db, repository.memory, source_reader=source_evidence_reader(db)),
             detail_reader=RuntimeEpisodeDetailReader(db), revalidate=lambda value: revalidate_episode_bundle(db, value),
             commit=repository.commit, rollback=repository.rollback, clock=clock)
         while True:
@@ -44,7 +48,7 @@ async def run_episode_batch(repository, batch, *, provider_factory, timeout, clo
                 repository.defer_foreground(batch, now=clock())
                 repository.commit()
                 return "memory_foreground_deferred"
-            provider = provider_factory(batch.setting.scope.owner_id, batch.model_id, batch.thinking_level)
+            provider = provider_factory(batch) if batch.credential_id is not None else provider_factory(batch.setting.scope.owner_id, batch.model_id, batch.thinking_level)
             if hasattr(provider, "phase_observer"):
                 def observe(phase):
                     # Best-effort telemetry uses a separate short transaction;

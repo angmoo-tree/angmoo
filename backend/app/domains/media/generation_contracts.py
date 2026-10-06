@@ -6,19 +6,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-ImageProvider = Literal["novelai", "comfyui", "nanogpt", "openrouter"]
+from app.providers.image_profiles import ImageProvider, MODEL_CATALOG
+
 ReferenceSource = Literal["override", "card", "profile", "none"]
-
-MODEL_CATALOG: dict[str, tuple[ImageProvider, str, bool]] = {
-    "novelai:nai-diffusion-4-5-full": ("novelai", "nai-diffusion-4-5-full", True),
-    "nanogpt:krea-v2/turbo": ("nanogpt", "krea-v2/turbo", True),
-    "nanogpt:z-image-turbo": ("nanogpt", "z-image-turbo", False),
-    "nanogpt:nano-banana-2": ("nanogpt", "nano-banana-2", True),
-    "openrouter:krea/krea-2-medium-turbo": ("openrouter", "krea/krea-2-medium-turbo", True),
-    "openrouter:google/gemini-3.1-flash-image": ("openrouter", "google/gemini-3.1-flash-image", True),
-    "openrouter:openai/gpt-image-2.5-flare": ("openrouter", "openai/gpt-image-2.5-flare", True),
-}
-
 
 class StrictInput(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -112,6 +102,8 @@ class GenerationRequest:
     world_id: str | None = None
     world_character_id: str | None = None
     world_configuration_revision: int | None = None
+    credential_binding: dict | None = None
+    world_image_policy_revision: int | None = None
 
 
 @dataclass(frozen=True)

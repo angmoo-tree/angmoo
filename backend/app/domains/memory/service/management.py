@@ -72,7 +72,7 @@ def update_memory_batch_setting(
             raise MemoryValidationError("memory_selection_model_invalid")
         if data.ai_enabled:
             # Readiness/credential resolution only: never generates on Save.
-            workflows.validate_provider(db, scope.owner_id, data.model_id or "")
+            workflows.validate_provider(db, scope, data.model_id or "")
         value = repository.save_settings(
             scope, **data.model_dump(), now=datetime.now(UTC)
         )

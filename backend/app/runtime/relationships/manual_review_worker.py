@@ -3,7 +3,8 @@ from collections import defaultdict
 from sqlalchemy import select, update, or_
 from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
 from app.domains.memory.models.items import MemoryScopeSettingModel, MemoryItem
-from app.domains.memory.models.batch import MemoryBatchSetting, MemoryBatchProfile
+from app.domains.memory.models.batch import MemoryBatchSetting
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.repository.consolidation_requests import progress
 from app.domains.relationships.models.manual_review import RelationshipReviewRequest as Request
@@ -32,7 +33,7 @@ def advance_manual_requests(db, now):
             continue
         setting = db.get(MemoryScopeSettingModel, request.scope_setting_id)
         config = db.get(MemoryBatchSetting, request.scope_setting_id)
-        profile = db.get(MemoryBatchProfile, setting.owner_id)
+        profile = db.get(MemorySubjectProfile, setting.id)
         policy = interpreted_policy(db, setting.world_id)
         if not setting.enabled or not config or not config.ai_enabled or not config.consent_version or not profile or not policy:
             request.state, request.last_code = "paused", "relationship_review_scope_changed"
@@ -65,6 +66,12 @@ def advance_manual_requests(db, now):
 
 def _plan_remaining(db, request, setting, profile, policy, now):
     scope = MemoryScope(setting.owner_id, setting.world_id, setting.subject_world_character_id)
+    from app.runtime.relationships.review_credentials import snapshot as credential_snapshot
+    try:
+        credential = credential_snapshot(db, scope, profile)
+    except ValueError:
+        request.state, request.last_code = "paused", "relationship_review_credential_unavailable"
+        return
     remaining = defaultdict(list)
     linked = set(request.work_ids)
     waiting = False
@@ -114,7 +121,7 @@ def _plan_remaining(db, request, setting, profile, policy, now):
             return
         root = plan_review(db, world_id=scope.world_id, actor_id=scope.subject_world_character_id, target_id=target,
             period_key="manual:" + request.memory_request_id, memories=memories,
-            base={"identity": identity, "owner_id": scope.owner_id, "setting_id": setting.id,
+            base={**credential, "identity": identity, "owner_id": scope.owner_id, "setting_id": setting.id,
                 "profile_version": profile.version, "model_id": profile.model_id, "thinking_level": profile.thinking_level})
         linked.add(root.id)
         waiting = True  # If an active root was reused, remaining refs are revisited next tick.

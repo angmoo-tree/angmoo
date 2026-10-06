@@ -197,6 +197,7 @@
       "app.domains.memory.contracts.scope_references",
       "app.domains.memory.contracts.source_evidence",
       "app.domains.memory.contracts.source_queries",
+      "app.domains.memory.exceptions",
       "app.domains.memory.schemas",
       "app.domains.memory.schemas.batch",
       "app.domains.memory.service",

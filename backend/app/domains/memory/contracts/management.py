@@ -39,7 +39,7 @@ class MemoryWorkflows:
     write_service: Callable[[Session], MemoryWriteLifecycleService]
     batch_repository: Callable[[Session], SqlAlchemyMemoryBatchRepository]
     character_names: Callable[[Session, MemoryScope], dict[str, str]]
-    validate_provider: Callable[[Session, str, str], None]
+    validate_provider: Callable[[Session, MemoryScope, str], None]
     validate_embedding_credential: Callable[[Session, str, str], None] | None = None
     embedding_credential_options: Callable[[Session, str, str | None], list[dict[str, str]]] | None = None
     consolidation_followup: Callable[[Session], ConsolidationFollowup] | None = None

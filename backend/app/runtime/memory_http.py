@@ -52,9 +52,12 @@ def _character_names(db: Session, scope: MemoryScope) -> dict[str, str]:
 
 
 
-def _validate_provider(db: Session, owner_id: str, model_id: str) -> None:
-    # Original Save-time credential readiness; no generation or replacement Session.
-    memory_provider(lambda: nullcontext(db), owner_id, model_id)
+def _validate_provider(db: Session, scope: MemoryScope, model_id: str) -> None:
+    from app.runtime.memory.scope_queries import read_consolidation_binding
+    from app.domains.memory.exceptions import MemoryValidationError
+    binding = read_consolidation_binding(db, scope)
+    if binding is None or binding.model != model_id:
+        raise MemoryValidationError("memory_selection_settings_required")
 
 
 def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
@@ -68,6 +71,6 @@ def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
         character_names=_character_names,
         validate_provider=_validate_provider,
         validate_embedding_credential=validate_embedding_credential,
-        embedding_credential_options=embedding_credential_options,
+        embedding_credential_options=None,
         embedding_runtime_status=embedding_runtime_status,
     )
