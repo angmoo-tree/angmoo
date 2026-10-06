@@ -41,7 +41,7 @@ test("T67/T74/T77: invalid view, independent query, back/forward and native keyb
   expect(new URL(page.url()).searchParams.get("keep")).toBe("original");
   await profileTab.focus(); await page.keyboard.press("ArrowLeft");
   await expect(field).toHaveValue("Same World query draft");
-  await surface.getByRole("button", { name: "변경 취소", exact: true }).click();
+  await surface.locator('[data-world-character-settings-card="persona"]').getByRole("button", { name: "변경 취소", exact: true }).click();
   await tabs.getByRole("tab", { name: "프로필", exact: true }).click();
   const activity = surface.locator("[data-world-character-social-activity]");
   await activity.getByRole("tab", { name: "게시글", exact: true }).click();
@@ -135,7 +135,7 @@ test("T61/T74: an old settings 401 cannot clear a renewed session with the same 
   const state = await installWorldCharacterManagementFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
   state.management.authOwner = "local-owner";
   await page.goto(`${worldCharacterRoute()}?view=settings`);
-  const form = page.locator("[data-world-character-settings-form]"), field = form.locator('textarea[name="personality"]');
+  const form = page.locator('[data-world-character-settings-card="persona"]'), field = form.locator('textarea[name="personality"]');
   await field.fill("Settings draft from the retired session");
   const write = barrier(); state.management.writeBarrier = write.promise; state.management.failure = 401;
   await form.getByRole("button", { name: "설정 저장", exact: true }).click();
