@@ -189,6 +189,7 @@ export function MemoryWorkspace({
         setPhase("ready");
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setError(uiText(memoryErrorMessage(reason)));
         setPhase("error");

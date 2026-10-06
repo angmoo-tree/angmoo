@@ -6,7 +6,7 @@ export function memoryBatchFailureMessage(code: string | null): string {
     case "memory_selection_request_invalid":
       return "AI 서비스가 정리 요청을 처리하지 못했어요. 경험은 보관되어 있습니다. 앱 업데이트 또는 지원 확인이 필요해요.";
     case "memory_selection_auth_failed":
-      return "쪽지용 API 키와 이용 권한을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
+      return "기억 정리용 API 키와 이용 권한을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
     case "memory_selection_model_unavailable":
       return "선택한 모델을 사용할 수 없어요. 기억 정리 모델을 확인해 주세요.";
     case "memory_selection_rate_limited":
@@ -18,7 +18,7 @@ export function memoryBatchFailureMessage(code: string | null): string {
       return "AI 정리를 일시적으로 완료하지 못했어요. 경험은 보관되어 있으니 잠시 후 다시 시도해 주세요.";
     case "memory_selection_settings_required":
     case "memory_selection_credential_purpose_invalid":
-      return "쪽지용 AI 설정을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
+      return "이 캐릭터의 기억 정리용 API 키와 모델을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
     case "memory_selection_model_unsupported":
     case "memory_selection_model_invalid":
       return "기억 정리에 사용할 수 있는 모델을 선택해 주세요. 경험은 보관되어 있어요.";

@@ -116,7 +116,7 @@ export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVers
     } catch (error) {
       if (!active.current) return;
       const conflict = error instanceof MemoryApiError && error.status === 409;
-      setNotice(conflict ? uiText("설정이 다른 곳에서 바뀌었어요. 최신 값을 확인한 뒤 다시 저장해 주세요.") : uiText("저장하지 못했어요. 쪽지용 AI 설정과 선택한 모델을 확인해 주세요."));
+      setNotice(conflict ? uiText("설정이 다른 곳에서 바뀌었어요. 최신 값을 확인한 뒤 다시 저장해 주세요.") : uiText("저장하지 못했어요. 이 캐릭터의 기억 정리용 API 키와 모델을 확인해 주세요."));
       setFailed(true);
       if (conflict) { pending.current = null; setRevision(value => value + 1); }
     } finally { if (active.current) setBusy(false); release(); }

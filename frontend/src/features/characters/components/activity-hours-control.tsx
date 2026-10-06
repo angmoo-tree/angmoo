@@ -1,5 +1,5 @@
 "use client";
-import { useUiText } from "@/hooks/use-ui-text";
+import { useUiText, type UiText } from "@/hooks/use-ui-text";
 
 
 import { Field, Select } from "@/components/ui/form-controls";
@@ -44,7 +44,7 @@ export function ActiveHoursControl({
   timeZone?: string | null;
 }) {
   const uiText = useUiText("characters");
-  const validation = getActiveHoursValidation(start, end);
+  const validation = getActiveHoursValidation(start, end, uiText);
   const selectedPreset =
     ACTIVE_HOUR_PRESETS.find(
       (preset) => preset.key !== "custom" && preset.start === start && preset.end === end,
@@ -163,7 +163,7 @@ export function formatActiveHoursDescription(start: string, end: string) {
   return getActiveHoursValidation(start, end).message;
 }
 
-export function getActiveHoursValidation(start: string, end: string): {
+export function getActiveHoursValidation(start: string, end: string, uiText?: UiText): {
   valid: boolean;
   durationMinutes: number | null;
   message: string;
@@ -173,45 +173,45 @@ export function getActiveHoursValidation(start: string, end: string): {
     return {
       valid: false,
       durationMinutes: null,
-      message: ACTIVE_HOURS_LIMIT_MESSAGE,
+      message: uiText ? uiText(ACTIVE_HOURS_LIMIT_MESSAGE) : ACTIVE_HOURS_LIMIT_MESSAGE,
     };
   }
   if (duration <= 0) {
     return {
       valid: false,
       durationMinutes: duration,
-      message: "활동 시작과 마감은 서로 달라야 합니다.",
+      message: uiText ? uiText("활동 시작과 마감은 서로 달라야 합니다.") : "활동 시작과 마감은 서로 달라야 합니다.",
     };
   }
   if (duration > MAX_ACTIVE_HOURS_MINUTES) {
     return {
       valid: false,
       durationMinutes: duration,
-      message: `${ACTIVE_HOURS_LIMIT_MESSAGE} 현재 선택은 ${formatActiveHoursDuration(
-        duration,
-      )}입니다.`,
+      message: uiText
+        ? uiText("활동 시간은 최대 17시간까지 설정할 수 있습니다. 현재 선택은 {{duration}}입니다.", { duration: formatActiveHoursDuration(duration, uiText) })
+        : `${ACTIVE_HOURS_LIMIT_MESSAGE} 현재 선택은 ${formatActiveHoursDuration(duration)}입니다.`,
     };
   }
   if (start < end) {
     return {
       valid: true,
       durationMinutes: duration,
-      message: `매일 ${start}부터 ${end} 전까지 활동합니다.`,
+      message: uiText ? uiText("매일 {{start}}부터 {{end}} 전까지 활동합니다.", { start, end }) : `매일 ${start}부터 ${end} 전까지 활동합니다.`,
     };
   }
   return {
     valid: true,
     durationMinutes: duration,
-    message: `매일 ${start}부터 다음 날 ${end} 전까지 활동합니다.`,
+    message: uiText ? uiText("매일 {{start}}부터 다음 날 {{end}} 전까지 활동합니다.", { start, end }) : `매일 ${start}부터 다음 날 ${end} 전까지 활동합니다.`,
   };
 }
 
-function formatActiveHoursDuration(durationMinutes: number) {
+function formatActiveHoursDuration(durationMinutes: number, uiText?: UiText) {
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
-  if (minutes === 0) return `${hours}시간`;
-  if (hours === 0) return `${minutes}분`;
-  return `${hours}시간 ${minutes}분`;
+  if (minutes === 0) return uiText ? uiText("{{hours}}시간", { hours }) : `${hours}시간`;
+  if (hours === 0) return uiText ? uiText("{{minutes}}분", { minutes }) : `${minutes}분`;
+  return uiText ? uiText("{{hours}}시간 {{minutes}}분", { hours, minutes }) : `${hours}시간 ${minutes}분`;
 }
 
 function parseActiveHour(value: string, allowEndOfDay: boolean) {

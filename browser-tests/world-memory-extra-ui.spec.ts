@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { installWorldCharacterManagementFixture, syntheticWorldCharacter, WORLD_AGENT } from "./world-character-management-fixture";
+import { installWorldCharacterManagementFixture, syntheticWorldCharacter, worldCharacterRoute, WORLD_AGENT } from "./world-character-management-fixture";
 import { FEED_WORLD } from "./world-feed-fixture";
 import { memoryBatchFixture } from "./memory-batch-fixture";
 
@@ -67,9 +67,9 @@ function reviewBarrier() {
   return { promise, release };
 }
 
-async function installPrivateMemoryFixture(page: Page, isStatic: boolean, baseURL: string) {
-  const fixture = await installWorldCharacterManagementFixture(page, isStatic, baseURL);
-  fixture.management.authOwner = "local-owner";
+async function installPrivateMemoryFixture(page: Page, isStatic: boolean, baseURL: string, language: "ko" | "en" = "ko") {
+  const fixture = await installWorldCharacterManagementFixture(page, isStatic, baseURL, language);
+  fixture.management.authOwner = language === "ko" ? "local-owner" : undefined;
   const state = { id: "private-memory", summary: "Original private memory", denied: false, reads: 0, completed: 0, writeCompleted: 0,
     barrier: null as Promise<void> | null, writeBarrier: null as Promise<void> | null, writes: [] as string[] };
   const scope = { world_id: FEED_WORLD, subject_world_character_id: WORLD_AGENT };
@@ -112,6 +112,65 @@ async function installPrivateMemoryFixture(page: Page, isStatic: boolean, baseUR
     return route.fulfill({ status: 404, json: { detail: "unexpected_memory_fixture_request" } });
   });
   return { fixture, state };
+}
+
+test("I38: English activity hours and reused cards translate UI without changing policies", async ({ page }, info) => {
+  const fixture = await installWorldCharacterManagementFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  await page.goto(`${worldCharacterRoute()}?view=settings`);
+  const settings = page.locator("[data-world-character-settings-form]");
+  const activity = settings.locator('[data-world-character-settings-card="activity"]');
+  await expect(activity).toContainText("Set activity hours, allowed actions and writing limits.");
+  await expect(activity).toContainText("Active daily from 09:00 until 02:00 the next day.");
+  await activity.getByRole("button", { name: "Morning", exact: true }).click();
+  await expect(activity).toContainText("Active daily from 06:00 until 14:00.");
+  await activity.getByLabel("Activity ends", { exact: true }).selectOption("06:00");
+  await expect(activity).toContainText("Activity start and end times must differ.");
+  await expect(activity.getByRole("button", { name: "Save settings", exact: true })).toBeDisabled();
+  await activity.getByLabel("Activity ends", { exact: true }).selectOption("00:30");
+  await expect(activity).toContainText("The activity window can be up to 17 hours. The current selection is 18 hours 30 minutes.");
+  await expect(activity.getByRole("button", { name: "Save settings", exact: true })).toBeDisabled();
+  await expect(activity).not.toContainText(/[가-힣]/);
+  const plan = settings.getByRole("region", { name: "Today's plan", exact: true });
+  await expect(plan).toContainText("Today's plan is not prepared");
+  await expect(plan).not.toContainText(/[가-힣]/);
+  const runtime = settings.getByRole("region", { name: "Activity mode and current state", exact: true });
+  await expect(runtime).toContainText("Activity mode informed by memories (V2)");
+  await expect(runtime).not.toContainText(/[가-힣]/);
+  expect(fixture.management.writes).toEqual([]);
+  expect(fixture.management.providerCalls).toEqual([]);
+});
+
+for (const language of ["ko", "en"] as const) {
+  test(`I41: Memory recovery uses its own purpose and localizes dynamic states (${language})`, async ({ page }, info) => {
+    const { state } = await installPrivateMemoryFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const scope = { world_id: FEED_WORLD, subject_world_character_id: WORLD_AGENT };
+    let saves = 0;
+    await page.route("**/memory/batch-settings", async route => {
+      if (route.request().method() === "PUT") {
+        saves += 1;
+        return route.fulfill({ status: 503, json: { detail: "synthetic-private-provider-response" } });
+      }
+      return route.fulfill({ json: { scope, version: 0, memory_enabled: true, ai_enabled: false,
+        shutdown_enabled: true, schedule_enabled: false, local_time: "22:30", timezone: "Asia/Seoul", next_due_at: null,
+        model_id: "gemini-3.1-flash-lite", thinking_level: "high", profile_version: 0, pending_count: 32,
+        status: "attention", last_code: "memory_selection_auth_failed", last_completed_at: null,
+        available_models: ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"], stored_count: 4, storage_limit: 100000,
+        capacity_blocked: false, can_run: true, retryable: true, run_saved_count: null, run_pending_count: null } });
+    });
+    await page.goto(`/memory?world=${FEED_WORLD}&subject=${WORLD_AGENT}`);
+    const shell = page.locator('[data-product-shell="memory"]');
+    const card = shell.getByRole("region", { name: language === "ko" ? "기억·관계 정리" : "Memory and relationship consolidation", exact: true });
+    await expect(card).toContainText(language === "ko" ? "기억 정리용 API 키와 이용 권한을 확인해 주세요." : "Check this character's memory consolidation API key and permissions.");
+    await expect(card).not.toContainText(/쪽지용|채팅용|Chat API|Chat AI/);
+    const memory = shell.getByRole("button").filter({ hasText: state.summary });
+    await expect(memory).toContainText(language === "ko" ? "경험" : "Experience");
+    await expect(memory).toContainText(language === "ko" ? "활성" : "Active");
+    await card.getByRole("button", { name: language === "ko" ? "정리 설정 저장" : "Save consolidation settings", exact: true }).click();
+    await expect(card).toContainText(language === "ko" ? "저장하지 못했어요. 이 캐릭터의 기억 정리용 API 키와 모델을 확인해 주세요." : "Could not save. Check this character's memory consolidation API key and model.");
+    await expect(card).not.toContainText("synthetic-private-provider-response");
+    expect(saves).toBe(1); expect(state.writes).toEqual([]);
+    if (language === "en") await expect(card).not.toContainText(/[가-힣]/);
+  });
 }
 
 test("I41: Memory owner change removes previous private memory and key drafts", async ({ page }, info) => {
@@ -341,7 +400,11 @@ for (const language of ["ko", "en"] as const) {
         await expect(card).not.toContainText(state.configuration); await expect(card).not.toContainText(state.jobStatus);
         await expect(card).toContainText(language === "ko" ? "정리 상태를 확인해주세요." : "Check the review status.");
       }
-      if (language === "en") await expect(page.locator("main")).not.toContainText("사유:");
+      if (language === "en") {
+        await expect(page.locator("main")).not.toContainText("사유:");
+        await expect(page.getByText("Graph temporarily unavailable", { exact: true }).first()).toBeVisible();
+        await expect(card).not.toContainText(/[가-힣]/);
+      }
       await expect(page.locator("main")).toContainText("Authored original label");
       expect(state.writes).toEqual([]);
     });
