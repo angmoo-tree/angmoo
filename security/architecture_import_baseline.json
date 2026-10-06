@@ -17311,19 +17311,15 @@
         "fastapi"
       ],
       "imports": [
-        "app.domains.chat.exceptions",
         "app.domains.chat.service.evidence",
         "app.domains.chat.service.generation",
         "app.domains.chat.service.messages",
         "app.domains.chat.service.settings",
         "app.domains.chat.service.threads",
-        "app.domains.identity.service.world_credentials",
-        "app.domains.memory.contracts.scope",
         "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.scope_queries",
-        "app.runtime.subject_scope"
+        "app.runtime.chat.scope_queries"
       ],
       "module": "app.runtime.chat.message_composition",
       "path": "backend/app/runtime/chat/message_composition.py",
@@ -17438,11 +17434,15 @@
       ],
       "imports": [
         "app.domains.characters.models",
+        "app.domains.chat.exceptions",
         "app.domains.chat.repository.threads",
         "app.domains.identity.constants",
         "app.domains.identity.models",
+        "app.domains.identity.service.world_credentials",
+        "app.domains.memory.contracts.scope",
         "app.domains.world_characters.models",
-        "app.domains.worlds.models"
+        "app.domains.worlds.models",
+        "app.runtime.subject_scope"
       ],
       "module": "app.runtime.chat.scope_queries",
       "path": "backend/app/runtime/chat/scope_queries.py",

@@ -249,7 +249,7 @@ class ThreadService:
                 outcome="reused", thread=thread_read
             )
         try:
-            default_model, default_thinking = self.settings_service.world_profile(db,
+            default_model, default_thinking = self.scope_queries.world_chat_profile(db,
                 owner_id=user.id, world_id=world_id, actor_id=responding.id)
             selected_model = data.selected_model or default_model
             self.settings_service._ensure_supported_model(selected_model)
@@ -387,7 +387,7 @@ class ThreadService:
                 "World Chat 모델 binding이 올바르지 않습니다."
             ) from exc
         if binding is MessageModelBindingMode.DEFAULT:
-            selected_model, thinking = self.settings_service.world_profile(db,
+            selected_model, thinking = self.scope_queries.world_chat_profile(db,
                 owner_id=user.id, world_id=thread.world_id, actor_id=thread.responding_world_character_id)
             self.settings_service._ensure_supported_model(selected_model)
             thread.selected_model = selected_model

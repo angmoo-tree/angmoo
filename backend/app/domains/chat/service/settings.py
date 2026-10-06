@@ -40,13 +40,6 @@ from app.domains.identity.service.credential_resolution import (
 
 
 class MessageSettingsService:
-    def __init__(self, *, world_profile_reader=None):
-        self._world_profile_reader = world_profile_reader
-
-    def world_profile(self, db, *, owner_id, world_id, actor_id):
-        if self._world_profile_reader is None:
-            raise MessageCredentialRequiredError("world_chat_profile_required")
-        return self._world_profile_reader(db, owner_id=owner_id, world_id=world_id, actor_id=actor_id)
     def get_user_settings(
         self, db: Session, user: ChatUser
     ) -> schemas.MessageSettingsRead:

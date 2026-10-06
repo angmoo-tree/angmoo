@@ -151,3 +151,19 @@ def claimed_local_installation_exists(db: Session) -> bool:
         return False
     installation = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
     return bool(installation and installation.bootstrap_state == "claimed")
+
+
+def world_chat_profile(
+    db: Session, *, owner_id: str, world_id: str, actor_id: str
+) -> tuple[str, str | None]:
+    """Read this live actor's native Chat profile in the caller's session."""
+    from app.domains.identity.service.world_credentials import find, metadata, validate_profile
+    from app.domains.chat.exceptions import MessageCredentialInvalidError
+    from app.domains.memory.contracts.scope import MemoryScope
+    from app.runtime.subject_scope import read_scope_presence
+
+    if any(value is None for value in read_scope_presence(db, MemoryScope(owner_id, world_id, actor_id))):
+        raise MessageCredentialInvalidError("world_chat_profile_required")
+    value = metadata(find(db, owner_id=owner_id, world_id=world_id, world_character_id=actor_id, purpose="chat"), purpose="chat")
+    validate_profile("chat", value.provider, value.model, value.thinking_level)
+    return value.model, value.thinking_level

@@ -10,19 +10,7 @@ from app.domains.chat.service.threads import ThreadService
 from app.runtime.chat import evidence_reads, generation_workflows, scope_queries
 from app.domains.social.repository.blocks import world_character_pair_is_blocked
 
-def world_chat_profile(db, *, owner_id, world_id, actor_id):
-    from app.domains.identity.service.world_credentials import find, metadata, validate_profile
-    from app.domains.chat.exceptions import MessageCredentialInvalidError
-    from app.domains.memory.contracts.scope import MemoryScope
-    from app.runtime.subject_scope import read_scope_presence
-    if any(value is None for value in read_scope_presence(db, MemoryScope(owner_id, world_id, actor_id))):
-        raise MessageCredentialInvalidError("world_chat_profile_required")
-    value = metadata(find(db, owner_id=owner_id, world_id=world_id, world_character_id=actor_id, purpose="chat"), purpose="chat")
-    validate_profile("chat", value.provider, value.model, value.thinking_level)
-    return value.model, value.thinking_level
-
-
-settings_service = MessageSettingsService(world_profile_reader=world_chat_profile)
+settings_service = MessageSettingsService()
 thread_service = ThreadService(
     settings_service, scope_queries, world_character_pair_is_blocked
 )
