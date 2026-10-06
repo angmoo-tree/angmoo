@@ -422,6 +422,28 @@ boundary check, current Memory inventory, L4 inventory and frontend design
 contract pass. This refresh records current source imports and does not rewrite
 the frozen source checkpoint, predecessor inventories or permission policy.
 
+The 91d2e487 candidate's Linux dependency audit and Windows installer build
+detect HIGH advisory GHSA-68fv-2mgg-jv7q in `source-map-js 1.2.1`; the backend
+audit still reports no known vulnerabilities in all 85 locked Python packages.
+The existing pnpm security-override pattern pins the corrected upstream 1.2.2.
+The official frozen install changes that package and its two consumer references
+only. Next, React, PostCSS and the other dependency versions are unchanged.
+The official license generator changes one notice row and verifies Python 85 /
+JavaScript 66 / conditional reviews 4 against the unchanged policy. Isolated
+frozen install, production HIGH-threshold audit, lint, typecheck, Next build and
+static/Tauri export pass. The new final candidate's hosted CI remains required.
+No audit suppression or severity-policy change is applied.
+[Upstream advisory](https://github.com/advisories/GHSA-68fv-2mgg-jv7q),
+[corrected release](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2).
+
+The same candidate's backend preflight finds the dependent current L4 inventory
+still reporting 4,115 external imports. The official generator changes only that
+count to 4,116; exact JSON comparison preserves module ownership, all source
+digests, parity nodes, predecessor, migration and policy fields. L4, current
+Memory successor, frontend architecture and frontend design checks pass. This
+derived count follows the already verified cancellation adapter import and
+does not regenerate historical frozen evidence or change test permissions.
+
 At integration start there are no running Docker containers and the user has
 ended the observation session. An isolated frontend preview is task-owned and
 stopped after validation. Docker images/containers/volumes, user data, backups

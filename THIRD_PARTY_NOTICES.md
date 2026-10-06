@@ -150,7 +150,7 @@ Package authors retain all rights granted by their respective licenses.
 - `semver 6.3.1` — ISC
 - `semver 7.8.5` — ISC
 - `sharp 0.35.4` — Apache-2.0
-- `source-map-js 1.2.1` — BSD-3-Clause
+- `source-map-js 1.2.2` — BSD-3-Clause
 - `styled-jsx 5.1.6` — MIT
 - `supports-color 7.2.0` — MIT
 - `tslib 2.8.1` — 0BSD
