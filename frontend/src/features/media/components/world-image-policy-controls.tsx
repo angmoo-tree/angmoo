@@ -61,6 +61,7 @@ export function WorldVisionControls(props: { worldId: string; actorId: string })
 }
 function ScopedVisionControls({ worldId, actorId }: { worldId: string; actorId: string }) {
   const t = useUiText("media"), policy = usePolicy(worldId, actorId);
+  const formatDate = useUiDateFormatter();
   const [draft, setDraft] = useState<{ cap: number | null; enabled: boolean; baseline: WorldImagePolicy } | null>(null);
   const value = draft ?? (policy.read ? { cap: policy.read.vision_limit, enabled: policy.read.vision_enabled, baseline: policy.read } : null);
   useProductLeaveGuard(Boolean(draft) || policy.busy);
@@ -70,7 +71,7 @@ function ScopedVisionControls({ worldId, actorId }: { worldId: string; actorId: 
     <label className="flex min-h-11 items-center gap-3"><input type="checkbox" className="accent-action-primary" checked={value.enabled} onChange={event => setDraft({ ...value, enabled: event.target.checked })} />{t("SNS·Chat 이미지 인식 사용")}</label>
     <p>{t("오늘 인식 {{used}} / {{limit}}회", { used: policy.read?.vision_usage ?? 0, limit: value.cap ?? "—" })}</p>
     {!value.cap ? <p>{t("상한을 설정해야 사용할 수 있어요.")}</p> : null}
-    <p className="text-sm text-text-secondary">{t("다음 한도 초기화:")} {policy.read?.reset_at} · {policy.read?.timezone}</p>
+    <p className="text-sm text-text-secondary">{t("다음 한도 초기화:")} {policy.read?.reset_at ? formatDate(policy.read.reset_at, policy.read.timezone) : "—"} · {policy.read?.timezone}</p>
     <ConflictReview policy={policy} onReview={() => { if (draft && policy.read) setDraft({ ...draft, baseline: policy.read }); }} />
     <div className="flex flex-wrap gap-2"><Button loading={policy.busy} disabled={!draft || !value.cap || value.cap < 1 || value.cap > 10000 || policy.conflicts.length > 0} onClick={async () => { if (await policy.save({ vision_limit: value.cap, vision_enabled: value.enabled }, value.baseline)) setDraft(null); }}>{t("인식 설정 저장")}</Button><Button variant="ghost" disabled={policy.busy} onClick={policy.refresh}>{t("상태 새로고침")}</Button></div>
   </>;

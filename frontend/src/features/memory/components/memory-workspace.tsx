@@ -43,6 +43,7 @@ import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
 import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
 import type { MemoryScopeLoaders, MemoryWorldOption, MemoryCharacterOption } from "@/features/memory/types/scope-options";
 
@@ -94,6 +95,23 @@ export function MemoryWorkspace({
   const [revision, setRevision] = useState(0);
   const correctionRef = useRef<HTMLTextAreaElement>(null);
   const mutationLockRef = useRef(false);
+  const active = useRef(true), generation = useRef(0);
+  const operations = useRef(new Set<AbortController>());
+  useEffect(() => {
+    active.current = true;
+    const pending = operations.current;
+    return () => { active.current = false; generation.current += 1; pending.forEach(controller => controller.abort()); };
+  }, []);
+
+  function beginOperation() {
+    const controller = new AbortController(), version = generation.current, scope = captureAuthRequestScope();
+    operations.current.add(controller);
+    return {
+      controller,
+      current: () => active.current && version === generation.current && !controller.signal.aborted && isCurrentAuthRequestScope(scope),
+      end: () => operations.current.delete(controller),
+    };
+  }
   const acquireBatch = useCallback(() => {
     if (mutationLockRef.current) return false;
     mutationLockRef.current = true;
@@ -183,10 +201,12 @@ export function MemoryWorkspace({
     const controller = new AbortController();
     void getMemoryItem(worldId, subjectId, memoryId, { signal: controller.signal })
       .then((read) => {
+        if (controller.signal.aborted) return;
         setDetail(read);
         setDetailPhase("ready");
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setDetail(null);
         setDetailPhase("error");
@@ -207,6 +227,7 @@ export function MemoryWorkspace({
   }
 
   function chooseWorld(nextWorldId: string) {
+    generation.current += 1; operations.current.forEach(controller => controller.abort());
     setPhase("loading");
     setError(null);
     setWorldId(nextWorldId);
@@ -220,6 +241,7 @@ export function MemoryWorkspace({
   }
 
   function chooseSubject(nextSubjectId: string) {
+    generation.current += 1; operations.current.forEach(controller => controller.abort());
     setPhase("loading");
     setError(null);
     setSubjectId(nextSubjectId);
@@ -243,8 +265,10 @@ export function MemoryWorkspace({
   async function loadMore() {
     if (!list?.next_cursor || pagePhase === "loading") return;
     setPagePhase("loading");
+    const operation = beginOperation();
     try {
-      const next = await listMemoryItems(worldId, subjectId, { cursor: list.next_cursor });
+      const next = await listMemoryItems(worldId, subjectId, { cursor: list.next_cursor, signal: operation.controller.signal });
+      if (!operation.current()) return;
       setList((current) => {
         if (!current) return next;
         const known = new Set(current.items.map((item) => item.id));
@@ -255,35 +279,42 @@ export function MemoryWorkspace({
       });
       setPagePhase("idle");
     } catch {
-      setPagePhase("error");
-    }
+      if (operation.current()) setPagePhase("error");
+    } finally { operation.end(); }
   }
 
-  async function reloadCurrentScope(nextMemoryId = memoryId) {
+  async function reloadCurrentScope(nextMemoryId = memoryId, pending?: ReturnType<typeof beginOperation>) {
     if (!worldId || !subjectId) return;
-    setMutationFailure(null);
-    const [settingRead, listRead] = await Promise.all([
-      getMemorySetting(worldId, subjectId),
-      listMemoryItems(worldId, subjectId),
-    ]);
-    setSetting(settingRead);
-    setList(listRead);
-    if (nextMemoryId && listRead.items.some((item) => item.id === nextMemoryId)) {
-      const detailRead = await getMemoryItem(worldId, subjectId, nextMemoryId);
-      setMemoryId(nextMemoryId);
-      setDetail(detailRead);
-      setDetailPhase("ready");
-      syncRoute(worldId, subjectId, nextMemoryId);
-    } else {
-      setMemoryId("");
-      setDetail(null);
-      setDetailPhase("idle");
-      syncRoute(worldId, subjectId);
-    }
+    const operation = pending ?? beginOperation();
+    try {
+      setMutationFailure(null);
+      const [settingRead, listRead] = await Promise.all([
+        getMemorySetting(worldId, subjectId, { signal: operation.controller.signal }),
+        listMemoryItems(worldId, subjectId, { signal: operation.controller.signal }),
+      ]);
+      if (!operation.current()) return;
+      setSetting(settingRead);
+      setList(listRead);
+      if (nextMemoryId && listRead.items.some((item) => item.id === nextMemoryId)) {
+        const detailRead = await getMemoryItem(worldId, subjectId, nextMemoryId, { signal: operation.controller.signal });
+        if (!operation.current()) return;
+        setMemoryId(nextMemoryId);
+        setDetail(detailRead);
+        setDetailPhase("ready");
+        syncRoute(worldId, subjectId, nextMemoryId);
+      } else {
+        setMemoryId("");
+        setDetail(null);
+        setDetailPhase("idle");
+        syncRoute(worldId, subjectId);
+      }
+    } catch (error) { if (operation.current()) throw error; }
+    finally { if (!pending) operation.end(); }
   }
 
   async function runOwnerMutation(ownerRequest: OwnerMutation) {
-    if (mutationLockRef.current) return;
+    if (!active.current || mutationLockRef.current) return;
+    const operation = beginOperation(), options = { signal: operation.controller.signal };
     mutationLockRef.current = true;
     setMutationKind(ownerRequest.kind);
     setMutationFailure(null);
@@ -294,7 +325,8 @@ export function MemoryWorkspace({
           expected_version: ownerRequest.expectedVersion,
           enabled: ownerRequest.enabled,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setSetting(result.setting);
         setList((current) => current ? { ...current, memory_enabled: result.setting.enabled } : current);
         setMutationNotice(ownerRequest.enabled
@@ -305,7 +337,8 @@ export function MemoryWorkspace({
           expected_version: ownerRequest.expectedVersion,
           pinned: ownerRequest.pinned,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setList((current) => current ? {
           ...current,
           items: current.items.map((item) => item.id === result.item.id ? result.item : item),
@@ -320,28 +353,33 @@ export function MemoryWorkspace({
           expected_scope_version: ownerRequest.expectedScopeVersion,
           summary: ownerRequest.summary,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setCorrectionOpen(false);
         setCorrectionText("");
-        await reloadCurrentScope(result.item.id);
+        await reloadCurrentScope(result.item.id, operation);
+        if (!operation.current()) return;
         setMutationNotice(uiText("기억을 정정했어요. 이전 기억은 교체됨으로 남고 새 기억만 회상에 사용됩니다."));
       } else {
         await deleteMemoryItem(worldId, subjectId, ownerRequest.memoryId, {
           expected_version: ownerRequest.expectedVersion,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setDeleteOpen(false);
-        await reloadCurrentScope("");
+        await reloadCurrentScope("", operation);
+        if (!operation.current()) return;
         setMutationNotice(uiText("기억을 삭제했어요. 이후 회상에서는 즉시 제외되며 검색용 사본은 자동으로 정리됩니다."));
       }
     } catch (reason: unknown) {
+      if (!operation.current()) return;
       const stale = reason instanceof MemoryApiError && reason.status === 409;
       if (ownerRequest.kind === "correct") setCorrectionOpen(false);
       if (ownerRequest.kind === "delete") setDeleteOpen(false);
       setMutationFailure({ message: uiText(mutationErrorMessage(reason)), request: ownerRequest, stale });
     } finally {
-      mutationLockRef.current = false;
-      setMutationKind(null);
+      operation.end();
+      if (operation.current()) { mutationLockRef.current = false; setMutationKind(null); }
     }
   }
 

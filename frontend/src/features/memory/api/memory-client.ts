@@ -184,12 +184,14 @@ export function updateMemorySetting(
   worldId: string,
   subjectId: string,
   data: { expected_version: number; enabled: boolean; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestMemoryMutation<MemorySettingMutationRead>(
     `${scopePath(worldId, subjectId)}/memory/settings`,
     {
       method: "PUT",
       body: JSON.stringify({ schema_version: "memory-setting-update.v1", ...data }),
+      ...options,
     },
   ).then((read) => {
     if (
@@ -209,6 +211,7 @@ export function setMemoryPin(
   subjectId: string,
   memoryId: string,
   data: { expected_version: number; pinned: boolean; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -218,6 +221,7 @@ export function setMemoryPin(
     {
       method: "PUT",
       body: JSON.stringify({ schema_version: "memory-pin-update.v1", ...data }),
+      ...options,
     },
     data.pinned ? "pin" : "unpin",
   ).then((read) => {
@@ -238,6 +242,7 @@ export function correctMemoryItem(
     summary: string;
     idempotency_key: string;
   },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -247,6 +252,7 @@ export function correctMemoryItem(
     {
       method: "POST",
       body: JSON.stringify({ schema_version: "memory-correction-create.v1", ...data }),
+      ...options,
     },
     "correct",
   ).then((read) => {
@@ -262,6 +268,7 @@ export function deleteMemoryItem(
   subjectId: string,
   memoryId: string,
   data: { expected_version: number; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -271,6 +278,7 @@ export function deleteMemoryItem(
     {
       method: "DELETE",
       body: JSON.stringify({ schema_version: "memory-delete.v1", ...data }),
+      ...options,
     },
     "delete",
   ).then((read) => {

@@ -52,6 +52,14 @@ const ERROR_LABELS: Record<string, string> = {
   relationship_query_failed: "관계망 조회를 완료하지 못했습니다. 데이터는 변경되지 않았습니다.",
 };
 
+const FALLBACK_LABELS: Record<string, string> = {
+  graph_disabled: "관계망 기능 꺼짐",
+  graph_rebuilding: "관계망 다시 구성 중",
+  graph_rebuild_failed: "관계망 복구 확인 필요",
+  ladybug_query_timeout: "관계망 조회 시간 초과",
+  schema_not_ready: "관계망 설정 확인 필요",
+};
+
 export function RelationshipGraphClient({
   characterId,
   worldId,
@@ -64,11 +72,11 @@ export function RelationshipGraphClient({
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("relationships");
   const router = useRouter();
-  const { status, user } = useAuth();
+  const { status, user, sessionRevision } = useAuth();
   const [depth, setDepth] = useState<1 | 2>(1);
   const [storedGraph, setGraph] = useState<RelationshipGraphRead | null>(null);
   const [loadedIdentity, setLoadedIdentity] = useState<string | null>(null);
-  const identity = JSON.stringify([characterId, worldId, user?.id ?? null]);
+  const identity = JSON.stringify([characterId, worldId, user?.id ?? null, sessionRevision]);
   const graph = loadedIdentity === identity && status === "authenticated" ? storedGraph : null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +103,7 @@ export function RelationshipGraphClient({
       .then((result) => {
         if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           setGraph(result);
-          setLoadedIdentity(JSON.stringify([characterId, worldId, scope.userId]));
+          setLoadedIdentity(JSON.stringify([characterId, worldId, scope.userId, sessionRevision]));
           setError(null);
         }
       })
@@ -112,7 +120,7 @@ export function RelationshipGraphClient({
       active = false;
       controller.abort();
     };
-  }, [characterId, depth, provider, requestVersion, router, status, user?.id, worldId]);
+  }, [characterId, depth, provider, requestVersion, router, sessionRevision, status, user?.id, worldId]);
 
   const orderedNodes = useMemo(() => {
     if (!graph) return [];
@@ -142,7 +150,11 @@ export function RelationshipGraphClient({
   };
   const degradedDescription =
     graph?.meta.source === "canonical_fallback"
-      ? uiText("LadybugDB projection 대신 Canonical DB의 직접 관계와 근거만 표시합니다.{{value0}}", {value0: graph.meta.fallback_reason ? ` 사유: ${graph.meta.fallback_reason}` : ""})
+      ? uiText("LadybugDB projection 대신 Canonical DB의 직접 관계와 근거만 표시합니다.{{value0}}", {
+          value0: graph.meta.fallback_reason ? uiText(" 사유: {{reason}}", {
+            reason: uiText(FALLBACK_LABELS[graph.meta.fallback_reason] ?? "관계망 연결 상태 확인 필요"),
+          }) : "",
+        })
       : uiText("LadybugDB가 새 사건을 아직 모두 반영하지 못했습니다. 표시된 관계는 최신 상태가 아닐 수 있습니다.");
   const rebuildingDescription =
     graph?.meta.source === "canonical_fallback"
@@ -235,7 +247,7 @@ export function RelationshipGraphClient({
         />
       ) : null}
 
-      <RelationshipReviewPanel key={`${worldId}:${characterId}`} characterId={characterId} worldId={worldId} revision={requestVersion} authenticated={status === "authenticated"} names={Object.fromEntries((graph?.nodes ?? []).map((node) => [node.world_character_id, node.display_name]))} />
+      {status === "authenticated" ? <RelationshipReviewPanel key={`${identity}:${requestVersion}`} characterId={characterId} worldId={worldId} revision={requestVersion} authenticated names={Object.fromEntries((graph?.nodes ?? []).map((node) => [node.world_character_id, node.display_name]))} /> : null}
 
       {graph && showGraph ? (
         <>

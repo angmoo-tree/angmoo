@@ -43,6 +43,10 @@ class SqlAlchemyDiagnosticReferences:
         from sqlalchemy import select
         from app.domains.memory.models.items import MemoryScopeSettingModel
         from app.domains.memory.models.batch import MemoryBatchSetting
+        from app.domains.memory.models.activity_configuration import MemorySubjectProfile
+        from app.domains.memory.contracts.scope import MemoryScope
+        from app.domains.identity.service.environment import snapshot
+        from app.runtime.relationships.review_credentials import snapshot as credential_snapshot
         setting = self.db.scalar(select(MemoryScopeSettingModel).where(
             MemoryScopeSettingModel.world_id == world_id, MemoryScopeSettingModel.subject_world_character_id == actor_id))
         batch = self.db.get(MemoryBatchSetting, setting.id) if setting else None
@@ -50,6 +54,14 @@ class SqlAlchemyDiagnosticReferences:
             return {"status": "memory_disabled"}
         if not batch or not batch.ai_enabled or not batch.consent_version:
             return {"status": "consent_or_ai_required"}
+        profile = self.db.get(MemorySubjectProfile, setting.id)
+        if profile is None:
+            return {"status": "consolidation_configuration_required", "manual_available": False}
+        try:
+            credential_snapshot(self.db, MemoryScope(setting.owner_id, world_id, actor_id), profile)
+        except ValueError:
+            return {"status": "consolidation_configuration_required", "manual_available": False}
         if not batch.schedule_enabled:
             return {"status": "schedule_disabled", "manual_available": True}
-        return {"status": "scheduled", "manual_available": True, "local_time": batch.local_time, "timezone": batch.timezone}
+        return {"status": "scheduled", "manual_available": True, "local_time": batch.local_time,
+            "timezone": snapshot(self.db, setting.owner_id).timezone}

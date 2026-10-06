@@ -9,6 +9,7 @@ from app.config import Settings, settings
 from app.domains.relationships import dependencies
 from app.runtime.graph_projection import composition, diagnostic_references
 from p7_graph_support import seed_projection_fixture, sqlite_engine
+from identity.test_world_credentials import world_session, write
 
 
 def test_both_factories_bind_relationship_readers_and_register_each_route_once():
@@ -78,3 +79,87 @@ def test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validati
         assert fixture.event.retrieval_status == "eligible"
         assert fixture.outbox.status == "pending"
     engine.dispose()
+
+
+def review_setting(db):
+    from app.domains.memory.models.items import MemoryScopeSettingModel
+    from app.domains.memory.models.batch import MemoryBatchSetting
+    from app.domains.memory.models.activity_configuration import MemorySubjectProfile
+    from datetime import UTC, datetime
+    setting = MemoryScopeSettingModel(id="review-setting", owner_id="fixture-owner", world_id="config-world-a",
+        subject_world_character_id="config-role-a", enabled=True)
+    db.add(setting)
+    db.flush()
+    batch = MemoryBatchSetting(scope_setting_id=setting.id, ai_enabled=True, consent_version="synthetic-consent",
+        schedule_enabled=True, local_time="05:20", timezone="Pacific/Honolulu")
+    profile = MemorySubjectProfile(scope_setting_id=setting.id, model_id="gemini-3.1-flash-lite", thinking_level="high",
+        updated_at=datetime.now(UTC))
+    db.add_all([batch, profile])
+    db.flush()
+    return setting, batch, profile
+
+
+def test_review_configuration_uses_exact_subject_purpose_model_and_current_timezone_without_writes(world_session):
+    from sqlalchemy import event
+    from app.domains.identity.service import world_credentials
+    from app.domains.identity.models_environment import LocalEnvironment
+    db = world_session
+    setting, batch, profile = review_setting(db)
+    reader = diagnostic_references.SqlAlchemyDiagnosticReferences(db, Settings())
+    scope = dict(owner_id=setting.owner_id, world_id=setting.world_id, world_character_id=setting.subject_world_character_id)
+    statements = []
+
+    def record(_conn, _cursor, sql, *_rest):
+        if sql.lstrip().upper().startswith(("INSERT", "UPDATE", "DELETE")):
+            statements.append(sql)
+
+    def read():
+        db.flush()
+        event.listen(db.get_bind(), "before_cursor_execute", record)
+        try:
+            return reader.review_configuration(world_id=setting.world_id, actor_id=setting.subject_world_character_id)
+        finally:
+            event.remove(db.get_bind(), "before_cursor_execute", record)
+
+    assert read()["status"] == "consolidation_configuration_required"
+    world_credentials.save(db, **{**scope, "world_id": "config-world-b", "world_character_id": "config-role-b"}, purpose="consolidation", data=write())
+    world_credentials.save(db, **scope, purpose="chat", data=write())
+    assert read()["status"] == "consolidation_configuration_required"
+    world_credentials.save(db, **scope, purpose="consolidation", data=write())
+    assert read() == {"status": "scheduled", "manual_available": True, "local_time": "05:20", "timezone": "UTC"}
+    db.add(LocalEnvironment(owner_id=setting.owner_id, installation_id="configuration-fixture", preferred_language="en", timezone="Asia/Seoul"))
+    assert read()["timezone"] == "Asia/Seoul"
+    assert batch.timezone == "Pacific/Honolulu"
+    world_credentials.save(db, **scope, purpose="consolidation", data=write(1, None, thinking="medium"))
+    assert read()["status"] == "consolidation_configuration_required"
+    profile.thinking_level = "medium"
+    assert read()["status"] == "scheduled"
+    batch.schedule_enabled = False
+    assert read() == {"status": "schedule_disabled", "manual_available": True}
+    world_credentials.delete(db, **scope, purpose="consolidation", expected_revision=2)
+    assert read() == {"status": "consolidation_configuration_required", "manual_available": False}
+    assert statements == []
+
+
+def test_review_configuration_keeps_memory_consent_and_schedule_gates(world_session):
+    from app.domains.identity.service import world_credentials
+    db = world_session
+    setting, batch, _profile = review_setting(db)
+    reader = diagnostic_references.SqlAlchemyDiagnosticReferences(db, Settings())
+
+    def read():
+        db.flush()
+        return reader.review_configuration(world_id=setting.world_id, actor_id=setting.subject_world_character_id)
+
+    setting.enabled = False
+    assert read() == {"status": "memory_disabled"}
+    setting.enabled, batch.ai_enabled = True, False
+    assert read() == {"status": "consent_or_ai_required"}
+    batch.ai_enabled, batch.consent_version = True, None
+    assert read() == {"status": "consent_or_ai_required"}
+    batch.consent_version = "synthetic-consent"
+    batch.schedule_enabled = False
+    assert read() == {"status": "consolidation_configuration_required", "manual_available": False}
+    world_credentials.save(db, owner_id=setting.owner_id, world_id=setting.world_id,
+        world_character_id=setting.subject_world_character_id, purpose="consolidation", data=write())
+    assert read() == {"status": "schedule_disabled", "manual_available": True}
