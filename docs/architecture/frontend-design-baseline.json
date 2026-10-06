@@ -173,14 +173,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "00dd29fab37d0069ab4fc451865830f8277c6dfebd233b61dced8403b9c048ef"
+      "sha256": "bae6c88eaf734bf4e115d30602f0b97f12cff82f60a1df2bed9eddb193ac78d3"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-      "sha256": "2f296e4aee36827d9a3caf1bcd6cb55f346a75f6673e33fbede4aa482d7951b6"
+      "sha256": "7974456b74c282a5023adcb5df194d0dd879fec4803acd47682d89d98fe0b64c"
     },
     {
       "classifications": [

@@ -2,7 +2,9 @@
 
 검증일: 2026-10-06–07, Windows / PowerShell / Python 3.13 / local Chromium.
 
-**현재 판정: I00–I49 50단계의 로컬 구현·기술 검증 완료 — LOCAL TECH PASS.** 마지막 일반 CLI의 backend/API/ORM/assertion 보존 검사도 종료 코드 0으로 통과했다. 실제 AI 품질, 네이티브 검색 성능, 설치판 검수를 로컬 PASS에 포함하지 않는다.
+**이전 실행 판정(HEAD `6c862f04`): I00–I49 50단계의 로컬 구현·기술 검증 완료 — LOCAL TECH PASS.** 마지막 일반 CLI의 backend/API/ORM/assertion 보존 검사도 종료 코드 0으로 통과했다. 실제 AI 품질, 네이티브 검색 성능, 설치판 검수를 로컬 PASS에 포함하지 않는다.
+
+**2026-10-07 후속 재검토에서 수명·오류·준비 상태의 누락을 발견해 보완했다.** 이 문서의 수치와 단계표는 이전 실행의 기록이다. 현재 코드의 보완 내용과 재검증은 [후속 누락 재검토 보고서](./world-ui-memory-batch32-audit-20261007.md)에 기록한다.
 
 ## 실행 경계와 기준 보존
 

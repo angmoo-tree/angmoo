@@ -36511,6 +36511,205 @@
       "frontend_files": [],
       "contracts": [],
       "orm_tables": []
+    },
+    {
+      "id": "world-memory-audit-20261007",
+      "implementation_commit": "92fb62b2d9e17a0030b84c61cd04d2897690a6ef",
+      "reason": "2026-10-07 user-requested I00-I49 omission audit: scoped private UI lifetime, safe localized review errors, exact-subject consolidation readiness, current timezone and recognition reset display.",
+      "review": "Exact committed preimages and postimages; original test lineages and historical migration/checkpoint data retained. Local fake/SQLite and Next/static audit results are linked in docs/verification/world-ui-memory-batch32-audit-20261007.md. No real provider, user data, remote CI, PR or main operations.",
+      "source_blobs": {
+        "backend/app/runtime/graph_projection/diagnostic_references.py": "1a290251723626a619d80a90f57b27ec26cfcad1",
+        "backend/tests/relationships/test_diagnostics_http_ownership.py": "97d1c548138ce6551d94c122aa99d519c61cd8e2",
+        "browser-tests/world-memory-extra-ui.spec.ts": "b4620b087b26d0fb0a2b80fe192c25763e8cdd4f",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx": "6fd712e44b54030cee26e7c757e773bc526300f8",
+        "frontend/src/features/identity/api/session.ts": "0cd79957a6f6821c77f3fb845a18596f2a110210",
+        "frontend/src/features/media/components/world-image-policy-controls.tsx": "535d132102cf0b09cdfa35eebc917b79704d5469",
+        "frontend/src/features/memory/api/memory-client.ts": "8bfe498553c91e737fc5c0d583f5c9ff9ee7daf4",
+        "frontend/src/features/memory/components/memory-workspace.tsx": "61ebcf233c3f9caaa8a65821aea418e292932386",
+        "frontend/src/features/memory/locales/en.json": "7491715dfafec47c83c2e6fd0468d78d8269bdd4",
+        "frontend/src/features/memory/locales/ko.json": "88d9c430608eee46d687ff3cbf4d0687842822e4",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx": "7eba565941e67ac2f3a21b46205ccd8afc2f7f1d",
+        "frontend/src/features/relationships/components/relationship-review-panel.tsx": "011e7e533b2587ce6e04e6c2d4bf2838cb47e1b3",
+        "frontend/src/features/relationships/locales/en.json": "b514c9741faa17ffd7911aba39df85469ed95ba0",
+        "frontend/src/features/relationships/locales/ko.json": "8bc4c4ce1a1a88e0ded0d265fc32ddf23f41d81d"
+      },
+      "definitions": [
+        {
+          "source": "backend/app/runtime/graph_projection/diagnostic_references.py",
+          "symbol": "SqlAlchemyDiagnosticReferences",
+          "before_ast": "ClassDef(name='SqlAlchemyDiagnosticReferences', body=[FunctionDef(name='__init__', args=arguments(args=[arg(arg='self'), arg(arg='db', annotation=Name(id='Session', ctx=Load())), arg(arg='config', annotation=Name(id='Settings', ctx=Load()))]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Store())], value=Name(id='db', ctx=Load())), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='config', ctx=Store())], value=Name(id='config', ctx=Load()))], returns=Constant(value=None)), FunctionDef(name='get_character', args=arguments(args=[arg(arg='self'), arg(arg='character_id', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Name(id='get_character', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Name(id='character_id', ctx=Load())]))]), FunctionDef(name='find_world_character', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='find_diagnostic_world_character', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='character_id', value=Name(id='character_id', ctx=Load()))]))]), FunctionDef(name='world_character_status', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='world_character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='diagnostic_world_character_status', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='world_character_id', value=Name(id='world_character_id', ctx=Load()))]))], returns=BinOp(left=Name(id='str', ctx=Load()), op=BitOr(), right=Constant(value=None))), FunctionDef(name='pair_blocked', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='actor_id', annotation=Name(id='str', ctx=Load())), arg(arg='target_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None, None]), body=[Return(value=Call(func=Name(id='world_character_pair_is_blocked', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='first_world_character_id', value=Name(id='actor_id', ctx=Load())), keyword(arg='second_world_character_id', value=Name(id='target_id', ctx=Load()))]))], returns=Name(id='bool', ctx=Load())), FunctionDef(name='get_post', args=arguments(args=[arg(arg='self'), arg(arg='post_id', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Name(id='get_post', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Name(id='post_id', ctx=Load())]))]), FunctionDef(name='list_active_joint_activities', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='world_character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='list_active_joint_activities', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='world_character_id', value=Name(id='world_character_id', ctx=Load()))]))]), FunctionDef(name='graph_gateway', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='graph_provider', annotation=Name(id='GraphProvider', ctx=Load()))], kw_defaults=[None]), body=[Return(value=Call(func=Name(id='SqlAlchemyRelationshipGraphReadGateway', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='config', value=Attribute(value=Name(id='self', ctx=Load()), attr='config', ctx=Load())), keyword(arg='graph_provider', value=Name(id='graph_provider', ctx=Load()))]))], returns=Name(id='RelationshipGraphReadGateway', ctx=Load())), FunctionDef(name='review_configuration', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id'), arg(arg='actor_id')], kw_defaults=[None, None]), body=[ImportFrom(module='sqlalchemy', names=[alias(name='select')], level=0), ImportFrom(module='app.domains.memory.models.items', names=[alias(name='MemoryScopeSettingModel')], level=0), ImportFrom(module='app.domains.memory.models.batch', names=[alias(name='MemoryBatchSetting')], level=0), Assign(targets=[Name(id='setting', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Name(id='MemoryScopeSettingModel', ctx=Load())]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='world_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='world_id', ctx=Load())]), Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='subject_world_character_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='actor_id', ctx=Load())])])])), Assign(targets=[Name(id='batch', ctx=Store())], value=IfExp(test=Name(id='setting', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemoryBatchSetting', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())]), orelse=Constant(value=None))), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='setting', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='setting', ctx=Load()), attr='enabled', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='memory_disabled')]))]), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='batch', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='ai_enabled', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='consent_version', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='consent_or_ai_required')]))]), If(test=UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='schedule_enabled', ctx=Load())), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='schedule_disabled'), Constant(value=True)]))]), Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available'), Constant(value='local_time'), Constant(value='timezone')], values=[Constant(value='scheduled'), Constant(value=True), Attribute(value=Name(id='batch', ctx=Load()), attr='local_time', ctx=Load()), Attribute(value=Name(id='batch', ctx=Load()), attr='timezone', ctx=Load())]))])])",
+          "after_ast": "ClassDef(name='SqlAlchemyDiagnosticReferences', body=[FunctionDef(name='__init__', args=arguments(args=[arg(arg='self'), arg(arg='db', annotation=Name(id='Session', ctx=Load())), arg(arg='config', annotation=Name(id='Settings', ctx=Load()))]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Store())], value=Name(id='db', ctx=Load())), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='config', ctx=Store())], value=Name(id='config', ctx=Load()))], returns=Constant(value=None)), FunctionDef(name='get_character', args=arguments(args=[arg(arg='self'), arg(arg='character_id', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Name(id='get_character', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Name(id='character_id', ctx=Load())]))]), FunctionDef(name='find_world_character', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='find_diagnostic_world_character', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='character_id', value=Name(id='character_id', ctx=Load()))]))]), FunctionDef(name='world_character_status', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='world_character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='diagnostic_world_character_status', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='world_character_id', value=Name(id='world_character_id', ctx=Load()))]))], returns=BinOp(left=Name(id='str', ctx=Load()), op=BitOr(), right=Constant(value=None))), FunctionDef(name='pair_blocked', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='actor_id', annotation=Name(id='str', ctx=Load())), arg(arg='target_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None, None]), body=[Return(value=Call(func=Name(id='world_character_pair_is_blocked', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='first_world_character_id', value=Name(id='actor_id', ctx=Load())), keyword(arg='second_world_character_id', value=Name(id='target_id', ctx=Load()))]))], returns=Name(id='bool', ctx=Load())), FunctionDef(name='get_post', args=arguments(args=[arg(arg='self'), arg(arg='post_id', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Name(id='get_post', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Name(id='post_id', ctx=Load())]))]), FunctionDef(name='list_active_joint_activities', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='world_character_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None]), body=[Return(value=Call(func=Name(id='list_active_joint_activities', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='world_character_id', value=Name(id='world_character_id', ctx=Load()))]))]), FunctionDef(name='graph_gateway', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='graph_provider', annotation=Name(id='GraphProvider', ctx=Load()))], kw_defaults=[None]), body=[Return(value=Call(func=Name(id='SqlAlchemyRelationshipGraphReadGateway', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load())], keywords=[keyword(arg='config', value=Attribute(value=Name(id='self', ctx=Load()), attr='config', ctx=Load())), keyword(arg='graph_provider', value=Name(id='graph_provider', ctx=Load()))]))], returns=Name(id='RelationshipGraphReadGateway', ctx=Load())), FunctionDef(name='review_configuration', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id'), arg(arg='actor_id')], kw_defaults=[None, None]), body=[ImportFrom(module='sqlalchemy', names=[alias(name='select')], level=0), ImportFrom(module='app.domains.memory.models.items', names=[alias(name='MemoryScopeSettingModel')], level=0), ImportFrom(module='app.domains.memory.models.batch', names=[alias(name='MemoryBatchSetting')], level=0), ImportFrom(module='app.domains.memory.models.activity_configuration', names=[alias(name='MemorySubjectProfile')], level=0), ImportFrom(module='app.domains.memory.contracts.scope', names=[alias(name='MemoryScope')], level=0), ImportFrom(module='app.domains.identity.service.environment', names=[alias(name='snapshot')], level=0), ImportFrom(module='app.runtime.relationships.review_credentials', names=[alias(name='snapshot', asname='credential_snapshot')], level=0), Assign(targets=[Name(id='setting', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Name(id='MemoryScopeSettingModel', ctx=Load())]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='world_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='world_id', ctx=Load())]), Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='subject_world_character_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='actor_id', ctx=Load())])])])), Assign(targets=[Name(id='batch', ctx=Store())], value=IfExp(test=Name(id='setting', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemoryBatchSetting', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())]), orelse=Constant(value=None))), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='setting', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='setting', ctx=Load()), attr='enabled', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='memory_disabled')]))]), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='batch', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='ai_enabled', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='consent_version', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='consent_or_ai_required')]))]), Assign(targets=[Name(id='profile', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemorySubjectProfile', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())])), If(test=Compare(left=Name(id='profile', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='consolidation_configuration_required'), Constant(value=False)]))]), Try(body=[Expr(value=Call(func=Name(id='credential_snapshot', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Call(func=Name(id='MemoryScope', ctx=Load()), args=[Attribute(value=Name(id='setting', ctx=Load()), attr='owner_id', ctx=Load()), Name(id='world_id', ctx=Load()), Name(id='actor_id', ctx=Load())]), Name(id='profile', ctx=Load())]))], handlers=[ExceptHandler(type=Name(id='ValueError', ctx=Load()), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='consolidation_configuration_required'), Constant(value=False)]))])]), If(test=UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='schedule_enabled', ctx=Load())), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='schedule_disabled'), Constant(value=True)]))]), Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available'), Constant(value='local_time'), Constant(value='timezone')], values=[Constant(value='scheduled'), Constant(value=True), Attribute(value=Name(id='batch', ctx=Load()), attr='local_time', ctx=Load()), Attribute(value=Call(func=Name(id='snapshot', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='owner_id', ctx=Load())]), attr='timezone', ctx=Load())]))])])"
+        },
+        {
+          "source": "backend/app/runtime/graph_projection/diagnostic_references.py",
+          "symbol": "SqlAlchemyDiagnosticReferences.review_configuration",
+          "before_ast": "FunctionDef(name='review_configuration', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id'), arg(arg='actor_id')], kw_defaults=[None, None]), body=[ImportFrom(module='sqlalchemy', names=[alias(name='select')], level=0), ImportFrom(module='app.domains.memory.models.items', names=[alias(name='MemoryScopeSettingModel')], level=0), ImportFrom(module='app.domains.memory.models.batch', names=[alias(name='MemoryBatchSetting')], level=0), Assign(targets=[Name(id='setting', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Name(id='MemoryScopeSettingModel', ctx=Load())]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='world_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='world_id', ctx=Load())]), Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='subject_world_character_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='actor_id', ctx=Load())])])])), Assign(targets=[Name(id='batch', ctx=Store())], value=IfExp(test=Name(id='setting', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemoryBatchSetting', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())]), orelse=Constant(value=None))), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='setting', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='setting', ctx=Load()), attr='enabled', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='memory_disabled')]))]), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='batch', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='ai_enabled', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='consent_version', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='consent_or_ai_required')]))]), If(test=UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='schedule_enabled', ctx=Load())), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='schedule_disabled'), Constant(value=True)]))]), Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available'), Constant(value='local_time'), Constant(value='timezone')], values=[Constant(value='scheduled'), Constant(value=True), Attribute(value=Name(id='batch', ctx=Load()), attr='local_time', ctx=Load()), Attribute(value=Name(id='batch', ctx=Load()), attr='timezone', ctx=Load())]))])",
+          "after_ast": "FunctionDef(name='review_configuration', args=arguments(args=[arg(arg='self')], kwonlyargs=[arg(arg='world_id'), arg(arg='actor_id')], kw_defaults=[None, None]), body=[ImportFrom(module='sqlalchemy', names=[alias(name='select')], level=0), ImportFrom(module='app.domains.memory.models.items', names=[alias(name='MemoryScopeSettingModel')], level=0), ImportFrom(module='app.domains.memory.models.batch', names=[alias(name='MemoryBatchSetting')], level=0), ImportFrom(module='app.domains.memory.models.activity_configuration', names=[alias(name='MemorySubjectProfile')], level=0), ImportFrom(module='app.domains.memory.contracts.scope', names=[alias(name='MemoryScope')], level=0), ImportFrom(module='app.domains.identity.service.environment', names=[alias(name='snapshot')], level=0), ImportFrom(module='app.runtime.relationships.review_credentials', names=[alias(name='snapshot', asname='credential_snapshot')], level=0), Assign(targets=[Name(id='setting', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Name(id='MemoryScopeSettingModel', ctx=Load())]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='world_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='world_id', ctx=Load())]), Compare(left=Attribute(value=Name(id='MemoryScopeSettingModel', ctx=Load()), attr='subject_world_character_id', ctx=Load()), ops=[Eq()], comparators=[Name(id='actor_id', ctx=Load())])])])), Assign(targets=[Name(id='batch', ctx=Store())], value=IfExp(test=Name(id='setting', ctx=Load()), body=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemoryBatchSetting', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())]), orelse=Constant(value=None))), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='setting', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='setting', ctx=Load()), attr='enabled', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='memory_disabled')]))]), If(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Name(id='batch', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='ai_enabled', ctx=Load())), UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='consent_version', ctx=Load()))]), body=[Return(value=Dict(keys=[Constant(value='status')], values=[Constant(value='consent_or_ai_required')]))]), Assign(targets=[Name(id='profile', ctx=Store())], value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='MemorySubjectProfile', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='id', ctx=Load())])), If(test=Compare(left=Name(id='profile', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='consolidation_configuration_required'), Constant(value=False)]))]), Try(body=[Expr(value=Call(func=Name(id='credential_snapshot', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Call(func=Name(id='MemoryScope', ctx=Load()), args=[Attribute(value=Name(id='setting', ctx=Load()), attr='owner_id', ctx=Load()), Name(id='world_id', ctx=Load()), Name(id='actor_id', ctx=Load())]), Name(id='profile', ctx=Load())]))], handlers=[ExceptHandler(type=Name(id='ValueError', ctx=Load()), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='consolidation_configuration_required'), Constant(value=False)]))])]), If(test=UnaryOp(op=Not(), operand=Attribute(value=Name(id='batch', ctx=Load()), attr='schedule_enabled', ctx=Load())), body=[Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available')], values=[Constant(value='schedule_disabled'), Constant(value=True)]))]), Return(value=Dict(keys=[Constant(value='status'), Constant(value='manual_available'), Constant(value='local_time'), Constant(value='timezone')], values=[Constant(value='scheduled'), Constant(value=True), Attribute(value=Name(id='batch', ctx=Load()), attr='local_time', ctx=Load()), Attribute(value=Call(func=Name(id='snapshot', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='db', ctx=Load()), Attribute(value=Name(id='setting', ctx=Load()), attr='owner_id', ctx=Load())]), attr='timezone', ctx=Load())]))])"
+        }
+      ],
+      "assertions": [],
+      "frontend_files": [
+        {
+          "source": "browser-tests/world-memory-extra-ui.spec.ts",
+          "before_sha256": "a192ee13b69a19f14c2c2d7a790accfb0089aa19615beec152a3da81d0c85403",
+          "after_sha256": "b73b02d3f936dae8d339e6bf3cdb5621a3abef7e40893c0774fb67a8d2db1d4a"
+        },
+        {
+          "source": "frontend/src/composition/screens/memory-workspace-screen.tsx",
+          "before_sha256": "5b678cf1886c5d4bbc54c39895c2348e4dce17238940ab84fc6aa9734df41954",
+          "after_sha256": "14ef3fb4beb34e95d76d9a883bffd5e3bdc0431b73ae2083ef9f70f49f95136b"
+        },
+        {
+          "source": "frontend/src/features/identity/api/session.ts",
+          "before_sha256": "d6c2c41028e1c1137fce25a9ffb286cf43f0e7cfb5dbf4d603d926ef58309966",
+          "after_sha256": "735ae9e0d31cd4fcba80cef71077e22e3de059ea37f0ba80168b3071ea3c3af0"
+        },
+        {
+          "source": "frontend/src/features/media/components/world-image-policy-controls.tsx",
+          "before_sha256": "8992f94e39ba3552bc3715c598fca12ec4b73d599d5118ccdcb9f695f6141fb6",
+          "after_sha256": "ff6af259d2d7aea12fdfa2143c5e5077ea9e22a2ceea91f586c27d295f77ecc7"
+        },
+        {
+          "source": "frontend/src/features/memory/api/memory-client.ts",
+          "before_sha256": "f1f774dc06eb78ab4c0fe7bc77a026900eb2d20622f4f1f804b134ddb84ba617",
+          "after_sha256": "e0b0600d055799d6abe437f92606681ab6de00393a4e462ee75e2a54e73d9ce4"
+        },
+        {
+          "source": "frontend/src/features/memory/components/memory-workspace.tsx",
+          "before_sha256": "00dd29fab37d0069ab4fc451865830f8277c6dfebd233b61dced8403b9c048ef",
+          "after_sha256": "f058d364766edca85694836d2d94ba5c5f916f16ba34b80acc8a59f82cd38a6d"
+        },
+        {
+          "source": "frontend/src/features/memory/locales/en.json",
+          "before_sha256": "ed83304023127692f0235ed106a9f9d8e830865035a0cb72dc1ac6a52824d623",
+          "after_sha256": "64ff8ad3f2c6b31e1fa80f9c310e1027ebe0f1c7163e76210c3f0bdb1deb0224"
+        },
+        {
+          "source": "frontend/src/features/memory/locales/ko.json",
+          "before_sha256": "48ed784d82f0958e86e47bd807975bef79c782e5b2637a525c95cf6c28bbb0c2",
+          "after_sha256": "cfe13aa028a47c69154b554e54e630648cac0898cc5ef5bab61139b3f4e3609e"
+        },
+        {
+          "source": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+          "before_sha256": "2f296e4aee36827d9a3caf1bcd6cb55f346a75f6673e33fbede4aa482d7951b6",
+          "after_sha256": "7974456b74c282a5023adcb5df194d0dd879fec4803acd47682d89d98fe0b64c"
+        },
+        {
+          "source": "frontend/src/features/relationships/components/relationship-review-panel.tsx",
+          "before_sha256": "ec9401fb36da1793c82ed0b103e24c2f06555c80b9f70d9ae8fdae444c9cc1be",
+          "after_sha256": "ac7006c9ccfe557d5cd6edfab78d91696798a3f1765b1d056ba522927603d3d2"
+        },
+        {
+          "source": "frontend/src/features/relationships/locales/en.json",
+          "before_sha256": "370c4b14d6b6b8f8600171503ba77c3617e89dbca17ac30dff74e12acdfbc0fb",
+          "after_sha256": "e134c68ab467c6aec00467dd91d3e3df5c15c5802e551ac12ea32c7eff20b53d"
+        },
+        {
+          "source": "frontend/src/features/relationships/locales/ko.json",
+          "before_sha256": "91e305e397b4490a4c89f19d9f5dbcaa4b2290d91c2212c83e905852d1f46359",
+          "after_sha256": "fb4d56d85be4c6dba6f4c2cc93bff9df909f0d9cbfa6949e0d3d50c2bf5241e2"
+        }
+      ],
+      "contracts": [],
+      "orm_tables": []
+    },
+    {
+      "id": "world-memory-audit-copy-20261007",
+      "implementation_commit": "7abc9e7c53bf24d208716c0258ec204b12490040",
+      "reason": "2026-10-07 user-requested I00-I49 follow-up audit: consolidation-specific recovery, dynamic bilingual state/card/wizard/activity-hour messages and stale-request abort handling.",
+      "review": "Exact committed preimages and postimages; original test lineages and historical migration/checkpoint data retained. Local fake/SQLite and Next/static audit results are linked in docs/verification/world-ui-memory-batch32-audit-20261007.md. No real provider, user data, remote CI, PR or main operations.",
+      "source_blobs": {
+        "browser-tests/local-creator.spec.ts": "ef474b8c1e32b90037fa2879ccd75d20025d96e3",
+        "browser-tests/world-memory-extra-ui.spec.ts": "f38481766ca8d34a03f2290b153bd57d6ebd9b97",
+        "frontend/src/features/characters/components/activity-hours-control.tsx": "4c15e5af112f88128c7ddffd9eed98912821d62d",
+        "frontend/src/features/characters/locales/en.json": "b9bbb71d24a9f18dd72721ce2878a1a7428f3900",
+        "frontend/src/features/characters/locales/ko.json": "cdbf3a2b3b54a6d2b4f9f997e3e867530e4c1de9",
+        "frontend/src/features/media/locales/en.json": "4d59050cdc9f8251d3267f8ff5f48c2f87917e8d",
+        "frontend/src/features/media/locales/ko.json": "4104f34b2a133e3d5c30acd771163500879726f0",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx": "f3e264dc5088e6ebbf0468d8e6e230a92a988e2d",
+        "frontend/src/features/memory/components/memory-workspace.tsx": "96011167d1a41b9bb2d40a3ab6d668088cb34e50",
+        "frontend/src/features/memory/locales/en.json": "706fd7b2d8cf457d3d904bbf411b97412cf979e3",
+        "frontend/src/features/memory/locales/ko.json": "fd7e4befdf6884f84206776e52b1dab42594928b",
+        "frontend/src/features/memory/utils/batch-status.ts": "66d2db1f5c2ca4fcbfe6192c85ab5f3df6e8993d",
+        "frontend/src/features/relationships/locales/en.json": "0ecf882f9612abf118d9fb27b4d7879f7c2dd822",
+        "frontend/src/features/relationships/locales/ko.json": "7aedee639f624d659cd51ee6f03797857c8089ac"
+      },
+      "definitions": [],
+      "assertions": [],
+      "frontend_files": [
+        {
+          "source": "browser-tests/local-creator.spec.ts",
+          "before_sha256": "c6dfbfa3e9e976c7b67e63907851508fb79e5d06b8e98607ad84d041a0714965",
+          "after_sha256": "ff9d57ecc1f5803c440c003c652d7f0554b1d164ef05770a18d557c5b1223c25"
+        },
+        {
+          "source": "browser-tests/world-memory-extra-ui.spec.ts",
+          "before_sha256": "b73b02d3f936dae8d339e6bf3cdb5621a3abef7e40893c0774fb67a8d2db1d4a",
+          "after_sha256": "4c7fe8241cebc9dcd339d660ce66049797fa1ea675c3579850b0a0ff6e252750"
+        },
+        {
+          "source": "frontend/src/features/characters/components/activity-hours-control.tsx",
+          "before_sha256": "d82f202081bcedab8f4ce7725cbdfe4c658b9deff62b468350ec255cdc56e214",
+          "after_sha256": "3135d915ec73bef5d1c62b80d2abcca98445d1baf822c37aafa5f21c559f56ad"
+        },
+        {
+          "source": "frontend/src/features/characters/locales/en.json",
+          "before_sha256": "8b71b71af14c61c2a888a61516a250bb5cf687db73d7861e80c854f350156632",
+          "after_sha256": "682bb02052e5e027361d03f694fe1e044245649b227436419061c63905a08374"
+        },
+        {
+          "source": "frontend/src/features/characters/locales/ko.json",
+          "before_sha256": "bd5898cf7e076bea757dc97879737c8278e31ab1ffad45f0ae769901fff03d07",
+          "after_sha256": "67de356b52fb6ba24d4f67cb58eb172d26ae3bf5de1ef28aad4d934c35969038"
+        },
+        {
+          "source": "frontend/src/features/media/locales/en.json",
+          "before_sha256": "e92d19c27ac50925099664486f5d45ce2a28ed6905bb083b3edc95291b3a2d96",
+          "after_sha256": "7a9ef1b2958ae5e316537c28c21491b3160fb20e1a33464f0fd1af3bb25cbe3b"
+        },
+        {
+          "source": "frontend/src/features/media/locales/ko.json",
+          "before_sha256": "08a76e2a8c64785ae9ba0bc48ee350618aed34436cb24e9c51c429fdd2e38484",
+          "after_sha256": "9f6a2b993c794cec48cec18391c8bc1a36dc85ee6c487685c01dd1648e74670e"
+        },
+        {
+          "source": "frontend/src/features/memory/components/memory-batch-controls.tsx",
+          "before_sha256": "768ac6cfb35e227dde0f8c67c8e37dbeaa90e425ab92b3c6242c9d932383bcb5",
+          "after_sha256": "6cb2d6472866dc32e8dbce3b325451ade8e28af064cea4fc360440b95f3a3cdb"
+        },
+        {
+          "source": "frontend/src/features/memory/components/memory-workspace.tsx",
+          "before_sha256": "f058d364766edca85694836d2d94ba5c5f916f16ba34b80acc8a59f82cd38a6d",
+          "after_sha256": "bae6c88eaf734bf4e115d30602f0b97f12cff82f60a1df2bed9eddb193ac78d3"
+        },
+        {
+          "source": "frontend/src/features/memory/locales/en.json",
+          "before_sha256": "64ff8ad3f2c6b31e1fa80f9c310e1027ebe0f1c7163e76210c3f0bdb1deb0224",
+          "after_sha256": "ecfdf596585248990cc451608f01496d97e79e39e819df1a9f6666024da2db1a"
+        },
+        {
+          "source": "frontend/src/features/memory/locales/ko.json",
+          "before_sha256": "cfe13aa028a47c69154b554e54e630648cac0898cc5ef5bab61139b3f4e3609e",
+          "after_sha256": "73371fc5f19511e8edbd11e6b76e6b508f0c9cf6a556377b522e6f19d3fdca88"
+        },
+        {
+          "source": "frontend/src/features/memory/utils/batch-status.ts",
+          "before_sha256": "c24d6a084353d7cffebdb68f7880e308aaa758ff6cfc99f78b9a590cdcf8ed6c",
+          "after_sha256": "2864a6a8f4e1e8eed07f78a54ba4d0b6200bd0cd5bd3afe622235ac9074a5943"
+        },
+        {
+          "source": "frontend/src/features/relationships/locales/en.json",
+          "before_sha256": "e134c68ab467c6aec00467dd91d3e3df5c15c5802e551ac12ea32c7eff20b53d",
+          "after_sha256": "2c55bf3a3ddd17045c38ff43084ddc3f2c458de63256a77f72c777f25c776366"
+        },
+        {
+          "source": "frontend/src/features/relationships/locales/ko.json",
+          "before_sha256": "fb4d56d85be4c6dba6f4c2cc93bff9df909f0d9cbfa6949e0d3d50c2bf5241e2",
+          "after_sha256": "8a0630a5ce754453d6aeb8b853722da754480fc946706b9a8f5da007e1d0fe7c"
+        }
+      ],
+      "contracts": [],
+      "orm_tables": []
     }
   ]
 }
