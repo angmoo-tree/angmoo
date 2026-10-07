@@ -14,6 +14,24 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-07 World 소개 화면
+
+World 첫 탭의 표시 명칭은 ko/en 모두 `World`, 내부 ID `home`과 루트 URL은 유지한다.
+상단은 Globe·World 문맥과 44px 원형 Device Home 아이콘으로 구성한다. 정상 상태에서
+중복 World 이름, 실행 가능·OWNER 배지와 내부 경계 안내를 반복하지 않는다. 기존 오류·접근
+차단과 복구 동선은 유지한다.
+
+배너 → World 이름 → 장르 전체·분위기 전체의 중립 태그 행 → 한 줄 소개 → World 소개 →
+원형 캐릭터 사진·이름 → 작은 내 프로필 동선 순서다. 등록된 배너와 같은 크기의
+`/world-default-banner.svg`를 미등록·표시 실패 시 사용한다. 이미지 ID·저장 데이터·AI 실행을 변경하지 않는다.
+World 소개의 기본 원문은 4줄까지 표시하고, 한 번의 펼침으로 원문 전체·일상·장소·역할·직업·추가
+생성 지침을 저장 순서대로 보여준다. 일상은 작은 소제목, 이후 세 영역은 큰 소제목이다.
+빈 값과 조회 실패를 구분하고, 소개 안에는 별도 세로 스크롤을 만들지 않는다.
+
+캐릭터 미리보기는 정식 World 공개 프로필 조회의 자율 캐릭터만 표시한다. owner-controlled
+프로필은 별도 내 프로필 링크로 연결한다. 이름은 두 줄, 접근성 이름은 전체 이름이며,
+가로 목록과 전체 보기·상세 링크는 현재 World를 유지한다. 출처는 사용자 목업에 따른 **LOCAL** 구현이다.
+
 Device Character dashboard summary and empty-state UI appear only after a
 successful read. A failed read keeps its retry feedback and any previously loaded
 cards; it must not show an unconfirmed zero count or claim that no characters exist.

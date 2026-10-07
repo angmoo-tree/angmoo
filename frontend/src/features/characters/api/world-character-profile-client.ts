@@ -90,6 +90,7 @@ function profileMatchesScope(
     typeof profile.world_character_id === "string" &&
     typeof profile.character_id === "string" &&
     typeof profile.display_name === "string" &&
+    (profile.control_mode === "autonomous" || profile.control_mode === "owner_controlled") &&
     profile.status === "active" &&
     profile.profile_capability === "available"
   );

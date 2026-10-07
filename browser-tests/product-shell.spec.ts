@@ -690,7 +690,7 @@ test("World App keeps the requested World boundary and never falls back", async 
   const worldApp = page.locator('main[data-product-surface="world-app"]');
   await expect(worldApp).toHaveAttribute("data-world-id", WORLD_ALPHA.world_id);
   await expect(page.getByRole("heading", { name: WORLD_ALPHA.name }).first()).toBeVisible();
-  await page.getByRole("link", { name: "Feed" }).click();
+  await page.getByRole("link", { name: "피드", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/worlds/${WORLD_ALPHA.world_id}/feed$`));
   await expect(worldApp).toHaveAttribute("data-world-id", WORLD_ALPHA.world_id);
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
@@ -703,7 +703,7 @@ test("World App keeps the requested World boundary and never falls back", async 
   await expect(page.locator('[data-device-shell="phone"]')).toHaveCount(1);
   await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
   await expect(page.getByRole("navigation", { name: "World 앱 기능" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Device Home", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "디바이스 홈으로 이동", exact: true })).toBeVisible();
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });

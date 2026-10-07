@@ -726,6 +726,19 @@ rights-cleared.
 
 ## Contributor workflow
 
+### 2026-10-07 World introduction — LOCAL
+
+The user-provided banner-first World mockup is a local presentation reference.
+`features/worlds/components/world-introduction.tsx` and
+`features/characters/components/world-character-preview.tsx` use existing semantic
+tokens, navigation, Button, feedback and ProfileAvatar primitives. Composition
+connects their real World reads and owner-profile links for both Next and static.
+`frontend/public/world-default-banner.svg` is a repo-native vector interpretation
+of the supplied sky, sun and city shapes, with no external asset/font/dependency.
+The image palette belongs to the illustration; product CSS uses semantic tokens.
+Genre/mood tags and expanded original text come from the canonical World DTO.
+Evidence is recorded in `docs/verification/world-introduction-20261007.md`.
+
 ### 2026-09-18 SNS recommendation topics
 
 World Creator recommendation tools and the character settings topic panel are

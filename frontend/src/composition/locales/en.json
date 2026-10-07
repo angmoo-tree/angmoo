@@ -451,5 +451,11 @@
   "대화를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.": "Could not start the conversation. Try again later.",
   "{{value0}}의 관계망 열기": "Open {{value0}} relationships",
   "프로필 통계를 불러오지 못했어요.": "Could not load profile statistics.",
-  "현재 설치 · 로컬 세션": "Current installation · Local session"
+  "현재 설치 · 로컬 세션": "Current installation · Local session",
+  "World": "World",
+  "디바이스 홈으로 이동": "Go to Device Home",
+  "이 World의 소개와 캐릭터를 만나보세요.": "Explore this World and its characters.",
+  "채팅": "Chat",
+  "관계": "Relationships",
+  "World의 캐릭터": "Characters"
 }

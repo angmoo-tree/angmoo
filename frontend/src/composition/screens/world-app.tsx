@@ -6,18 +6,25 @@ import Link from "next/link";
 import Image from "next/image";
 import type { LocalWorldAppRead, OwnerControlledActorRead } from "@/features/worlds/types/world-app";
 import {
-  ArrowLeft,
+  ChevronRight,
+  Globe,
   House,
   MessageCircle,
   Network,
   Newspaper,
   Users,
+  UserRound,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 
 import { WorldCharacterManagementScreen } from "@/composition/screens/world-character-management-screen";
 import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
+import { WorldCharacterPreview } from "@/features/characters/components/world-character-preview";
+import { WorldIntroduction } from "@/features/worlds/components/world-introduction";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
 import { ImagePicker } from "@/features/media/components/image-picker";
 import { FeedHeader } from "@/components/layout/feed-header";
@@ -26,7 +33,6 @@ import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { GenerationStatus } from "@/features/media/components/generation-status";
 import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { getLocalWorldApp, getOwnerControlledActor, WorldAppApiError } from "@/features/worlds/api/world-app-client";
 import { ensureMyProfile, WorldApiError } from "@/features/worlds/api/worlds";
 import { WORLD_APP_SECTIONS, worldAppSectionRoute, type WorldAppSection, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
@@ -49,7 +55,7 @@ type WorldAppProps = {
 };
 
 const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
-  home: <House size={19} strokeWidth={2.2} />,
+  home: <Globe size={19} strokeWidth={2.2} />,
   feed: <Newspaper size={19} strokeWidth={2.2} />,
   chat: <MessageCircle size={19} strokeWidth={2.2} />,
   characters: <Users size={19} strokeWidth={2.2} />,
@@ -57,7 +63,14 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
 };
 
 export function WorldApp(props: WorldAppProps) {
-  return <WorldAppContent key={`${props.worldId}:${props.authStatus}`} {...props} />;
+  const { user } = useAuth();
+  const [runtimeRevision, setRuntimeRevision] = useState(0);
+  useEffect(() => {
+    const invalidate = () => setRuntimeRevision(value => value + 1);
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
+    return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
+  }, []);
+  return <WorldAppContent key={`${props.worldId}:${props.authStatus}:${user?.id ?? ""}:${runtimeRevision}`} {...props} />;
 }
 
 function WorldAppContent({
@@ -77,6 +90,8 @@ function WorldAppContent({
   useEffect(() => {
     if (authStatus !== "authenticated") return;
     const controller = new AbortController();
+    const scope = captureAuthRequestScope();
+    const current = () => !controller.signal.aborted && isCurrentAuthRequestScope(scope);
     const worldRead = getLocalWorldApp(worldId, { signal: controller.signal });
     void Promise.all([
       worldRead,
@@ -85,21 +100,21 @@ function WorldAppContent({
         // Reads may overlap, but a new identity requires a verified launchable
         // owner World. A rejected or abandoned route must not start a write.
         await worldRead;
-        return controller.signal.aborted ? null : ensureMyProfile(worldId);
+        return current() ? ensureMyProfile(worldId) : null;
       }),
     ])
       .then(([read, identity]) => {
-        if (controller.signal.aborted) return;
+        if (!current()) return;
         setWorld(read.world);
         setOwnerActor(identity);
       })
       .catch((reason: unknown) => {
-        if (controller.signal.aborted) return;
+        if (!current()) return;
         setWorld(null);
         setError(reason instanceof Error ? reason : new Error("world_app_unavailable"));
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (current()) setLoading(false);
       });
     return () => controller.abort();
   }, [authStatus, worldId]);
@@ -201,11 +216,11 @@ function WorldNavigation({
 }
 
 function WorldHomeReturn() {
+  const uiText = useUiText("shell");
   return (
-    <Link className={styles.homeReturn} href={PRODUCT_ROUTES.deviceHome}>
-      <ArrowLeft size={16} aria-hidden="true" />
-      Device Home
-    </Link>
+    <LocalProductLink className={styles.homeReturn} href={PRODUCT_ROUTES.deviceHome} ariaLabel={uiText("디바이스 홈으로 이동")} title={uiText("디바이스 홈으로 이동")}>
+      <House size={20} aria-hidden="true" />
+    </LocalProductLink>
   );
 }
 
@@ -251,28 +266,11 @@ function WorldSection({
   const uiText = useUiText("shell");
   if (activeSection.id === "home") {
     return (
-      <section className={styles.worldOverview}>
-        <div className={styles.overviewHeading}>
-          <StatusBadge label={uiText("실행 가능")} tone="healthy" />
-          <span className={styles.role}>{world.membership_role}</span>
-        </div>
-        <h2>{world.name}</h2>
-        <p className={styles.tagline}>{world.tagline || uiText("이 World의 일상을 만나보세요.")}</p>
-        <div className={styles.scopeNotice}>
-          <strong>{uiText("World 경계가 적용됐어요")}</strong>
-          <p>{uiText("아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.")}</p>
-        </div>
-        <div className={styles.scopeNotice}>
-          <strong>{uiText("이 World의 내 프로필")}</strong>
-          {ownerActor ? (
-            <p>
-              {ownerActor.profile.display_name} · @{ownerActor.profile.handle}
-            </p>
-          ) : (
-            <p>{uiText("World 관리에서 내 프로필을 확인할 수 있습니다.")}</p>
-          )}
-        </div>
-      </section>
+      <WorldIntroduction key={worldId} world={world}
+        characters={<WorldCharacterPreview worldId={worldId} canAdd={world.membership_role === "owner" || world.membership_role === "editor"} />}
+        myProfile={ownerActor ? <LocalProductLink className={styles.myProfile} href={worldCharacterProfileRoute(worldId, ownerActor.world_character_id)} ariaLabel={`${uiText("이 World의 내 프로필")}: ${ownerActor.profile.display_name}`}>
+          <UserRound size={18} aria-hidden="true" /><span>{uiText("이 World의 내 프로필")}</span><ChevronRight size={16} aria-hidden="true" />
+        </LocalProductLink> : <p>{uiText("World 관리에서 내 프로필을 확인할 수 있습니다.")}</p>} />
     );
   }
 
@@ -309,7 +307,7 @@ function WorldSection({
     return (
       <section className={styles.capability}>
         <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
-        <p className={styles.capabilityKicker}>{activeSection.label}</p>
+        <p className={styles.capabilityKicker}>{uiText(activeSection.label)}</p>
         <h2>{uiText("이 World의 관계망")}</h2>
         {ownerActor ? (
           <>
@@ -331,7 +329,7 @@ function WorldSection({
   return (
     <section className={styles.capability} role="status">
       <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
-      <p className={styles.capabilityKicker}>{activeSection.label}</p>
+      <p className={styles.capabilityKicker}>{uiText(activeSection.label)}</p>
       <h2>{uiText("이 World 전용 기능은 준비 중이에요")}</h2>
       <p>{uiText(activeSection.description)}</p>
     </section>

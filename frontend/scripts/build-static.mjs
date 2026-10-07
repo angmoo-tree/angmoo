@@ -36,6 +36,7 @@ for (const asset of [
   "pwa-icon-192.png",
   "pwa-icon-512.png",
   "pwa-maskable-512.png",
+  "world-default-banner.svg",
 ]) {
   cpSync(join(publicRoot, asset), join(productOutput, asset));
 }

@@ -82,7 +82,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "3a56118b476be01206ce1e8abfe3121aa7877ceab66617d1345860725dde4f4c"
+      "sha256": "e0aacb1b690762e458af68282d1af04419245ca7b61ccfb3313614f8c7137db1"
     },
     {
       "classifications": [
@@ -257,7 +257,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "1dc07910ac33800fc84f3071c7254f11161daba6c5afbb43896db7fa1bc1e828"
+        "sha256": "e7d54fdbdcf7e6e5cc6652bc52c33cf1cd94d63b4185cc53ee6fd7bed2bf38a1"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",

@@ -1,5 +1,12 @@
 # Frontend product-shell boundaries
 
+2026-10-07: the World root retains section ID `home` and its existing URL, with
+World as the displayed tab name and a compact Globe header. The circular Device
+Home link retains the existing destination. Worlds renders its banner-first
+introduction, while composition connects Characters' scoped public preview and
+the separate owner-profile link. The DeviceFrame content remains the only
+vertical scroll owner; the character preview has its own horizontal list only.
+
 2026-10-05: scoped World character management keeps the World header and five
 bottom destinations while composition connects the existing Profile/Status/Settings
 anatomy. Reaction target updates retain the scroll owner and mounted media/form.

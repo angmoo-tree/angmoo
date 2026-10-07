@@ -865,5 +865,11 @@
   "매일 {{start}}부터 다음 날 {{end}} 전까지 활동합니다.": "Active daily from {{start}} until {{end}} the next day.",
   "{{hours}}시간": "{{hours}} hours",
   "{{minutes}}분": "{{minutes}} minutes",
-  "{{hours}}시간 {{minutes}}분": "{{hours}} hours {{minutes}} minutes"
+  "{{hours}}시간 {{minutes}}분": "{{hours}} hours {{minutes}} minutes",
+  "전체 보기": "View all",
+  "캐릭터를 불러오는 중…": "Loading characters…",
+  "캐릭터를 불러오지 못했어요.": "Could not load the characters.",
+  "이 World에 참여 중인 자율 캐릭터가 없어요.": "No autonomous characters are participating in this World.",
+  "캐릭터 추가": "Add character",
+  "World의 캐릭터": "Characters"
 }

@@ -1,5 +1,20 @@
 # Angmoo Frontend Architecture
 
+### World introduction (2026-10-07)
+
+Worlds owns `components/world-introduction.tsx`, the existing World detail read,
+scope/schema validation, banner interpretation and expandable definition display.
+Characters owns `components/world-character-preview.tsx`, canonical public-profile
+reads and the compact autonomous-character preview. Composition supplies character
+and owner-profile ReactNode slots without cross-feature implementation imports.
+Existing media URL validation/runtime authentication and ProfileAvatar fallbacks
+remain in the common media/display owners. The bundled default banner is a static
+LOCAL SVG asset and does not create a media record or invoke generation.
+
+World App retains the `home` section ID and URL while displaying World. World,
+auth identity and runtime changes remount the scoped screen; cancelled or stale
+reads cannot apply to the replacement scope or initiate profile creation.
+
 ### World management and confirmed reactions (2026-10-05)
 
 Characters owns the scoped dashboard/management clients, DTO validation, shared

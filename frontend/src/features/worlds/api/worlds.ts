@@ -142,8 +142,17 @@ export function getWorldCreatorContext(worldId: string) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"));
 }
 
-export function getWorld(worldId: string) {
-  return apiRequest<WorldRead>(worldPath(worldId));
+export async function getWorld(worldId: string, options: { signal?: AbortSignal } = {}) {
+  const world = await apiRequest<WorldRead>(worldPath(worldId), options);
+  const textFields = ["name", "tagline", "setting_description", "daily_life_description", "additional_generation_guidance", "banner_alt_text"] as const;
+  if (!world || world.id !== worldId || textFields.some(field => typeof world[field] !== "string") ||
+    ![world.genre_tags, world.tone_tags].every(tags => Array.isArray(tags) && tags.every(tag => typeof tag === "string")) ||
+    !Array.isArray(world.places) || world.places.some(place => !place || typeof place.name !== "string" || typeof place.description !== "string") ||
+    !Array.isArray(world.roles) || world.roles.some(role => !role || typeof role.name !== "string" || typeof role.description !== "string" || !Array.isArray(role.responsibilities) || role.responsibilities.some(value => typeof value !== "string")) ||
+    !(world.banner_media_id === null || typeof world.banner_media_id === "string")) {
+    throw new WorldApiError("world_read_schema_mismatch", 502, null);
+  }
+  return world;
 }
 
 export function updateWorld(worldId: string, data: WorldUpdate) {
