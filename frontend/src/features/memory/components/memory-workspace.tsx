@@ -478,27 +478,29 @@ export function MemoryWorkspace({
       {phase === "ready" && list ? (
         <div className={styles.workspace}>
           <section className={styles.listPane} aria-label={uiText("저장된 기억 목록")}>
-            <SettingsCard title={setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")} description={uiText("검증된 경험을 기억하고 이후 대화에서 회상해요.")} icon={<ShieldCheck size={20} />} data-memory-enabled={setting?.enabled ?? false}>
-              <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-text-secondary">{uiText("기억을 꺼도 저장된 기억은 관리할 수 있어요.")}</p>
-              <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
-                {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
-              </Button></div>
-            </SettingsCard>
-            {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
-            <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
-            {mutationFailure ? (
-              <div className={styles.mutationError} role="alert">
-                <p>{mutationFailure.message}</p>
-                <Button compact onClick={() => {
-                  if (mutationFailure.stale) {
-                    void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: uiText("최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.") }));
-                  } else {
-                    void runOwnerMutation(mutationFailure.request);
-                  }
-                }} variant="secondary">{mutationFailure.stale ? uiText("최신 상태 불러오기") : uiText("다시 시도")}</Button>
-              </div>
-            ) : null}
+            <div className={styles.settingsCards}>
+              <SettingsCard elevated title={setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")} description={uiText("검증된 경험을 기억하고 이후 대화에서 회상해요.")} icon={<ShieldCheck size={20} />} data-memory-enabled={setting?.enabled ?? false}>
+                <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-text-secondary">{uiText("기억을 꺼도 저장된 기억은 관리할 수 있어요.")}</p>
+                <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
+                  {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
+                </Button></div>
+              </SettingsCard>
+              {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
+              <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+              <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
+              {mutationFailure ? (
+                <div className={styles.mutationError} role="alert">
+                  <p>{mutationFailure.message}</p>
+                  <Button compact onClick={() => {
+                    if (mutationFailure.stale) {
+                      void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: uiText("최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.") }));
+                    } else {
+                      void runOwnerMutation(mutationFailure.request);
+                    }
+                  }} variant="secondary">{mutationFailure.stale ? uiText("최신 상태 불러오기") : uiText("다시 시도")}</Button>
+                </div>
+              ) : null}
+            </div>
             {list.items.length === 0 ? (
               <MemoryState icon={<BookOpenText />} title={uiText("아직 저장된 기억이 없어요")} description={uiText("기억이 켜진 뒤 성공한 대화와 활동에서 검증된 기억이 생기면 여기에 표시됩니다.")} />
             ) : (

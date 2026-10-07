@@ -23,7 +23,7 @@ export function WorldCharacterDeletionCard({ worldId, actorId, name, revision, o
     } catch { if (!controller.signal.aborted) setFailed(true); }
     finally { if (!controller.signal.aborted) setBusy(false); }
   }
-  return <SettingsCard danger title={t("캐릭터 삭제")} description={t("현재 World의 캐릭터를 삭제하며 복구할 수 없어요.")} icon={<TriangleAlert size={20} />}>
+  return <SettingsCard elevated danger title={t("캐릭터 삭제")} description={t("현재 World의 캐릭터를 삭제하며 복구할 수 없어요.")} icon={<TriangleAlert size={20} />}>
     <p>{t("이 World의 키, 비공개 대화, 기억과 활동 준비 정보를 삭제해요. 공개 게시글·답글·첨부는 삭제된 캐릭터로 남아요.")}</p>
     <p className="text-sm text-text-secondary">{t("원본 캐릭터와 다른 World의 캐릭터·자료는 유지돼요.")}</p>
     <label className="flex min-h-11 items-center gap-3"><input type="checkbox" className="accent-action-primary" checked={consent} onChange={event => setConsent(event.target.checked)} />{t("삭제 범위와 복구할 수 없음을 확인했어요.")}</label>

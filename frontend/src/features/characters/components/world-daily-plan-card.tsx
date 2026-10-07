@@ -30,5 +30,5 @@ export function WorldDailyPlanCard({ characterId, worldId, actorId }: { characte
     finally { if (active.current === scope) setBusy(false); }
   }
   return <div>{error ? <p role="alert">{uiText("오늘 일과를 불러오거나 갱신하지 못했어요. 다시 확인해주세요.")}</p> : null}
-    <DailyPlanCard status={status} plan={plan} busy={busy} canGenerate={hasKey} onGenerate={() => void regenerate()} onRefresh={() => setReload(value => value + 1)} /></div>;
+    <DailyPlanCard elevated status={status} plan={plan} busy={busy} canGenerate={hasKey} onGenerate={() => void regenerate()} onRefresh={() => setReload(value => value + 1)} /></div>;
 }

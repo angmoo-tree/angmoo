@@ -16,8 +16,8 @@ export type TopicCharacterChoice = { id: string; name: string };
 const labels = { pending: "주제 준비 필요", running: "주제 만드는 중", ready: "준비됨", failed: "주제 생성 실패 · 이전 결과 유지", stale: "설정 변경됨 · 기존 주제 사용 중" };
 
 // LOCAL: existing semantic form/button primitives; shared by Next and static screens.
-export function RecommendationTopicsPanel({ worldId, characterId, characters = [] }: {
-  worldId: string; characterId?: string; characters?: TopicCharacterChoice[];
+export function RecommendationTopicsPanel({ worldId, characterId, characters = [], elevated = false }: {
+  worldId: string; characterId?: string; characters?: TopicCharacterChoice[]; elevated?: boolean;
 }) {
   const uiText = useUiText("social");
   const [data, setData] = useState<RecommendationTopics | null>(null);
@@ -60,7 +60,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
   }
   const current = data?.world_id === worldId && data?.world_character_id === (characterId ?? null) ? data : null;
   const currentReadError = readError?.scope === `${worldId}:${characterId ?? "world"}` ? readError.message : undefined;
-  return <SettingsCard title={uiText(characterId ? "캐릭터 관심 주제" : "World 추천 주제")} description={uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20} />}>
+  return <SettingsCard elevated={elevated} title={uiText(characterId ? "캐릭터 관심 주제" : "World 추천 주제")} description={uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20} />}>
     <p role="status" className="text-sm text-text-default">{current ? uiText(labels[current.state]) : uiText("주제 확인 중")}</p>
     {current && <ul className="flex flex-wrap gap-2" aria-label={uiText("현재 주제 목록")}>{current.topics.map(topic => <li key={topic.id} className="rounded-full bg-surface-muted px-3 py-1 text-sm text-text-default">{topic.name}</li>)}</ul>}
     {current && current.topics.length === 0 && <p className="text-sm text-text-secondary">{uiText("등록된 주제가 없습니다.")}</p>}

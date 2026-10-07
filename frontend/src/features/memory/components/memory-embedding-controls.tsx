@@ -95,7 +95,7 @@ export function MemoryEmbeddingControls({ worldId, subjectId, disabled, acquire,
     } finally { if (active.current) setBusy(false); release(); }
   }
 
-  return <SettingsCard title={uiText("기억 의미 검색")} description={uiText("선택한 캐릭터의 기억을 의미로 찾아요.")} icon={<Search size={20} />}>
+  return <SettingsCard elevated title={uiText("기억 의미 검색")} description={uiText("선택한 캐릭터의 기억을 의미로 찾아요.")} icon={<Search size={20} />}>
     <MemoryCredentialFields worldId={worldId} subjectId={subjectId} purpose="embedding" onMetadata={value => { setCredentialReady(value.has_key); setRevision(value => value + 1); }} onDirtyChange={setCredentialDirty} />
     {saved && draft ? <>
       <p role="status">{!saved.enabled ? uiText("의미 검색 꺼짐") : saved.ready ? uiText("의미 검색 설정됨") : uiText("API 설정 확인 필요")}</p>

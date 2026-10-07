@@ -8,11 +8,11 @@ import type { DailyPreparationRead, DailyActivityPlanRead } from "../api/world-a
 const STATES = { pending: "오늘 일과 준비 전", running: "오늘 일과 만드는 중", waiting: "다시 시도할 때까지 대기", ready: "오늘 일과 준비됨", failed: "오늘 일과 생성 실패", needs_user_action: "오늘 일과 다시 만들기 필요" };
 const PARTS = [["dawn", "새벽", "00:00–06:00"], ["morning", "오전", "06:00–12:00"], ["afternoon", "오후", "12:00–18:00"], ["evening", "저녁", "18:00–00:00"]] as const;
 const ITEM_STATES: Record<string, string> = { planned: "예정", active: "진행 중", completed: "완료", skipped: "시간이 지나 실행하지 않음", interrupted: "중단", cancelled: "취소" };
-export function DailyPlanCard({ status, plan, busy, canGenerate, onGenerate, onRefresh }: {
-  status: DailyPreparationRead | null; plan: DailyActivityPlanRead | null; busy: boolean; canGenerate: boolean; onGenerate: () => void; onRefresh: () => void;
+export function DailyPlanCard({ status, plan, busy, canGenerate, onGenerate, onRefresh, elevated = false }: {
+  status: DailyPreparationRead | null; plan: DailyActivityPlanRead | null; busy: boolean; canGenerate: boolean; onGenerate: () => void; onRefresh: () => void; elevated?: boolean;
 }) {
   const uiText = useUiText("characters"), formatDate = useUiDateFormatter();
-  return <SettingsCard title={uiText("오늘 하루 계획")} description={uiText("오늘의 활동 방향과 시간대별 계획을 확인해요.")} icon={<CalendarDays size={20} />}>
+  return <SettingsCard elevated={elevated} title={uiText("오늘 하루 계획")} description={uiText("오늘의 활동 방향과 시간대별 계획을 확인해요.")} icon={<CalendarDays size={20} />}>
     <p role="status">{status ? `${status.local_date} · ${uiText(STATES[status.plan_state])}` : uiText("준비 상태 확인 중")}</p>
     {status?.reason_code ? <p>{uiText("현재 일과를 준비하지 못했습니다. 모델·키와 World 설정을 확인한 후 다시 만들어 주세요.")}</p> : null}
     {status?.request_state === "failed" && status.plan_state === "ready" ? <p>{uiText("다시 만들기에 실패했습니다. 기존의 유효한 오늘 일과를 계속 사용합니다.")}</p> : null}

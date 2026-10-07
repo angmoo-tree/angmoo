@@ -370,7 +370,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
       data-product-content="creator-studio-world"
     >
       <div className="mx-auto max-w-6xl space-y-6">
-        <header className="overflow-hidden rounded-[28px] border border-[#e1e5eb] bg-white shadow-sm">
+        <header className="overflow-hidden rounded-[28px] border border-[#e1e5eb] bg-white shadow-[var(--shadow-summary)]">
           {worldBannerUrl ? (
             <div className="relative h-44 bg-[#eef1f5]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -480,7 +480,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
 
           <aside className="h-fit space-y-4 lg:sticky lg:top-6">
             <ReadinessCard context={context} />
-            <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-sm">
+            <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-[var(--shadow-summary)]">
               <div className="grid gap-3">
                 <button type="button" className={primaryButtonClass} disabled={pending !== null || definition.name.trim().length < 2} onClick={() => void handleSave()}>
                   {pending === "save" ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} {uiText("초안 저장")}</button>
@@ -582,7 +582,7 @@ function ReadinessCard({ context }: { context: WorldCreatorContext | null }) {
   const uiText = useUiText("worlds");
   const readiness = context?.readiness;
   return (
-    <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-sm">
+    <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-[var(--shadow-summary)]">
       <div className="flex items-center gap-3">
         {readiness?.ready_for_publish ? <CheckCircle2 className="size-6 text-[#12b76a]" /> : <AlertTriangle className="size-6 text-[#f79009]" />}
         <div><h2 className="font-black text-[#101828]">{uiText("공개 준비")}</h2><p className="text-xs font-extrabold text-[#667085]">{readiness?.ready_for_publish ? "READY" : "DRAFT"}</p></div>
@@ -604,7 +604,7 @@ function Field({ label, hint, counter, issue, children }: { label: string; hint?
 }
 
 function Panel({ title, description, children }: { title: string; description: string; children: ReactNode }) {
-  return <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-sm md:p-8"><h2 className="text-xl font-black text-[#101828]">{title}</h2><p className="mt-2 text-sm font-medium leading-6 text-[#667085]">{description}</p><div className="mt-6 space-y-5">{children}</div></section>;
+  return <section className="rounded-[28px] border border-[#e1e5eb] bg-white p-6 shadow-[var(--shadow-summary)] md:p-8"><h2 className="text-xl font-black text-[#101828]">{title}</h2><p className="mt-2 text-sm font-medium leading-6 text-[#667085]">{description}</p><div className="mt-6 space-y-5">{children}</div></section>;
 }
 
 function Notice({ tone, text }: { tone: "error" | "success"; text: string }) {

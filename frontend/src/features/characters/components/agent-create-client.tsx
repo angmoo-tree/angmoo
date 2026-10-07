@@ -258,7 +258,7 @@ function CreationGuide() {
         sessionStorage.setItem(storageKey, value.id); sessionStorage.removeItem("angmoo.agentCreationDraftId");
       })}>{uiText("이전 초안 이어가기")}</Button>
     </aside>}
-    <SettingsCard title={uiText(STEPS[step])} description={uiText(stepDescriptions[step])} icon={stepIcons[step]} iconTone="soft">
+    <SettingsCard elevated title={uiText(STEPS[step])} description={uiText(stepDescriptions[step])} icon={stepIcons[step]} iconTone="soft">
     <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void perform(async () => {
       if (step === 0) await start(); else if (step === 4) await finish(); else { if (await save()) setStep(step + 1); }
     }); }}>

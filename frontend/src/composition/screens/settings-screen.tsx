@@ -105,7 +105,7 @@ export function SettingsClient() {
 
       <div className={styles.content}>
         <LanguageSettings />
-        <Card as="section" className={styles.sectionCard}>
+        <Card as="section" elevated className={styles.sectionCard}>
           <div className={styles.sectionHeading}>
             <span className={styles.sectionIcon} aria-hidden="true">
               <Database />
@@ -175,7 +175,7 @@ export function SettingsClient() {
 
 
 
-        <Card as="section" className={`${styles.sectionCard} ${styles.dangerCard}`}>
+        <Card as="section" elevated className={`${styles.sectionCard} ${styles.dangerCard}`}>
           <div className={styles.sectionHeading}>
             <span className={`${styles.sectionIcon} ${styles.dangerIcon}`} aria-hidden="true">
               <AlertTriangle />

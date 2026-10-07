@@ -27,8 +27,8 @@ export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { 
     activeView={activeView} onViewChange={selectView} onBack={back} renderSettings={read => ({
       imageCard: <WorldImageGenerationCard key={`${worldId}:${worldCharacterId}:image`} worldId={worldId} actorId={worldCharacterId} />,
       visionControls: <WorldVisionControls key={`${worldId}:${worldCharacterId}:vision`} worldId={worldId} actorId={worldCharacterId} />,
-      interestCard: <RecommendationTopicsPanel key={`${worldId}:${worldCharacterId}:topics`} worldId={worldId} characterId={worldCharacterId} />,
-      modeCard: <PersonalizedActivityPanel key={`${worldId}:${worldCharacterId}:mode`} worldId={worldId} actorId={worldCharacterId} onlyCharacter />,
+      interestCard: <RecommendationTopicsPanel elevated key={`${worldId}:${worldCharacterId}:topics`} worldId={worldId} characterId={worldCharacterId} />,
+      modeCard: <PersonalizedActivityPanel elevated key={`${worldId}:${worldCharacterId}:mode`} worldId={worldId} actorId={worldCharacterId} onlyCharacter />,
       dayCard: <WorldDailyPlanCard key={`${worldId}:${worldCharacterId}:day`} worldId={worldId} actorId={worldCharacterId} characterId={read.character_id} />,
       deleteCard: <WorldCharacterDeletionCard key={`${worldId}:${worldCharacterId}:delete`} worldId={worldId} actorId={worldCharacterId} revision={read.item.revision} name={read.item.profile.display_name} onDeleted={() => router.replace(worldCharacterDirectoryRoute(worldId))} />,
     })} renderProfile={({ read, onEditProfile }) =>

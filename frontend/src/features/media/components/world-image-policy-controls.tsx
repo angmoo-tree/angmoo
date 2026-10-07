@@ -113,7 +113,7 @@ function ScopedGenerationCard({ worldId, actorId }: { worldId: string; actorId: 
     const result = await policy.save({ generation_limit: value.cap, generation_enabled: value.enabled, generation_settings: value.settings }, value.baseline, check);
     if (result) { setDraft(null); setChecked(check); }
   }
-  return <SettingsCard title={t("SNS 게시글 이미지 생성")} description={t("게시글에 사용할 이미지, 참조 사진과 일일 상한을 설정해요.")} icon={<ImagePlus size={20} />}>
+  return <SettingsCard elevated title={t("SNS 게시글 이미지 생성")} description={t("게시글에 사용할 이미지, 참조 사진과 일일 상한을 설정해요.")} icon={<ImagePlus size={20} />}>
     {catalog ? <CredentialFields scopeKey={`${worldId}:${actorId}:image`} profiles={[...catalog.models.map(item => ({ provider: item.provider, model: item.id, thinking_level: null, label: `${item.provider} · ${modelLabels[item.id] ?? item.id}` })), { provider: "comfyui", model: "workflow", thinking_level: null, label: "ComfyUI · workflow" }]}
       {...imageCredentialTransport(worldId, actorId, chosen?.provider === "comfyui" ? { ...(partnerKey ? { partner_api_key: partnerKey } : {}), ...(clearPartner ? { clear_partner_key: true } : {}) } : {})}
       onMetadata={setCredential} onProfileChange={next => { setPreview(next); setPartnerKey(""); setClearPartner(false); setChecked(false); }}

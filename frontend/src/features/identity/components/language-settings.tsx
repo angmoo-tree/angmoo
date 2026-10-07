@@ -24,7 +24,7 @@ export function LanguageSettings() {
     catch { setFailed(true); }
     finally { setSaving(false); }
   }
-  return <SettingsCard title={t("languageTitle")} description={t("languageHelp")} icon={<Languages size={20} />}>
+  return <SettingsCard elevated title={t("languageTitle")} description={t("languageHelp")} icon={<Languages size={20} />}>
     <div role="group" aria-label={t("languageTitle")}>
       <Button type="button" disabled={saving || status !== "authenticated"} aria-pressed={i18n.language === "ko"} onClick={() => void select("ko")}>{t("korean")}</Button>
       <Button type="button" disabled={saving || status !== "authenticated"} aria-pressed={i18n.language === "en"} onClick={() => void select("en")}>{t("english")}</Button>

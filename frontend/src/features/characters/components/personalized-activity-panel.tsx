@@ -21,7 +21,7 @@ const statuses: Record<string, string> = { running: "진행 중", waiting: "재�
 const stages: Record<string, string> = { PrepareCandidates: "받은 대화와 피드 준비 중", ChooseSelectionMode: "대상 선택 준비 중", CombinedTargetSelector: "받은 대화와 피드에서 대상 선택 중", ChooseGenerationMode: "반응과 글 작성 준비 중", DecisionDraft: "반응을 정하고 글 작성 중", ValidateDraft: "작성 결과 확인 중", RefreshAfterInbox: "받은 대화 이후 상황 확인 중", RefreshAfterFeed: "피드 이후 상황 확인 중", RefreshAfterRoutine: "일과 이후 상황 확인 중", LoadContext: "현재 상황 확인 중", LoadCandidates: "확인할 대상 준비 중", TargetSelector: "살펴볼 대상 선택 중", ResolveQuery: "기억 검색 준비 중", RecallSelected: "관련 기억 확인 중", BuildDecisionContext: "행동 판단 자료 준비 중", ActionPlanner: "반응 판단 중", ValidateDecision: "판단 결과 확인 중", Writer: "글 작성 중", Execute: "행동 실행 중", Settle: "경험 반영 중", PathResult: "활동 결과 정리 중", Resume: "이전 작업 이어가는 중", Finalize: "실행 결과 정리" };
 
 /** LOCAL: payload-backed controls using existing semantic surface tokens. */
-export function PersonalizedActivityPanel({ worldId, actorId, onlyCharacter = false }: { worldId: string; actorId: string; onlyCharacter?: boolean }) {
+export function PersonalizedActivityPanel({ worldId, actorId, onlyCharacter = false, elevated = false }: { worldId: string; actorId: string; onlyCharacter?: boolean; elevated?: boolean }) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("characters");
   const [data, setData] = useState<ActivityRuntimeStatus | null>(null);
@@ -56,7 +56,7 @@ export function PersonalizedActivityPanel({ worldId, actorId, onlyCharacter = fa
     } finally { if (active.current === identity) setBusy(false); }
   }
 
-  return <SettingsCard title={uiText("활동 방식과 현재 상태")} description={uiText("기억을 반영하는 활동 방식과 현재 상태를 확인해요.")} icon={<Activity size={20} />}>
+  return <SettingsCard elevated={elevated} title={uiText("활동 방식과 현재 상태")} description={uiText("기억을 반영하는 활동 방식과 현재 상태를 확인해요.")} icon={<Activity size={20} />}>
     {error && <p role="alert" className="text-sm text-text-secondary">{error}</p>}
     {!current ? <p className="text-sm text-text-secondary">{uiText("상태 확인 중")}</p> : <>
       <p className="text-sm text-text-secondary">{uiText(engines[current.effective.engine])} · {uiText(sources[current.effective.source] ?? uiText("설정 확인 필요"))}</p>

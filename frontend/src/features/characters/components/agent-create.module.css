@@ -4,7 +4,7 @@
 .current { background: var(--color-action-primary); color: var(--color-on-action-primary); font-weight: 700; }
 .complete { color: var(--color-action-primary); background: var(--color-brand-soft); }
 .methods { display: grid; gap: var(--spacing-phone); grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.method { display: flex; align-items: flex-start; gap: var(--spacing-control); border: 1px solid var(--color-border-default); border-radius: var(--radius-card); padding: var(--spacing-phone); cursor: pointer; min-height: 88px; overflow-wrap: anywhere; }
+.method { display: flex; align-items: flex-start; gap: var(--spacing-control); border: 1px solid var(--color-border-default); border-radius: var(--radius-card); box-shadow: var(--shadow-summary); padding: var(--spacing-phone); cursor: pointer; min-height: 88px; overflow-wrap: anywhere; }
 .method:has(input:checked) { border-color: var(--color-action-primary); background: var(--color-brand-soft); }
 .method:has(input:disabled) { opacity: .6; cursor: not-allowed; }
 .method:focus-within { outline: 2px solid var(--color-action-primary); outline-offset: 3px; }

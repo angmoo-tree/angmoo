@@ -60,7 +60,7 @@ function SettingsEditor({ initial, pending, onSave, kind }: {
     setDraft(current => ({ ...current, [key]: value })); setSaved(false); setConflict(false);
   }
 
-  return <SettingsCard data-world-character-settings-card={kind} title={uiText(kind === "persona" ? "캐릭터 페르소나 설정" : "활동 설정")} description={uiText(kind === "persona" ? "캐릭터 설명과 성격·말투를 설정해요." : "활동 시간, 허용 행동, 작성 상한을 설정해요.")} icon={kind === "persona" ? <Sparkles size={20} /> : <Settings2 size={20} />}><form className={styles.settingsForm} data-world-character-settings-editor onSubmit={async event => {
+  return <SettingsCard elevated data-world-character-settings-card={kind} title={uiText(kind === "persona" ? "캐릭터 페르소나 설정" : "활동 설정")} description={uiText(kind === "persona" ? "캐릭터 설명과 성격·말투를 설정해요." : "활동 시간, 허용 행동, 작성 상한을 설정해요.")} icon={kind === "persona" ? <Sparkles size={20} /> : <Settings2 size={20} />}><form className={styles.settingsForm} data-world-character-settings-editor onSubmit={async event => {
     event.preventDefault();
     if (pending || (kind === "persona" ? personaInvalid : hoursInvalid || numbersInvalid) || !dirty) return;
     const edited = keys.filter(key => draft[key] !== baseline[key]);

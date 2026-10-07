@@ -122,7 +122,7 @@ export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVers
     } finally { if (active.current) setBusy(false); release(); }
   }
 
-  return <SettingsCard title={uiText("기억·관계 정리")} description={uiText("지금 또는 예약 시간에 경험을 정리해요.")} icon={<BrainCircuit size={20} />}>
+  return <SettingsCard elevated title={uiText("기억·관계 정리")} description={uiText("지금 또는 예약 시간에 경험을 정리해요.")} icon={<BrainCircuit size={20} />}>
     <MemoryCredentialFields worldId={worldId} subjectId={subjectId} purpose="consolidation" onDirtyChange={setCredentialDirty} onMetadata={value => {
       setCredentialReady(value.has_key);
       const changes = { model_id: value.model, thinking_level: value.thinking_level === "medium" ? "medium" as const : "high" as const, profile_version: value.configuration_revision ?? 0 };

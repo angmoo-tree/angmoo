@@ -73,6 +73,14 @@
   min-height: 0;
 }
 .listPane { border-right: 1px solid var(--color-border-default); background: var(--color-surface); }
+.settingsCards {
+  display: grid;
+  min-width: 0;
+  gap: var(--spacing-section);
+  padding: var(--spacing-section) var(--spacing-phone);
+}
+.settingsCards .mutationNotice,
+.settingsCards .mutationError { margin: 0; }
 .batchControls { display: grid; min-width: 0; gap: 12px; margin: 18px; padding: 18px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); }
 .batchControls h2 { margin: 0; color: var(--color-text-strong); font-size: 1rem; }
 .batchControls p { margin: 0; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
@@ -164,6 +172,10 @@
 .scopeSummary a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@media (min-width: 768px) {
+  .settingsCards { padding-inline: 36px; }
+}
 
 @media (max-width: 799px) {
   .header { min-height: 92px; padding: 16px; }
