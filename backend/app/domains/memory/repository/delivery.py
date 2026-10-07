@@ -73,6 +73,10 @@ def capture_delivery(connection, *, world_id, subjects, source_type, source_id, 
         .all()
     )
     for scope in scopes:
+        from app.domains.memory.models.activity_situation import MemorySituationTransition
+        if connection.execute(select(MemorySituationTransition.__table__.c.scope_setting_id).where(
+            MemorySituationTransition.__table__.c.scope_setting_id == scope["id"])).first():
+            continue
         if connection.execute(
             select(deliveries.c.sequence).where(
                 deliveries.c.scope_setting_id == scope["id"],

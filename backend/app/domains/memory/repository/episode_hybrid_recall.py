@@ -18,6 +18,7 @@ from app.domains.memory.policies.episode_provider_view import episode_provider_v
 from app.domains.memory.repository.episode_candidates import SqlAlchemyEpisodeCandidates
 from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePackets
 from app.domains.memory.repository.recall_records import _item_retrievable, _item_scope
+from app.domains.memory.repository.situation_reads import representation
 
 
 def _aware(value):
@@ -52,6 +53,11 @@ class SqlAlchemyEpisodeHybridReader:
                 types = [kind.value for kind, family in SOURCE_KIND_BY_TYPE.items() if family in request.episode_source_kinds]
                 matching = set(db.scalars(select(MemoryItemEvidence.memory_item_id).where(
                     MemoryItemEvidence.memory_item_id.in_(rows), MemoryItemEvidence.source_type.in_(types))))
+                from app.domains.memory.models.activity_situation import MemoryActivitySituationSource
+                for source in db.scalars(select(MemoryActivitySituationSource).where(
+                    MemoryActivitySituationSource.memory_item_id.in_(rows))):
+                    if source.source.get("source_type") in types:
+                        matching.add(source.memory_item_id)
             result, seen = [], set()
             from app.domains.memory.repository.episode_privacy import currently_accessible
             privacy_reader = self.details(db)
@@ -77,7 +83,8 @@ class SqlAlchemyEpisodeHybridReader:
                 # Episode time is its canonical experience time, never the time
                 # a later raw source happened to be hydrated for this request.
                 occurred = _aware(item.valid_from)
-                times = [_aware(e.source_created_at) for e in material] or [occurred]
+                item_representation = representation(db, item)
+                times = [occurred] if item_representation == "activity_situation_v1" else [_aware(e.source_created_at) for e in material] or [occurred]
                 # These are observed/source times, not dates mentioned in text.
                 # A multi-day episode overlaps a query if its material interval does.
                 if (request.occurred_from is not None and max(times) < request.occurred_from
@@ -88,7 +95,7 @@ class SqlAlchemyEpisodeHybridReader:
                     item.id, item.summary, occurred, memory_item_id=item.id,
                     counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
                     metadata={"item_version": str(item.version), "memory_kind": item.memory_kind,
-                              "representation": "episode_v1"}))
+                              "representation": item_representation}))
             return tuple(result)
 
     def axis_request(self, request):

@@ -342,6 +342,9 @@ class SqlAlchemyMemoryBatchRepository:
         generation_policy: str = "legacy",
         request_id: str | None = None,
     ) -> str | None:
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, scope_setting_id):
+            return None
         if generation_policy not in {"legacy", "episode_v1", "activity32"}:
             raise MemoryValidationError("memory_generation_policy_invalid")
         if not candidate_ids:
@@ -440,6 +443,9 @@ class SqlAlchemyMemoryBatchRepository:
         setting = self.memory.get_scope_setting(scope)
         if setting is None:
             raise MemoryValidationError("memory_selection_settings_required")
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, setting.id):
+            raise MemoryConflictError("memory_legacy_generation_retired")
         config = self.settings(scope)
         if not config.memory_enabled or not config.ai_enabled:
             raise MemoryValidationError("memory_selection_settings_required")
@@ -497,6 +503,7 @@ class SqlAlchemyMemoryBatchRepository:
         self.session.flush()
 
     def claim(self, *, lease_token: str, now: datetime) -> MemorySelectionBatch | None:
+        from app.domains.memory.models.activity_situation import MemorySituationTransition
         # Runtime calls this on a fresh session; SQLite serializes read/claim.
         if self.session.bind.dialect.name == "sqlite":
             self.session.connection().exec_driver_sql("BEGIN IMMEDIATE")
@@ -506,6 +513,8 @@ class SqlAlchemyMemoryBatchRepository:
             .where(
                 MemoryMaintenanceJob.status == "running",
                 MemoryMaintenanceJob.lease_expires_at > now,
+                ~exists(select(MemorySituationTransition.scope_setting_id).where(
+                    MemorySituationTransition.scope_setting_id == MemoryBatchRun.scope_setting_id)),
             )
             .limit(1)
         )
@@ -526,6 +535,8 @@ class SqlAlchemyMemoryBatchRepository:
             )
             .where(
                 MemoryScopeSettingModel.enabled.is_(True),
+                ~exists(select(MemorySituationTransition.scope_setting_id).where(
+                    MemorySituationTransition.scope_setting_id == MemoryBatchRun.scope_setting_id)),
                 MemoryBatchSetting.ai_enabled.is_(True),
                 MemoryBatchSetting.consent_version == MEMORY_CONSENT_VERSION,
                 MemoryBatchRun.available_at <= now,
@@ -543,6 +554,9 @@ class SqlAlchemyMemoryBatchRepository:
             .limit(50)
         ).all()
         for run in rows:
+            from app.domains.memory.repository.situation_transition import retired
+            if retired(self.session, run.scope_setting_id):
+                continue
             scope = self.session.get(MemoryScopeSettingModel, run.scope_setting_id)
             config = self.session.get(MemoryBatchSetting, run.scope_setting_id)
             if (
@@ -629,6 +643,9 @@ class SqlAlchemyMemoryBatchRepository:
         return None
 
     def fence(self, batch: MemorySelectionBatch, *, now: datetime) -> None:
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, batch.setting.id):
+            raise MemoryConflictError("memory_legacy_generation_retired")
         self.session.expire_all()
         self.memory.validate_scope(batch.setting.scope)
         scope = self.session.get(MemoryScopeSettingModel, batch.setting.id)

@@ -57,7 +57,7 @@ class EpisodePacketUnit:
 class EpisodePacket:
     reference: str
     summary: str
-    representation: Literal["legacy_summary", "episode_v1"]
+    representation: Literal["legacy_summary", "episode_v1", "activity_situation_v1"]
     units: tuple[EpisodePacketUnit, ...]
     follows_references: tuple[str, ...] = ()
     followup_truncated: bool = False

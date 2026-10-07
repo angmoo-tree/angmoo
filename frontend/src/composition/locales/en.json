@@ -21,10 +21,7 @@
   "로컬 엔진 다시 시작": "Restart local engine",
   "로컬 엔진과 저장된 World를 준비하고 있습니다.": "Preparing the local engine and saved Worlds.",
   "끄는 중…": "Closing…",
-  "저장된 경험의 기억 정리를 마무리하고 있습니다.": "Finishing memory consolidation for saved experiences.",
   "지금 종료": "Close now",
-  "남은 기억 정리는 다음 실행에서 이어집니다.": "Remaining consolidation resumes at the next launch.",
-  "기억을 정리하고 있어요. 잠시만 기다려 주세요.": "Consolidating memories. Please wait.",
   "Angmoo 창 이동": "Move Angmoo window",
   "Angmoo 창 최소화": "Minimize Angmoo window",
   "Angmoo 창 닫기": "Close Angmoo window",
@@ -457,5 +454,8 @@
   "이 World의 소개와 캐릭터를 만나보세요.": "Explore this World and its characters.",
   "채팅": "Chat",
   "관계": "Relationships",
-  "World의 캐릭터": "Characters"
+  "World의 캐릭터": "Characters",
+  "접수한 경험을 기억으로 저장하고 검색 자료를 준비합니다.": "Saving received experiences and preparing search data.",
+  "남은 기억 저장은 다음 실행에서 이어집니다.": "Remaining memory saves will resume the next time you open the app.",
+  "기억을 저장하고 있어요. 잠시만 기다려 주세요.": "Saving memories. Please wait a moment."
 }

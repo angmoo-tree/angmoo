@@ -43,4 +43,5 @@ class MemoryWorkflows:
     validate_embedding_credential: Callable[[Session, str, str], None] | None = None
     embedding_credential_options: Callable[[Session, str, str | None], list[dict[str, str]]] | None = None
     consolidation_followup: Callable[[Session], ConsolidationFollowup] | None = None
+    generation_policy: str = "legacy"
     embedding_runtime_status: Callable[[], str] | None = None

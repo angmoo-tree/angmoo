@@ -726,6 +726,23 @@ rights-cleared.
 
 ## Contributor workflow
 
+### 2026-10-08 activity situation processing — LOCAL
+
+The Memory usage card now contains the shared
+`features/memory/components/memory-processing-controls.tsx` controls for pending
+receipts, explicit save, daily time and native-quit saving. The existing second
+card retains relationship review settings, and the third retains semantic search.
+This is a `LOCAL` adaptation of the existing cards, spacing, coral Button, Field,
+native time input and semantic feedback tokens. It adds no hosted assets, fonts,
+raw colors, route-specific presentation or synthetic product counts.
+
+The same components and Korean/English catalogs serve Next and static/native.
+Local Playwright evidence covers both routers, both locales, repeat submission,
+timeout replay, dirty settings and 390px layout. Diagnostic screenshots are local
+evidence rather than new canonical visual baselines or native USER CHECK.
+Implementation and verification records are in
+`docs/operations/10-08-activity-situation-implementation.md`.
+
 ### 2026-10-07 World introduction — LOCAL
 
 The user-provided banner-first World mockup is a local presentation reference.

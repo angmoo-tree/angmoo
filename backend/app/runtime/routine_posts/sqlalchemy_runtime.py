@@ -615,7 +615,7 @@ async def _run_routine_post_runtime(
     return publish_routine_activity(resident_context, prepared=prepared, generation=generation)
 
 
-def publish_routine_activity(resident_context, *, prepared, generation, relationship_validator=None):
+def publish_routine_activity(resident_context, *, prepared, generation, relationship_validator=None, situation_admission=None):
     db = resident_context.db
     context, beat = prepared.context, prepared.beat
     world_character, joint_activity = prepared.world_character, prepared.joint_activity
@@ -819,6 +819,9 @@ def publish_routine_activity(resident_context, *, prepared, generation, relation
                 if not prepared.common_state_managed and context.common_state:
                     from app.runtime.character_activity_state import settle_legacy_success
                     settle_legacy_success(db, prepared=prepared, run_id=resident_context.run_id, generation=generation)
+                if situation_admission is not None:
+                    from app.core.calendar import utc_instant
+                    situation_admission(db, execution, {"post_id": post.id}, utc_instant(post.created_at))
         if relationship_validator is not None:
             from app.core.sqlite_concurrency import run_sqlite_session_immediate
             if db.in_transaction():

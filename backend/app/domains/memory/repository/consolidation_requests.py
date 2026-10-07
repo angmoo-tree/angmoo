@@ -47,7 +47,7 @@ def admit(session, *, setting, kind, key, now, digest="", scheduled_for=None, co
     return row, "already_active" if active else "accepted"
 
 
-def manual(session, *, repository, scope, data, now):
+def manual(session, *, repository, scope, data, now, relationship_only=False):
     repository.memory.validate_scope(scope)
     setting = repository.memory.get_scope_setting(scope)
     if setting is None:
@@ -70,7 +70,11 @@ def manual(session, *, repository, scope, data, now):
         raise MemoryConflictError("memory_batch_settings_version_conflict")
     if repository.settings(scope).capacity_blocked and not data.followup:
         raise MemoryConflictError("memory_capacity_reached")
-    return admit(session, setting=setting, kind="manual", key=receipt_key, digest=digest, now=now, coalesce=True)
+    row, disposition = admit(session, setting=setting, kind="manual", key=receipt_key, digest=digest, now=now, coalesce=not relationship_only)
+    if relationship_only:
+        row.state, row.completed_at = "completed", now
+        row.cutoff_sequence = 0
+    return row, disposition
 
 
 def find(session, *, setting_id, request_id=None):

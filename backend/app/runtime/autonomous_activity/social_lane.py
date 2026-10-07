@@ -253,8 +253,11 @@ class SocialLane:
                 "interaction_intent": decision.get("interaction_intent"), "comment_purpose": decision.get("comment_purpose"),
                 "brief": decision["brief"], "_activity_thought": decision.get("_activity_thought") or asdict(parse_activity_thought(decision.get("thought"))),
                 "_auxiliary_normalization": decision.get("_auxiliary_normalization")}
+            from app.runtime.autonomous_activity.situation_memory import participant
+            admission = participant(self, state, decision["target_id"])
             result = self.action_executor(self.ctx, action=action, scope=self.lane, index=index,
                 writing={"reply_task_results": state.get("drafts", [])}, used_reply_bodies=used,
+                **({"situation_admission": admission} if admission is not None else {}),
                 relationship_validator=self.effect_relationship_validator(state, decision["target_id"]))
             results.append({"target_id": decision["target_id"], **result})
         return {"executions": plain(results)}

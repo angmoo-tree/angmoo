@@ -28,19 +28,19 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
         write_interpretation_settings(setup, "p-owner", InterpretationSettingsWrite(
             expected_revision=0, enabled=True, daily_limit=6, api_key=key))
         from app.domains.chat.models import MessageThread
-        from app.domains.identity.service.world_credentials import save
+        from app.domains.identity.service.world_credentials import save, find
         from app.domains.identity.schemas import WorldCredentialWrite
         from app.domains.media.models_world_policy import WorldImagePolicy
         actor = setup.get(MessageThread, "p-thread").responding_world_character_id
         for purpose, thinking in (("vision", "medium"), ("chat", "high")):
+            existing = find(setup, owner_id="p-owner", world_id="p-world", world_character_id=actor, purpose=purpose)
             save(setup, owner_id="p-owner", world_id="p-world", world_character_id=actor, purpose=purpose,
-                data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite",
+                data=WorldCredentialWrite(expected_revision=existing.revision if existing else 0, provider="google", model="gemini-3.1-flash-lite",
                     thinking_level=thinking, api_key=key))
         setup.merge(WorldImagePolicy(world_character_id=actor, generation_limit=20, vision_limit=6,
             generation_enabled=False, vision_enabled=True, generation_settings={}, revision=1, provenance="synthetic-own-fixture"))
         setup.commit()
-    from app.runtime.chat.message_composition import world_chat_profile
-    settings = MessageSettingsService(world_profile_reader=world_chat_profile)
+    settings = MessageSettingsService()
     material = CredentialMaterial("synthetic-text", "google", "gemini-3.1-flash-lite", None,
                                   CredentialPurpose.MESSAGE_LLM, "synthetic-text-never-sent")
     settings.resolve_message_credential_material = lambda _db, _user: (None, material)

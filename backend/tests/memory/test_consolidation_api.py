@@ -5,6 +5,8 @@ from memory.test_p8_l_q_memory_read_inspector import _fixture, _seed, FRONTEND_H
 
 
 def test_manual_http_scope_consent_versions_replay_and_read_only_progress(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "activity32")
     client, engine, principal = _fixture()
     _seed(engine, principal)
     from app.domains.identity.schemas import WorldCredentialWrite

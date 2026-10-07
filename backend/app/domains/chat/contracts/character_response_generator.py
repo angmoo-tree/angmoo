@@ -11,6 +11,7 @@ from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext
 from app.domains.relationships.contracts.social_context import SocialContextSnapshot
+from app.contracts.activity_situation import SituationDelivery, SituationDraft
 
 
 class CharacterResponseGeneratorError(RuntimeError):
@@ -51,6 +52,7 @@ class CharacterResponseProfile:
 class CharacterResponseContextMessage:
     role: str
     content: str
+    source_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.role not in {"user", "assistant"} or not self.content.strip():
@@ -69,6 +71,9 @@ class CharacterResponseGeneratorRequest:
     recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
     recall_interpretation: RecallInterpretationContext | None = None
     thought_finalizer: Callable[[object], ActivityThought] | None = field(default=None, repr=False, compare=False)
+    situation_locale: str | None = None
+    situation_target: str | None = None
+    situation_manifest_factory: Callable[[dict], SituationDelivery] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if self.recall_interpretation is not None:
@@ -108,6 +113,9 @@ class CharacterResponseGeneratorResult:
     finish_reason: str | None = None
     activity_thought: ActivityThought | None = None
     relationship_metrics: object = None
+    situation_draft: SituationDraft | None = None
+    situation_manifest: SituationDelivery | None = None
+    situation_output_digest: str | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -136,6 +144,9 @@ class CharacterResponseGenerationResult:
     finish_reason: str | None = None
     activity_thought: ActivityThought | None = None
     relationship_metrics: object = None
+    situation_draft: SituationDraft | None = None
+    situation_manifest: SituationDelivery | None = None
+    situation_output_digest: str | None = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

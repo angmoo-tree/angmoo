@@ -71,6 +71,10 @@ class _SourceQueries:
 class RuntimeEpisodeDetailReader:
     def __init__(self, session): self.session = session
 
+    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset()):
+        from app.runtime.memory.situation_sources import SituationSources
+        return SituationSources(self.session).validate(manifest, source, now=now, ancestors=ancestors)
+
     def read_evidence(self, *, scope, source_type, source_id):
         from app.runtime.memory.source_composition import source_evidence_reader
         return source_evidence_reader(self.session).read_evidence(scope=scope, source_type=source_type, source_id=source_id)
@@ -100,6 +104,17 @@ class RuntimeEpisodeDetailReader:
                 # Non-text activities are typed canonical execution records.
                 text = canonical.deterministic_summary
             result[(kind, identifier)] = EpisodeSourceDetail(canonical, text)
+        return result
+
+    def read_situation_sources(self, *, scope, identities):
+        from dataclasses import replace
+        result = self.read_sources(scope=scope, identities=identities)
+        # Situation offsets use the canonical body, excluding a display title.
+        for kind, identifier in identities:
+            if kind in {"POST", "REPLY"} and (kind, identifier) in result:
+                post = self.session.get(Post, identifier)
+                if post is not None:
+                    result[(kind, identifier)] = replace(result[(kind, identifier)], text=post.body)
         return result
 
     def read_thoughts(self, *, scope, references):

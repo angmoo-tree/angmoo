@@ -42,6 +42,7 @@ import { correctMemoryItem, deleteMemoryItem, getMemoryItem, getMemorySetting, l
 import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
+import { MemoryProcessingControls } from "@/features/memory/components/memory-processing-controls";
 import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
@@ -484,6 +485,7 @@ export function MemoryWorkspace({
                 <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
                   {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
                 </Button></div>
+                <MemoryProcessingControls key={`processing:${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
               </SettingsCard>
               {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
               <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />

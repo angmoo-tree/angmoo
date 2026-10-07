@@ -66,7 +66,7 @@ export type MemoryItemDetailRead = MemoryItemSummaryRead & {
 };
 
 export type EpisodeDetailRead = {
-  representation: "episode_v1" | "legacy_summary";
+  representation: "episode_v1" | "activity_situation_v1" | "legacy_summary";
   partial: boolean;
   omitted_units: number;
   followup_count: number;

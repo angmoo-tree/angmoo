@@ -51,6 +51,9 @@ def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) ->
     assert type(generation_service) is GenerationService
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
+    # This test uses the real admission composition, including Memory policy.
+    from app.runtime.persistence.model_registration import register_models
+    register_models().create_all(engine)
     try:
         with Session(engine) as db:
             owner = _user("direct-owner")

@@ -14,6 +14,7 @@ from app.domains.relationships.service.personalized_metrics import interpreted_p
 from app.runtime.relationships.review_memories import collect_new_review_memories, resolve_memory_batch
 from app.runtime.relationships.review_identity import review_identity_context
 from app.runtime.relationships.manual_review import TERMINAL
+from app.runtime.relationships.situation_ordering import application_pending
 
 
 def advance_manual_requests(db, now):
@@ -24,6 +25,8 @@ def advance_manual_requests(db, now):
         db.execute(update(Request).where(Request.memory_request_id == identifier).values(state=Request.state))
         request = db.get(Request, identifier, populate_existing=True)
         if request.state in TERMINAL + ("paused",):
+            continue
+        if application_pending(db, request.scope_setting_id, lock=True):
             continue
         memory = db.get(MemoryConsolidationRequest, identifier)
         memory_state = progress(db, memory)["state"]

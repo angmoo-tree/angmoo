@@ -11,9 +11,15 @@ from app.domains.memory.service.items import memory_evidence_blocked_code
 
 
 def currently_accessible(session, reader, scope, item, now, *, ancestors=frozenset()):
+    from app.domains.memory.repository.situation_reads import situation_origin, situation_accessible
+    situation = situation_origin(session, item)
+    if situation is not None:
+        return situation_accessible(session, reader, scope, item, situation, now, ancestors=ancestors)
     info = session.get(MemoryEpisodeInfo, item.id)
-    if info is None or info.policy_version != ACTIVITY_POLICY_VERSION:
+    if info is None or info.policy_version == "episode-selection.v1":
         return True
+    if info.policy_version != ACTIVITY_POLICY_VERSION:
+        return False
     if item.id in ancestors or not _item_retrievable(item, now):
         return False
     row = session.get(MemoryEpisodeRestriction, item.id)

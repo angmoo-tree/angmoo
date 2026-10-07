@@ -1,9 +1,23 @@
 """Authenticate original envelopes for an unpublished migration generation."""
 from collections.abc import Callable
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from pydantic import SecretStr
 
 from app.core import security
+
+_migration_secret_source = ContextVar("migration_secret_source", default=None)
+
+
+@contextmanager
+def migration_secret_source(source: Callable[[], str]):
+    """Composition-root binding for immutable historical Alembic revisions."""
+    token = _migration_secret_source.set(source)
+    try:
+        yield
+    finally:
+        _migration_secret_source.reset(token)
 
 
 def authenticate_original_secret(envelope, scope, *, app_secret: str):
@@ -16,14 +30,16 @@ def authenticate_original_secret(envelope, scope, *, app_secret: str):
 
 
 class MigrationSecretInterpreter:
-    def __init__(self, *, secret_source: Callable[[], str]) -> None:
-        self._secret_source = secret_source
+    def __init__(self, *, secret_source: Callable[[], str] | None = None) -> None:
+        self._secret_source = secret_source or _migration_secret_source.get()
         self._app_secret: SecretStr | None = None
 
     def _secret(self) -> str:
         # Empty/older transitions need no credential material. Once needed,
         # use one owned-root value throughout authentication and rebinding.
         if self._app_secret is None:
+            if self._secret_source is None:
+                raise ValueError("migration_secret_source_required")
             app_secret = self._secret_source()
             if not isinstance(app_secret, str) or not app_secret.strip():
                 raise ValueError("migration_app_secret_empty")

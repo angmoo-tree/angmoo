@@ -180,6 +180,9 @@ class EmbeddedMemoryRecallProjection:
         if (
             getattr(orm_execute_state, "is_update", False)
             and getattr(table, "name", None) == MemoryScopeSettingModel.__tablename__
+            # Receipt admission serializes writers with id=id. That lock is
+            # not a settings mutation and must not rebuild historical memory.
+            and not orm_execute_state.execution_options.get("memory_scope_lock_only", False)
         ):
             query = select(MemoryScopeSettingModel.id)
             if statement.whereclause is not None:

@@ -73,11 +73,13 @@ class GenerationService:
         settings_service: MessageSettingsService,
         workflows: GenerationWorkflows,
         images=None,
+        memory_policy=None,
     ) -> None:
         self.thread_service = thread_service
         self.settings_service = settings_service
         self.workflows = workflows
         self.images = images
+        self.memory_policy = memory_policy
 
     def accept_world_message(
         self,
@@ -323,6 +325,9 @@ class GenerationService:
         metadata["_world_configuration"] = configuration.request_snapshot()
         metadata["_world_credential"] = self.workflows.capture_credential(db, owner_id=user.id,
             world_id=thread.world_id, actor_id=thread.responding_world_character_id)
+        metadata["_situation_policy"] = self.memory_policy(db, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id,
+            environment=EnvironmentSnapshot.from_dict(metadata["_environment"])) if self.memory_policy else None
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -708,7 +713,7 @@ def _recent_context(
     )
     response = tuple(
         (
-            CharacterResponseContextMessage(role=row.role, content=contents[row.id])
+            CharacterResponseContextMessage(role=row.role, content=contents[row.id], source_id=str(row.id))
             for row in selected
         )
     )

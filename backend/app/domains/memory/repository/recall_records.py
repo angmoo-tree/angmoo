@@ -123,6 +123,8 @@ def _current_evidence(
         from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
         info = session.get(MemoryEpisodeInfo, item.id)
         modern = info is not None and info.policy_version == ACTIVITY_POLICY_VERSION
+        from app.domains.memory.repository.situation_reads import situation_origin
+        modern = modern or situation_origin(session, item) is not None
         if not currently_accessible(session, reader, scope, item, now):
             return None
     try:

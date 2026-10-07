@@ -13,6 +13,7 @@ from app.contracts.retrieval_observation import observe
 from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
 )
+from app.domains.chat.contracts.situation_memory import ChatSituationMemoryPort
 from app.domains.chat.contracts.evidence_bundle import EvidenceKind
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.generation_lifecycle import (
@@ -74,6 +75,7 @@ class ResponseWorkflowSteps:
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
         social_context_provider=None,
         thought_finalizer=None,
+        situation_memory: ChatSituationMemoryPort | None = None,
     ) -> None:
         self.command = command
         self.progress = progress
@@ -96,6 +98,7 @@ class ResponseWorkflowSteps:
         self._today_snapshot_validator = today_snapshot_validator
         self._social_context_provider = social_context_provider
         self._thought_finalizer = thought_finalizer
+        self._situation_memory = situation_memory
 
     def assert_active(self, state: ResponseGraphState) -> None:
         record = self.progress.record
@@ -497,6 +500,10 @@ class ResponseWorkflowSteps:
                 source=kind.value,
                 items=sum(item.kind is kind for item in bundle.items),
             )
+        from app.contracts.activity_situation import admitted_locale
+        situation = admitted_locale(command.request.node_state.get("_situation_policy"))
+        if situation is not None and self._situation_memory is None:
+            raise RetrievalContractError("situation_memory_runtime_missing")
         response = await self._character_response.generate(
             CharacterResponseGeneratorRequest(
                 user_message=command.preflight.user_message,
@@ -508,6 +515,9 @@ class ResponseWorkflowSteps:
                 recall_mode=command.recall_mode,
                 recall_interpretation=interpretation,
                 thought_finalizer=self._thought_finalizer,
+                situation_locale=situation,
+                situation_target=command.request.response_slot_id if situation else None,
+                situation_manifest_factory=(lambda payload: self._situation_memory.freeze(command, bundle, payload)) if situation else None,
                 today_sns_manifest=(
                     None
                     if command.today_sns_snapshot is None

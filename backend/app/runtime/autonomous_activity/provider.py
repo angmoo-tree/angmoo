@@ -140,6 +140,13 @@ class ActivityProvider:
             raise ValueError("activity_input_budget_exceeded")
         from hashlib import sha256
         def record_input(actual_user):
+            if getattr(self, "situation_output_active", False):
+                from app.runtime.autonomous_activity.situation_memory import freeze_social_input
+                # JSON recovery feedback follows the original JSON value. The
+                # manifest's payload digest includes those actual transmitted bytes.
+                final_payload, _ = json.JSONDecoder().raw_decode(actual_user)
+                self.situation_manifest = freeze_social_input(self.context, self.situation_snapshot,
+                    node=node, payload=final_payload, transmitted=actual_user, state=self.situation_state)
             memories = context.get("memories") if isinstance(context, dict) else None
             memory_refs = [packet.get("ref") for item in (memories or {}).values()
                 if isinstance(item, dict) for packet in item.get("packets", [])]
@@ -204,10 +211,13 @@ class ActivityProvider:
             nonlocal dispatched
             # The final guard and physical-call allowance are checked by the
             # transport before this synchronous submission boundary.
-            if delivery is not None:
+            if delivery is not None and not dispatched:
                 delivery.dispatched()
             dispatched = True
             record_input(request.user_prompt)
+            db = getattr(self.context, "db", None)
+            if db is not None and db.in_transaction():
+                db.commit()
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,
@@ -221,9 +231,9 @@ class ActivityProvider:
                 retry_input_char_limit=64000 if json_retry_policy is not None and not token_budget else None,
                 sdk_attempts=1,
                 before_json_retry=before_json_retry,
-                before_provider_request=guard_request if before_provider_request is not None else None,
+                before_provider_request=guard_request,
                 request_preparer=prepare_request if token_budget else None,
-                on_request_submission=submitted_request if token_budget else None,
+                on_request_submission=submitted_request,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None and dispatched:

@@ -18,7 +18,8 @@ message_service = MessageService(thread_service, settings_service)
 
 
 generation_service = GenerationService(
-    thread_service, settings_service, generation_workflows
+    thread_service, settings_service, generation_workflows,
+    memory_policy=generation_workflows.capture_memory_policy,
 )
 
 evidence_service = EvidenceService(thread_service, evidence_reads)

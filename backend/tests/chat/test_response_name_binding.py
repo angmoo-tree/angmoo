@@ -15,6 +15,13 @@ from tests.characters.name_binding_fixture import rename_profile
 from tests.chat.test_p8_l_p_evidence_response_streaming import response_session, _Generator, _MemoryProducer, _workflow, _command, _collect
 
 
+@pytest.fixture(autouse=True)
+def legacy_memory_hook(monkeypatch):
+    # These assertions exercise the historical producer port, not situation admission.
+    from app.config import settings
+    monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "legacy")
+
+
 @pytest.mark.parametrize("invalid", [False, True])
 def test_chat_resolves_before_first_delta_and_stream_storage_memory_match(response_session, invalid):
     db = response_session

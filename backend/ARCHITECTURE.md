@@ -1,5 +1,38 @@
 # Angmoo Backend Architecture
 
+## Activity situation admission and deferred application (2026-10-08)
+
+Memory owns `activity_situation` policy, immutable delivery manifests, receipts,
+processing settings, accepted cutoffs, application runs and canonical metadata.
+Chat and WorldCharacters consume neutral values from `contracts/activity_situation.py`;
+Runtime injects policy capture and same-Session participation at their existing
+admission/finalization boundaries. A receipt commits with the successful assistant
+message, SNS target effects or Routine post. Invalid auxiliary descriptions do not
+invalidate a valid base answer; a database admission failure rolls the activity back.
+
+The final provider payload owns delivery proof after selection, truncation and
+name binding. Source adapters revalidate the entire delivered scope and current
+permissions, including prior memories and image interpretations. No original body
+is copied into a replacement evidence store. Source deletion and changed/private
+sources have distinct policies. Unknown policies fail closed.
+
+Daily, explicit manual and authenticated host-quit requests use one Memory
+application consumer. Each request freezes an immutable cutoff; bounded pages
+atomically write MemoryItem, evidence, situation metadata and applied identity.
+Ordinary activity, reads, settings saves and Memory ON do not trigger a flush or
+whole-library indexing. FTS and Vec1 are derived from each committed summary.
+Provider I/O occurs outside canonical write transactions. Shutdown observes only
+accepted search work within its deadline and fences late projection results.
+
+Relationship preparation, refresh and apply wait for their own scope's accepted
+canonical work, then use the old/new memory union. Other scopes remain eligible;
+neither vector readiness nor unrequested pending activities block relationship work.
+Explicit D03 maintenance retires only its inventoried legacy queue and fences
+re-admission. Ordinary forward migration preserves historical work and memories.
+SQLite v31 and Alembic 0108 share the registered ORM; historical migrations remain
+immutable. [Implementation and validation](../docs/operations/10-08-activity-situation-implementation.md)
+records automated, synthetic-load and unperformed real-provider/native checks separately.
+
 ## Runtime diagnostic migration target (2026-10-07)
 
 Runtime diagnostics composition reads the frozen manifest for the shipped

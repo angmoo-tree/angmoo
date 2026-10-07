@@ -80,6 +80,23 @@ def test_deleted_item_during_embedding_cannot_install_late_vector(runtime_factor
     assert index.identity(f"memory-item:{item_id}") is None
 
 
+def test_shutdown_fence_rejects_late_embedding_without_holding_canonical_lock(runtime_factory, index, monkeypatch):
+    item_id, _ = setup_projection_scope(runtime_factory, monkeypatch)
+    class Provider:
+        async def embed_measured(self, request, *, timeout_seconds):
+            # Simulate a provider completing after the host abandons its wait.
+            with runtime_factory() as session:
+                setting = session.scalar(select(MemoryScopeSettingModel))
+                setting.updated_at = datetime.now(UTC)
+                session.commit()
+            projection.fence()
+            return MeasuredEmbeddingResponse(tuple(A), ProviderUsage(), 1)
+    projection = vector_projection.MemoryVectorProjection(runtime_factory, index, provider=Provider())
+    assert asyncio.run(projection.sync_item(item_id)) == "deferred"
+    assert index.identity(f"memory-item:{item_id}") is None
+    assert projection.logical_calls == 1
+
+
 def test_restart_pin_off_and_deleted_source_do_not_reembed_existing_content(runtime_factory, index, monkeypatch):
     item_id, _ = setup_projection_scope(runtime_factory, monkeypatch)
     class Provider:

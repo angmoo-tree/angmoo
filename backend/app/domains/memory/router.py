@@ -39,6 +39,42 @@ from app.domains.memory.schemas.batch import (
 
 router = APIRouter(prefix="/worlds/{world_id}/world-characters/{subject_id}", tags=["memory"])
 
+from app.domains.memory.schemas.situation import MemoryProcessingRead, MemoryProcessingUpdate, MemorySaveRequest
+from app.domains.memory.service import situation_management
+
+
+@router.get("/memory/processing-settings", response_model=MemoryProcessingRead)
+def read_memory_processing(world_id: str, subject_id: str, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return situation_management.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows)
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+
+
+@router.put("/memory/processing-settings", response_model=MemoryProcessingRead)
+def update_memory_processing(world_id: str, subject_id: str, data: MemoryProcessingUpdate, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_management.save_settings(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/save", response_model=MemoryProcessingRead)
+def save_memory_situations(world_id: str, subject_id: str, data: MemorySaveRequest, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_management.save_now(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
 from app.domains.memory.schemas.embedding import MemoryEmbeddingRead, MemoryEmbeddingUpdate
 from app.domains.memory.service import embedding_management
 from app.domains.memory.schemas.embedding import MemoryPreparationStart

@@ -17,7 +17,8 @@ def configure_chat_image_services(app):
     threads = app.state.chat_thread_service
     settings = app.state.chat_settings_service
     app.state.chat_generation_service = GenerationService(
-        threads, settings, generation_workflows, images=images)
+        threads, settings, generation_workflows, images=images,
+        memory_policy=generation_workflows.capture_memory_policy)
     app.state.chat_evidence_service = EvidenceService(
         threads, evidence_reads, image_reader=images.asset_current)
 

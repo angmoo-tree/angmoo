@@ -123,7 +123,7 @@ class EpisodeUnitRead(BaseModel):
 
 
 class EpisodeDetailRead(BaseModel):
-    representation: Literal["episode_v1", "legacy_summary"]
+    representation: Literal["episode_v1", "legacy_summary", "activity_situation_v1"]
     partial: bool
     omitted_units: int
     followup_count: int

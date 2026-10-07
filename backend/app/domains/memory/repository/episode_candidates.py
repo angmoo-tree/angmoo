@@ -36,12 +36,8 @@ class SqlAlchemyEpisodeCandidates:
         self.session, self.source_reader = session, source_reader
 
     def _current(self, scope, item, now):
-        from app.domains.memory.models.episode import MemoryEpisodeInfo
-        from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
         from app.domains.memory.repository.episode_privacy import currently_accessible
-        info = self.session.get(MemoryEpisodeInfo, item.id)
-        return (info is None or info.policy_version != ACTIVITY_POLICY_VERSION or
-                (self.source_reader is not None and currently_accessible(self.session, self.source_reader, scope, item, now)))
+        return currently_accessible(self.session, self.source_reader, scope, item, now)
 
     def _enabled(self, scope):
         return self.session.scalar(select(MemoryScopeSettingModel.id).where(

@@ -4,6 +4,7 @@ The application composes concrete readers and credential readiness here.
 Memory services own the actual consent, mutation and transaction decisions.
 """
 from sqlalchemy.orm import Session
+from app.config import settings
 from app.runtime.memory.composition import memory_repository, memory_batch_repository
 
 
@@ -64,6 +65,7 @@ def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
     from app.runtime.relationships.manual_review import ManualRelationshipFollowup
     return MemoryWorkflows(
         consolidation_followup=ManualRelationshipFollowup,
+        generation_policy=settings.MEMORY_GENERATION_POLICY,
         read_service=_service,
         scope_service=_scope_service,
         write_service=_write_service,

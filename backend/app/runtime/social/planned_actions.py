@@ -284,6 +284,7 @@ def _execute_planned_action(
     writing: dict[str, Any],
     used_reply_bodies: dict[str, str] | None = None,
     relationship_validator=None,
+    situation_admission=None,
 ) -> dict[str, Any]:
     validate_social_context(ctx)
     action_type = str(action.get("action_type") or "")
@@ -527,6 +528,8 @@ def _execute_planned_action(
                         context=_declared_action_subjective_context(action_type, action),
                         captured_at=occurred_at,
                     )
+                if situation_admission is not None:
+                    situation_admission(ctx.db, execution, {**payload, "social_event_id": social_result.event.id}, occurred_at)
             action_result["social_event_id"] = social_result.event.id
             if writer_validation is not None:
                 action_result["writer_validation"] = writer_validation

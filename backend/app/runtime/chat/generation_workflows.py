@@ -7,6 +7,12 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.runtime import world_credential_binding
 
 
+def capture_memory_policy(db, **values):
+    from app.config import settings
+    from app.domains.memory.service.situation_policy import capture
+    return capture(db, policy=settings.MEMORY_GENERATION_POLICY, **values)
+
+
 def capture_credential(db, *, owner_id, world_id, actor_id):
     try:
         return world_credential_binding.capture(db, owner_id=owner_id, world_id=world_id, actor_id=actor_id, purpose="chat")
@@ -57,6 +63,7 @@ from app.integrations.llm import (
 from app.runtime.chat.evidence_reads import today_reader as today_reader
 from app.runtime.chat import name_binding
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
+from app.runtime.chat.situation_memory import ChatSituationMemory
 from app.runtime.chat.response_graph import LangGraphResponseExecutor
 from app.integrations.llm.supervisor_selection import DirectLlmSupervisorSelectionProvider
 from app.runtime.chat.retrieval_tools import ToolPlanningService, ToolBothCoordinator, parallel_tools, RetryingRead
@@ -206,6 +213,7 @@ def build(
         ),
         unit_of_work=SupervisorResponseWorkflowUnitOfWork(db, relationship_world_id=world_id if relationship_enabled else None),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
+        situation_memory=ChatSituationMemory(db),
         recall_mode=recall_mode,
         social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
         today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(

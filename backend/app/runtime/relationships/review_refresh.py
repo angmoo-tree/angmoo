@@ -16,6 +16,8 @@ from app.runtime.relationships.review_identity import review_identity_context
 
 def refresh_review_inputs(db, root):
     base = root.manifest['base']
+    from app.runtime.relationships.situation_ordering import require_application_complete
+    require_application_complete(db, base['setting_id'])
     from app.runtime.relationships.review_credentials import validate
     validate(db, root, base)
     profile = db.get(MemorySubjectProfile, base['setting_id'])

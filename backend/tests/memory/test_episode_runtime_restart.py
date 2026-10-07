@@ -1,18 +1,21 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.config import settings
+from app.config import Settings, settings
 from app.runtime.contributor_backend import create_contributor_runtime_app
 
 
 def test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback(tmp_path, monkeypatch):
+    default_policy = Settings.model_fields["MEMORY_GENERATION_POLICY"].default
+    assert default_policy == "activity_situation"
     for selected_policy in (None, "legacy", "episode_v1", "activity32"):
-        policy = selected_policy or "activity32"
+        policy = selected_policy or default_policy
         recall = "legacy" if policy == "legacy" else "episode_v1"
-        if selected_policy is not None:
-            monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", policy)
-            monkeypatch.setattr(settings, "MEMORY_RECALL_REPRESENTATION", recall)
-            monkeypatch.setattr(settings, "ACTIVITY_THOUGHT_POLICY", "legacy" if policy == "legacy" else "thought_v1")
+        # Explicitly bind the declared default as well: other application
+        # fixtures may have a different active runtime configuration in process.
+        monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", policy)
+        monkeypatch.setattr(settings, "MEMORY_RECALL_REPRESENTATION", recall)
+        monkeypatch.setattr(settings, "ACTIVITY_THOUGHT_POLICY", "legacy" if policy == "legacy" else "thought_v1")
         app = create_contributor_runtime_app(data_root=tmp_path / "episode-runtime")
         with TestClient(app) as client:
             assert client.get("/health").status_code == 200

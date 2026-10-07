@@ -330,10 +330,7 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
                 break
             offset += len(page)
             for item in page:
-                info = self._session.get(MemoryEpisodeInfo, item.id)
-                if info is not None and info.policy_version == ACTIVITY_POLICY_VERSION and (
-                    self._source_reader is None or not currently_accessible(self._session, self._source_reader, setting.scope, item, now)
-                ):
+                if not currently_accessible(self._session, self._source_reader, setting.scope, item, now):
                     continue
                 result.append(item)
                 if len(result) == limit:

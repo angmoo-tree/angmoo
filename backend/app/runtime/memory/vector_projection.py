@@ -21,6 +21,7 @@ class MemoryVectorProjection:
         self._provider = provider or GeminiAdapter()
         self._cursor = self._cleanup_cursor = ""
         self._task = None
+        self._closing = False
         self.status = "stopped"
         self.last_code = None
         self.logical_calls = self.physical_attempts = 0
@@ -61,6 +62,8 @@ class MemoryVectorProjection:
             connection.commit()
 
     async def sync_item(self, item_id, *, credential_revision=None):
+        if self._closing:
+            return "deferred"
         with self._factory() as session:
             work = read_work(session, item_id)
         doc_id = f"memory-item:{item_id}"
@@ -110,6 +113,8 @@ class MemoryVectorProjection:
             return "failed"
         # Serialize the local projection write with canonical deletion/revocation.
         # The provider wait has already ended; no network IO holds this lock.
+        if self._closing:
+            return "deferred"
         with self._factory() as session:
             from sqlalchemy import update
             from app.domains.memory.models.items import MemoryScopeSettingModel
@@ -117,7 +122,8 @@ class MemoryVectorProjection:
                 MemoryScopeSettingModel.owner_id == scope.owner_id,
                 MemoryScopeSettingModel.world_id == scope.world_id,
                 MemoryScopeSettingModel.subject_world_character_id == scope.subject_world_character_id,
-            ).values(version=MemoryScopeSettingModel.version))
+            ).values(version=MemoryScopeSettingModel.version,
+                updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
             if locked.rowcount != 1:
                 return "changed"
             if read_work(session, item_id) != work:
@@ -240,6 +246,7 @@ class MemoryVectorProjection:
                 session.commit()
 
     async def start(self):
+        self._closing = False
         self.index.open()
         self.status = "ready"
         if self._task is None:
@@ -256,7 +263,13 @@ class MemoryVectorProjection:
                 self.status, self.last_code = "degraded", "memory_vector_projection_failed"
             await asyncio.sleep(1)
 
+    def fence(self):
+        self._closing = True
+        if self._task is not None:
+            self._task.cancel()
+
     async def stop(self):
+        self.fence()
         if self._task is not None:
             self._task.cancel()
             await asyncio.gather(self._task, return_exceptions=True)

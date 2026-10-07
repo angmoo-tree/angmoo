@@ -98,6 +98,7 @@ class ResponseGenerationWorkflowService:
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
         recall_mode: ChatRecallMode = ChatRecallMode.LEGACY,
         social_context_provider: SocialContextProvider | None = None,
+        situation_memory=None,
     ) -> None:
         self._graph_executor = graph_executor
         self._lifecycle = lifecycle
@@ -112,6 +113,7 @@ class ResponseGenerationWorkflowService:
         self._today_snapshot_validator = today_snapshot_validator
         self._recall_mode = recall_mode
         self._social_context_provider = social_context_provider
+        self._situation_memory = situation_memory
 
     async def run(
         self,
@@ -218,6 +220,7 @@ class ResponseGenerationWorkflowService:
                 today_snapshot_validator=self._today_snapshot_validator,
                 social_context_provider=self._social_context_provider,
                 thought_finalizer=thought_finalizer,
+                situation_memory=self._situation_memory,
             )
             try:
                 state = await self._graph_executor.run(
@@ -333,8 +336,11 @@ class ResponseGenerationWorkflowService:
                 ),
                 now=datetime.now(UTC),
             )
+            if self._situation_memory is not None:
+                self._situation_memory.admit(command, committed, response)
             self._unit_of_work.checkpoint()
-            self._propose_memory_after_commit(command, committed)
+            if command.request.node_state.get("_situation_policy") is None:
+                self._propose_memory_after_commit(command, committed)
             yield completed
         except asyncio.CancelledError as exc:
             self._unit_of_work.rollback()

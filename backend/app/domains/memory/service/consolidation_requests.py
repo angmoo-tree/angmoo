@@ -8,7 +8,11 @@ from app.domains.memory.service.batch_preparation import deliver_candidates, enq
 def submit(*, scope, db, workflows, data):
     try:
         repository = workflows.batch_repository(db)
-        row, disposition = receipts.manual(db, repository=repository, scope=scope, data=data, now=datetime.now(UTC))
+        relationship_only = workflows.generation_policy == "activity_situation"
+        if relationship_only and data.followup != "relationships":
+            from app.domains.memory.exceptions import MemoryValidationError
+            raise MemoryValidationError("memory_legacy_generation_retired")
+        row, disposition = receipts.manual(db, repository=repository, scope=scope, data=data, now=datetime.now(UTC), relationship_only=relationship_only)
         followup = workflows.consolidation_followup(db) if workflows.consolidation_followup else None
         if data.followup:
             if followup is None:
@@ -106,8 +110,9 @@ def retry(*, scope, db, workflows, request_id, key):
         from sqlalchemy import select
         from app.domains.memory.models.consolidation_request import MemoryConsolidationJob
         jobs = tuple(db.scalars(select(MemoryConsolidationJob.job_id).where(MemoryConsolidationJob.request_id == root.id)))
-        repo.retry_failed(scope, idempotency_key=key, now=datetime.now(UTC), request_job_ids=jobs)
-        if root.state == "paused":
+        if workflows.generation_policy != "activity_situation":
+            repo.retry_failed(scope, idempotency_key=key, now=datetime.now(UTC), request_job_ids=jobs)
+        if root.state == "paused" and workflows.generation_policy != "activity_situation":
             # Re-admit the same frozen cutoff against explicitly confirmed current settings.
             from app.domains.memory.models.batch import MemoryBatchSetting
             from app.domains.memory.models.activity_configuration import MemorySubjectProfile

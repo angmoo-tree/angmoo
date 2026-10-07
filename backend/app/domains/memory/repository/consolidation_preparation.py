@@ -9,7 +9,10 @@ from app.domains.memory.repository.consolidation_requests import progress
 
 
 def pending_requests(session):
-    return session.scalars(select(Request).where(Request.state == "preparing", Request.coalesced_to_request_id.is_(None))
+    from sqlalchemy import exists
+    from app.domains.memory.models.activity_situation import MemorySituationTransition
+    return session.scalars(select(Request).where(Request.state == "preparing", Request.coalesced_to_request_id.is_(None),
+        ~exists().where(MemorySituationTransition.scope_setting_id == Request.scope_setting_id))
         .order_by(Request.accepted_at).limit(16)).all()
 
 

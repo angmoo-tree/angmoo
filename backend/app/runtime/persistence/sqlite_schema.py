@@ -11,12 +11,13 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 30
-SOURCE_ALEMBIC_REVISION = "20261006_0107"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 106
-EXPECTED_CANONICAL_TABLE_COUNT = 160
+SQLITE_SCHEMA_VERSION = 31
+SOURCE_ALEMBIC_REVISION = "20261008_0108"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 107
+EXPECTED_CANONICAL_TABLE_COUNT = 168
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
+SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
 
 ACTIVITY_V19_TABLES = (
     "world_character_activity_states", "world_character_state_receipts",
@@ -141,7 +142,7 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -171,7 +172,7 @@ def build_sqlite_v3_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -201,7 +202,7 @@ def build_sqlite_v5_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -230,7 +231,7 @@ def build_sqlite_v6_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -254,7 +255,7 @@ def build_sqlite_v7_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if (
             table_name in SUBJECTIVE_CONTEXT_V8_TABLES
@@ -275,7 +276,7 @@ def build_sqlite_v8_metadata() -> MetaData:
     """Immutable pre-batch settings/admission schema."""
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
             continue
         if table_name not in MEMORY_BATCH_V9_TABLES:
             Base.metadata.tables[table_name].to_metadata(metadata)
@@ -738,8 +739,17 @@ def build_sqlite_v27_metadata() -> MetaData:
 
 def build_sqlite_v29_metadata() -> MetaData:
     """Frozen v29 shape, including the attested final v28 admission columns."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v30_metadata()
     _remove_world_activity_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v30_metadata() -> MetaData:
+    """Frozen shape before durable activity situation admission."""
+    from app.domains.memory.models.activity_situation import SITUATION_TABLES
+    metadata = build_sqlite_baseline_metadata()
+    for name in SITUATION_TABLES:
+        metadata.remove(metadata.tables[name])
     return metadata
 
 

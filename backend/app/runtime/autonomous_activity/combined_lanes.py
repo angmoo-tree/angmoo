@@ -18,6 +18,7 @@ class CombinedGeneration:
         if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
         self.provider.mode = mode
+        self.provider.situation_state = state
         self.provider.image_enabled = bool(state.get("decision_context", {}).get("image_output_enabled"))
         async def before_retry(_attempt):
             from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
@@ -42,6 +43,8 @@ class CombinedGeneration:
         return result
 
     async def write(self, state):
+        self.provider.situation_state = state
+        self.provider.situation_writer_results = []
         async def guard_request(_attempt):
             from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
             try:
@@ -51,13 +54,13 @@ class CombinedGeneration:
         self.provider.request_guard = guard_request
         mode = state.get("generation_mode")
         if mode == "split" and not isinstance(self, RoutineLane):
-            return await super().write(state)
+            return self.with_writer_situations(state, await super().write(state))
         if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
         raw = state["decision"].get("provisional_draft")
         try:
             if mode == "split":
-                return await super().write(state)
+                return self.with_writer_situations(state, await super().write(state))
             if isinstance(self, RoutineLane):
                 from app.domains.characters.policies.authored_names import authored_routine_draft
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, observe_output
@@ -77,7 +80,8 @@ class CombinedGeneration:
             from app.runtime.autonomous_activity.name_binding import observe_normalization
             observe_normalization(self.tracker, lane=self.lane,
                 receipts=[draft["_auxiliary_normalization"] for draft in drafts])
-            return {"drafts": drafts, "writer_input_receipts": [
+            return {"decision": {**state["decision"], "_situation_normalized_draft": raw},
+                "drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
             receipt = state.get("decision", {}).get("_json_recovery_receipt")
@@ -107,9 +111,25 @@ class CombinedGeneration:
                 result = await super().write(state)
                 result["writer_input_receipts"] = [
                     {**r, "writer_recovery": True} for r in result.get("writer_input_receipts", [])]
-                return result
+                return self.with_writer_situations(state, result)
             finally:
                 self.provider.repairing = False
+
+    def with_writer_situations(self, state, result):
+        overrides = dict(state["decision"].get("_situation_overrides", {}))
+        for receipt in self.provider.situation_writer_results:
+            output = receipt["output"]
+            if self.lane == "routine":
+                normalized = output
+            else:
+                assignments = {row["task_id"]: row["source"]["target_id"] for row in state["assignments"]}
+                normalized = {"replies": [{**row, "target_id": assignments[row["task_id"]]}
+                    for row in output.get("reply_task_results", [])]}
+            for target, draft in receipt["situations"].items():
+                overrides[target] = {"manifest": receipt["manifest"], "draft": draft, "normalized": normalized}
+        if overrides:
+            result["decision"] = {**state["decision"], "_situation_overrides": overrides}
+        return result
 
 
 class CombinedInboxLane(CombinedGeneration, InboxLane):

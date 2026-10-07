@@ -179,18 +179,19 @@ def enqueue_scope(
 
 
 
-def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None) -> None:
+def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None,
+                   settings_type=MemoryBatchSetting) -> None:
     repository = dependencies.consolidation_repository(session)
     reader = source_reader or dependencies.source_reader(session)
     memory = dependencies.memory_repository(session)
     configs = session.scalars(
-        select(MemoryBatchSetting)
+        select(settings_type)
         .join(
             MemoryScopeSettingModel,
-            MemoryScopeSettingModel.id == MemoryBatchSetting.scope_setting_id,
+            MemoryScopeSettingModel.id == settings_type.scope_setting_id,
         )
         .where(
-            MemoryBatchSetting.brief_dirty.is_(True),
+            settings_type.brief_dirty.is_(True),
             MemoryScopeSettingModel.enabled.is_(True),
         )
         .limit(16)
@@ -204,6 +205,10 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
         items = repository.hot_brief_source_items(setting=snapshot, now=now, limit=24)
         valid = True
         for item in items:
+            situation_evidence = memory.situation_correction_evidence(
+                scope=snapshot.scope, item_id=item.id, reader=reader, now=now)
+            if situation_evidence is not None:
+                continue
             evidence_rows = memory.list_item_evidence(
                 scope=snapshot.scope, item_id=item.id
             )

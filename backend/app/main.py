@@ -450,7 +450,10 @@ def create_app(
                 MemoryShutdownAdmissionMiddleware,
             )
 
-            runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime)
+            from app.runtime.memory.situation_indexing import SituationSearchDrain
+            runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime,
+                search=SituationSearchDrain(composition.memory_hybrid_runtime, composition.memory_recall_projection)
+                    if composition is not None and memory_runtime.situations is not None else None)
             runtime_app.add_middleware(
                 MemoryShutdownAdmissionMiddleware,
                 coordinator=runtime_app.state.memory_shutdown,

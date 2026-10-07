@@ -100,6 +100,9 @@ class CharacterResponseGenerationService:
             finish_reason=result.finish_reason,
             activity_thought=result.activity_thought,
             relationship_metrics=result.relationship_metrics,
+            situation_draft=result.situation_draft,
+            situation_manifest=result.situation_manifest,
+            situation_output_digest=result.situation_output_digest,
         )
 
 

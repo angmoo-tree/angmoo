@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     SNS_CHECKPOINT_MAINTENANCE_ENABLED: bool = True
     CANONICAL_GENERATION_RETENTION_ENABLED: bool = True
     MEMORY_RECALL_REPRESENTATION: Literal["legacy", "episode_v1"] = "episode_v1"
-    MEMORY_GENERATION_POLICY: Literal["legacy", "episode_v1", "activity32"] = "activity32"
+    MEMORY_GENERATION_POLICY: Literal["legacy", "episode_v1", "activity32", "activity_situation"] = "activity_situation"
     CHAT_RECALL_MODE: Literal["legacy_checkpoint", "social_context_baseline", "social_hybrid"] = "social_hybrid"
     SNS_SOCIAL_CONTEXT_ENABLED: bool = True
     API_V1_PREFIX: str = "/api/v1"

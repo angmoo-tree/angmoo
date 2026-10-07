@@ -15,5 +15,5 @@ export function MemoryCredentialFields({ worldId, subjectId, purpose, onMetadata
     read={signal => apiRequest<SecretMetadata>(path, { signal })}
     save={({ label: _label, ...data }: SecretWrite, signal) => { void _label; return apiRequest<SecretMetadata>(path, { method: "PUT", signal, body: data }); }}
     remove={(expected_revision, signal) => apiRequest<SecretMetadata>(path, { method: "DELETE", signal, body: { expected_revision } })}
-    text={{ model: t(purpose === "embedding" ? "임베딩 모델" : "기억 정리 모델"), key: t("새 API key"), stored: t("API key 저장됨"), missing: t("API key 없음"), save: t("키·모델 저장"), remove: t("저장된 key 삭제"), confirm: t("이 용도의 API key를 삭제할까요?"), failed: t("저장하지 못했어요. 최신 설정을 확인해 주세요."), saved: t("설정을 저장했어요."), keep: t("비워 두면 저장된 키를 유지해요."), unsupported: t("현재 저장된 모델") }} />;
+    text={{ model: t(purpose === "embedding" ? "임베딩 모델" : "관계 정리 모델"), key: t("새 API key"), stored: t("API key 저장됨"), missing: t("API key 없음"), save: t("키·모델 저장"), remove: t("저장된 key 삭제"), confirm: t("이 용도의 API key를 삭제할까요?"), failed: t("저장하지 못했어요. 최신 설정을 확인해 주세요."), saved: t("설정을 저장했어요."), keep: t("비워 두면 저장된 키를 유지해요."), unsupported: t("현재 저장된 모델") }} />;
 }

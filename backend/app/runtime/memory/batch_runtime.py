@@ -80,9 +80,11 @@ class MemoryBatchRuntime:
         logging.getLogger("app.domains.memory.service.episode_selection").setLevel(logging.INFO)
         logging.getLogger("app.runtime.memory.episode_batch").setLevel(logging.INFO)
         self.session_factory, self.provider_factory = session_factory, provider_factory
-        if generation_policy not in {"legacy", "episode_v1", "activity32"}:
+        if generation_policy not in {"legacy", "episode_v1", "activity32", "activity_situation"}:
             raise ValueError("memory_generation_policy_invalid")
         self.generation_policy = generation_policy
+        from app.runtime.memory.situation_runtime import SituationRuntime
+        self.situations = SituationRuntime(session_factory) if generation_policy == "activity_situation" else None
         self.episode_provider_factory = episode_provider_factory
         self.activity_provider_factory = activity_provider_factory
         self.episode_prior_search = episode_prior_search
@@ -95,7 +97,8 @@ class MemoryBatchRuntime:
     async def start(self) -> None:
         if self.task is not None and not self.task.done():
             return
-        install_memory_delivery(self.session_factory)
+        if self.situations is None:
+            install_memory_delivery(self.session_factory)
         self.stop_event.clear()
         self.task = asyncio.create_task(self._loop(), name="memory-batch-worker")
 
@@ -111,6 +114,9 @@ class MemoryBatchRuntime:
                 pass
 
     def prepare(self, *, shutdown: bool = False) -> None:
+        if self.situations is not None:
+            self.situations.prepare(shutdown=shutdown)
+            return
         with self.session_factory() as db:
             now = datetime.now(UTC)
             reconcile_sources(db, now=now, dependencies=self.preparation)
@@ -125,6 +131,22 @@ class MemoryBatchRuntime:
     async def tick(self, *, shutdown: bool = False, timeout: float = MEMORY_PROVIDER_TIMEOUT_SECONDS) -> str:
         async with self.lock:
             from app.runtime.memory.foreground_priority import chat_is_active
+            if self.situations is not None:
+                closing = shutdown or self.situations.quit_identity is not None
+                if not closing:
+                    with self.session_factory() as db:
+                        if chat_is_active(db, now=datetime.now(UTC)):
+                            return "memory_foreground_deferred"
+                self.situations.prepare(shutdown=closing)
+                result = self.situations.tick()
+                if not closing:
+                    from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
+                    with self.session_factory() as db:
+                        rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
+                            settings_type=MemorySituationProcessingSetting)
+                if result == "memory_batch_queue_empty" and self.idle_work is not None and not closing:
+                    return await self.idle_work()
+                return result
             if not shutdown and self.generation_policy in {"episode_v1", "activity32"}:
                 with self.session_factory() as db:
                     if chat_is_active(db, now=datetime.now(UTC)):

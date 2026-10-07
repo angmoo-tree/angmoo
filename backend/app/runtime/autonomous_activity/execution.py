@@ -251,7 +251,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     classes = (("inbox", CombinedInboxLane), ("routine", CombinedRoutineLane), ("feed", CombinedFeedLane))
     from app.runtime.autonomous_activity.input_budget import SnsInputBudget
     budget = SnsInputBudget(ctx.db, run.activity_id, notify=tracker._notify) if generation_policies["sns_input_budget_policy"] else None
-    version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id), "policies": {**execution_policies, **generation_policies}, "input_budget": budget}
+    version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id), "policies": {**execution_policies, **generation_policies,
+        "_situation_policy": (run.result or {}).get("_situation_policy")}, "input_budget": budget}
     adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service,
                       guard=guard, claim_validator=validate_claim,
                       **version_options,

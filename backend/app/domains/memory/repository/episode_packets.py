@@ -39,6 +39,16 @@ class SqlAlchemyEpisodePackets:
             not require_enabled or currently_accessible(self.session, self.reader, scope, row, now))}
         if not items:
             return ()
+        from app.domains.memory.repository.situation_reads import situation_origin
+        from app.domains.memory.repository.situation_packets import read_situation_packet
+        situations = {}
+        for identifier, item in tuple(items.items()):
+            situation = situation_origin(self.session, item)
+            if situation is not None:
+                packet = read_situation_packet(self.session, self.reader, scope, item, situation, now)
+                if packet is not None:
+                    situations[identifier] = packet
+                del items[identifier]
         evidence_rows = self.session.scalars(select(MemoryItemEvidence).where(
             MemoryItemEvidence.memory_item_id.in_(items)).order_by(MemoryItemEvidence.id)).all()
         evidence = {row.id: row for row in evidence_rows}
@@ -117,6 +127,8 @@ class SqlAlchemyEpisodePackets:
         for following, prior in prior_rows:
             if _item_retrievable(prior, now):
                 priors.setdefault(following, []).append(prior.id)
-        return tuple(EpisodePacket(identifier, items[identifier].summary,
+        packets = {identifier: EpisodePacket(identifier, items[identifier].summary,
             "episode_v1" if identifier in info else "legacy_summary", tuple(packet_units[identifier]),
-            tuple(sorted(priors.get(identifier, ())))) for identifier in ids if identifier in items)
+            tuple(sorted(priors.get(identifier, ())))) for identifier in ids if identifier in items}
+        packets.update(situations)
+        return tuple(packets[identifier] for identifier in ids if identifier in packets)

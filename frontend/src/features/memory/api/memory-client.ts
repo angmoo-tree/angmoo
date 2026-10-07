@@ -2,6 +2,33 @@ import { captureAuthRequestScope, isCurrentAuthRequestScope, clearStoredUser, no
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 import type { MemoryEmbeddingSetting, MemoryEmbeddingUpdate } from "@/features/memory/types/memory-embedding-contract";
+import type { MemoryProcessingSetting, MemoryProcessingUpdate, MemorySaveRequest } from "../types/memory-processing-contract";
+
+function validateProcessing(value: MemoryProcessingSetting, worldId: string, subjectId: string) {
+  if (!value || !matchesScope(value.scope, worldId, subjectId) ||
+    !Number.isSafeInteger(value.version) || value.version < 1 ||
+    [value.pending_count, value.blocked_count, value.applied_count].some(n => !Number.isSafeInteger(n) || n < 0) ||
+    [value.memory_enabled, value.daily_enabled, value.shutdown_apply_enabled].some(v => typeof v !== "boolean") ||
+    !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) || typeof value.timezone !== "string" ||
+    !["idle", "accepted", "applying", "saved", "partial_error"].includes(value.status) ||
+    ![null, "accepted", "empty"].includes(value.result) ||
+    [value.next_due_at, value.last_applied_at].some(v => v !== null && (typeof v !== "string" || !Number.isFinite(Date.parse(v))))) {
+    throw new MemoryApiError(502, "memory_processing_contract_invalid");
+  }
+  return value;
+}
+export function getMemoryProcessing(worldId: string, subjectId: string, signal?: AbortSignal) {
+  return requestMemoryApi<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings`, { signal })
+    .then(value => validateProcessing(value, worldId, subjectId));
+}
+export function saveMemoryProcessing(worldId: string, subjectId: string, data: MemoryProcessingUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings`,
+    { method: "PUT", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
+}
+export function savePendingMemories(worldId: string, subjectId: string, data: MemorySaveRequest, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/save`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
+}
 
 export function getMemoryEmbeddingSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
   return requestMemoryApi<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { signal })
@@ -161,7 +188,7 @@ function episodeDetailMatches(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  return ["episode_v1", "legacy_summary"].includes(String(v.representation)) &&
+  return ["episode_v1", "activity_situation_v1", "legacy_summary"].includes(String(v.representation)) &&
     typeof v.partial === "boolean" && Number.isInteger(v.omitted_units) && Number(v.omitted_units) >= 0 &&
     Number.isInteger(v.followup_count) && Number(v.followup_count) >= 0 &&
     Array.isArray(v.units) && v.units.every((unit: unknown) => {

@@ -340,7 +340,9 @@ class RoutineLane:
         elif common["known"]:
             after.update(mood=common["mood"], mood_intensity=common["mood_intensity"], action_note=common["state_note"])
         generation = RoutineGeneration(validated.plan, validated.draft, after)
+        from app.runtime.autonomous_activity.situation_memory import participant
         return {"executions": [plain(publish_routine_activity(self.ctx, prepared=self.prepared, generation=generation,
+            situation_admission=participant(self, state, "routine-post"),
             relationship_validator=self.effect_relationship_validator(state)))]}
 
     async def settle(self, state):
