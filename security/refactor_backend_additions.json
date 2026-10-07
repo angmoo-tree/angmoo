@@ -31154,6 +31154,127 @@
       "test_suppressions": {
         "tests/relationships/test_diagnostics_http_ownership.py": {}
       }
+    },
+    {
+      "commit": "347ed34b71eaca80277d6e41eda0c780a189f248",
+      "feature_id": "AR-WORLD-MEMORY-AUDIT-REPORT",
+      "reason": "Record the audit report at its exact original introduction commit; preserve the earlier test evidence unchanged.",
+      "tracked_files": {
+        "docs/verification/world-ui-memory-batch32-audit-20261007.md": "febb6ac7e8fd35a02f6b2c64d4b7b2bdc619ef68"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "a9d4f4264ee1a52ae269b1019a7b8abdaa138b85",
+      "feature_id": "AR-EMBEDDED-MIGRATION-SECRETS",
+      "reason": "Owned embedded data-root secret binding, offline credential and startup regressions, and data-preservation verification report.",
+      "tracked_files": {
+        "backend/tests/identity/test_migration_secrets.py": "3adbb5d194063e94147ba9ee9109c14b3049afb2",
+        "backend/tests/runtime/test_embedded_migration_secret_binding.py": "e9eb2667730ba1058a2211ce3ff5e5a3a4171d5a",
+        "docs/verification/embedded-migration-secret-binding-20261007.md": "bccf1c683219387224f3b4d0c3e329fa4d2bc026"
+      },
+      "test_nodes": [
+        "tests/identity/test_migration_secrets.py::test_empty_migration_secret_never_falls_back_to_process_settings",
+        "tests/identity/test_migration_secrets.py::test_local_migration_authentication_uses_only_the_injected_key[False]",
+        "tests/identity/test_migration_secrets.py::test_local_migration_authentication_uses_only_the_injected_key[True]",
+        "tests/identity/test_migration_secrets.py::test_local_migration_keeps_scope_authentication_and_rejects_remote_envelopes",
+        "tests/identity/test_migration_secrets.py::test_owned_secret_is_read_only_when_needed_and_once_per_transition",
+        "tests/runtime/test_embedded_migration_secret_binding.py::test_contributor_upgrade_authenticates_each_root_without_changing_process_settings",
+        "tests/runtime/test_embedded_migration_secret_binding.py::test_wrong_owned_secret_aborts_without_promoting_or_modifying_original_data"
+      ],
+      "test_assertions": {
+        "tests/identity/test_migration_secrets.py": {
+          "test_local_migration_authentication_uses_only_the_injected_key": [
+            "assert interpreter(envelope, scope.as_dict()) is None",
+            "assert security.decrypt_local_secret(envelope, scope=scope, app_secret=app_secret) == 'synthetic-key'",
+            "pytest.raises(ValueError, match='authentication')",
+            "assert security.settings.model_dump() == original"
+          ],
+          "test_local_migration_keeps_scope_authentication_and_rejects_remote_envelopes": [
+            "pytest.raises(ValueError, match='scope does not match')",
+            "pytest.raises(ValueError, match='Unsupported local credential envelope')"
+          ],
+          "test_empty_migration_secret_never_falls_back_to_process_settings": [
+            "pytest.raises(ValueError, match='migration_app_secret_empty')"
+          ],
+          "test_owned_secret_is_read_only_when_needed_and_once_per_transition": [
+            "assert reads == []",
+            "assert len(reads) == 1"
+          ]
+        },
+        "tests/runtime/test_embedded_migration_secret_binding.py": {
+          "_seed_root": [],
+          "_digest": [],
+          "_read_credentials": [],
+          "test_contributor_upgrade_authenticates_each_root_without_changing_process_settings": [
+            "assert result.canonical.source_version == 29",
+            "assert result.canonical.target_version == 30",
+            "assert [_digest(p) for p in (database, secret, media)] == original",
+            "assert controller.current()['data_version'] == 30",
+            "assert [r[0] for r in credentials] == ['image', 'sns']",
+            "assert settings.model_dump() == original_settings",
+            "assert not again.canonical.migrated",
+            "assert _read_credentials(again.canonical.database_path) == credentials",
+            "assert settings.model_dump() == original_settings",
+            "assert json.loads(raw) == {'version': 'comfy-secrets.v1', 'key': 'synthetic-comfy-server', 'partner': 'synthetic-comfy-partner'}",
+            "assert raw == 'synthetic-sns-key'"
+          ],
+          "test_wrong_owned_secret_aborts_without_promoting_or_modifying_original_data": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='world_activity_secret_authentication_failed')",
+            "assert [_digest(p) for p in (database, secret, media, controller.current_marker)] == original",
+            "assert controller.current()['data_version'] == 29",
+            "assert not list(controller.generations.glob('.*.tmp-*'))",
+            "assert settings.model_dump() == original_settings"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_migration_secrets.py": {},
+        "tests/runtime/test_embedded_migration_secret_binding.py": {}
+      }
+    },
+    {
+      "commit": "b31da53066af1440c6bf96a54548f97383ce378e",
+      "feature_id": "AR-RUNTIME-DIAGNOSTIC-MANIFEST",
+      "reason": "Shipped-manifest diagnostic target, immediate prior revision and next-packaged-schema regressions, and actual Docker/UI verification report.",
+      "tracked_files": {
+        "docs/verification/runtime-diagnostic-manifest-target-20261007.md": "65ef958527bac99960b4c29140eae94ab9f3b285"
+      },
+      "test_nodes": [
+        "tests/runtime/test_current_schema_diagnostics.py::test_diagnostics_follow_a_new_shipped_manifest_without_a_domain_version_constant",
+        "tests/runtime/test_current_schema_diagnostics.py::test_real_canonical_database_diagnostic_accepts_only_current_revision[20261005_0106]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_current_schema_diagnostics.py": {
+          "test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph": [
+            "assert load_sqlite_manifest(19).source_revision == '20260918_0096'",
+            "assert diagnostic.head_revision == manifest.source_revision",
+            "assert diagnostic.head_revision == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == [diagnostic.head_revision]",
+            "assert scripts.get_revision(load_sqlite_manifest(30).source_revision).down_revision == load_sqlite_manifest(29).source_revision"
+          ],
+          "test_real_canonical_database_diagnostic_accepts_only_current_revision": [
+            "assert status.head_revision == doctor.source_revision",
+            "assert status.current_revision == (replacement or doctor.source_revision)",
+            "assert status.state is RuntimeComponentState.READY",
+            "assert status.reason_code is None",
+            "assert status.state is RuntimeComponentState.DEGRADED",
+            "assert status.reason_code is RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT"
+          ],
+          "test_diagnostics_follow_a_new_shipped_manifest_without_a_domain_version_constant": [
+            "assert status.head_revision == next_manifest.source_revision",
+            "assert status.current_revision == doctor.source_revision",
+            "assert status.state is RuntimeComponentState.DEGRADED",
+            "assert status.reason_code is RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT",
+            "assert version == next_manifest.schema_version"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_current_schema_diagnostics.py": {}
+      }
     }
   ]
 }

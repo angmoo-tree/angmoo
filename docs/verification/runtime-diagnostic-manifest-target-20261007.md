@@ -107,5 +107,25 @@ backend와 frontend는 모두 `running / healthy`, 홈 응답은 HTTP 200이다.
 기존 데이터 보존 기준은
 `.task-output/migration-secret-binding-20261007-144725/before.json`이다.
 
+## 로컬 Git 검증 이력
+
+구현 커밋은 `08616293ab7bec32f3919b3745a289c1077bd605`이다.
+기존 동결 checkpoint와 모든 이전 metadata record는 그대로 유지하고,
+두 수정 커밋의 정확한 source blob, 변경 전후 AST·assertion 및 새로운
+테스트 출처를 append-only record로 추가했다. 이전 감사 보고서의 출처
+누락도 최초 도입 커밋 `2a776fd9ad5a1d2a294833807af0c896c6961842`에
+연결했다. 문서·테스트를 뒤의 수정 커밋에서 새로 도입한 것으로 처리하지 않는다.
+
+저장소의 `committed_snapshot` helper로 두 구현 커밋을 수집하여, 이전
+암호화 수정의 새 테스트 일곱 사례와 이번 진단 수정의 새 테스트 두 사례를
+원래 커밋에 연결했다. 추가 record의 최초 도입 커밋, source blob,
+assertion·suppression 원본, 정확한 변경 전후 조건과 이전 record의
+불변성을 별도로 검증했다.
+
+이력 검사의 통과 범위는 새로 추가한 metadata의 정확성이다. 저장소 전체
+과거 이력을 순회하는 보존 스캔은 완료하지 않았으며 전체 보존 검사
+PASS로 산정하지 않는다. 위 45개 회귀 테스트, 구조 검사와 실제 Docker/UI
+검증은 각각 완료된 결과이다.
+
 작업은 지정된 로컬 브랜치와 로컬 커밋으로 제한한다. push, PR 생성,
 원격 CI 실행, main 병합은 수행하지 않는다.
