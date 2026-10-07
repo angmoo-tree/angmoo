@@ -18,7 +18,7 @@ from app.runtime.chat.message_composition import generation_service
 from app.runtime.chat.message_composition import thread_service
 from chat.test_p8_l_d_world_chat_identity import (
     _character,
-    _create_tables,
+    _create_tables as _create_chat_tables,
     _installation,
     _seed_world as _seed_world_roles,
     _user,
@@ -29,6 +29,14 @@ from chat.test_p8_l_j_response_generation_lifecycle import (
     _ready_to_commit,
     response_session,
 )
+
+
+def _create_tables(engine):
+    """Prepare the real Chat admission schema, including its Memory collaborator."""
+    from app.runtime.persistence.model_registration import register_models
+
+    _create_chat_tables(engine)
+    register_models().create_all(engine)
 
 
 def _seed_world(db, **values):
@@ -51,9 +59,6 @@ def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) ->
     assert type(generation_service) is GenerationService
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
-    # This test uses the real admission composition, including Memory policy.
-    from app.runtime.persistence.model_registration import register_models
-    register_models().create_all(engine)
     try:
         with Session(engine) as db:
             owner = _user("direct-owner")
