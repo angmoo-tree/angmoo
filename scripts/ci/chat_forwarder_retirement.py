@@ -7,6 +7,7 @@ it cannot approve a generic deleted class, proxy, or weakened assertion.
 from __future__ import annotations
 
 import ast
+import copy
 from collections import Counter
 from functools import lru_cache
 import hashlib
@@ -211,6 +212,34 @@ def validate_message_settings_retirement(path, original_source, current_source, 
         raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
 
 
+def validate_situation_policy_composition(path, original_source, current_source, matches):
+    """Prove only the committed Memory-policy port, retaining the whole DI frame."""
+    original, current = ast.parse(original_source), ast.parse(current_source)
+
+    def binding(tree):
+        return [node for node in tree.body if isinstance(node, ast.Assign)
+                and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "generation_service"]
+
+    before, after = binding(original), binding(current)
+    if len(before) == len(after) == 1 and dump(before[0]) != dump(after[0]):
+        expected = copy.deepcopy(before[0])
+        old_call = ast.parse(
+            "GenerationService(thread_service, settings_service, generation_workflows)",
+            mode="eval",
+        ).body
+        if dump(expected.value) == dump(old_call):
+            expected.value.keywords.append(ast.keyword(
+                arg="memory_policy",
+                value=ast.parse("generation_workflows.capture_memory_policy", mode="eval").body,
+            ))
+            if (dump(after[0]) == dump(expected)
+                    and matches(path, "generation_service", before[0], after[0])):
+                original.body[original.body.index(before[0])] = after[0]
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual service construction changed")
+
+
 def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if enabled is False or enabled is None:
         return None
@@ -281,7 +310,8 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     expected_composition = ast.parse(before(composition))
     # B6 already replaced the Runtime re-export with this same Social query.
     # Prove the signed re-export and the entire actual query module before
-    # allowing precisely that one import change; construction stays exact.
+    # allowing precisely that one import change. The Memory-policy port below
+    # additionally requires its exact committed pre/post construction evidence.
     block_query = "world_character_pair_is_blocked"
     block_module = "app.domains.social.repository.blocks"
     old_block_module = "app.runtime.relationships.sqlalchemy_social_event"
@@ -293,8 +323,10 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if len(imports) != 1:
         raise ValueError("Chat historical Social block query import changed")
     imports[0].module = block_module
-    if dump(expected_composition) != dump(ast.parse((root / composition).read_text(encoding="utf-8-sig"))):
-        raise ValueError("Chat actual service construction changed")
+    validate_situation_policy_composition(
+        composition, ast.unparse(expected_composition),
+        (root / composition).read_text(encoding="utf-8-sig"), matches,
+    )
     # These three original route files only imported the actual HTTP endpoints
     # and the service instances whose construction was proved above. Retire the
     # import surface only after proving the complete original HTTP/DI modules;
