@@ -153,6 +153,8 @@ def test_legacy_waiting_job_reuses_its_original_schema_digest_and_source(prepara
     now = time_for_test()
     scope = runtime._scope(db, ready.character.id, world.id, ready.user)
     source, digest, _, _ = runtime._source(db, scope, now, generation_contract=None)
+    source["credential_binding"] = runtime.capture_key(db, owner_id=ready.user.id,
+        world_id=world.id, actor_id=ready.world_character.id, purpose="sns")
     job, token = store.claim(db, wc_id=ready.world_character.id, world_id=world.id,
         target_date=date.fromisoformat(source["local_date"]), timezone=world.timezone,
         mode="initial", request_id="legacy-waiting", source=source, input_digest=digest, now=now,
