@@ -40,7 +40,7 @@ runtime = _RuntimeTestNamespace(
     RuntimeDiagnosticCode=_runtime_RuntimeDiagnosticCode,
     SchedulerRuntimeStatus=_runtime_SchedulerRuntimeStatus,
 )
-from app.domains.runtime.service.status import RUNTIME_MIGRATION_HEAD
+from app.runtime.persistence.sqlite_schema import SOURCE_ALEMBIC_REVISION
 from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
 from app.domains.runtime.service.status import _find_opaque_id
 from app.domains.runtime.service.status import _graph_backend_available
@@ -215,7 +215,7 @@ def test_application_probe_degrades_when_alembic_metadata_is_missing() -> None:
 
         assert migration.state is runtime.RuntimeComponentState.DEGRADED
         assert migration.current_revision is None
-        assert migration.head_revision == RUNTIME_MIGRATION_HEAD
+        assert migration.head_revision == SOURCE_ALEMBIC_REVISION
         assert (
             migration.reason_code
             is runtime.RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT
@@ -251,14 +251,14 @@ def test_application_probe_reads_embedded_sqlite_schema_lineage(monkeypatch) -> 
                 ) VALUES (1, :revision)
                 """
             ),
-            {"revision": RUNTIME_MIGRATION_HEAD},
+            {"revision": SOURCE_ALEMBIC_REVISION},
         )
 
     with Session(engine) as session:
         migration = SqlAlchemyApplicationRuntimeProbe(session)._migration_status()
 
     assert migration.state is runtime.RuntimeComponentState.READY
-    assert migration.current_revision == RUNTIME_MIGRATION_HEAD
+    assert migration.current_revision == SOURCE_ALEMBIC_REVISION
     assert migration.reason_code is None
 
 

@@ -1,5 +1,5 @@
 {
-  "edge_count": 6050,
+  "edge_count": 6052,
   "external_import_count": 4196,
   "module_count": 1434,
   "modules": [
@@ -17728,7 +17728,9 @@
         "app.domains.runtime.contracts.status_queries",
         "app.domains.runtime.repository.status",
         "app.domains.runtime.service.status",
-        "app.runtime.diagnostics.status_queries"
+        "app.runtime.diagnostics.status_queries",
+        "app.runtime.migrations.sqlite_versions.registry",
+        "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.diagnostics.status_composition",
       "path": "backend/app/runtime/diagnostics/status_composition.py",

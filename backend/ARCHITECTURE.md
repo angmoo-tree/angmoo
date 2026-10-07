@@ -1,5 +1,20 @@
 # Angmoo Backend Architecture
 
+## Runtime diagnostic migration target (2026-10-07)
+
+Runtime diagnostics composition reads the frozen manifest for the shipped
+`SQLITE_SCHEMA_VERSION` and injects its `source_revision` into the Runtime
+status service. Runtime domain policy compares the persisted revision with
+that explicit target; it does not maintain a second release-version constant
+or import persistence and migration implementations.
+
+An actual old, unknown, or missing DB revision still reports
+`migration_not_current`. Regression checks compare the manifest, SQLite
+baseline lineage, Alembic head, and a real canonical DB independently, and
+exercise a future packaged manifest without changing domain policy. This
+diagnostic correction changes neither stored schema markers nor the startup
+migration and component failure checks.
+
 ## Embedded migration credentials (2026-10-07)
 
 Before upgrading canonical SQLite, the common embedded coordinator binds
