@@ -42,7 +42,7 @@ def load(root: Path, *, reader=None) -> list[dict]:
     # One immutable committed file can contain many changed definitions. Read
     # its Git object once per validation, retaining every provenance check.
     @lru_cache(maxsize=None)
-    def git(*args: str) -> bytes:
+    def cached_git(*args: str) -> bytes:
         if reader is not None:
             return reader(*args, root=root)
         if args[:2] == ("log", "--format=%H"):
@@ -51,6 +51,17 @@ def load(root: Path, *, reader=None) -> list[dict]:
             args = (*args[:-1], head)
         # Every command issued below now names an immutable commit/object.
         return _committed_git(str(root.resolve()), head, args)
+
+    def git(*args: str) -> bytes:
+        # History documents can each be tens of MiB. Stream their bytes into
+        # the same append-only comparison without retaining every historical
+        # version in either the per-load or process-wide source-object cache.
+        if len(args) == 2 and args[0] == "show" and args[1].endswith(":" + MANIFEST):
+            if reader is not None:
+                return reader(*args, root=root)
+            return subprocess.check_output(["git", *args], cwd=root)
+        return cached_git(*args)
+
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
         old = json.loads(git("show", f"{commit}:{MANIFEST}"))["records"]
         if records[:len(old)] != old:

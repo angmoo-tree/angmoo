@@ -141,6 +141,33 @@ def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path
         changes.load(tmp_path)
 
 
+@pytest.mark.parametrize("injected", [False, True])
+def test_historical_manifests_are_rechecked_without_retaining_their_bytes(tmp_path, monkeypatch, injected):
+    payload = {"schema_version": 1, "records": []}
+    path = tmp_path / changes.MANIFEST
+    path.parent.mkdir()
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    calls, history = [], {"records": []}
+
+    def git(args, **kwargs):
+        calls.append(tuple(args))
+        if args[1] == "rev-parse":
+            return ("a" * 40).encode()
+        if args[1] == "log":
+            return ("b" * 40 + "\n").encode()
+        assert args[1] == "show"
+        return json.dumps(history).encode()
+
+    monkeypatch.setattr(changes.subprocess, "check_output", git)
+    reader = (lambda *args, root: git(["git", *args], cwd=root)) if injected else None
+    assert changes.load(tmp_path, reader=reader) == []
+    assert changes.load(tmp_path, reader=reader) == []
+    assert sum(args[1] == "show" for args in calls) == 2
+    history["records"] = [{"id": "unexpected historical record"}]
+    with pytest.raises(ValueError, match="append-only"):
+        changes.load(tmp_path, reader=reader)
+
+
 def test_git_object_cache_rereads_head_and_candidate_manifest(tmp_path, monkeypatch):
     commit, blob = "a" * 40, "b" * 40
     state = {"head": "c" * 40}
