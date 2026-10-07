@@ -33,17 +33,19 @@ export function RecentActivityStatusCard({ title, children, onScroll }: {
   </Card>;
 }
 
-export function PersonaStatusCard({ title, sections }: { title: ReactNode; sections: { label: string; value: string }[] }) {
-  return <Card as="section" className={styles.card}><h2>{title}</h2><div className={styles.stack}>
+export function PersonaStatusCard({ title, sections, elevated = false }: {
+  title: ReactNode; sections: { label: string; value: string }[]; elevated?: boolean;
+}) {
+  return <Card as="section" elevated={elevated} className={styles.card}><h2>{title}</h2><div className={styles.stack}>
     {sections.map(section => <article className={styles.tile} key={section.label}><h3>{section.label}</h3>
       <p className={styles.body}>{section.value}</p></article>)}
   </div></Card>;
 }
 
-export function ActivitySummaryStatusCard({ title, time, metrics }: {
-  title: ReactNode; time: ReactNode; metrics: { label: string; value: ReactNode }[];
+export function ActivitySummaryStatusCard({ title, time, metrics, elevated = false }: {
+  title: ReactNode; time: ReactNode; metrics: { label: string; value: ReactNode }[]; elevated?: boolean;
 }) {
-  return <Card as="section" className={styles.card}><header className={styles.header}><h2>{title}</h2><div>{time}</div></header>
+  return <Card as="section" elevated={elevated} className={styles.card}><header className={styles.header}><h2>{title}</h2><div>{time}</div></header>
     <dl className={styles.metrics}>{metrics.map(metric => <div className={styles.tile} key={metric.label}>
       <dt>{metric.label}</dt><dd>{metric.value}</dd></div>)}</dl></Card>;
 }

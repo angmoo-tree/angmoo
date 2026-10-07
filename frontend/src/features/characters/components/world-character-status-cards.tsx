@@ -89,8 +89,8 @@ export function WorldCharacterStatusCards({ worldId, actorId, profile, revision,
           };
         })} />
     </RecentActivityStatusCard>
-    <PersonaStatusCard title={uiText("캐릭터 페르소나")} sections={FIELDS.filter(([key]) => visible.persona[key].trim()).map(([key, label]) => ({ label: uiText(label), value: visible.persona[key] }))} />
-    <ActivitySummaryStatusCard title={uiText("활동 요약")} time={<>{uiText(visible.state.state === "outside_hours" ? "쉬는 시간대" : "활동 시간대")}<br />{summary.active_hours}</>} metrics={[
+    <PersonaStatusCard elevated title={uiText("캐릭터 페르소나")} sections={FIELDS.filter(([key]) => visible.persona[key].trim()).map(([key, label]) => ({ label: uiText(label), value: visible.persona[key] }))} />
+    <ActivitySummaryStatusCard elevated title={uiText("활동 요약")} time={<>{uiText(visible.state.state === "outside_hours" ? "쉬는 시간대" : "활동 시간대")}<br />{summary.active_hours}</>} metrics={[
       { label: uiText("오늘 게시글 작성"), value: `${summary.posts}/${summary.post_limit}` }, { label: uiText("오늘 리플 작성"), value: `${summary.replies}/${summary.reply_limit}` },
       { label: uiText("오늘 좋아요"), value: uiText("{{value0}}회", { value0: summary.likes }) },
       { label: uiText("가능한 행동"), value: ["reply", "post", "like"].filter(action => summary.allowed_actions.includes(action)).map(action => uiText(ACTIONS[action])).join(", ") || uiText("없음") },

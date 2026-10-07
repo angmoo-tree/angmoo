@@ -50,7 +50,7 @@ export function RelationshipReviewPanel({ characterId, worldId, revision, authen
     return () => { current = false; controller.abort(); };
   }, [characterId, worldId, revision, authenticated]);
   if (!authenticated) return null;
-  return <SettingsCard title={uiText("하루 관계 정리")} description={uiText("저장된 기억으로 관계를 정리해요. 조회와 새로고침은 AI를 호출하지 않아요.")} icon={<History size={20} />}>
+  return <SettingsCard elevated title={uiText("하루 관계 정리")} description={uiText("저장된 기억으로 관계를 정리해요. 조회와 새로고침은 AI를 호출하지 않아요.")} icon={<History size={20} />}>
     {error ? <p role="alert" className="mt-2 text-sm">{uiText("정리 상태를 불러오지 못했습니다. 기존 관계는 보존됩니다.")}</p> : !data ? <p className="mt-2 text-sm">{uiText("상태 확인 중…")}</p> : <>
       <p className="mt-2 text-sm">{data.mode === "interpreted" ? uiText("개인화 관계 적용 중") : uiText("관계 정책 전환 대기")} · {uiText(labels[data.configuration.status] ?? "정리 상태 확인 필요")}</p>
       {data.configuration.manual_available ? <p className="text-sm text-on-surface-variant">{uiText("기억 화면의 ‘지금 기억·관계 정리’로 예약 시간과 관계없이 실행할 수 있습니다.")}</p> : null}

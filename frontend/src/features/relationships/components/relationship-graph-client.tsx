@@ -169,7 +169,7 @@ export function RelationshipGraphClient({
       className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6"
       data-product-content="relationship-graph"
     >
-      <SettingsCard headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
+      <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
         {provider === "ladybug" ? <details><summary>{uiText("관계 데이터 정보")}</summary><p>{uiText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")}</p></details> : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
@@ -251,7 +251,7 @@ export function RelationshipGraphClient({
 
       {graph && showGraph ? (
         <>
-          <SettingsCard title={uiText("방향 관계 지도")} description={uiText("화살표는 캐릭터가 상대를 바라보는 방향이에요. 반대 방향은 별도의 관계예요.")} icon={<GitBranch size={20} />}>
+          <SettingsCard elevated title={uiText("방향 관계 지도")} description={uiText("화살표는 캐릭터가 상대를 바라보는 방향이에요. 반대 방향은 별도의 관계예요.")} icon={<GitBranch size={20} />}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <StatusChip
@@ -330,7 +330,7 @@ export function RelationshipGraphClient({
             {graph.meta.truncated ? <p className="mt-3 text-xs text-on-surface-variant">{uiText("표시 상한에 따라 일부 관계만 보입니다.")}</p> : null}
           </SettingsCard>
 
-          <SettingsCard title={uiText("접근 가능한 관계 목록")} description={uiText("방향별 관계 설명과 현재 확인된 근거를 살펴봐요.")} icon={<List size={20} />}>
+          <SettingsCard elevated title={uiText("접근 가능한 관계 목록")} description={uiText("방향별 관계 설명과 현재 확인된 근거를 살펴봐요.")} icon={<List size={20} />}>
             <div className="mt-5 space-y-3">
               {graph.edges.length === 0 ? <p className="text-sm text-on-surface-variant">{uiText("아직 검증된 직접 관계가 없습니다.")}</p> : null}
               {graph.edges.map((edge) => {
@@ -357,7 +357,7 @@ export function RelationshipGraphClient({
           </SettingsCard>
 
           {graph.evidence.length > 0 ? (
-            <SettingsCard title={uiText("최근 검증된 사건 근거")} description={uiText("관계에 반영된 실제 사건과 원문을 확인해요.")} icon={<FileSearch size={20} />}>
+            <SettingsCard elevated title={uiText("최근 검증된 사건 근거")} description={uiText("관계에 반영된 실제 사건과 원문을 확인해요.")} icon={<FileSearch size={20} />}>
               <div className="mt-5 space-y-3">
                 {graph.evidence.map((event) => (
                   <article key={event.event_id} className="rounded-2xl border border-outline-variant p-4">
