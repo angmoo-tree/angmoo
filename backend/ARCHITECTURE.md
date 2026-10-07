@@ -1,5 +1,22 @@
 # Angmoo Backend Architecture
 
+## Embedded migration credentials (2026-10-07)
+
+Before upgrading canonical SQLite, the common embedded coordinator binds
+`secrets/app-secret` from its resolved data root through a separate settings
+value and injects that reader into Identity's `MigrationSecretInterpreter`.
+The interpreter reads and caches the key when credential authentication is
+actually needed; transitions without credentials do not require a key read.
+Migration authentication and Comfy credential rebinding use the shared local
+envelope implementation with that explicit key. They do not modify process
+settings, select a default key, or contact KMS or an AI provider.
+
+This applies to both embedded startup entrypoints. Existing local-v2 and legacy
+dev-v1 reads keep their envelope contracts, including local-v2 scope validation.
+Authentication failure still aborts the unpublished staging generation and
+preserves the selected original database, secret and media. Runtime configuration
+and worker startup remain after a successful canonical upgrade.
+
 ## World configuration and permanent import origins (2026-10-05)
 
 Characters owns immutable import snapshots and proven origin references. Final

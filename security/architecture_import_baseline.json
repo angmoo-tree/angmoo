@@ -1,6 +1,6 @@
 {
-  "edge_count": 6049,
-  "external_import_count": 4194,
+  "edge_count": 6050,
+  "external_import_count": 4196,
   "module_count": 1434,
   "modules": [
     {
@@ -3850,7 +3850,9 @@
     },
     {
       "external_imports": [
-        "json"
+        "collections.abc",
+        "json",
+        "pydantic"
       ],
       "imports": [
         "app.core.security"
@@ -19105,6 +19107,7 @@
         "pathlib"
       ],
       "imports": [
+        "app.config",
         "app.database",
         "app.domains.identity.service.migration_secrets",
         "app.domains.runtime.contracts.data_paths",

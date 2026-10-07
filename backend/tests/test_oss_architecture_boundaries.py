@@ -155,13 +155,20 @@ def test_secret_decryption_is_confined_to_credential_resolver():
         "core/security.py",
         "runtime/startup_security.py",
         "domains/identity/service/credential_resolution.py",
+        "domains/identity/service/world_credentials.py",
+        "domains/identity/service/migration_secrets.py",
     }
     violations: list[str] = []
     for path in sorted(APP_ROOT.rglob("*.py")):
         relative = path.relative_to(APP_ROOT).as_posix()
         if relative in allowed:
             continue
-        if "decrypt_secret(" in path.read_text(encoding="utf-8"):
+        calls = {
+            node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id
+            for node in ast.walk(ast.parse(path.read_text(encoding="utf-8")))
+            if isinstance(node, ast.Call) and isinstance(node.func, (ast.Attribute, ast.Name))
+        }
+        if calls & {"decrypt_secret", "decrypt_local_secret"}:
             violations.append(relative)
 
     assert violations == []

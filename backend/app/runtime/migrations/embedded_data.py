@@ -7,6 +7,7 @@ import logging
 import hashlib
 from pathlib import Path
 
+from app.config import settings
 from app.database import create_database_engine, create_session_factory
 from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.integrations.ladybug_projection import (
@@ -59,10 +60,13 @@ class EmbeddedDataUpgradeCoordinator:
             self._paths.runtime / "embedded-data-migration.lock"
         ):
             from app.domains.identity.service.migration_secrets import MigrationSecretInterpreter
+            migration_settings = settings.model_copy(update={
+                "APP_SECRET_FILE": str(self._paths.secrets / "app-secret"),
+            })
             canonical = SqliteCanonicalUpgradeCoordinator(
                 self._data_paths,
                 fallback_generation=self._fallback_generation,
-                secret_interpreter=MigrationSecretInterpreter(),
+                secret_interpreter=MigrationSecretInterpreter(secret_source=lambda: migration_settings.app_secret),
             ).upgrade()
             engine = create_database_engine(
                 "sqlite+pysqlite:///" + canonical.database_path.resolve().as_posix()

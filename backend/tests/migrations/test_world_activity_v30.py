@@ -3,6 +3,7 @@ import json
 import pytest
 from sqlalchemy import create_engine
 
+from app.config import settings
 from app.runtime.migrations.sqlite_versions import world_activity_v30
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.persistence.model_registration import register_models
@@ -82,7 +83,7 @@ def test_populated_transition_keeps_original_aad_configuration_and_independent_p
     from app.domains.media.models_world_policy import WorldImagePolicy
     from app.domains.memory.models.activity_configuration import MemorySubjectProfile
     engine, scope, sid, character = populated_v29(tmp_path)
-    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter()):
+    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter(secret_source=lambda: settings.app_secret)):
         before = world_activity_v30.capture_delta(connection)
         old = tuple(connection.execute(text("SELECT encrypted_api_key FROM llm_credentials ORDER BY id")))
         world_activity_v30.upgrade(connection)
@@ -113,7 +114,7 @@ def test_missing_or_wrong_secret_proof_stops_before_schema_changes(tmp_path, int
     from app.domains.identity.service.migration_secrets import MigrationSecretInterpreter
     from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationDeltaError
     engine, *_ = populated_v29(tmp_path, invalid_key=interpreter == "invalid")
-    with engine.begin() as connection, world_activity_v30.secret_interpreter(None if interpreter is None else MigrationSecretInterpreter()):
+    with engine.begin() as connection, world_activity_v30.secret_interpreter(None if interpreter is None else MigrationSecretInterpreter(secret_source=lambda: settings.app_secret)):
         old = sqlite_schema_contract_digest(connection)
         with pytest.raises(SqliteMigrationDeltaError, match="secret_interpreter_required|secret_authentication_failed"):
             world_activity_v30.upgrade(connection)
@@ -126,7 +127,7 @@ def test_ambiguous_original_keys_are_preserved_for_reentry_instead_of_arbitraril
     from sqlalchemy import text
     from app.domains.identity.service.migration_secrets import MigrationSecretInterpreter
     engine, scope, *_ = populated_v29(tmp_path, duplicate_key=True)
-    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter()):
+    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter(secret_source=lambda: settings.app_secret)):
         world_activity_v30.upgrade(connection)
         assert connection.execute(text("SELECT count(*) FROM llm_credentials WHERE character_id IS NOT NULL")).scalar_one() == 2
         assert connection.execute(text("SELECT count(*) FROM world_credentials WHERE world_character_id=:id AND purpose='sns'"), {"id": scope.subject_world_character_id}).scalar_one() == 0
@@ -141,7 +142,7 @@ def test_local_comfy_partner_only_is_migrated_without_inventing_a_primary_key(tm
     engine, scope, *_ = populated_v29(tmp_path)
     with engine.begin() as connection:
         connection.execute(text("DELETE FROM media_credentials WHERE purpose='user_image'"))
-    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter()):
+    with engine.begin() as connection, world_activity_v30.secret_interpreter(MigrationSecretInterpreter(secret_source=lambda: settings.app_secret)):
         world_activity_v30.upgrade(connection)
     with Session(engine) as db:
         kwargs = dict(owner_id=scope.owner_id, world_id=scope.world_id, world_character_id=scope.subject_world_character_id)

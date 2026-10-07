@@ -11,6 +11,7 @@ from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
+from app.core import security
 from app.runtime.social.observations import observe_source
 from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
@@ -152,7 +153,8 @@ def _seed_v2_roleless(
 
     secret = root / "secrets" / "app-secret"
     secret.parent.mkdir(parents=True)
-    secret.write_text("supported-v2-secret\n", encoding="utf-8")
+    app_secret = "supported-v2-secret"
+    secret.write_text(app_secret + "\n", encoding="utf-8")
     database = SqliteCanonicalDatabase(
         StaticRuntimeDataPath(root),
         settings=SqliteCanonicalSettings(generation=V2_GENERATION),
@@ -314,7 +316,16 @@ def _seed_v2_roleless(
                     model="fixture-model",
                     auth_profile_id="fixture-profile",
                     label="Existing credential",
-                    encrypted_api_key="fixture-ciphertext",
+                    encrypted_api_key=security.encrypt_local_secret(
+                        "synthetic-v2-api-key",
+                        scope=security.SecretScope(
+                            owner_id=owner.id,
+                            character_id=characters[0].id,
+                            provider="google",
+                            purpose="agent",
+                        ),
+                        app_secret=app_secret,
+                    ),
                     key_fingerprint="fixture-fingerprint",
                     enabled=True,
                 ),
@@ -398,6 +409,11 @@ def _seed_v2_roleless(
                 # not appear in the historical predecessor under test.
                 from app.runtime.persistence.sqlite_schema import WORLD_CONFIGURATION_V28_TABLES
                 for name in WORLD_CONFIGURATION_V28_TABLES:
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                # v30 actor credentials/policies are absent from the frozen v2
+                # predecessor, just like the later World configuration tables.
+                from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES
+                for name in sorted(NEW_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 connection.exec_driver_sql('ALTER TABLE agent_slots DROP COLUMN admission_metadata')
                 connection.exec_driver_sql('ALTER TABLE agent_runs DROP COLUMN input_snapshot')
@@ -673,6 +689,10 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
     source = _seed_v2_roleless(root)
     source_sha = _sha256(source)
     secret_sha = _sha256(root / "secrets" / "app-secret")
+    with sqlite3.connect(source) as connection:
+        original_envelope = connection.execute(
+            "SELECT encrypted_api_key FROM llm_credentials WHERE id='credential-v2'"
+        ).fetchone()[0]
 
     first = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
@@ -728,7 +748,7 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
         assert custom_role.version == 1
         credential = session.get(models.LlmCredential, "credential-v2")
         assert credential is not None
-        assert credential.encrypted_api_key == "fixture-ciphertext"
+        assert credential.encrypted_api_key == original_envelope
         assert credential.key_fingerprint == "fixture-fingerprint"
     database.close()
 
