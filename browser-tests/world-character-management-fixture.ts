@@ -1,6 +1,7 @@
 import type { Page, Route } from "@playwright/test";
 import { FEED_WORLD, OTHER_FEED_WORLD, ownerId } from "./world-feed-fixture";
 import { installSocialChatFixture } from "./world-social-chat-fixture";
+import type { WorldCharacterStatus } from "../frontend/src/features/characters/api/world-character-status";
 
 export const WORLD_AGENT = "synthetic-responder";
 export const worldCharacterRoute = (id = WORLD_AGENT, world = FEED_WORLD) => `/worlds/${world}/characters/${id}`;
@@ -27,7 +28,8 @@ export async function installWorldCharacterManagementRoutes(page: Page) {
     completed: [] as { path: string; method: string; status: number }[],
     readDelay: 0, writeDelay: 0, readBarrier: null as Promise<void> | null, writeBarrier: null as Promise<void> | null,
     failure: 0, settingsFailure: 0, forbidden: false, readonly: false, corrupt: false,
-    authOwner: undefined as string | null | undefined, authMeFailures: 0 };
+    authOwner: undefined as string | null | undefined, authMeFailures: 0,
+    statusActivity: null as WorldCharacterStatus["recent_activity"] | null, statusFailure: 0 };
   const dashboard = (world: string) => {
     const items = worlds.get(world)!;
     const users = items.filter(item => item.profile.control_mode === "owner_controlled").length;
@@ -61,11 +63,12 @@ export async function installWorldCharacterManagementRoutes(page: Page) {
     if (extra && worlds.has(extra[1])) {
       const [, world, id, operation, purpose] = extra, item = worlds.get(world)!.find(row => row.profile.world_character_id === id);
       if (!item || state.forbidden || state.readonly) return route.fulfill({ status: item ? 403 : 404, json: { detail: "world_access_forbidden" } });
+      if (operation === "status" && state.statusFailure) return route.fulfill({ status: state.statusFailure, json: { detail: "world_access_forbidden" } });
       if (method === "GET") state.reads.push(path);
       else state.writes.push({ path, method, body: request.postDataJSON() });
       if (operation === "status") return route.fulfill({ json: { contract_version: "world-character-status-v1", world_id: world, world_character_id: id, revision: item.revision,
-        autonomous_enabled: item.autonomous_enabled, state: item.status, timezone: "Asia/Seoul", next_activity_at: null,
-        recent_activity: [{ id: "synthetic-activity", action: "post", status: "completed", occurred_at: "2026-10-05T01:00:00Z", post_id: "synthetic-root", title: "Original activity title" }],
+        autonomous_enabled: item.autonomous_enabled, state: item.status, timezone: "Asia/Seoul", next_activity_at: item.next_activity_at,
+        recent_activity: state.statusActivity ?? [{ id: "synthetic-activity", action: "post", status: "completed", occurred_at: "2026-10-05T01:00:00Z", post_id: "synthetic-root", title: "Original activity title" }],
         persona: { worldview: "Original character description", personality: "Original personality", speech_style: "Original voice", character_background: "Original background", topic_preferences: "Original topics", safety_rules: "Original safety" },
         summary: { posts: 3, replies: 8, likes: 1, post_limit: 30, reply_limit: 30, active_hours: "09:00–02:00", allowed_actions: ["reply", "post", "like"] } } });
       if (purpose) {

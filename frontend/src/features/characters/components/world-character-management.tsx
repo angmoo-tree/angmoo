@@ -96,9 +96,8 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
     {(visited.has("profile") || activeView === "profile") ? <div className={styles.pane} hidden={activeView !== "profile"} role="tabpanel" id={panelId("profile")} aria-labelledby={`${panelId("profile")}-tab`}>
       {renderProfile({ read, onEditProfile: edit })}
     </div> : null}
-    {(visited.has("status") || activeView === "status") ? <div className={styles.pane} hidden={activeView !== "status"} role="tabpanel" id={panelId("status")} aria-labelledby={`${panelId("status")}-tab`}>
-      <p className={styles.readonly}>{uiText("이 World에서만 적용되는 활동 상태예요.")}</p>
-      {read.can_manage && !isUser ? <WorldCharacterStatusCards worldId={worldId} actorId={worldCharacterId} revision={item.revision} active={activeView === "status"} /> : <WorldCharacterManagementItem item={item} />}
+    {(visited.has("status") || activeView === "status") ? <div className={`${styles.pane} ${styles.statusPane}`} hidden={activeView !== "status"} role="tabpanel" id={panelId("status")} aria-labelledby={`${panelId("status")}-tab`}>
+      {read.can_manage && !isUser ? <WorldCharacterStatusCards worldId={worldId} actorId={worldCharacterId} profile={profile} revision={item.revision} active={activeView === "status"} /> : <WorldCharacterManagementItem item={item} />}
       {!read.can_manage ? <p className={styles.readonly}>{uiText("이 World 캐릭터의 관리 권한이 없어요.")}</p> : null}
     </div> : null}
     {(visited.has("settings") || activeView === "settings") ? <div className={styles.pane} hidden={activeView !== "settings"} role="tabpanel" id={panelId("settings")} aria-labelledby={`${panelId("settings")}-tab`}>

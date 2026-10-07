@@ -1,6 +1,6 @@
 "use client";
 
-import { PersonaStatusCard, ActivitySummaryStatusCard } from "@/components/ui/status-cards";
+import { PersonaStatusCard, ActivitySummaryStatusCard, CurrentStateStatusCard, RecentActivityStatusCard } from "@/components/ui/status-cards";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 
@@ -423,14 +423,7 @@ export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
     <div className="space-y-6">
       <CurrentStateCard agent={agent} />
 
-      <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("최근 활동")}</h2>
-        </div>
-        <div
-          className="max-h-[568px] overflow-y-auto overscroll-contain px-1 pr-2 [scrollbar-gutter:stable] [&>div>article]:min-h-[112px]"
-          onScroll={handleScroll}
-        >
+      <RecentActivityStatusCard title={uiText("최근 활동")} onScroll={handleScroll}>
           <AgentActivityList
             logs={visibleLogs}
             characterName={agent.character.name}
@@ -438,8 +431,7 @@ export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
             showActorName={false}
             timeZone={agent.activity_summary.timezone}
           />
-        </div>
-      </section>
+      </RecentActivityStatusCard>
 
       <StatusPersonaSections agent={agent} />
 
@@ -496,14 +488,7 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("최근 활동")}</h2>
-        </div>
-        <div
-          className="max-h-[568px] overflow-y-auto overscroll-contain px-1 pr-2 [scrollbar-gutter:stable] [&>div>article]:min-h-[112px]"
-          onScroll={handleScroll}
-        >
+      <RecentActivityStatusCard title={uiText("최근 활동")} onScroll={handleScroll}>
           <AgentActivityList
             logs={visibleLogs}
             characterName={agent.character.name}
@@ -511,8 +496,7 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
             showActorName={false}
             timeZone={agent.activity_summary.timezone}
           />
-        </div>
-      </section>
+      </RecentActivityStatusCard>
     </div>
   );
 }
@@ -521,57 +505,15 @@ export function CurrentStateCard({ agent }: { agent: AgentDetailRead }) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("characters");
   const stateText = currentStateText(agent);
-  return (
-    <section className="rounded-[28px] border border-[#eef1f5] bg-white p-5 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-6">
-      <div className="flex items-start gap-4">
-        <ProfileAvatar
-          name={agent.character.name}
-          avatarUrl={agent.character.avatar_url}
-          sizeClassName="size-[62px]"
-          textClassName="text-[26px]"
-        />
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 flex flex-wrap gap-2">
-            <span
-              className={`rounded-full px-3 py-1 text-[13px] font-extrabold ${
-                agent.settings.auto_enabled
-                  ? "bg-[#fff0ef] text-[#ff6b6b]"
-                  : "bg-[#f2f4f7] text-[#667085]"
-              }`}
-            >
-              {agent.settings.auto_enabled ? uiText("활동 중") : uiText("대기 중")}
-            </span>
-            {agent.state?.mood ? (
-              <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-bold text-[#667085]">
-                {agent.state.mood}
-              </span>
-            ) : null}
-            <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-bold text-[#667085]">
-              {formatHandle(agent.character.handle)}
-            </span>
-          </div>
-          <h2 className="break-words text-[24px] font-extrabold leading-8 text-[#101828]">
-            {agent.character.name}
-          </h2>
-          <p className="mt-1 whitespace-pre-wrap break-words text-[16px] font-bold leading-7 text-[#475467]">
-            {stateText}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-3 border-t border-[#eaedf2] pt-4 sm:grid-cols-2">
-        <StateMeta
-          label={uiText("최근 활동")}
-          value={
-            agent.activity_summary.last_activity_at
-              ? formatDate(agent.activity_summary.last_activity_at)
-              : "-"
-          }
-        />
-        <StateMeta label={uiText("다음 활동")} value={nextActivityText(agent, formatDate)} />
-      </div>
-    </section>
-  );
+  return <CurrentStateStatusCard name={agent.character.name} avatarUrl={agent.character.avatar_url}
+    badges={[
+      { label: uiText(agent.settings.auto_enabled ? "활동 중" : "대기 중"), tone: agent.settings.auto_enabled ? "accent" : "neutral" },
+      ...(agent.state?.mood ? [{ label: agent.state.mood }] : []),
+      { label: formatHandle(agent.character.handle) },
+    ]} description={stateText} metadata={[
+      { label: uiText("최근 활동"), value: agent.activity_summary.last_activity_at ? formatDate(agent.activity_summary.last_activity_at) : "-" },
+      { label: uiText("다음 활동"), value: nextActivityText(agent, formatDate) },
+    ]} />;
 }
 
 export function StateMeta({ label, value }: { label: string; value: string }) {

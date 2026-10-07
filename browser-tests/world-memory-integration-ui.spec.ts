@@ -51,7 +51,7 @@ for (const language of ["ko", "en"] as const) {
     expect(labels.indexOf(language === "ko" ? "캐릭터 설명" : "Character description")).toBeLessThan(labels.indexOf(language === "ko" ? "성격" : "Personality"));
     await expect(panel).not.toContainText(/리포스트|언팔로우|repost|unfollow/i);
     await expect(panel).toContainText("Original activity title");
-    await expect(panel.getByRole("link", { name: language === "ko" ? "게시글 열기" : "Open post", exact: true })).toHaveAttribute("href", `/worlds/${FEED_WORLD}/posts/synthetic-root${info.project.name === "static-export" ? "/" : ""}`);
+    await expect(panel.getByRole("link", { name: language === "ko" ? "관련 글 보기" : "View related post", exact: true })).toHaveAttribute("href", `/worlds/${FEED_WORLD}/posts/synthetic-root${info.project.name === "static-export" ? "/" : ""}`);
     const header = surface.locator(":scope > div > header").first();
     const initial = (await header.boundingBox())!.y;
     await page.mouse.wheel(0, 1100);

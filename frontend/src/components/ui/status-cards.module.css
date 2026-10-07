@@ -9,4 +9,26 @@
 .metrics { display: grid; gap: var(--spacing-phone); }
 .metrics .tile { background: var(--color-surface-muted); border-color: transparent; }
 .metrics dd { font-weight: 800; color: var(--color-text-strong); overflow-wrap: anywhere; }
+.currentCard, .recentCard { min-width: 0; border-radius: 28px; }
+.currentCard { padding: var(--spacing-dense); }
+.identity { display: flex; align-items: flex-start; gap: var(--spacing-phone); }
+.identityBody { min-width: 0; flex: 1; }
+.badges { display: flex; flex-wrap: wrap; gap: var(--spacing-compact); margin-bottom: var(--spacing-compact); }
+.identityBadge { padding: 4px 12px; font-size: 13px; font-weight: 700; background: var(--color-surface-muted); color: var(--color-text-secondary); }
+.identityBadge[data-badge-tone="accent"] { background: var(--color-brand-soft); color: var(--color-action-primary); font-weight: 800; }
+.identityBadge[data-badge-tone="danger"] { color: var(--color-state-danger); }
+.name, .recentCard h2 { font-size: var(--text-section-title); font-weight: 800; color: var(--color-text-strong); }
+.name { line-height: 1.333; overflow-wrap: anywhere; }
+.description { margin-top: 4px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--text-body); font-weight: 700; line-height: 1.75; color: var(--color-text-secondary); }
+.stateMetadata { display: grid; gap: var(--spacing-control); margin-top: var(--spacing-dense); padding-top: var(--spacing-phone); border-top: 1px solid var(--color-border-default); }
+.stateMetadata > div { min-width: 0; }
+.stateMetadata dt { margin-bottom: 4px; font-size: var(--text-label); font-weight: 700; color: var(--color-text-muted); }
+.stateMetadata dd { font-size: var(--text-body-small); font-weight: 800; color: var(--color-text-strong); overflow-wrap: anywhere; }
+.recentCard { padding: var(--spacing-section); }
+.recentCard h2 { margin-bottom: var(--spacing-phone); }
+.activityScroll { max-height: 568px; min-width: 0; overflow-y: auto; overscroll-behavior: contain; padding-inline: 4px 8px; scrollbar-gutter: stable; }
+.activityScroll:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.activityScroll > div > article { min-height: 112px; }
 @media (min-width: 480px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 640px) { .stateMetadata { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .currentCard { padding: var(--spacing-section); } .recentCard { padding: 28px; } }
