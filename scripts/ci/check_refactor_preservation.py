@@ -1000,7 +1000,11 @@ def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_t
     New uncommitted work is reviewable before capture. Once committed, append its
     immutable evidence in a following metadata commit before the PR can pass.
     """
-    introduced = set(filter(None, git_bytes("log", "--format=", "--name-only", "--diff-filter=A", f"{checkpoint['commit']}..HEAD", root=root).decode().splitlines()))
+    # NUL separation returns actual paths, including non-ASCII names that Git
+    # otherwise quotes and escapes under core.quotepath.
+    introduced = set(filter(None, git_bytes(
+        "log", "--format=", "--name-only", "--diff-filter=A", "-z",
+        f"{checkpoint['commit']}..HEAD", root=root).decode("utf-8").split("\0")))
     known = set(file_targets.values()).union(*(set(snapshot["tracked_files"]) for snapshot in snapshots))
     # A formerly introduced engine can leave the source set only after the
     # closed SNS proof verifies its committed deletion, every moved/retired

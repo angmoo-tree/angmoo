@@ -306,7 +306,7 @@ def test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source(monk
 
 
 def test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work(monkeypatch, tmp_path):
-    monkeypatch.setattr(p, "git_bytes", lambda *args, **kwargs: b"backend/app/new.py\nbackend/app/moved.py\n")
+    monkeypatch.setattr(p, "git_bytes", lambda *args, **kwargs: b"backend/app/new.py\0backend/app/moved.py\0")
     checkpoint = {"commit": "a" * 40}
     targets = {"backend/app/old.py": "backend/app/moved.py"}
     assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ["committed source lacks append-only introduction evidence: backend/app/new.py"]

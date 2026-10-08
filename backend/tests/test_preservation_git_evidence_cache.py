@@ -59,3 +59,32 @@ def test_injected_reader_is_never_cached(monkeypatch, tmp_path):
     monkeypatch.setattr(checker.subprocess, "run", lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0, next(values), b""))
     assert checker.git_bytes("show", SHA + ":fixture.txt", root=tmp_path) == b"first"
     assert checker.git_bytes("show", SHA + ":fixture.txt", root=tmp_path) == b"second"
+
+
+def test_committed_unicode_paths_require_exact_introduction_evidence(tmp_path):
+    def git(*args):
+        return subprocess.check_output(["git", *args], cwd=tmp_path)
+
+    def commit(message):
+        git("-c", "user.name=Local test", "-c", "user.email=local@example.invalid",
+            "commit", "-q", "-m", message)
+
+    git("init", "-q")
+    git("config", "core.quotepath", "true")
+    (tmp_path / "anchor.txt").write_text("anchor", encoding="utf-8")
+    git("add", "--", "anchor.txt")
+    commit("anchor")
+    anchor = git("rev-parse", "HEAD").decode().strip()
+    paths = ["docs/관찰 증명 결과.md", "docs/기억 복구 검증.md"]
+    (tmp_path / "docs").mkdir()
+    for path in paths:
+        (tmp_path / path).write_text("reviewed evidence", encoding="utf-8")
+        git("add", "--", path)
+        commit(path)
+
+    checkpoint = {"commit": anchor}
+    registered = [{"tracked_files": {paths[0]: "blob"}}]
+    assert checker.unrecorded_committed_sources(checkpoint, registered, {}, tmp_path) == [
+        "committed source lacks append-only introduction evidence: " + paths[1]]
+    registered.append({"tracked_files": {paths[1]: "blob"}})
+    assert checker.unrecorded_committed_sources(checkpoint, registered, {}, tmp_path) == []

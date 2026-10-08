@@ -78,7 +78,7 @@ def test_committed_source_requires_exact_closed_retirement(evidence, monkeypatch
     arbitrary = "backend/app/current_unrecorded.py"
     def committed_reader(*args, **kwargs):
         if args[0] == "log":
-            return (SOURCE + "\n" + arbitrary + "\n").encode()
+            return (SOURCE + "\0" + arbitrary + "\0").encode()
         return reader(*args, **kwargs)
     monkeypatch.setattr(preservation, "git_bytes", committed_reader)
     if damage == "remaining_source":
