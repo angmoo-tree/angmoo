@@ -170,10 +170,10 @@ def test_comfy_samples_use_typed_bindings_without_mutating_json(kind):
         assert result[binding.node_id]["inputs"][binding.input_name] == value
     with pytest.raises(ImagePreparationError):
         inject_workflow(workflow, object_info(), {**values, "steps": "20"})
-    with pytest.raises(ImagePreparationError, match="link_invalid"):
-        broken = workflow.model_copy(deep=True)
-        broken.prompt["7"]["inputs"]["images"] = ["1", 0]
-        validate_workflow(broken, object_info())
+    # ComfyUI owns link existence/type validation; preserve server-specific graphs.
+    server_graph = workflow.model_copy(deep=True)
+    server_graph.prompt["7"]["inputs"]["images"] = ["1", 0]
+    validate_workflow(server_graph, object_info())
 
 
 def test_comfy_receipt_recovery_does_not_resubmit_or_interrupt():

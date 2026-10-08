@@ -41,7 +41,7 @@ type Props = {
   worldId: string;
   feedHeader?: ReactNode;
   renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void; renderLayout: (slots: { trigger: ReactNode; preview: ReactNode; feedback: ReactNode }) => ReactNode }) => ReactNode;
-  imageStatus?: ComponentType<{ worldId: string; postId: string; onCompleted: () => void }>;
+  imageStatus?: ComponentType<{ worldId: string; postId: string; hasResult?: boolean; onCompleted: () => void }>;
 };
 
 type PendingPost = {
@@ -536,7 +536,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post, formatDate)}
-              />{!post.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={post.id} onCompleted={() => void loadFeed()} /> : null}</div>
+              />{ImageStatus && (!post.media?.length || post.media.some(item => item.source_kind === "generated")) ? <ImageStatus worldId={worldId} postId={post.id} hasResult={Boolean(post.media?.length)} onCompleted={() => void loadFeed()} /> : null}</div>
             );
           })}
         </div>
@@ -562,7 +562,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
             post={presentManualPost(detailRoot, formatDate)}
             variant="detail"
           />
-          {!detailRoot.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={detailRoot.id} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
+          {ImageStatus && (!detailRoot.media?.length || detailRoot.media.some(item => item.source_kind === "generated")) ? <ImageStatus worldId={worldId} postId={detailRoot.id} hasResult={Boolean(detailRoot.media?.length)} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
           {detailRoot.reply_to_post_id && currentState.feed.schema_version === "owner-manual-social-thread-v2" ? (
             currentState.feed.parent?.state === "available" ? <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, detailRoot.reply_to_post_id)}>{uiText("부모 게시글 보기")}</Link> : <p className={styles.parentReply}>{uiText("부모 게시글을 볼 수 없습니다.")}</p>
           ) : null}

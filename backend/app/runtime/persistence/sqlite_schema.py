@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 32
-SOURCE_ALEMBIC_REVISION = "20261008_0109"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 108
+SQLITE_SCHEMA_VERSION = 33
+SOURCE_ALEMBIC_REVISION = "20261009_0110"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 109
 EXPECTED_CANONICAL_TABLE_COUNT = 169
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
@@ -318,6 +318,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_comfy_diagnostics(metadata)
     _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:
         if name in metadata.tables:
@@ -748,16 +749,28 @@ def build_sqlite_v29_metadata() -> MetaData:
 def build_sqlite_v30_metadata() -> MetaData:
     """Frozen shape before durable activity situation admission."""
     from app.domains.memory.models.activity_situation import SITUATION_TABLES
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v32_metadata()
     for name in SITUATION_TABLES:
         metadata.remove(metadata.tables[name])
     return metadata
 
 
+def build_sqlite_v32_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _remove_comfy_diagnostics(metadata)
+    return metadata
+
+
+def _remove_comfy_diagnostics(metadata):
+    table = metadata.tables.get("post_image_generation_jobs")
+    if table is not None and "provider_diagnostic_json" in table.c:
+        table._columns.remove(table.c.provider_diagnostic_json)
+
+
 def build_sqlite_v31_metadata() -> MetaData:
     """Frozen shape before receipt recovery; preserve v31 manifest semantics."""
     from sqlalchemy import CheckConstraint
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v32_metadata()
     metadata.remove(metadata.tables["memory_situation_recheck_attempts"])
     run = metadata.tables["memory_situation_runs"]
     run.constraints.remove(next(value for value in run.constraints if value.name == "ck_situation_run_work_kind"))

@@ -18,6 +18,8 @@ from app.domains.media.contracts import ImagePreparationError, ImageSubmissionEr
 from app.domains.social.models.posts import Post, PostMedia, PostImageGenerationJob
 from app.domains.social.models.image_intents import ImageIntent, ImageGenerationAttempt
 from app.domains.social.service.generation_usage import reserve_attempt
+from app.domains.media.service.comfy_workflows import freeze_comfy_request
+from app.domains.media.schemas import diagnostic_projection
 
 
 def source_revision(post):
@@ -34,6 +36,11 @@ def admit(db, *, post, owner_id, character_id, scene, scene_error, prepare, quot
     identity = hashlib.sha256(f"{post.id}|{source_revision(post)}|{revision}".encode()).hexdigest()
     if existing := db.get(ImageIntent, identity):
         return existing
+    if request is not None and not error:
+        try:
+            request = freeze_comfy_request(request)
+        except ImagePreparationError as exc:
+            request, error = None, str(exc)
     intent = ImageIntent(id=identity, post_id=post.id, source_revision=source_revision(post),
         settings_revision=revision, scene=scene if isinstance(scene, str) else "", request_json=json.dumps(asdict(request) if request else {}),
         credential_id=credential.id if credential else None, credential_revision=credential.revision if credential else None,
@@ -97,6 +104,7 @@ class GenerationWorker:
     def view(job):
         return {"job_id": job.id, "post_id": job.post_id, "status": job.status,
             "reason": job.failure_class or job.skip_reason, "attempt_count": job.attempt_count,
+            "provider_diagnostic": diagnostic_projection(job.provider_diagnostic_json),
             "reference_source": job.reference_source, "model": job.image_model,
             "cancellable": job.status in {"queued", "running", "result_pending", "result_ready"},
             "retryable": job.status in {"failed", "result_pending", "result_ready"} or (job.status == "outcome_unknown" and bool(job.provider_receipt))}
@@ -152,6 +160,7 @@ class GenerationWorker:
             self.execution.reserve_attempt(db, job_id=job.id, owner_id=owner_id, character_id=job.character_id,
                 character_limit=self.execution.character_limit(db, job.character_id), quota_day=quota_day)
         job.failure_class = None
+        job.provider_diagnostic_json = None
         intent = db.get(ImageIntent, job.intent_id)
         intent.state, intent.reason = "queued", None
         db.refresh(job)
@@ -202,6 +211,7 @@ class GenerationWorker:
     def _write_received(self, job_id, result):
         pixels_path, manifest_path = self._spool_paths(job_id)
         metadata = {"content_type": result.content_type, "receipt": result.receipt, "usage": result.usage,
+            "diagnostic": diagnostic_projection(result.diagnostic),
             "content_base64": base64.b64encode(result.content).decode("ascii")}
         self.spool.mkdir(parents=True, exist_ok=True)
         # One atomic journal contains both pixels and metadata. The separate
@@ -283,6 +293,11 @@ class GenerationWorker:
             intent = db.get(ImageIntent, job.intent_id)
             try:
                 execution = self.execution.prepare(db, job, intent)
+                # Enrich only a never-submitted legacy job in its leased write transition.
+                if previous_status == "queued" and not job.provider_receipt and execution.request.provider == "comfyui" and execution.request.comfy_execution is None:
+                    frozen = freeze_comfy_request(execution.request)
+                    intent.request_json = json.dumps(asdict(frozen))
+                    execution.request = frozen
             except Exception as exc:
                 self._fail(db, job, str(exc) if isinstance(exc, ImagePreparationError) else "generation_preparation_failed", release=True)
                 return
@@ -321,8 +336,18 @@ class GenerationWorker:
                     receipt_db.commit()
         result = None
         received_receipt = None
+        async def diagnostic_received(value):
+            value = diagnostic_projection(value)
+            if value is None:
+                return
+            with self.sessions() as diagnostic_db:
+                diagnostic_db.execute(update(PostImageGenerationJob).where(PostImageGenerationJob.id == job_id,
+                    PostImageGenerationJob.status == "running", PostImageGenerationJob.lease_token == token)
+                    .values(provider_diagnostic_json=json.dumps(value)))
+                diagnostic_db.commit()
         try:
-            result = await self.execution.submit(execution, on_receipt=receipt_received, on_submit=submission_started)
+            result = await self.execution.submit(execution, on_receipt=receipt_received,
+                on_submit=submission_started, on_diagnostic=diagnostic_received)
             with self.sessions() as received_db:
                 current = received_db.get(PostImageGenerationJob, job_id)
                 claimed = received_db.execute(update(PostImageGenerationJob).where(
@@ -371,6 +396,8 @@ class GenerationWorker:
                     else:
                         current.provider_receipt = received_receipt or current.provider_receipt
                         code = str(exc) if isinstance(exc, (ImagePreparationError, ImageSubmissionError)) else "generation_submission_failed"
+                        if value := diagnostic_projection(getattr(exc, "diagnostic", None)):
+                            current.provider_diagnostic_json = json.dumps(value)
                         self._fail(db, current, code, unknown=getattr(exc, "outcome_unknown", False) or (received_receipt is not None and not isinstance(exc, ImageSubmissionError)),
                             release=isinstance(exc, ImagePreparationError) and received_receipt is None)
                 elif current is None or current.status in {"cancelled", "failed", "skipped"}:
@@ -397,6 +424,8 @@ class GenerationWorker:
                 return
             job.result_asset_id = asset.id
         job.provider_receipt = metadata.get("receipt") or job.provider_receipt
+        if value := diagnostic_projection(metadata.get("diagnostic")):
+            job.provider_diagnostic_json = json.dumps(value)
         job.status, job.lease_token, job.lease_until = "result_ready", None, None
         for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job.id,
             ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown", "result_received")))):

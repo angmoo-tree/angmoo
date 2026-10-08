@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, model_serializer
 
 from app.providers.image_profiles import ImageProvider, MODEL_CATALOG
 
@@ -52,30 +52,107 @@ class Binding(StrictInput):
 
 
 class ComfyWorkflow(StrictInput):
+    """Unversioned stored contract: explicit bindings and exactly one output."""
     prompt: dict[str, dict[str, Any]]
     bindings: dict[str, Binding]
     output_node: str = Field(min_length=1, max_length=80)
     reference_required: bool = False
 
 
+class AutoImageOutput(StrictInput):
+    mode: Literal["auto_first_image"] = "auto_first_image"
+
+
+class ExplicitImageOutput(StrictInput):
+    mode: Literal["explicit_node"]
+    node_id: str = Field(min_length=1, max_length=80)
+
+
+class PlaceholderWorkflow(StrictInput):
+    input_mode: Literal["placeholders"]
+    prompt: dict[str, dict[str, Any]]
+    output: Annotated[AutoImageOutput | ExplicitImageOutput, Field(discriminator="mode")] = Field(default_factory=AutoImageOutput)
+
+
+class BoundWorkflow(StrictInput):
+    input_mode: Literal["node_bindings"]
+    prompt: dict[str, dict[str, Any]]
+    bindings: dict[str, Binding]
+    output: Annotated[AutoImageOutput | ExplicitImageOutput, Field(discriminator="mode")] = Field(default_factory=AutoImageOutput)
+
+
+WorkflowInput = ComfyWorkflow | Annotated[PlaceholderWorkflow | BoundWorkflow, Field(discriminator="input_mode")]
+
+
 class ComfyOptions(StrictInput):
+    options_schema_version: Literal[2] | None = None
+    clip_skip_value_mode: Literal["skip_count", "node_value"] | None = None
     base_url: str = Field(default="http://127.0.0.1:8188", max_length=500)
     partner_auth: bool = False
-    workflow: ComfyWorkflow | None = None
-    text_workflow: ComfyWorkflow | None = None
+    workflow: WorkflowInput | None = None
+    text_workflow: WorkflowInput | None = None
     values: dict[str, str | int | float] = Field(default_factory=dict)
-    # Set only by the service after object_info validation, never from user input.
+    @model_validator(mode="after")
+    def version_contract(self):
+        import math
+        versioned = self.options_schema_version == 2
+        for graph in (self.workflow, self.text_workflow):
+            if graph is not None and versioned == isinstance(graph, ComfyWorkflow):
+                raise ValueError("comfy_options_version_invalid")
+        if not versioned and self.clip_skip_value_mode is not None:
+            raise ValueError("comfy_options_version_invalid")
+        if any(isinstance(value, float) and not math.isfinite(value) for value in self.values.values()):
+            raise ValueError("comfy_value_invalid")
+        return self
+
+    @model_serializer(mode="wrap")
+    def stored_options(self, handler):
+        result = handler(self)
+        if self.options_schema_version is None:
+            result.pop("options_schema_version", None)
+            result.pop("clip_skip_value_mode", None)
+        else:
+            result["clip_skip_value_mode"] = self.clip_skip_value_mode or "skip_count"
+        return result
 
 
-def select_comfy_workflow(options: ComfyOptions, *, has_reference: bool) -> ComfyWorkflow:
-    workflow = options.workflow
-    if workflow is None:
-        raise ImagePreparationError("comfy_workflow_required")
-    if workflow.reference_required and not has_reference:
-        workflow = options.text_workflow
-    if workflow is None or (workflow.reference_required and not has_reference):
-        raise ImagePreparationError("comfy_reference_or_text_path_required")
-    return workflow
+@dataclass(frozen=True)
+class ComfyExecution:
+    options_schema_version: int | None
+    selected_path: Literal["workflow", "text_workflow"]
+    graph_digest: str
+    base_url: str
+    input_mode: Literal["legacy_bindings", "placeholders", "node_bindings"]
+    output: dict[str, str]
+    prepared_values: dict[str, str | int | float]
+    seed: int | None
+    clip_skip_display: int | None
+    clip_skip_value_mode: Literal["node_value", "skip_count"]
+    clip_skip_actual: int | None
+
+    def __post_init__(self):
+        import math
+        import re
+        if (self.options_schema_version not in (None, 2)
+            or self.selected_path not in ("workflow", "text_workflow")
+            or self.input_mode not in ("legacy_bindings", "placeholders", "node_bindings")
+            or (self.options_schema_version is None) != (self.input_mode == "legacy_bindings")
+            or not isinstance(self.graph_digest, str) or not re.fullmatch(r"[a-f0-9]{64}", self.graph_digest)
+            or self.clip_skip_value_mode not in ("node_value", "skip_count")
+            or not isinstance(self.prepared_values, dict)
+            or "reference" in self.prepared_values
+            or any(type(value) not in (str, int, float) or (type(value) is float and not math.isfinite(value)) for value in self.prepared_values.values())
+            or any(value is not None and type(value) is not int for value in (self.seed, self.clip_skip_display, self.clip_skip_actual))):
+            raise ImagePreparationError("comfy_execution_snapshot_invalid")
+        policy = self.output
+        if not isinstance(policy, dict) or not (
+            policy == {"mode": "auto_first_image"}
+            or (policy.get("mode") in ("explicit_node", "legacy_single")
+                and set(policy) == {"mode", "node_id"} and isinstance(policy["node_id"], str)
+                and 0 < len(policy["node_id"]) <= 80)):
+            raise ImagePreparationError("comfy_execution_snapshot_invalid")
+        if self.seed != self.prepared_values.get("seed") or self.clip_skip_actual != self.prepared_values.get("clip_skip"):
+            raise ImagePreparationError("comfy_execution_snapshot_invalid")
 
 
 @dataclass(frozen=True)
@@ -104,6 +181,7 @@ class GenerationRequest:
     world_configuration_revision: int | None = None
     credential_binding: dict | None = None
     world_image_policy_revision: int | None = None
+    comfy_execution: ComfyExecution | None = None
 
 
 @dataclass(frozen=True)
@@ -112,6 +190,7 @@ class ImageResult:
     content_type: str
     receipt: str | None = None
     usage: dict[str, Any] | None = None
+    diagnostic: dict | None = None
 
 
 class ImagePreparationError(ValueError):
@@ -119,12 +198,13 @@ class ImagePreparationError(ValueError):
 
 
 class ImageSubmissionError(RuntimeError):
-    def __init__(self, code: str, *, outcome_unknown: bool = False, receipt: str | None = None, stage: str | None = None):
+    def __init__(self, code: str, *, outcome_unknown: bool = False, receipt: str | None = None, stage: str | None = None, diagnostic: dict | None = None):
         super().__init__(code)
         self.code = code
         self.outcome_unknown = outcome_unknown
         self.receipt = receipt
         self.stage = stage
+        self.diagnostic = diagnostic
 
 
 def compose_positive(*, style: str, appearance: str, scene: str) -> str:

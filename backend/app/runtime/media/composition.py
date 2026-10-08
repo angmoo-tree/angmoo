@@ -18,7 +18,7 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.models_media import MediaCredential
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service import media_credentials
-from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, select_comfy_workflow, MODEL_CATALOG
+from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, MODEL_CATALOG
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.service.assets import AssetService, prepare_asset_image
 from app.domains.media.models import MediaAsset
@@ -27,6 +27,7 @@ from app.domains.routines.service.tick_schedule import APP_TIMEZONE
 from app.domains.social.service.image_intent_generation import GenerationWorker, admit, source_revision
 from app.domains.worlds.models import World
 from app.integrations.comfy_images import ComfyImageClient
+from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, restore_generation_request, select_comfy_workflow
 from app.integrations.image_api import ImageApiClient
 from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options
 from app.integrations.llm.image_interpretation import GeminiImageInterpreter
@@ -133,7 +134,7 @@ class MediaRuntime:
         if saved["provider"] == "comfyui":
             try:
                 workflow = select_comfy_workflow(ComfyOptions.model_validate(options), has_reference=has_reference)
-                path = "reference" if has_reference and "reference" in workflow.bindings else "text"
+                path = "reference" if has_reference and "reference" in required_roles(workflow) else "text"
             except (ImagePreparationError, ValueError):
                 path = "unavailable"
                 reason = "comfy_reference_or_text_path_required"
@@ -341,8 +342,8 @@ class MediaRuntime:
                 if partner and partner.revision != profile.get("partner_credential_revision"):
                     raise ImagePreparationError("comfy_partner_key_changed")
                 workflow = select_comfy_workflow(comfy, has_reference=bool(reference.asset_id))
-                negative = row.negative_prompt if "negative" in workflow.bindings else None
-                options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
+                negative = row.negative_prompt if "negative" in required_roles(workflow) else None
+                options = comfy.model_dump(exclude_none=True)
             else:
                 negative = row.negative_prompt if provider == "novelai" else None
             if provider == "novelai":
@@ -356,7 +357,7 @@ class MediaRuntime:
                 world_id=configuration.world_id if configuration else None,
                 world_character_id=configuration.world_character_id if configuration else None,
                 world_configuration_revision=configuration.revision if configuration else None)
-            return request, credential, row.generation_revision, row.generation_daily_limit, None
+            return freeze_comfy_request(request), credential, row.generation_revision, row.generation_daily_limit, None
         except Exception as exc:
             code = str(exc) if isinstance(exc, ImagePreparationError) else "reference_preparation_failed"
             return None, credential, row.generation_revision, row.generation_daily_limit, code
@@ -406,7 +407,7 @@ class MediaRuntime:
         if post.author_character_id != job.character_id:
             raise ImagePreparationError("generation_post_author_changed")
         value = json.loads(intent.request_json)
-        request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        request = restore_generation_request(value)
         if request.credential_binding:
             from app.runtime.media.world_generation import prepare_execution
             key, partner, reference = prepare_execution(self, db, job, intent, request)
@@ -417,7 +418,7 @@ class MediaRuntime:
         if row is None or not row.generation_auto_enabled or row.generation_revision != intent.settings_revision:
             raise ImagePreparationError("generation_settings_changed")
         value = json.loads(intent.request_json)
-        request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        request = restore_generation_request(value)
         if request.world_configuration_revision is not None and (
                 request.world_id != post.world_id or request.world_character_id != post.author_world_character_id
                 or type(request.world_configuration_revision) is not int or request.world_configuration_revision < 1):
@@ -459,12 +460,12 @@ class MediaRuntime:
         db.execute(update(WorldImageAttempt).where(WorldImageAttempt.purpose == "image",
             WorldImageAttempt.request_key == attempt_id).values(state=state))
 
-    async def submit(self, execution, *, on_receipt, on_submit=None):
+    async def submit(self, execution, *, on_receipt, on_submit=None, on_diagnostic=None):
         request = execution.request
         if request.provider == "comfyui":
             client = self.clients.get("comfyui") or ComfyImageClient(request.options["base_url"])
             return await client.generate(request, execution.key, execution.reference, on_receipt=on_receipt,
-                receipt=execution.receipt, on_submit=on_submit,
+                receipt=execution.receipt, on_submit=on_submit, on_diagnostic=on_diagnostic,
                 **({"partner_key": execution.partner_key} if request.options.get("partner_auth") else {}))
         client = self.clients[request.provider]
         if request.provider in {"nanogpt", "openrouter"}:
@@ -491,14 +492,26 @@ class MediaRuntime:
                     character_id=character_id, provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE).reveal()
             if not partner_key:
                 raise ImagePreparationError("comfy_partner_key_required")
+        if data.provider == "comfyui":
+            from types import SimpleNamespace
+            options = ComfyOptions.model_validate(data.options)
+            row = db.get(AgentImageGenerationSetting, character_id)
+            profiles = json.loads(row.generation_profiles_json) if row else {}
+            from app.domains.characters.service.generation_settings import profile_key
+            previous = profiles.get(profile_key(data.provider, data.model, data.options), {})
+            initialized = bool(previous and previous.get("reference_initialized", True))
+            preferred = data.reference_enabled if data.reference_enabled is not None else (
+                bool(previous.get("reference_enabled")) if initialized
+                else "reference" in required_roles(options.workflow))
+            reference = self._reference(db, user.id, db.get(Character, character_id),
+                SimpleNamespace(reference_asset_id=data.reference_asset_id),
+                preferred, materialize=False)
+            has_reference = bool(reference.asset_id) or reference.source != "none"
         # Read-only connection checks end the read transaction before awaiting the network.
         db.rollback()
         if data.provider == "comfyui":
-            options = ComfyOptions.model_validate(data.options)
-            info = await ComfyImageClient(options.base_url).validate(options, key=key)
-            return {"ready": True, "reference_supported": bool(options.workflow and "reference" in options.workflow.bindings),
-                "object_info": {node["class_type"]: info[node["class_type"]] for workflow in (options.workflow,options.text_workflow) if workflow for node in workflow.prompt.values()},
-                "checked_at": datetime.now(timezone.utc).isoformat()}
+            checked = await ComfyImageClient(options.base_url).validate(options, key=key, has_reference=has_reference)
+            return {**checked, "checked_at": datetime.now(timezone.utc).isoformat()}
         if not key:
             raise ImagePreparationError("generation_key_required")
         if data.provider == "novelai":

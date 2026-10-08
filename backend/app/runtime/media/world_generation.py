@@ -10,7 +10,7 @@ from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.service.configuration import configuration_for_actor
 from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.generation_contracts import (GenerationRequest, EffectiveReference, ImagePreparationError,
-    NovelOptions, ComfyOptions, ApiImageOptions, select_comfy_workflow, MODEL_CATALOG, compose_positive)
+    NovelOptions, ComfyOptions, ApiImageOptions, MODEL_CATALOG, compose_positive)
 from app.domains.media.api_image_policy import validate_api_options
 from app.domains.media.service import world_policy
 from app.domains.identity.service import world_credentials
@@ -18,6 +18,7 @@ from app.domains.identity.service.environment import snapshot
 from app.domains.social.models.image_intents import ImageGenerationAttempt, ImageIntent
 from app.domains.social.models.posts import PostImageGenerationJob, Post
 from app.runtime.world_credential_binding import capture
+from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, select_comfy_workflow, validate_app_workflow, validate_base_url
 
 
 def validate_settings(value, *, previous=None):
@@ -35,7 +36,13 @@ def validate_settings(value, *, previous=None):
             raise ImagePreparationError("world_image_policy_invalid")
         provider = key.split(":", 1)[0]
         options = profile.get("options", {})
-        parsed_options = (NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions).model_validate(options).model_dump(exclude_none=True)
+        typed = (NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions).model_validate(options)
+        if provider == "comfyui":
+            validate_base_url(typed.base_url)
+            for workflow in (typed.workflow, typed.text_workflow):
+                if workflow is not None:
+                    validate_app_workflow(workflow)
+        parsed_options = typed.model_dump(exclude_none=True)
         profile["options"] = parsed_options
         connection = profile.get("connection")
         old = (previous or {}).get("profiles", {}).get(key, {})
@@ -50,7 +57,7 @@ def validate_settings(value, *, previous=None):
     return parsed
 
 
-def _reference(media, db, owner, actor, config, values):
+def _reference(media, db, owner, actor, config, values, *, materialize=True):
     if not values.get("reference_enabled"):
         return EffectiveReference(False, reason="disabled")
     if values.get("reference_asset_id"):
@@ -62,7 +69,7 @@ def _reference(media, db, owner, actor, config, values):
         CharacterCardSource.source_format == "png").order_by(CharacterCardSource.created_at.desc(), CharacterCardSource.id.desc()))
     if card:
         return media._reference_asset(db, owner, actor.character_id, "image/png", card.source_bytes,
-            source="card", materialize=True, actor_id=actor.id)
+            source="card", materialize=materialize, actor_id=actor.id)
     url = config.profile.avatar_url
     if url:
         prefix = media.settings.media_url_path.rstrip("/") + "/"
@@ -76,7 +83,7 @@ def _reference(media, db, owner, actor, config, values):
         pixels = path.read_bytes()
         with Image.open(BytesIO(pixels)) as image:
             mime = Image.MIME.get(image.format)
-        return media._reference_asset(db, owner, actor.character_id, mime, pixels, source="profile", materialize=True, actor_id=actor.id)
+        return media._reference_asset(db, owner, actor.character_id, mime, pixels, source="profile", materialize=materialize, actor_id=actor.id)
     return EffectiveReference(True, reason="source_missing")
 
 
@@ -115,8 +122,8 @@ def prepare_intent(media, db, owner, character_id, scene, scene_error, config):
             if comfy.partner_auth and not partner:
                 raise ImagePreparationError("comfy_partner_key_required")
             workflow = select_comfy_workflow(comfy, has_reference=bool(reference.asset_id))
-            negative = values.get("negative") if "negative" in workflow.bindings else None
-            options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
+            negative = values.get("negative") if "negative" in required_roles(workflow) else None
+            options = comfy.model_dump(exclude_none=True)
         elif provider == "novelai":
             options = NovelOptions.model_validate(options).model_dump()
             if options["mode"] == "opus_free":
@@ -139,7 +146,7 @@ def prepare_intent(media, db, owner, character_id, scene, scene_error, config):
             connection.get("endpoint"), world_id=actor.world_id, world_character_id=actor.id,
             world_configuration_revision=config.revision, credential_binding=binding,
             world_image_policy_revision=policy.revision)
-        return request, None, policy.revision, policy.generation_limit, None
+        return freeze_comfy_request(request), None, policy.revision, policy.generation_limit, None
     except Exception as exc:
         code = str(exc) if isinstance(exc, ImagePreparationError) else "generation_source_or_key_changed"
         return None, None, policy.revision, policy.generation_limit, code

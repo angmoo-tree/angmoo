@@ -173,6 +173,8 @@
       "app.domains.local_bot.service.rate_limits",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.media.service.comfy_workflows",
+      "app.domains.media.service.http_workflows",
       "app.domains.memory.contracts",
       "app.domains.memory.contracts.batch",
       "app.domains.memory.contracts.batch_preparation",

@@ -689,3 +689,15 @@ SNS 관계 현재성은 AI에 제공한 순서를 유지하는 입력 해시와 
 판단 전용 응답/제안의 의미는 `domains/routines/contracts/reply_writing.py`와 `domains/social/contracts/proposal_plan.py`에 두고 실제 본문·서버 task·일정/공개 제안 결합은 canonical owner에서 검증한다. 모델용 view의 필드 축소는 원천 Candidate·revision·Chat/Memory 입력을 삭제하는 절차가 아니다. 신규 wire 정책과 Routine 출력 정책은 별도 metadata로 생성 시 고정하며 이전 V2/2의 정책 부재는 기존 계약으로 읽는다.
 
 미완료 current/V1의 퇴역은 `runtime/autonomous_activity/retirement.py`가 도메인 `routines/service/legacy_claims.py`와 조립한다. 실제 claim·불확실 효과는 actor별로 보류하고, 지원 정산 이후에만 abandoned/aborted로 종료한다. 성공·역사·원장·기존 보존 정책은 유지한다. current 설정은 승인·하루 준비·scope/revision 확인 후 조건부 전환하며 구 실행을 SDK로 재개하지 않는다. startup은 그 앱의 composition session factory를 사용한다. 상세 계약과 검증 범위는 [실행·검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)에 있다.
+
+## ComfyUI 입력·출력 연동 (2026-10-09)
+
+`domains/media/generation_contracts.py`와 `service/comfy_workflows.py`가 legacy/v2 옵션, typed 자리표시자 위치, 유한 값·JSON 상한, 선택 경로와 실행 snapshot을 소유한다. 문자열 전체가 14개 지원 토큰과 같은 `node.inputs` 위치만 바꾸며 링크·metadata·고정 값은 보존한다. API graph의 class/input type·연결 가능성·custom node·모델 설치 조건은 `integrations/comfy_images.py`의 `/prompt` 요청에서 ComfyUI가 최종 검사한다. `/system_stats`는 연결 확인, `/object_info`는 선택적인 입력 후보 조회이며 후보 실패가 준비 완료를 막지 않는다. Partner 인증은 명시적 옵션과 별도 목적 credential을 사용한다.
+
+다른 업무가 소비하는 지원 경로는 실제 역할 파일인 `service/comfy_workflows.py`(순수 입력 준비·선택·복원), `schemas.py`(제한된 분석·진단 DTO), `service/http_workflows.py`(framework decoding 전 raw HTTP JSON 검사)다. import 정책에 이 세 경로만 명시하며 예외나 facade를 추가하지 않는다. DTO 파일은 워크플로 알고리즘을 역참조하지 않고, 선택 함수는 `service/comfy_workflows.py`에서 DTO를 소비하므로 순환 의존이 없다.
+
+Character와 World runtime은 실제 장면·negative·참조 scope를 조립하고, 접수 전에 seed -1을 한 번 추첨하고 양수 CLIP skip을 한 번 변환한다. 경로·graph digest·입력/출력 정책·실제 값은 기존 intent `request_json`에 고정한다. PNG Base64는 제출 시 픽셀에서 한 번 만들고 저장하지 않는다. 이전 receipt는 history만 조회하며, 이전 미제출 작업만 lease 안에서 snapshot을 보완한다. 참조 없는 텍스트 대체 경로는 제출 전에 선택한다.
+
+자동 출력은 JavaScript Object.values 키 순서의 첫 images 배열 첫 항목을 선택한다. explicit v2도 지정 노드 첫 항목이며 legacy는 기존 단일 출력 규칙을 보존한다. 잘못된 첫 결과를 두 번째 이미지로 대체하지 않는다. 제출 오류는 receipt 유무와 HTTP 상태로 알려진 실패/미확정 상태를 구분하며, history 실행 오류·완료 후 이미지 없음은 종료 상태다.
+
+`schemas.py`와 `integrations/comfy_diagnostics.py`는 whitelist·민감값 가림·20항목/16 KiB 진단을 담당한다. Social worker가 동일 lease의 receipt와 nullable 진단을 짧은 transaction으로 저장하고 spool 복구 시 재사용한다. Alembic 0110 및 embedded SQLite v33은 새 진단 컬럼만 추가하며 v32 이하 manifest를 바꾸지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)은 모의 원본 재사용, 실제 무모델 ComfyUI 통신, 미측정 AI/설치 환경을 구분한다.

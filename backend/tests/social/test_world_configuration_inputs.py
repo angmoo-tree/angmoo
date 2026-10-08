@@ -295,7 +295,7 @@ class FakeImages:
     def __init__(self):
         self.requests = []
 
-    async def generate(self, request, key, reference, *, on_receipt=None, receipt=None, on_submit=None):
+    async def generate(self, request, key, reference, *, on_receipt=None, receipt=None, on_submit=None, on_diagnostic=None):
         assert key is None and reference is None
         if receipt is None:
             if on_submit:
@@ -349,6 +349,42 @@ def test_actual_image_admission_and_worker_retain_frozen_world_values(database, 
         assert db.get(PostImageGenerationJob, job_id).status == "succeeded"
         assert db.scalar(select(PostMedia).where(PostMedia.post_id == "world-a-image-post")).source_kind == "generated"
         assert db.get(WorldCharacter, "config-role-b").autonomous_enabled is False
+
+
+def test_world_placeholder_admission_freezes_actual_values_once(database, tmp_path, monkeypatch):
+    from app.domains.media.service import comfy_workflows
+    draws = []
+    monkeypatch.setattr(comfy_workflows.secrets, "randbits", lambda bits: draws.append(bits) or 731)
+    sessions = sessionmaker(database, expire_on_commit=False)
+    fake = FakeImages()
+    media = MediaRuntime(sessions, SimpleNamespace(media_root_path=tmp_path / "media"), clients={"comfyui": fake})
+    with sessions() as db:
+        actor, configuration = world_values(db, "a", image=True)
+        media.limits.write(db, 4, expected_revision=0)
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_settings = {**policy.generation_settings, "profiles": {"comfyui:workflow": {
+            "options": {"options_schema_version": 2, "values": {"seed": -1, "clip_skip": 2},
+                "workflow": {"input_mode": "placeholders", "prompt": {"8": {"class_type": "Custom", "inputs": {
+                    "text": "%prompt%", "negative": "%negative_prompt%", "seed": "%seed%", "clip": "%clip_skip%"}}}}},
+            "connection": {"ready": True}}}}
+        db.flush()
+        post = Post(id="world-v2-image-post", world_id=actor.world_id, author_world_character_id=actor.id,
+            author_character_id=actor.character_id, author_name=configuration.profile.display_name, title="A post", body="A body")
+        db.add(post); db.flush()
+        intent = media.admit_post(db, post=post, owner_id="fixture-owner", character_id=actor.character_id,
+            draft=SimpleNamespace(_image_prompt="reading at a desk", _image_error=None),
+            input_snapshot={"_world_configuration": configuration.request_snapshot()})
+        db.commit()
+        assert intent.state == "queued"
+        snapshot = json.loads(intent.request_json)["comfy_execution"]
+        assert snapshot["prepared_values"] == {"positive": "World a watercolor, World a red coat, reading at a desk",
+            "negative": "blur", "seed": 731, "clip_skip": -2}
+        assert snapshot["clip_skip_display"] == 2 and snapshot["input_mode"] == "placeholders"
+        job_id = db.scalar(select(PostImageGenerationJob.id).where(PostImageGenerationJob.intent_id == intent.id))
+    asyncio.run(media.worker.process(job_id))
+    asyncio.run(media.worker.process(job_id))
+    assert draws == [32] and len(fake.requests) == 1
+    assert fake.requests[0].comfy_execution.prepared_values == snapshot["prepared_values"]
 
 
 def test_image_validation_options_and_prepare_use_same_supported_profile(database, tmp_path):

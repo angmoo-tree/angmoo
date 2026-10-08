@@ -47,7 +47,14 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
     if provider != "comfyui" and f"{provider}:{model}" not in MODEL_CATALOG:
         raise ImagePreparationError("model_not_supported")
     option_type = NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions
-    options = option_type.model_validate(data.options).model_dump(exclude_none=True)
+    typed = option_type.model_validate(data.options)
+    if provider == "comfyui":
+        from app.domains.media.service.comfy_workflows import validate_app_workflow, validate_base_url
+        validate_base_url(typed.base_url)
+        for workflow in (typed.workflow, typed.text_workflow):
+            if workflow is not None:
+                validate_app_workflow(workflow)
+    options = typed.model_dump(exclude_none=True)
     if provider != "comfyui" and (data.partner_api_key is not None or data.clear_partner_api_key):
         raise ImagePreparationError("comfy_partner_credential_scope_invalid")
     if data.reference_asset_id:

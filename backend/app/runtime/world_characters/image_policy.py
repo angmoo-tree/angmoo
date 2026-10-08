@@ -72,7 +72,7 @@ async def check(service, *, world_id, world_character_id, user, data):
     media = current()
     if media is None:
         raise ImagePreparationError("image_runtime_unavailable")
-    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
+    actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
     row = service.db.get(WorldImagePolicy, world_character_id)
     if row is None or row.revision != data.expected_revision:
         raise ImagePreparationError("world_image_policy_revision_conflict")
@@ -84,15 +84,19 @@ async def check(service, *, world_id, world_character_id, user, data):
     material, partner = resolve_image_keys(service.db, owner_id=user.id, world_id=world_id,
         world_character_id=world_character_id, revision=binding["revision"])
     secret = material.reveal() if material else None
+    if binding["provider"] == "comfyui":
+        from app.runtime.media.world_generation import _reference
+        from app.domains.world_characters.service.configuration import effective_configuration
+        reference = _reference(media, service.db, user.id, actor,
+            effective_configuration(service.db, world_character_id=actor.id), values, materialize=False)
+        has_reference = bool(reference.asset_id) or reference.source != "none"
     service.db.rollback()
     provider = binding["provider"]
     if provider == "comfyui":
         typed = ComfyOptions.model_validate(options)
         if typed.partner_auth and not partner:
             raise ImagePreparationError("comfy_partner_key_required")
-        info = await ComfyImageClient(typed.base_url).validate(typed, key=secret)
-        connection = {"ready": True, "reference_supported": bool(typed.workflow and "reference" in typed.workflow.bindings),
-            "object_info": {node["class_type"]: info[node["class_type"]] for workflow in (typed.workflow, typed.text_workflow) if workflow for node in workflow.prompt.values()}}
+        connection = await ComfyImageClient(typed.base_url).validate(typed, key=secret, has_reference=has_reference)
     elif provider == "novelai":
         typed = NovelOptions.model_validate(options)
         media._require_novel_validation()

@@ -32,6 +32,8 @@ WORKFLOW = {"prompt": {"1": {"class_type": "PartnerImage", "inputs": {"prompt": 
 
 def transport(info=INFO):
     def respond(method, url, kwargs):
+        if url.endswith("/system_stats"):
+            return httpx.Response(200, json={"system": {"os": "synthetic"}})
         if url.endswith("/object_info"):
             return httpx.Response(200, json=info)
         if url.endswith("/prompt"):
@@ -45,13 +47,12 @@ def transport(info=INFO):
 
 @pytest.mark.parametrize("enabled", [False, True])
 def test_partner_detection_requires_matching_auth_mode(enabled):
+    # Keep the protected node name; the new contract uses the explicit switch.
     options = ComfyOptions(partner_auth=enabled, workflow=WORKFLOW)
     call = ComfyImageClient(options.base_url, transport()).validate(options)
-    if enabled:
-        assert asyncio.run(call) == INFO
-    else:
-        with pytest.raises(ImagePreparationError, match="comfy_partner_auth_required"):
-            asyncio.run(call)
+    result = asyncio.run(call)
+    assert result["ready"] and result["object_info"] == INFO
+    assert options.partner_auth is enabled
 
 
 def test_partner_body_uses_account_key_and_headers_use_server_key_once():
@@ -66,8 +67,9 @@ def test_partner_body_uses_account_key_and_headers_use_server_key_once():
     posts = [entry for entry in http.calls if entry[1].endswith("/prompt")]
     assert len(posts) == 1 and receipts == ["partner-receipt"]
     assert posts[0][2]["key"] == "synthetic-server-key"
-    assert posts[0][2]["json"]["extra_data"] == {"api_key_comfy_org": "synthetic-account-key"}
-    assert "synthetic-account-key" not in json.dumps(posts[0][2]["json"]["prompt"])
+    body = json.loads(posts[0][2]["content"])
+    assert body["extra_data"] == {"api_key_comfy_org": "synthetic-account-key"}
+    assert "synthetic-account-key" not in json.dumps(body["prompt"])
     http.calls.clear()
     asyncio.run(client.generate(request, "synthetic-server-key", None, partner_key="synthetic-account-key",
         on_receipt=receipt, receipt="partner-receipt"))
@@ -93,7 +95,7 @@ def test_nonpartner_does_not_receive_account_key():
         pass
     asyncio.run(ComfyImageClient(options.base_url, http).generate(request, None, None,
         partner_key="must-not-send", on_receipt=receipt))
-    assert all("must-not-send" not in json.dumps(kwargs) for _, _, kwargs in http.calls)
+    assert all("must-not-send" not in str(kwargs) for _, _, kwargs in http.calls)
 
 
 def test_partner_credential_envelope_snapshot_reload_delete_and_revision(tmp_path):

@@ -1,5 +1,6 @@
 """Plan regressions: synthetic DB/files and no real network or credentials."""
 import asyncio
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -63,7 +64,7 @@ def test_known_failed_comfy_job_retry_can_submit_a_new_attempt(tmp_path):
     job_id = admit(sessions, media)
     original = provider.generate
 
-    async def execution_failed(request, key, reference, *, on_submit, on_receipt, receipt=None):
+    async def execution_failed(request, key, reference, *, on_submit, on_receipt, receipt=None, on_diagnostic=None):
         await on_submit()
         provider.calls += 1
         await on_receipt("failed-comfy-receipt")
@@ -105,7 +106,7 @@ def test_text_workflow_applies_its_supported_negative_prompt(tmp_path):
         if url.endswith("/object_info"):
             return httpx.Response(200, json=object_info())
         if url.endswith("/prompt"):
-            calls.append(kwargs["json"]["prompt"])
+            calls.append(json.loads(kwargs["content"])["prompt"])
             return httpx.Response(200, json={"prompt_id":"text-receipt"})
         if "/history/" in url:
             return httpx.Response(200, json={"text-receipt":{"outputs":{"7":{"images":[{"filename":"result.png","type":"output"}]}}}})

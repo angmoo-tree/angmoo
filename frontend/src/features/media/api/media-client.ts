@@ -1,7 +1,8 @@
 import { apiRequest } from "@/lib/http/api-request";
-import type { Asset, Catalog, GenerationSettings, GenerationWrite, InterpretationSettings, Workflow, UsageSettings, GenerationJob } from "../types/media";
+import type { Asset, Catalog, GenerationSettings, GenerationWrite, InterpretationSettings, Workflow, WorkflowAnalysis, UsageSettings, GenerationJob } from "../types/media";
 
 export const getCatalog = (signal?: AbortSignal) => apiRequest<Catalog>("/media/catalog", { signal });
+export const analyzeComfyWorkflow = (source_json: string, input_mode: "placeholders" | "node_bindings", signal?: AbortSignal) => apiRequest<WorkflowAnalysis>("/media/comfy-workflows/analyze", { method: "POST", body: { source_json, input_mode }, signal });
 export const getUsage = (signal?: AbortSignal) => apiRequest<UsageSettings>("/media/usage-settings", { signal });
 export const saveUsage = (data: { expected_revision: number; daily_limit: number }) => apiRequest<UsageSettings>("/media/usage-settings", { method: "PUT", body: data });
 const generationJobPath = (worldId: string, postId: string) => `/media/worlds/${encodeURIComponent(worldId)}/posts/${encodeURIComponent(postId)}/image-generation`;

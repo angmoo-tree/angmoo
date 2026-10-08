@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.runtime.persistence.model_registration import register_models
 from app.runtime.persistence.sqlite_schema import (
-    build_sqlite_v31_metadata, build_sqlite_baseline_metadata, create_schema_version_table,
+    build_sqlite_v31_metadata, build_sqlite_v32_metadata, create_schema_version_table, SQLITE_SCHEMA_VERSION,
     sqlite_schema_contract_digest, sqlite_schema_digest,
 )
 from app.runtime.migrations.sqlite_versions import situation_recovery_v32
@@ -95,9 +95,10 @@ def test_populated_v31_delta_preserves_every_old_column_and_high_water_sequence(
 
 
 def test_fresh_orm_matches_frozen_v32_manifest(tmp_path):
+    # The published v32 contract uses its frozen builder after the v33 delta.
     engine = create_engine(f"sqlite:///{tmp_path / 'fresh.sqlite3'}")
     register_models()
-    build_sqlite_baseline_metadata().create_all(engine)
+    build_sqlite_v32_metadata().create_all(engine)
     with engine.begin() as connection:
         create_schema_version_table(connection)
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest
@@ -158,5 +159,5 @@ def test_staging_failure_keeps_original_database_and_selected_marker(tmp_path, m
     assert not list(controller.generations.glob(".*.tmp-*"))
     monkeypatch.setitem(registry.MIGRATIONS, 31, original)
     result = SqliteCanonicalUpgradeCoordinator(StaticRuntimeDataPath(root), fallback_generation="v31-fixture").upgrade()
-    assert result.source_version == 31 and result.target_version == 32 and result.migrated
+    assert result.source_version == 31 and result.target_version == SQLITE_SCHEMA_VERSION and result.migrated
     assert hashlib.sha256(path.read_bytes()).hexdigest() == original_sha

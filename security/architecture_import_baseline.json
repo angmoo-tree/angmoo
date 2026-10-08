@@ -1,7 +1,7 @@
 {
-  "edge_count": 6249,
-  "external_import_count": 4275,
-  "module_count": 1465,
+  "edge_count": 6268,
+  "external_import_count": 4294,
+  "module_count": 1469,
   "modules": [
     {
       "external_imports": [],
@@ -1476,7 +1476,8 @@
         "app.domains.identity.contracts",
         "app.domains.identity.service.demo_access",
         "app.domains.identity.service.media_credentials",
-        "app.domains.media.contracts"
+        "app.domains.media.contracts",
+        "app.domains.media.service.comfy_workflows"
       ],
       "module": "app.domains.characters.service.generation_settings",
       "path": "backend/app/domains/characters/service/generation_settings.py",
@@ -4368,7 +4369,9 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "math",
         "pydantic",
+        "re",
         "typing"
       ],
       "imports": [
@@ -4430,6 +4433,9 @@
         "app.domains.identity.service.http_auth",
         "app.domains.media.contracts",
         "app.domains.media.generation_contracts",
+        "app.domains.media.schemas",
+        "app.domains.media.service.comfy_workflows",
+        "app.domains.media.service.http_workflows",
         "app.domains.media.service.interpretation",
         "app.domains.media.setting_schemas"
       ],
@@ -4440,10 +4446,14 @@
     {
       "external_imports": [
         "datetime",
+        "json",
         "pydantic",
+        "typing",
         "urllib.parse"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.media.generation_contracts"
+      ],
       "module": "app.domains.media.schemas",
       "path": "backend/app/domains/media/schemas.py",
       "wildcard_imports": []
@@ -4469,6 +4479,37 @@
       ],
       "module": "app.domains.media.service.assets",
       "path": "backend/app/domains/media/service/assets.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "math",
+        "secrets",
+        "urllib.parse"
+      ],
+      "imports": [
+        "app.domains.media.generation_contracts"
+      ],
+      "module": "app.domains.media.service.comfy_workflows",
+      "path": "backend/app/domains/media/service/comfy_workflows.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "json"
+      ],
+      "imports": [
+        "app.domains.media.generation_contracts",
+        "app.domains.media.service.comfy_workflows"
+      ],
+      "module": "app.domains.media.service.http_workflows",
+      "path": "backend/app/domains/media/service/http_workflows.py",
       "wildcard_imports": []
     },
     {
@@ -12773,6 +12814,8 @@
       ],
       "imports": [
         "app.domains.media.contracts",
+        "app.domains.media.schemas",
+        "app.domains.media.service.comfy_workflows",
         "app.domains.social.models.image_intents",
         "app.domains.social.models.posts",
         "app.domains.social.service.generation_usage"
@@ -13994,6 +14037,7 @@
         "app.domains.identity.schemas",
         "app.domains.media.contracts",
         "app.domains.media.schemas",
+        "app.domains.media.service.http_workflows",
         "app.domains.memory.exceptions",
         "app.domains.world_characters.schemas.deletion",
         "app.domains.world_characters.schemas.management",
@@ -15714,17 +15758,32 @@
     },
     {
       "external_imports": [
+        "json",
+        "re"
+      ],
+      "imports": [
+        "app.domains.media.schemas"
+      ],
+      "module": "app.integrations.comfy_diagnostics",
+      "path": "backend/app/integrations/comfy_diagnostics.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
         "asyncio",
-        "copy",
-        "ipaddress",
-        "math",
-        "secrets",
+        "base64",
+        "dataclasses",
+        "hashlib",
+        "io",
         "time",
         "urllib.parse"
       ],
       "imports": [
         "app.core.image_bytes",
         "app.domains.media.generation_contracts",
+        "app.domains.media.service.comfy_workflows",
+        "app.integrations.comfy_diagnostics",
         "app.integrations.image_api",
         "app.integrations.media.images"
       ],
@@ -18554,7 +18613,8 @@
         "json",
         "logging",
         "pathlib",
-        "sqlalchemy"
+        "sqlalchemy",
+        "types"
       ],
       "imports": [
         "app.domains.characters.models",
@@ -18572,6 +18632,7 @@
         "app.domains.media.models",
         "app.domains.media.models_world_policy",
         "app.domains.media.service.assets",
+        "app.domains.media.service.comfy_workflows",
         "app.domains.media.service.interpretation",
         "app.domains.routines.service.tick_schedule",
         "app.domains.social.models.image_intents",
@@ -18659,6 +18720,7 @@
         "app.domains.media.generation_contracts",
         "app.domains.media.models_world_policy",
         "app.domains.media.schemas",
+        "app.domains.media.service.comfy_workflows",
         "app.domains.media.service.world_policy",
         "app.domains.social.models.image_intents",
         "app.domains.social.models.posts",
@@ -19807,6 +19869,17 @@
     },
     {
       "external_imports": [
+        "hashlib"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.comfy_diagnostics_v33",
+      "path": "backend/app/runtime/migrations/sqlite_versions/comfy_diagnostics_v33.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "dataclasses",
@@ -19900,6 +19973,7 @@
       "imports": [
         "app.runtime.migrations.sqlite_versions.activity_situation_v31",
         "app.runtime.migrations.sqlite_versions.character_background_v22",
+        "app.runtime.migrations.sqlite_versions.comfy_diagnostics_v33",
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.creator_v21",
         "app.runtime.migrations.sqlite_versions.daily_preparation_v23",
@@ -22792,6 +22866,7 @@
         "app.domains.media.generation_contracts",
         "app.domains.media.models_world_policy",
         "app.domains.media.service.world_policy",
+        "app.domains.world_characters.service.configuration",
         "app.integrations.comfy_images",
         "app.runtime.media.binding",
         "app.runtime.media.world_generation",

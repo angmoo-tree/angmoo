@@ -32,7 +32,7 @@ class Provider:
         return {"exact_verified": False, "generation_available": True, "state": "synthetic_only"}
     async def discover(self, model):
         return CATALOG[f"{self.provider}:{model}"]["payload"]["endpoints"][0]
-    async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None):
+    async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None, on_diagnostic=None):
         if self.error == "preparation":
             raise ImagePreparationError("test_preparation_failure")
         if receipt is None:

@@ -32,6 +32,7 @@ export type PostMediaRead = {
   alt_text: string;
   model: string;
   prompt_hash: string;
+  source_kind?: "generated" | "upload" | "legacy";
   byte_size: number;
   width: number;
   height: number;

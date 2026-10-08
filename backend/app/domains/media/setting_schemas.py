@@ -44,3 +44,8 @@ class AssetUpload(StrictInput):
 class InstallationUsageWrite(StrictInput):
     expected_revision: int = Field(ge=0)
     daily_limit: int = Field(ge=1, le=10000)
+
+
+class ComfyAnalysisWrite(StrictInput):
+    source_json: str = Field(min_length=1, max_length=2 * 1024 * 1024)
+    input_mode: Literal["placeholders", "node_bindings"] = "placeholders"

@@ -28,6 +28,7 @@ from app.domains.world_characters.schemas.status import WorldCharacterStatusRead
 from app.api.world_character_management_dependencies import instance_deletion_workflow
 from app.domains.world_characters.schemas.deletion import WorldInstanceDelete
 from app.domains.world_characters.schemas.deletion import WorldInstanceDeleteRead
+from app.domains.media.service.http_workflows import require_comfy_raw_json
 
 
 @router.get("/{world_id}/world-characters/{world_character_id}/status", response_model=WorldCharacterStatusRead)
@@ -49,13 +50,13 @@ def read_image_policy(world_id: str, world_character_id: str, request: Request, 
     return _credential_call(workflows.read, service, request, world_id=world_id, world_character_id=world_character_id, user=user)
 
 
-@router.patch("/{world_id}/world-characters/{world_character_id}/image-policy", response_model=WorldImagePolicyRead)
+@router.patch("/{world_id}/world-characters/{world_character_id}/image-policy", response_model=WorldImagePolicyRead, dependencies=[Depends(require_comfy_raw_json)])
 def write_image_policy(world_id: str, world_character_id: str, data: WorldImagePolicyPatch, request: Request, user=Depends(get_current_user),
     service=Depends(get_management_service), workflows=Depends(image_policy_workflows)):
     return _credential_call(workflows.write, service, request, mutation=True, world_id=world_id, world_character_id=world_character_id, user=user, data=data)
 
 
-@router.post("/{world_id}/world-characters/{world_character_id}/image-policy/check", response_model=WorldImagePolicyRead)
+@router.post("/{world_id}/world-characters/{world_character_id}/image-policy/check", response_model=WorldImagePolicyRead, dependencies=[Depends(require_comfy_raw_json)])
 async def check_image_policy(world_id: str, world_character_id: str, data: WorldImagePolicyPatch, request: Request,
     user=Depends(get_current_user), service=Depends(get_management_service), workflows=Depends(image_policy_workflows)):
     browser_session.require_local_frontend_request(request, mutation=True)

@@ -595,3 +595,11 @@ ko/en은 기존 namespace와 안정된 hook을 사용하고 locale 변경은 dra
 일반 Next 내부 링크의 작성 중 이탈 확인은 composition의 `BrowserNavigationGuard`가 기존 등록된 leave guard를 호출해 처리한다. Native와 static 탐색의 소유자는 그대로 유지하며, 수정 키·초안·첨부·사업 정책을 공통 탐색 계층으로 옮기지 않는다. locale 변경은 같은 route와 actor의 component 수명을 유지한다.
 
 `features/characters`의 personalized activity API/type/panel이 현재 지원 engine 쓰기와 역사 engine 읽기를 구분한다. 신규 입력은 V2 또는 상속 null이고 과거 current·abandoned 및 backend 전환 상태는 그대로 표시한다. 전환 readiness·owner·World·scope/revision·claim 정산은 Backend가 소유한다. UI의 안내 문구나 선택만으로 활동 ON·승인·예약을 변경하지 않는다. Next와 static 모두 같은 소유 컴포넌트를 사용한다. [검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)과 [LOCAL 디자인 근거](../docs/architecture/frontend-design-reference.md)의 최신 기록을 함께 읽는다.
+
+## 공통 ComfyUI 편집 화면 (2026-10-09)
+
+`features/media/components/comfy-editor.tsx`가 Character 생성 설정과 World 이미지 설정이 공통 사용하는 JSON 가져오기/편집·위치 안내·필요 값·후보·고급 출력 UI를 소유한다. `api/media-client.ts`의 인증된 분석 endpoint를 사용하며 입력 원문은 화면의 draft로 남기고, 분석된 graph만 부모 설정 draft로 전달한다. invalid 원문은 지우지 않고 저장을 막는다. 파일 import와 paste는 같은 분석 경로이며 중복 JSON 키 검사는 Backend raw decoder의 책임이다.
+
+Character/model 및 World/actor/profile 별 component key와 AbortSignal로 늦은 분석 결과를 격리한다. legacy는 조회 시 전환하지 않으며 명시적 전환만 v2 node_value 모드로 바꾼다. UI는 필요한 role만 보여주고 object_info 후보가 없으면 자유 입력을 제공한다. `/system_stats` 연결·앱 입력 준비·후보 조회 상태를 구분하며 서버의 실행 가능성 검사를 UI에서 재현하지 않는다. Next와 static은 동일 editor/status/error/types를 사용한다. 상세 진단은 plain text로 렌더링하며 성공한 작업의 warning도 확인할 수 있다.
+
+조립·소유권·credential transport는 기존 위치를 유지한다. JSON과 API 키를 localStorage에 보관하거나 다른 캐릭터 키를 가져오지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)을 참조한다.

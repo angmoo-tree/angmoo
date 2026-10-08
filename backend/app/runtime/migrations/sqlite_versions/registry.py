@@ -127,8 +127,10 @@ from app.runtime.migrations.sqlite_versions import world_configuration_v29
 from app.runtime.migrations.sqlite_versions import world_activity_v30
 from app.runtime.migrations.sqlite_versions import activity_situation_v31
 from app.runtime.migrations.sqlite_versions import situation_recovery_v32
+from app.runtime.migrations.sqlite_versions import comfy_diagnostics_v33
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    32: comfy_diagnostics_v33.upgrade,
     31: situation_recovery_v32.upgrade,
     30: activity_situation_v31.upgrade,
     29: world_activity_v30.upgrade,
@@ -163,6 +165,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    32: SqliteMigrationContract(source_version=32, target_version=33, name="comfy_safe_diagnostics", mutable_identity_tables=comfy_diagnostics_v33.MUTABLE_IDENTITY_TABLES, capture=comfy_diagnostics_v33.capture_delta, verify=comfy_diagnostics_v33.verify_delta),
     31: SqliteMigrationContract(source_version=31, target_version=32, name="situation_delivery_recovery", mutable_identity_tables=situation_recovery_v32.MUTABLE_IDENTITY_TABLES, capture=situation_recovery_v32.capture_delta, verify=situation_recovery_v32.verify_delta),
     30: SqliteMigrationContract(source_version=30, target_version=31, name="activity_situation_admission", mutable_identity_tables=activity_situation_v31.MUTABLE_IDENTITY_TABLES, capture=activity_situation_v31.capture_delta, verify=activity_situation_v31.verify_delta),
     29: SqliteMigrationContract(source_version=29, target_version=30, name="world_activity_credentials_batch32", mutable_identity_tables=world_activity_v30.MUTABLE_IDENTITY_TABLES, capture=world_activity_v30.capture_delta, verify=world_activity_v30.verify_delta),

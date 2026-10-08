@@ -14,6 +14,10 @@ from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.generation_contracts import ImagePreparationError, ImageSubmissionError
 from app.domains.media.setting_schemas import AssetUpload, GenerationSettingsWrite, InterpretationSettingsWrite, InstallationUsageWrite
 from app.domains.media.service.interpretation import read_interpretation_settings, write_interpretation_settings
+from app.domains.media.setting_schemas import ComfyAnalysisWrite
+from app.domains.media.service.comfy_workflows import analyze_source
+from app.domains.media.service.http_workflows import require_comfy_raw_json
+from app.domains.media.schemas import WorkflowAnalysis, ImageGenerationJobRead
 
 router = APIRouter(tags=["media"])
 
@@ -59,14 +63,14 @@ def read_generation(character_id: str, request: Request, db: Session = Depends(g
     return value
 
 
-@router.put("/agents/{character_id}/generation-settings", dependencies=[Depends(require_local_frontend_request)])
+@router.put("/agents/{character_id}/generation-settings", dependencies=[Depends(require_local_frontend_request), Depends(require_comfy_raw_json)])
 def save_generation(character_id: str, data: GenerationSettingsWrite, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
     value = guarded(lambda: runtime(request).write_generation(db, user, character_id, data), db)
     db.commit()
     return value
 
 
-@router.post("/agents/{character_id}/generation-settings/check", dependencies=[Depends(require_local_frontend_request)])
+@router.post("/agents/{character_id}/generation-settings/check", dependencies=[Depends(require_local_frontend_request), Depends(require_comfy_raw_json)])
 async def check_generation(character_id: str, data: GenerationSettingsWrite, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
     media = runtime(request)
     ensure_demo_user_mutable(user)
@@ -139,7 +143,15 @@ def comfy_sample(kind: str, user=Depends(get_current_user)):
     return json.loads((Path(__file__).parent / "samples" / f"comfy-{kind}.json").read_text("utf-8"))
 
 
-@router.get("/media/worlds/{world_id}/posts/{post_id}/image-generation")
+@router.post("/media/comfy-workflows/analyze", response_model=WorkflowAnalysis, dependencies=[Depends(require_local_frontend_request)])
+def analyze_comfy(data: ComfyAnalysisWrite, user=Depends(get_current_user)):
+    try:
+        return analyze_source(data.source_json, data.input_mode)
+    except ImagePreparationError as exc:
+        raise HTTPException(422, detail=str(exc)) from None
+
+
+@router.get("/media/worlds/{world_id}/posts/{post_id}/image-generation", response_model=ImageGenerationJobRead | None)
 def read_job(world_id: str, post_id: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
     media = runtime(request)
     guarded(lambda: media.authorize_post_world(db, user.id, world_id, post_id), db)

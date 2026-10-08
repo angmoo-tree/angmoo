@@ -1407,3 +1407,11 @@ child 창 닫기·화면 이동은 종료로 처리하지 않고, 내부 provide
 새 Media 화면은 LOCAL 작성으로 분류하고 기존 화면에 조합한다. 기존 semantic form/control/status 토큰을 사용하고 API 키는 저장 여부만 표시하며 input/localStorage에 되돌리지 않는다. Provider 모델/비용 모드의 참조 강제 OFF와 검증 여부, 생성·인식 사용량의 예약/시도, 오류/결과 미확정/로컬 첨부 복구를 구분한다. 참조 선호를 자동 생성 활성화로 표시하지 않는다.
 
 첨부는 한 장의 인증된 미리보기와 제거 버튼을 제공한다. 인식이 불가능한 Chat 첨부는 미리보기를 유지한 채 전송을 막으며 본문을 지우지 않는다. 사용자가 사진을 제거하면 원래 본문을 전송할 수 있다. SNS 작성은 제목과 본문 조건을 유지한다. 44px control, keyboard focus, reduced motion, 360/390/436/1440 폭과 확대 상태를 검증한다. Windows 브라우저 결과를 고정 Linux 환경의 pixel baseline 통과로 기록하지 않는다.
+
+## ComfyUI 공통 설정 편집 (2026-10-09)
+
+LOCAL 화면의 기존 설정 카드·semantic border/background/text/shadow와 44px control, keyboard focus를 사용한다. 서비스 선택과 독립된 서버/Partner 인증, API JSON 편집, 감지 위치, 필요한 값, 참조 설명, 기본 첫 이미지 선택, 접힌 고급 출력·연결/상한 안내의 순서로 설정한다. 기존 직접 입력 설정의 표시와 명시 전환은 별도로 안내한다.
+
+긴 JSON은 monospaced textarea 안에서 스크롤하고 위치 목록도 내부 스크롤한다. 명시적 label-for 및 오류 aria-describedby를 사용하며 invalid 원문을 보존한다. 후보 조회 실패는 입력을 계속할 수 있는 안내로 표시한다. 서버 연결 확인은 이미지 생성 성공으로 표현하지 않는다. 오류 정보는 접힌 plain-text 상세이며 prompt/key/Base64를 표시하지 않는다. ko/en 문구를 함께 관리한다.
+
+이번 LOCAL 진단 캡처는 360/1440 화면과 Next/static·ko/en 동작 확인에 사용한다. screenshot 호출 목록 42개, canonical PNG 11개 및 pixel threshold는 구분하며 기존 PNG·기준을 변경하지 않는다. Windows 기능 시험은 Linux canonical visual PASS나 native USER CHECK를 의미하지 않는다.
