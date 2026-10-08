@@ -200,12 +200,12 @@ def frontend_style_retirement_matches(source: str, original: str, records: list[
     return False
 
 
-@lru_cache(maxsize=2048)
+@lru_cache(maxsize=64)
 def definition_body(source: str) -> list[ast.stmt]:
     return ast.parse(source).body
 
 
-@lru_cache(maxsize=8192)
+@lru_cache(maxsize=1024)
 def definition_ast(source: str, symbol: str) -> str:
     body = definition_body(source)
     for part in symbol.split("."):
@@ -220,7 +220,7 @@ def definition_ast(source: str, symbol: str) -> str:
     return ast.dump(node, include_attributes=False)
 
 
-@lru_cache(maxsize=8192)
+@lru_cache(maxsize=2048)
 def normalize_ast_dump(value: str) -> str:
     """Normalize AST dumps or captured assertion source without executing text."""
     if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
