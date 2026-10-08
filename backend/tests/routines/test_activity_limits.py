@@ -1891,6 +1891,79 @@ def test_sqlite_concurrent_world_activation_serializes_capacity_at_one(
 
 
 @pytest.mark.parametrize("persistent_busy", [False, True])
+def test_sqlite_activation_detail_preparation_joins_bounded_writer(
+    monkeypatch: pytest.MonkeyPatch, tmp_path, persistent_busy: bool,
+) -> None:
+    import sqlite3
+    from sqlalchemy import event
+    from sqlalchemy.exc import OperationalError
+
+    monkeypatch.setattr(settings, "WORLD_AUTONOMY_MAX_ACTIVE_CHARACTERS", 1)
+    monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
+    monkeypatch.setattr(settings, "OPENCLAW_AGENT_IDS", "angmoo-1")
+    monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
+    monkeypatch.setattr(agent_service, "_activity_profile_readiness", _selected_world_readiness)
+    engine = create_engine(
+        f"sqlite:///{tmp_path / 'activation-detail.db'}",
+        connect_args={"timeout": 0.01},
+    )
+    _create_autonomy_capacity_tables(engine)
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        _add_capacity_agent(db, user_id=user.id, character_id="char-detail")
+        _add_active_routine_world_character(db, character_id="char-detail")
+        db.commit()
+
+    attempts = []
+    writer_starts = []
+
+    def contend(_connection, _cursor, statement, parameters, _context, _many):
+        if statement == "BEGIN IMMEDIATE":
+            writer_starts.append(statement)
+        if statement.startswith("INSERT INTO agent_image_generation_settings"):
+            attempts.append(statement)
+            assert len(writer_starts) == len(attempts)
+            if persistent_busy or len(attempts) == 1:
+                raise OperationalError(statement, parameters, sqlite3.OperationalError("database is locked"))
+
+    event.listen(engine, "before_cursor_execute", contend)
+    try:
+        with Session(engine) as db:
+            user = db.get(models.User, "user-1")
+            assert user is not None
+            if persistent_busy:
+                with pytest.raises(agent_service.AgentAutonomyRetryableError) as caught:
+                    autonomy_management.activate_agent(
+                        db, user, "char-detail", workflows=agent_service.build_autonomy_workflows(),
+                    )
+                assert caught.value.reason_code == "autonomy_activation_retryable"
+            else:
+                detail = autonomy_management.activate_agent(
+                    db, user, "char-detail", workflows=agent_service.build_autonomy_workflows(),
+                )
+                assert detail.settings.auto_enabled is True
+                assert detail.image_settings.image_generation_enabled is False
+        assert 1 <= len(attempts) <= 4
+        if not persistent_busy:
+            assert len(attempts) == 2
+        with Session(engine) as db:
+            setting = db.get(models.AgentActivitySetting, "char-detail")
+            assert setting.auto_enabled is (not persistent_busy)
+            world_character = db.scalar(select(models.WorldCharacter))
+            assert world_character.autonomous_enabled is (not persistent_busy)
+            expected_count = 0 if persistent_busy else 1
+            assert len(list(db.scalars(select(models.AgentImageGenerationSetting)))) == expected_count
+            assert len(list(db.scalars(select(models.AgentActivityLog)))) == expected_count
+            assigned = list(db.scalars(select(models.AgentSlot).where(
+                models.AgentSlot.assigned_character_id == "char-detail",
+            )))
+            assert len(assigned) == expected_count
+    finally:
+        event.remove(engine, "before_cursor_execute", contend)
+        engine.dispose()
+
+
+@pytest.mark.parametrize("persistent_busy", [False, True])
 def test_sqlite_capacity_rejection_log_has_bounded_writer_retry(
     monkeypatch: pytest.MonkeyPatch, tmp_path, persistent_busy: bool,
 ) -> None:

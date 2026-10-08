@@ -92,6 +92,11 @@ def _activate_agent_uow(
     if credential is None or not credential.enabled:
         raise workflows.credential_required_error("Agent credential is required before activation")
 
+    if not commit:
+        # SQLite owns one bounded writer UoW. Prepare lazy detail rows here so
+        # the response read cannot start an unprotected write after activation.
+        workflows.prepare_activation_detail(db, character.id)
+
     current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     selected_world_character = workflows.select_world_character(
         db, character_id=character.id
