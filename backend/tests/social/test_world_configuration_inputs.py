@@ -10,11 +10,15 @@ import pytest
 from PIL import Image
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
+from pydantic import SecretStr
 
 from app.config import settings
 from app.domains.characters.models import Character, AgentImageGenerationSetting
 from app.domains.characters.service.world_image_profiles import available_world_image_models, select_world_image_profile
 from app.domains.identity.models import LlmCredential
+from app.domains.identity.schemas import WorldCredentialWrite
+from app.domains.identity.service import world_credentials
+from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.generation_contracts import ImageResult, ImagePreparationError
 from app.domains.routines.contracts.activity_policy import ActivityPolicy
 from app.domains.routines.models import AgentRun, AgentActivitySetting
@@ -51,6 +55,12 @@ def database(tmp_path, request):
             before = world_configuration_v28.capture_delta(connection)
             world_configuration_v28.upgrade(connection)
             world_configuration_v28.verify_delta(connection, before)
+            from app.runtime.migrations.sqlite_versions.registry import migration_chain, migration_contract
+            for version, upgrade in migration_chain(28):
+                contract = migration_contract(version)
+                previous = contract.capture(connection)
+                upgrade(connection)
+                contract.verify(connection, previous)
     yield engine
     engine.dispose()
 
@@ -66,6 +76,19 @@ def world_values(db, suffix, *, name=None, image=False):
     if image:
         model = install_configuration_image_fixture(db, actor.character_id)
         stored.settings = {**stored.settings, "image_model": model}
+        world_credentials.save(db, owner_id="fixture-owner", world_id=actor.world_id,
+            world_character_id=actor.id, purpose="image", data=WorldCredentialWrite(
+                provider="comfyui", model="workflow", thinking_level=None, expected_revision=0))
+        common = db.get(AgentImageGenerationSetting, actor.character_id)
+        profile = json.loads(common.generation_profiles_json)["comfyui:fixture-workflow:"]
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_enabled, policy.generation_limit = True, 4
+        policy.generation_settings = {"style": f"World {suffix} watercolor", "appearance": f"World {suffix} red coat",
+            "negative": "blur", "profiles": {"comfyui:workflow": {"options": profile["options"], "connection": profile["connection"]}}}
+    world_credentials.save(db, owner_id="fixture-owner", world_id=actor.world_id,
+        world_character_id=actor.id, purpose="sns", data=WorldCredentialWrite(provider="google",
+            model=stored.settings["generation_model"], thinking_level="high",
+            api_key=SecretStr("synthetic-world-input-key"), expected_revision=0))
     actor.version += 1
     actor.autonomous_enabled = True
     db.commit()
@@ -73,6 +96,7 @@ def world_values(db, suffix, *, name=None, image=False):
 
 
 def context(db, actor, configuration, *, run_id=None, manual=False):
+    from app.runtime.world_credential_binding import capture
     cid = actor.character_id
     character = db.get(Character, cid)
     credential = db.get(LlmCredential, f"config-credential-{cid[-1]}")
@@ -82,7 +106,9 @@ def context(db, actor, configuration, *, run_id=None, manual=False):
         character=character, credential=credential, state=None,
         activity_policy=ActivityPolicy(True, ("post", "reply", "like"), {}, now, "synthetic ready"),
         selected_post_id=None, run_started_at=now,
-        input_snapshot={"_world_configuration": configuration.request_snapshot()})
+        input_snapshot={"_world_configuration": configuration.request_snapshot(),
+            "_world_credential": capture(db, owner_id="fixture-owner", world_id=actor.world_id,
+                actor_id=actor.id, purpose="sns")})
 
 
 def test_actual_selector_planner_writer_transport_uses_each_accepted_world(database, monkeypatch):
@@ -96,7 +122,6 @@ def test_actual_selector_planner_writer_transport_uses_each_accepted_world(datab
         return kwargs["validator"](value)
 
     monkeypatch.setattr(transport, "generate_json", fake_generate)
-    monkeypatch.setattr(transport, "_api_key", lambda _: "synthetic-only")
     with Session(database, expire_on_commit=False) as db:
         for suffix in ("a", "b"):
             actor, configuration = world_values(db, suffix)
@@ -298,7 +323,7 @@ def test_actual_image_admission_and_worker_retain_frozen_world_values(database, 
     asyncio.run(media.worker.process(job_id))
     asyncio.run(media.worker.process(job_id))
     assert len(fake.requests) == 1
-    assert fake.requests[0].model == "fixture-workflow"
+    assert fake.requests[0].model == "workflow"
     assert fake.requests[0].positive == "World a watercolor, World a red coat, reading at a desk"
     assert (fake.requests[0].world_id, fake.requests[0].world_character_id, fake.requests[0].world_configuration_revision) == (
         "config-world-a", "config-role-a", configuration.revision)
@@ -317,7 +342,7 @@ def test_image_validation_options_and_prepare_use_same_supported_profile(databas
         options = references.image_model_options(db, character_id=actor.character_id)
         assert options == [{"value": "comfyui:fixture-workflow", "label": "comfyui · fixture-workflow", "enabled": True, "reason": None}]
         request, _, _, _, error = media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)
-        assert error is None and request.model == "fixture-workflow"
+        assert error is None and request.model == "workflow"
         setting = db.get(AgentImageGenerationSetting, actor.character_id)
         profile = json.loads(setting.generation_profiles_json)["comfyui:fixture-workflow:"]
         setting.generation_profiles_json = json.dumps({"comfyui:custom:workflow:": profile})
@@ -332,7 +357,14 @@ def test_image_validation_options_and_prepare_use_same_supported_profile(databas
         assert available_world_image_models(setting)[0]["enabled"] is False
         with pytest.raises(ImagePreparationError, match="connection_unverified"):
             select_world_image_profile(setting, "klein")
-        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] == "world_image_model_connection_unverified"
+        # The common profile cannot alter an actor-owned connection. Only the
+        # actual World policy going unavailable must block its next image.
+        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] is None
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_settings = {**policy.generation_settings,
+            "profiles": {"comfyui:workflow": {"connection": {"ready": False}}}}
+        db.commit()
+        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] == "generation_connection_unverified"
         assert not db.dirty
 
 
