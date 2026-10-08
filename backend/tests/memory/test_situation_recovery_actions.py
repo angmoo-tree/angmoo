@@ -66,6 +66,75 @@ def test_recheck_preserves_original_result_and_is_idempotent(durable_stack):
             expected_version=1, receipt_sequence=None, now=NOW)
 
 
+@pytest.mark.parametrize("deletion", ["account", "character"])
+def test_private_cleanup_cascades_recheck_history_and_preserves_another_owner(durable_stack, deletion):
+    from app.domains.identity.models import User
+    from app.domains.worlds.models import World, WorldMembership
+    from app.domains.social.models.posts import Post
+    from app.domains.memory.contracts.scope import MemoryScope
+    from app.domains.memory.service.scope import MemoryScopeService
+    from app.runtime.memory_privacy import scrub_memory_data
+    from environment_fixture_support import seed_environment
+    from memory.test_p8_l_o_memory_consolidation import _character, _world_character
+
+    db, scope, setting, memory = durable_stack
+    other_owner = User(id="recheck-other-owner", email="recheck-other@example.test",
+        display_name="Other owner", profile_setup_completed=True)
+    db.add(other_owner)
+    db.flush()
+    other_world = World(id="recheck-other-world", slug="recheck-other-world",
+        owner_user_id=other_owner.id, name="Other World", status="published",
+        contract_version="world-v1", contract_hash="a" * 64,
+        create_idempotency_key="recheck-other-world")
+    other_character = _character("recheck-other-character", other_owner.id, "other")
+    db.add_all([other_world, other_character])
+    db.flush()
+    membership = WorldMembership(id="recheck-other-membership", world_id=other_world.id,
+        user_id=other_owner.id, role="owner", status="active", joined_at=NOW)
+    db.add(membership)
+    db.flush()
+    other_subject = _world_character("recheck-other-subject", other_world.id,
+        other_character.id, membership.id)
+    db.add(other_subject)
+    seed_environment(db, other_owner.id)
+    db.commit()
+    other_scope = MemoryScope(owner_id=other_owner.id, world_id=other_world.id,
+        subject_world_character_id=other_subject.id)
+    scope_service = MemoryScopeService(memory)
+    initial = scope_service.get_or_create(other_scope)
+    other_setting = scope_service.update(other_scope, expected_version=initial.version,
+        enabled=True, retention_days=180, provider_mode=initial.provider_mode)
+    db.commit()
+    post = real_source(db, scope)
+    other_post = Post(id="recheck-other-post", world_id=other_world.id,
+        author_world_character_id=other_subject.id, author_character_id=other_character.id,
+        author_name="Other", title="Other note", body="Another owner's ordinary day.", created_at=NOW)
+    db.add(other_post)
+    db.commit()
+    removed, *_ = blocked(db, scope, post, "removed")
+    retained, *_ = blocked(db, other_scope, other_post, "retained")
+    removed_setting_id, other_setting_id, post_id = setting.id, other_setting.id, post.id
+    removed_sequence, retained_sequence = removed.sequence, retained.sequence
+    consume(db, memory, recheck(db, setting, row=removed))
+    other_run = recheck(db, other_setting, key="other-recheck-0001", row=retained)
+    consume(db, memory, other_run)
+    assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 2
+
+    scrub_memory_data(db, owner_id=scope.owner_id,
+        character_id="consolidation-subject-character" if deletion == "character" else None)
+    db.commit()
+    db.expire_all()
+    assert db.get(MemoryScopeSettingModel, removed_setting_id) is None
+    assert db.get(MemorySituationReceipt, removed_sequence) is None
+    assert db.get(MemorySituationApplyRun, other_run.run_id) is not None
+    assert db.get(MemorySituationReceipt, retained_sequence) is not None
+    assert db.get(MemoryScopeSettingModel, other_setting_id) is not None
+    attempt = db.scalar(select(MemorySituationRecheckAttempt))
+    assert attempt.receipt_sequence == retained_sequence and attempt.run_id == other_run.run_id
+    assert db.get(Post, post_id) is not None
+    assert db.connection().exec_driver_sql("PRAGMA foreign_key_check").all() == []
+
+
 def test_global_cutoff_pages_do_not_include_later_arrivals(durable_stack):
     db, scope, setting, memory = durable_stack
     post = real_source(db, scope)

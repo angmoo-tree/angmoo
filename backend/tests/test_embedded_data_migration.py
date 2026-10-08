@@ -55,6 +55,7 @@ from app.runtime.persistence.sqlite_schema import (
     build_sqlite_v1_metadata,
     build_sqlite_v8_metadata,
     create_schema_version_table,
+    sqlite_schema_contract_digest,
     sqlite_schema_digest,
 )
 from p7_graph_support import seed_projection_fixture
@@ -415,7 +416,9 @@ def _seed_v2_roleless(
                 from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES
                 for name in sorted(NEW_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
-                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES
+                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES, SITUATION_V32_TABLES
+                for name in reversed(SITUATION_V32_TABLES):
+                    Base.metadata.tables[name].drop(connection)
                 for name in reversed(SITUATION_V31_TABLES):
                     Base.metadata.tables[name].drop(connection)
                 connection.exec_driver_sql('ALTER TABLE agent_slots DROP COLUMN admission_metadata')
@@ -488,6 +491,7 @@ def _seed_v2_roleless(
                 drop_response_request_schema(connection)
                 drop_memory_schema_v1(connection)
                 rebuild_message_threads_v3(connection, create_legacy_unique_index=False)
+                assert sqlite_schema_contract_digest(connection) == manifest.schema_digest
                 connection.exec_driver_sql(
                     f"UPDATE {SCHEMA_VERSION_TABLE} "
                     "SET schema_version = ?, source_revision = ?, "

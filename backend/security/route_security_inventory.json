@@ -652,6 +652,11 @@
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_setting"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/unsaved-experiences": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "read_memory_unsaved"
+    },
     "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}": {
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
@@ -1206,6 +1211,21 @@
       "access": "owner-only",
       "module": "app.domains.social.recommendation_router",
       "endpoint": "regenerate"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/recheck": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "recheck_memory_unsaved"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/situations/{receipt_sequence}/recheck": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "recheck_memory_experience"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/situations/{receipt_sequence}/discard": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "discard_memory_experience"
     },
     "POST /api/v1/worlds/{world_id}/validate": {
       "access": "owner-only",
