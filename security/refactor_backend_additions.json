@@ -33041,6 +33041,256 @@
       "test_suppressions": {
         "tests/memory/test_situation_recovery_actions.py": {}
       }
+    },
+    {
+      "commit": "0438b755e0d394aa605a02fe2ef4cb43235fd6db",
+      "feature_id": "AR-COMFY-WORKFLOW-REUSE",
+      "reason": "New ComfyUI placeholder contracts, bounded diagnostics/migration, shared UI, private-workflow diagnostic tool and no-AI regressions; I00-I31 introduction evidence.",
+      "tracked_files": {
+        "backend/alembic/versions/20261009_0110_comfy_diagnostics.py": "e912bb0e827336a8068816d22937c543cf1f6dbb",
+        "backend/app/domains/media/service/comfy_workflows.py": "80cba07f6cc2371813c927d9ec7a04946b7b783d",
+        "backend/app/domains/media/service/http_workflows.py": "f0168066cf572275d0638836a3071df1823ef5f4",
+        "backend/app/integrations/comfy_diagnostics.py": "4aeeb3c165db1c45323cca9d8b9274f8ecebdbf0",
+        "backend/app/runtime/migrations/sqlite_versions/comfy_diagnostics_v33.py": "d67f65ab2df7eb71b5d44024f5fbc93a0df4f797",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v33.json": "8fccc06e4587f11a53bc12e99ab20fe5e0e9f5ba",
+        "backend/tests/image_integration/test_comfy_http_contracts.py": "804f2d35e67aa510c4b632a66a252dafdf78970e",
+        "backend/tests/image_integration/test_comfy_placeholders.py": "2950f2269e0c993c78aed17c8ee40b2794174da1",
+        "backend/tests/migrations/test_comfy_diagnostics_v33.py": "03683b00b5b2145bde1d03f641f10737798de435",
+        "docs/verification/comfy-workflow-reuse-20261009.md": "5daa8118b7320a02febf96a48ea64c6cfc94efbd",
+        "frontend/src/features/media/components/comfy-editor.tsx": "242743cb4a0fe2d386bcd77cd4ad3063d1858de8",
+        "frontend/src/features/media/utils/comfy-errors.ts": "438555edb7db357a7dc654e921ce56e1c501fa1d",
+        "scripts/diagnostics/check_comfy_workflow_reuse.py": "b81d12b5fca8f8b5c8a1991a640ba5ee1116d950"
+      },
+      "test_nodes": [
+        "tests/image_integration/test_comfy_http_contracts.py::test_analysis_preserves_raw_semantics_and_requires_auth",
+        "tests/image_integration/test_comfy_http_contracts.py::test_character_reference_check_uses_requested_profile_and_actual_asset[False-False-text_workflow]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_character_reference_check_uses_requested_profile_and_actual_asset[None-False-workflow]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_character_reference_check_uses_requested_profile_and_actual_asset[None-True-text_workflow]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_other_provider_decoder_contract_is_unchanged",
+        "tests/image_integration/test_comfy_http_contracts.py::test_raw_analysis_rejects_lossy_or_excessive_json[{\"9\": {\"class_type\": \"UninstalledCustomNode\", \"inputs\": {\"x\": [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[1]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}}}-comfy_json_complexity_exceeded]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_raw_analysis_rejects_lossy_or_excessive_json[{\"9\":{\"class_type\":\"Custom\",\"inputs\":{\"x\":1,\"x\":2}}}-comfy_json_duplicate_key]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_raw_analysis_rejects_lossy_or_excessive_json[{\"9\":{\"class_type\":\"Custom\",\"inputs\":{\"x\":NaN}}}-comfy_json_invalid]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_snapshot_rejects_mutated_modes_or_numeric_values",
+        "tests/image_integration/test_comfy_http_contracts.py::test_untrusted_storage_diagnostics_cannot_leak_raw_fields",
+        "tests/image_integration/test_comfy_http_contracts.py::test_write_guard_detects_duplicates_before_framework_collapses_keys[{\"generation_settings\":{\"profiles\":{\"comfyui:workflow\":{\"options\":{\"a\":1,\"a\":2}}}}}]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_write_guard_detects_duplicates_before_framework_collapses_keys[{\"provider\":\"comfyui\",\"options\":{\"values\":{\"seed\":1,\"seed\":2}}}]",
+        "tests/image_integration/test_comfy_http_contracts.py::test_write_guard_detects_duplicates_before_framework_collapses_keys[{\"provider\":\"comfyui\",\"provider\":\"novelai\"}]",
+        "tests/image_integration/test_comfy_placeholders.py::test_all_14_exact_tokens_nested_literal_keys_links_and_metadata",
+        "tests/image_integration/test_comfy_placeholders.py::test_bounded_error_body_opt_in_does_not_change_other_provider_http_behavior",
+        "tests/image_integration/test_comfy_placeholders.py::test_character_runtime_admission_snapshot_and_worker_warning_persist",
+        "tests/image_integration/test_comfy_placeholders.py::test_completed_failures_are_terminal_even_if_other_images_exist[history0-no_image_output]",
+        "tests/image_integration/test_comfy_placeholders.py::test_completed_failures_are_terminal_even_if_other_images_exist[history1-execution_failed]",
+        "tests/image_integration/test_comfy_placeholders.py::test_completed_failures_are_terminal_even_if_other_images_exist[history2-output_shape_invalid]",
+        "tests/image_integration/test_comfy_placeholders.py::test_fallback_is_chosen_before_submit_and_only_selected_values_needed",
+        "tests/image_integration/test_comfy_placeholders.py::test_fixed_prompt_unused_roles_and_missing_values",
+        "tests/image_integration/test_comfy_placeholders.py::test_javascript_key_order_first_preview_batch_and_no_replacement",
+        "tests/image_integration/test_comfy_placeholders.py::test_legacy_round_trip_and_explicit_discriminants",
+        "tests/image_integration/test_comfy_placeholders.py::test_pending_timeout_and_receipt_recovery_never_resubmit",
+        "tests/image_integration/test_comfy_placeholders.py::test_raw_json_preserves_strict_errors[{\"9\": NaN}-invalid]",
+        "tests/image_integration/test_comfy_placeholders.py::test_raw_json_preserves_strict_errors[{\"9\":1,\"9\":2}-duplicate]",
+        "tests/image_integration/test_comfy_placeholders.py::test_raw_json_preserves_strict_errors[{\"9\":Infinity}-invalid]",
+        "tests/image_integration/test_comfy_placeholders.py::test_raw_json_preserves_strict_errors[{\"9\":{\"inputs\":{\"x\":1,\"x\":2}}}-duplicate]",
+        "tests/image_integration/test_comfy_placeholders.py::test_raw_json_preserves_strict_errors[{\"a\":1e400}-invalid]",
+        "tests/image_integration/test_comfy_placeholders.py::test_reference_metadata_stripped_encoded_once_arbitrary_node",
+        "tests/image_integration/test_comfy_placeholders.py::test_rejected_submission_classification[400-False]",
+        "tests/image_integration/test_comfy_placeholders.py::test_rejected_submission_classification[500-True]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[cfg-5]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[clip_skip-1.5]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[denoise-inf]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[height-4.5]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[seed-False]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[steps-20]",
+        "tests/image_integration/test_comfy_placeholders.py::test_required_values_are_typed_without_coercion[width-True]",
+        "tests/image_integration/test_comfy_placeholders.py::test_seed_clip_snapshot_round_trip_is_single_and_secret_free",
+        "tests/image_integration/test_comfy_placeholders.py::test_submission_diagnostics_redact_selected_fields_and_receipt_warning_survives",
+        "tests/image_integration/test_comfy_placeholders.py::test_tree_limits_and_editor_format",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_keeps_host_and_base_path[http://[::1]:8188]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_keeps_host_and_base_path[http://comfyui:8188]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_keeps_host_and_base_path[http://host.docker.internal:8188/base]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_keeps_host_and_base_path[http://localhost:8188]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_keeps_host_and_base_path[https://example.test/comfy]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[file:///tmp]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://:secret@host]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://a@b]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://host#frag]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://host/a b]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://host:99999]",
+        "tests/image_integration/test_comfy_placeholders.py::test_url_rejects_non_base_components[http://host?key=x]",
+        "tests/migrations/test_comfy_diagnostics_v33.py::test_both_migration_paths_preserve_old_rows_and_match_current_orm[False]",
+        "tests/migrations/test_comfy_diagnostics_v33.py::test_both_migration_paths_preserve_old_rows_and_match_current_orm[True]",
+        "tests/migrations/test_comfy_diagnostics_v33.py::test_staged_upgrade_preserves_source_even_if_ddl_fails[False]",
+        "tests/migrations/test_comfy_diagnostics_v33.py::test_staged_upgrade_preserves_source_even_if_ddl_fails[True]",
+        "tests/social/test_world_configuration_inputs.py::test_world_placeholder_admission_freezes_actual_values_once[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_world_placeholder_admission_freezes_actual_values_once[legacy_transition]"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_comfy_http_contracts.py": {
+          "test_analysis_preserves_raw_semantics_and_requires_auth": [
+            "assert response.status_code == 200",
+            "assert analyzed['prompt'] == json.loads(source)",
+            "assert next((position for position in analyzed['positions'] if position['role'] == 'seed'))['path'] == ['a/b', 0]",
+            "assert client.post('/media/comfy-workflows/analyze', json={'source_json': source}).status_code == 401"
+          ],
+          "test_character_reference_check_uses_requested_profile_and_actual_asset": [
+            "assert checked['ready'] and checked['reference_supported']",
+            "assert checked['input_readiness']['path'] == expected_path",
+            "assert db.get(AgentImageGenerationSetting, CHARACTER).generation_profiles_json == json.dumps(profiles)",
+            "assert all((method == 'GET' for method, _, _ in http.calls))",
+            "assert saved['active_profile']['reference_initialized'] is True",
+            "assert saved['active_profile']['reference_enabled'] is (expected_path == 'workflow')"
+          ],
+          "test_other_provider_decoder_contract_is_unchanged": [
+            "assert response.status_code == 200 and response.json()['a'] == 2"
+          ],
+          "test_raw_analysis_rejects_lossy_or_excessive_json": [
+            "assert response.status_code == 422 and response.json()['detail'] == code"
+          ],
+          "test_snapshot_rejects_mutated_modes_or_numeric_values": [
+            "pytest.raises(ImagePreparationError, match='snapshot_invalid')",
+            "pytest.raises(ImagePreparationError, match='snapshot_invalid')"
+          ],
+          "test_untrusted_storage_diagnostics_cannot_leak_raw_fields": [
+            "assert diagnostic_projection(None) is None",
+            "assert diagnostic_projection('not-json') is None",
+            "assert diagnostic_projection('[' * 1100 + '0' + ']' * 1100) is None",
+            "assert diagnostic_projection('x' * 16385) is None",
+            "assert diagnostic_projection({'kind': 'error', 'stage': 'execution', 'messages': [{'message': 'safe', 'inputs': 'private'}]}) is None",
+            "assert diagnostic_projection(json.dumps(safe)) == safe"
+          ],
+          "test_write_guard_detects_duplicates_before_framework_collapses_keys": [
+            "assert response.status_code == 422 and response.json()['detail'] == 'comfy_json_duplicate_key'"
+          ]
+        },
+        "tests/image_integration/test_comfy_placeholders.py": {
+          "test_all_14_exact_tokens_nested_literal_keys_links_and_metadata": [
+            "assert set(analysis['used_roles']) == set(TOKENS.values())",
+            "assert len(analysis['positions']) == 16",
+            "assert source == original",
+            "assert result['9']['inputs']['data']['a.b'][1:] == inputs['data']['a.b'][1:]",
+            "assert result['9']['inputs']['file'] == 'prefix_%seed%.png' and result['9']['_meta'] == original['9']['_meta']",
+            "assert value == supplied[location['role']]"
+          ],
+          "test_bounded_error_body_opt_in_does_not_change_other_provider_http_behavior": [
+            "pytest.raises(ImagePreparationError, match='too_large')",
+            "assert len(response.content) == 32 * 1024 and response.extensions['angmoo_body_truncated']",
+            "pytest.raises(ImageSubmissionError, match='provider_http_400')"
+          ],
+          "test_character_runtime_admission_snapshot_and_worker_warning_persist": [
+            "assert sum((url.endswith('/prompt') for _, url, _ in http.calls)) == 1",
+            "assert captured['comfy_execution']['prepared_values']['positive'] == 'ink, short hair, reading at a desk'",
+            "assert captured['comfy_execution']['clip_skip_actual'] == -1",
+            "assert view['status'] == 'succeeded' and view['provider_diagnostic']['kind'] == 'warning'",
+            "assert restore_generation_request(json.loads(db.get(ImageIntent, db.get(PostImageGenerationJob, job_id).intent_id).request_json)) == original"
+          ],
+          "test_completed_failures_are_terminal_even_if_other_images_exist": [
+            "pytest.raises(ImageSubmissionError, match=code)",
+            "assert caught.value.receipt == 'test-receipt' and (not caught.value.outcome_unknown)",
+            "assert not any((url.endswith('/view') for _, url, _ in http.calls))"
+          ],
+          "test_fallback_is_chosen_before_submit_and_only_selected_values_needed": [
+            "assert frozen.comfy_execution.selected_path == 'text_workflow'",
+            "assert checked['ready'] and checked['candidate_lookup']['state'] == 'unavailable'",
+            "assert checked['input_readiness']['path'] == 'text_workflow'",
+            "assert all((method == 'GET' for method, _, _ in http.calls))",
+            "assert sum((url.endswith('/prompt') for _, url, _ in http.calls)) == 1"
+          ],
+          "test_fixed_prompt_unused_roles_and_missing_values": [
+            "assert prepare_values(config, config.workflow) == {}",
+            "assert render_workflow(config.workflow, {}) == config.workflow.prompt",
+            "pytest.raises(ImagePreparationError, match='comfy_value_required')"
+          ],
+          "test_javascript_key_order_first_preview_batch_and_no_replacement": [
+            "assert javascript_keys(dict.fromkeys(keys)) == ['0', '2', '9', '4294967294', '01', '-1', '4294967295', '١', 'alpha']",
+            "assert select_image(outputs, {'mode': 'auto_first_image'})['filename'] == 'preview'",
+            "assert select_image(outputs, {'mode': 'explicit_node', 'node_id': '12'})['filename'] == 'later'",
+            "pytest.raises(ImageSubmissionError)",
+            "assert select_image(outputs, {'mode': 'auto_first_image'}) is None"
+          ],
+          "test_legacy_round_trip_and_explicit_discriminants": [
+            "assert 'options_schema_version' not in encoded and 'clip_skip_value_mode' not in encoded",
+            "assert ComfyOptions.model_validate(encoded).model_dump(exclude_none=True) == encoded",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_pending_timeout_and_receipt_recovery_never_resubmit": [
+            "pytest.raises(ImageSubmissionError, match='timeout')",
+            "assert caught.value.outcome_unknown and all((method == 'GET' for method, _, _ in http.calls))"
+          ],
+          "test_raw_json_preserves_strict_errors": [
+            "pytest.raises(ImagePreparationError, match=code)"
+          ],
+          "test_reference_metadata_stripped_encoded_once_arbitrary_node": [
+            "assert actual == [encoded, {'again': encoded}] and count == [1]",
+            "assert not actual[0].startswith('data:') and (not any(('/upload/' in url for _, url, _ in http.calls)))",
+            "assert image.size == (24, 18) and (not image.info)"
+          ],
+          "test_rejected_submission_classification": [
+            "pytest.raises(ImageSubmissionError, match='prompt_rejected')",
+            "assert caught.value.outcome_unknown is unknown and caught.value.diagnostic['messages'][0]['type'] == 'invalid_prompt'",
+            "assert len(http.calls) == 1"
+          ],
+          "test_required_values_are_typed_without_coercion": [
+            "pytest.raises((ValidationError, ImagePreparationError))"
+          ],
+          "test_seed_clip_snapshot_round_trip_is_single_and_secret_free": [
+            "assert prepared.comfy_execution.seed == 12345 and prepared.comfy_execution.clip_skip_actual == -2",
+            "assert prepared.comfy_execution.clip_skip_display == 2",
+            "assert freeze_comfy_request(restored) == prepared and calls == [32]",
+            "assert rendered['9']['inputs']['twice'] == [12345, -2]",
+            "assert 'base64' not in json.dumps(asdict(prepared)) and 'reference' not in prepared.comfy_execution.prepared_values",
+            "assert freeze_comfy_request(request(direct)).comfy_execution.clip_skip_actual == -2",
+            "assert calls == [32]"
+          ],
+          "test_submission_diagnostics_redact_selected_fields_and_receipt_warning_survives": [
+            "assert result.diagnostic['kind'] == 'warning' and warnings == [result.diagnostic]",
+            "assert 'actual caller scene' not in encoded and 'server-secret' not in encoded and ('forbidden' not in encoded) and ('inputs' not in encoded)",
+            "assert result.receipt == 'test-receipt'"
+          ],
+          "test_tree_limits_and_editor_format": [
+            "pytest.raises(ImagePreparationError, match='size')",
+            "pytest.raises(ImagePreparationError, match='complexity')",
+            "pytest.raises(ImagePreparationError, match='complexity')",
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_url_keeps_host_and_base_path": [
+            "assert validate_base_url(base + '/') == base",
+            "assert http.calls[0][1] == base + '/system_stats'"
+          ],
+          "test_url_rejects_non_base_components": [
+            "pytest.raises(ImagePreparationError, match='url_invalid')"
+          ]
+        },
+        "tests/migrations/test_comfy_diagnostics_v33.py": {
+          "test_both_migration_paths_preserve_old_rows_and_match_current_orm": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(33).schema_digest",
+            "assert connection.exec_driver_sql('SELECT provider_receipt,status,provider_diagnostic_json FROM post_image_generation_jobs').one() == ('old-receipt', 'outcome_unknown', None)",
+            "assert connection.exec_driver_sql('PRAGMA integrity_check').scalar() == 'ok'",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(33).schema_digest"
+          ],
+          "test_staged_upgrade_preserves_source_even_if_ddl_fails": [
+            "assert hashlib.sha256(source.read_bytes()).hexdigest() == before",
+            "pytest.raises(SqliteCanonicalUpgradeError)",
+            "assert not (tmp_path / 'canonical/current-generation.json').exists()",
+            "assert not list(source.parent.parent.glob('.*.tmp-*'))",
+            "assert result.source_version == 32 and result.target_version == 33 and (result.database_path != source)"
+          ]
+        },
+        "tests/social/test_world_configuration_inputs.py": {
+          "test_world_placeholder_admission_freezes_actual_values_once": [
+            "assert draws == [32] and len(fake.requests) == 1",
+            "assert fake.requests[0].comfy_execution.prepared_values == snapshot['prepared_values']",
+            "assert intent.state == 'queued'",
+            "assert snapshot['prepared_values'] == {'positive': 'World a watercolor, World a red coat, reading at a desk', 'negative': 'blur', 'seed': 731, 'clip_skip': -2}",
+            "assert snapshot['clip_skip_display'] == 2 and snapshot['input_mode'] == 'placeholders'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_comfy_http_contracts.py": {},
+        "tests/image_integration/test_comfy_placeholders.py": {},
+        "tests/migrations/test_comfy_diagnostics_v33.py": {},
+        "tests/social/test_world_configuration_inputs.py": {}
+      }
     }
   ]
 }
