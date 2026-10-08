@@ -130,6 +130,10 @@ test(`Comfy editable raw JSON and manual values survive invalid drafts, import a
   await page.goto(`/agents/${character}?tab=settings`);await page.setViewportSize({width:360,height:880});
   const panel=page.getByRole("region",{name:t("SNS 이미지 생성 설정")});const raw=panel.getByLabel(t("불러온 API workflow JSON"),{exact:true});
   await expect(panel.getByText(t("JSON 분석 완료"),{exact:true})).toBeVisible();
+  await panel.getByText(t("연결 확인과 크기 제한"),{exact:true}).click();
+  await expect(panel.getByText(t("서버 연결 미확인"),{exact:true})).toBeVisible();
+  await expect(panel.getByText(t("서버 연결과 입력 준비를 확인했습니다. 실행 가능 여부는 생성 요청 시 ComfyUI가 확인합니다."),{exact:true})).toHaveCount(0);
+  await panel.getByText(t("연결 확인과 크기 제한"),{exact:true}).click();
   await raw.fill('{"broken":');await expect(panel.getByRole("alert")).toContainText(t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요."));
   await expect(raw).toHaveValue('{"broken":');await expect(panel.getByRole("button",{name:t("설정 저장"),exact:true})).toBeDisabled();
   await panel.getByLabel(t("API workflow 파일")).setInputFiles({name:"synthetic-api.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(placeholderGraph))});
@@ -143,6 +147,7 @@ test(`Comfy editable raw JSON and manual values survive invalid drafts, import a
   const stored=audit.writes[0].options as ReturnType<typeof placeholderOptions>;
   expect(stored.workflow.prompt).toEqual(placeholderGraph);expect(stored.values.model).toBe("manual-model.safetensors");expect(stored.workflow.output).toEqual({mode:"explicit_node",node_id:"9"});
   await panel.getByText(t("연결 확인과 크기 제한"),{exact:true}).click();
+  await expect(panel.getByText(t("서버 연결과 입력 준비를 확인했습니다. 실행 가능 여부는 생성 요청 시 ComfyUI가 확인합니다."),{exact:true})).toBeVisible();
   await expect(panel.getByText(t("설정 후보를 불러오지 못했습니다. 값을 직접 입력할 수 있습니다."),{exact:true})).toBeVisible();
   expect(await panel.evaluate(element=>element.scrollWidth<=element.clientWidth+1)).toBe(true);
   expect(await raw.evaluate(element=>element.scrollHeight>element.clientHeight)).toBe(true);
