@@ -74,9 +74,9 @@ def test_contributor_upgrade_authenticates_each_root_without_changing_process_se
         original = [_digest(p) for p in (database, secret, media)]
         result = _prepare_contributor_data_root(root)
         assert result.canonical.source_version == 29
-        assert result.canonical.target_version == 30
+        assert result.canonical.target_version == 31
         assert [_digest(p) for p in (database, secret, media)] == original
-        assert controller.current()["data_version"] == 30
+        assert controller.current()["data_version"] == 31
         credentials = _read_credentials(result.canonical.database_path)
         assert [r[0] for r in credentials] == ["image", "sns"]
         for credential_purpose, provider, envelope, character, purpose in credentials:

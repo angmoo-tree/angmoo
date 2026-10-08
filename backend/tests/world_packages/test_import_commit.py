@@ -899,6 +899,21 @@ def test_commit_maps_portable_no_role_to_canonical_reserved_role(
         assert reserved.autonomous_allowed is True
 
 
+def _save_imported_sns_credential(db: Session, owner_id: str, world_character) -> None:
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service import world_credentials
+
+    world_credentials.save(
+        db, owner_id=owner_id, world_id=world_character.world_id,
+        world_character_id=world_character.id, purpose="sns",
+        data=WorldCredentialWrite(
+            expected_revision=0, provider="google", model="gemini-3.1-flash-lite",
+            thinking_level="high", api_key="synthetic-imported-world-sns-key",
+        ),
+    )
+    db.commit()
+
+
 def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
     import_runtime,
     monkeypatch: pytest.MonkeyPatch,
@@ -1112,6 +1127,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             "AGENT_ACTIVITY_ENGINE",
             "langgraph",
         )
+        _save_imported_sns_credential(db, owner.id, world_character)
         activated = autonomy_management.activate_agent(db, owner, character.id, workflows=agent_service.build_autonomy_workflows())
         db.refresh(world_character)
         assert activated.settings.auto_enabled is True
