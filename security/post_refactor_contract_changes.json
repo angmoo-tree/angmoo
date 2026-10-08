@@ -40959,6 +40959,33 @@
           "after": "51dba37b81a6853db7cae63647ed2c8c7b2cf8b0287de515528d3970de17eef5"
         }
       ]
+    },
+    {
+      "id": "comfy-readiness-confirmation-display-20261009",
+      "implementation_commit": "9eaea2458e89430df914218831d8449d14445f41",
+      "reason": "Only show completed ComfyUI verification copy when both server connection and input readiness are confirmed; preserve the separate unverified states.",
+      "review": "Existing ko/en Next/static import/edit/save scenario verifies unconfirmed copy before check and confirmed copy after check; no generation or backend contract change.",
+      "source_blobs": {
+        "frontend/src/features/media/components/comfy-editor.tsx": "7fb2e1a993f7ef7c6bf51cdb2bc5cc60e674bf3c",
+        "browser-tests/image-integration.spec.ts": "02b7b27172328c280049fea98dcceaef35841d8e"
+      },
+      "frontend_files": [
+        {
+          "source": "frontend/src/features/media/components/comfy-editor.tsx",
+          "before_sha256": "babc4b4192dfa6455731349623eff36f846efceb25c40c7b3621d196404acf11",
+          "after_sha256": "5a29336eedf1b916d4b79b788a0fdcf0d10038185863557a0bbe548c96916503"
+        },
+        {
+          "source": "browser-tests/image-integration.spec.ts",
+          "before_sha256": "ce4d3b24aa219e74f2c83af70458c464b6ed93f3b2993abffef9f1dcc1935a6d",
+          "after_sha256": "644ff904644e839989aad599b68173fc47c147a276045194732dadc778b6ab54"
+        }
+      ],
+      "definitions": [],
+      "assertions": [],
+      "removed_bindings": [],
+      "contracts": [],
+      "orm_tables": []
     }
   ]
 }
