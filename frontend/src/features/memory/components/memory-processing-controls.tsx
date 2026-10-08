@@ -35,6 +35,8 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
   const draftRef = useRef<typeof draft>(null);
   function changeDraft(value: NonNullable<typeof draft>) { draftRef.current = value; setDraft(value); }
   const dirty = Boolean(saved && draft && JSON.stringify(editable(saved)) !== JSON.stringify(draft));
+  const running = saved?.status === "accepted" || saved?.status === "applying";
+  const saveAvailable = Boolean(saved?.memory_enabled && saved.pending_count > 0 && !running);
   useProductLeaveGuard(dirty || busy !== null);
 
   useEffect(() => {
@@ -68,7 +70,7 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
   }, [worldId, subjectId, revision, onCompleted, uiText]);
 
   async function perform(kind: "save" | "settings") {
-    if (!saved || !draft || lock.current || disabled || (kind === "settings" && conflict) || !acquire()) return;
+    if (!saved || !draft || lock.current || disabled || (kind === "save" && !saveAvailable) || (kind === "settings" && conflict) || !acquire()) return;
     lock.current = true; generation.current += 1;
     const signal = lifetime.current?.signal;
     setBusy(kind); setError(""); setNotice("");
@@ -104,11 +106,10 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
 
   if (!saved || !draft) return <div role="status"><p>{error || uiText("설정 불러오는 중")}</p>
     {error && <Button compact variant="secondary" onClick={() => setRevision(v => v + 1)}>{uiText("설정 다시 불러오기")}</Button>}</div>;
-  const running = saved.status === "accepted" || saved.status === "applying";
   return <div className="grid gap-4" data-memory-processing>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <p role="status">{uiText("저장 대기 {{count}}개", { count: saved.pending_count })}</p>
-      <Button disabled={disabled || !saved.memory_enabled || running} loading={busy === "save"}
+      <Button disabled={disabled || busy !== null || !saveAvailable} loading={busy === "save"}
         loadingLabel={uiText("요청 중")} onClick={() => void perform("save")}>{uiText("지금 기억 저장")}</Button>
     </div>
     <p role="status">{uiText(labels[saved.status])}</p>

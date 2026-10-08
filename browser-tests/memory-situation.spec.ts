@@ -60,6 +60,7 @@ for (const language of ["ko", "en"] as const) {
     const { state, writes, panel } = await fixture(page, info, language);
     const save = panel.getByRole("button", { name: language === "ko" ? "지금 기억 저장" : "Save memories now", exact: true });
     await expect(save).toBeEnabled();
+    await save.focus(); await expect(save).toBeFocused();
     await expect(page.getByRole("button", { name: language === "ko" ? "지금 관계 정리" : "Review relationships now", exact: true })).toBeVisible();
     await panel.getByRole("checkbox").first().check();
     await panel.locator('input[type="time"]').fill("21:20");
@@ -69,7 +70,8 @@ for (const language of ["ko", "en"] as const) {
     expect(writes).toHaveLength(1);
     expect(state.daily_enabled).toBe(false); expect(state.local_time).toBe("22:30");
     Object.assign(state, { status: "saved", pending_count: 0, applied_count: 3, last_applied_at: "2026-10-08T08:00:00Z" });
-    await expect(save).toBeEnabled();
+    await expect(panel.getByText(language === "ko" ? "저장 대기 0개" : "0 waiting to be saved")).toBeVisible();
+    await expect(save).toBeDisabled();
     await expect(panel.locator('input[type="time"]')).toHaveValue("21:20");
     await panel.getByRole("button", { name: language === "ko" ? "기억 저장 설정 저장" : "Save memory saving settings", exact: true }).click();
     await expect.poll(() => state.daily_enabled).toBe(true);
@@ -79,7 +81,8 @@ for (const language of ["ko", "en"] as const) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
       await panel.screenshot({ path: `../artifacts/situation-validation/${info.project.name}-${language}-${width}.png` });
     }
-    await save.focus(); await expect(save).toBeFocused();
+    await panel.getByRole("checkbox").first().focus();
+    await expect(panel.getByRole("checkbox").first()).toBeFocused();
   });
 
   test(`empty, OFF, timeout and duplicate click retain request identity (${language})`, async ({ page }, info) => {
@@ -99,6 +102,9 @@ for (const language of ["ko", "en"] as const) {
     expect(writes).toHaveLength(2);
     state.pending_count = 0; finish(); controls.barrier = null;
     await expect(panel.getByText(language === "ko" ? "지금 저장할 경험이 없어요." : "There are no experiences to save right now.")).toBeVisible();
+    await expect(save).toBeDisabled();
+    await save.evaluate(element => { (element as HTMLButtonElement).click(); });
+    expect(writes).toHaveLength(2);
     state.memory_enabled = false;
     await expect(save).toBeDisabled();
     expect(writes).toHaveLength(2);
