@@ -1,10 +1,8 @@
 import asyncio
-from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import select
 from social.test_recommendation_topics import scope
-from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.domains.social.models.topics import RecommendationPreparation
 from app.domains.social.schemas.recommendation import TopicDefinition, TopicGenerationResult
 from app.domains.social.service.recommendation_topics import available_topics, replace_source_topics
@@ -12,15 +10,18 @@ from app.runtime.social import topic_preparation as service
 
 
 def connected(scope, monkeypatch):
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service import world_credentials
+
     db, world, character, wc = scope
     world.owner_user_id = character.owner_id
+    world_credentials.save(
+        db, owner_id=character.owner_id, world_id=world.id, world_character_id=wc.id,
+        purpose="sns", data=WorldCredentialWrite(expected_revision=0, provider="google",
+            model="gemini-3.5-flash-lite", thinking_level="high", api_key="synthetic-topic-sns-key"),
+    )
     db.commit()
     service.connect_key(db, world_id=world.id, owner_id=character.owner_id, world_character_id=wc.id)
-    monkeypatch.setattr(service, "find_world_character_credential", lambda db, **kwargs: SimpleNamespace(id="test-key"))
-    def resolve(credential, **kwargs):
-        assert kwargs["owner_id"] == character.owner_id and kwargs["character_id"] == character.id
-        return CredentialMaterial("test-key", "google", "gemini-3.5-flash-lite", None, CredentialPurpose.WORLD_CHARACTER_SETUP_LLM, "test-only")
-    monkeypatch.setattr(service.CredentialResolver, "resolve_llm_credential", resolve)
     return db, world, character, wc
 
 

@@ -26,6 +26,9 @@ def scope():
         db.add(world)
         db.flush()
         _, character, wc = _add_world_character(db, world=world, suffix="actor")
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        initialize_created_world_character(db, character=character, world_character=wc)
+        db.commit()
         yield db, world, character, wc
     engine.dispose()
 
