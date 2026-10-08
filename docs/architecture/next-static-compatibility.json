@@ -4,7 +4,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "headers",
-      "line": 50,
+      "line": 52,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -13,7 +13,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "redirects",
-      "line": 80,
+      "line": 82,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -22,7 +22,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "rewrites",
-      "line": 89,
+      "line": 91,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",

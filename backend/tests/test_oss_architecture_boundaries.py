@@ -223,6 +223,11 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         # Scoped media material is revealed only for the selected physical transport.
         "domains/media/service/interpretation.py": {"_execute"},
         "runtime/media/composition.py": {"validate_connection", "_prepare"},
+        # Actor-owned material: unwrap only after owner, purpose and admitted
+        # revision checks; never expose it in public read schemas or diagnostics.
+        "domains/identity/service/world_credentials.py": {"resolve", "resolve_image_keys"},
+        "runtime/media/world_generation.py": {"prepare_execution"},
+        "runtime/world_characters/image_policy.py": {"check"},
     }
     observed: dict[str, set[str]] = {}
 

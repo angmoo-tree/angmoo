@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4116,
-      "internal_edge_count": 5819,
+      "external_import_count": 4261,
+      "internal_edge_count": 6217,
       "legacy_import_exception_count": 0,
-      "module_count": 1404,
+      "module_count": 1459,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -368,6 +368,13 @@
             ],
             "module": "app.domains.relationships.repository.events",
             "path": "backend/app/domains/relationships/repository/events.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models.manual_review"
+            ],
+            "module": "app.domains.relationships.repository.legacy_memory_followups",
+            "path": "backend/app/domains/relationships/repository/legacy_memory_followups.py"
           },
           {
             "imports": [
@@ -1894,6 +1901,7 @@
           },
           {
             "imports": [
+              "app.domains.social.constants",
               "app.domains.social.contracts.post_authors"
             ],
             "module": "app.domains.social.service.post_authors",
@@ -2240,6 +2248,9 @@
             "imports": [
               "app.config",
               "app.domains.characters.service.profile",
+              "app.domains.identity.service.environment",
+              "app.domains.memory.contracts.scope",
+              "app.domains.memory.models.activity_configuration",
               "app.domains.memory.models.batch",
               "app.domains.memory.models.items",
               "app.domains.relationships.contracts.graph_read",
@@ -2247,7 +2258,8 @@
               "app.domains.social.repository.blocks",
               "app.domains.social.repository.event_evidence",
               "app.domains.world_characters.service.projection_scope",
-              "app.runtime.graph_projection.relationship_graph_read"
+              "app.runtime.graph_projection.relationship_graph_read",
+              "app.runtime.relationships.review_credentials"
             ],
             "module": "app.runtime.graph_projection.diagnostic_references",
             "path": "backend/app/runtime/graph_projection/diagnostic_references.py"
@@ -2409,6 +2421,7 @@
               "app.config",
               "app.contracts.activity_thought",
               "app.contracts.routine_output",
+              "app.core.calendar",
               "app.core.sqlite_concurrency",
               "app.core.unit_of_work",
               "app.domains.relationships.contracts.social_consumption",
@@ -3015,7 +3028,9 @@
               "app.providers.gemini",
               "app.runtime.preparation_names",
               "app.runtime.social.recommendation_history",
-              "app.runtime.social.status_composition"
+              "app.runtime.social.status_composition",
+              "app.runtime.world_configuration.persona",
+              "app.runtime.world_credential_binding"
             ],
             "module": "app.runtime.social.topic_preparation",
             "path": "backend/app/runtime/social/topic_preparation.py"
@@ -3263,17 +3278,19 @@
             "@/lib/runtime/runtime-config"
           ],
           "path": "frontend/src/features/relationships/api/relationship-graph.ts",
-          "sha256": "28aae12db448d5ec031202d9c27bbf6485cb6f49846fd8d68cd27b28a4d7a235"
+          "sha256": "ea69b110c7eaf66b3fd953f3547a8ac144eeb8a782587680ca5ea479e7fe34f0"
         },
         {
           "exports": [
             "RelationshipGraphClient"
           ],
           "imports": [
+            "../utils/graph-layout",
             "./relationship-graph-node",
             "./relationship-review-panel",
             "@/components/ui/button",
             "@/components/ui/feedback",
+            "@/components/ui/settings-card",
             "@/components/ui/status",
             "@/features/relationships/api/relationship-graph",
             "@/features/relationships/types/relationship-graph",
@@ -3285,11 +3302,12 @@
             "@/lib/auth/browser-session",
             "@/lib/navigation/product-routes",
             "@/lib/runtime/runtime-config",
+            "lucide-react",
             "next/link",
             "react"
           ],
           "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-          "sha256": "22d2693fbf587b3f392cbbf31b8aa85351e15d8c028458b8999d0d67cc31f4e3"
+          "sha256": "c58bc1ea7016b53503c70acf19ddfe2616f0700321a9eefc258e346b6df4e8db"
         },
         {
           "exports": [
@@ -3427,7 +3445,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "c85522747c6e20854bc7332aba5370fa50af1e5ba993aa4aa3271df84551cdd6"
+        "sha256": "e810c47c6220a0039723753e7390f3ed249c3d04b432de8b9ca4a292ac1eb34c"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -3441,7 +3459,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "170a207944eebd23ae6a38899f5fcd2b412b44efbf43c24cba9c9b8b297f09ce"
+        "sha256": "305197a4dce0132607ab419abac81f74b854cc438362a18bc917d23e855d50f9"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3461,7 +3479,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "8c78d34a2fdb0c51c7e80d1d3d76466c231e936e2d8646b72cb6b8e65ad88c94"
+        "sha256": "5e2f0ae0de1111b8eaf897dfa6cf5b57e54e4bb499d2f294933b55d7d08068e2"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -3691,7 +3709,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "722a41b1885010d68b9dc03ee3546c9088af8d973bc3823fdb3436659da67264"
+        "sha256": "5c091fed1c38d468ea1d36d8113b3d08c06906f9e76fc2a842e3ab2e6d23bc17"
       },
       "steps": [
         {

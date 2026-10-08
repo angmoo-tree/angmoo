@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -626,10 +626,11 @@ def _seed_supported_predecessor(
                 from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES as WORLD_ACTIVITY_TABLES
                 for name in reversed(SITUATION_V31_TABLES):
                     Base.metadata.tables[name].drop(sql_connection)
-                for name in sorted(WORLD_ACTIVITY_TABLES):
-                    Base.metadata.tables[name].drop(sql_connection)
-                for column in ("credential_id", "credential_revision"):
-                    sql_connection.exec_driver_sql(f'ALTER TABLE "memory_batch_runs" DROP COLUMN "{column}"')
+                if source_version < 30:
+                    for name in sorted(WORLD_ACTIVITY_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection)
+                    for column in ("credential_id", "credential_revision"):
+                        sql_connection.exec_driver_sql(f'ALTER TABLE "memory_batch_runs" DROP COLUMN "{column}"')
 
                 # Only this isolated historical fixture moves backwards. Final
                 # v28 already has v29's shape; earlier sources must omit all

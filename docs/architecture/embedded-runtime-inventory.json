@@ -23,11 +23,11 @@
     },
     {
       "path": "frontend/next.config.ts",
-      "sha256": "562259eedae768971a0c9990fec750670cc14fee17a95ddf88927eef0619fd98"
+      "sha256": "b478ff11d5cd7002e61d3d873836649efe4393f1fcd296acea91a690e257850a"
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb"
+      "sha256": "34944b2346b36ebcc36b398ac29462fe9b8a4e767efb3d6842d9746e3c030998"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -297,7 +297,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb",
+      "source_sha256": "34944b2346b36ebcc36b398ac29462fe9b8a4e767efb3d6842d9746e3c030998",
       "transition_pr": "ER4 PR J"
     },
     {
