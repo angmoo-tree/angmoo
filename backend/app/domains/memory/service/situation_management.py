@@ -4,13 +4,13 @@ from sqlalchemy import func, select
 from app.domains.memory.contracts.activity_situation import stable_digest
 from app.domains.memory.contracts.items import normalize_memory_idempotency_key
 from app.domains.memory.exceptions import MemoryConflictError
-from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting, MemorySituationApplyRun, MemorySituationReceipt
+from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting, MemorySituationApplyRun, MemorySituationReceipt, MemorySituationRequest
 from app.domains.memory.models.batch import MemoryBatchSetting
 from app.domains.memory.repository.situation_runs import get_or_create_settings, next_due, request_run
 from app.domains.memory.schemas.situation import MemoryProcessingRead
 
 
-def read(*, scope, db, workflows, result=None):
+def read(*, scope, db, workflows, result=None, request_key=None):
     memory = workflows.batch_repository(db).memory
     memory.validate_scope(scope)
     setting = memory.get_scope_setting(scope)
@@ -18,7 +18,10 @@ def read(*, scope, db, workflows, result=None):
     legacy = db.get(MemoryBatchSetting, setting.id) if setting and config is None else None
     pending = blocked = 0
     run = None
+    resolved = None
     if setting:
+        if request_key is not None:
+            resolved = db.get(MemorySituationRequest, (setting.id, request_key))
         counts = dict(db.execute(select(MemorySituationReceipt.state, func.count()).where(
             MemorySituationReceipt.scope_setting_id == setting.id).group_by(MemorySituationReceipt.state)).all())
         pending, blocked = counts.get("pending", 0), counts.get("blocked", 0) + counts.get("error", 0)
@@ -35,7 +38,9 @@ def read(*, scope, db, workflows, result=None):
         timezone=zone, shutdown_apply_enabled=config.shutdown_apply_enabled if config else legacy.shutdown_enabled if legacy else True,
         next_due_at=config.next_due_at if config else legacy.next_due_at if legacy else None,
         last_applied_at=config.last_applied_at if config else None,
-        pending_count=pending, blocked_count=blocked, status=status, applied_count=run.applied_count if run else 0, result=result)
+        pending_count=pending, blocked_count=blocked, status=status, applied_count=run.applied_count if run else 0,
+        result=resolved.result_code if resolved else result,
+        resolved_request_key=resolved.request_key if resolved else None)
 
 
 def _ensure(db, workflows, scope, now):
@@ -87,4 +92,4 @@ def save_now(*, scope, db, workflows, data):
     except Exception:
         db.rollback()
         raise
-    return read(scope=scope, db=db, workflows=workflows, result=result)
+    return read(scope=scope, db=db, workflows=workflows, result=result, request_key=data.idempotency_key)

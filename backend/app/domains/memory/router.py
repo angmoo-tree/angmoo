@@ -45,11 +45,13 @@ from app.domains.memory.service import situation_management
 
 @router.get("/memory/processing-settings", response_model=MemoryProcessingRead)
 def read_memory_processing(world_id: str, subject_id: str, request: Request,
+    request_key: str | None = Query(default=None, min_length=8, max_length=128),
     db: Session = Depends(get_db), user: User = Depends(get_current_user),
     workflows: MemoryWorkflows = Depends(get_memory_workflows)):
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        return situation_management.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows)
+        return situation_management.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows,
+            request_key=request_key)
     except Exception as exc:
         _raise_memory_read_error(exc)
 

@@ -20,6 +20,7 @@ class MemoryProcessingRead(BaseModel):
     status: Literal["idle", "accepted", "applying", "saved", "partial_error"]
     applied_count: int = 0
     result: str | None = None
+    resolved_request_key: str | None = None
 
 
 class MemoryProcessingUpdate(BaseModel):

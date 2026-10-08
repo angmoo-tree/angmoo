@@ -7,6 +7,7 @@ export type MemoryProcessingSetting = {
   pending_count: number; blocked_count: number; applied_count: number;
   status: "idle" | "accepted" | "applying" | "saved" | "partial_error";
   result: "accepted" | "empty" | null;
+  resolved_request_key?: string | null;
 };
 export type MemorySaveRequest = { expected_version: number; idempotency_key: string };
 export type MemoryProcessingUpdate = MemorySaveRequest & Pick<MemoryProcessingSetting,

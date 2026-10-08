@@ -97,6 +97,29 @@ def test_http_save_authorization_versions_empty_replay_and_no_implicit_work(monk
     saved = client.post(path + "/save", headers=FRONTEND_HEADERS, json=body)
     assert saved.status_code == 200 and saved.json()["result"] == "empty", saved.text
     assert client.post(path + "/save", headers=FRONTEND_HEADERS, json=body).json()["result"] == "empty"
+    assert saved.json()["resolved_request_key"] == body["idempotency_key"]
+    from sqlalchemy import event
+    statements = []
+    def capture_read(_connection, _cursor, statement, _parameters, _context, _many):
+        statements.append(statement)
+    event.listen(engine, "before_cursor_execute", capture_read)
+    try:
+        resolved = client.get(path + "/processing-settings", headers=FRONTEND_HEADERS,
+            params={"request_key": body["idempotency_key"]})
+        assert resolved.status_code == 200
+        assert resolved.json()["resolved_request_key"] == body["idempotency_key"]
+        assert resolved.json()["result"] == "empty"
+        unknown = client.get(path + "/processing-settings", headers=FRONTEND_HEADERS,
+            params={"request_key": "unknown-save-request"})
+        assert unknown.status_code == 200 and unknown.json()["resolved_request_key"] is None
+        assert unknown.json()["result"] is None
+        assert client.get(path.replace("q-world", "other-world") + "/processing-settings",
+            headers=FRONTEND_HEADERS, params={"request_key": body["idempotency_key"]}).status_code == 404
+        assert client.get(path + "/processing-settings", headers=FRONTEND_HEADERS,
+            params={"request_key": "short"}).status_code == 422
+    finally:
+        event.remove(engine, "before_cursor_execute", capture_read)
+    assert statements and all(statement.lstrip().upper().startswith("SELECT") for statement in statements)
     changed = client.put(path + "/processing-settings", headers=FRONTEND_HEADERS, json={**body,
         "idempotency_key": "http-config-001", "daily_enabled": True, "local_time": "22:30", "shutdown_apply_enabled": False})
     assert changed.status_code == 200, changed.text

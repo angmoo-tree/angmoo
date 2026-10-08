@@ -12,14 +12,22 @@ function validateProcessing(value: MemoryProcessingSetting, worldId: string, sub
     !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) || typeof value.timezone !== "string" ||
     !["idle", "accepted", "applying", "saved", "partial_error"].includes(value.status) ||
     ![null, "accepted", "empty"].includes(value.result) ||
+    (value.resolved_request_key != null && (typeof value.resolved_request_key !== "string" || value.resolved_request_key.length < 8 || value.resolved_request_key.length > 128)) ||
     [value.next_due_at, value.last_applied_at].some(v => v !== null && (typeof v !== "string" || !Number.isFinite(Date.parse(v))))) {
     throw new MemoryApiError(502, "memory_processing_contract_invalid");
   }
   return value;
 }
-export function getMemoryProcessing(worldId: string, subjectId: string, signal?: AbortSignal) {
-  return requestMemoryApi<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings`, { signal })
-    .then(value => validateProcessing(value, worldId, subjectId));
+export function getMemoryProcessing(worldId: string, subjectId: string, signal?: AbortSignal, requestKey?: string) {
+  const query = requestKey ? `?request_key=${encodeURIComponent(requestKey)}` : "";
+  return requestMemoryApi<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings${query}`, { signal })
+    .then(value => {
+      validateProcessing(value, worldId, subjectId);
+      if (value.resolved_request_key != null && value.resolved_request_key !== requestKey) {
+        throw new MemoryApiError(502, "memory_processing_contract_invalid");
+      }
+      return value;
+    });
 }
 export function saveMemoryProcessing(worldId: string, subjectId: string, data: MemoryProcessingUpdate, signal?: AbortSignal) {
   return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings`,

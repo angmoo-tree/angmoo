@@ -12,6 +12,7 @@ async function fixture(page: Page, info: TestInfo, language: "ko" | "en") {
     blocked_count: 0, applied_count: 0, status: "idle", result: null as string | null };
   const writes: { path: string; body: Record<string, unknown> }[] = [];
   const controls = { timeout: false, barrier: null as Promise<void> | null,
+    resolvedKey: null as string | null,
     readBarrier: null as Promise<void> | null, waitingRead: false };
   const batch = memoryBatchFixture(FEED_WORLD, WORLD_AGENT, () => state.memory_enabled);
   const secondBatch = memoryBatchFixture(FEED_WORLD, SECOND, () => state.memory_enabled);
@@ -32,7 +33,8 @@ async function fixture(page: Page, info: TestInfo, language: "ko" | "en") {
         Object.assign(state, { daily_enabled: body.daily_enabled, local_time: body.local_time,
           shutdown_apply_enabled: body.shutdown_apply_enabled, version: state.version + 1 });
       }
-      return route.fulfill({ json: state });
+      const key = new URL(request.url()).searchParams.get("request_key");
+      return route.fulfill({ json: { ...state, resolved_request_key: key && key === controls.resolvedKey ? key : null } });
     }
     if (path.endsWith("/memory/save")) {
       expect(request.method()).toBe("POST");
@@ -108,6 +110,25 @@ for (const language of ["ko", "en"] as const) {
     state.memory_enabled = false;
     await expect(save).toBeDisabled();
     expect(writes).toHaveLength(2);
+  });
+
+  test(`a timed-out accepted save is resolved by reads before the next manual save (${language})`, async ({ page }, info) => {
+    const { state, writes, controls, panel } = await fixture(page, info, language);
+    const save = panel.getByRole("button", { name: language === "ko" ? "지금 기억 저장" : "Save memories now", exact: true });
+    controls.timeout = true;
+    await save.click();
+    await expect(panel.getByRole("alert")).toBeVisible();
+    const firstKey = String(writes[0].body.idempotency_key);
+    controls.resolvedKey = firstKey;
+    Object.assign(state, { status: "saved", pending_count: 0, applied_count: 3, last_applied_at: "2026-10-08T08:00:00Z" });
+    await expect(panel.getByRole("alert")).not.toBeVisible();
+    await expect(save).toBeDisabled();
+    expect(writes).toHaveLength(1);
+    state.pending_count = 2;
+    await expect(save).toBeEnabled();
+    await save.click();
+    await expect.poll(() => writes.length).toBe(2);
+    expect(writes[1].body.idempotency_key).not.toBe(firstKey);
   });
 
   test(`a late response from the previous character cannot replace current settings (${language})`, async ({ page }, info) => {

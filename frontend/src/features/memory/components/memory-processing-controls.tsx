@@ -50,8 +50,11 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
     async function poll() {
       const started = generation.current;
       try {
-        const value = await getMemoryProcessing(worldId, subjectId, controller.signal);
+        const value = await getMemoryProcessing(worldId, subjectId, controller.signal, pending.current?.idempotency_key);
         if (controller.signal.aborted || lock.current || started !== generation.current) return;
+        if (pending.current && value.resolved_request_key === pending.current.idempotency_key) {
+          pending.current = null; setError("");
+        }
         const previous = baseline.current;
         setSaved(value);
         if (draftRef.current === null || (previous && JSON.stringify(draftRef.current) === JSON.stringify(editable(previous)))) {
