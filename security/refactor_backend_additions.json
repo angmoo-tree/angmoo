@@ -32401,6 +32401,646 @@
       "test_suppressions": {
         "tests/test_p8_l_d_installer_upgrade_contract.py": {}
       }
+    },
+    {
+      "commit": "afe31bbb5b49f6003f213a279e6027657b1a26ee",
+      "feature_id": "AR-SITUATION-RECOVERY",
+      "reason": "Committed delivery proof, prepared relationship validation, owner recovery and v32 regression evidence.",
+      "tracked_files": {
+        "backend/alembic/versions/20261008_0109_situation_recovery.py": "3b99c9d6d0e44f962c99d2768e5d97d539382f0f",
+        "backend/app/domains/memory/contracts/situation_validation.py": "fc3e1ebe2df09365c38855e57460a7dc17e1a6bf",
+        "backend/app/domains/memory/policies/situation_validation.py": "ef0d730751cc569ab636b977a5cd3dcd0273a8d9",
+        "backend/app/domains/memory/repository/situation_recovery.py": "8fe4bfc2ee00089a5f55aeef5859b2ff2084ce05",
+        "backend/app/domains/memory/repository/situation_validation.py": "f104e4e0e2674367001679dac7e7f4a65b291089",
+        "backend/app/domains/memory/service/situation_recovery_management.py": "eb94be1bba60771c71bc7f76a8bd6b8cb778a19f",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v32.json": "a5935548ab13bb563b26fcf582a78abab01833c3",
+        "backend/app/runtime/migrations/sqlite_versions/situation_recovery_v32.py": "717fedc4fa3e50c4f37015924c1b7ed7e5c4a1bc",
+        "backend/app/runtime/migrations/sqlite_versions/situation_recovery_v32_ddl.json": "4d41b2a9b8608e6c09584665c3c1f812a19b8f0a",
+        "backend/tests/memory/test_situation_delivery_recovery.py": "da9cd50f864882dafbf2183821061341c5461190",
+        "backend/tests/memory/test_situation_proof_guards.py": "29cb721a7d03bccbd775d587c113faba5b254418",
+        "backend/tests/memory/test_situation_recovery_actions.py": "4534d54b64c24f8ad08fec2a6bfff7219706cc0e",
+        "backend/tests/memory/test_situation_recovery_http.py": "e2243a499bcb1232aba32bf1f771deb5b57cc857",
+        "backend/tests/migrations/test_situation_recovery_v32.py": "030f614ad291375514d32f9114c4691f8b75b11d",
+        "browser-tests/memory-situation-recovery.spec.ts": "051d85b9f4e14128fb851d95925d2017e0b58346",
+        "browser-tests/playwright.memory-situation-recovery.config.ts": "22dda990957fa413848d900fd4fdadb8eef8f332",
+        "docs/verification/10-08 Chat·SNS 상황기억 관찰 검증과 차단 기록 복구 구현 결과.md": "403f05006563f477d785941a63b6a74f45b3efed",
+        "frontend/src/features/memory/components/memory-unsaved-experiences.tsx": "da708146b7ba90a2c89b977d5a6ca0496017e10e"
+      },
+      "test_nodes": [
+        "tests/chat/test_activity_situation_receipt.py::test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven",
+        "tests/memory/test_activity_situation_receipt.py::test_inbox_reply_to_reply_delivery_and_prepared_relationship_are_saved_without_feed_claims",
+        "tests/memory/test_situation_delivery_recovery.py::test_actual_inbox_reply_without_feed_observation_is_saved",
+        "tests/memory/test_situation_delivery_recovery.py::test_normal_relationship_update_preserves_delivered_experience",
+        "tests/memory/test_situation_proof_guards.py::test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted[description]",
+        "tests/memory/test_situation_proof_guards.py::test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted[logical_activity_id]",
+        "tests/memory/test_situation_proof_guards.py::test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted[result]",
+        "tests/memory/test_situation_proof_guards.py::test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted[scope_version]",
+        "tests/memory/test_situation_proof_guards.py::test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted[target_key]",
+        "tests/memory/test_situation_proof_guards.py::test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration[body]",
+        "tests/memory/test_situation_proof_guards.py::test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration[hidden]",
+        "tests/memory/test_situation_proof_guards.py::test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration[participant]",
+        "tests/memory/test_situation_proof_guards.py::test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration[visibility]",
+        "tests/memory/test_situation_proof_guards.py::test_inbox_delivery_lineage_is_shared_by_recall_prior_hotbrief_and_relationship_reads",
+        "tests/memory/test_situation_proof_guards.py::test_only_actual_path_fragment_and_exact_persisted_entry_grant_observation",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[call_identity]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[ordinal]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[payload_path]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[ranges]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[role]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[source_digest]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[source_id]",
+        "tests/memory/test_situation_proof_guards.py::test_persisted_manifest_tampering_is_not_a_delivery_proof[target_key]",
+        "tests/memory/test_situation_recovery_actions.py::test_application_and_discard_transactions_roll_back_whole_page",
+        "tests/memory/test_situation_recovery_actions.py::test_closed_activation_recheck_is_rejected_but_discard_is_allowed",
+        "tests/memory/test_situation_recovery_actions.py::test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory",
+        "tests/memory/test_situation_recovery_actions.py::test_discard_off_closed_epoch_cleans_detail_and_prevents_readmission",
+        "tests/memory/test_situation_recovery_actions.py::test_discard_queued_candidate_is_audited_and_never_revived_on_restart[deferred]",
+        "tests/memory/test_situation_recovery_actions.py::test_discard_queued_candidate_is_audited_and_never_revived_on_restart[error]",
+        "tests/memory/test_situation_recovery_actions.py::test_discard_queued_candidate_is_audited_and_never_revived_on_restart[pending]",
+        "tests/memory/test_situation_recovery_actions.py::test_global_cutoff_pages_do_not_include_later_arrivals",
+        "tests/memory/test_situation_recovery_actions.py::test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit",
+        "tests/memory/test_situation_recovery_actions.py::test_recheck_does_not_rewrite_the_completed_original_save",
+        "tests/memory/test_situation_recovery_actions.py::test_recheck_failure_stays_blocked_with_revision_and_specific_reason",
+        "tests/memory/test_situation_recovery_actions.py::test_recheck_preserves_original_result_and_is_idempotent",
+        "tests/memory/test_situation_recovery_actions.py::test_stale_version_discard_and_stale_worker_never_apply",
+        "tests/memory/test_situation_recovery_http.py::test_off_discard_works_for_damaged_proof_without_leaking_description_or_reapplying",
+        "tests/memory/test_situation_recovery_http.py::test_recovery_api_rejects_foreign_scope_csrf_extra_proof_and_cursor_and_resolves_exact_request",
+        "tests/migrations/test_situation_recovery_v32.py::test_empty_predecessor_preserves_the_exact_sequence_marker[False-0]",
+        "tests/migrations/test_situation_recovery_v32.py::test_empty_predecessor_preserves_the_exact_sequence_marker[False-None]",
+        "tests/migrations/test_situation_recovery_v32.py::test_empty_predecessor_preserves_the_exact_sequence_marker[True-0]",
+        "tests/migrations/test_situation_recovery_v32.py::test_empty_predecessor_preserves_the_exact_sequence_marker[True-None]",
+        "tests/migrations/test_situation_recovery_v32.py::test_fresh_orm_matches_frozen_v32_manifest",
+        "tests/migrations/test_situation_recovery_v32.py::test_populated_v31_delta_preserves_every_old_column_and_high_water_sequence[False]",
+        "tests/migrations/test_situation_recovery_v32.py::test_populated_v31_delta_preserves_every_old_column_and_high_water_sequence[True]",
+        "tests/migrations/test_situation_recovery_v32.py::test_staging_failure_keeps_original_database_and_selected_marker",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[31]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_activity_situation_receipt.py": {
+          "test_real_chat_finalize_receipt_is_atomic_and_auxiliary_errors_do_not_lose_reply": [
+            "assert len(receipts) == assistants == (0 if fail_insert else 1)",
+            "assert receipts[0].state == ('blocked' if invalid else 'pending')",
+            "assert receipts[0].description_status == ('missing' if invalid else 'valid')",
+            "assert source.role == 'background' and source.source_id == interpretation.id",
+            "assert reader.validate(manifest, source, now=datetime.now(UTC)).state == 'available'",
+            "assert reader.validate(manifest, source, now=datetime.now(UTC)).state == 'changed'"
+          ],
+          "test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven": [
+            "assert len(social.items) == 1",
+            "assert receipt is not None and receipt.state == 'pending', (events, delivered)",
+            "assert source.relationship_basis.version == 6 and relation.version == 7",
+            "assert next((source for source in race.sources if source.source_type == 'RELATIONSHIP')).relationship_basis.version == 6",
+            "assert receipt.state == 'applied', receipt.error_code",
+            "assert db.get(MemoryItem, receipt.applied_item_id) is not None",
+            "assert db.scalar(select(func.count()).select_from(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id == receipt.applied_item_id)) == 2",
+            "assert SituationSources(db).validate(restore_context(db, receipt), source, now=now).state == 'available'"
+          ]
+        },
+        "tests/memory/test_activity_situation_receipt.py": {
+          "enabled": [],
+          "test_feed_actual_effect_and_receipt_commit_rollback_and_replay": [
+            "assert len(receipts) == (0 if fail_insert else 1)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert db.scalar(select(func.count()).select_from(Post)) == before + int(action == 'comment' and (not fail_insert))",
+            "assert db.scalar(select(func.count()).select_from(PostLike)) == int(action == 'like' and (not fail_insert))",
+            "assert receipts[0].state == ('blocked' if invalid else 'pending'), receipts[0].error_code",
+            "pytest.raises(RuntimeError, match='injected_receipt_failure')",
+            "assert result['executions'][0]['status'] == 'succeeded'",
+            "assert (await lane.execute(state))['executions'][0]['status'] == 'reused'"
+          ],
+          "test_inbox_three_real_effects_are_target_scoped_and_receipt_failure_rolls_back": [
+            "assert len(receipts) == (0 if fail_insert else 3)",
+            "assert {r.target_key for r in receipts} == (set() if fail_insert else {p.id for p in targets})",
+            "assert all((r.state == 'pending' for r in receipts))",
+            "assert db.scalar(select(func.count()).select_from(PostLike)) == (0 if fail_insert else 3)",
+            "assert result['status'] == ('failed' if fail_insert else 'succeeded'), result"
+          ],
+          "test_inbox_reply_to_reply_delivery_and_prepared_relationship_are_saved_without_feed_claims": [
+            "assert len(social.items) == 1",
+            "assert next((source for source in manifest.sources if source.source_type == 'RELATIONSHIP')).relationship_basis.version == 6",
+            "assert result['status'] == 'succeeded', result",
+            "assert admitted.state == 'pending'",
+            "assert admitted.state == 'applied', admitted.error_code",
+            "assert access.proof_origin == 'situation_delivered' and access.evidence.observation_id is None",
+            "assert db.scalar(select(func.count()).select_from(WorldCharacterFeedObservation)) == 0"
+          ],
+          "test_routine_real_post_transaction_and_receipt_replay": [
+            "assert not isinstance(prepared, dict), prepared",
+            "assert result['status'] == ('failed' if fail_insert else 'completed'), result",
+            "assert len(rows) == (0 if fail_insert else 1)",
+            "assert all((r.state == 'pending' for r in rows))",
+            "assert db.scalar(select(func.count()).select_from(Post)) == before + int(not fail_insert)",
+            "assert publish_routine_activity(ctx, prepared=prepared, generation=generation, situation_admission=participant(lane, state, 'routine-post'))['routine_outcome'] == 'REUSED_SUCCESS'"
+          ]
+        },
+        "tests/memory/test_situation_delivery_recovery.py": {
+          "durable_stack": [],
+          "delivered_reply": [],
+          "test_actual_inbox_reply_without_feed_observation_is_saved": [
+            "assert row.state == 'applied', row.error_code",
+            "assert db.get(MemoryItem, row.applied_item_id) is not None"
+          ],
+          "test_normal_relationship_update_preserves_delivered_experience": [
+            "assert row.state == 'applied', row.error_code"
+          ]
+        },
+        "tests/memory/test_situation_proof_guards.py": {
+          "test_persisted_manifest_tampering_is_not_a_delivery_proof": [
+            "assert row.state == 'blocked' and row.error_code == 'situation_manifest_integrity_invalid'",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_cross_call_scope_target_and_success_bindings_are_not_reinterpreted": [
+            "assert row.state == 'blocked'",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_only_actual_path_fragment_and_exact_persisted_entry_grant_observation": [
+            "assert db.scalar(select(func.count()).select_from(WorldCharacterFeedObservation)) == 0",
+            "assert access.state == 'available' and access.proof_origin == 'situation_delivered'",
+            "assert access.evidence.observation_id is None",
+            "pytest.raises(ValueError)",
+            "pytest.raises((ValueError, KeyError))",
+            "assert SituationSources(db).validate(context.manifest, source, now=NOW).state == 'forbidden'",
+            "assert SituationSources(db).validate(context, forged, now=NOW).state == 'forbidden'"
+          ],
+          "test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration": [
+            "assert item is not None",
+            "assert len(selected) == 1",
+            "assert reader.revalidate(request, (ranked,)) == ()",
+            "assert reader.hydrate(request, selected).records == ()",
+            "assert evidence.observation_id is None"
+          ],
+          "test_inbox_delivery_lineage_is_shared_by_recall_prior_hotbrief_and_relationship_reads": [
+            "assert canonical.revalidate_candidates(scope=scope, candidates=(ranked.candidate,), now=NOW)",
+            "assert item.id in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}",
+            "assert item.id in review_ids()",
+            "assert SituationSources(db).validate(context, prior, now=NOW).state == 'available'",
+            "assert canonical.revalidate_candidates(scope=scope, candidates=(ranked.candidate,), now=NOW) == ()",
+            "assert item.id not in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}",
+            "assert item.id not in review_ids()",
+            "assert SituationSources(db).validate(context, prior, now=NOW).state == 'forbidden'"
+          ]
+        },
+        "tests/memory/test_situation_recovery_actions.py": {
+          "blocked": [],
+          "recheck": [],
+          "consume": [],
+          "test_recheck_preserves_original_result_and_is_idempotent": [
+            "assert consume(db, memory, first) == 1",
+            "assert row.state == 'applied' and row.state_version == 2",
+            "assert replay.run_id == first.run_id",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1",
+            "assert attempt.outcome == 'applied' and attempt.previous_error_code == 'situation_source_changed_or_forbidden'",
+            "assert attempt.applied_item_id == row.applied_item_id",
+            "pytest.raises(MemoryConflictError, match='request_conflict')"
+          ],
+          "test_global_cutoff_pages_do_not_include_later_arrivals": [
+            "assert consume(db, memory, request) == 100",
+            "assert db.get(MemorySituationApplyRun, request.run_id).state == 'deferred'",
+            "assert consume(db, memory, request) == 2",
+            "assert late.state == 'blocked'",
+            "assert all((row.state == 'applied' for row in rows))",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 102"
+          ],
+          "test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit": [
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "assert first.state == 'applied' and second.state == 'blocked'"
+          ],
+          "test_recheck_failure_stays_blocked_with_revision_and_specific_reason": [
+            "assert row.state == 'blocked' and row.error_code == 'situation_source_changed' and (row.state_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == 'rejected'",
+            "assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1"
+          ],
+          "test_recheck_does_not_rewrite_the_completed_original_save": [
+            "assert row.state == 'blocked' and old_run.blocked_count == 1",
+            "assert row.state == 'applied'",
+            "assert (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at) == before",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).previous_run_id == first.run_id"
+          ],
+          "test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory": [
+            "assert second.state == 'applied'",
+            "assert first.manifest_id is None and db.get(MemorySituationManifest, shared_id) is not None",
+            "assert (item.summary, item.version, item.deleted_at, second.content_digest) == before",
+            "assert second.manifest_id == shared_id and second.state == 'applied'"
+          ],
+          "test_discard_off_closed_epoch_cleans_detail_and_prevents_readmission": [
+            "assert row.state == 'discarded' and row.state_version == 2 and (row.content_digest == original_digest)",
+            "assert row.description is None and row.result == {} and (row.manifest_id is None)",
+            "assert db.get(MemorySituationManifest, manifest_id) is None",
+            "assert db.get(type(post), post.id).body == post.body",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-001', now=NOW).result_code == first.result_code",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-002', now=NOW).result_code == 'already_discarded'",
+            "assert admit(db, manifest=manifest, draft=draft, result=result, now=NOW).state == 'discarded'",
+            "assert db.get(MemorySituationManifest, manifest_id) is None and row.discarded_at == NOW.replace(tzinfo=None)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_stale_version_discard_and_stale_worker_never_apply": [
+            "pytest.raises(MemoryConflictError, match='version_conflict')",
+            "assert replacement != token",
+            "pytest.raises(MemoryConflictError, match='fence_lost')",
+            "assert row.state == 'blocked' and db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_discard_queued_candidate_is_audited_and_never_revived_on_restart": [
+            "assert consume(db, memory, request) == 0",
+            "assert row.state == 'discarded' and run.skipped_count == 1 and (run.applied_count == 0)",
+            "assert attempt.outcome == 'discarded' and attempt.before_version == 1 and (attempt.after_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_closed_activation_recheck_is_rejected_but_discard_is_allowed": [
+            "pytest.raises(MemoryConflictError, match='activation_closed')",
+            "assert row.state == 'discarded'"
+          ],
+          "test_application_and_discard_transactions_roll_back_whole_page": [
+            "assert row.state == 'blocked' and row.state_version == 1",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert run.cursor == run.applied_count == 0",
+            "assert row.state == 'blocked' and row.manifest_id == original_manifest and row.description",
+            "assert db.get(MemorySituationManifest, original_manifest) is not None",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')"
+          ]
+        },
+        "tests/memory/test_situation_recovery_http.py": {
+          "fixture": [
+            "assert enabled.status_code == 200, enabled.text"
+          ],
+          "test_recovery_api_rejects_foreign_scope_csrf_extra_proof_and_cursor_and_resolves_exact_request": [
+            "assert client.post(PATH + '/recheck', json=body).status_code == 403",
+            "assert client.post(PATH + '/recheck', headers=FRONTEND_HEADERS, json={**body, 'observed': True}).status_code == 422",
+            "assert client.get(PATH + '/unsaved-experiences', headers=FRONTEND_HEADERS).status_code == 404",
+            "assert first.status_code == 200, first.text",
+            "assert data['blocked_count'] == 3 and len(data['items']) == 2 and data['next_cursor']",
+            "assert data['items'][0]['description'] and data['items'][0]['can_discard']",
+            "assert client.get(PATH + '/unsaved-experiences', headers=FRONTEND_HEADERS, params={'cursor': 'invalid'}).status_code == 422",
+            "assert second.status_code == 200 and len(second.json()['items']) == 1",
+            "assert client.post(PATH + f'/situations/{rows[0]}/recheck', headers=FRONTEND_HEADERS, json={**body, 'expected_receipt_version': 99}).status_code == 409",
+            "assert accepted.status_code == 200, accepted.text",
+            "assert accepted.json()['operation'] == 'blocked_recheck' and accepted.json()['resolved_request_key'] == body['idempotency_key']",
+            "assert runtime.tick() == 'situation_page_applied'",
+            "assert response.json()['applied_count'] == 3 and response.json()['blocked_count'] == 0",
+            "assert unknown.json()['run_id'] is None and unknown.json()['applied_count'] == 0",
+            "assert client.post(PATH + '/save', headers=FRONTEND_HEADERS, json=body).status_code == 409"
+          ],
+          "test_off_discard_works_for_damaged_proof_without_leaking_description_or_reapplying": [
+            "assert client.put(PATH + '/settings', headers=FRONTEND_HEADERS, json={'expected_version': settings['version'], 'enabled': False, 'idempotency_key': 'http-disable-memory-001'}).status_code == 200",
+            "assert damaged['description'] is None and (not damaged['can_recheck']) and damaged['can_discard']",
+            "assert client.post(PATH + '/recheck', headers=FRONTEND_HEADERS, json={'expected_version': 1, 'idempotency_key': 'http-off-recheck-001'}).status_code == 409",
+            "assert result.status_code == 200, result.text",
+            "assert result.json()['result'] == 'discarded' and result.json()['blocked_count'] == 2",
+            "assert client.post(path, headers=FRONTEND_HEADERS, json=body).json()['discarded_at'] == result.json()['discarded_at']",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == before",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationApplyRun)) == 0",
+            "assert db.get(Post, 'recovery-http-post').body == 'A calm day.'"
+          ]
+        },
+        "tests/migrations/test_situation_recovery_v32.py": {
+          "seed_v31": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(31).schema_digest"
+          ],
+          "test_populated_v31_delta_preserves_every_old_column_and_high_water_sequence": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest",
+            "assert connection.exec_driver_sql('SELECT state,state_version,manifest_id FROM memory_situation_receipts').one()[:2] == ('blocked', 1)",
+            "assert connection.exec_driver_sql('PRAGMA integrity_check').scalar() == 'ok'",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert tuple(connection.exec_driver_sql(f'SELECT * FROM \"{table}\"')) == rows, table"
+          ],
+          "test_fresh_orm_matches_frozen_v32_manifest": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest"
+          ],
+          "test_empty_predecessor_preserves_the_exact_sequence_marker": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(31).schema_digest",
+            "assert before['sequence'] == sequence",
+            "assert connection.exec_driver_sql(\"SELECT seq FROM sqlite_sequence WHERE name='memory_situation_receipts'\").scalar() == sequence",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()"
+          ],
+          "test_staging_failure_keeps_original_database_and_selected_marker": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='step_failed')",
+            "assert hashlib.sha256(path.read_bytes()).hexdigest() == original_sha",
+            "assert controller.current_marker.read_bytes() == marker",
+            "assert not list(controller.generations.glob('.*.tmp-*'))",
+            "assert result.source_version == 31 and result.target_version == 32 and result.migrated",
+            "assert hashlib.sha256(path.read_bytes()).hexdigest() == original_sha"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 32",
+            "assert fixture['target_table_count'] == 169",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_activity_situation_receipt.py": {},
+        "tests/memory/test_activity_situation_receipt.py": {},
+        "tests/memory/test_situation_delivery_recovery.py": {},
+        "tests/memory/test_situation_proof_guards.py": {},
+        "tests/memory/test_situation_recovery_actions.py": {},
+        "tests/memory/test_situation_recovery_http.py": {},
+        "tests/migrations/test_situation_recovery_v32.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
+    },
+    {
+      "commit": "f5bb1f311f5ed122c731b9f52331841c9694dec2",
+      "feature_id": "AR-SITUATION-RECOVERY-SCOPE",
+      "reason": "Current scope loss after acceptance preserves rejected rechecks and ordinary-save policy with six regression cases.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[blocked_recheck-owner_deleted]",
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[blocked_recheck-subject_inactive]",
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[blocked_recheck-world_archived]",
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[pending_apply-owner_deleted]",
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[pending_apply-subject_inactive]",
+        "tests/memory/test_situation_recovery_actions.py::test_scope_lost_after_request_preserves_the_recheck_failure[pending_apply-world_archived]"
+      ],
+      "test_assertions": {
+        "tests/memory/test_situation_recovery_actions.py": {
+          "blocked": [],
+          "recheck": [],
+          "consume": [],
+          "test_recheck_preserves_original_result_and_is_idempotent": [
+            "assert consume(db, memory, first) == 1",
+            "assert row.state == 'applied' and row.state_version == 2",
+            "assert replay.run_id == first.run_id",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1",
+            "assert attempt.outcome == 'applied' and attempt.previous_error_code == 'situation_source_changed_or_forbidden'",
+            "assert attempt.applied_item_id == row.applied_item_id",
+            "pytest.raises(MemoryConflictError, match='request_conflict')"
+          ],
+          "test_global_cutoff_pages_do_not_include_later_arrivals": [
+            "assert consume(db, memory, request) == 100",
+            "assert db.get(MemorySituationApplyRun, request.run_id).state == 'deferred'",
+            "assert consume(db, memory, request) == 2",
+            "assert late.state == 'blocked'",
+            "assert all((row.state == 'applied' for row in rows))",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 102"
+          ],
+          "test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit": [
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "assert first.state == 'applied' and second.state == 'blocked'"
+          ],
+          "test_recheck_failure_stays_blocked_with_revision_and_specific_reason": [
+            "assert row.state == 'blocked' and row.error_code == 'situation_source_changed' and (row.state_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == 'rejected'",
+            "assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1"
+          ],
+          "test_scope_lost_after_request_preserves_the_recheck_failure": [
+            "assert consume(db, memory, request) == 1",
+            "assert row.error_code == 'situation_scope_removed' and row.state_version == 2",
+            "assert row.description and row.manifest_id and (row.applied_item_id is None)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert row.state == 'blocked' and run.blocked_count == 1 and (run.skipped_count == 0)",
+            "assert attempt.outcome == 'rejected' and attempt.reason == 'situation_scope_removed'",
+            "assert row.state == 'skipped' and run.skipped_count == 1 and (run.blocked_count == 0)",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 0"
+          ],
+          "test_recheck_does_not_rewrite_the_completed_original_save": [
+            "assert row.state == 'blocked' and old_run.blocked_count == 1",
+            "assert row.state == 'applied'",
+            "assert (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at) == before",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).previous_run_id == first.run_id"
+          ],
+          "test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory": [
+            "assert second.state == 'applied'",
+            "assert first.manifest_id is None and db.get(MemorySituationManifest, shared_id) is not None",
+            "assert (item.summary, item.version, item.deleted_at, second.content_digest) == before",
+            "assert second.manifest_id == shared_id and second.state == 'applied'"
+          ],
+          "test_discard_off_closed_epoch_cleans_detail_and_prevents_readmission": [
+            "assert row.state == 'discarded' and row.state_version == 2 and (row.content_digest == original_digest)",
+            "assert row.description is None and row.result == {} and (row.manifest_id is None)",
+            "assert db.get(MemorySituationManifest, manifest_id) is None",
+            "assert db.get(type(post), post.id).body == post.body",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-001', now=NOW).result_code == first.result_code",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-002', now=NOW).result_code == 'already_discarded'",
+            "assert admit(db, manifest=manifest, draft=draft, result=result, now=NOW).state == 'discarded'",
+            "assert db.get(MemorySituationManifest, manifest_id) is None and row.discarded_at == NOW.replace(tzinfo=None)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_stale_version_discard_and_stale_worker_never_apply": [
+            "pytest.raises(MemoryConflictError, match='version_conflict')",
+            "assert replacement != token",
+            "pytest.raises(MemoryConflictError, match='fence_lost')",
+            "assert row.state == 'blocked' and db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_discard_queued_candidate_is_audited_and_never_revived_on_restart": [
+            "assert consume(db, memory, request) == 0",
+            "assert row.state == 'discarded' and run.skipped_count == 1 and (run.applied_count == 0)",
+            "assert attempt.outcome == 'discarded' and attempt.before_version == 1 and (attempt.after_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_closed_activation_recheck_is_rejected_but_discard_is_allowed": [
+            "pytest.raises(MemoryConflictError, match='activation_closed')",
+            "assert row.state == 'discarded'"
+          ],
+          "test_application_and_discard_transactions_roll_back_whole_page": [
+            "assert row.state == 'blocked' and row.state_version == 1",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert run.cursor == run.applied_count == 0",
+            "assert row.state == 'blocked' and row.manifest_id == original_manifest and row.description",
+            "assert db.get(MemorySituationManifest, original_manifest) is not None",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_situation_recovery_actions.py": {}
+      }
+    },
+    {
+      "commit": "bb7f50739aaaec7ba31b1c6d3a2559a4c076bba8",
+      "feature_id": "AR-SITUATION-RECOVERY-UNICODE",
+      "reason": "Read committed Unicode paths exactly; preserve registration and retirement checks with a real Git regression",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_preservation_git_evidence_cache.py::test_committed_unicode_paths_require_exact_introduction_evidence"
+      ],
+      "test_assertions": {
+        "tests/test_preservation_git_evidence_cache.py": {
+          "test_only_pinned_object_or_range_reads_are_cacheable": [
+            "assert checker.immutable_git_read(args) is immutable"
+          ],
+          "test_actual_head_changes_are_reread_and_original_blob_stays_pinned": [
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker._immutable_git_bytes.cache_info().hits == 1",
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'changed'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('rev-parse', 'HEAD', root=tmp_path).decode().strip() != original"
+          ],
+          "test_injected_reader_is_never_cached": [
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'first'",
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'second'"
+          ],
+          "test_committed_unicode_paths_require_exact_introduction_evidence": [
+            "assert checker.unrecorded_committed_sources(checkpoint, registered, {}, tmp_path) == ['committed source lacks append-only introduction evidence: ' + paths[1]]",
+            "assert checker.unrecorded_committed_sources(checkpoint, registered, {}, tmp_path) == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_preservation_git_evidence_cache.py": {}
+      }
+    },
+    {
+      "commit": "97c11cb0d16dff5ff031db78c35c602fc17ec025",
+      "feature_id": "AR-SITUATION-RECOVERY-INVENTORY",
+      "reason": "Recovery owner-only routes and private audit cleanup with frozen v2 fixtures and exact approved operation checks",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/memory/test_situation_recovery_actions.py::test_private_cleanup_cascades_recheck_history_and_preserves_another_owner[account]",
+        "tests/memory/test_situation_recovery_actions.py::test_private_cleanup_cascades_recheck_history_and_preserves_another_owner[character]"
+      ],
+      "test_assertions": {
+        "tests/memory/test_situation_recovery_actions.py": {
+          "blocked": [],
+          "recheck": [],
+          "consume": [],
+          "test_recheck_preserves_original_result_and_is_idempotent": [
+            "assert consume(db, memory, first) == 1",
+            "assert row.state == 'applied' and row.state_version == 2",
+            "assert replay.run_id == first.run_id",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1",
+            "assert attempt.outcome == 'applied' and attempt.previous_error_code == 'situation_source_changed_or_forbidden'",
+            "assert attempt.applied_item_id == row.applied_item_id",
+            "pytest.raises(MemoryConflictError, match='request_conflict')"
+          ],
+          "test_private_cleanup_cascades_recheck_history_and_preserves_another_owner": [
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 2",
+            "assert db.get(MemoryScopeSettingModel, removed_setting_id) is None",
+            "assert db.get(MemorySituationReceipt, removed_sequence) is None",
+            "assert db.get(MemorySituationApplyRun, other_run.run_id) is not None",
+            "assert db.get(MemorySituationReceipt, retained_sequence) is not None",
+            "assert db.get(MemoryScopeSettingModel, other_setting_id) is not None",
+            "assert attempt.receipt_sequence == retained_sequence and attempt.run_id == other_run.run_id",
+            "assert db.get(Post, post_id) is not None",
+            "assert db.connection().exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ],
+          "test_global_cutoff_pages_do_not_include_later_arrivals": [
+            "assert consume(db, memory, request) == 100",
+            "assert db.get(MemorySituationApplyRun, request.run_id).state == 'deferred'",
+            "assert consume(db, memory, request) == 2",
+            "assert late.state == 'blocked'",
+            "assert all((row.state == 'applied' for row in rows))",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 102"
+          ],
+          "test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit": [
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "pytest.raises(MemoryConflictError, match='scope_busy')",
+            "assert first.state == 'applied' and second.state == 'blocked'"
+          ],
+          "test_recheck_failure_stays_blocked_with_revision_and_specific_reason": [
+            "assert row.state == 'blocked' and row.error_code == 'situation_source_changed' and (row.state_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == 'rejected'",
+            "assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1"
+          ],
+          "test_scope_lost_after_request_preserves_the_recheck_failure": [
+            "assert consume(db, memory, request) == 1",
+            "assert row.error_code == 'situation_scope_removed' and row.state_version == 2",
+            "assert row.description and row.manifest_id and (row.applied_item_id is None)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert row.state == 'blocked' and run.blocked_count == 1 and (run.skipped_count == 0)",
+            "assert attempt.outcome == 'rejected' and attempt.reason == 'situation_scope_removed'",
+            "assert row.state == 'skipped' and run.skipped_count == 1 and (run.blocked_count == 0)",
+            "assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 0"
+          ],
+          "test_recheck_does_not_rewrite_the_completed_original_save": [
+            "assert row.state == 'blocked' and old_run.blocked_count == 1",
+            "assert row.state == 'applied'",
+            "assert (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at) == before",
+            "assert db.scalar(select(MemorySituationRecheckAttempt)).previous_run_id == first.run_id"
+          ],
+          "test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory": [
+            "assert second.state == 'applied'",
+            "assert first.manifest_id is None and db.get(MemorySituationManifest, shared_id) is not None",
+            "assert (item.summary, item.version, item.deleted_at, second.content_digest) == before",
+            "assert second.manifest_id == shared_id and second.state == 'applied'"
+          ],
+          "test_discard_off_closed_epoch_cleans_detail_and_prevents_readmission": [
+            "assert row.state == 'discarded' and row.state_version == 2 and (row.content_digest == original_digest)",
+            "assert row.description is None and row.result == {} and (row.manifest_id is None)",
+            "assert db.get(MemorySituationManifest, manifest_id) is None",
+            "assert db.get(type(post), post.id).body == post.body",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-001', now=NOW).result_code == first.result_code",
+            "assert discard(db, setting, sequence=row.sequence, expected_version=1, request_key='discard-owner-002', now=NOW).result_code == 'already_discarded'",
+            "assert admit(db, manifest=manifest, draft=draft, result=result, now=NOW).state == 'discarded'",
+            "assert db.get(MemorySituationManifest, manifest_id) is None and row.discarded_at == NOW.replace(tzinfo=None)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_stale_version_discard_and_stale_worker_never_apply": [
+            "pytest.raises(MemoryConflictError, match='version_conflict')",
+            "assert replacement != token",
+            "pytest.raises(MemoryConflictError, match='fence_lost')",
+            "assert row.state == 'blocked' and db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_discard_queued_candidate_is_audited_and_never_revived_on_restart": [
+            "assert consume(db, memory, request) == 0",
+            "assert row.state == 'discarded' and run.skipped_count == 1 and (run.applied_count == 0)",
+            "assert attempt.outcome == 'discarded' and attempt.before_version == 1 and (attempt.after_version == 2)",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0"
+          ],
+          "test_closed_activation_recheck_is_rejected_but_discard_is_allowed": [
+            "pytest.raises(MemoryConflictError, match='activation_closed')",
+            "assert row.state == 'discarded'"
+          ],
+          "test_application_and_discard_transactions_roll_back_whole_page": [
+            "assert row.state == 'blocked' and row.state_version == 1",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert run.cursor == run.applied_count == 0",
+            "assert row.state == 'blocked' and row.manifest_id == original_manifest and row.description",
+            "assert db.get(MemorySituationManifest, original_manifest) is not None",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')",
+            "pytest.raises(RuntimeError, match='injected_audit_failure')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_situation_recovery_actions.py": {}
+      }
     }
   ]
 }
