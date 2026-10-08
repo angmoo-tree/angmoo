@@ -53,8 +53,13 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 206
-    assert len(operations) == 255
+    assert len(paths) == 214
+    assert len(operations) == 267
+    assert {
+        ("GET", "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-settings"),
+        ("PUT", "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-settings"),
+        ("POST", "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/save"),
+    } <= operations
     # Approved World management and chat deletion stay scoped to the selected World.
     assert {
         ("GET", "/api/v1/worlds/{world_id}/character-dashboard"),

@@ -148,9 +148,10 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     ):
         assert forbidden not in combined
 
-    assert '<Field label={uiText("만드는 방법")}>' in create_client
-    assert 'value="external"' in create_client
-    assert 'value="card"' in create_client
+    assert '<legend className="sr-only">{uiText("만드는 방법")}</legend>' in create_client
+    assert "['external', '외부 실행기 연결용 캐릭터']" in create_client
+    assert "['card', '실리태번 캐릭터 카드 가져오기']" in create_client
+    assert 'type="radio" name="creation-method" value={value}' in create_client
     assert "counts=" not in create_client
     assert "summarizeCharacterAutonomy(items)" in dashboard
     assert 'uiText("전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}"' in dashboard

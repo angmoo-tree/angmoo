@@ -619,6 +619,18 @@ def _seed_supported_predecessor(
                 from app.models import Base
                 from sqlalchemy.schema import CreateIndex, CreateTable
 
+                # Current initialization includes v30/v31. Remove only those
+                # later deltas from this synthetic predecessor before freezing
+                # its historical manifest; production upgrades stay forward-only.
+                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES
+                from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES as WORLD_ACTIVITY_TABLES
+                for name in reversed(SITUATION_V31_TABLES):
+                    Base.metadata.tables[name].drop(sql_connection)
+                for name in sorted(WORLD_ACTIVITY_TABLES):
+                    Base.metadata.tables[name].drop(sql_connection)
+                for column in ("credential_id", "credential_revision"):
+                    sql_connection.exec_driver_sql(f'ALTER TABLE "memory_batch_runs" DROP COLUMN "{column}"')
+
                 # Only this isolated historical fixture moves backwards. Final
                 # v28 already has v29's shape; earlier sources must omit all
                 # World-configuration tables and frozen admission input fields.

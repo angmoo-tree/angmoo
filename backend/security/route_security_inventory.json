@@ -132,6 +132,16 @@
       "module": "app.domains.memory.router",
       "endpoint": "delete_memory_item"
     },
+    "DELETE /api/v1/worlds/{world_id}/world-characters/{world_character_id}/credentials/{purpose}": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "credential_delete"
+    },
+    "DELETE /api/v1/worlds/{world_id}/world-characters/{world_character_id}/instance": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "delete_instance"
+    },
     "GET /api/v1/agent-runs/resident-slots": {
       "access": "owner-only",
       "module": "app.api.v1.routes.agent_runs",
@@ -632,6 +642,11 @@
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_embedding_setting"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-settings": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "read_memory_processing"
+    },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
@@ -641,6 +656,16 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "read_world_character_profile"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/credentials/{purpose}": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "credential_read"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/image-policy": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "read_image_policy"
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/management": {
       "access": "authenticated-shared",
@@ -656,6 +681,11 @@
       "access": "owner-only",
       "module": "app.domains.social.router",
       "endpoint": "read_world_character_social_activity"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/status": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "character_status"
     },
     "GET /health": {
       "access": "public",
@@ -736,6 +766,11 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "update_owner_character"
+    },
+    "PATCH /api/v1/worlds/{world_id}/world-characters/{world_character_id}/image-policy": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "write_image_policy"
     },
     "PATCH /api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile": {
       "access": "owner-only",
@@ -1197,6 +1232,16 @@
       "module": "app.domains.memory.router",
       "endpoint": "retry_memory_relationship_batch"
     },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/embedding-preparation": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "start_memory_embedding_preparation"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/save": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "save_memory_situations"
+    },
     "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/activate": {
       "access": "owner-only",
       "module": "app.domains.world_characters.router.management",
@@ -1206,6 +1251,11 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.management",
       "endpoint": "deactivate"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/image-policy/check": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "check_image_policy"
     },
     "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile/media": {
       "access": "owner-only",
@@ -1297,10 +1347,20 @@
       "module": "app.domains.memory.router",
       "endpoint": "update_memory_embedding_setting"
     },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-settings": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "update_memory_processing"
+    },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "update_memory_setting"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{world_character_id}/credentials/{purpose}": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.management",
+      "endpoint": "credential_write"
     }
   }
 }
