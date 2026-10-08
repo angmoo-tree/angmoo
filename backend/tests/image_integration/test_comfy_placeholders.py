@@ -188,6 +188,8 @@ def test_url_rejects_non_base_components(base):
 
 
 def test_javascript_key_order_first_preview_batch_and_no_replacement():
+    long_numeric_key = "9" * 5000
+    assert javascript_keys(dict.fromkeys([long_numeric_key, "2", "ordinary"])) == ["2", long_numeric_key, "ordinary"]
     keys = ["01", "9", "-1", "4294967295", "2", "0", "١", "4294967294", "alpha"]
     assert javascript_keys(dict.fromkeys(keys)) == ["0", "2", "9", "4294967294", "01", "-1", "4294967295", "١", "alpha"]
     outputs = {"12": {"images": [{"filename": "later"}]}, "2": {"images": [{"filename": "preview"}, {"filename": "batch2"}]}}

@@ -32,7 +32,7 @@ def inject_workflow(workflow, info, values):
 def javascript_keys(mapping):
     indices, other = [], []
     for key in mapping:
-        if isinstance(key, str) and key.isascii() and key.isdigit() and str(int(key)) == key and int(key) < 4294967295:
+        if isinstance(key, str) and len(key) <= 10 and key.isascii() and key.isdigit() and str(int(key)) == key and int(key) < 4294967295:
             indices.append(key)
         else:
             other.append(key)
