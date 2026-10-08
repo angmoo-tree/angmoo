@@ -90,9 +90,12 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
             try:
                 memory.validate_scope(snapshot.scope)
             except MemoryScopeError:
-                receipt.state, receipt.error_code = "skipped", "situation_scope_removed"
+                receipt.state, receipt.error_code = ("blocked" if run.work_kind == "blocked_recheck" else "skipped"), "situation_scope_removed"
                 processed(receipt, before_version, previous)
-                run.skipped_count += 1
+                if run.work_kind == "blocked_recheck":
+                    run.blocked_count += 1
+                else:
+                    run.skipped_count += 1
                 continue
             access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]
             legacy_deleted = run.work_kind == "blocked_recheck" and manifest.version == 1 and any(

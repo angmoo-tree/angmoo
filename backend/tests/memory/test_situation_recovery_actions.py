@@ -116,6 +116,43 @@ def test_recheck_failure_stays_blocked_with_revision_and_specific_reason(durable
     assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1
 
 
+@pytest.mark.parametrize("change", ["owner_deleted", "world_archived", "subject_inactive"])
+@pytest.mark.parametrize("work_kind", ["pending_apply", "blocked_recheck"])
+def test_scope_lost_after_request_preserves_the_recheck_failure(durable_stack, change, work_kind):
+    from app.domains.identity.models import User
+    from app.domains.worlds.models import World
+    from app.domains.world_characters.models import WorldCharacter
+    db, scope, setting, memory = durable_stack
+    row, *_ = blocked(db, scope, real_source(db, scope), 1)
+    if work_kind == "blocked_recheck":
+        request = recheck(db, setting, row=row)
+    else:
+        row.state = "pending"
+        get_or_create_settings(db, setting.id, timezone="Asia/Seoul", now=NOW)
+        request = request_run(db, setting, trigger="manual", request_key="scope-save-0001",
+            expected_version=1, now=NOW)
+        db.commit()
+    if change == "owner_deleted":
+        db.get(User, scope.owner_id).deleted_at = NOW
+    elif change == "world_archived":
+        db.get(World, scope.world_id).archived_at = NOW
+    else:
+        db.get(WorldCharacter, scope.subject_world_character_id).status = "inactive"
+    db.commit()
+    assert consume(db, memory, request) == 1
+    run = db.get(MemorySituationApplyRun, request.run_id)
+    assert row.error_code == "situation_scope_removed" and row.state_version == 2
+    assert row.description and row.manifest_id and row.applied_item_id is None
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
+    if work_kind == "blocked_recheck":
+        assert row.state == "blocked" and run.blocked_count == 1 and run.skipped_count == 0
+        attempt = db.scalar(select(MemorySituationRecheckAttempt))
+        assert attempt.outcome == "rejected" and attempt.reason == "situation_scope_removed"
+    else:
+        assert row.state == "skipped" and run.skipped_count == 1 and run.blocked_count == 0
+        assert db.scalar(select(func.count()).select_from(MemorySituationRecheckAttempt)) == 0
+
+
 def test_recheck_does_not_rewrite_the_completed_original_save(durable_stack):
     db, scope, setting, memory = durable_stack
     post = real_source(db, scope)
