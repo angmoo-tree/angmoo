@@ -1,6 +1,6 @@
 """Owner-only Memory HTTP endpoints and stable error translation."""
 from __future__ import annotations
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import browser_session
@@ -41,6 +41,58 @@ router = APIRouter(prefix="/worlds/{world_id}/world-characters/{subject_id}", ta
 
 from app.domains.memory.schemas.situation import MemoryProcessingRead, MemoryProcessingUpdate, MemorySaveRequest
 from app.domains.memory.service import situation_management
+from app.domains.memory.schemas.situation import (
+    MemoryIndividualRecheckRequest, MemorySituationDiscardRequest, MemorySituationDiscardRead, MemoryUnsavedExperiencesRead,
+)
+from app.domains.memory.service import situation_recovery_management
+
+
+@router.get("/memory/unsaved-experiences", response_model=MemoryUnsavedExperiencesRead)
+def read_memory_unsaved(world_id: str, subject_id: str, request: Request,
+    cursor: str | None = Query(default=None, max_length=512), limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return situation_recovery_management.list_unsaved(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, cursor=cursor, limit=limit)
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+
+
+@router.post("/memory/recheck", response_model=MemoryProcessingRead)
+def recheck_memory_unsaved(world_id: str, subject_id: str, data: MemorySaveRequest, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.recheck(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/situations/{receipt_sequence}/recheck", response_model=MemoryProcessingRead)
+def recheck_memory_experience(world_id: str, subject_id: str, data: MemoryIndividualRecheckRequest, request: Request,
+    receipt_sequence: int = Path(ge=1), db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.recheck(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows,
+            data=data, sequence=receipt_sequence)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/situations/{receipt_sequence}/discard", response_model=MemorySituationDiscardRead)
+def discard_memory_experience(world_id: str, subject_id: str, data: MemorySituationDiscardRequest, request: Request,
+    receipt_sequence: int = Path(ge=1), db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.discard_experience(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, data=data, sequence=receipt_sequence)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
 
 
 @router.get("/memory/processing-settings", response_model=MemoryProcessingRead)

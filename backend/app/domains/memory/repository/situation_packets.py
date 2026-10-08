@@ -21,13 +21,14 @@ def read_situation_packet(session, reader, scope, item, info, now):
         MemoryActivitySituationSource.memory_item_id == info.memory_item_id).order_by(
             MemoryActivitySituationSource.ordinal).limit(101)))
     truncated = len(rows) > 100
-    entries = [DeliveredSourceEntry(**{**row.source, "ranges": tuple(tuple(pair) for pair in row.source.get("ranges", ()))})
+    entries = [DeliveredSourceEntry.from_dict(row.source)
         for row in rows[:100]]
     access = {entry.ordinal: reader.validate_situation_source(manifest, entry, now=now) for entry in entries}
     identities = tuple(dict.fromkeys((entry.source_type, entry.source_id) for entry in entries
         if access[entry.ordinal].state == "available" and access[entry.ordinal].evidence is not None))
-    source_reader = getattr(reader, "read_situation_sources", reader.read_sources)
-    originals = source_reader(scope=scope, identities=identities)
+    source_reader = getattr(reader, "read_situation_sources", None)
+    originals = (reader.read_sources(scope=scope, identities=identities) if source_reader is None else
+        source_reader(scope=scope, identities=identities, context=manifest, entries=tuple(entries), now=now))
     sources = []
     for entry in entries:
         status = access[entry.ordinal].state

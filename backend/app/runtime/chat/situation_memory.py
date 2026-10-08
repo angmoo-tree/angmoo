@@ -5,7 +5,11 @@ from app.domains.chat.models import MessageMessage
 from app.core.calendar import utc_instant
 
 from app.domains.chat.contracts.evidence_bundle import EvidenceLocatorKind
-from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, CommittedActivityResult, CommittedEffect, stable_digest
+from app.domains.memory.contracts.activity_situation import (
+    DeliveredInputManifest, CommittedActivityResult, CommittedEffect, stable_digest,
+    FinalDeliveredFragment, RelationshipDeliveryBasis,
+)
+from app.domains.relationships.policies.social_context_validation import facts_digest
 from app.domains.memory.service.situation_policy import restore
 from app.domains.memory.repository.situation_admission import admit
 from app.domains.memory.policies.situation_output import parse_description
@@ -22,11 +26,13 @@ class ChatSituationMemory:
             raise ValueError("situation_snapshot_required")
         sources = SituationSources(self.session)
         entries = []
-        def add(kind, identifier, delivered, path, *, role="core"):
+        payload_digest = stable_digest(payload)
+        def add(kind, identifier, delivered, path, *, role="core", basis=None):
             entries.append(sources.describe(snapshot.scope, kind=kind, identifier=identifier,
                 delivered=delivered, path=path, role=role, ordinal=len(entries),
                 target=command.request.response_slot_id if role == "core" else None,
-                private_thread=command.request.thread_id))
+                private_thread=command.request.thread_id, relationship_basis=basis,
+                delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)))
         add("CHAT_MESSAGE", str(command.request.user_message_id), payload["latest_user_message"], "/latest_user_message")
         for index, context in enumerate(command.response_context):
             if context.source_id is None:
@@ -43,8 +49,15 @@ class ChatSituationMemory:
                 add(locator.source_type, locator.source_id, payload["frozen_evidence"]["items"][index]["text"],
                     f"/frozen_evidence/items/{index}/text", role="background")
             elif locator.kind in {EvidenceLocatorKind.GRAPH_RELATIONSHIP, EvidenceLocatorKind.IMAGE_ASSET}:
+                basis = None
+                if locator.kind is EvidenceLocatorKind.GRAPH_RELATIONSHIP:
+                    if locator.relationship_facts_digest is None or locator.relationship_view_version is None:
+                        raise ValueError("situation_relationship_prepared_basis_missing")
+                    basis = RelationshipDeliveryBasis(locator.source_id, locator.actor_world_character_id,
+                        locator.target_world_character_id, int(locator.source_revision),
+                        locator.relationship_view_version, locator.relationship_facts_digest)
                 add("RELATIONSHIP" if locator.kind is EvidenceLocatorKind.GRAPH_RELATIONSHIP else "IMAGE_ASSET",
-                    locator.source_id, payload["frozen_evidence"]["items"][index]["text"], f"/frozen_evidence/items/{index}/text", role="background")
+                    locator.source_id, payload["frozen_evidence"]["items"][index]["text"], f"/frozen_evidence/items/{index}/text", role="background", basis=basis)
                 if locator.kind is EvidenceLocatorKind.IMAGE_ASSET:
                     image = command.image_evidence
                     if image is None or image.asset_id != locator.source_id:
@@ -57,10 +70,14 @@ class ChatSituationMemory:
                 raise ValueError("situation_evidence_kind_unsupported")
         if command.social_snapshot is not None:
             for item in command.social_snapshot.items:
+                relationship = item.relationship
+                basis = RelationshipDeliveryBasis(relationship.relationship_state_id,
+                    relationship.actor_world_character_id, relationship.target_world_character_id,
+                    relationship.relationship_version, relationship.view_version, facts_digest(item))
                 add("RELATIONSHIP", item.relationship.relationship_state_id,
-                    payload["social_context"]["context"], "/social_context/context", role="background")
+                    payload["social_context"]["context"], "/social_context/context", role="background", basis=basis)
         return DeliveredInputManifest(f"chat:{command.request.request_scope_hash}", snapshot,
-            stable_digest(payload), tuple(entries), private_thread_id=command.request.thread_id)
+            payload_digest, tuple(entries), private_thread_id=command.request.thread_id, version=2)
 
     def admit(self, command, committed, response):
         if command.request.node_state.get("_situation_policy") is None:

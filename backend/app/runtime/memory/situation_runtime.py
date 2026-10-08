@@ -50,9 +50,16 @@ class SituationRuntime:
                 scope = MemoryScope(row.owner_id, row.world_id, row.subject_world_character_id)
                 memory.validate_scope(scope)
                 setting = memory.get_scope_setting(scope)
-                request_run(db, setting, trigger="quit" if shutdown else "scheduled",
-                    request_key=self.quit_identity if shutdown else "daily:" + stable_digest(utc_instant(config.next_due_at).isoformat()),
-                    expected_version=config.version, now=now)
+                try:
+                    request_run(db, setting, trigger="quit" if shutdown else "scheduled",
+                        request_key=self.quit_identity if shutdown else "daily:" + stable_digest(utc_instant(config.next_due_at).isoformat()),
+                        expected_version=config.version, now=now)
+                except MemoryConflictError as exc:
+                    if str(exc) != "situation_scope_busy":
+                        raise
+                    # Keep the due time / quit request absent so the next bounded
+                    # prepare retries it after the owner's recheck completes.
+                    continue
             db.commit()
 
     def tick(self):

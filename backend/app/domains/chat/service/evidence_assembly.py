@@ -393,6 +393,8 @@ class EvidenceBundleAssembler:
                             kind=EvidenceLocatorKind.GRAPH_RELATIONSHIP,
                             source_id=relationship.relationship_state_id,
                             source_revision=str(relationship.relationship_version),
+                            relationship_facts_digest=relationship.delivery_facts_digest(),
+                            relationship_view_version=relationship.view_version,
                             actor_world_character_id=(
                                 relationship.actor_world_character_id
                             ),

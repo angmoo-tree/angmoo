@@ -1202,7 +1202,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "3293b7fc14facbd46384e2a6f37ce3b7b4ff372b3dc1e6c05dbb4b2c789f1b46",
+    "next_static_inventory_sha256": "6943503511fc792ee4b5ea279370eeff1bdbcb356b8747903997322464b150c3",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,

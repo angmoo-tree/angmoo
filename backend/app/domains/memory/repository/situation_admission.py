@@ -53,6 +53,7 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
     if draft.status == "valid" and valid.status != "valid":
         raise MemoryValidationError("situation_draft_invalid")
     payload = asdict(result)
+    payload["result_sources"] = [entry.to_dict(version=manifest.version) for entry in result.result_sources]
     payload["occurred_at"] = result.occurred_at.isoformat()
     content_digest = stable_digest({"manifest": manifest.to_dict(), "draft": asdict(draft), "result": payload})
     locked = session.execute(update(MemoryScopeSettingModel).where(
@@ -88,6 +89,9 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
         session.flush()
     elif stored.content_digest != manifest_digest:
         raise MemoryConflictError("situation_manifest_content_conflict")
+    if manifest.version == 2:
+        payload["_admission"] = {"draft": asdict(draft), "manifest_digest": manifest_digest,
+            "result_digest": stable_digest(payload)}
     setting = session.get(MemoryScopeSettingModel, snapshot.setting_id, populate_existing=True)
     epoch = session.get(MemoryActivationEpoch, snapshot.activation_epoch, populate_existing=True)
     inactive = (not setting.enabled or setting.version != snapshot.scope_version or epoch is None

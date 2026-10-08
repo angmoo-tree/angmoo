@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -619,13 +619,27 @@ def _seed_supported_predecessor(
                 from app.models import Base
                 from sqlalchemy.schema import CreateIndex, CreateTable
 
-                # Current initialization includes v30/v31. Remove only those
+                # Current initialization includes v30/v31/v32. Remove only those
                 # later deltas from this synthetic predecessor before freezing
                 # its historical manifest; production upgrades stay forward-only.
-                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES
+                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES, build_sqlite_v31_metadata
                 from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES as WORLD_ACTIVITY_TABLES
-                for name in reversed(SITUATION_V31_TABLES):
-                    Base.metadata.tables[name].drop(sql_connection)
+                sql_connection.exec_driver_sql('DROP TABLE "memory_situation_recheck_attempts"')
+                if source_version < 31:
+                    for name in reversed(SITUATION_V31_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection)
+                else:
+                    historical = build_sqlite_v31_metadata()
+                    for name in ("memory_situation_runs", "memory_situation_receipts"):
+                        table = historical.tables[name]
+                        columns = ", ".join(f'"{column.name}"' for column in table.columns)
+                        sql_connection.exec_driver_sql(f'CREATE TEMP TABLE "{name}_fixture_copy" AS SELECT {columns} FROM "{name}"')
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
+                        sql_connection.execute(CreateTable(table))
+                        sql_connection.exec_driver_sql(f'INSERT INTO "{name}" ({columns}) SELECT {columns} FROM "{name}_fixture_copy"')
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}_fixture_copy"')
+                        for index in table.indexes:
+                            sql_connection.execute(CreateIndex(index))
                 if source_version < 30:
                     for name in sorted(WORLD_ACTIVITY_TABLES):
                         Base.metadata.tables[name].drop(sql_connection)

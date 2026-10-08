@@ -9,6 +9,7 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { getMemoryProcessing, saveMemoryProcessing, savePendingMemories, MemoryApiError } from "../api/memory-client";
 import type { MemoryProcessingSetting, MemoryProcessingUpdate, MemorySaveRequest } from "../types/memory-processing-contract";
 import styles from "./memory-workspace.module.css";
+import { MemoryUnsavedExperiencesControls } from "./memory-unsaved-experiences";
 
 const editable = (value: MemoryProcessingSetting) => ({ daily_enabled: value.daily_enabled,
   local_time: value.local_time, shutdown_apply_enabled: value.shutdown_apply_enabled });
@@ -115,8 +116,10 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
       <Button disabled={disabled || busy !== null || !saveAvailable} loading={busy === "save"}
         loadingLabel={uiText("요청 중")} onClick={() => void perform("save")}>{uiText("지금 기억 저장")}</Button>
     </div>
-    <p role="status">{uiText(labels[saved.status])}</p>
-    {saved.blocked_count > 0 && <p>{uiText("확인할 수 없어 저장하지 않은 경험 {{count}}개", { count: saved.blocked_count })}</p>}
+    <p role="status">{uiText(!running && saved.pending_count === 0 && saved.blocked_count === 0
+      ? "현재 저장하지 못한 경험이나 저장 대기가 없어요." : labels[saved.status])}</p>
+    <MemoryUnsavedExperiencesControls worldId={worldId} subjectId={subjectId} processing={saved}
+      disabled={disabled || busy !== null} acquire={acquire} release={release} onCompleted={onCompleted} onProcessing={setSaved} />
     <fieldset disabled={disabled || busy !== null} className="grid gap-3">
       <label className={styles.batchCheck}><input type="checkbox" checked={draft.daily_enabled} onChange={event => { update.current = null; changeDraft({ ...draft, daily_enabled: event.target.checked }); }} />{uiText("매일 정해진 시각에 기억 저장")}</label>
       <Field label={uiText("예약 시각 · {{value0}}", { value0: saved.timezone })}>{props => <Input {...props} type="time" required value={draft.local_time} onChange={event => { update.current = null; changeDraft({ ...draft, local_time: event.target.value }); }} />}</Field>

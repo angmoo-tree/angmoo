@@ -21,6 +21,13 @@ class MemoryProcessingRead(BaseModel):
     applied_count: int = 0
     result: str | None = None
     resolved_request_key: str | None = None
+    operation: Literal["pending_apply", "blocked_recheck"] | None = None
+    run_id: str | None = None
+    run_state: Literal["pending", "running", "deferred", "completed", "error"] | None = None
+    rejected_count: int = 0
+    skipped_count: int = 0
+    scope_busy: bool = False
+    can_recheck: bool = False
 
 
 class MemoryProcessingUpdate(BaseModel):
@@ -36,3 +43,45 @@ class MemorySaveRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     expected_version: int = Field(ge=0)
     idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryIndividualRecheckRequest(MemorySaveRequest):
+    expected_receipt_version: int = Field(ge=1)
+
+
+class MemorySituationDiscardRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_receipt_version: int = Field(ge=1)
+    idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryUnsavedExperienceRead(BaseModel):
+    receipt_sequence: int
+    state_version: int
+    occurred_at: datetime
+    description: str | None
+    reason: Literal["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "result_invalid", "validation_failed"]
+    can_recheck: bool
+    can_discard: bool
+
+
+class MemoryUnsavedExperiencesRead(BaseModel):
+    scope: MemoryScopeRead
+    items: list[MemoryUnsavedExperienceRead]
+    next_cursor: str | None
+    blocked_count: int
+    scope_busy: bool
+    can_recheck: bool
+
+
+class MemorySituationDiscardRead(BaseModel):
+    scope: MemoryScopeRead
+    receipt_sequence: int
+    state: Literal["discarded"]
+    state_version: int
+    discarded_at: datetime
+    operation: Literal["discard"] = "discard"
+    result: Literal["discarded", "already_discarded"]
+    resolved_request_key: str
+    pending_count: int
+    blocked_count: int

@@ -1479,18 +1479,18 @@
     {
       "markers": {
         "driver_or_url": [
-          110,
           111,
           112,
-          354,
+          113,
           355,
-          356
+          356,
+          357
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "65592eaef249ee8f47e75193c283fb2e9a78f326e426578491eb863707243694",
+      "source_sha256": "6879f2065984178116a07dc245877e5ad404e3dab95b4b86a73cd4e61aeb7082",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

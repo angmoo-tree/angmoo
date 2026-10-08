@@ -63,6 +63,7 @@ def _validate_provider(db: Session, scope: MemoryScope, model_id: str) -> None:
 
 def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
     from app.runtime.relationships.manual_review import ManualRelationshipFollowup
+    from app.runtime.memory.situation_sources import SituationSources
     return MemoryWorkflows(
         consolidation_followup=ManualRelationshipFollowup,
         generation_policy=settings.MEMORY_GENERATION_POLICY,
@@ -75,4 +76,5 @@ def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
         validate_embedding_credential=validate_embedding_credential,
         embedding_credential_options=None,
         embedding_runtime_status=embedding_runtime_status,
+        situation_validator=SituationSources,
     )

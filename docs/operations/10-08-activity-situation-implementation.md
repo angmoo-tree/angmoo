@@ -274,6 +274,8 @@ ANGMOO_TEST_VEC1_EXTENSION=/evidence/vec1-linux/vec1.so python -m pytest -q test
 
 ## 보류와 운영 경계
 
+이 문서는 최초 v31 구현 당시 기록이다. 이후 관찰 증명·관계 snapshot·owner 재검사/저장 포기와 v32의 구현 및 최종 검증은 [상황기억 검증·복구 구현 결과](<../verification/10-08 Chat·SNS 상황기억 관찰 검증과 차단 기록 복구 구현 결과.md>)를 참조한다. 아래 당시 결과를 최신 구현 결과로 대신 판독하지 않는다.
+
 - 실제 AI의 ko/en 준수, 원문↔응답↔설명의 의미 정확성, 검색 유용성: 별도 관찰 전까지 미검증.
 - 설치 앱 physical identity, 실제 native quit/skip/강제 종료·자연 활동·사용자 확인: 미수행. host 요청 의미는 유지했고 backend fake coordinator를 검증했다.
 - 새 배포 이미지 빌드·앱 재시작·PR·원격 CI·push·main merge: 미수행. 개발 앱 컨테이너는 중지 상태다. 사용자가 시작하면 설정된 키로 자율 활동이 재개될 수 있다.

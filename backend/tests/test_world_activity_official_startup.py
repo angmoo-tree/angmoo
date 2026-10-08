@@ -28,7 +28,7 @@ def test_official_factory_cold_start_read_only_settings_health_and_restart(tmp_p
         app.dependency_overrides[get_current_user] = lambda: owner
         prefix = "/api/v1/worlds/world-a/world-characters/wc-responding"
         with engine.connect() as connection:
-            assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(31).schema_digest
+            assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest
         with factory() as db:
             before = (db.scalar(select(func.count()).select_from(WorldCredential)),
                 [(p.world_character_id, p.revision, p.generation_enabled, p.vision_enabled) for p in db.scalars(select(WorldImagePolicy))])

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4261,
-      "internal_edge_count": 6217,
+      "external_import_count": 4275,
+      "internal_edge_count": 6249,
       "legacy_import_exception_count": 0,
-      "module_count": 1459,
+      "module_count": 1465,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -3709,7 +3709,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "5c091fed1c38d468ea1d36d8113b3d08c06906f9e76fc2a842e3ab2e6d23bc17"
+        "sha256": "8a58da3fb8f2d575d6d62021f00cb8f61ce3b455de4d25ae21ffba7267f438a2"
       },
       "steps": [
         {

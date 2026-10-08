@@ -11,13 +11,14 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 31
-SOURCE_ALEMBIC_REVISION = "20261008_0108"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 107
-EXPECTED_CANONICAL_TABLE_COUNT = 168
+SQLITE_SCHEMA_VERSION = 32
+SOURCE_ALEMBIC_REVISION = "20261008_0109"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 108
+EXPECTED_CANONICAL_TABLE_COUNT = 169
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
+SITUATION_V32_TABLES = ("memory_situation_recheck_attempts",)
 
 ACTIVITY_V19_TABLES = (
     "world_character_activity_states", "world_character_state_receipts",
@@ -142,7 +143,7 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -172,7 +173,7 @@ def build_sqlite_v3_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -202,7 +203,7 @@ def build_sqlite_v5_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -231,7 +232,7 @@ def build_sqlite_v6_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -255,7 +256,7 @@ def build_sqlite_v7_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if (
             table_name in SUBJECTIVE_CONTEXT_V8_TABLES
@@ -276,7 +277,7 @@ def build_sqlite_v8_metadata() -> MetaData:
     """Immutable pre-batch settings/admission schema."""
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES:
             continue
         if table_name not in MEMORY_BATCH_V9_TABLES:
             Base.metadata.tables[table_name].to_metadata(metadata)
@@ -750,6 +751,25 @@ def build_sqlite_v30_metadata() -> MetaData:
     metadata = build_sqlite_baseline_metadata()
     for name in SITUATION_TABLES:
         metadata.remove(metadata.tables[name])
+    return metadata
+
+
+def build_sqlite_v31_metadata() -> MetaData:
+    """Frozen shape before receipt recovery; preserve v31 manifest semantics."""
+    from sqlalchemy import CheckConstraint
+    metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["memory_situation_recheck_attempts"])
+    run = metadata.tables["memory_situation_runs"]
+    run.constraints.remove(next(value for value in run.constraints if value.name == "ck_situation_run_work_kind"))
+    run._columns.remove(run.c.work_kind)
+    receipt = metadata.tables["memory_situation_receipts"]
+    for value in tuple(receipt.constraints):
+        if value.name in {"ck_situation_receipt_version", "ck_situation_receipt_manifest", "ck_situation_receipt_state"}:
+            receipt.constraints.remove(value)
+    receipt.append_constraint(CheckConstraint("state IN ('pending','claimed','applied','blocked','skipped','error')", name="ck_situation_receipt_state"))
+    for name in ("state_version", "discarded_at", "discard_request_key"):
+        receipt._columns.remove(receipt.c[name])
+    receipt.c.manifest_id.nullable = False
     return metadata
 
 

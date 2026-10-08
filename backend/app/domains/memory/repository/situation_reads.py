@@ -4,6 +4,7 @@ from sqlalchemy import select
 from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, DeliveredSourceEntry, SITUATION_POLICY
 from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemorySituationReceipt, MemorySituationManifest
 from app.domains.memory.models.items import MemoryItem
+from app.domains.memory.repository.situation_validation import restore_context
 
 
 def situation_origin(session, item):
@@ -36,7 +37,7 @@ def correction_evidence(session, reader, scope, item, now):
     evidence = {}
     for row in session.scalars(select(MemoryActivitySituationSource).where(
             MemoryActivitySituationSource.memory_item_id == info.memory_item_id)):
-        entry = DeliveredSourceEntry(**{**row.source, "ranges": tuple(tuple(pair) for pair in row.source.get("ranges", ()))})
+        entry = DeliveredSourceEntry.from_dict(row.source)
         access = reader.validate_situation_source(manifest, entry, now=now)
         if access.evidence is not None:
             evidence[(entry.source_type, entry.source_id)] = access.evidence
@@ -69,13 +70,11 @@ def read_manifest(session, info):
     receipt = session.get(MemorySituationReceipt, info.receipt_sequence)
     if receipt is None or receipt.state != "applied" or receipt.policy_version != SITUATION_POLICY:
         return None
-    row = session.get(MemorySituationManifest, receipt.manifest_id)
-    if row is None:
+    try:
+        context = restore_context(session, receipt)
+    except (ValueError, TypeError, KeyError):
         return None
-    manifest = DeliveredInputManifest.from_dict(row.payload)
-    results = tuple(DeliveredSourceEntry(**{**value, "ranges": tuple(tuple(pair) for pair in value.get("ranges", ()))})
-        for value in receipt.result.get("result_sources", ()))
-    return manifest, results
+    return context, context.result_sources
 
 
 def situation_accessible(session, reader, scope, item, info, now, *, ancestors):

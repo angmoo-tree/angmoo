@@ -7,7 +7,7 @@ from app.models import Base
 SITUATION_TABLES = (
     "memory_situation_settings", "memory_situation_manifests", "memory_situation_runs",
     "memory_situation_requests", "memory_situation_receipts", "memory_situation_info",
-    "memory_situation_sources", "memory_situation_transitions",
+    "memory_situation_sources", "memory_situation_transitions", "memory_situation_recheck_attempts",
 )
 
 
@@ -44,12 +44,14 @@ class MemorySituationApplyRun(Base):
     __table_args__ = (
         CheckConstraint("trigger IN ('scheduled','manual','quit')", name="ck_situation_run_trigger"),
         CheckConstraint("state IN ('pending','running','completed','deferred','error')", name="ck_situation_run_state"),
+        CheckConstraint("work_kind IN ('pending_apply','blocked_recheck')", name="ck_situation_run_work_kind"),
         UniqueConstraint("scope_setting_id", "trigger", "request_identity", name="uq_situation_run_identity"),
         Index("ix_situation_run_pending", "state", "created_at"),
     )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     scope_setting_id: Mapped[str] = mapped_column(ForeignKey("memory_scope_settings.id", ondelete="CASCADE"), nullable=False)
     trigger: Mapped[str] = mapped_column(String(16), nullable=False)
+    work_kind: Mapped[str] = mapped_column(String(24), nullable=False, default="pending_apply", server_default="pending_apply")
     request_identity: Mapped[str] = mapped_column(String(128), nullable=False)
     cutoff_sequence: Mapped[int] = mapped_column(Integer, nullable=False)
     cursor: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -82,7 +84,9 @@ class MemorySituationReceipt(Base):
         UniqueConstraint("scope_setting_id", "logical_activity_id", "lane", "target_key", name="uq_situation_activity_target"),
         CheckConstraint("lane IN ('chat','inbox','feed','routine')", name="ck_situation_lane"),
         CheckConstraint("description_status IN ('valid','missing','invalid','output_order_invalid')", name="ck_situation_description_status"),
-        CheckConstraint("state IN ('pending','claimed','applied','blocked','skipped','error')", name="ck_situation_receipt_state"),
+        CheckConstraint("state IN ('pending','claimed','applied','blocked','skipped','error','discarded')", name="ck_situation_receipt_state"),
+        CheckConstraint("state_version >= 1", name="ck_situation_receipt_version"),
+        CheckConstraint("(state = 'discarded' AND manifest_id IS NULL AND description IS NULL AND applied_item_id IS NULL) OR (state <> 'discarded' AND manifest_id IS NOT NULL)", name="ck_situation_receipt_manifest"),
         Index("ix_situation_receipt_pending", "scope_setting_id", "state", "sequence"),
         {"sqlite_autoincrement": True},
     )
@@ -91,7 +95,7 @@ class MemorySituationReceipt(Base):
     logical_activity_id: Mapped[str] = mapped_column(String(160), nullable=False)
     lane: Mapped[str] = mapped_column(String(16), nullable=False)
     target_key: Mapped[str] = mapped_column(String(256), nullable=False)
-    manifest_id: Mapped[str] = mapped_column(ForeignKey("memory_situation_manifests.id", ondelete="CASCADE"), nullable=False)
+    manifest_id: Mapped[str | None] = mapped_column(ForeignKey("memory_situation_manifests.id", ondelete="CASCADE"))
     policy_version: Mapped[str] = mapped_column(String(40), nullable=False)
     activation_epoch: Mapped[str] = mapped_column(String(64), nullable=False)
     scope_version: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -102,6 +106,9 @@ class MemorySituationReceipt(Base):
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     state: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    state_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    discarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    discard_request_key: Mapped[str | None] = mapped_column(String(128))
     error_code: Mapped[str | None] = mapped_column(String(80))
     run_id: Mapped[str | None] = mapped_column(ForeignKey("memory_situation_runs.id", ondelete="SET NULL"))
     applied_item_id: Mapped[str | None] = mapped_column(ForeignKey("memory_items.id", ondelete="SET NULL"))
@@ -125,6 +132,23 @@ class MemoryActivitySituationSource(Base):
     evidence_id: Mapped[str | None] = mapped_column(ForeignKey("memory_item_evidence.id", ondelete="SET NULL"))
     source: Mapped[dict] = mapped_column(JSON, nullable=False)
     state: Mapped[str] = mapped_column(String(24), nullable=False)
+
+
+class MemorySituationRecheckAttempt(Base):
+    """One bounded outcome per receipt in a frozen recheck run; no originals."""
+    __tablename__ = "memory_situation_recheck_attempts"
+    run_id: Mapped[str] = mapped_column(ForeignKey("memory_situation_runs.id", ondelete="CASCADE"), primary_key=True)
+    receipt_sequence: Mapped[int] = mapped_column(ForeignKey("memory_situation_receipts.sequence", ondelete="CASCADE"), primary_key=True)
+    validation_revision: Mapped[str] = mapped_column(String(40), nullable=False)
+    outcome: Mapped[str] = mapped_column(String(16), nullable=False)
+    reason: Mapped[str | None] = mapped_column(String(80))
+    previous_run_id: Mapped[str | None] = mapped_column(ForeignKey("memory_situation_runs.id", ondelete="SET NULL"))
+    previous_state: Mapped[str] = mapped_column(String(16), nullable=False)
+    previous_error_code: Mapped[str | None] = mapped_column(String(80))
+    applied_item_id: Mapped[str | None] = mapped_column(ForeignKey("memory_items.id", ondelete="SET NULL"))
+    before_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    after_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class MemorySituationTransition(Base):

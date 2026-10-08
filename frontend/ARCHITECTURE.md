@@ -1,5 +1,29 @@
 # Angmoo Frontend Architecture
 
+### Scoped unsaved experience recovery (2026-10-08)
+
+Memory owns the bounded unsaved-experience client/DTO and recovery controls inside
+the existing memory-processing card. Composition retains the shared mutation
+lock; recheck/save/settings/discard cannot overlap through separate UI controllers.
+The server supplies safe descriptions, reason enums and action capabilities.
+Provider credentials, source bodies, manifests, internal run IDs and proof flags
+are not presented or accepted from the UI.
+
+The list exposes a whole-scope recheck next to the unresolved count, individual
+recheck/discard below each experience, bounded cursor pagination and an internal
+scroll region. Scope changes remount the controller, abort requests and reject
+late responses. Ambiguous failures retry the exact operation/target/body/key;
+request-key reads must resolve that request. Completed partial results display
+saved/rejected/skipped counts, while operational worker errors retain a resumable
+request instead of a completion notice.
+
+Discard uses the common Dialog/Button, safe default focus, focus trapping/return
+and an irreversible confirmation. Current counts and list/focus update after the
+canonical response. Memory OFF blocks recheck while owner discard remains subject
+to the server capability. Korean and English catalogs share keys/placeholders;
+saved experience text is not translated. Next and static shell use the same
+feature implementation and are verified separately.
+
 ### World introduction (2026-10-07)
 
 Worlds owns `components/world-introduction.tsx`, the existing World detail read,

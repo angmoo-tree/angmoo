@@ -8,6 +8,8 @@ from app.domains.memory.models.activity_situation import MemorySituationProcessi
 from app.domains.memory.models.batch import MemoryBatchSetting
 from app.domains.memory.repository.situation_runs import get_or_create_settings, next_due, request_run
 from app.domains.memory.schemas.situation import MemoryProcessingRead
+from app.domains.memory.repository.situation_recovery import active_run
+from app.domains.memory.models.batch import MemoryActivationEpoch
 
 
 def read(*, scope, db, workflows, result=None, request_key=None):
@@ -25,12 +27,19 @@ def read(*, scope, db, workflows, result=None, request_key=None):
         counts = dict(db.execute(select(MemorySituationReceipt.state, func.count()).where(
             MemorySituationReceipt.scope_setting_id == setting.id).group_by(MemorySituationReceipt.state)).all())
         pending, blocked = counts.get("pending", 0), counts.get("blocked", 0) + counts.get("error", 0)
-        run = db.scalar(select(MemorySituationApplyRun).where(MemorySituationApplyRun.scope_setting_id == setting.id)
+        run = (db.get(MemorySituationApplyRun, resolved.run_id) if resolved and resolved.run_id else None) if request_key is not None else db.scalar(
+            select(MemorySituationApplyRun).where(MemorySituationApplyRun.scope_setting_id == setting.id)
             .order_by(MemorySituationApplyRun.created_at.desc(), MemorySituationApplyRun.id.desc()).limit(1))
     status = "idle"
     if run:
         status = "applying" if run.state == "running" else "accepted" if run.state in {"pending", "deferred"} else "partial_error" if run.state == "error" or run.blocked_count else "saved"
     zone = config.timezone if config else legacy.timezone if legacy else workflows.batch_repository(db).timezone(scope)
+    busy = active_run(db, setting.id) is not None if setting else False
+    eligible = db.scalar(select(MemorySituationReceipt.sequence).join(MemoryActivationEpoch,
+        MemoryActivationEpoch.id == MemorySituationReceipt.activation_epoch).where(
+            MemorySituationReceipt.scope_setting_id == setting.id, MemorySituationReceipt.state == "blocked",
+            MemorySituationReceipt.scope_version == setting.version,
+            MemoryActivationEpoch.scope_setting_id == setting.id, MemoryActivationEpoch.closed_at.is_(None)).limit(1)) if setting and setting.enabled else None
     return MemoryProcessingRead(scope={"world_id": scope.world_id, "subject_world_character_id": scope.subject_world_character_id},
         version=config.version if config else 1, memory_enabled=bool(setting and setting.enabled),
         daily_enabled=config.daily_enabled if config else legacy.schedule_enabled if legacy else False,
@@ -40,7 +49,10 @@ def read(*, scope, db, workflows, result=None, request_key=None):
         last_applied_at=config.last_applied_at if config else None,
         pending_count=pending, blocked_count=blocked, status=status, applied_count=run.applied_count if run else 0,
         result=resolved.result_code if resolved else result,
-        resolved_request_key=resolved.request_key if resolved else None)
+        resolved_request_key=resolved.request_key if resolved else None,
+        operation=run.work_kind if run else None, run_id=run.id if run else None, run_state=run.state if run else None,
+        rejected_count=run.blocked_count if run else 0, skipped_count=run.skipped_count if run else 0,
+        scope_busy=busy, can_recheck=eligible is not None and not busy)
 
 
 def _ensure(db, workflows, scope, now):

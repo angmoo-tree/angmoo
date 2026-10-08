@@ -1,5 +1,55 @@
 # Angmoo Backend Architecture
 
+## Situation delivery validation and owner recovery (2026-10-08)
+
+Memory owns `SituationValidationContext`, delivery/relationship policies, receipt
+restoration, the common apply operation and owner recovery endpoints. Runtime
+adapters read foreign canonical sources through injected ports and participate
+in the existing Chat/SNS transaction. They never fabricate Feed observations.
+`MemoryItemEvidence.observation_id` remains the actual Feed foreign key; an Inbox
+fragment proved by a restored receipt uses the separate `situation_delivered`
+origin and leaves that foreign key empty.
+
+The v2 delivery manifest binds the actual final payload digest, JSON pointer,
+fragment ranges, source identity and scope to the successful execution result.
+Restoration verifies the stored manifest hash, receipt's original admission hash,
+call/target/lane/epoch and committed effects before constructing trusted context.
+Raw manifests, client flags and unsigned observation booleans cannot grant access.
+Relationship background evidence carries the approved prepared version, view
+version and facts digest. Normal later version increments preserve that history;
+current World ownership, participants, blocks, thread access and source integrity
+are still mandatory. V1 serialization and hashes remain unchanged; insufficient
+historical relationship proof fails closed.
+
+Apply, correction lineage, canonical/hybrid recall, prior memories, HotBrief,
+relationship review and source hydration share the restored proof and current
+access checks. Hydration reads only allowed delivered ranges. Summary-only FTS and
+vector preparation remain derived work after canonical commit, without library
+backfill or provider calls inside save/recheck/discard transactions.
+
+`pending_apply` and explicit `blocked_recheck` use the same bounded, lease-fenced
+consumer. Individual recovery freezes one receipt and state version; whole-scope
+recovery freezes a cutoff and processes at most 100 rows per page. Operation,
+validation revision, scope, target and version bind idempotent requests, including
+legacy save-key reuse. Recheck attempts record decisions atomically with item,
+source, cursor and receipt updates; previous completed runs are immutable.
+Operational `run_state=error` is distinct from a completed run with rejected rows.
+
+Owner discard accepts only unapplied blocked receipts with a matching state
+version, including Memory OFF/closed epochs. A live scope lease prevents races;
+queued/deferred/error rechecks may record an atomic discarded/skipped attempt.
+Discarded receipts are terminal and excluded from replay, counts and consumers.
+Only their description, result detail and unshared manifest are removed; original
+activities, other memories and shared manifests remain. Identity, content digest,
+sequence, state version and discard time retain the minimal termination record.
+
+SQLite v32 / Alembic 0109 is a forward delta from v31 / 0108. Frozen historical
+migrations are unchanged. Embedded upgrade rebuilds affected tables only in an
+unpublished staging database, preserving legacy rows, foreign keys, credentials
+and receipt sequence high-water marks. Failure leaves the selected database and
+marker unchanged. [Implementation and validation](<../docs/verification/10-08 Chat·SNS 상황기억 관찰 검증과 차단 기록 복구 구현 결과.md>)
+separates local regression, isolated Docker, real AI and installed/user checks.
+
 ## Activity situation admission and deferred application (2026-10-08)
 
 Memory owns `activity_situation` policy, immutable delivery manifests, receipts,

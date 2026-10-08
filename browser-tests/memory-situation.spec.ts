@@ -25,6 +25,10 @@ async function fixture(page: Page, info: TestInfo, language: "ko" | "en") {
     const activeScope = second ? { ...scope, subject_world_character_id: SECOND } : scope;
     if (!second && !path.includes(`/world-characters/${WORLD_AGENT}/`)) return route.fallback();
     if (request.method() !== "GET") writes.push({ path, body: request.postDataJSON() });
+    if (path.endsWith("/memory/unsaved-experiences")) return route.fulfill({ json: {
+      schema_version: "memory-unsaved-experiences.v1", scope: activeScope, items: [], next_cursor: null,
+      blocked_count: 0, scope_busy: false, can_recheck: false,
+    } });
     if (path.endsWith("/memory/processing-settings")) {
       if (second) return route.fulfill({ json: { ...state, scope: { ...scope, subject_world_character_id: SECOND }, pending_count: 77, local_time: "06:10" } });
       if (request.method() === "GET" && controls.readBarrier) { controls.waitingRead = true; await controls.readBarrier; }

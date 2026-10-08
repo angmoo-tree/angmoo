@@ -3,6 +3,7 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 import type { MemoryEmbeddingSetting, MemoryEmbeddingUpdate } from "@/features/memory/types/memory-embedding-contract";
 import type { MemoryProcessingSetting, MemoryProcessingUpdate, MemorySaveRequest } from "../types/memory-processing-contract";
+import type { MemoryUnsavedExperiences, MemoryIndividualRecheckRequest, MemoryDiscardRequest, MemoryDiscardResult } from "../types/memory-processing-contract";
 
 function validateProcessing(value: MemoryProcessingSetting, worldId: string, subjectId: string) {
   if (!value || !matchesScope(value.scope, worldId, subjectId) ||
@@ -13,6 +14,11 @@ function validateProcessing(value: MemoryProcessingSetting, worldId: string, sub
     !["idle", "accepted", "applying", "saved", "partial_error"].includes(value.status) ||
     ![null, "accepted", "empty"].includes(value.result) ||
     (value.resolved_request_key != null && (typeof value.resolved_request_key !== "string" || value.resolved_request_key.length < 8 || value.resolved_request_key.length > 128)) ||
+    [value.rejected_count, value.skipped_count].some(n => n !== undefined && (!Number.isSafeInteger(n) || n < 0)) ||
+    [value.scope_busy, value.can_recheck].some(v => v !== undefined && typeof v !== "boolean") ||
+    (value.operation != null && !["pending_apply", "blocked_recheck"].includes(value.operation)) ||
+    (value.run_id != null && (typeof value.run_id !== "string" || !value.run_id)) ||
+    (value.run_state != null && !["pending", "running", "deferred", "completed", "error"].includes(value.run_state)) ||
     [value.next_due_at, value.last_applied_at].some(v => v !== null && (typeof v !== "string" || !Number.isFinite(Date.parse(v))))) {
     throw new MemoryApiError(502, "memory_processing_contract_invalid");
   }
@@ -36,6 +42,49 @@ export function saveMemoryProcessing(worldId: string, subjectId: string, data: M
 export function savePendingMemories(worldId: string, subjectId: string, data: MemorySaveRequest, signal?: AbortSignal) {
   return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/save`,
     { method: "POST", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
+}
+
+export function getUnsavedExperiences(worldId: string, subjectId: string, signal?: AbortSignal, cursor?: string) {
+  const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+  return requestMemoryApi<MemoryUnsavedExperiences>(`${scopePath(worldId, subjectId)}/memory/unsaved-experiences${query}`, { signal }).then(value => {
+    if (!value || !matchesScope(value.scope, worldId, subjectId) || !Array.isArray(value.items) || value.items.length > 100 ||
+        !Number.isSafeInteger(value.blocked_count) || value.blocked_count < 0 || typeof value.scope_busy !== "boolean" || typeof value.can_recheck !== "boolean" ||
+        (value.next_cursor !== null && (typeof value.next_cursor !== "string" || value.next_cursor.length > 512)) ||
+        value.items.some(row => !row || !Number.isSafeInteger(row.receipt_sequence) || row.receipt_sequence < 1 ||
+          !Number.isSafeInteger(row.state_version) || row.state_version < 1 || !Number.isFinite(Date.parse(row.occurred_at)) ||
+          (row.description !== null && (typeof row.description !== "string" || Array.from(row.description).length > 1000)) ||
+          !["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "result_invalid", "validation_failed"].includes(row.reason) ||
+          typeof row.can_recheck !== "boolean" || typeof row.can_discard !== "boolean") ||
+        new Set(value.items.map(row => row.receipt_sequence)).size !== value.items.length) {
+      throw new MemoryApiError(502, "memory_unsaved_contract_invalid");
+    }
+    return value;
+  });
+}
+
+export function recheckUnsavedExperiences(worldId: string, subjectId: string, data: MemorySaveRequest | MemoryIndividualRecheckRequest, signal?: AbortSignal, sequence?: number) {
+  const suffix = sequence === undefined ? "/memory/recheck" : `/memory/situations/${sequence}/recheck`;
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}${suffix}`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => {
+      validateProcessing(value, worldId, subjectId);
+      if (value.resolved_request_key !== data.idempotency_key || (value.run_id != null && value.operation !== "blocked_recheck")) {
+        throw new MemoryApiError(502, "memory_recheck_contract_invalid");
+      }
+      return value;
+    });
+}
+
+export function discardUnsavedExperience(worldId: string, subjectId: string, sequence: number, data: MemoryDiscardRequest, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryDiscardResult>(`${scopePath(worldId, subjectId)}/memory/situations/${sequence}/discard`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => {
+      if (!value || !matchesScope(value.scope, worldId, subjectId) || value.receipt_sequence !== sequence || value.state !== "discarded" ||
+          !Number.isSafeInteger(value.state_version) || value.state_version < 1 || !Number.isFinite(Date.parse(value.discarded_at)) ||
+          value.operation !== "discard" || !["discarded", "already_discarded"].includes(value.result) || value.resolved_request_key !== data.idempotency_key ||
+          [value.pending_count, value.blocked_count].some(n => !Number.isSafeInteger(n) || n < 0)) {
+        throw new MemoryApiError(502, "memory_discard_contract_invalid");
+      }
+      return value;
+    });
 }
 
 export function getMemoryEmbeddingSetting(worldId: string, subjectId: string, signal?: AbortSignal) {

@@ -123,6 +123,80 @@ def test_inbox_three_real_effects_are_target_scoped_and_receipt_failure_rolls_ba
         assert db.scalar(select(func.count()).select_from(PostLike)) == (0 if fail_insert else 3)
 
 
+def test_inbox_reply_to_reply_delivery_and_prepared_relationship_are_saved_without_feed_claims():
+    from types import SimpleNamespace
+    from app.domains.social.models.feed import WorldCharacterFeedObservation
+    from app.domains.relationships.models.social import RelationshipState
+    from app.domains.relationships.contracts.graph_recall import GraphRecallScope
+    from app.domains.relationships.contracts.social_context import RelationshipValidationBinding
+    from app.domains.relationships.service.graph_recall import GraphRecallService
+    from app.domains.relationships.service.social_context import SocialContextService
+    from app.domains.relationships.policies.social_context_validation import receipt_for_snapshot
+    from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
+    from app.runtime.social.planned_actions import _execute_planned_action
+    from app.runtime.autonomous_activity.situation_memory import participant
+    from app.domains.memory.repository.situation_runs import get_or_create_settings, request_run, claim_run
+    from app.domains.memory.repository.situation_apply import apply_page
+    from app.domains.memory.repository.situation_validation import restore_context
+    from app.runtime.memory.situation_sources import SituationSources
+    with Session(_engine(), expire_on_commit=False) as db:
+        lane, state, _, reply = fixture(db)
+        snapshot = enabled(db, lane)
+        now = datetime.now(UTC)
+        root = Post(id="inbox-own-root", world_id=reply.world_id, author_world_character_id=lane.actor.id,
+            author_character_id=lane.ctx.character.id, author_name=lane.ctx.character.name,
+            title="오늘의 하루", body="책을 읽으며 조용히 하루를 보냈다.", created_at=reply.created_at)
+        db.add(root); db.flush()
+        reply.reply_to_post_id = root.id
+        reply.body = "네 이야기를 읽으니 마음이 편안해졌어."
+        relation = RelationshipState(id="inbox-prepared-relation", world_id=reply.world_id,
+            actor_world_character_id=lane.actor.id, target_world_character_id=reply.author_world_character_id,
+            version=6, interaction_count=1, last_metric_at=now)
+        db.add(relation); db.commit()
+        graph_scope = GraphRecallScope(snapshot.scope.owner_id, reply.world_id, lane.actor.id)
+        recall = GraphRecallService(SqlAlchemyRelationshipGraphReadGateway(db))
+        social = SocialContextService(lambda query: recall.execute(query, graph_projection_enabled=False)).prepare(
+            graph_scope, labels={reply.author_world_character_id: "친구"}, counterpart_id=reply.author_world_character_id, now=now)
+        assert len(social.items) == 1
+        receipt = receipt_for_snapshot(social, scope=graph_scope, binding=RelationshipValidationBinding(
+            lane.ctx.run_id, "inbox", reply.id, reply.author_world_character_id))
+        projection = {"target_id": reply.id, "source_ids": [reply.id], "text": reply.body,
+            "counterpart_id": reply.author_world_character_id,
+            "source_revisions": {reply.id: "fixture", root.id: "fixture"}, "parent_text": root.body,
+            "relationship": social.prompt_view()}
+        state["relationship_validation_receipts"] = {reply.id: receipt.to_dict()}
+        payload = {"selected_targets": [projection], "context": {}}
+        # The later canonical value must not replace the prepared facts.
+        relation.version = 7; db.commit()
+        manifest = freeze_social_input(lane.ctx, snapshot, node="InboxDecisionDraft", payload=payload,
+            transmitted=json.dumps(payload, ensure_ascii=False), state=state)
+        assert next(source for source in manifest.sources if source.source_type == "RELATIONSHIP").relationship_basis.version == 6
+        body = "고마워. 네 말 덕분에 오늘이 더 따뜻해졌어."
+        state.update(candidates=[projection], lane_data={reply.id: {"post_id": reply.id}}, decision={
+            "decisions": [{"target_id": reply.id, "action": "comment"}],
+            "provisional_draft": {"replies": [{"target_id": reply.id, "body": body}]},
+            "_situation_manifest": manifest.to_dict(),
+            "_situations": {reply.id: asdict(parse_description("내 일상에 남긴 친구의 답글을 읽고 고마움을 전했다.", target_key=reply.id))}})
+        result = _execute_planned_action(lane.ctx, action={"action_type": "reply", "post_id": reply.id},
+            scope="inbox", index=0, writing={"reply_bodies": [{"scope": "inbox", "index": 0, "post_id": reply.id, "body": body}]},
+            situation_admission=participant(SimpleNamespace(lane="inbox"), state, reply.id))
+        assert result["status"] == "succeeded", result
+        admitted = db.scalar(select(MemorySituationReceipt))
+        assert admitted.state == "pending"
+        memory = memory_repository(db)
+        setting = MemoryScopeService(memory).get_or_create(snapshot.scope)
+        get_or_create_settings(db, setting.id, timezone="Asia/Seoul", now=now)
+        run = request_run(db, setting, trigger="manual", request_key="inbox-proof-save-001", expected_version=1, now=now)
+        token = claim_run(db, run.run_id, now=now); db.commit()
+        apply_page(db, memory, SituationSources(db), run_id=run.run_id, token=token, now=now); db.commit()
+        assert admitted.state == "applied", admitted.error_code
+        restored = restore_context(db, admitted)
+        source = next(source for source in restored.sources if source.source_id == reply.id)
+        access = SituationSources(db).validate(restored, source, now=now)
+        assert access.proof_origin == "situation_delivered" and access.evidence.observation_id is None
+        assert db.scalar(select(func.count()).select_from(WorldCharacterFeedObservation)) == 0
+
+
 @pytest.mark.parametrize("fail_insert", [False, True])
 def test_routine_real_post_transaction_and_receipt_replay(monkeypatch, fail_insert):
     from types import SimpleNamespace

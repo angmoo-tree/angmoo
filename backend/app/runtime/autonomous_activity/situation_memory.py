@@ -4,7 +4,10 @@ from datetime import UTC, datetime
 from hashlib import sha256
 import json
 
-from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, SituationDraft, CommittedActivityResult, CommittedEffect, stable_digest
+from app.domains.memory.contracts.activity_situation import (
+    DeliveredInputManifest, SituationDraft, CommittedActivityResult, CommittedEffect, stable_digest,
+    FinalDeliveredFragment, RelationshipDeliveryBasis,
+)
 from app.domains.memory.policies.situation_output import parse_description
 from app.domains.memory.policies.episode_provider_view import episode_provider_reference
 from app.domains.memory.repository.situation_admission import admit
@@ -17,9 +20,17 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
         raise ValueError("situation_activity_state_missing")
     reader = SituationSources(ctx.db)
     sources = []
-    def add(kind, identifier, delivered, path, role="background", target=None):
+    payload_digest = sha256(transmitted.encode()).hexdigest()
+    if json.JSONDecoder().raw_decode(transmitted)[0] != payload:
+        raise ValueError("situation_final_payload_mismatch")
+    def add(kind, identifier, delivered, path, role="background", target=None, basis=None):
         sources.append(reader.describe(snapshot.scope, kind=kind, identifier=str(identifier), delivered=delivered,
-            path=path, role=role, ordinal=len(sources), target=target, allow_delivery=True))
+            path=path, role=role, ordinal=len(sources), target=target, relationship_basis=basis,
+            delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)))
+    def relation(ref, delivered, path):
+        basis = RelationshipDeliveryBasis(ref["relationship_state_id"], snapshot.scope.subject_world_character_id,
+            ref["target_world_character_id"], ref["relationship_version"], ref["view_version"], ref["facts_digest"])
+        add("RELATIONSHIP", basis.state_id, delivered, path, basis=basis)
     def post(identifier, delivered, path, role, target=None):
         row = ctx.db.get(Post, identifier)
         if row is None:
@@ -39,10 +50,10 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
         proposal = target.get("activity_proposal")
         if proposal:
             add("ACTIVITY_PROPOSAL", proposal["proposal_id"], json.dumps(proposal, ensure_ascii=False), target_path + "/activity_proposal")
-        relation = state.get("relationship_validation_receipts", {}).get(target["target_id"], {})
+        relationship_receipt = state.get("relationship_validation_receipts", {}).get(target["target_id"], {})
         if target.get("relationship"):
-            for ref in relation.get("references", []):
-                add("RELATIONSHIP", ref["relationship_state_id"], json.dumps(target["relationship"], ensure_ascii=False), target_path + "/relationship")
+            for ref in relationship_receipt.get("references", []):
+                relation(ref, json.dumps(target["relationship"], ensure_ascii=False), target_path + "/relationship")
     context = payload.get("context", payload)
     prefix = "/context" if "context" in payload else ""
     for index, source in enumerate(context.get("source_manifest", [])):
@@ -77,7 +88,7 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
         add("ROUTINE_ACTIVITY", identifier, json.dumps(routine["activity"], ensure_ascii=False), prefix + "/routine/activity")
     for target, relations in context.get("relationships", {}).items():
         for ref in state.get("relationship_validation_receipts", {}).get(target, {}).get("references", []):
-            add("RELATIONSHIP", ref["relationship_state_id"], json.dumps(relations, ensure_ascii=False), f"{prefix}/relationships/{target}")
+            relation(ref, json.dumps(relations, ensure_ascii=False), f"{prefix}/relationships/{target}")
     def images(value, path):
         if isinstance(value, dict):
             if value.get("asset_id"):
@@ -102,14 +113,15 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
                 raise ValueError("situation_memory_identity_missing")
             entry = reader.describe(snapshot.scope, kind="MEMORY_ITEM", identifier=identifier,
                 delivered=json.dumps(packet, ensure_ascii=False), path=f"{prefix}/memories/{target}/packets/{index}",
-                role="prior", ordinal=len(sources))
+                role="prior", ordinal=len(sources), delivery=FinalDeliveredFragment.capture(payload,
+                    path=f"{prefix}/memories/{target}/packets/{index}", text=json.dumps(packet, ensure_ascii=False), payload_digest=payload_digest))
             version, digest = revisions[identifier]
             if entry.source_version != str(version) or entry.source_digest != digest:
                 raise ValueError("situation_prior_changed")
             sources.append(entry)
     threads = {row.thread_id for row in sources if row.thread_id}
     return DeliveredInputManifest(f"sns:{ctx.run_id}:{node}:{sha256(transmitted.encode()).hexdigest()}", snapshot,
-        sha256(transmitted.encode()).hexdigest(), tuple(sources), next(iter(threads)) if len(threads) == 1 else None)
+        payload_digest, tuple(sources), next(iter(threads)) if len(threads) == 1 else None, version=2)
 
 
 def participant(lane, state, target):

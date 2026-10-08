@@ -106,15 +106,24 @@ class RuntimeEpisodeDetailReader:
             result[(kind, identifier)] = EpisodeSourceDetail(canonical, text)
         return result
 
-    def read_situation_sources(self, *, scope, identities):
-        from dataclasses import replace
-        result = self.read_sources(scope=scope, identities=identities)
-        # Situation offsets use the canonical body, excluding a display title.
-        for kind, identifier in identities:
-            if kind in {"POST", "REPLY"} and (kind, identifier) in result:
-                post = self.session.get(Post, identifier)
-                if post is not None:
-                    result[(kind, identifier)] = replace(result[(kind, identifier)], text=post.body)
+    def read_situation_sources(self, *, scope, identities, context, entries, now):
+        if len(identities) > 100 or context.snapshot.scope != scope:
+            raise ValueError("situation_source_manifest_invalid")
+        result = {}
+        for entry in entries:
+            identity = entry.source_type, entry.source_id
+            if identity not in identities or identity in result:
+                continue
+            access = self.validate_situation_source(context, entry, now=now)
+            if access.state != "available" or access.evidence is None:
+                continue
+            if entry.source_type in {"POST", "REPLY"}:
+                text = self.session.get(Post, entry.source_id, populate_existing=True).body
+            elif entry.source_type in {"CHAT_MESSAGE", "OWNER_MEMORY_REQUEST"}:
+                text = self.session.get(MessageMessage, int(entry.source_id), populate_existing=True).content
+            else:
+                text = access.evidence.deterministic_summary
+            result[identity] = EpisodeSourceDetail(access.evidence, text)
         return result
 
     def read_thoughts(self, *, scope, references):

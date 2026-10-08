@@ -155,6 +155,14 @@
 .chatEvidence small { display: block; margin-top: 8px; color: var(--color-text-secondary); }
 .degradedNotice { border-radius: 14px; background: var(--color-state-warning-surface); padding: 10px 12px; }
 .dialogCopy { max-height: 180px; overflow: auto; margin: 0; border-radius: 14px; background: var(--color-surface-muted); color: var(--color-text-default); line-height: 1.65; overflow-wrap: anywhere; padding: 14px; }
+.unsavedSection { display: grid; min-width: 0; gap: 12px; border-top: 1px solid var(--color-border-default); padding-top: 16px; }
+.unsavedSection h3 { margin: 0; font-size: .95rem; color: var(--color-text-strong); }
+.unsavedSection p { margin: 0; line-height: 1.65; overflow-wrap: anywhere; }
+.unsavedScroll { max-height: 440px; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 2px 4px; }
+.unsavedScroll:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 14px; }
+.unsavedList { display: grid; gap: 12px; margin: 0 0 12px; list-style: none; padding: 0; }
+.unsavedList li { display: grid; gap: 10px; border: 1px solid var(--color-border-default); border-radius: 18px; background: var(--color-surface-muted); padding: 16px; }
+.unsavedList time { color: var(--color-text-secondary); font-size: .75rem; }
 
 .scopeSummary {
   display: flex;
