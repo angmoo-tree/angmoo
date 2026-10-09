@@ -49,11 +49,13 @@ def register_draft(db, user, draft, data):
         if receipt.request_digest != digest:
             raise AgentCreationDraftHandleConflictError("registration_request_changed")
         return get_agent(db, user, receipt.character_id)
+    if draft.source_kind == "external":
+        raise AgentCreationDraftValidationError("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요.")
     if draft.status != "editing" or data.revision != draft.revision:
         raise AgentCreationDraftHandleConflictError("draft_revision_conflict")
     if data.activity_interval_minutes is not None or data.active_hours_start is not None or data.promotion_usage_allowed:
         raise AgentCreationDraftValidationError("실행 설정은 등록 후 활동 준비에서 지정해주세요.")
-    if not draft.name.strip() or (draft.source_kind != "external" and not draft.worldview.strip()):
+    if not draft.name.strip() or not draft.worldview.strip():
         raise AgentCreationDraftValidationError("이름과 캐릭터 설명을 입력해주세요.")
     try:
         schemas.AgentCreationDraftUpdate(**{key: getattr(draft, key) for key in (
@@ -83,7 +85,7 @@ def register_draft(db, user, draft, data):
             one_liner=draft.one_liner, personality=draft.personality, speech_style=draft.speech_style,
             worldview=draft.worldview, character_background=draft.character_background,
             topic_preferences=draft.topic_preferences, safety_rules=draft.safety_rules,
-            status="inactive", execution_mode="local" if draft.source_kind == "external" else "llm", persona_summary="")
+            status="inactive", execution_mode="llm", persona_summary="")
         character.persona_summary = profile._build_persona_summary(character)
         for kind in ("avatar", "banner"):
             source = getattr(draft, f"{kind}_temp_url")

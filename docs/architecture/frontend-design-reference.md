@@ -1,5 +1,15 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-09 World summaries, graph and settings: **LOCAL** reuse of existing
+SettingsCard, ProfileAvatar, WorldApp/Device scroll ownership, semantic coral
+icons, controls and dialogs. New plan/topic summaries reuse feature presentation;
+the graph moves into the shared World Phone shell without changing directional
+content. Saved embedding guidance and provider-key metadata remain scoped data,
+not decoration or hosted semantics. No new hosted code, assets, fonts or dependency
+is imported, and no design baseline/policy exception is relaxed. Evidence is in
+`docs/verification/world-ui-settings-improvements-20261009.md`; dev/static/native
+unit checks remain separate from actual export, installed-app and AI observations.
+
 2026-10-05 World post/chat/character management: **ADAPTED** shared Device Home
 management cards, Profile/Status/Settings layout, neutral Network/Mail actions,
 inline statistics and ProfileAvatar. **LOCAL** stored World settings, server-confirmed

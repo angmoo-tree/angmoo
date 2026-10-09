@@ -11,6 +11,8 @@ import { WorldImageGenerationCard, WorldVisionControls } from "@/features/media/
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
 import { WorldDailyPlanCard } from "@/features/characters/components/world-daily-plan-card";
+import { WorldDailyPlanSummary } from "@/features/characters/components/world-daily-plan-summary";
+import { RecommendationTopicsSummary } from "@/features/social/components/recommendation-topics-summary";
 import { WorldCharacterDeletionCard } from "@/features/characters/components/world-character-deletion-card";
 
 export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { worldId: string; worldCharacterId: string }) {
@@ -24,7 +26,10 @@ export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { 
     router.replace(query ? `${pathname}?${query}` : pathname);
   }, [router, searchParams, worldId, worldCharacterId]);
   return <WorldCharacterManagement key={`${worldId}:${worldCharacterId}`} worldId={worldId} worldCharacterId={worldCharacterId}
-    activeView={activeView} onViewChange={selectView} onBack={back} renderSettings={read => ({
+    activeView={activeView} onViewChange={selectView} onBack={back} renderStatus={({ read, active, onSettings }) => <>
+      <WorldDailyPlanSummary worldId={worldId} actorId={worldCharacterId} characterId={read.character_id} active={active} onSettings={onSettings} />
+      <RecommendationTopicsSummary worldId={worldId} actorId={worldCharacterId} active={active} onSettings={onSettings} />
+    </>} renderSettings={read => ({
       imageCard: <WorldImageGenerationCard key={`${worldId}:${worldCharacterId}:image`} worldId={worldId} actorId={worldCharacterId} />,
       visionControls: <WorldVisionControls key={`${worldId}:${worldCharacterId}:vision`} worldId={worldId} actorId={worldCharacterId} />,
       interestCard: <RecommendationTopicsPanel elevated key={`${worldId}:${worldCharacterId}:topics`} worldId={worldId} characterId={worldCharacterId} />,

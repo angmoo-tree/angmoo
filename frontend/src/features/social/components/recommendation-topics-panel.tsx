@@ -11,9 +11,9 @@ import { InlineError } from "@/components/ui/feedback";
 import { FeedStatusPanel } from "@/features/social/components/feed-status";
 import { RecommendationHistory } from "@/features/social/components/recommendation-history";
 import { connectRecommendationKey, readRecommendationTopics, regenerateRecommendationTopics, type RecommendationTopics } from "@/features/social/api/recommendation-topics";
+import { RecommendationTopicList, TOPIC_STATES } from "./recommendation-topic-list";
 
 export type TopicCharacterChoice = { id: string; name: string };
-const labels = { pending: "주제 준비 필요", running: "주제 만드는 중", ready: "준비됨", failed: "주제 생성 실패 · 이전 결과 유지", stale: "설정 변경됨 · 기존 주제 사용 중" };
 
 // LOCAL: existing semantic form/button primitives; shared by Next and static screens.
 export function RecommendationTopicsPanel({ worldId, characterId, characters = [], elevated = false }: {
@@ -61,9 +61,8 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
   const current = data?.world_id === worldId && data?.world_character_id === (characterId ?? null) ? data : null;
   const currentReadError = readError?.scope === `${worldId}:${characterId ?? "world"}` ? readError.message : undefined;
   return <SettingsCard elevated={elevated} title={uiText(characterId ? "캐릭터 관심 주제" : "World 추천 주제")} description={uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20} />}>
-    <p role="status" className="text-sm text-text-default">{current ? uiText(labels[current.state]) : uiText("주제 확인 중")}</p>
-    {current && <ul className="flex flex-wrap gap-2" aria-label={uiText("현재 주제 목록")}>{current.topics.map(topic => <li key={topic.id} className="rounded-full bg-surface-muted px-3 py-1 text-sm text-text-default">{topic.name}</li>)}</ul>}
-    {current && current.topics.length === 0 && <p className="text-sm text-text-secondary">{uiText("등록된 주제가 없습니다.")}</p>}
+    <p role="status" className="text-sm text-text-default">{current ? uiText(TOPIC_STATES[current.state]) : uiText("주제 확인 중")}</p>
+    {current && <RecommendationTopicList topics={current.topics} />}
     {current?.approval_required && <p className="text-sm text-text-secondary">{uiText("먼저 이 World의 캐릭터 프로필을 승인해 주세요.")}</p>}
     {!characterId && <div className="space-y-2">
       <Field label={uiText("주제 생성에 사용할 캐릭터의 일과 생성 키")}>{props => <Select {...props} value={keyId} onChange={event => setKeyId(event.target.value)} disabled={busy}>

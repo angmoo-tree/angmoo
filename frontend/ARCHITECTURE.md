@@ -1,5 +1,41 @@
 # Angmoo Frontend Architecture
 
+### World summaries, embedded relationships and saved embedding settings (2026-10-09)
+
+Characters owns the four-row daily-plan presentation and scoped read-only plan
+summary; Social owns the six-topic summary and the shared expandable topic list.
+Composition passes these through the Status ReactNode slot, preserving the order
+identity, recent activity, plan, topics, persona and activity summary. Features do
+not import another feature's implementation. `hooks/use-active-scoped-read` owns
+only neutral active/visibility, abort, auth/runtime identity and refresh lifetime;
+the calling feature validates scope, plan versions and the server World timezone.
+Settings retains the existing generation, credential and Feed-detail controls.
+
+The World Relationships section and the explicit Character/World graph URL use
+one `WorldApp` composition and Phone shell in both Next and StaticProductRouter.
+The default center comes from that World's existing owner profile; an explicit
+Character remains the center without owner fallback or profile creation.
+Relationships owns the unchanged directional graph, depth, evidence and review
+presentation. The old dedicated window enum is retained for launch metadata
+compatibility; current navigation classifies the graph URL as Phone.
+
+Media decides whether generic service-secret fields exist. The neutral common
+CredentialFields accepts selected-provider metadata, revision-aware transports
+and an optional saved metadata source; it never chooses a business provider.
+World image settings and legacy generation settings retain write-only inputs,
+clear unsaved keys on provider changes, preserve them for same-provider model
+changes and reject stale auth/runtime/provider responses. ComfyUI has no generic
+server-key DOM. The separate Partner account-key field remains Media-owned.
+
+Memory owns one saved embedding controller, shared by storage guidance and the
+embedding editor. Saved configuration/key readiness is separate from dirty
+inputs, read failures and preparation state. Memory renders storage, embedding,
+then relationship review. Only explicit save/prepare controls issue mutations;
+no embedding shortcut or scroll/focus navigation is added. Korean/English copy,
+scope cancellation and the existing shared mutation lock remain mandatory.
+
+Implementation and scoped evidence: [2026-10-09 verification](../docs/verification/world-ui-settings-improvements-20261009.md).
+
 ### Scoped unsaved experience recovery (2026-10-08)
 
 Memory owns the bounded unsaved-experience client/DTO and recovery controls inside

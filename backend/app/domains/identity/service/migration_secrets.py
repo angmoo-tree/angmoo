@@ -58,3 +58,27 @@ class MigrationSecretInterpreter:
             raise ValueError("migration_secret_empty")
         return security.encrypt_local_secret(json.dumps({"version": "comfy-secrets.v1", "key": raw, "partner": other}),
             scope=security.SecretScope(**target_scope), app_secret=app_secret)
+
+    def image_provider_material(self, envelope, source_scope, target_scope, *, comfy=False):
+        """Return only authenticated ciphertext and fingerprints, never plaintext."""
+        import json
+        app_secret = self._secret()
+        raw = security.decrypt_local_secret(envelope, scope=security.SecretScope(**source_scope), app_secret=app_secret)
+        if not isinstance(raw, str) or not raw.strip():
+            raise ValueError("migration_secret_empty")
+        if comfy:
+            try:
+                values = json.loads(raw)
+            except ValueError:
+                values = None  # The historical standalone server key is retired.
+            if values is not None:
+                if not isinstance(values, dict) or values.get("version") != "comfy-secrets.v1" or not all(isinstance(values.get(k), str) for k in ("key", "partner")):
+                    raise ValueError("migration_image_envelope_invalid")
+                raw = values["partner"]
+            else:
+                raw = ""
+        fingerprint = security.fingerprint_secret(raw) if raw else None
+        vault = security.encrypt_local_secret(raw, scope=security.SecretScope(**target_scope), app_secret=app_secret) if raw else None
+        executable = json.dumps({"version": "comfy-secrets.v1", "key": "", "partner": raw}) if raw and comfy else raw
+        cleaned = security.encrypt_local_secret(executable, scope=security.SecretScope(**source_scope), app_secret=app_secret) if executable else None
+        return cleaned, fingerprint, vault

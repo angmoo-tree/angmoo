@@ -12,6 +12,7 @@ def register_models() -> MetaData:
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models_media  # noqa: F401
     import app.domains.identity.models_world_credentials  # noqa: F401
+    import app.domains.identity.models_world_image_credentials  # noqa: F401
     import app.domains.identity.models_environment  # noqa: F401
     import app.domains.media.models  # noqa: F401
     import app.domains.media.models_world_policy  # noqa: F401

@@ -17,10 +17,11 @@ import { WorldCharacterSettingsForm } from "./world-character-settings-form";
 import { WorldCharacterStatusCards } from "./world-character-status-cards";
 import styles from "./world-character-management.module.css";
 
-export function WorldCharacterManagement({ worldId, worldCharacterId, activeView, onViewChange, renderProfile, renderSettings }: {
+export function WorldCharacterManagement({ worldId, worldCharacterId, activeView, onViewChange, renderProfile, renderSettings, renderStatus }: {
   worldId: string; worldCharacterId: string; activeView: WorldCharacterManagementView;
   onViewChange: (view: WorldCharacterManagementView) => void; onBack: () => void;
   renderProfile: (input: { read: WorldCharacterManagementRead; onEditProfile?: () => void }) => ReactNode;
+  renderStatus?: (input: { read: WorldCharacterManagementRead; active: boolean; onSettings: () => void }) => ReactNode;
   renderSettings?: (read: WorldCharacterManagementRead) => Pick<React.ComponentProps<typeof WorldCharacterSettingsForm>, "imageCard" | "visionControls" | "interestCard" | "modeCard" | "dayCard" | "deleteCard">;
 }) {
   const uiText = useUiText("characters");
@@ -97,7 +98,7 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
       {renderProfile({ read, onEditProfile: edit })}
     </div> : null}
     {(visited.has("status") || activeView === "status") ? <div className={`${styles.pane} ${styles.statusPane}`} hidden={activeView !== "status"} role="tabpanel" id={panelId("status")} aria-labelledby={`${panelId("status")}-tab`}>
-      {read.can_manage && !isUser ? <WorldCharacterStatusCards worldId={worldId} actorId={worldCharacterId} profile={profile} revision={item.revision} active={activeView === "status"} /> : <WorldCharacterManagementItem item={item} />}
+      {read.can_manage && !isUser ? <WorldCharacterStatusCards worldId={worldId} actorId={worldCharacterId} profile={profile} revision={item.revision} active={activeView === "status"} summaryCards={renderStatus?.({ read, active: activeView === "status", onSettings: () => onViewChange("settings") })} /> : <WorldCharacterManagementItem item={item} />}
       {!read.can_manage ? <p className={styles.readonly}>{uiText("이 World 캐릭터의 관리 권한이 없어요.")}</p> : null}
     </div> : null}
     {(visited.has("settings") || activeView === "settings") ? <div className={styles.pane} hidden={activeView !== "settings"} role="tabpanel" id={panelId("settings")} aria-labelledby={`${panelId("settings")}-tab`}>

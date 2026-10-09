@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useAuth } from "@/hooks/use-auth";
+import { ApiRequestError } from "@/lib/http/error-contract";
 import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
 import { isTauriDesktopRuntime, navigateDesktopProductRoute } from "@/lib/desktop/product-window";
 import { studioWorldRoute, worldCharacterDirectoryRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
@@ -56,7 +57,7 @@ function CreationGuide() {
   const [busy, setBusy] = useState(false);
   const [unsavedInput, setUnsavedInput] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"direct" | "card" | "copy" | "external">(target && query.get("mode") === "copy" ? "copy" : "direct");
+  const [mode, setMode] = useState<"direct" | "card" | "copy">(target && query.get("mode") === "copy" ? "copy" : "direct");
   const [cards, setCards] = useState<AgentDetailRead[]>([]);
   const [copyId, setCopyId] = useState("");
   const [source, setSource] = useState<unknown>(null);
@@ -86,7 +87,7 @@ function CreationGuide() {
             if (!currentId && value.contract_version === 1) { setLegacyDraft(value); return; }
             if (value.contract_version !== 2 || (target && value.target_world_id !== target)) throw new Error(uiText("이 초안의 대상 World를 확인해주세요."));
             setDraft(value);
-            setMode(value.source_kind === "external" ? "external" : value.source_kind === "card" ? "card" : "direct");
+            setMode(value.source_kind === "card" ? "card" : "direct");
             setStep(value.status === "completed" ? 4 : 1);
             if (value.source_kind === "card") {
               try {
@@ -144,6 +145,7 @@ function CreationGuide() {
   }
   async function start() {
     const epoch = requestEpoch.current;
+    if (draft?.source_kind === "external") throw new Error(uiText("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요."));
     if (mode === "copy") {
       if (!copyId || !target) throw new Error(uiText("설정을 복사할 캐릭터를 선택해주세요."));
       const existing = await findExistingWorldCharacter(target, copyId);
@@ -152,7 +154,7 @@ function CreationGuide() {
     }
     let current = draft;
     if (!current) {
-      current = await createAgentDraft({ target_world_id: target, execution_mode: mode === "external" ? "local" : "llm" });
+      current = await createAgentDraft({ target_world_id: target, execution_mode: "llm" });
       if (epoch !== requestEpoch.current) return;
       sessionStorage.setItem(storageKey, current.id);
       setDraft(current);
@@ -199,6 +201,7 @@ function CreationGuide() {
   }
   async function finish() {
     const epoch = requestEpoch.current;
+    if (draft?.source_kind === "external" && draft.status !== "completed") throw new Error(uiText("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요."));
     const saved = draft?.status === "completed" ? draft : await save();
     if (!saved) return;
     try {
@@ -242,6 +245,10 @@ function CreationGuide() {
     <ol className={styles.steps} aria-label={uiText("생성 단계")}>{STEPS.map((label, index) => <li className={`${styles.step} ${index === step ? styles.current : index < step ? styles.complete : ""}`} key={label} aria-current={index === step ? "step" : undefined}>{index + 1}. {uiText(label)}</li>)}</ol>
     {error && <p role="alert">{error}</p>}
     {/* LOCAL: non-blocking metadata notice, shared by Next and static creation. */}
+    {draft?.source_kind === "external" && draft.status !== "completed" ? <aside className="space-y-3" role="status">
+      <p>{uiText("외부 실행기 방식은 현재 새로 등록할 수 없어요. 입력한 내용은 유지되며, 지원하는 생성 방식을 다시 선택할 수 있어요.")}</p>
+      <Button variant="secondary" disabled={busy} onClick={() => setStep(0)}>{uiText("만드는 방법 다시 선택")}</Button>
+    </aside> : null}
     {draft?.source_kind === "card" && mode === "card" && metadataSelection?.multiple_definitions && <p role="status" className="rounded-xl border border-state-warning-border bg-state-warning-surface p-4 text-sm text-state-warning">
       {uiText("이 카드에는 같은 형식의 캐릭터 정의가 여러 개 있습니다. 실리태번과 같은 순서로 첫 번째 정의를 가져왔습니다. 등록 전에 이름과 설명을 확인해주세요.")}</p>}
     {draft?.source_kind === "card" && mode === "card" && cardMetadataError && <div className="space-y-2">
@@ -265,11 +272,22 @@ function CreationGuide() {
       <fieldset disabled={busy || draft?.status === "completed"} className="space-y-5">
       {step === 0 && <>
         <fieldset><legend className="sr-only">{uiText("만드는 방법")}</legend><div className={styles.methods}>
-          {([['direct', '새 캐릭터 직접 만들기'], ['card', '실리태번 캐릭터 카드 가져오기'], ...(target ? [['copy', '기존 캐릭터 설정 복사']] : []), ['external', '외부 실행기 연결용 캐릭터']] as [typeof mode, string][]).map(([value, label]) => <label key={value} className={styles.method}>
-            <input type="radio" name="creation-method" value={value} checked={mode === value} disabled={value === "external" ? !!draft && draft.source_kind !== "external" : draft?.source_kind === "external"} onChange={() => {
-              setMode(value); setPendingFile(null); setSource(null);
-              if (value !== "card") { setMetadataSelection(null); setCardMetadataError(null); setReview([]); setRawOnly([]); }
-              else if (draft?.source_kind === "card") void perform(reloadCardMetadata);
+          {([['direct', '새 캐릭터 직접 만들기'], ['card', '실리태번 캐릭터 카드 가져오기'], ...(target ? [['copy', '기존 캐릭터 설정 복사']] : [])] as [typeof mode, string][]).map(([value, label]) => <label key={value} className={styles.method}>
+            <input type="radio" name="creation-method" value={value} checked={draft?.source_kind !== "external" && mode === value} onChange={() => {
+              void perform(async () => {
+                const epoch = requestEpoch.current;
+                if (draft?.source_kind === "external") {
+                  try {
+                    const next = await updateAgentDraft(draft.id, { revision: draft.revision, creation_method: "direct", target_world_id: draft.target_world_id ?? undefined,
+                      ...Object.fromEntries(TEXT_FIELDS.map(key => [key, draft[key]])) });
+                    if (epoch !== requestEpoch.current) return;
+                    setDraft(next); setUnsavedInput(false);
+                  } catch (reason) { throw new Error(uiText(reason instanceof ApiRequestError && reason.status === 409 ? "초안이 다른 곳에서 변경됐어요. 입력한 내용은 유지되며 최신 초안을 확인해야 합니다." : "만드는 방법을 변경하지 못했어요. 입력한 내용은 유지됩니다.")); }
+                }
+                setMode(value); setPendingFile(null); setSource(null);
+                if (value !== "card") { setMetadataSelection(null); setCardMetadataError(null); setReview([]); setRawOnly([]); }
+                else if (draft?.source_kind === "card") await reloadCardMetadata();
+              });
             }} /><span className="font-semibold">{uiText(label)}</span>
           </label>)}
         </div></fieldset>
@@ -326,7 +344,7 @@ function CreationGuide() {
       </details>}
       <div className={styles.footer}>
         {step > 0 && draft?.status !== "completed" && <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(step - 1)}>{uiText("이전")}</Button>}
-        {(step !== 0 || mode !== "card") && <Button type="submit" loading={busy}>{step === 4 ? (draft?.status === "completed" ? uiText("등록 결과 확인") : uiText("자율활동 OFF로 등록")) : uiText("저장하고 다음")}</Button>}
+        {(step !== 0 || mode !== "card") && <Button type="submit" disabled={draft?.source_kind === "external" && draft.status !== "completed"} loading={busy}>{step === 4 ? (draft?.status === "completed" ? uiText("등록 결과 확인") : uiText("자율활동 OFF로 등록")) : uiText("저장하고 다음")}</Button>}
         {draft && draft.status === "editing" && step > 0 && <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(async () => { await save(); })}>{uiText("초안 저장")}</Button>}
         <Button type="button" variant="ghost" disabled={busy} onClick={() => router.push(returnRoute)}>{uiText("나중에 하기")}</Button>
       </div>

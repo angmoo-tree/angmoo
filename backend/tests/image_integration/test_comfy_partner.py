@@ -55,7 +55,7 @@ def test_partner_detection_requires_matching_auth_mode(enabled):
     assert options.partner_auth is enabled
 
 
-def test_partner_body_uses_account_key_and_headers_use_server_key_once():
+def test_partner_body_uses_account_key_without_server_headers():
     http = transport()
     options = ComfyOptions(partner_auth=True, workflow=WORKFLOW)
     request = GenerationRequest("comfyui", "workflow", "new scene", None, options.model_dump(), EffectiveReference(False))
@@ -63,15 +63,15 @@ def test_partner_body_uses_account_key_and_headers_use_server_key_once():
     async def receipt(value):
         receipts.append(value)
     client = ComfyImageClient(options.base_url, http)
-    asyncio.run(client.generate(request, "synthetic-server-key", None, partner_key="synthetic-account-key", on_receipt=receipt))
+    asyncio.run(client.generate(request, None, None, partner_key="synthetic-account-key", on_receipt=receipt))
     posts = [entry for entry in http.calls if entry[1].endswith("/prompt")]
     assert len(posts) == 1 and receipts == ["partner-receipt"]
-    assert posts[0][2]["key"] == "synthetic-server-key"
+    assert all(call[2].get("key") is None for call in http.calls)
     body = json.loads(posts[0][2]["content"])
     assert body["extra_data"] == {"api_key_comfy_org": "synthetic-account-key"}
     assert "synthetic-account-key" not in json.dumps(body["prompt"])
     http.calls.clear()
-    asyncio.run(client.generate(request, "synthetic-server-key", None, partner_key="synthetic-account-key",
+    asyncio.run(client.generate(request, None, None, partner_key="synthetic-account-key",
         on_receipt=receipt, receipt="partner-receipt"))
     assert all(method == "GET" and "extra_data" not in kwargs for method, _, kwargs in http.calls)
 
@@ -81,7 +81,7 @@ def test_missing_account_key_fails_before_any_network_or_submission():
     request = GenerationRequest("comfyui", "workflow", "scene", None, options.model_dump(), EffectiveReference(False))
     http = transport()
     with pytest.raises(ImagePreparationError, match="comfy_partner_key_required"):
-        asyncio.run(ComfyImageClient(options.base_url, http).generate(request, "server", None, on_receipt=None))
+        asyncio.run(ComfyImageClient(options.base_url, http).generate(request, None, None, on_receipt=None))
     assert http.calls == []
 
 
@@ -106,20 +106,20 @@ def test_partner_credential_envelope_snapshot_reload_delete_and_revision(tmp_pat
         user = db.get(User, OWNER)
         data = GenerationSettingsWrite(expected_revision=0, provider="comfyui", model="workflow", auto_enabled=True,
             daily_limit=2, installation_daily_limit=2, options=options,
-            api_key="synthetic-server-key", partner_api_key="synthetic-account-key")
+            partner_api_key="synthetic-account-key")
         saved = media.write_generation(db, user, CHARACTER, data, validated_connection={"ready": True, "reference_supported": False})
         db.commit()
-        assert saved["has_api_key"] and saved["has_partner_api_key"]
+        assert not saved["has_api_key"] and saved["has_partner_api_key"]
         assert "synthetic" not in json.dumps(media.read_generation(db, user, CHARACTER))
         rows = db.scalars(select(MediaCredential)).all()
-        assert len(rows) == 2 and len({row.purpose for row in rows}) == 2
+        assert len(rows) == 1 and rows[0].purpose == CredentialPurpose.COMFY_PARTNER_IMAGE
         assert all(row.encrypted_secret not in {"synthetic-server-key", "synthetic-account-key"} for row in rows)
     identity = admit(sessions, media)
     from app.domains.social.models.posts import PostImageGenerationJob
     with sessions() as db:
         job = db.get(PostImageGenerationJob, identity)
         execution = media.prepare(db, job, db.get(ImageIntent, job.intent_id))
-        assert execution.key == "synthetic-server-key" and execution.partner_key == "synthetic-account-key"
+        assert execution.key is None and execution.partner_key == "synthetic-account-key"
         assert "synthetic" not in repr(execution)
         media_credentials.save_credential(db, owner_id=OWNER, character_id=CHARACTER, provider="comfyui",
             purpose=CredentialPurpose.COMFY_PARTNER_IMAGE, secret="replacement")
@@ -131,7 +131,7 @@ def test_partner_credential_envelope_snapshot_reload_delete_and_revision(tmp_pat
             data.model_copy(update={"expected_revision": previous["revision"], "auto_enabled": False,
                 "api_key": None, "partner_api_key": None, "clear_partner_api_key": True}))
         db.commit()
-        assert saved["has_api_key"] and not saved["has_partner_api_key"]
+        assert not saved["has_api_key"] and not saved["has_partner_api_key"]
 
 
 @pytest.mark.parametrize("clear_field", ["clear_partner_api_key", "clear_api_key"])
@@ -143,7 +143,7 @@ def test_delete_credential_preserves_validated_reference_preference_while_off(tm
         user = db.get(User, OWNER)
         initial = GenerationSettingsWrite(expected_revision=0, provider="comfyui", model="workflow",
             auto_enabled=True, daily_limit=2, installation_daily_limit=2, reference_enabled=True,
-            options=options, api_key="synthetic-server", partner_api_key="synthetic-partner")
+            options=options, partner_api_key="synthetic-partner")
         saved = media.write_generation(db, user, CHARACTER, initial,
             validated_connection={"ready": True, "reference_supported": True})
         db.commit()
@@ -160,3 +160,15 @@ def test_delete_credential_preserves_validated_reference_preference_while_off(tm
         with pytest.raises(ImagePreparationError):
             media.write_generation(db, user, CHARACTER, deleting.model_copy(update={
                 "expected_revision": saved["revision"], "auto_enabled": True, clear_field: False}))
+
+
+@pytest.mark.parametrize("operation", ["validate", "generate"])
+def test_retired_server_key_is_rejected_before_network(operation):
+    options = ComfyOptions(workflow=WORKFLOW)
+    http = transport()
+    client = ComfyImageClient(options.base_url, http)
+    request = GenerationRequest("comfyui", "workflow", "scene", None, options.model_dump(), EffectiveReference(False))
+    with pytest.raises(ImagePreparationError, match="comfy_server_key_retired"):
+        call = client.validate(options, "synthetic-retired-server") if operation == "validate" else client.generate(request, "synthetic-retired-server", None, on_receipt=None)
+        asyncio.run(call)
+    assert http.calls == []

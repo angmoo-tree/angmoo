@@ -111,7 +111,7 @@ export const LOCAL_PRODUCT_ROUTE_CAPABILITIES = [
     next: "supported",
     routeFamily: "/characters/{characterId}/worlds/{worldId}/relationship-graph",
     static: "supported",
-    window: "relationship-graph",
+    window: "phone",
   },
   {
     canonicalRoute: PRODUCT_ROUTES.studioNewWorld,

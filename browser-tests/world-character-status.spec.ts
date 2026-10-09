@@ -1,7 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { FEED_WORLD } from "./world-feed-fixture";
 import { installWorldCharacterManagementFixture, worldCharacterRoute, WORLD_AGENT } from "./world-character-management-fixture";
+import { staticDocumentFallback } from "./world-ui-improvements-fixture";
 import { continuityAgentDetail } from "./continuity-fixture";
+
+test.beforeEach(async ({ page }, info) => {
+  if (info.project.name === "static-export") await staticDocumentFallback(page, String(info.project.use.baseURL));
+});
 
 for (const language of ["ko", "en"] as const) {
   for (const width of [390, 960]) {
@@ -31,7 +36,7 @@ for (const language of ["ko", "en"] as const) {
       await expect(panel).not.toContainText(/이 World에서만 적용되는 활동 상태예요|Activity status applies only in this World/);
       await expect(panel).not.toContainText(/리포스트|언팔로우|repost|unfollow/i);
       const cards = panel.locator(":scope > div > section");
-      await expect(cards).toHaveCount(4);
+      await expect(cards).toHaveCount(6);
       const panelBox = (await panel.boundingBox())!;
       for (const card of await cards.all()) {
         const box = (await card.boundingBox())!;

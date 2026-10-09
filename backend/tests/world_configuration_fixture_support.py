@@ -16,7 +16,7 @@ from app.runtime.world_characters.creation_configuration import initialize_creat
 from app.domains.world_characters.service.owner_identity import OwnerControlledIdentityService
 
 
-def seed_configuration_fixture(path, *, legacy=False, browser_ready=False):
+def seed_configuration_fixture(path, *, legacy=False, browser_ready=False, schema_metadata=None):
     register_models()
     engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False, "timeout": 10})
     @event.listens_for(engine, "connect")
@@ -28,7 +28,7 @@ def seed_configuration_fixture(path, *, legacy=False, browser_ready=False):
         with engine.begin() as connection:
             create_schema_version_table(connection)
     else:
-        Base.metadata.create_all(engine)
+        (schema_metadata if schema_metadata is not None else Base.metadata).create_all(engine)
     with Session(engine, expire_on_commit=False) as db:
         owner = User(id="fixture-owner", email="owner@example.test", display_name="Owner", display_name_normalized="owner",
             privacy_policy_version="test", terms_version="test", profile_setup_completed=True)

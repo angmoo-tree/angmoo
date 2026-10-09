@@ -16,6 +16,7 @@ from app.domains.memory.models.activity_configuration import MemoryEpisodeRestri
 
 def scrub_memory_data(session, *, owner_id: str, character_id: str | None = None):
     from app.domains.identity.models_world_credentials import WorldCredential, WorldCredentialRevision
+    from app.domains.identity.models_world_image_credentials import WorldImageProviderCredential
     from app.domains.media.models_world_policy import WorldImagePolicy, WorldImageAttempt
     from app.domains.characters.models import Character
     from app.domains.world_characters.models import WorldCharacter
@@ -24,6 +25,8 @@ def scrub_memory_data(session, *, owner_id: str, character_id: str | None = None
         subjects = subjects.where(Character.id == character_id)
     credentials = select(WorldCredential.id).where(WorldCredential.owner_id == owner_id, WorldCredential.world_character_id.in_(subjects))
     session.execute(delete(WorldCredentialRevision).where(WorldCredentialRevision.credential_id.in_(credentials)))
+    session.execute(delete(WorldImageProviderCredential).where(WorldImageProviderCredential.owner_id == owner_id,
+        WorldImageProviderCredential.world_character_id.in_(subjects)))
     session.execute(delete(WorldCredential).where(WorldCredential.id.in_(credentials)))
     session.execute(delete(WorldImageAttempt).where(WorldImageAttempt.world_character_id.in_(subjects)))
     session.execute(delete(WorldImagePolicy).where(WorldImagePolicy.world_character_id.in_(subjects)))

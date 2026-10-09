@@ -79,6 +79,8 @@ class ComfyImageClient:
         self.http = http or ImageHttp()
 
     async def validate(self, options, key=None, *, has_reference=True):
+        if key:
+            raise ImagePreparationError("comfy_server_key_retired")
         if options.workflow is None:
             raise ImagePreparationError("comfy_workflow_required")
         analyses = {}
@@ -113,6 +115,8 @@ class ComfyImageClient:
             "reference_supported": "reference" in required_roles(options.workflow), "ready": True}
 
     async def generate(self, request, key, reference, *, on_receipt, receipt=None, timeout=120.0, on_submit=None, partner_key=None, on_diagnostic=None):
+        if key:
+            raise ImagePreparationError("comfy_server_key_retired")
         options = ComfyOptions.model_validate(request.options)
         if options.partner_auth and not partner_key:
             raise ImagePreparationError("comfy_partner_key_required")
@@ -187,6 +191,8 @@ class ComfyImageClient:
         return name, folder
 
     async def retrieve(self, receipt, output_node, *, key, deadline, sensitive=()):
+        if key:
+            raise ImagePreparationError("comfy_server_key_retired")
         policy = {"mode": "legacy_single", "node_id": output_node} if isinstance(output_node, str) else output_node
         while time.monotonic() < deadline:
             response = await self.http.request("GET", self.base + "/history/" + quote(receipt, safe=""), key=key, timeout=min(15, max(1, deadline - time.monotonic())))

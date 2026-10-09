@@ -43,6 +43,7 @@ import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
 import { MemoryProcessingControls } from "@/features/memory/components/memory-processing-controls";
+import { useSavedEmbedding, embeddingStorageNotice } from "../hooks/use-saved-embedding";
 import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
@@ -94,6 +95,7 @@ export function MemoryWorkspace({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
+  const embedding = useSavedEmbedding(worldId, subjectId, phase === "ready", mutationKind !== null);
   const correctionRef = useRef<HTMLTextAreaElement>(null);
   const mutationLockRef = useRef(false);
   const active = useRef(true), generation = useRef(0);
@@ -485,11 +487,12 @@ export function MemoryWorkspace({
                 <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
                   {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
                 </Button></div>
+                <p role="status">{setting?.enabled ? uiText(embeddingStorageNotice(embedding)) : uiText("현재 저장된 임베딩 설정입니다. 기억 사용 여부는 위에서 따로 설정해요.")}</p>
                 <MemoryProcessingControls key={`processing:${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
               </SettingsCard>
               {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
+              <MemoryEmbeddingControls key={embedding.identity} embedding={embedding} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
               <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
-              <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
               {mutationFailure ? (
                 <div className={styles.mutationError} role="alert">
                   <p>{mutationFailure.message}</p>

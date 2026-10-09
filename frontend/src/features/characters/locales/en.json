@@ -871,5 +871,22 @@
   "캐릭터를 불러오지 못했어요.": "Could not load the characters.",
   "이 World에 참여 중인 자율 캐릭터가 없어요.": "No autonomous characters are participating in this World.",
   "캐릭터 추가": "Add character",
-  "World의 캐릭터": "Characters"
+  "World의 캐릭터": "Characters",
+  "불러오는 중…": "Loading…",
+  "설정에서 보기": "View in settings",
+  "접기": "Collapse",
+  "정보를 불러오지 못했어요.": "We couldn't load this information.",
+  "최신 정보를 확인하지 못했어요.": "We couldn't check for updates.",
+  "오늘의 시간대별 계획을 확인해요.": "See today's plan by time of day.",
+  "오늘 계획이 아직 없습니다.": "Today's plan is not available yet.",
+  "등록된 계획 없음": "No plan for this time slot",
+  "상세 보기": "View details",
+  "현재 시간대": "Current time slot",
+  "{{date}}의 계획 · 오늘 계획이 아닙니다.": "Plan for {{date}} · This is not today's plan.",
+  "만드는 방법 다시 선택": "Choose a creation method again",
+  "만드는 방법을 변경하지 못했어요. 입력한 내용은 유지됩니다.": "We couldn't change the creation method. Your entered content is preserved.",
+  "다른 곳에서 초안이 변경됐어요. 최신 내용을 확인한 뒤 다시 선택해주세요.": "The draft was changed elsewhere. Check the latest version before choosing again.",
+  "외부 실행기 방식은 현재 새로 등록할 수 없어요. 입력한 내용은 유지되며, 지원하는 생성 방식을 다시 선택할 수 있어요.": "Characters for an external runner cannot currently be registered. Your entered content is preserved, and you can choose a supported creation method.",
+  "현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요.": "This creation method is not currently supported. Choose a supported method.",
+  "초안이 다른 곳에서 변경됐어요. 입력한 내용은 유지되며 최신 초안을 확인해야 합니다.": "The draft was changed elsewhere. Your input is preserved; review the latest draft before continuing."
 }

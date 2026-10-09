@@ -3,16 +3,22 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiErrorText } from "@/hooks/use-ui-error-text";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
-import { getCatalog, getGeneration, saveGeneration } from "../api/media-client";
+import { getCatalog, getGeneration, getGenerationProviderKey, saveGeneration } from "../api/media-client";
 import type { Catalog, GenerationSettings, GenerationWrite, Provider } from "../types/media";
 import { ComfyEditor, newComfyOptions } from "./comfy-editor";
 import { comfyFailure } from "../utils/comfy-errors";
 import { ImagePicker } from "./image-picker";
 import styles from "./media-settings.module.css";
 import { NovelOptionsEditor, NovelReferenceEditor, novelDefaults } from "./novel-options-editor";
+
+import { useActiveScopedRead } from "@/hooks/use-active-scoped-read";
+import { imageUsesServiceKey } from "../utils/image-key-presentation";
 
 const labels: Record<string, string> = { "nai-diffusion-4-5-full": "NovelAI V4.5 Full", "krea-v2/turbo": "Krea 2 Turbo", "z-image-turbo": "Z-Image Turbo", "nano-banana-2": "Nano Banana 2", "krea/krea-2-medium-turbo": "Krea 2 Medium Turbo", "google/gemini-3.1-flash-image": "Nano Banana 2", "openai/gpt-image-2.5-flare": "GPT Image 2.5 Flare" };
 
@@ -25,19 +31,37 @@ function initial(saved: GenerationSettings): GenerationWrite {
 }
 
 export function GenerationSettingsPanel({ characterId }: { characterId: string }) {
-  return <ScopedGenerationSettings key={characterId} characterId={characterId} />;
+  const { user, sessionRevision } = useAuth();
+  const [runtimeRevision, setRuntimeRevision] = useState(0);
+  useEffect(() => {
+    const changed = () => setRuntimeRevision(value => value + 1);
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+  }, []);
+  return <ScopedGenerationSettings key={`${characterId}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} characterId={characterId} />;
 }
 function ScopedGenerationSettings({ characterId }: { characterId: string }) {
   const uiText = useUiText("media");
   const errorText = useUiErrorText("media");
   const [saved, setSaved] = useState<GenerationSettings | null>(null); const [value, setValue] = useState<GenerationWrite | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null); const [key, setKey] = useState("");
+  const provider = value?.provider;
+  const readProviderKey = useCallback((signal: AbortSignal) => getGenerationProviderKey(characterId, provider ?? "novelai", signal), [characterId, provider]);
+  const providerKey = useActiveScopedRead({ scopeKey: `${characterId}:${provider ?? ""}:image-key`, active: Boolean(provider), read: readProviderKey });
   const [partnerKey, setPartnerKey] = useState("");
   const [busy, setBusy] = useState(false); const [uploading, setUploading] = useState(false);
   const [comfyValid, setComfyValid] = useState(false);
   const [comfyReferenceSupported, setComfyReferenceSupported] = useState(false);
   const [error, setError] = useState<string | null>(null); const [notice, setNotice] = useState<string | null>(null);
-  useEffect(() => { const operation = new AbortController(); Promise.all([getGeneration(characterId, operation.signal), getCatalog(operation.signal)]).then(([settings, models]) => { setSaved(settings); setValue(initial(settings)); setCatalog(models); }).catch(reason => { if (!operation.signal.aborted) setError(errorText(reason, "이미지 설정을 불러오지 못했습니다.")); }); return () => operation.abort(); }, [characterId, errorText]);
+  const writeRequest = useRef<AbortController | null>(null);
+  useEffect(() => {
+    const operation = new AbortController(), authScope = captureAuthRequestScope();
+    Promise.all([getGeneration(characterId, operation.signal), getCatalog(operation.signal)]).then(([settings, models]) => {
+      if (operation.signal.aborted || !isCurrentAuthRequestScope(authScope)) return;
+      setSaved(settings); setValue(initial(settings)); setCatalog(models);
+    }).catch(reason => { if (!operation.signal.aborted && isCurrentAuthRequestScope(authScope)) setError(errorText(reason, "이미지 설정을 불러오지 못했습니다.")); });
+    return () => { operation.abort(); writeRequest.current?.abort(); };
+  }, [characterId, errorText]);
   useProductLeaveGuard(Boolean(key || partnerKey || busy || uploading || (saved && value && JSON.stringify(initial(saved)) !== JSON.stringify(value))));
   function choose(provider: Provider, model: string, mode = "") {
     if (!value || !saved) return;
@@ -46,14 +70,25 @@ function ScopedGenerationSettings({ characterId }: { characterId: string }) {
     setValue({ ...value, provider, model, auto_enabled: false, reference_enabled: provider === "comfyui" && (!profile || profile.reference_initialized === false) ? null : profile?.reference_enabled ?? (supported && mode !== "opus_free"),
       reference_asset_id: profile ? profile.reference_asset_id ?? null : value.reference_asset_id,
       options: profile?.options ?? (provider === "novelai" ? { ...novelDefaults, mode: mode || "opus_free" } : provider === "comfyui" ? newComfyOptions : {}) });
-    setKey(""); setPartnerKey(""); setNotice(null);
+    if (provider !== value.provider) { setKey(""); setPartnerKey(""); }
+    setNotice(null);
     setComfyReferenceSupported(false);
   }
-  async function save(check = false, clear = false) {
-    if (!value) return; setBusy(true); setError(null); setNotice(null);
-    try { const next = await saveGeneration(characterId, { ...value, ...(key ? { api_key: key } : {}), ...(partnerKey ? { partner_api_key: partnerKey } : {}), ...(clear ? { clear_api_key: true, auto_enabled: false } : {}) }, check); setSaved(next); setValue(initial(next)); setKey(""); setPartnerKey(""); setNotice(check ? uiText("연결과 입력을 확인하고 저장했습니다. 이미지 생성 요청은 보내지 않았습니다.") : uiText("이미지 설정을 저장했습니다.")); }
-    catch (reason) { setError(comfyFailure(reason, uiText, errorText(reason, "이미지 설정을 저장하지 못했습니다."))); }
-    finally { setBusy(false); }
+  async function save(check = false, clear = false, clearPartner = false) {
+    if (!value || busy || providerKey.loading || providerKey.error || !providerKey.data) return;
+    const operation = new AbortController(), authScope = captureAuthRequestScope();
+    writeRequest.current = operation; setBusy(true); setError(null); setNotice(null);
+    try {
+      const next = await saveGeneration(characterId, { ...value,
+        ...(imageUsesServiceKey(value) && key ? { api_key: key } : {}),
+        ...(partnerKey && !clearPartner ? { partner_api_key: partnerKey } : {}),
+        ...(clear ? { clear_api_key: true, auto_enabled: false } : {}),
+        ...(clearPartner ? { clear_partner_api_key: true, auto_enabled: false } : {}) }, check, operation.signal);
+      if (operation.signal.aborted || !isCurrentAuthRequestScope(authScope)) return;
+      setSaved(next); setValue(initial(next)); setKey(""); setPartnerKey(""); providerKey.refresh();
+      setNotice(clearPartner ? uiText("Comfy 계정 키를 삭제했습니다.") : check ? uiText("연결과 입력을 확인하고 저장했습니다. 이미지 생성 요청은 보내지 않았습니다.") : uiText("이미지 설정을 저장했습니다."));
+    } catch (reason) { if (!operation.signal.aborted && isCurrentAuthRequestScope(authScope)) setError(comfyFailure(reason, uiText, errorText(reason, "이미지 설정을 저장하지 못했습니다."))); }
+    finally { if (!operation.signal.aborted && isCurrentAuthRequestScope(authScope)) setBusy(false); }
   }
   if (!value || !catalog) return <section className={styles.panel} aria-label={uiText("SNS 이미지 생성 설정")}><h3>{uiText("SNS 이미지 생성")}</h3>{error ? <InlineError>{error}</InlineError> : <p role="status">{uiText("설정을 불러오는 중…")}</p>}</section>;
   const model = catalog.models.find(m => m.provider === value.provider && m.id === value.model);
@@ -69,12 +104,16 @@ function ScopedGenerationSettings({ characterId }: { characterId: string }) {
       <label>{uiText("이미지 서비스")}<select disabled={busy} value={value.provider} onChange={e => { const provider = e.target.value as Provider; const first = catalog.models.find(m => m.provider === provider); choose(provider, first?.id ?? "workflow", provider === "novelai" ? "opus_free" : ""); }}><option value="novelai">NovelAI</option><option value="comfyui">ComfyUI</option><option value="nanogpt">NanoGPT</option><option value="openrouter">OpenRouter</option></select></label>
       {value.provider !== "comfyui" ? <label>{uiText("이미지 모델")}<select disabled={busy} value={value.model} onChange={e => choose(value.provider, e.target.value, value.provider === "novelai" ? String(value.options.mode) : "")}>{catalog.models.filter(m => m.provider === value.provider).map(m => <option key={m.id} value={m.id}>{labels[m.id] ?? m.id}</option>)}</select></label> : <p>{uiText("workflow에 등록된 모델을 사용합니다.")}</p>}
     </div>
-    <label>{uiText("이미지 API 키")}{value.provider === "comfyui" ? uiText("(서버 인증이 있을 때만)") : ""}<input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={saved?.has_api_key ? uiText("선택된 서비스에 저장된 키가 있습니다") : uiText("API 키를 입력해 주세요")} /></label>
+    {imageUsesServiceKey(value) ? <>
+      <p role="status">{uiText(providerKey.loading ? "이 서비스의 API 키 상태를 확인하고 있어요." : providerKey.error ? "이 서비스의 API 키 상태를 확인하지 못했어요." : providerKey.data?.has_key ? "이 서비스의 API 키가 저장되어 있어요." : "이 서비스의 API 키를 등록해 주세요.")}</p>
+      <label>{uiText("이미지 API 키")}<input type="password" autoComplete="new-password" value={key} onChange={e => setKey(e.target.value)} placeholder={providerKey.data?.has_key ? uiText("선택된 서비스에 저장된 키가 있습니다") : uiText("API 키를 입력해 주세요")} /></label>
+    </> : <p>{uiText("ComfyUI는 서버 인증 키 없이 연결해요. Partner 노드에는 별도의 Comfy 계정 키를 사용해요.")}</p>}
+
     {value.provider === "comfyui" ? <>
       <label className={styles.toggle}><input type="checkbox" checked={Boolean(value.options.partner_auth)} disabled={busy} onChange={e => setValue({ ...value, options: { ...value.options, partner_auth: e.target.checked } })} />{uiText("Comfy Partner 계정 인증 사용")}</label>
-      <label>{uiText("Comfy 계정 API 키")}<input type="password" autoComplete="off" value={partnerKey} onChange={e => setPartnerKey(e.target.value)} placeholder={saved?.has_partner_api_key ? uiText("Comfy 계정 키가 저장되어 있습니다") : uiText("Partner 노드를 사용할 계정 키")} /></label>
-      <p className={styles.note}>{uiText("Partner 노드의 Comfy Credits를 사용합니다. 서버 접속 키와 별도로 저장하며 workflow에는 키를 넣지 않습니다.")}</p>
-      <Button type="button" variant="ghost" disabled={busy || !saved?.has_partner_api_key} onClick={async () => { if (!value) return; setBusy(true); try { const next = await saveGeneration(characterId, { ...value, auto_enabled: false, clear_partner_api_key: true }); setSaved(next); setValue(initial(next)); setPartnerKey(""); setNotice(uiText("Comfy 계정 키를 삭제했습니다.")); } catch (reason) { setError(reason instanceof Error ? uiText(reason.message) : uiText("계정 키를 삭제하지 못했습니다.")); } finally { setBusy(false); } }}>{uiText("Comfy 계정 키 삭제")}</Button>
+      <label>{uiText("Comfy 계정 API 키")}<input type="password" autoComplete="off" value={partnerKey} onChange={e => setPartnerKey(e.target.value)} placeholder={providerKey.data?.provider === "comfyui" && providerKey.data.has_key ? uiText("Comfy 계정 키가 저장되어 있습니다") : uiText("Partner 노드를 사용할 계정 키")} /></label>
+      <p className={styles.note}>{uiText("Partner 노드에서 Comfy Credits를 사용할 계정 키입니다. workflow JSON에는 키를 넣지 않습니다.")}</p>
+      <Button type="button" variant="ghost" disabled={busy || !(providerKey.data?.provider === "comfyui" && providerKey.data.has_key)} onClick={() => void save(false, false, true)}>{uiText("Comfy 계정 키 삭제")}</Button>
     </> : null}
     {value.provider === "novelai" ? <NovelOptionsEditor options={value.options} disabled={busy} onChange={options => setValue({ ...value, options })} onModeChange={mode => choose("novelai", value.model, mode)} /> : null}
     {value.provider === "nanogpt" || value.provider === "openrouter" ? <>
@@ -100,7 +139,8 @@ function ScopedGenerationSettings({ characterId }: { characterId: string }) {
     <label className={styles.toggle}><input type="checkbox" disabled={busy || (!value.auto_enabled && promptUnavailable)} checked={value.auto_enabled} onChange={e => setValue({ ...value, auto_enabled: e.target.checked })} />{uiText("새 Routine 게시글 자동 이미지 생성 허용")}</label>
     <p className={styles.note}>{uiText("연결·입력·키와 두 상한이 확인되어야 활성화됩니다. 참조 선택과 자동 생성 허용은 별개입니다. 기준 시간대:")}{catalog.quota_timezone}.</p>
     <p role="status">{uiText("연결 상태:")}{promptUnavailable ? uiText("입력 검사 준비 필요 · 생성 비활성화") : connection?.ready ? free ? connection.opus_verified ? uiText("Opus 혜택 확인됨") : uiText("Opus 혜택 미확인") : connection.credential_validation === "not_verified" ? uiText("모델 경로 확인 · 키 인증은 첫 생성에서 확인") : uiText("확인됨") : uiText("미확인")}</p>
-    <div className={styles.actions}><Button disabled={busy || uploading || (value.provider === "comfyui" && !comfyValid)} onClick={() => void save(true)}>{uiText("연결·입력 확인 및 저장")}</Button><Button variant="secondary" disabled={busy || uploading || (value.provider === "comfyui" && !comfyValid)} onClick={() => void save()}>{uiText("설정 저장")}</Button><Button variant="ghost" disabled={busy || !saved?.has_api_key} onClick={() => void save(false, true)}>{uiText("이미지 키 삭제")}</Button></div>
+    {providerKey.error ? <InlineError>{uiText("이 서비스의 API 키 상태를 확인하지 못했어요.")}<Button variant="secondary" onClick={providerKey.refresh}>{uiText("다시 시도")}</Button></InlineError> : null}
+    <div className={styles.actions}><Button disabled={busy || uploading || providerKey.loading || Boolean(providerKey.error) || !providerKey.data || (value.provider === "comfyui" && !comfyValid)} onClick={() => void save(true)}>{uiText("연결·입력 확인 및 저장")}</Button><Button variant="secondary" disabled={busy || uploading || providerKey.loading || Boolean(providerKey.error) || !providerKey.data || (value.provider === "comfyui" && !comfyValid)} onClick={() => void save()}>{uiText("설정 저장")}</Button>{imageUsesServiceKey(value) ? <Button variant="ghost" disabled={busy || !providerKey.data?.has_key} onClick={() => void save(false, true)}>{uiText("이미지 키 삭제")}</Button> : null}</div>
     {notice ? <p role="status">{notice}</p> : null}{error ? <InlineError>{error}</InlineError> : null}
   </section>;
 }

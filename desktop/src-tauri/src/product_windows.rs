@@ -110,7 +110,7 @@ pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<St
     if kind == ProductWindowKind::Memory && !memory_query_matches(&parsed) {
         return Err("invalid_memory_query".to_owned());
     }
-    if kind == ProductWindowKind::RelationshipGraph {
+    if relationship_path_matches(&segments) {
         for (key, value) in parsed.query_pairs() {
             if key != "provider" || value != "ladybug" {
                 return Err("invalid_relationship_graph_query".to_owned());
@@ -164,7 +164,7 @@ fn phone_path_matches(segments: &[&str]) -> bool {
             character_id,
             "worlds",
             world_id,
-            "autonomy-setup",
+            "autonomy-setup" | "relationship-graph",
         ] => safe_segment(character_id) && safe_world_id(world_id),
         _ => false,
     }
@@ -627,7 +627,7 @@ mod tests {
                 ProductWindowKind::Phone,
                 "/characters/mango/worlds/arcana/relationship-graph?provider=ladybug"
             )
-            .is_err()
+            .is_ok()
         );
         assert!(
             validate_product_route(
@@ -679,22 +679,24 @@ mod tests {
     #[test]
     fn relationship_graph_provider_is_ladybug_only() {
         let route = "/characters/mango/worlds/arcana/relationship-graph";
-        assert!(validate_product_route(ProductWindowKind::RelationshipGraph, route).is_ok());
-        assert!(
-            validate_product_route(
-                ProductWindowKind::RelationshipGraph,
-                &format!("{route}?provider=ladybug")
-            )
-            .is_ok()
-        );
-
-        for provider in ["neo4j", "remote"] {
-            assert_eq!(
+        for kind in [ProductWindowKind::Phone, ProductWindowKind::RelationshipGraph] {
+            assert!(validate_product_route(kind, route).is_ok());
+            assert!(
                 validate_product_route(
-                    ProductWindowKind::RelationshipGraph,
-                    &format!("{route}?provider={provider}")
-                ),
-                Err("invalid_relationship_graph_query".to_owned())
+                    kind,
+                    &format!("{route}?provider=ladybug")
+                )
+                .is_ok()
+            );
+            for query in ["provider=neo4j", "provider=remote", "debug=true"] {
+                assert_eq!(
+                    validate_product_route(kind, &format!("{route}?{query}")),
+                    Err("invalid_relationship_graph_query".to_owned())
+                );
+            }
+            assert_eq!(
+                validate_product_route(kind, &format!("{route}?api_key=synthetic")),
+                Err("private_product_route".to_owned())
             );
         }
     }

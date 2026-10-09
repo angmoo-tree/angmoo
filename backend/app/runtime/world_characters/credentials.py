@@ -7,6 +7,13 @@ def read(service, *, world_id, world_character_id, user, purpose):
     row = world_credentials.find(service.db, owner_id=user.id, world_id=world_id,
         world_character_id=world_character_id, purpose=purpose)
     result = world_credentials.metadata(row, purpose=purpose)
+    if purpose == "image":
+        from app.domains.identity.service import world_image_credentials
+        from app.domains.media.models_world_policy import WorldImagePolicy
+        key = world_image_credentials.metadata(service.db, owner_id=user.id, world_id=world_id,
+            world_character_id=world_character_id, provider=result.provider)
+        policy = service.db.get(WorldImagePolicy, role.id)
+        result = result.model_copy(update={"key_revision": key.key_revision, "configuration_revision": policy.revision if policy else 0})
     if purpose == "sns":
         result = result.model_copy(update={"configuration_revision": role.version})
     if purpose == "consolidation":
@@ -23,17 +30,26 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
     try:
         role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
         scope = dict(owner_id=user.id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
-        result = world_credentials.delete(service.db, **scope, expected_revision=data.expected_revision) if remove else world_credentials.save(service.db, **scope, data=data)
         if purpose == "image":
             from app.domains.media.models_world_policy import WorldImagePolicy
+            from app.domains.identity.service import world_image_credentials
             policy = service.db.get(WorldImagePolicy, role.id)
-            if policy is not None:
+            if data.expected_configuration_revision != (policy.revision if policy else 0):
+                raise ValueError("world_image_policy_revision_conflict")
+            before = world_credentials.find(service.db, **scope)
+            selected_provider = before.provider if before else None
+            result = world_image_credentials.delete_provider(service.db, owner_id=user.id, world_id=world_id,
+                world_character_id=world_character_id, data=data) if remove else world_credentials.save(service.db, **scope, data=data)
+            if policy is not None and (not remove or (data.provider or selected_provider) == selected_provider):
                 profiles = (policy.generation_settings or {}).get("profiles", {})
                 policy.generation_settings = {**(policy.generation_settings or {}), "profiles": {
                     key: {**value, "connection": None} for key, value in profiles.items()
                 }}
                 policy.generation_enabled = False
                 policy.revision += 1
+            result = result.model_copy(update={"configuration_revision": policy.revision if policy else 0})
+        else:
+            result = world_credentials.delete(service.db, **scope, expected_revision=data.expected_revision) if remove else world_credentials.save(service.db, **scope, data=data)
         if purpose == "sns" and not remove:
             from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
             configuration = service.db.get(WorldCharacterConfiguration, role.id)
@@ -63,3 +79,10 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
     except BaseException:
         service.db.rollback()
         raise
+
+
+def read_image_provider(service, *, world_id, world_character_id, user, provider):
+    from app.domains.identity.service import world_image_credentials
+    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user)
+    return world_image_credentials.metadata(service.db, owner_id=user.id, world_id=world_id,
+        world_character_id=world_character_id, provider=provider)

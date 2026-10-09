@@ -6,6 +6,7 @@ from app.domains.world_characters.models import WorldCharacter, CharacterActiveW
 from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
 from app.domains.world_characters.service.management import WorldManagementError
 from app.domains.identity.models_world_credentials import WorldCredential, WorldCredentialRevision
+from app.domains.identity.models_world_image_credentials import WorldImageProviderCredential
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.media.models import MediaAsset, ImageInterpretation, InterpretationAttempt
 from app.domains.media.models_world_policy import WorldImagePolicy, WorldImageAttempt
@@ -39,6 +40,8 @@ def erase(service, *, world_id, world_character_id, user, data):
         own_credentials = select(WorldCredential.id).where(WorldCredential.owner_id == user.id,
             WorldCredential.world_id == world_id, WorldCredential.world_character_id == role.id)
         db.execute(delete(WorldCredentialRevision).where(WorldCredentialRevision.credential_id.in_(own_credentials)))
+        db.execute(delete(WorldImageProviderCredential).where(WorldImageProviderCredential.owner_id == user.id,
+            WorldImageProviderCredential.world_id == world_id, WorldImageProviderCredential.world_character_id == role.id))
         db.execute(delete(WorldCredential).where(WorldCredential.owner_id == user.id, WorldCredential.world_id == world_id,
             WorldCredential.world_character_id == role.id))
         from app.domains.memory.repository.privacy import erase_subject

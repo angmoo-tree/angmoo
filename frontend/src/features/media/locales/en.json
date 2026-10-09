@@ -289,5 +289,20 @@
   "ComfyUI 실행 안내": "ComfyUI execution notice",
   "ComfyUI 오류 정보": "ComfyUI error details",
   "오류 정보 일부가 생략되었습니다.": "Some error details were truncated.",
-  "고급 출력 설정": "Advanced output settings"
+  "고급 출력 설정": "Advanced output settings",
+  "ComfyUI는 서버 인증 키 없이 연결해요. Partner 노드에는 별도의 Comfy 계정 키를 사용해요.": "ComfyUI connects without a server authentication key. Partner nodes use a separate Comfy account key.",
+  "Partner 노드에서 Comfy Credits를 사용할 계정 키입니다. workflow JSON에는 키를 넣지 않습니다.": "This account key lets Partner nodes use Comfy Credits. The key is not included in the workflow JSON.",
+  "먼저 서비스 설정을 저장한 뒤 이미지 설정을 저장해주세요.": "Save the service settings before saving the image settings.",
+  "서비스 설정 저장": "Save service settings",
+  "서비스 설정을 저장하지 못했어요.": "We couldn't save the service settings.",
+  "서비스 설정을 저장했어요.": "Service settings saved.",
+  "서비스를 바꿔도 등록한 키는 보관하며, 다시 선택하면 해당 서비스의 키를 사용해요.": "Saved keys are kept when you switch services and reused when you select the same service again.",
+  "이 서비스의 API 키 상태를 확인하고 있어요.": "Checking the API key status for this service.",
+  "이 서비스의 API 키 상태를 확인하지 못했어요.": "We couldn't check the API key status for this service.",
+  "이 서비스의 API 키가 저장되어 있어요.": "An API key is saved for this service.",
+  "이 서비스의 API 키를 등록해 주세요.": "Register an API key for this service.",
+  "comfy_server_key_not_supported": "ComfyUI server authentication keys cannot be registered.",
+  "comfy_server_key_retired": "This ComfyUI server key has been retired. Save the service settings without a server key.",
+  "world_image_key_revision_conflict": "The key for this service was changed elsewhere. Check its latest status before saving again.",
+  "다시 시도": "Try again"
 }

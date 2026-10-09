@@ -11,7 +11,8 @@ from app.api.world_character_management_contracts import WorldCharacterRunNowRea
 from app.domains.characters import exceptions as character_errors
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.identity.exceptions import CredentialResolutionError
-from app.domains.identity.schemas import WorldCredentialRead, WorldCredentialWrite, WorldCredentialDelete, WorldCredentialPurpose
+from app.domains.identity.schemas import WorldCredentialRead, WorldCredentialWrite, WorldCredentialDelete, WorldCredentialPurpose, WorldImageProviderKeyRead
+from typing import Literal
 from app.api.world_character_management_dependencies import credential_workflows
 from app.domains.memory.exceptions import MemoryDomainError
 
@@ -100,6 +101,12 @@ def _credential_call(workflow, service, request, *, mutation=False, **kwargs):
 def credential_read(world_id: str, world_character_id: str, purpose: WorldCredentialPurpose, request: Request,
                     user=Depends(get_current_user), service=Depends(get_management_service), workflows=Depends(credential_workflows)):
     return _credential_call(workflows.read, service, request, world_id=world_id, world_character_id=world_character_id, user=user, purpose=purpose)
+
+
+@router.get("/{world_id}/world-characters/{world_character_id}/image-provider-key/{provider}", response_model=WorldImageProviderKeyRead)
+def image_provider_key_read(world_id: str, world_character_id: str, provider: Literal["novelai", "nanogpt", "openrouter", "comfyui"], request: Request,
+                            user=Depends(get_current_user), service=Depends(get_management_service), workflows=Depends(credential_workflows)):
+    return _credential_call(workflows.read_image_provider, service, request, world_id=world_id, world_character_id=world_character_id, user=user, provider=provider)
 
 
 @router.put("/{world_id}/world-characters/{world_character_id}/credentials/{purpose}", response_model=WorldCredentialRead)

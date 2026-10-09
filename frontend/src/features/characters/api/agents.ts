@@ -128,7 +128,7 @@ export function revokeAgentLocalKey(characterId: string) {
 }
 
 export function createAgentDraft(data: {
-  execution_mode?: "llm" | "local";
+  execution_mode?: "llm";
   target_world_id?: string;
   provider?: string;
   model?: GoogleGeminiModel;

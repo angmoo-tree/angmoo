@@ -37,6 +37,8 @@ import { getLocalWorldApp, getOwnerControlledActor, WorldAppApiError } from "@/f
 import { ensureMyProfile, WorldApiError } from "@/features/worlds/api/worlds";
 import { WORLD_APP_SECTIONS, worldAppSectionRoute, type WorldAppSection, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { WorldAppShell } from "@/composition/shells/world-app-shell";
+import { WorldRelationshipsScreen } from "@/composition/screens/world-relationships-screen";
+import { useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
 import styles from "./world-app.module.css";
 
 
@@ -49,6 +51,7 @@ type WorldAppProps = {
   authStatus: WorldAppAuthStatus;
   chatThreadId?: string;
   postId?: string;
+  relationshipCharacterId?: string;
   sectionId: WorldAppSectionId;
   worldCharacterId?: string;
   worldId: string;
@@ -63,25 +66,27 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
 };
 
 export function WorldApp(props: WorldAppProps) {
-  const { user } = useAuth();
+  const { user, sessionRevision } = useAuth();
   const [runtimeRevision, setRuntimeRevision] = useState(0);
   useEffect(() => {
     const invalidate = () => setRuntimeRevision(value => value + 1);
     window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
     return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
   }, []);
-  return <WorldAppContent key={`${props.worldId}:${props.authStatus}:${user?.id ?? ""}:${runtimeRevision}`} {...props} />;
+  return <WorldAppContent key={`${props.worldId}:${props.authStatus}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} {...props} />;
 }
 
 function WorldAppContent({
   authStatus,
   chatThreadId,
   postId,
+  relationshipCharacterId,
   sectionId,
   worldCharacterId,
   worldId,
 }: WorldAppProps) {
   const uiText = useUiText("shell");
+  const searchParams = useRuntimeSearchParams();
   const [world, setWorld] = useState<LocalWorldAppRead["world"] | null>(null);
   const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,11 +97,12 @@ function WorldAppContent({
     const controller = new AbortController();
     const scope = captureAuthRequestScope();
     const current = () => !controller.signal.aborted && isCurrentAuthRequestScope(scope);
+    queueMicrotask(() => { if (current()) { setLoading(true); setError(null); setOwnerActor(null); } });
     const worldRead = getLocalWorldApp(worldId, { signal: controller.signal });
     void Promise.all([
       worldRead,
-      getOwnerControlledActor(worldId, { signal: controller.signal }).then(async (actor) => {
-        if (actor) return actor;
+      sectionId === "relationships" && relationshipCharacterId ? Promise.resolve(null) : getOwnerControlledActor(worldId, { signal: controller.signal }).then(async (actor) => {
+        if (actor || sectionId === "relationships") return actor;
         // Reads may overlap, but a new identity requires a verified launchable
         // owner World. A rejected or abandoned route must not start a write.
         await worldRead;
@@ -117,7 +123,7 @@ function WorldAppContent({
         if (current()) setLoading(false);
       });
     return () => controller.abort();
-  }, [authStatus, worldId]);
+  }, [authStatus, relationshipCharacterId, sectionId, worldId]);
 
   const activeSection =
     WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];
@@ -134,7 +140,9 @@ function WorldAppContent({
   }
   if (authStatus === "unauthenticated") {
     const returnTo =
-      sectionId === "characters" && worldCharacterId
+      sectionId === "relationships" && relationshipCharacterId
+        ? `${relationshipGraphRoute(relationshipCharacterId, worldId)}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`
+        : sectionId === "characters" && worldCharacterId
         ? worldCharacterProfileRoute(worldId, worldCharacterId)
         : sectionId === "chat" && chatThreadId
         ? `${worldAppSectionRoute(worldId, activeSection)}/${encodeURIComponent(chatThreadId)}`
@@ -184,6 +192,7 @@ function WorldAppContent({
         chatThreadId={chatThreadId}
         ownerActor={ownerActor}
         postId={postId}
+        relationshipCharacterId={relationshipCharacterId}
         world={world}
         worldCharacterId={worldCharacterId}
         worldId={worldId}
@@ -251,6 +260,7 @@ function WorldSection({
   chatThreadId,
   ownerActor,
   postId,
+  relationshipCharacterId,
   world,
   worldCharacterId,
   worldId,
@@ -259,6 +269,7 @@ function WorldSection({
   chatThreadId?: string;
   ownerActor: OwnerControlledActorRead | null;
   postId?: string;
+  relationshipCharacterId?: string;
   world: LocalWorldAppRead["world"];
   worldCharacterId?: string;
   worldId: string;
@@ -304,26 +315,7 @@ function WorldSection({
   }
 
   if (activeSection.id === "relationships") {
-    return (
-      <section className={styles.capability}>
-        <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
-        <p className={styles.capabilityKicker}>{uiText(activeSection.label)}</p>
-        <h2>{uiText("이 World의 관계망")}</h2>
-        {ownerActor ? (
-          <>
-            <p>
-              {uiText("기준 캐릭터: {{name}}. 이 World 안의 관계와 근거를 확인합니다.", {name: ownerActor.profile.display_name})}</p>
-            <Link
-              className={styles.capabilityAction}
-              href={relationshipGraphRoute(ownerActor.character_id, worldId)}
-            >
-              {uiText("내 조종 앵무 관계망 열기")}</Link>
-          </>
-        ) : (
-          <p>{uiText("Creator Studio에서 사용자 조종 앵무를 만든 뒤 관계망을 열 수 있습니다.")}</p>
-        )}
-      </section>
-    );
+    return <WorldRelationshipsScreen characterId={relationshipCharacterId ?? ownerActor?.character_id ?? null} worldId={worldId} />;
   }
 
   return (

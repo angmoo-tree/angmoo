@@ -1,5 +1,40 @@
 # Angmoo Backend Architecture
 
+## Image provider vault and supported creation methods (2026-10-09)
+
+Identity owns `WorldImageProviderCredential`, keyed by owner, World, actor,
+provider and credential purpose, with encrypted material, key revision and
+tombstone. The existing WorldCredential remains the current executable
+provider/model selection and preserves admitted execution revisions. Selecting
+another provider reuses its active vault key without reading plaintext into a
+DTO. Same-provider model changes reuse the key; explicit deletion tombstones
+the vault and revokes that provider's execution copies. Other providers and
+Comfy Partner remain independent. Current, provider-key and image-policy CAS
+checks participate in the runtime's existing Session/UoW and rollback together.
+Runtime composes authorization, policy invalidation and privacy deletion; domain
+services do not import another domain's internal service or open nested Sessions.
+
+ComfyUI accepts no server authentication key. Its separate Partner key is the
+account credential used only in Comfy extra_data. Runtime resolution and the
+HTTP integration reject retired server material before submission; external
+service secrets cannot become Comfy server headers. Embedded SQLite v34 and
+Alembic 20261009_0111 authenticate prior material before mutation, seed the
+provider vault without reviving deletion, and retire Comfy server secrets from
+current/history and legacy USER_IMAGE. Partner/other-provider material remains
+protected. Previous manifests and migrations are frozen. Failed authentication
+does not promote a staging DB or alter the source DB/selection marker.
+
+Characters separates supported new creation inputs from legacy read types.
+New local/external creation and new external draft registration are rejected
+before side effects. Completed receipt reads remain idempotent. An owned,
+unexpired editing external draft may be explicitly reselected as direct under
+target/revision checks, preserving fields and temporary media in one transaction.
+V1 adoption does not silently reselect; old credentials are not copied.
+
+Memory admission, validation, apply, scheduling, shutdown, FTS5 and Vec1 behavior
+is unchanged by the frontend saved-embedding controller. Related isolated and
+mock evidence is recorded in [2026-10-09 verification](../docs/verification/world-ui-settings-improvements-20261009.md).
+
 ## Situation delivery validation and owner recovery (2026-10-08)
 
 Memory owns `SituationValidationContext`, delivery/relationship policies, receipt

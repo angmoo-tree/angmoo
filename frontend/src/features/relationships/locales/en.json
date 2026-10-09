@@ -133,5 +133,12 @@
   "최종 적용 대기": "Awaiting final application",
   "검토 완료": "Review completed",
   "제한·오류 확인 후 재개": "Resume after reviewing limits or errors",
-  "자료 변경으로 검토 제외": "Excluded because the source data changed"
+  "자료 변경으로 검토 제외": "Excluded because the source data changed",
+  "기준 캐릭터 확인 중": "Checking the center character",
+  "이 캐릭터의 관계망을 열 수 없습니다. 권한과 World 참여 상태를 확인해주세요.": "These relationships are unavailable. Check your access permissions and World membership.",
+  "World 관리에서 관계망의 기준 프로필을 확인해주세요.": "Check the center profile in World management.",
+  "이 World의 내 프로필이 아직 연결되지 않았습니다. 관계 조회는 새 프로필을 만들지 않습니다.": "Your profile in this World is not connected yet. Viewing relationships does not create a new profile.",
+  "World 관리 열기": "Open World management",
+  "이 World의 관계": "Relationships in this World",
+  "저장된 경험에서 이어진 관계를 확인해요.": "Explore relationships built from saved experiences."
 }

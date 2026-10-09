@@ -15,8 +15,6 @@ import { PostDetailClient } from "@/composition/screens/post-detail-screen";
 import { getSocialPostThread, listSocialFeed } from "@/features/social/api/social-feed-client";
 import { type FeedPage, type PostThreadRead } from "@/features/social/types/social-feed-contract";
 import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
-import { RelationshipGraphClient } from "@/features/relationships/components/relationship-graph-client";
-import { RelationshipGraphFrame } from "@/features/relationships/components/relationship-graph-frame";
 import { SettingsClient } from "@/composition/screens/settings-screen";
 import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
 import { WorldCreatorClient } from "@/composition/screens/world-creator-screen";
@@ -32,7 +30,6 @@ import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
-import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
 import { isStaticLocalProductRouteSupported } from "@/lib/navigation/device-navigation";
 
 type BrowserLocation = {
@@ -300,16 +297,7 @@ function renderStaticRoute(location: BrowserLocation) {
       );
     }
     if (characterId && worldId && segments[4] === "relationship-graph") {
-      const provider = getRuntimeConfig()?.graphProvider ?? "ladybug";
-      return (
-        <RelationshipGraphFrame>
-          <RelationshipGraphClient
-            characterId={characterId}
-            provider={provider}
-            worldId={worldId}
-          />
-        </RelationshipGraphFrame>
-      );
+      return <WorldAppRouteClient sectionId="relationships" relationshipCharacterId={characterId} worldId={worldId} />;
     }
   }
   return <StaticNotFound pathname={pathname} />;

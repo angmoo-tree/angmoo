@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/surfaces";
 import { PersonaStatusCard, ActivitySummaryStatusCard, CurrentStateStatusCard, RecentActivityStatusCard } from "@/components/ui/status-cards";
@@ -26,7 +26,7 @@ const FIELDS = [["worldview", "캐릭터 설명"], ["personality", "성격"], ["
   ["character_background", "캐릭터 배경·세계관"], ["topic_preferences", "관심 주제"], ["safety_rules", "피해야 할 행동/표현"]] as const;
 const ACTIONS: Record<string, string> = { reply: "답글 작성", comment: "답글 작성", post: "게시글 작성", like: "좋아요" };
 
-export function WorldCharacterStatusCards({ worldId, actorId, profile, revision, active }: { worldId: string; actorId: string; profile: WorldCharacterPublicProfile; revision: number; active: boolean }) {
+export function WorldCharacterStatusCards({ worldId, actorId, profile, revision, active, summaryCards }: { worldId: string; actorId: string; profile: WorldCharacterPublicProfile; revision: number; active: boolean; summaryCards?: ReactNode }) {
   const uiText = useUiText("characters"), { status, user } = useAuth();
   const formatDate = useUiDateFormatter();
   const displayTimezone = useUserEnvironment().environment?.timezone ?? "UTC";
@@ -60,8 +60,8 @@ export function WorldCharacterStatusCards({ worldId, actorId, profile, revision,
     `${worldId}:${actorId}:${visible?.recent_activity.length ?? 0}:${visible?.recent_activity[0]?.id ?? ""}`,
     5, 10,
   );
-  if (!visible) return <Card><p role="status">{uiText(loading ? "상태를 불러오는 중..." : error ? "상태를 불러오지 못했어요." : "아직 상태 정보가 없어요.")}</p>
-    {error ? <Button variant="secondary" onClick={() => setRetry(value => value + 1)}>{uiText("다시 시도")}</Button> : null}</Card>;
+  if (!visible) return <div className="grid min-w-0 gap-6"><Card><p role="status">{uiText(loading ? "상태를 불러오는 중..." : error ? "상태를 불러오지 못했어요." : "아직 상태 정보가 없어요.")}</p>
+    {error ? <Button variant="secondary" onClick={() => setRetry(value => value + 1)}>{uiText("다시 시도")}</Button> : null}</Card>{summaryCards}</div>;
   const summary = visible.summary;
   const state = presentWorldCharacterState({ profile: { control_mode: "autonomous" }, autonomous_enabled: visible.autonomous_enabled, status: visible.state, next_activity_at: visible.next_activity_at });
   return <div className="grid min-w-0 gap-6">
@@ -89,6 +89,7 @@ export function WorldCharacterStatusCards({ worldId, actorId, profile, revision,
           };
         })} />
     </RecentActivityStatusCard>
+    {summaryCards}
     <PersonaStatusCard elevated title={uiText("캐릭터 페르소나")} sections={FIELDS.filter(([key]) => visible.persona[key].trim()).map(([key, label]) => ({ label: uiText(label), value: visible.persona[key] }))} />
     <ActivitySummaryStatusCard elevated title={uiText("활동 요약")} time={<>{uiText(visible.state.state === "outside_hours" ? "쉬는 시간대" : "활동 시간대")}<br />{summary.active_hours}</>} metrics={[
       { label: uiText("오늘 게시글 작성"), value: `${summary.posts}/${summary.post_limit}` }, { label: uiText("오늘 리플 작성"), value: `${summary.replies}/${summary.reply_limit}` },

@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 33
-SOURCE_ALEMBIC_REVISION = "20261009_0110"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 109
-EXPECTED_CANONICAL_TABLE_COUNT = 169
+SQLITE_SCHEMA_VERSION = 34
+SOURCE_ALEMBIC_REVISION = "20261009_0111"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 110
+EXPECTED_CANONICAL_TABLE_COUNT = 170
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
@@ -755,8 +755,14 @@ def build_sqlite_v30_metadata() -> MetaData:
     return metadata
 
 
-def build_sqlite_v32_metadata() -> MetaData:
+def build_sqlite_v33_metadata() -> MetaData:
     metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["world_image_provider_credentials"])
+    return metadata
+
+
+def build_sqlite_v32_metadata() -> MetaData:
+    metadata = build_sqlite_v33_metadata()
     _remove_comfy_diagnostics(metadata)
     return metadata
 

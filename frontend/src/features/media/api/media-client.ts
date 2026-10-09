@@ -9,7 +9,8 @@ const generationJobPath = (worldId: string, postId: string) => `/media/worlds/${
 export const getGenerationJob = (worldId: string, postId: string, signal?: AbortSignal) => apiRequest<GenerationJob | null>(generationJobPath(worldId, postId), { signal });
 export const changeGenerationJob = (worldId: string, postId: string, action: "cancel" | "retry") => apiRequest<GenerationJob>(`${generationJobPath(worldId, postId)}/${action}`, { method: "POST" });
 export const getGeneration = (id: string, signal?: AbortSignal) => apiRequest<GenerationSettings>(`/agents/${encodeURIComponent(id)}/generation-settings`, { signal });
-export const saveGeneration = (id: string, data: GenerationWrite, check = false) => apiRequest<GenerationSettings>(`/agents/${encodeURIComponent(id)}/generation-settings${check ? "/check" : ""}`, { method: check ? "POST" : "PUT", body: data });
+export const getGenerationProviderKey = (id: string, provider: string, signal: AbortSignal) => apiRequest<import("@/components/ui/credential-fields").SecretKeyMetadata>(`/agents/${encodeURIComponent(id)}/generation-provider-key/${encodeURIComponent(provider)}`, { signal });
+export const saveGeneration = (id: string, data: GenerationWrite, check = false, signal?: AbortSignal) => apiRequest<GenerationSettings>(`/agents/${encodeURIComponent(id)}/generation-settings${check ? "/check" : ""}`, { method: check ? "POST" : "PUT", body: data, signal });
 export const getInterpretation = (signal?: AbortSignal) => apiRequest<InterpretationSettings>("/media/interpretation-settings", { signal });
 export const saveInterpretation = (data: InterpretationSettings & { expected_revision: number; api_key?: string; clear_api_key?: boolean }) => {
   const { revision: _revision, has_api_key: _hasKey, ...body } = data;

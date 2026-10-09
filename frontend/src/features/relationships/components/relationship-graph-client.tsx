@@ -13,7 +13,7 @@ import { relationshipGraphPresentationState } from "@/features/relationships/uti
 import Link from "next/link";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 import { RelationshipGraphNode } from "./relationship-graph-node";
@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DegradedPanel, EmptyState, InlineError } from "@/components/ui/feedback";
 import { StatusChip, type StatusChipTone } from "@/components/ui/status";
+import styles from "./relationship-graph-client.module.css";
 
 const STATUS_PRESENTATION: Record<
   RelationshipGraphStatus,
@@ -64,10 +65,12 @@ export function RelationshipGraphClient({
   characterId,
   worldId,
   provider = "ladybug",
+  embedded = false,
 }: {
   characterId: string;
   worldId: string;
   provider?: "ladybug";
+  embedded?: boolean;
 }) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("relationships");
@@ -110,7 +113,8 @@ export function RelationshipGraphClient({
       .catch((nextError) => {
         if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           const code = nextError instanceof Error ? nextError.message : "relationship_query_failed";
-          setError(ERROR_LABELS[code] ?? ERROR_LABELS.relationship_query_failed);
+          const responseStatus = nextError && typeof nextError === "object" && "status" in nextError ? nextError.status : null;
+          setError(responseStatus === 403 || responseStatus === 404 ? "이 캐릭터의 관계망을 열 수 없습니다. 권한과 World 참여 상태를 확인해주세요." : ERROR_LABELS[code] ?? ERROR_LABELS.relationship_query_failed);
         }
       })
       .finally(() => {
@@ -132,6 +136,13 @@ export function RelationshipGraphClient({
   }, [graph]);
   const layout = useMemo(() => relationshipGraphLayout(orderedNodes), [orderedNodes]);
   const positions = layout.positions;
+  const mapViewport = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!embedded || !graph || !mapViewport.current) return;
+    const viewport = mapViewport.current;
+    const center = positions.get(graph.center_world_character_id);
+    viewport.scrollLeft = Math.max(0, (center?.x ?? layout.width / 2) - viewport.clientWidth / 2);
+  }, [embedded, graph, layout.width, positions]);
   const markerId = `relationship-arrow-${useId().replaceAll(":", "")}`;
   const presentationState = relationshipGraphPresentationState({
     graph,
@@ -166,10 +177,13 @@ export function RelationshipGraphClient({
 
   return (
     <div
-      className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6"
+      className={embedded ? "min-w-0 pb-6" : "mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6"}
       data-product-content="relationship-graph"
     >
-      <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
+      {embedded ? <header className={styles.header}>
+        <span className={styles.icon}><Network size={20} aria-hidden="true" /></span>
+        <div className={styles.identity}><h1>{uiText("이 World의 관계")}</h1><p>{uiText("저장된 경험에서 이어진 관계를 확인해요.")}</p><p>{graph?.nodes.find(node => node.is_center)?.display_name ?? uiText("기준 캐릭터 확인 중")}</p></div>
+      </header> : <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
         {provider === "ladybug" ? <details><summary>{uiText("관계 데이터 정보")}</summary><p>{uiText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")}</p></details> : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
@@ -179,8 +193,9 @@ export function RelationshipGraphClient({
             {uiText("활동 준비로 돌아가기")}</Link>
 
         </div>
-      </SettingsCard>
+      </SettingsCard>}
 
+      <div className={embedded ? styles.body : "space-y-6"}>
       {presentationState === "loading" ? (
         <p data-relationship-graph-state="loading" className="rounded-3xl bg-surface-container p-5">
           {uiText("관계 근거를 확인하는 중입니다.")}</p>
@@ -284,7 +299,7 @@ export function RelationshipGraphClient({
           >
             {depth === 1 ? uiText("2단계까지 보기") : uiText("직접 관계만 보기")}
           </Button>
-            <div className="mt-6 overflow-x-auto" aria-hidden="true">
+            <div ref={mapViewport} data-relationship-map-viewport className="mt-6 overflow-x-auto" aria-hidden="true">
               <svg viewBox={`0 0 ${layout.width} ${layout.height}`} style={{ minWidth: layout.width, width: "100%" }} aria-hidden="true">
                 <defs>
                   <marker id={markerId} markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
@@ -377,6 +392,7 @@ export function RelationshipGraphClient({
           ) : null}
         </>
       ) : null}
+      </div>
     </div>
   );
 }

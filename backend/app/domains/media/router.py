@@ -63,6 +63,11 @@ def read_generation(character_id: str, request: Request, db: Session = Depends(g
     return value
 
 
+@router.get("/agents/{character_id}/generation-provider-key/{provider}")
+def read_generation_provider_key(character_id: str, provider: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return guarded(lambda: runtime(request).read_generation_provider_key(db, user, character_id, provider), db)
+
+
 @router.put("/agents/{character_id}/generation-settings", dependencies=[Depends(require_local_frontend_request), Depends(require_comfy_raw_json)])
 def save_generation(character_id: str, data: GenerationSettingsWrite, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
     value = guarded(lambda: runtime(request).write_generation(db, user, character_id, data), db)

@@ -63,6 +63,9 @@ def create_agent(
     *,
     workflows: CharacterManagementWorkflows,
 ) -> schemas.AgentDetailRead:
+    if data.execution_mode != "llm":
+        from app.domains.characters.exceptions import AgentExecutionModeError
+        raise AgentExecutionModeError("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요.")
     workflows.validate_initial_activity(data)
     character = mutations.create_owned_character(db, user, data)
     return workflows.after_create(db, user, character, data)

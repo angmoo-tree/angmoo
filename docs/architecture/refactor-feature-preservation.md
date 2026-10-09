@@ -1,5 +1,21 @@
 # Angmoo 기능 보존과 현재 코드 읽기 지도
 
+## 2026-10-09 World 요약·관계와 설정의 현재 경로
+
+상태 탭의 Characters 일과/ Social 주제는 composition 슬롯에서 조립하며 설정의
+생성·키·Feed 상세와 최근 활동 내부 스크롤을 유지한다. 관계 탭/직접 관계 URL은
+`composition/screens/world-app`과 `world-relationships-screen`에서 동일한 Phone 틀을
+사용하고 `features/relationships`의 방향·깊이·근거·정리 표시는 그대로 유지한다.
+신규 외부 생성만 제한하며 기존 외부 캐릭터 읽기·완료 receipt·초안 원문은 보존한다.
+
+World 이미지 키는 Identity의 `world_image_credentials`와 제공사별 ORM 보관소가
+소유하고 기존 current/revision 실행 계약을 유지한다. Comfy 서버 키는 정식 v34
+forward 이관·입력/실행 경계에서 폐기하고 Partner·다른 서비스 키는 보존한다.
+Memory의 변경은 saved embedding controller와 카드 표시이며 기존 접수·검증·저장·
+FTS/Vec1·재검사/포기·관계 정리 업무를 바꾸지 않는다. 역사 inventory/baseline을
+재작성하지 않으며 이번 범위의 코드·계약·검증은
+[관련 검증 기록](../verification/world-ui-settings-improvements-20261009.md)으로 연결한다.
+
 기능을 수정할 때는 [Backend ARCHITECTURE](../../backend/ARCHITECTURE.md)의 역할 설명과 [기능 inventory](../../security/refactor_feature_inventory.json)의 현재 경로를 함께 확인한다. 이 문서는 기능별 실제 구현과 그 기능을 보존하는 증거의 관계를 설명한다. 원래 파일이 여러 업무로 나뉜 경우 대표 파일 하나가 원래 기능 전체를 대신하지 않는다.
 
 ## 현재 적용 범위와 검증 상태

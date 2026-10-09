@@ -85,22 +85,15 @@ def save(db, *, owner_id, world_id, world_character_id, purpose, data):
     validate_profile(purpose, data.provider, data.model, data.thinking_level)
     if (data.partner_api_key is not None or data.clear_partner_key) and (purpose != "image" or data.provider != "comfyui"):
         raise CredentialResolutionError("world_credential_profile_invalid")
+    if purpose == "image":
+        from .world_image_credentials import select_provider
+        return select_provider(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id, data=data)
     row = find(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
     if data.expected_revision != (row.revision if row else 0):
         raise CredentialResolutionError("world_credential_revision_conflict")
     raw = data.api_key.get_secret_value().strip() if data.api_key is not None else ""
     if len(raw) > 4096:
         raise CredentialResolutionError("world_credential_too_long")
-    if purpose == "image" and data.provider == "comfyui" and (raw or data.partner_api_key is not None or data.clear_partner_key):
-        previous = {}
-        if row and row.provider == "comfyui" and row.encrypted_secret:
-            decrypted = security.decrypt_secret(row.encrypted_secret, scope=security.SecretScope(owner_id=owner_id,
-                character_id=row.aad_character_id, provider=row.provider, purpose=row.aad_purpose))
-            previous = _comfy_secrets(decrypted)
-        partner = "" if data.clear_partner_key else data.partner_api_key.get_secret_value().strip() if data.partner_api_key is not None else previous.get("partner", "")
-        if len(partner) > 4096:
-            raise CredentialResolutionError("world_credential_too_long")
-        raw = json.dumps({"version": "comfy-secrets.v1", "key": raw or previous.get("key", ""), "partner": partner})
     if row is not None and row.provider != data.provider and row.encrypted_secret and not raw:
         if row.provider in {"google", "gemini", "google-generative-ai"} and data.provider in {"google", "gemini", "google-generative-ai"}:
             raw = security.decrypt_secret(row.encrypted_secret, scope=security.SecretScope(owner_id=owner_id,
@@ -130,7 +123,13 @@ def save(db, *, owner_id, world_id, world_character_id, purpose, data):
     return metadata(row, purpose=purpose)
 
 
-def delete(db, *, owner_id, world_id, world_character_id, purpose, expected_revision):
+def delete(db, *, owner_id, world_id, world_character_id, purpose, expected_revision, provider=None, expected_key_revision=None):
+    if purpose == "image":
+        from .world_image_credentials import delete_provider
+        from app.domains.identity.schemas import WorldCredentialDelete
+        return delete_provider(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id,
+            data=WorldCredentialDelete(expected_revision=expected_revision, provider=provider,
+                expected_key_revision=expected_key_revision))
     row = find(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
     if row is None or row.revision != expected_revision:
         raise CredentialResolutionError("world_credential_revision_conflict")
@@ -147,9 +146,11 @@ def _comfy_secrets(raw):
     try:
         value = json.loads(raw)
     except (ValueError, TypeError):
-        return {"key": raw, "partner": ""}
+        raise CredentialResolutionError("comfy_server_key_retired") from None
     if not isinstance(value, dict) or value.get("version") != "comfy-secrets.v1" or not all(isinstance(value.get(k), str) for k in ("key", "partner")):
         raise CredentialResolutionError("world_credential_secret_invalid")
+    if value["key"]:
+        raise CredentialResolutionError("comfy_server_key_retired")
     return value
 
 
@@ -167,19 +168,21 @@ def resolve_image_keys(db, *, owner_id, world_id, world_character_id, revision=N
         purpose="image", revision=revision, _image_envelope=True)
     if row.provider == "comfyui":
         secrets = _comfy_secrets(material.reveal())
-        return replace(material, _secret=secrets["key"]), secrets["partner"] or None
+        return None, secrets["partner"] or None
     return material, None
 
 
 def resolve(db, *, owner_id, world_id, world_character_id, purpose, revision=None, _image_envelope=False):
     row = find(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
-    if row is None or not row.encrypted_secret:
+    if row is None:
         raise CredentialResolutionError("world_credential_key_required")
     if revision is not None:
         row = find_revision(db, owner_id=owner_id, world_id=world_id, world_character_id=world_character_id,
             purpose=purpose, credential_id=row.id, revision=revision)
         if not row.encrypted_secret:
             raise CredentialResolutionError("world_credential_key_required")
+    if not row.encrypted_secret:
+        raise CredentialResolutionError("world_credential_key_required")
     validate_profile(purpose, row.provider, row.model, row.thinking_level)
     material = CredentialResolver.resolve_encrypted_material(encrypted_secret=row.encrypted_secret,
         credential_id=getattr(row, "credential_id", None) or row.id, provider=row.provider, model=row.model, fingerprint=row.fingerprint,

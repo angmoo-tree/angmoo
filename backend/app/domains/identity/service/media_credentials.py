@@ -17,6 +17,8 @@ def find_credential(db: Session, *, owner_id: str, character_id: str, provider: 
 
 def save_credential(db: Session, *, owner_id: str, character_id: str, provider: str,
                     purpose: CredentialPurpose, secret: str | None, expected_revision: int | None = None) -> MediaCredential:
+    if purpose == CredentialPurpose.USER_IMAGE and provider == "comfyui" and (secret or "").strip():
+        raise CredentialResolutionError("comfy_server_key_not_supported")
     if purpose not in (CredentialPurpose.USER_IMAGE, CredentialPurpose.COMFY_PARTNER_IMAGE, CredentialPurpose.IMAGE_INTERPRETATION):
         raise CredentialResolutionError("media_credential_purpose_invalid")
     if purpose == CredentialPurpose.IMAGE_INTERPRETATION and (character_id or provider != "gemini"):
@@ -53,6 +55,8 @@ def save_credential(db: Session, *, owner_id: str, character_id: str, provider: 
 
 def resolve_credential(row: MediaCredential | None, *, owner_id: str, character_id: str,
                        provider: str, purpose: CredentialPurpose, revision: int | None = None):
+    if provider == "comfyui" and purpose == CredentialPurpose.USER_IMAGE:
+        raise CredentialResolutionError("comfy_server_key_retired")
     if row is None or not row.enabled or (row.owner_id, row.character_scope, row.provider, row.purpose) != (owner_id, character_id, provider, purpose.value):
         raise CredentialResolutionError("media_credential_scope_or_key_invalid")
     if revision is not None and row.revision != revision:

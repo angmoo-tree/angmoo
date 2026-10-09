@@ -392,5 +392,13 @@
   "이 경험을 기억으로 저장하지 않습니다. 원래 채팅과 SNS 글은 유지됩니다.": "This experience will not be saved as a memory. Your original chats and SNS posts will remain.",
   "현재 저장하지 못한 경험이나 저장 대기가 없어요.": "There are currently no unsaved or pending experiences.",
   "불러오는 중": "Loading",
-  "다른 기억 저장 작업이 진행 중이에요. 가능한 동작은 각 경험에서 확인해 주세요.": "Another memory saving task is running. Check each experience for available actions."
+  "다른 기억 저장 작업이 진행 중이에요. 가능한 동작은 각 경험에서 확인해 주세요.": "Another memory saving task is running. Check each experience for available actions.",
+  "기억과 근거는 저장하고, 키워드 검색 자료만 준비해요.": "Memories and their evidence are saved, and only keyword search data is prepared.",
+  "기억을 저장한 뒤 의미 검색 자료도 순서대로 준비해요.": "After memories are saved, their semantic search data is prepared in turn.",
+  "새로 저장된 기억의 의미 검색 자료를 준비하고, 검색할 때 검색 문구를 임베딩하는 데 사용해요.": "Used to prepare semantic search data for newly saved memories and to embed search queries.",
+  "의미 검색을 켜면 두 작업에 같은 API 키를 사용해요. 기억 내용과 검색 문구가 선택한 API로 전송되며 사용료가 발생할 수 있어요.": "When semantic search is enabled, both tasks use the same API key. Memory content and search queries are sent to the selected API, and usage charges may apply.",
+  "임베딩 모델 API 키": "Embedding model API key",
+  "임베딩 설정 상태를 확인하지 못했어요.": "We couldn't check the embedding settings.",
+  "임베딩 설정 확인 중": "Checking embedding settings",
+  "현재 저장된 임베딩 설정입니다. 기억 사용 여부는 위에서 따로 설정해요.": "These are the saved embedding settings. Memory use is controlled separately above."
 }

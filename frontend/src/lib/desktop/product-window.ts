@@ -131,13 +131,6 @@ export function desktopWindowKindForRoute(
   if (pathname === "/studio" || pathname.startsWith("/studio/")) {
     return "studio";
   }
-  if (
-    /^\/characters\/[^/]+\/worlds\/[^/]+\/relationship-graph$/.test(
-      pathname,
-    )
-  ) {
-    return "relationship-graph";
-  }
   return "phone";
 }
 

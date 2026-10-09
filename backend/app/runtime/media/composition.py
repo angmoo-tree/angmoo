@@ -91,6 +91,11 @@ class MediaRuntime:
         from app.domains.characters.service.generation_settings import read_settings
         return self._generation_view(db, user, character_id, read_settings(db, user, character_id, limits=self.limits))
 
+    def read_generation_provider_key(self, db, user, character_id, provider):
+        authorize_scope(db, user.id, "character", character_id)
+        from app.domains.characters.service.generation_settings import read_provider_key
+        return read_provider_key(db, user, character_id, provider)
+
     def write_generation(self, db, user, character_id, data, *, validated_connection=None):
         authorize_scope(db, user.id, "character", character_id)
         from app.domains.characters.service.generation_settings import write_settings
@@ -480,7 +485,7 @@ class MediaRuntime:
         credential = media_credentials.find_credential(db, owner_id=user.id, character_id=character_id,
             provider=data.provider, purpose=CredentialPurpose.USER_IMAGE)
         key = data.api_key.get_secret_value() if data.api_key else None
-        if key is None and credential and not data.clear_api_key:
+        if key is None and credential and data.provider != "comfyui" and not data.clear_api_key:
             key = media_credentials.resolve_credential(credential, owner_id=user.id, character_id=character_id,
                 provider=data.provider, purpose=CredentialPurpose.USER_IMAGE).reveal()
         if data.provider == "comfyui" and data.options.get("partner_auth"):

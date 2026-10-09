@@ -4,14 +4,15 @@ import { CredentialFields, type SecretMetadata, type SecretWrite } from "@/compo
 import { GENERATION_PROFILES } from "@/config/generation-profiles";
 import { useUiText } from "@/hooks/use-ui-text";
 
-export function MemoryCredentialFields({ worldId, subjectId, purpose, onMetadata, onDirtyChange }: {
+export function MemoryCredentialFields({ worldId, subjectId, purpose, onMetadata, onSaved, onDirtyChange, initialMetadata }: {
   worldId: string; subjectId: string; purpose: "consolidation" | "embedding"; onMetadata?: (value: SecretMetadata) => void; onDirtyChange?: (value: boolean) => void;
+  initialMetadata?: SecretMetadata; onSaved?: (value: SecretMetadata) => void;
 }) {
   const t = useUiText("memory");
   const path = `/worlds/${encodeURIComponent(worldId)}/world-characters/${encodeURIComponent(subjectId)}/credentials/${purpose}`;
   const profiles = purpose === "embedding" ? [{ provider: "google", model: "gemini-embedding-2", thinking_level: null, label: "Gemini Embedding 2" }] :
     GENERATION_PROFILES.map(p => ({ provider: "google", model: p.model, thinking_level: p.thinking, label: p.label }));
-  return <CredentialFields scopeKey={`${worldId}:${subjectId}:${purpose}`} profiles={profiles} onMetadata={onMetadata} onDirtyChange={onDirtyChange}
+  return <CredentialFields scopeKey={`${worldId}:${subjectId}:${purpose}`} profiles={profiles} onMetadata={onMetadata} onSaved={onSaved} initialMetadata={initialMetadata} onDirtyChange={onDirtyChange}
     read={signal => apiRequest<SecretMetadata>(path, { signal })}
     save={({ label: _label, ...data }: SecretWrite, signal) => { void _label; return apiRequest<SecretMetadata>(path, { method: "PUT", signal, body: data }); }}
     remove={(expected_revision, signal) => apiRequest<SecretMetadata>(path, { method: "DELETE", signal, body: { expected_revision } })}

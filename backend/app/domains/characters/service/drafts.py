@@ -31,6 +31,8 @@ async def create_draft(
     db: Session, user: CharacterOwner, data: schemas.AgentCreationDraftCreate,
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
+    if data.execution_mode != "llm":
+        raise AgentCreationDraftValidationError("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요.")
     _cleanup_expired_drafts(db, workflows=workflows)
     draft_id = f"draft-{uuid4().hex[:12]}"
     if workflows.resolve_target is None:
@@ -47,7 +49,7 @@ async def create_draft(
         contract_version=2,
         revision=1,
         target_world_id=target_world_id,
-        source_kind="external" if data.execution_mode == "local" else "direct",
+        source_kind="direct",
         status="editing",
         name="",
         handle=None,
@@ -88,10 +90,22 @@ def update_draft(
         if data.model_fields_set - {"status", "revision"}:
             raise AgentCreationDraftValidationError("취소와 내용 수정은 함께 요청할 수 없습니다.")
         return cancel_draft(db, draft, data.revision, workflows=workflows)
+    if data.target_world_id is not None and data.target_world_id != draft.target_world_id:
+        raise AgentCreationDraftHandleConflictError("draft_target_conflict")
+    if data.creation_method is not None:
+        if draft.contract_version < 2 or draft.source_kind != "external" or draft.status != "editing":
+            raise AgentCreationDraftValidationError("draft_creation_method_transition_invalid")
+        if workflows.resolve_target is None or not draft.target_world_id:
+            raise AgentCreationDraftValidationError("creation_target_resolver_required")
+        workflows.resolve_target(db, user, draft.target_world_id)
+        if db.scalar(select(models.CharacterCardSource.id).where(models.CharacterCardSource.draft_id == draft.id)):
+            raise AgentCreationDraftValidationError("draft_creation_method_transition_invalid")
     if draft.contract_version >= 2:
         claim_edit(db, draft, data.revision)
     try:
-        for field, value in data.model_dump(exclude_unset=True, exclude={"revision", "status"}).items():
+        if data.creation_method is not None:
+            draft.source_kind = "direct"
+        for field, value in data.model_dump(exclude_unset=True, exclude={"revision", "status", "creation_method", "target_world_id"}).items():
             if field == "handle":
                 if value is None or not str(value).strip():
                     draft.handle = None
@@ -250,7 +264,8 @@ def adopt_legacy_draft(db, user, draft_id, data: schemas.AgentCreationDraftAdopt
         claim_edit(db, draft, data.revision)
         draft.contract_version = 2
         draft.target_world_id = target
-        draft.source_kind = "direct"
+        if draft.source_kind != "external":
+            draft.source_kind = "direct"
         # Keep legacy encrypted material in its private row, but never attach it
         # to the newly registered character. Preparation requires explicit setup.
         db.commit()

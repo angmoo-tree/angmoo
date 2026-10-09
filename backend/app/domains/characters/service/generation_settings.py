@@ -40,6 +40,8 @@ def read_settings(db, user, character_id, *, limits):
 def write_settings(db, user, character_id, data, *, assets, limits, validated_connection=None):
     _get_owned_character(db, user, character_id)
     ensure_demo_user_mutable(user)
+    if data.provider == "comfyui" and data.api_key is not None and data.api_key.get_secret_value().strip():
+        raise ImagePreparationError("comfy_server_key_not_supported")
     row = ensure_image_generation_setting(db, character_id, commit=False)
     if data.expected_revision not in (row.generation_revision, 0 if row.generation_provider is None else -1):
         raise ImagePreparationError("settings_revision_conflict")
@@ -139,3 +141,14 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
     db.flush()
     db.expire(row)
     return read_settings(db, user, character_id, limits=limits)
+
+
+def read_provider_key(db, user, character_id, provider):
+    _get_owned_character(db, user, character_id)
+    if provider not in {"novelai", "nanogpt", "openrouter", "comfyui"}:
+        raise ImagePreparationError("model_not_supported")
+    purpose = CredentialPurpose.COMFY_PARTNER_IMAGE if provider == "comfyui" else CredentialPurpose.USER_IMAGE
+    row = media_credentials.find_credential(db, owner_id=user.id, character_id=character_id, provider=provider, purpose=purpose)
+    ready = bool(row and row.enabled and row.encrypted_secret)
+    return {"provider": provider, "purpose": purpose.value, "has_key": ready,
+        "fingerprint": row.fingerprint if ready else None, "key_revision": row.revision if row else 0}

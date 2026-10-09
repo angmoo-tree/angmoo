@@ -1,5 +1,17 @@
 # Next static product shell contract
 
+2026-10-09: World Relationships and the explicit Character/World graph deep URL
+resolve to the same WorldAppRouteClient/WorldApp composition in both profiles.
+The explicit ID is not replaced by the owner profile; query and login returnTo
+are preserved. Device/native dispatch classifies that URL as Phone, with the
+same Rust Ladybug query restriction and legacy window-enum read compatibility.
+Status summary slots, creator recovery, image service-key UI and saved embedding
+settings also use one feature implementation across the two delivery profiles.
+The scoped tests use Next dev and tauri-static static-shell dev, with a test-only
+single-document fallback retaining the original deep URL. They do not establish
+production export, packaged Tauri or installed-app success. See
+[the scoped verification record](../verification/world-ui-settings-improvements-20261009.md).
+
 ER5 PR K keeps one React/Next frontend source while separating two delivery
 profiles:
 

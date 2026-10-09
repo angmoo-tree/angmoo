@@ -1,5 +1,25 @@
 # Frontend product-shell boundaries
 
+2026-10-09: World Relationships renders its directional graph immediately in
+the shared WorldApp Phone shell. The existing explicit
+`/characters/{characterId}/worlds/{worldId}/relationship-graph` URL uses that
+same composition in Next and the static router, preserving the specified center,
+World, query and login returnTo. Default entry reads the existing World owner
+profile without ensure/create. Missing owner, forbidden/deleted World and graph
+failure retain separate recovery states. There is one main, footer and outer
+scroll owner; internal graph interaction and bounded detail remain feature-owned.
+Frontend route dispatch and Rust Phone URL validation agree and retain Ladybug
+query restrictions. The old RelationshipGraph window enum remains readable for
+previous launch metadata, while new graph navigation belongs to Phone. Other
+product window families are unchanged. This LOCAL contract supersedes only the
+historical independent wide graph presentation below.
+
+World status now composes six cards through feature slots; Memory composes saved
+storage guidance above its embedding editor and relationship review. Both share
+existing primitives and keep their original mutation owners. Scoped dev/native
+unit evidence and unexecuted export/install/AI checks are recorded separately in
+[the verification record](../verification/world-ui-settings-improvements-20261009.md).
+
 2026-10-07: the World root retains section ID `home` and its existing URL, with
 World as the displayed tab name and a compact Globe header. The circular Device
 Home link retains the existing destination. Worlds renders its banner-first
