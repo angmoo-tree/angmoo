@@ -4,7 +4,7 @@
 
 기준선: `feat/0.1.0-release-readiness`, HEAD `547ef4c75d0ad9eca9c017709cee7bb30b2cb843`, 작업 시작 시 변경 없음. 제품 저장소는 `angmoo-tree-angmoo`이며 workspace 문서 루트와 구분한다. 모든 작업은 이 로컬 브랜치에서 수행한다. 원격 push·PR·CI workflow·main merge·fetch/pull/rebase는 수행하지 않는다.
 
-상태: 제품 코드와 원본/실서버 시험 완료. 최종 회귀·보존 검사와 커밋 증거 취합 중. 아래 미확정 결과는 최종 확인 후 갱신한다.
+상태: **I00–I31 총32개 구현 단계와 V00–V12 총13개 필수 검증 묶음 완료 — 2026-10-09.** 재개 시 I00–I29는 완료됐고 I30·I31이 남아 있었다. 기존 백엔드 보존 PASS를 유지한 채 프론트엔드 원본 보존 검사를 재개해 324개 파일 PASS·exit0를 확인하고, 완료 표·사용법·증거·로컬 커밋 기록을 마무리했다. 아래 미측정 AI/native/Docker 범위는 이 완료 판정과 구분한다.
 
 ## 1. 최종 동작과 소유권
 
@@ -51,7 +51,7 @@
 | I13 | Character/World profile 저장·참조/ready·revision 계약, 기존 무전환과 명시 전환 회귀. |
 | I14 | 두 runtime 실제 admission·저장 JSON 재로드·frozen 입력·key/ref/World fence와 기존 receipt 복구. |
 | I15 | 공통 제출 payload. token_normalization/union/custom/link 실행 조건의 서버 위임. |
-| I16 | JS index key 경계/일반 key·Unicode 순서, auto/direct/legacy 출력, MIME/size/pixels/path 검증. |
+| I16 | JS index key 경계/일반 key·Unicode·5,000자리 숫자 문자열 순서, auto/direct/legacy 출력, MIME/size/pixels/path 검증. |
 | I17 | HTTP 400·5xx·valid receipt+warning, bounded errors/redaction·history terminal/pending 구분. |
 | I18 | nullable provider_diagnostic_json, Alembic 0110·embedded33 registry/manifest와 frozen32 빌더. 이전 row/원본 staging 보존. |
 | I19 | worker CAS receipt/diagnostic, 정상·미확정·terminal·spool 복구, 미제출 enrichment·재제출 방지. |
@@ -65,16 +65,16 @@
 | I27 | Next/static build 및 두 UI의 import/edit/save·legacy·late response·warning·반응형 회귀. |
 | I28 | 고정 외부 자료 5개를 제품 DTO/renderer/capture/client/HTTP mock 경로로 시험. 5/5 PASS, AI0. |
 | I29 | 실제 ComfyUI no-model LoadImage→ImageScale→SaveImage, HTTP 오류, receipt/history/view, AI0. |
-| I30 | 최종 소비자 검색·architecture/design/inventory/보존 검사와 V00–V12 취합. 최종 결과는 §4. |
-| I31 | 이 기록/아키텍처/계획 완료 표 및 정확한 출처·보존 ledger를 로컬 커밋. 최종 SHA는 §9. |
+| I30 | 완료. 최종 소비자 검색·architecture/design/inventory 및 backend/frontend 보존 검사 PASS, V00–V12 취합. 최종 결과는 §4. |
+| I31 | 완료. 이 기록·아키텍처·계획의32단계/13검증 완료 표와 정확한 출처·보존 ledger를 저장하고 별도 로컬 문서 커밋으로 마무리. 커밋 기록은 §9. |
 
 ## 4. 로컬 검증
 
-최종 결과 취합 중. 최초 image/World/migration 묶음 337 PASS, 추가 raw HTTP 계약 10 PASS, 추가 World v2 admission 2 PASS를 얻었고 최종 소스의 재실행으로 교체한다.
+최종 코드의 image/World/migration 묶음 **352 PASS**(228.25초, 기존 TestClient deprecation warning 2개)다. 마지막 출력 ID 수정 후 다시 실행한 결과이며 앞선 실행을 합산하지 않는다. Next/static 브라우저 **56 PASS**와 ko/en·360/1440px 시각 캡처·확인 전후 상태의 후속 **4 PASS**를 얻었다. lint·typecheck, 16 namespace/2,705 key 번역 검사, 53개 UI 오류 계약, Next/static 빌드와 개별 architecture/design/embedded migration 검사도 통과했다. 기존 11개 canonical PNG와 tolerance는 변경하지 않았다. 백엔드 source/API/ORM/test 보존은 37개 항목·5,684개 test node, 프론트엔드 원본 보존은 324개 source files·browser assertions/fixtures/assets/locks로 모두 통과했다.
 
 | ID | 판정/증거 |
 |---|---|
-| V00 | backend/frontend architecture·inventory·semantic design, lint/typecheck/catalog/errors, Next/static build. 보존 provenance 최종 검사 대기. |
+| V00 | PASS. backend/frontend architecture·inventory·semantic design, lint/typecheck/catalog/errors, Next/static build. 백엔드 보존37개 항목·5,684개 test node, 프론트엔드 보존324개 파일 PASS. |
 | V01 | DTO·raw decoder·auth·duplicate/depth/size·legacy 읽기·migration 회귀 PASS. |
 | V02 | 합성 14토큰·typed 경로·원본/연결/metadata·부분/미지원 표현 보존 PASS. |
 | V03 | Character/World actual 입력·snapshot·한 번 seed/CLIP·고정 graph PASS. |
@@ -83,12 +83,25 @@
 | V06 | 서버 graph 검사·명시적 Partner와 키 계약 mock PASS. |
 | V07 | 출력 순서·첫 결과·legacy-single·파일/pixels 제한 PASS. |
 | V08 | receipt·HTTP/history·bounded/redacted/nullable 진단·worker/spool·unknown PASS. |
-| V09 | 기존 Provider·profile/privacy/worker·migration 최종 회귀 실행 중. |
-| V10 | Next/static·ko/en·narrow/wide·keyboard·import/edit/legacy/late response/warning 최종 실행 중. |
+| V09 | 기존 Provider·profile/privacy/worker·migration 포함 최종 백엔드 352 PASS. |
+| V10 | Next/static 브라우저 56 PASS, ko/en 좁은/넓은 화면 캡처 후속 4 PASS. PNG 확인과 키보드·내부 scroll·import/edit/legacy/late response/warning 포함. |
 | V11 | 외부 고정 자료 5/5 mock PASS. 원본의 실제 AI/custom-node 실행 미측정. |
 | V12 | 실제 ComfyUI no-model PASS. 모델 다운로드·모델 추론·외부 AI 0회. |
 
 로컬 명령은 repository root에서 실행한다. `scripts/ci` 파일의 로컬 실행은 GitHub CI 실행과 구분한다.
+
+최종 실행 증거는 제품 저장소의 `artifacts/`에 보존한다. 이전 중단·실패 로그와 최종 성공 로그를 구분하고, 로그가 없는 상태를 통과로 해석하지 않는다.
+
+| 최종 증거 | 확인 내용 |
+|---|---|
+| `comfy-final-backend.txt` | 마지막 출력 ID 수정 후 352 PASS, 228.25초. |
+| `comfy-browser.txt` | Next/static 전체 56 PASS. |
+| `comfy-final-browser-readiness.txt` | 확인 전후 표시·ko/en·시각 캡처의 기존 시나리오 후속 4 PASS, 22.8초. |
+| `comfy-final-architecture.txt` | 1,469 modules/6,268 edges, legacy exact edges 0. |
+| `comfy-final-lint.txt`, `comfy-final-typecheck.txt` | 마지막 화면 수정 후 lint/typecheck 성공. |
+| `comfy-final-next-build.txt`, `comfy-final-static-build.txt` | 마지막 화면 수정 후 Next/static 빌드 성공. |
+| `comfy-preservation.txt` | 백엔드 원본 보존 검사 PASS: 37 items, protected/current nodes 각5,684. 이어진 프론트엔드 결과는 기록되지 않아 이 로그만으로 통과를 주장하지 않는다. |
+| `comfy-final-frontend-preservation.txt` | 재개한 원본 프론트엔드 보존 검사 PASS·exit0: 324 source files; browser assertions/fixtures/assets/locks preserved. |
 
 ```powershell
 uv run --directory backend python -m pytest -q tests/image_integration tests/social/test_world_configuration_inputs.py tests/migrations/test_comfy_diagnostics_v33.py tests/migrations/test_situation_recovery_v32.py
@@ -98,6 +111,7 @@ uv run --project backend python scripts/ci/generate_architecture_inventory.py --
 uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
 uv run --project backend python scripts/ci/check_embedded_data_migration_contract.py
 uv run --project backend python scripts/ci/check_refactor_preservation.py --contracts --nodes
+uv run --project backend python scripts/ci/check_refactor_frontend_preservation.py
 pnpm --dir frontend lint
 pnpm --dir frontend typecheck
 pnpm --dir frontend test:ui-catalog
@@ -107,7 +121,7 @@ pnpm --dir frontend build:static
 pnpm --dir browser-tests exec playwright test --config=playwright.image-integration.config.ts
 ```
 
-시험 도중 발견한 문제는 JSON label이 textarea 값을 포함해 정확한 label 접근이 실패하던 부분, text 경로의 접힌 고급 입력을 다시 열어야 하는 test locator, 생성 이미지 부착 후 warning을 숨기던 기존 표시 조건이다. label-for, 실제 UI 상태에 맞는 locator, generated-image 상태 slot/이미 표시한 결과의 불필요한 갱신 방지로 수정했다. 테스트 timeout/skip/기준 snapshot을 낮춰 해결하지 않았다.
+시험 도중 발견한 문제는 JSON label이 textarea 값을 포함하던 부분, 접힌 고급 입력의 locator, 생성 이미지 부착 후 warning을 숨기던 조건, 새 참조 프로필 확인과 체크박스가 서로 기다리던 초기화, DTO와 워크플로 선택의 순환 의존이다. label-for, 실제 UI 상태의 locator, generated-image 상태 slot, 요청한 프로필·실제 참조와 분석 기반의 선택, 실제 service/schema 역할 분리로 수정했다. 서비스 이동 뒤 World 시험의 import 두 경로도 정리했다. 마지막 화면 점검에서 고급 안내의 확인 완료 문구가 미확인 상태에도 보이던 부분은 실제 연결·입력 상태 조건으로 수정했다. 기존 ko/en 수정·저장 시험에서 확인 전 미확인/완료 문구 부재와 확인 후 완료 문구를 함께 검증한다. 인식 UI 시험은 더 이상 사용하지 않는 전역 설정 대신 현재 World 카드에서 medium·키·일일 상한·용도 격리를 검증한다. 기존 보호된 백엔드 시험 이름·권한 단언을 유지하고 timeout/skip/원본 snapshot을 낮추지 않았다.
 
 ## 5. 공식·커뮤니티 고정 자료 5개
 
@@ -125,7 +139,7 @@ pnpm --dir browser-tests exec playwright test --config=playwright.image-integrat
 
 제품 strict analysis·값 렌더링·snapshot serialize/restore·ImageHttp mock submit·JS 첫 이미지 선택을 사용한다. 모든 자료의 원본/links/metadata와 미치환 위치를 비교하고 참조는 metadata-free PNG로 확인한다. `/object_info` 503에도 입력 준비 가능하며 graph 설치 가능성은 mock 서버 결과를 따른다.
 
-외부 JSON과 ST 소스는 제품/repository에 배포하지 않는다. 격리 fixture와 보고서는 workspace `.local-diagnostics/comfy-placeholder-20261009/{fixtures,official-sources.json,external-reuse.json}` 및 기존 `.local-diagnostics/comfyui-builtin-workflows-20261008-161347`에 있다. 재현 도구는 [check_comfy_workflow_reuse.py](../../scripts/diagnostics/check_comfy_workflow_reuse.py)이다. 원본 모델/custom node 품질·설치 호환성은 이 시험의 PASS 범위가 아니다.
+외부 JSON과 ST 소스는 제품/repository에 배포하지 않는다. 격리 fixture와 보고서는 workspace `.local-diagnostics/comfy-placeholder-20261009/{fixtures,official-sources.json,external-reuse.json,external-reuse-final.json}` 및 기존 `.local-diagnostics/comfyui-builtin-workflows-20261008-161347`에 있다. `external-reuse-final.json`은 마지막 출력 ID 수정 뒤 다시 얻은 5/5 PASS·AI0 증거다. 재현 도구는 [check_comfy_workflow_reuse.py](../../scripts/diagnostics/check_comfy_workflow_reuse.py)이다. 원본 모델/custom node 품질·설치 호환성은 이 시험의 PASS 범위가 아니다.
 
 ## 6. 실제 ComfyUI, 무AI 통신
 
@@ -135,8 +149,8 @@ pnpm --dir browser-tests exec playwright test --config=playwright.image-integrat
 - receipt `cb1004a5-bad8-49bb-bfdf-8ee5702ea4be`; graph SHA-256 `56daead91094739ad6aeb18412164870c32fe265c1746c27fe876f65f6476e37`.
 - 출력 PNG SHA-256 `2f899924d6c7f407b35dce05e7ee5183adf95d8fa87897c9589315bc9feceff8`, 64×32.
 - 별도 존재하지 않는 합성 노드 요청은 실제 HTTP 400 `missing_node_type` 진단을 받았다. `comfy_prompt_rejected`로 알려진 접수 실패를 반환했다.
-- 모델 추론·외부 AI 호출·외부 5개 AI workflow 실제출·모델 다운로드는 모두 0회다. 실제 custom Base64 decoder의 모델 실행 성공은 측정하지 않았다.
-- 자신이 띄운 launcher PID1888/서버 PID23672만 queue 비어 있음 확인 후 종료했다. 18289 port의 최종 종료 여부를 별도로 확인한다. 사용자 ComfyUI·Angmoo 설치 앱·Docker/원본 DB/키/기존 모델은 작업 대상으로 사용하지 않았다.
+- 모델 추론·외부 AI 호출·외부 5개 AI workflow 실제 실행·모델 다운로드는 모두 0회다. 실제 custom Base64 decoder의 모델 실행 성공은 측정하지 않았다.
+- 자신이 띄운 launcher PID1888/서버 PID23672만 queue 비어 있음 확인 후 종료했다. 18289 port가 이후 LISTEN하지 않는 것도 확인했다. 사용자 ComfyUI·Angmoo 설치 앱·Docker/원본 DB/키/기존 모델은 작업 대상으로 사용하지 않았다.
 
 증거는 workspace `.local-diagnostics/comfy-placeholder-20261009/live-result.json`, `live-result.png`, `live/process.json`, `live/{stdout,stderr}.log`에 남긴다. 이 증거를 실제 AI 품질 또는 모든 환경 실행 보장으로 확대하지 않는다.
 
@@ -160,7 +174,7 @@ known HTTP400 거절·history 실행 실패·완료/no-image·잘못된 첫 출�
 
 `.bindings`, `output_node`, `reference_required`는 무버전 legacy와 명시적 node binding/출력 호환 위치에 남긴다. required_roles/output_policy를 통해 신규 경로와 구분한다. runtime은 object_info class 존재/type 검사 없이 앱의 graph/value/ref/owner 계약만 확인한다. object_info는 integration과 editor 후보 표시만 사용한다. `api_node`, `comfy_remote_requires_https`, input-name secret gate의 제품 실행 차단은 제거했다.
 
-공통 기존 제공사, 원본 JPEG/WebP 업로드와 출력 형식, quota·lease·receipt·result spool·credential/ref revision·owner/World와 DTO의 privacy 회귀는 유지한다. 새 기능 때문에 바뀐 테스트는 full graph 검사의 서버 위임, 명시적 Partner, raw JSON HTTP body, schema33 target 및 warning 표시 후 조회 횟수다. 기존 test node 이름/권한/다른 제공사 검증을 삭제·skip/xfail하지 않는다.
+공통 기존 제공사, 원본 JPEG/WebP 업로드와 출력 형식, quota·lease·receipt·result spool·credential/ref revision·owner/World와 DTO의 privacy 회귀는 유지한다. 새 기능 때문에 바뀐 테스트는 full graph 검사의 서버 위임, 명시적 Partner, raw JSON HTTP body, schema33 target 및 warning 표시 후 조회 횟수다. 기존 보호된 백엔드 test node 이름/권한/다른 제공사 검증을 삭제·skip/xfail하지 않는다. 새 narrow/wide·ko/en 캡처의 참조 분류는 LOCAL이다.
 
 정확한 변경 출처는 append-only 보존 ledger에 별도 로컬 구현 commit의 before/after AST·assertions·schema/ORM hash·source blob을 기록한다. 기존 checkpoint·원본 보존 snapshot·과거 ledger records를 바꾸지 않는다. 디자인 정책은 새 LOCAL 캡처 호출 1개(41→42)만 명시하고 기존11 canonical PNG와 diff tolerance를 보존한다.
 
@@ -168,4 +182,17 @@ known HTTP400 거절·history 실행 실패·완료/no-image·잘못된 첫 출�
 
 ## 9. 최종 로컬 커밋과 증거
 
-구현 commit과 보존 ledger/검증 문서 commit을 이 로컬 branch에 기록한다. 정확한 SHA, final status와 V00/V09/V10 최종 결과는 확인 후 갱신한다. 원격 작업은 하지 않는다.
+| 로컬 commit | 내용 |
+|---|---|
+| `9a861df468e886f77e7b6e67f2b764bd29d61a46` | ComfyUI 입력/출력·snapshot·진단·migration·공통 UI·ko/en·회귀·아키텍처 구현. |
+| `67d72193db436f183c7fa2c5bb46ae6bd019edc6` | 정확한 구현 보존 증거: 62 definition, 5 assertion 전후, 4 폐기 binding, 14 frontend 파일, 18 API 계약, 1 ORM delta, 13 새 파일, 60 새 test node. |
+| `59022f6275524d4314334b8f06e9cd202f63ee2f` | 확인 완료 안내를 실제 연결·입력 준비 상태에 맞춤. 기존 ko/en browser 시나리오에 확인 전후 표시 검증. |
+| `90cf2ff4c30389ec993d78f651ea4697ee22a30e` | 후속 editor/browser 2개 파일의 정확한 before/after 보존. |
+| `2dbc450c6f8ebbdf53b7af6043702f6b88cf3440` | 매우 긴 숫자 출력 ID를 일반 문자열 키로 유지. Python 정수 변환 안전 상한을 바꾸지 않음. 기존 출력 순서 시험에 5,000자리 ID 회귀 추가. |
+| `bb52051489b90526a70b17fb22ebfcade7eea88e` | 후속 2개 definition과 1개 assertion 전후 보존. 이전 199 records 무변경. |
+
+확인 완료 안내 수정 뒤 lint/typecheck·Next/static 빌드·semantic design과 ko/en Next/static 4개 기존 시나리오가 4 PASS(22.8초)로 통과했다. 출력 ID 문제는 수정 전 ValueError를 재현했고, 수정 뒤 placeholder 회귀 41개가 모두 통과했다. 마지막 경계 수정 전 실행 중이던 자신의 보존 검사는 중단 로그를 보존하고 확정 소스·증거에서 재시작했다. 이전 ledger records·frozen evidence·pytest node 이름은 변경하지 않았고 앞선 전체 시험과 반복 실행을 합산하지 않는다.
+
+재개 시 제품 소스/보존 증거 HEAD는 `bb52051489b90526a70b17fb22ebfcade7eea88e`였고 제품 저장소의 미커밋 파일은 이 보고서뿐이었다. `comfy-preservation.txt`에서 백엔드 보존 PASS를 확인했으나 이어진 프론트엔드 최종 결과와 실행 프로세스가 남아 있지 않아 성공으로 간주하지 않았다. 원본 `check_refactor_frontend_preservation.py`만 재개해324개 파일 PASS·exit0를 확인했다. 이 재개 중 제품 소스·시험·보존 정책은 변경하지 않았고 이미 통과한 기능 검사를 반복하지 않았다.
+
+I31의 완료 기록은 이 보고서만 선별한 `docs(media): finalize ComfyUI workflow reuse verification` 로컬 문서 커밋으로 마무리한다. 자기 자신의 SHA를 본문에 넣기 위한 amend는 하지 않으며, 최종 문서 커밋 SHA와 clean 브랜치 상태는 저장소 밖 workspace 계획 §14.3에 기록한다. 계획 문서는 제품 Git 저장소 밖에 있어 파일로 저장하고 제품 커밋에 혼입하지 않는다. 원격 push·PR·CI workflow·main merge는 수행하지 않았다.
