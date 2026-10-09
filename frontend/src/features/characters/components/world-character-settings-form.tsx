@@ -5,25 +5,20 @@ import { Sparkles, Settings2 } from "lucide-react";
 import { WorldCredentialCard } from "./world-credential-card";
 import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/form-controls";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
-import { ActiveHoursControl, ACTIVE_HOURS_LIMIT_MESSAGE, isValidActiveHours } from "./activity-hours-control";
+import { isValidActiveHours } from "./activity-hours-control";
 import { PersonaField } from "./persona-field";
 import { PERSONA_LIMITS, normalizePersonaText, personaLengthError } from "../utils/persona-limits";
 import type { WorldCharacterSettingsRead, WorldCharacterSettingsValues } from "../types/world-character-management";
 import styles from "./world-character-management.module.css";
+import { ActivityPolicyFields, POLICY_FIELDS } from "./activity-policy-fields";
 
 const PERSONA_FIELDS = [
   { key: "worldview", label: "캐릭터 설명" },
   { key: "personality", label: "성격" }, { key: "speech_style", label: "말투" },
   { key: "character_background", label: "캐릭터 배경" },
   { key: "topic_preferences", label: "관심 주제" }, { key: "safety_rules", label: "안전 규칙" },
-] as const;
-const POLICY_FIELDS = [
-  { key: "activity_interval_minutes", label: "활동 간격 (분)", min: 30, max: 1440 },
-  { key: "max_posts_per_day", label: "하루 게시글 한도", min: 0, max: 1000 },
-  { key: "max_comments_per_day", label: "하루 답글 한도", min: 0, max: 1000 },
 ] as const;
 function SettingsEditor({ initial, pending, onSave, kind }: {
   kind: "persona" | "activity";
@@ -76,17 +71,7 @@ function SettingsEditor({ initial, pending, onSave, kind }: {
       {PERSONA_FIELDS.map(field => <PersonaField key={field.key} name={field.key} label={uiText(field.label)} value={draft[field.key]}
         limit={PERSONA_LIMITS[field.key]} onChange={value => change(field.key, value)} disabled={pending} />)}
     </fieldset> : null}
-    {kind === "activity" ? <fieldset disabled={pending} className={styles.fieldset}>
-
-      <ActiveHoursControl start={draft.active_hours_start} end={draft.active_hours_end} onChange={(start, end) => {
-        setDraft(current => ({ ...current, active_hours_start: start, active_hours_end: end })); setSaved(false);
-      }} />
-      {hoursInvalid ? <p role="alert" className={styles.error}>{uiText(ACTIVE_HOURS_LIMIT_MESSAGE)}</p> : null}
-      <div className={styles.policyFields}>{([['allow_post', '게시글 작성'], ['allow_reply', '답글 작성'], ['allow_like', '좋아요']] as const).map(([key, label]) => <label className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border-default px-4" key={key}>{uiText(label)}<input type="checkbox" className="accent-action-primary" checked={draft[key]} onChange={event => change(key, event.target.checked)} /></label>)}</div>
-      <div className={styles.policyFields}>{POLICY_FIELDS.map(field => <Field key={field.key} label={uiText(field.label)}>{props => <Input {...props} name={field.key}
-        type="number" min={field.min} max={field.max} step={1} required value={Number.isFinite(draft[field.key]) ? draft[field.key] : ""}
-        onChange={event => change(field.key, event.target.value === "" ? Number.NaN : Number(event.target.value))} />}</Field>)}</div>
-    </fieldset> : null}
+    {kind === "activity" ? <ActivityPolicyFields value={draft} disabled={pending} onChange={changes => { setDraft(current => ({ ...current, ...changes })); setSaved(false); }} /> : null}
     {saved ? <p role="status">{uiText("이 World의 설정을 저장했어요.")}</p> : null}
     {conflict ? <div role="alert"><p>{uiText("같은 항목이 다른 곳에서 변경되었어요. 입력을 보존했으니 최신 값과 확인해주세요.")}</p>
       <dl>{keys.filter(key => draft[key] !== baseline[key] && initial.settings[key] !== baseline[key]).map(key => <div key={key}><dt>{uiText(PERSONA_FIELDS.find(f => f.key === key)?.label ?? POLICY_FIELDS.find(f => f.key === key)?.label ?? (key === "active_hours_start" ? "활동 시작" : key === "active_hours_end" ? "활동 마감" : key === "allow_post" ? "게시글 작성" : key === "allow_reply" ? "답글 작성" : "좋아요"))}</dt><dd className="whitespace-pre-wrap break-words">{String(initial.settings[key])}</dd></div>)}</dl>

@@ -4,18 +4,20 @@ import { Badge } from "./status";
 import { Card } from "./surfaces";
 import styles from "./status-cards.module.css";
 
-export function CurrentStateStatusCard({ name, avatarUrl, badges, description, metadata }: {
+export function CurrentStateStatusCard({ name, avatarUrl, badges, description, metadata, stateDetails }: {
   name: string;
   avatarUrl: string | null;
   badges: { label: string; tone?: "accent" | "danger" | "neutral" }[];
   description: ReactNode;
   metadata: { label: string; value: ReactNode }[];
+  stateDetails?: ReactNode;
 }) {
   return <Card as="section" elevated className={styles.currentCard} aria-label={name}>
     <div className={styles.identity}>
       <ProfileAvatar name={name} avatarUrl={avatarUrl} sizeClassName="size-[62px]" textClassName="text-[26px]" />
       <div className={styles.identityBody}>
         <div className={styles.badges}>{badges.map((badge, index) => <Badge key={index} className={styles.identityBadge} data-badge-tone={badge.tone ?? "neutral"}>{badge.label}</Badge>)}</div>
+        {stateDetails}
         <h2 className={styles.name}>{name}</h2>
         {description ? <p className={styles.description}>{description}</p> : null}
       </div>

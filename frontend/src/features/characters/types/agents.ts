@@ -195,6 +195,7 @@ export type AgentPromotionUsageRead = {
 };
 
 export type AgentDetailRead = {
+  registration_scope?: { world_id: string; world_character_id: string; character_id: string } | null;
   character: CharacterRead;
   state: CharacterStateRead | null;
   credential: CredentialRead | null;

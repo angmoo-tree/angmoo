@@ -239,5 +239,7 @@
   "주제 생성 실패 · 이전 결과 유지": "Couldn't prepare interests · Keeping previous results",
   "주제 준비 전": "Interests not prepared yet",
   "주제 준비됨": "Interests ready",
-  "현재 관심 주제를 확인해요.": "See the character's current interests."
+  "현재 관심 주제를 확인해요.": "See the character's current interests.",
+  "주제 접기": "Collapse topics",
+  "주제 펼치기": "Expand topics"
 }

@@ -11,7 +11,7 @@ import { DailyPlanRows } from "./daily-plan-rows";
 
 type Read = { preparation: DailyPreparationRead; plan: DailyActivityPlanRead | null };
 const boundary = (value: Read) => value.plan ? nextWorldDateBoundary(value.plan.timezone_name) : null;
-export function WorldDailyPlanSummary({ worldId, actorId, characterId, active, onSettings }: { worldId: string; actorId: string; characterId: string; active: boolean; onSettings: () => void }) {
+export function WorldDailyPlanSummary({ worldId, actorId, characterId, active }: { worldId: string; actorId: string; characterId: string; active: boolean }) {
   const t = useUiText("characters");
   const load = useCallback(async (signal: AbortSignal): Promise<Read> => {
     const [preparation, plan] = await Promise.all([getDailyPreparation(characterId, worldId, signal), getDailyActivityPlan(characterId, worldId, signal)]);
@@ -31,6 +31,6 @@ export function WorldDailyPlanSummary({ worldId, actorId, characterId, active, o
       {data.preparation.request_state === "failed" && presentation === "ready" ? <p>{t("다시 만들기에 실패했습니다. 기존의 유효한 오늘 일과를 계속 사용합니다.")}</p> : null}
       {presentation !== "inconsistent" ? <DailyPlanRows plan={data.plan} compact highlightCurrent={presentation === "ready"} /> : null}
     </> : null}
-    <div className="flex flex-wrap gap-2">{error || presentation === "inconsistent" ? <Button variant="secondary" onClick={refresh}>{t("다시 시도")}</Button> : null}<Button variant="ghost" onClick={onSettings}>{t("설정에서 보기")}</Button></div>
+    {error || presentation === "inconsistent" ? <Button variant="secondary" onClick={refresh}>{t("다시 시도")}</Button> : null}
   </SettingsCard>;
 }

@@ -23,6 +23,7 @@
 
 .content {
   padding: var(--spacing-dense);
+  padding-bottom: max(var(--spacing-dense), env(safe-area-inset-bottom));
 }
 
 .grid {

@@ -4,6 +4,7 @@ import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { cardMetadataTests } from "./card-metadata-fixture";
 import { uiDManualThread, uiDWorldCharacterManagement } from "./continuity-next-fixture";
+import { staticDocumentFallback } from "./world-ui-improvements-fixture";
 
 cardMetadataTests();
 
@@ -38,6 +39,7 @@ test.beforeEach(async ({ page }, info) => {
   const origin = new URL(String(info.project.use.baseURL)).origin;
   await page.route("**/*", route => new URL(route.request().url()).origin === origin
     ? route.fallback() : route.abort("blockedbyclient"));
+  await staticDocumentFallback(page, origin);
   await page.addInitScript(() => {
     Object.assign(window, {
       __ANGMOO_RUNTIME_CONFIG__: {
@@ -1630,6 +1632,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
       await route.fulfill({
         contentType: "application/json",
         json: {
+          registration_scope: { world_id: "world-static-probe", world_character_id: "static-new-actor", character_id: "char-new-1" },
           character: {
             id: "char-new-1",
             name: "미도리야 이즈쿠",
@@ -1654,9 +1657,9 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
   await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill("관찰력이 뛰어나고 책임감이 강한 히어로 지망생.");
   await page.getByRole("button", { name: "저장하고 다음" }).click();
   await page.getByRole("button", { name: "저장하고 다음" }).click();
-  await page.getByRole("button", { name: "자율활동 OFF로 등록" }).click();
+  await page.getByRole("button", { name: "등록", exact: true }).click();
   await expect(page.getByRole("heading", { name: "미도리야 이즈쿠 등록 완료" })).toBeVisible();
-  await page.getByRole("button", { name: "나중에 하기" }).click();
+  await page.getByRole("button", { name: "건너뛰기", exact: true }).click();
 
   await expect(
     page.getByRole("alert").filter({ hasText: "캐릭터는 등록되었습니다. 돌아갈 화면을 열지 못했습니다. 다시 시도해주세요." }),
@@ -1677,7 +1680,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
     )
     .toEqual({ kind: "phone", route: fixtureRoute });
 
-  await page.getByRole("button", { name: "나중에 하기" }).click();
+  await page.getByRole("button", { name: "건너뛰기", exact: true }).click();
 
   expect(createRequestCount).toBe(1);
   await expect
@@ -1718,7 +1721,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
     )
     .toEqual({ kind: "phone", route: fixtureRoute });
 
-  await page.getByRole("button", { name: "활동 준비", exact: true }).click();
+  await expect(page.getByRole("button", { name: "활동 준비", exact: true })).toHaveCount(0);
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -1728,8 +1731,8 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
         return desktop.__ANGMOO_DESKTOP_WINDOW__;
       }),
     )
-    .toEqual({ kind: "phone", route: "/characters/char-new-1/worlds/world-static-probe/autonomy-setup" });
-  await expect(page).toHaveURL(/\/characters\/char-new-1\/worlds\/world-static-probe\/autonomy-setup$/);
+    .toEqual({ kind: "phone", route: fixtureRoute });
+  await expect(page).toHaveURL(new RegExp(fixtureRoute.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   expect(createRequestCount).toBe(1);
 });
 
@@ -1915,7 +1918,7 @@ test("returned Studio preselects the created Character and clears the query afte
   await page.getByRole("button", { name: "이 World에 연결" }).click();
 
   await expect(
-    page.getByText("현재 World에 연결했습니다. 이제 P2 활동 준비·승인을 진행해 주세요."),
+    page.getByText("현재 World에 연결했습니다. 활동 설정에서 키와 정책을 저장해주세요."),
   ).toBeVisible();
   expect(entryRequestCount).toBe(1);
   expect(entryBody).toMatchObject({

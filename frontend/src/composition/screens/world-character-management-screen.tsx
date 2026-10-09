@@ -26,9 +26,9 @@ export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { 
     router.replace(query ? `${pathname}?${query}` : pathname);
   }, [router, searchParams, worldId, worldCharacterId]);
   return <WorldCharacterManagement key={`${worldId}:${worldCharacterId}`} worldId={worldId} worldCharacterId={worldCharacterId}
-    activeView={activeView} onViewChange={selectView} onBack={back} renderStatus={({ read, active, onSettings }) => <>
-      <WorldDailyPlanSummary worldId={worldId} actorId={worldCharacterId} characterId={read.character_id} active={active} onSettings={onSettings} />
-      <RecommendationTopicsSummary worldId={worldId} actorId={worldCharacterId} active={active} onSettings={onSettings} />
+    activeView={activeView} onViewChange={selectView} onBack={back} renderStatus={({ read, active }) => <>
+      <WorldDailyPlanSummary worldId={worldId} actorId={worldCharacterId} characterId={read.character_id} active={active} />
+      <RecommendationTopicsSummary worldId={worldId} actorId={worldCharacterId} active={active} />
     </>} renderSettings={read => ({
       imageCard: <WorldImageGenerationCard key={`${worldId}:${worldCharacterId}:image`} worldId={worldId} actorId={worldCharacterId} />,
       visionControls: <WorldVisionControls key={`${worldId}:${worldCharacterId}:vision`} worldId={worldId} actorId={worldCharacterId} />,

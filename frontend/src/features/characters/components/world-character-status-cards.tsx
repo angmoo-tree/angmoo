@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/surfaces";
 import { PersonaStatusCard, ActivitySummaryStatusCard, CurrentStateStatusCard, RecentActivityStatusCard } from "@/components/ui/status-cards";
@@ -12,7 +12,9 @@ import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useContainerIncrementalCount } from "@/hooks/use-incremental-list";
 import { useUserEnvironment } from "@/hooks/use-user-environment";
 import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
-import { formatHandle } from "@/utils/profile-presentation";
+import { useActiveScopedRead } from "@/hooks/use-active-scoped-read";
+import { getActivityRuntime } from "../api/personalized-activity";
+import { MOOD_LABELS } from "../utils/current-state-presentation";
 import { getActivityIcon } from "../utils/activity-icons";
 import { presentWorldRecentActivity } from "../utils/world-character-status-presentation";
 import type { WorldCharacterPublicProfile } from "../types/world-character-profile";
@@ -30,6 +32,12 @@ export function WorldCharacterStatusCards({ worldId, actorId, profile, revision,
   const uiText = useUiText("characters"), { status, user } = useAuth();
   const formatDate = useUiDateFormatter();
   const displayTimezone = useUserEnvironment().environment?.timezone ?? "UTC";
+  const loadEmotion = useCallback(async (signal: AbortSignal) => {
+    const value = await getActivityRuntime(worldId, actorId, signal);
+    if (value.world_id !== worldId || value.world_character_id !== actorId) throw new Error("activity_runtime_scope_invalid");
+    return value.current_state;
+  }, [worldId, actorId]);
+  const emotion = useActiveScopedRead({ scopeKey: `${worldId}:${actorId}`, active, read: loadEmotion });
   const [read, setRead] = useState<WorldCharacterStatus | null>(null);
   const [error, setError] = useState(false), [loading, setLoading] = useState(false), [retry, setRetry] = useState(0);
   const [runtime, setRuntime] = useState(0);
@@ -69,8 +77,14 @@ export function WorldCharacterStatusCards({ worldId, actorId, profile, revision,
     <CurrentStateStatusCard name={profile.display_name} avatarUrl={profile.avatar_url}
       badges={[
         { label: uiText(state.label), tone: state.tone === "danger" ? "danger" : visible.autonomous_enabled ? "accent" : "neutral" },
-        ...(profile.handle ? [{ label: formatHandle(profile.handle) }] : []),
-      ]} description={profile.intro} metadata={[
+      ]} stateDetails={<div className="my-3 min-w-0 space-y-2">
+        {emotion.data?.known ? <>
+          <p className="text-sm text-text-secondary">{uiText(MOOD_LABELS[emotion.data.mood ?? ""] ?? emotion.data.mood ?? "미확인")}{emotion.data.mood_intensity !== null ? ` · ${uiText("강도")} ${emotion.data.mood_intensity}` : ""}</p>
+          <p className="whitespace-pre-wrap break-words text-text-default">{emotion.data.state_note}</p>
+          <p className="text-xs text-text-secondary">{uiText("마지막 확인")} · {emotion.data.confirmed_at ? <time dateTime={emotion.data.confirmed_at}>{formatDate(emotion.data.confirmed_at)}</time> : uiText("미확인")}</p>
+        </> : <p role="status">{uiText(emotion.loading ? "상태 확인 중" : "아직 확인된 상태가 없습니다.")}</p>}
+        {emotion.error ? <><p role="alert">{uiText("현재 상태를 불러오지 못했어요.")}</p><Button variant="secondary" onClick={emotion.refresh}>{uiText("다시 시도")}</Button></> : null}
+      </div>} description={profile.intro} metadata={[
         { label: uiText("최근 활동"), value: visible.recent_activity[0] ? <time dateTime={visible.recent_activity[0].occurred_at}>{formatDate(visible.recent_activity[0].occurred_at)}</time> : "-" },
         { label: uiText("다음 활동"), value: visible.next_activity_at ? <time dateTime={visible.next_activity_at}>{formatDate(visible.next_activity_at)}</time> : "-" },
       ]} />

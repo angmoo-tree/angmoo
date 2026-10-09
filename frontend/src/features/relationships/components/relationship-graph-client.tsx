@@ -182,7 +182,7 @@ export function RelationshipGraphClient({
     >
       {embedded ? <header className={styles.header}>
         <span className={styles.icon}><Network size={20} aria-hidden="true" /></span>
-        <div className={styles.identity}><h1>{uiText("이 World의 관계")}</h1><p>{uiText("저장된 경험에서 이어진 관계를 확인해요.")}</p><p>{graph?.nodes.find(node => node.is_center)?.display_name ?? uiText("기준 캐릭터 확인 중")}</p></div>
+        <div className={styles.identity}><h1>{uiText("이 World의 관계")}</h1><p>{uiText("저장된 경험에서 이어진 관계를 확인해요.")}</p></div>
       </header> : <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
         {provider === "ladybug" ? <details><summary>{uiText("관계 데이터 정보")}</summary><p>{uiText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")}</p></details> : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">

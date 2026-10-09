@@ -21,7 +21,7 @@ for (const language of ["ko", "en"] as const) {
     await expect(plan.locator("li")).toHaveCount(4);
     await expect(plan.locator("li").nth(1)).toContainText(language === "ko" ? "진행 중" : "In progress");
     await expect(plan.locator("li").nth(2)).toContainText(language === "ko" ? "예정" : "Planned");
-    const details = plan.getByRole("button", { name: language === "ko" ? "상세 보기" : "View details", exact: true });
+    const details = plan.getByRole("button", { name: language === "ko" ? "계획 펼치기" : "Expand plan", exact: true });
     await details.nth(2).click();
     await expect(plan.locator("li").nth(2)).toContainText("Original afternoon seed");
     await expect(plan.locator("li").nth(2).getByRole("button").first()).toHaveAttribute("aria-expanded", "true");
@@ -31,12 +31,12 @@ for (const language of ["ko", "en"] as const) {
     await expect(firstDetail).toBeFocused(); await expect(firstDetail).toHaveAttribute("aria-expanded", "true");
     await page.keyboard.press("Space"); await expect(firstDetail).toHaveAttribute("aria-expanded", "false");
     await expect(topics.locator("li")).toHaveCount(6);
-    await topics.getByRole("button", { name: language === "ko" ? "+4개 보기" : "Show 4 more", exact: true }).click();
+    await topics.getByRole("button", { name: language === "ko" ? "주제 펼치기" : "Expand topics", exact: true }).click();
     await expect(topics.locator("li")).toHaveCount(10);
-    await topics.getByRole("button", { name: language === "ko" ? "접기" : "Collapse", exact: true }).click();
+    await topics.getByRole("button", { name: language === "ko" ? "주제 접기" : "Collapse topics", exact: true }).click();
     await expect(topics.locator("li")).toHaveCount(6);
-    await plan.getByRole("button", { name: language === "ko" ? "설정에서 보기" : "View in settings", exact: true }).click();
-    await expect(page.getByRole("tab", { name: language === "ko" ? "설정" : "Settings", exact: true })).toHaveAttribute("aria-selected", "true");
+    await expect(plan.getByRole("button", { name: language === "ko" ? "설정에서 보기" : "View in settings", exact: true })).toHaveCount(0);
+    await expect(topics.getByRole("button", { name: language === "ko" ? "설정에서 보기" : "View in settings", exact: true })).toHaveCount(0);
     expect(state.writes).toEqual([]); expect(state.management.providerCalls).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     await page.getByRole("tab", { name: language === "ko" ? "상태" : "Status", exact: true }).click();
@@ -140,7 +140,7 @@ test("status-summary: 0/1/6/7/10 topics, partial failure, version conflict and W
     await page.goto(`${worldCharacterRoute()}?view=status`);
     const topics = page.getByRole("tabpanel").getByRole("region", { name: "캐릭터 관심 주제", exact: true });
     await expect(topics.locator("li")).toHaveCount(Math.min(count, 6));
-    if (count > 6) await expect(topics.getByRole("button", { name: `+${count - 6}개 보기`, exact: true })).toBeVisible();
+    if (count > 6) await expect(topics.getByRole("button", { name: "주제 펼치기", exact: true })).toBeVisible();
   }
   const plan = page.getByRole("tabpanel").getByRole("region", { name: "오늘 하루 계획", exact: true });
   await page.clock.runFor(4000);

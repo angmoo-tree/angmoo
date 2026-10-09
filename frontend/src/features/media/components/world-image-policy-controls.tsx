@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
@@ -84,10 +84,10 @@ import { imageUsesServiceKey } from "../utils/image-key-presentation";
 
 const emptySettings = (): WorldImageSettings => ({ appearance: "", style: "", negative: "", reference_enabled: false, reference_asset_id: null, profiles: {} });
 const modelLabels: Record<string, string> = { "nai-diffusion-4-5-full": "NovelAI V4.5 Full", "krea-v2/turbo": "Krea 2 Turbo", "z-image-turbo": "Z-Image Turbo", "nano-banana-2": "Nano Banana 2", "krea/krea-2-medium-turbo": "Krea 2 Medium Turbo", "google/gemini-3.1-flash-image": "Nano Banana 2", "openai/gpt-image-2.5-flare": "GPT Image 2.5 Flare" };
-export function WorldImageGenerationCard(props: { worldId: string; actorId: string }) {
+export function WorldImageGenerationCard(props: { worldId: string; actorId: string; onBusyChange?: (busy: boolean) => void }) {
   return <ScopedGenerationCard key={`${props.worldId}:${props.actorId}`} {...props} />;
 }
-function ScopedGenerationCard({ worldId, actorId }: { worldId: string; actorId: string }) {
+function ScopedGenerationCard({ worldId, actorId, onBusyChange }: { worldId: string; actorId: string; onBusyChange?: (busy: boolean) => void }) {
   const t = useUiText("media"), policy = usePolicy(worldId, actorId);
   const formatDate = useUiDateFormatter();
   const [catalog, setCatalog] = useState<Catalog | null>(null), [credential, setCredential] = useState<SecretMetadata | null>(null), [preview, setPreview] = useState<SecretProfile | null>(null);
@@ -95,6 +95,9 @@ function ScopedGenerationCard({ worldId, actorId }: { worldId: string; actorId: 
   const [draft, setDraft] = useState<{ settings: WorldImageSettings; cap: number | null; enabled: boolean; baseline: WorldImagePolicy } | null>(null);
   const [uploading, setUploading] = useState(false), [partnerKey, setPartnerKey] = useState(""), [clearPartner, setClearPartner] = useState(false), [checked, setChecked] = useState(false);
   const [comfyValid, setComfyValid] = useState(false);
+  const [credentialBusy, setCredentialBusy] = useState(false);
+  const notifyBusy = useEffectEvent((value: boolean) => onBusyChange?.(value));
+  useEffect(() => { notifyBusy(policy.busy || uploading || credentialBusy); }, [policy.busy, uploading, credentialBusy]);
   const [comfyReferenceSupported, setComfyReferenceSupported] = useState(false);
   useEffect(() => { const controller = new AbortController(); void getCatalog(controller.signal).then(value => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined); return () => controller.abort(); }, []);
   const value = draft ?? (policy.read ? { settings: { ...emptySettings(), ...policy.read.generation_settings }, cap: policy.read.generation_limit, enabled: policy.read.generation_enabled, baseline: policy.read } : null);
@@ -124,7 +127,7 @@ function ScopedGenerationCard({ worldId, actorId }: { worldId: string; actorId: 
   return <SettingsCard elevated title={t("SNS 게시글 이미지 생성")} description={t("게시글에 사용할 이미지, 참조 사진과 일일 상한을 설정해요.")} icon={<ImagePlus size={20} />}>
     {catalog ? <CredentialFields scopeKey={`${worldId}:${actorId}:image`} profiles={[...catalog.models.map(item => ({ provider: item.provider, model: item.id, thinking_level: null, label: `${item.provider} · ${modelLabels[item.id] ?? item.id}` })), { provider: "comfyui", model: "workflow", thinking_level: null, label: "ComfyUI · workflow" }]}
       {...imageCredentialTransport(worldId, actorId, { expected_configuration_revision: policy.read?.revision, provider: chosen?.provider, expected_key_revision: providerKey?.key_revision, ...(chosen?.provider === "comfyui" ? { ...(partnerKey ? { partner_api_key: partnerKey } : {}), ...(clearPartner ? { clear_partner_key: true } : {}) } : {}) })}
-      showSecretFields={imageUsesServiceKey} onSelectedKey={setProviderKey}
+      showSecretFields={imageUsesServiceKey} onSelectedKey={setProviderKey} onBusyChange={setCredentialBusy}
       onMetadata={setCredential} onProfileChange={next => { setPreview(next); setPartnerKey(""); setClearPartner(false); setChecked(false); }}
       onSaved={next => { setPreview({ ...next, label: "" }); setPartnerKey(""); setClearPartner(false); setChecked(false); policy.refresh(); }}
       text={{ model: t("이미지 서비스·모델"), key: t("새 이미지 API key"), stored: t("이 서비스의 API 키가 저장되어 있어요."), missing: t("이 서비스의 API 키를 등록해 주세요."), loading: t("이 서비스의 API 키 상태를 확인하고 있어요."), save: t(chosen?.provider === "comfyui" ? "서비스 설정 저장" : "키와 모델 저장"), remove: t("이미지 키 삭제"), confirm: t("이미지 API key를 삭제할까요?"), failed: t(chosen?.provider === "comfyui" ? "서비스 설정을 저장하지 못했어요." : "이 서비스의 API 키 상태를 확인하지 못했어요."), saved: t(chosen?.provider === "comfyui" ? "서비스 설정을 저장했어요." : "키와 모델을 저장했어요."), keep: t("비워 두면 저장된 키를 유지해요."), unsupported: t("현재 저장된 모델"), reload: t("최신 설정 확인") }}>

@@ -1,83 +1,46 @@
 "use client";
-import { SettingsCard } from "@/components/ui/settings-card";
+import { useCallback, useState } from "react";
 import { Tags } from "lucide-react";
-import { useUiText } from "@/hooks/use-ui-text";
-
-
-import { useEffect, useRef, useState } from "react";
+import { SettingsCard } from "@/components/ui/settings-card";
 import { Button } from "@/components/ui/button";
-import { Field, Select } from "@/components/ui/form-controls";
-import { InlineError } from "@/components/ui/feedback";
-import { FeedStatusPanel } from "@/features/social/components/feed-status";
-import { RecommendationHistory } from "@/features/social/components/recommendation-history";
-import { connectRecommendationKey, readRecommendationTopics, regenerateRecommendationTopics, type RecommendationTopics } from "@/features/social/api/recommendation-topics";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useActiveScopedRead } from "@/hooks/use-active-scoped-read";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { readRecommendationTopics, regenerateRecommendationTopics } from "../api/recommendation-topics";
 import { RecommendationTopicList, TOPIC_STATES } from "./recommendation-topic-list";
-
-export type TopicCharacterChoice = { id: string; name: string };
-
-// LOCAL: existing semantic form/button primitives; shared by Next and static screens.
-export function RecommendationTopicsPanel({ worldId, characterId, characters = [], elevated = false }: {
-  worldId: string; characterId?: string; characters?: TopicCharacterChoice[]; elevated?: boolean;
+export function RecommendationTopicsPanel({ worldId, characterId, elevated = false }: {
+    worldId: string;
+    characterId: string;
+    elevated?: boolean;
 }) {
-  const uiText = useUiText("social");
-  const [data, setData] = useState<RecommendationTopics | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [readError, setReadError] = useState<{ scope: string; message: string } | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [keyId, setKeyId] = useState("");
-  const [reload, setReload] = useState(0);
-  const request = useRef<string | null>(null);
-  const activeScope = useRef(`${worldId}:${characterId ?? "world"}`);
-  useEffect(() => {
-    activeScope.current = `${worldId}:${characterId ?? "world"}`;
-    return () => { activeScope.current = "unmounted"; };
-  }, [worldId, characterId]);
-  useEffect(() => {
-    const controller = new AbortController();
-    readRecommendationTopics(worldId, characterId, controller.signal).then((result) => {
-      if (controller.signal.aborted) return;
-      setData(result); setKeyId(result.key_world_character_id ?? ""); setError(null); setReadError(null);
-    }).catch(() => { if (!controller.signal.aborted) setReadError({ scope: `${worldId}:${characterId ?? "world"}`, message: uiText("추천 주제와 전달 이력을 불러오지 못했습니다. 접근 권한을 확인한 뒤 상태 새로고침을 눌러 주세요.") }); });
-    return () => controller.abort();
-  }, [worldId, characterId, reload, uiText]);
-
-  async function mutate(action: "generate" | "key") {
-    if (request.current) return;
-    const scope = activeScope.current;
-    request.current = crypto.randomUUID();
-    setBusy(true); setError(null);
-    try {
-      const result = action === "key"
-        ? await connectRecommendationKey(worldId, keyId || null)
-        : await regenerateRecommendationTopics(worldId, request.current, characterId);
-      if (activeScope.current === scope) setData(result);
-    } catch {
-      if (activeScope.current === scope) setError(uiText("처리하지 못했습니다. 활동용 Google API 키와 캐릭터 설정을 확인한 뒤 다시 시도해 주세요."));
-    } finally {
-      request.current = null;
-      if (activeScope.current === scope) setBusy(false);
+    const t = useUiText("social"), [busy, setBusy] = useState(false), [failed, setFailed] = useState(false);
+    const load = useCallback(async (signal: AbortSignal) => { const value = await readRecommendationTopics(worldId, characterId, signal); if (value.world_id !== worldId || value.world_character_id !== characterId)
+        throw new Error("topics_scope_invalid"); return value; }, [worldId, characterId]);
+    const { data, error, refresh } = useActiveScopedRead({ scopeKey: `${worldId}:${characterId}`, active: true, read: load });
+    async function generate() {
+        if (busy)
+            return;
+        const auth = captureAuthRequestScope();
+        setBusy(true);
+        setFailed(false);
+        try {
+            await regenerateRecommendationTopics(worldId, crypto.randomUUID(), characterId);
+            if (isCurrentAuthRequestScope(auth))
+                refresh();
+        }
+        catch {
+            if (isCurrentAuthRequestScope(auth))
+                setFailed(true);
+        }
+        finally {
+            if (isCurrentAuthRequestScope(auth))
+                setBusy(false);
+        }
     }
-  }
-  const current = data?.world_id === worldId && data?.world_character_id === (characterId ?? null) ? data : null;
-  const currentReadError = readError?.scope === `${worldId}:${characterId ?? "world"}` ? readError.message : undefined;
-  return <SettingsCard elevated={elevated} title={uiText(characterId ? "캐릭터 관심 주제" : "World 추천 주제")} description={uiText("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20} />}>
-    <p role="status" className="text-sm text-text-default">{current ? uiText(TOPIC_STATES[current.state]) : uiText("주제 확인 중")}</p>
-    {current && <RecommendationTopicList topics={current.topics} />}
-    {current?.approval_required && <p className="text-sm text-text-secondary">{uiText("먼저 이 World의 캐릭터 프로필을 승인해 주세요.")}</p>}
-    {!characterId && <div className="space-y-2">
-      <Field label={uiText("주제 생성에 사용할 캐릭터의 일과 생성 키")}>{props => <Select {...props} value={keyId} onChange={event => setKeyId(event.target.value)} disabled={busy}>
-        <option value="">{uiText("연결하지 않음")}</option>{characters.map(character => <option key={character.id} value={character.id}>{character.name}</option>)}
-      </Select>}</Field>
-      <Button variant="secondary" disabled={busy || !current} onClick={() => void mutate("key")}>{uiText("키 연결 저장")}</Button>
-    </div>}
-    {current && <p className="text-xs text-text-secondary">{current.model} · thinking {current.thinking_level}{characterId ? uiText("· 이 캐릭터의 일과 생성 키 사용") : ""}</p>}
-    {error && <InlineError>{error}</InlineError>}
-    {currentReadError && <InlineError>{currentReadError}</InlineError>}
-    <div className="flex flex-wrap gap-2">
-      <Button loading={busy} disabled={!current || current.approval_required || (!characterId && !current.key_world_character_id)} onClick={() => void mutate("generate")}>{characterId ? uiText("캐릭터 주제 다시 만들기") : uiText("World 주제 다시 만들기")}</Button>
-      <Button variant="ghost" disabled={busy} onClick={() => { setReadError(null); setReload(value => value + 1); }}>{uiText("상태 새로고침")}</Button>
-    </div>
-    {characterId && current && !currentReadError && <FeedStatusPanel status={current.feed_status} />}
-    {characterId && <RecommendationHistory deliveries={current?.recent_deliveries} loading={!current} error={currentReadError} />}
+    return <SettingsCard elevated={elevated} title={t("캐릭터 관심 주제")} description={t("저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.")} icon={<Tags size={20}/>}>
+    <p role="status">{t(data ? TOPIC_STATES[data.state] ?? "확인 필요" : "주제 확인 중")}</p>
+    {data ? <><RecommendationTopicList topics={data.topics}/><p>{data.model} · thinking {data.thinking_level} {t("· 이 캐릭터의 일과 생성 키 사용")}</p>{data.approval_required ? <p>{t("먼저 이 World의 캐릭터 프로필을 승인해 주세요.")}</p> : null}</> : null}
+    {failed || error ? <p role="alert">{t("처리하지 못했습니다. 활동용 Google API 키와 캐릭터 설정을 확인한 뒤 다시 시도해 주세요.")}</p> : null}
+    <div className="flex flex-wrap gap-2"><Button loading={busy} disabled={!data || data.approval_required} onClick={() => void generate()}>{t("캐릭터 주제 다시 만들기")}</Button><Button variant="ghost" disabled={busy} onClick={refresh}>{t("상태 새로고침")}</Button></div>
   </SettingsCard>;
 }

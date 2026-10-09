@@ -22,6 +22,7 @@ type Props = {
   onSaved?: (value: SecretMetadata) => void;
   onMetadata?: (value: SecretMetadata) => void;
   onDirtyChange?: (value: boolean) => void;
+  onBusyChange?: (value: boolean) => void;
   scopeKey: string; profiles: readonly SecretProfile[]; read: (signal: AbortSignal) => Promise<SecretMetadata>;
   save: (data: SecretWrite, signal: AbortSignal) => Promise<SecretMetadata>;
   remove: (revision: number, signal: AbortSignal) => Promise<SecretMetadata>;
@@ -41,7 +42,7 @@ export function CredentialFields(props: Props) {
   return <ScopedCredentialFields key={`${props.scopeKey}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} {...props} />;
 }
 
-function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, onMetadata, onProfileChange, onSaved, onDirtyChange, children, initialMetadata, showSecretFields, readSelectedKey, onSelectedKey }: Props) {
+function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, onMetadata, onProfileChange, onSaved, onDirtyChange, onBusyChange, children, initialMetadata, showSecretFields, readSelectedKey, onSelectedKey }: Props) {
   const [metadata, setMetadata] = useState<SecretMetadata | null>(initialMetadata ?? null);
   const [selected, setSelected] = useState(initialMetadata ? profileKey(initialMetadata) : "");
   const [key, setKey] = useState("");
@@ -83,6 +84,8 @@ function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, 
   }, [initialMetadata, dirty, metadata]);
   const notifyDirty = useEffectEvent((value: boolean) => onDirtyChange?.(value));
   useEffect(() => { notifyDirty(dirty); }, [dirty]);
+  const notifyBusy = useEffectEvent((value: boolean) => onBusyChange?.(value));
+  useEffect(() => { notifyBusy(busy); }, [busy]);
   useProductLeaveGuard(Boolean(key) || (metadata !== null && selected !== profileKey(metadata)) || busy);
   useEffect(() => {
     if (initial.current) { notifyRead(initial.current); return () => request.current?.abort(); }

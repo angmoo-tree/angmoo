@@ -73,7 +73,10 @@ export function useRuntimeBack(fallbackHref: string) {
       staticNavigate(fallbackHref, true);
       return;
     }
-    router.back();
+    // Direct entry has no in-app history. Keep the existing runtime navigation
+    // owner and use its explicit destination instead of a timeout redirect.
+    if (window.history.length <= 1) router.replace(fallbackHref);
+    else router.back();
   }, [fallbackHref, router]);
 }
 

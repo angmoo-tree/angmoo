@@ -6,7 +6,7 @@ import { useUiText } from "@/hooks/use-ui-text";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
+import { AgentCreationScreen } from "@/composition/screens/agent-creation-screen";
 import { AgentDetailClient } from "@/composition/screens/agent-detail-screen";
 import { AgentsDashboardClient } from "@/features/characters/components/agents-dashboard-client";
 import { AppShell } from "@/composition/shells/app-shell";
@@ -169,7 +169,7 @@ function renderStaticRoute(location: BrowserLocation) {
   if (pathname === "/agents/new") {
     return (
       <AppShell>
-        <AgentCreateClient />
+        <AgentCreationScreen />
       </AppShell>
     );
   }

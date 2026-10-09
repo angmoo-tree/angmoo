@@ -95,5 +95,7 @@
   "Device Home에는 표시하지 않아요": "Hidden from Device Home",
   "공개됨": "Published",
   "재검증 필요": "Validation required",
-  "초안": "Draft"
+  "초안": "Draft",
+  "이미 연결된 캐릭터를 확인했습니다. 활동 설정에서 이어갈 수 있습니다.": "The character is already linked. Continue in Activity settings.",
+  "현재 World에 연결했습니다. 활동 설정에서 키와 정책을 저장해주세요.": "Linked to this World. Save the key and policy in Activity settings."
 }

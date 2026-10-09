@@ -224,8 +224,8 @@ export function StudioWorldCharacterList({
       });
       setActionMessage(
         entry.reused
-          ? uiText("이미 연결된 캐릭터를 확인했습니다. 활동 준비 화면에서 이어갈 수 있습니다.")
-          : uiText("현재 World에 연결했습니다. 이제 P2 활동 준비·승인을 진행해 주세요."),
+          ? uiText("이미 연결된 캐릭터를 확인했습니다. 활동 설정에서 이어갈 수 있습니다.")
+          : uiText("현재 World에 연결했습니다. 활동 설정에서 키와 정책을 저장해주세요."),
       );
       setCandidateOpen(false);
       refreshList();
@@ -449,7 +449,7 @@ export function StudioWorldCharacterList({
                         href={`/characters/${encodeURIComponent(item.character_id)}/worlds/${encodeURIComponent(worldId)}/autonomy-setup`}
                         className="inline-flex min-h-11 items-center rounded-full bg-action-dark px-4 py-2 text-xs font-extrabold text-on-action-dark"
                       >
-                        {uiText("활동 준비·상태 보기")}</Link>
+                        {uiText("활동 설정")}</Link>
                       <Button
                         compact
                         variant="danger"

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { CharacterCardSourceRead } from "../frontend/src/features/characters/types/agents";
+import { staticDocumentFallback } from "./world-ui-improvements-fixture";
 
 const staticShell = process.env.ANGMOO_CREATOR_STATIC === "1";
 const owner = { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
@@ -22,6 +23,8 @@ test("explicit draft cancellation returns to creation and survives reload", asyn
 });
 
 async function fixture(page: Page, language: "ko" | "en" = "ko") {
+  const isStatic = staticShell || test.info().project.name === "static-export";
+  if (isStatic) await staticDocumentFallback(page, String(test.info().project.use.baseURL));
   const writes: { path: string; body: any }[] = [];
   let cardRawReads = 0, cardMetadataReads = 0;
   const cardSource: CharacterCardSourceRead = {
@@ -41,16 +44,34 @@ async function fixture(page: Page, language: "ko" | "en" = "ko") {
     profile: { display_name: "사용자", handle: "owner-local", intro: "", avatar_url: null, banner_url: null, role_key: null, preferred_address: "이전 호칭", interests: [], background: "보존 배경" } };
   const context = () => ({ world, membership_role: "owner", readiness: { world_id: world.id, definition_version: 1, row_version: world.row_version,
     contract_version: "world-v1", contract_hash: world.contract_hash, required_fields: {}, optional_setting_count: 0, quality_tier: "CORE", issues: [], ready_for_publish: true, evaluated_at: world.updated_at } });
-  if (staticShell) await page.addInitScript(() => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {
+  if (isStatic) await page.addInitScript(() => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {
     profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "creator-fixture-token-0000000000000",
   } }));
-  await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
+  await page.route(isStatic ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
     const requestUrl = new URL(route.request().url());
     const path = requestUrl.pathname.replace(/^\/api\/(backend|v1)/, "");
     const method = route.request().method();
     const body = route.request().postDataJSON();
     const reply = (json: unknown, status = 200) => route.fulfill({ status, contentType: "application/json", json });
     if (path === "/auth/me") return reply({ ...owner, ui_language: language });
+    if (method === "GET" && path.endsWith("/activity-settings")) return reply({
+      contract_version: "world-activity-settings-v1", world_id: draft.target_world_id, world_character_id: "registered-actor", character_id: "registered",
+      revision: 1, timezone: "Asia/Seoul", autonomous_enabled: false, can_activate: false, can_deactivate: false, reason: "credential_required",
+      policy: { active_hours_start: "09:00", active_hours_end: "02:00", activity_interval_minutes: 30,
+        max_posts_per_day: 30, max_comments_per_day: 30, allow_post: true, allow_reply: true, allow_like: true },
+    });
+    if (method === "GET" && /\/credentials\/(sns|image)$/.test(path)) {
+      const image = path.endsWith("image");
+      return reply({ purpose: image ? "image" : "sns", provider: image ? "novelai" : "google",
+        model: image ? "nai-diffusion-4-5-full" : "gemini-3.1-flash-lite", thinking_level: image ? null : "high",
+        has_key: false, fingerprint: null, revision: 0, key_revision: 0, configuration_revision: 1 });
+    }
+    if (method === "GET" && path.endsWith("/image-policy")) return reply({ world_id: draft.target_world_id, world_character_id: "registered-actor",
+      revision: 1, generation_limit: 20, vision_limit: 10, generation_enabled: false, vision_enabled: false,
+      generation_settings: {}, generation_usage: 0, vision_usage: 0, timezone: "Asia/Seoul", reset_at: "2026-10-11T00:00:00Z" });
+    if (method === "GET" && path === "/media/catalog") return reply({ models: [{ provider: "novelai", id: "nai-diffusion-4-5-full",
+      reference_supported: true, parameters: {}, pricing: null, prompt_validation: { generation_available: true } }],
+      quota_timezone: "Asia/Seoul", max_images: 1, upload_limit_bytes: 10485760 });
     if (path === "/agents" && method === "GET") return reply([{ character: { id: "source", name: "복사 원본", execution_mode: "llm" } }]);
     if (method !== "GET") writes.push({ path, body });
     if (path === "/worlds/world-test/creator-context") return reply(context());
@@ -105,7 +126,8 @@ async function fixture(page: Page, language: "ko" | "en" = "ko") {
       expect(body.revision).toBe(draft.revision);
       if (draft.source_kind !== "external") expect(draft.worldview.trim()).not.toBe("");
       draft.status = "completed";
-      return reply({ character: { id: "registered", name: draft.name, execution_mode: "llm" } });
+      return reply({ character: { id: "registered", name: draft.name, execution_mode: "llm" },
+        registration_scope: { world_id: draft.target_world_id, world_character_id: "registered-actor", character_id: "registered" } });
     }
     return reply({ detail: `unexpected:${method}:${path}` }, 404);
   });
@@ -126,7 +148,7 @@ for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436
     await expect(page.getByText("선택 상세 설정", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "저장하고 다음" }).click();
     await page.getByRole("button", { name: "저장하고 다음" }).click();
-    await page.getByRole("button", { name: "자율활동 OFF로 등록" }).click();
+    await page.getByRole("button", { name: "등록", exact: true }).click();
     await expect(page.getByRole("heading", { name: "테스트 앵무 등록 완료" })).toBeVisible();
     expect(state.getDraft().target_world_id).toBe("sns");
     expect(state.getDraft().personality).toBe("");
@@ -136,13 +158,13 @@ for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436
   });
 }
 
-test("English five-step creation keeps authored Unicode and no AI side effects", async ({ page }) => {
+test("English six-step creation keeps authored Unicode and no AI side effects", async ({ page }) => {
   const state = await fixture(page, "en");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/agents/new");
   await expect(page.getByRole("heading", { name: "Create character", exact: true })).toBeVisible();
   const steps = page.getByRole("list", { name: "Creation steps" });
-  await expect(steps.getByRole("listitem")).toHaveCount(5);
+  await expect(steps.getByRole("listitem")).toHaveCount(6);
   await expect(page.getByRole("group", { name: "Creation method", exact: true })).toBeVisible();
   await expect(page.getByText("Create a character directly or import saved settings.", { exact: true })).toBeVisible();
   const next = () => page.getByRole("button", { name: "Save and continue", exact: true }).click();
@@ -161,7 +183,7 @@ test("English five-step creation keeps authored Unicode and no AI side effects",
   await expect(steps.locator('[aria-current="step"]')).toContainText("5.");
   await expect(page.getByText("Review the information and images, then create the character.", { exact: true })).toBeVisible();
   await expect(page.getByText(description, { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Register with autonomous activity OFF", exact: true }).click();
+  await page.getByRole("button", { name: "Register", exact: true }).click();
   await expect(page.getByRole("heading", { name: `${name} Registration complete`, exact: true })).toBeVisible();
   expect(state.getDraft().name).toBe(name);
   expect(state.getDraft().worldview).toBe(description);

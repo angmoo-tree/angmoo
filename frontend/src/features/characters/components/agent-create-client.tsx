@@ -6,7 +6,8 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText, type UiText } from "@/hooks/use-ui-text";
 
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { confirmProductLeave } from "@/lib/desktop/navigation-guard";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,7 +23,7 @@ import type { AgentCreationDraftRead, AgentDetailRead, CharacterCardMetadataSele
 
 // ADAPTED: existing creation steps, PersonaField and ProfileMediaUploader.
 // Registration persists the edited settings; preparation is a separate user action.
-const STEPS = ["만드는 방법", "기본 정보", "페르소나", "프로필", "확인"];
+const STEPS = ["만드는 방법", "기본 정보", "페르소나", "프로필", "확인", "활동 설정"];
 const TEXT_FIELDS = ["name", "handle", "one_liner", "worldview", "personality", "speech_style", "character_background", "topic_preferences", "safety_rules"] as const;
 const PERSONA_FIELDS = [
   ["worldview", "캐릭터 설명"], ["personality", "성격"], ["speech_style", "말투·대화 예시"], ["character_background", "캐릭터 배경·세계관"],
@@ -40,12 +41,17 @@ function reviewLabel(code: string, uiText: UiText) {
     : uiText("{{label}}: 자동 처리하지 않는 동적 문구가 있습니다. 확인 후 수정해주세요.", {label});
 }
 
-export function AgentCreateClient() {
+type ActivitySlot = (scope: { worldId: string; actorId: string; onBusyChange: (busy: boolean) => void }) => ReactNode;
+function validateRegistration(result: AgentDetailRead, worldId: string | null) {
+  const scope = result.registration_scope;
+  if (!scope || scope.character_id !== result.character.id || scope.world_id !== worldId || !scope.world_character_id) throw new Error("등록은 완료됐지만 활동 설정의 연결을 확인하지 못했어요. 등록 결과를 다시 확인해주세요.");
+}
+export function AgentCreateClient({ renderActivitySettings }: { renderActivitySettings: ActivitySlot }) {
   const query = useRuntimeSearchParams();
-  return <CreationGuide key={query.get("worldId") ?? "default"} />;
+  return <CreationGuide key={query.get("worldId") ?? "default"} renderActivitySettings={renderActivitySettings} />;
 }
 
-function CreationGuide() {
+function CreationGuide({ renderActivitySettings }: { renderActivitySettings: ActivitySlot }) {
   const uiText = useUiText("characters");
   const router = useRuntimeRouter();
   const query = useRuntimeSearchParams();
@@ -55,6 +61,7 @@ function CreationGuide() {
   const [draft, setDraft] = useState<AgentCreationDraftRead | null>(null);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [settingsBusy, setSettingsBusy] = useState(false);
   const [unsavedInput, setUnsavedInput] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"direct" | "card" | "copy">(target && query.get("mode") === "copy" ? "copy" : "direct");
@@ -89,6 +96,12 @@ function CreationGuide() {
             setDraft(value);
             setMode(value.source_kind === "card" ? "card" : "direct");
             setStep(value.status === "completed" ? 4 : 1);
+            if (value.status === "completed") {
+              const result = await completeAgentDraft(value.id, { revision: value.revision });
+              if (cancelled || epoch !== requestEpoch.current) return;
+              validateRegistration(result, value.target_world_id);
+              setCreated(result); setStep(5);
+            }
             if (value.source_kind === "card") {
               try {
                 const summary = await getAgentCardMetadata(value.id);
@@ -207,7 +220,8 @@ function CreationGuide() {
     try {
       const result = await completeAgentDraft(saved.id, { revision: saved.revision });
       if (epoch !== requestEpoch.current) return;
-      setCreated(result); setUnsavedInput(false); permitCommittedNavigation(); sessionStorage.removeItem(storageKey);
+      validateRegistration(result, saved.target_world_id);
+      setCreated(result); setStep(5); setUnsavedInput(false); permitCommittedNavigation();
     } catch (reason) {
       // A lost response may follow a successful commit. Recover the same receipt.
       try { const value = await getAgentDraft(saved.id); if (epoch === requestEpoch.current) setDraft(value); } catch { /* Keep the saved draft for explicit retry. */ }
@@ -217,11 +231,13 @@ function CreationGuide() {
   const returnRoute = target && query.get("returnTo") === studioWorldRoute(target) ? studioWorldRoute(target)
     : draft?.target_world_id ? worldCharacterDirectoryRoute(draft.target_world_id) : "/";
   async function returnAfterRegistration() {
+    if (settingsBusy || (!isTauriDesktopRuntime() && !confirmProductLeave())) return;
     const href = target && created && returnRoute === studioWorldRoute(target)
       ? `${returnRoute}?createdCharacterId=${encodeURIComponent(created.character.id)}` : returnRoute;
     try {
       if (isTauriDesktopRuntime()) await navigateDesktopProductRoute(href);
       else router.push(href);
+      sessionStorage.removeItem(storageKey);
     } catch {
       throw new Error(uiText("캐릭터는 등록되었습니다. 돌아갈 화면을 열지 못했습니다. 다시 시도해주세요."));
     }
@@ -229,12 +245,14 @@ function CreationGuide() {
 
   if (status === "unauthenticated") return <section className="space-y-4 p-6"><p>{uiText("캐릭터를 등록하려면 로컬 사용자 연결이 필요합니다.")}</p><Button onClick={() => router.push("/login")}>{uiText("사용자 연결")}</Button></section>;
   if (status !== "authenticated" || restoring) return <p role="status" className="p-6">{uiText("생성 화면을 준비하고 있습니다.")}</p>;
-  if (created) return <section className="space-y-5 p-6" aria-labelledby="created-heading">
+  if (created) return <section className={styles.page} aria-labelledby="created-heading">
+    <ol className={styles.steps} aria-label={uiText("생성 단계")}>{STEPS.map((label, index) => <li className={`${styles.step} ${index === 5 ? styles.current : styles.complete}`} key={label} aria-current={index === 5 ? "step" : undefined}>{index + 1}. {uiText(label)}</li>)}</ol>
     <h1 id="created-heading" className="text-2xl font-bold">{created.character.name} {uiText("등록 완료")}</h1>
-    <p>{uiText("World에 저장했습니다. 자율활동은 OFF입니다. 모델과 API 키는 활동 준비에서 설정할 수 있습니다.")}</p>
+    <p>{uiText("등록을 마쳤어요. 활동 설정은 선택 사항이며 각 카드에서 별도로 저장해요.")}</p>
     {error && <p role="alert">{error}</p>}
-    <Button onClick={() => router.push(draft?.source_kind === "external" ? `/agents/${encodeURIComponent(created.character.id)}` : `/characters/${encodeURIComponent(created.character.id)}/worlds/${encodeURIComponent(draft!.target_world_id!)}/autonomy-setup`)}>{draft?.source_kind === "external" ? uiText("외부 실행기 설정") : uiText("활동 준비")}</Button>
-    <Button variant="secondary" loading={busy} onClick={() => void perform(returnAfterRegistration)}>{uiText("나중에 하기")}</Button>
+    {created.registration_scope && renderActivitySettings({ worldId: created.registration_scope.world_id, actorId: created.registration_scope.world_character_id, onBusyChange: setSettingsBusy })}
+    <Button loading={busy} disabled={settingsBusy} onClick={() => void perform(returnAfterRegistration)}>{uiText("완료")}</Button>
+    <Button variant="secondary" loading={busy} disabled={settingsBusy} onClick={() => void perform(returnAfterRegistration)}>{uiText("건너뛰기")}</Button>
   </section>;
 
   const stepIcons = [<Route key="method" size={20} />, <Sparkles key="basic" size={20} />, <WandSparkles key="persona" size={20} />, <ImageIcon key="profile" size={20} />, <Check key="review" size={20} />];
@@ -344,7 +362,7 @@ function CreationGuide() {
       </details>}
       <div className={styles.footer}>
         {step > 0 && draft?.status !== "completed" && <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(step - 1)}>{uiText("이전")}</Button>}
-        {(step !== 0 || mode !== "card") && <Button type="submit" disabled={draft?.source_kind === "external" && draft.status !== "completed"} loading={busy}>{step === 4 ? (draft?.status === "completed" ? uiText("등록 결과 확인") : uiText("자율활동 OFF로 등록")) : uiText("저장하고 다음")}</Button>}
+        {(step !== 0 || mode !== "card") && <Button type="submit" disabled={draft?.source_kind === "external" && draft.status !== "completed"} loading={busy}>{step === 4 ? (draft?.status === "completed" ? uiText("등록 결과 확인") : uiText("등록")) : uiText("저장하고 다음")}</Button>}
         {draft && draft.status === "editing" && step > 0 && <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(async () => { await save(); })}>{uiText("초안 저장")}</Button>}
         <Button type="button" variant="ghost" disabled={busy} onClick={() => router.push(returnRoute)}>{uiText("나중에 하기")}</Button>
       </div>

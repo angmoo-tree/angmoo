@@ -8,7 +8,7 @@ import { useActiveScopedRead } from "@/hooks/use-active-scoped-read";
 import { readRecommendationTopics } from "../api/recommendation-topics";
 import { RecommendationTopicList, TOPIC_STATES } from "./recommendation-topic-list";
 
-export function RecommendationTopicsSummary({ worldId, actorId, active, onSettings }: { worldId: string; actorId: string; active: boolean; onSettings: () => void }) {
+export function RecommendationTopicsSummary({ worldId, actorId, active }: { worldId: string; actorId: string; active: boolean }) {
   const t = useUiText("social");
   const load = useCallback(async (signal: AbortSignal) => {
     const value = await readRecommendationTopics(worldId, actorId, signal);
@@ -20,6 +20,6 @@ export function RecommendationTopicsSummary({ worldId, actorId, active, onSettin
     {error ? <p role="alert">{t(data ? "최신 정보를 확인하지 못했어요." : "정보를 불러오지 못했어요.")}</p> : null}
     {loading && !data ? <p role="status">{t("불러오는 중…")}</p> : null}
     {data ? <><p role="status">{t(TOPIC_STATES[data.state] ?? "확인 필요")}</p><RecommendationTopicList topics={data.topics} maxVisible={6} /></> : null}
-    <div className="flex flex-wrap gap-2">{error ? <Button variant="secondary" onClick={refresh}>{t("다시 시도")}</Button> : null}<Button variant="ghost" onClick={onSettings}>{t("설정에서 보기")}</Button></div>
+    {error ? <Button variant="secondary" onClick={refresh}>{t("다시 시도")}</Button> : null}
   </SettingsCard>;
 }

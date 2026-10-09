@@ -28,7 +28,7 @@ for (const language of ["ko", "en"] as const) {
       const identity = panel.getByRole("region", { name: "Synthetic Responder", exact: true });
       await expect(identity.getByRole("heading", { name: "Synthetic Responder", exact: true })).toBeVisible();
       await expect(identity.getByRole("img")).toHaveCount(1);
-      await expect(identity).toContainText("@synthetic_responder");
+      await expect(identity).not.toContainText("@synthetic_responder");
       await expect(identity).toContainText(actor.profile.intro);
       await expect(identity.locator("time").first()).toHaveAttribute("dateTime", "2026-10-07T08:29:00Z");
       await expect(identity.locator("time").last()).toHaveAttribute("dateTime", actor.next_activity_at);
