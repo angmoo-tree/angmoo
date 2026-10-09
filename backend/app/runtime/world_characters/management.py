@@ -12,6 +12,7 @@ from app.domains.world_characters.configuration_models import WorldCharacterConf
 from app.domains.world_characters.service.management import WorldCharacterManagementService, WorldManagementError
 from app.domains.world_characters.service.readiness import evaluate, evaluate_many
 from app.runtime.world_characters.queries import SqlAlchemyWorldCharacterQueries
+from app.domains.world_characters.service.activation_eligibility import activation_reason
 
 
 class SqlAlchemyWorldManagementReferences:
@@ -26,11 +27,28 @@ class SqlAlchemyWorldManagementReferences:
         characters = list(db.scalars(select(Character).where(Character.id.in_(character_ids))))
         activity = {s.character_id: s for s in db.scalars(select(AgentActivitySetting).where(AgentActivitySetting.character_id.in_(character_ids)))}
         readiness = evaluate_many(db, characters=characters, activity_settings=activity, world_id=world_id)
-        credential_ids = set(db.scalars(select(WorldCharacter.character_id).join(WorldCredential,
+        credentials = list(db.execute(select(WorldCharacter, WorldCredential).join(WorldCredential,
             WorldCredential.world_character_id == WorldCharacter.id).where(
             WorldCharacter.world_id == world_id, WorldCharacter.character_id.in_(character_ids),
             WorldCredential.owner_id == world.owner_user_id, WorldCredential.world_id == world_id,
             WorldCredential.purpose == "sns", WorldCredential.encrypted_secret.is_not(None))))
+        from app.domains.identity.service.world_credentials import validate_profile
+        from app.domains.identity.exceptions import CredentialResolutionError
+        from app.domains.characters.service.import_configuration import ImportSettings
+        from app.domains.routines.policies.active_hours import validate_active_hours
+        from app.domains.operations.service.maintenance import agent_activity_blocks_auto_ticks
+        credential_ids = set()
+        for actor, credential in credentials:
+            try:
+                validate_profile("sns", credential.provider, credential.model, credential.thinking_level)
+                credential_ids.add(actor.character_id)
+            except CredentialResolutionError:
+                pass
+        actors = {row.character_id: row for row in db.scalars(select(WorldCharacter).where(
+            WorldCharacter.world_id == world_id, WorldCharacter.character_id.in_(character_ids)))}
+        policies = {row.world_character_id: row for row in db.scalars(select(WorldCharacterConfiguration).where(
+            WorldCharacterConfiguration.world_character_id.in_([row.id for row in actors.values()])))}
+        maintenance = agent_activity_blocks_auto_ticks(db)
         all_slots = list(db.scalars(select(AgentSlot)))
         slots = {s.assigned_character_id: s for s in all_slots if s.assigned_character_id in character_ids}
         # A legacy global log without a scoped post cannot establish a World.
@@ -50,7 +68,20 @@ class SqlAlchemyWorldManagementReferences:
         result = {}
         for character in characters:
             setting = activity.get(character.id)
-            ready = character.execution_mode == "llm" and character.id in credential_ids and readiness[character.id].ready
+            actor = actors.get(character.id)
+            policy = policies.get(actor.id) if actor else None
+            policy_valid = False
+            if policy is not None:
+                try:
+                    saved = ImportSettings.model_validate(policy.settings)
+                    validate_active_hours(saved.active_hours_start, saved.active_hours_end)
+                    policy_valid = True
+                except ValueError:
+                    pass
+            reason = activation_reason(world=world, actor=actor, character=character,
+                policy_valid=policy_valid, credential_valid=character.id in credential_ids,
+                readiness=readiness[character.id], maintenance=maintenance)
+            ready = reason is None
             slot = slots.get(character.id)
             running = bool(slot and slot.status == "running" and slot.lease_expires_at and aware_utc(slot.lease_expires_at) > datetime.now(UTC))
             log_post = logs.get(character.id)
@@ -63,7 +94,7 @@ class SqlAlchemyWorldManagementReferences:
                     "post_id": post.id if accessible else None, "title": post.title if accessible else None}
             result[character.id] = {"ready": ready, "running": running, "timezone": environment.timezone,
                 "capacity_wait": slot is None and capacity_full, "last_error": slot.last_error if slot else None,
-                "reason": None if ready else "credential_required" if character.id not in credential_ids else readiness[character.id].reason_code or "world_activity_not_ready",
+                "reason": reason,
                 "next_activity_at": aware_utc(slot.next_tick_at).isoformat() if slot and slot.next_tick_at else None, "recent_activity": recent}
         return result
 
@@ -138,9 +169,9 @@ class SqlAlchemyWorldManagementReferences:
         setting = db.get(AgentActivitySetting, character_id)
         if character is None or setting is None or character.execution_mode != "llm":
             raise WorldManagementError("world_activity_not_ready")
-        ready = evaluate(db, character=character, setting=setting)
-        if not ready.ready or ready.world_id != world_id:
-            raise WorldManagementError(ready.reason_code or "world_activity_not_ready")
+        facts = self.states(db, world_id=world_id, character_ids=[character_id])[character_id]
+        if not facts["ready"]:
+            raise WorldManagementError(facts["reason"])
         try:
             capture_activity_input(db, character_id=character_id)
         except Exception as exc:

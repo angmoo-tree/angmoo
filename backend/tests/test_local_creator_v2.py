@@ -77,7 +77,7 @@ def test_default_space_is_publish_ready_for_both_owner_languages(db, language):
     assert ensure_default_space(session, owner_id=owner.id).id == world.id
 
 
-def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):
+def test_keyless_registration_is_atomic_off_and_replayed(db):
     session, owner = db
     async def forbidden(**kwargs):
         raise AssertionError("Registration must not call AI")
@@ -87,22 +87,24 @@ def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):
     assert session.get(AgentCreationDraft, draft.id).encrypted_api_key is None
     changed = drafts.update_draft(session, owner, draft.id,
         AgentCreationDraftUpdate(revision=draft.revision, name="하루", worldview="호기심 많은 기자", personality="호기심 많은 기자"), workflows=workflows)
-    # Detail presentation is independent of the atomic persistence contract.
-    monkeypatch.setattr("app.runtime.characters.management.get_agent", lambda db, user, cid: db.get(Character, cid))
     data = AgentCreationDraftComplete(revision=changed.revision)
     first = drafts.complete_draft(session, owner, draft.id, data, workflows=workflows)
     again = drafts.complete_draft(session, owner, draft.id, data, workflows=workflows)
-    assert first.id == again.id
-    binding = session.get(CharacterWorldBinding, first.id)
-    row = session.scalar(select(WorldCharacter).where(WorldCharacter.character_id == first.id))
+    assert first.character.id == again.character.id
+    binding = session.get(CharacterWorldBinding, first.character.id)
+    row = session.scalar(select(WorldCharacter).where(WorldCharacter.character_id == first.character.id))
     assert binding.world_id == row.world_id == draft.target_world_id
+    assert first.registration_scope == again.registration_scope
+    assert first.registration_scope.model_dump() == {
+        "world_id": row.world_id, "world_character_id": row.id, "character_id": first.character.id,
+    }
     assert row.role_key == NO_SPECIFIC_ROLE_KEY
     preflight = preflight_setup(session, world_character_id=row.id, user=owner)
     assert preflight.safe_reason_code == "credential_required"
     assert row.autonomous_enabled is False
     assert first.credential is None
-    assert first.activity_setting.auto_enabled is False
-    assert session.get(CharacterRegistrationReceipt, draft.id).character_id == first.id
+    assert first.settings.auto_enabled is False
+    assert session.get(CharacterRegistrationReceipt, draft.id).character_id == first.character.id
 
 
 def test_upgrade_preserves_legacy_draft_and_matches_fresh(tmp_path):
@@ -291,6 +293,14 @@ def test_http_keyless_register_replay_and_detail_use_real_persistence(db):
         repeated = client.post(f"/api/v1/agents/drafts/{draft['id']}/complete", json=payload)
         assert repeated.status_code == 200, repeated.text
         assert repeated.json()["character"]["id"] == done.json()["character"]["id"]
+        registration_scope = done.json()["registration_scope"]
+        assert repeated.json()["registration_scope"] == registration_scope
+        registered_actor = session.get(WorldCharacter, registration_scope["world_character_id"])
+        assert registration_scope == {
+            "world_id": draft["target_world_id"], "world_character_id": registered_actor.id,
+            "character_id": done.json()["character"]["id"],
+        }
+        assert registered_actor.autonomous_enabled is False
         assert done.json()["credential"] is None
         assert done.json()["settings"]["auto_enabled"] is False
         # Exercise the production aggregator, not an otherwise-unmounted domain router.

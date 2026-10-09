@@ -30,6 +30,7 @@ from app.api.world_character_management_dependencies import instance_deletion_wo
 from app.domains.world_characters.schemas.deletion import WorldInstanceDelete
 from app.domains.world_characters.schemas.deletion import WorldInstanceDeleteRead
 from app.domains.media.service.http_workflows import require_comfy_raw_json
+from app.domains.world_characters.schemas.basic_activity import BasicActivitySettingsRead, BasicActivitySettingsPatch
 
 
 @router.get("/{world_id}/world-characters/{world_character_id}/status", response_model=WorldCharacterStatusRead)
@@ -147,6 +148,16 @@ def management(world_id: str, world_character_id: str, request: Request, user=De
 @router.get("/{world_id}/world-characters/{world_character_id}/settings", response_model=schemas.WorldCharacterSettingsRead)
 def settings(world_id: str, world_character_id: str, request: Request, user=Depends(get_current_user), service=Depends(get_management_service)):
     return _call(service, "settings", request, world_id=world_id, world_character_id=world_character_id, user=user)
+
+
+@router.get("/{world_id}/world-characters/{world_character_id}/activity-settings", response_model=BasicActivitySettingsRead)
+def activity_settings(world_id: str, world_character_id: str, request: Request, user=Depends(get_current_user), service=Depends(get_management_service)):
+    return _call(service, "activity_settings", request, world_id=world_id, world_character_id=world_character_id, user=user)
+
+
+@router.patch("/{world_id}/world-characters/{world_character_id}/activity-settings", response_model=BasicActivitySettingsRead)
+def patch_activity_settings(world_id: str, world_character_id: str, data: BasicActivitySettingsPatch, request: Request, user=Depends(get_current_user), service=Depends(get_management_service)):
+    return _call(service, "patch_activity_settings", request, mutation=True, world_id=world_id, world_character_id=world_character_id, user=user, data=data)
 
 
 @router.patch("/{world_id}/world-characters/{world_character_id}/profile", response_model=schemas.WorldCharacterManagementRead)

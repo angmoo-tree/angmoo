@@ -21,6 +21,7 @@ def register_models() -> MetaData:
     import app.domains.memory.models.batch  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.activity_configuration  # noqa: F401
     import app.domains.memory.models.activity_situation  # noqa: F401
+    import app.domains.memory.models.situation_source_binding  # noqa: F401
     import app.domains.memory.models.embedding  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.daypart  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.items  # noqa: F401 - explicit ORM registration

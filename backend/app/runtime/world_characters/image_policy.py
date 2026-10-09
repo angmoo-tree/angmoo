@@ -8,7 +8,7 @@ from app.core.calendar import local_period
 
 
 def read(service, *, world_id, world_character_id, user):
-    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user)
+    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, basic=True)
     row = service.db.get(WorldImagePolicy, world_character_id)
     if row is None:
         raise ImagePreparationError("world_image_policy_missing")
@@ -22,8 +22,11 @@ def read(service, *, world_id, world_character_id, user):
 
 def write(service, *, world_id, world_character_id, user, data):
     try:
-        actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
         changes = data.model_dump(exclude_unset=True, exclude={"expected_revision"})
+        from app.domains.identity.service.environment import lock_environment_admission
+        lock_environment_admission(service.db, user.id)
+        actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True,
+            basic=not bool({"vision_limit", "vision_enabled"} & changes.keys()))
         if "generation_settings" in changes:
             from app.runtime.media.world_generation import validate_settings
             from app.runtime.media.binding import current
@@ -41,8 +44,8 @@ def write(service, *, world_id, world_character_id, user, data):
         def require_key(purpose):
             if purpose == "image":
                 from app.domains.identity.service.world_credentials import resolve_image_keys
-                from app.runtime.world_credential_binding import capture
-                binding = capture(service.db, owner_id=user.id, world_id=world_id, actor_id=world_character_id, purpose="image")
+                from app.runtime.world_credential_binding import capture_image_settings
+                binding = capture_image_settings(service, user=user, world_id=world_id, actor_id=world_character_id)
                 old_policy = service.db.get(WorldImagePolicy, world_character_id)
                 values = changes.get("generation_settings", old_policy.generation_settings)
                 profile = values.get("profiles", {}).get(f'{binding["provider"]}:{binding["model"]}', {})
@@ -63,7 +66,7 @@ def write(service, *, world_id, world_character_id, user, data):
 async def check(service, *, world_id, world_character_id, user, data):
     """Explicit user check only. Normal GET/save never contacts a provider."""
     from app.runtime.media.binding import current
-    from app.runtime.world_credential_binding import capture
+    from app.runtime.world_credential_binding import capture_image_settings
     from app.domains.identity.service.world_credentials import resolve_image_keys
     from app.runtime.media.world_generation import validate_settings
     from app.domains.media.generation_contracts import NovelOptions, ComfyOptions, ApiImageOptions
@@ -72,11 +75,12 @@ async def check(service, *, world_id, world_character_id, user, data):
     media = current()
     if media is None:
         raise ImagePreparationError("image_runtime_unavailable")
-    actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
+    actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True,
+        basic=not bool({"vision_limit", "vision_enabled"} & data.model_fields_set))
     row = service.db.get(WorldImagePolicy, world_character_id)
     if row is None or row.revision != data.expected_revision:
         raise ImagePreparationError("world_image_policy_revision_conflict")
-    binding = capture(service.db, owner_id=user.id, world_id=world_id, actor_id=world_character_id, purpose="image")
+    binding = capture_image_settings(service, user=user, world_id=world_id, actor_id=world_character_id)
     values = validate_settings(data.generation_settings if data.generation_settings is not None else row.generation_settings,
         previous=row.generation_settings)
     key = f'{binding["provider"]}:{binding["model"]}'
@@ -110,8 +114,9 @@ async def check(service, *, world_id, world_character_id, user, data):
         validate_api_options(provider, endpoint, typed.model_dump(exclude_none=True))
         connection = {"ready": True, "credential_validation": "not_verified", "endpoint": endpoint,
             "reference_supported": endpoint_parameters(provider, endpoint).get("input_references", {}).get("max", 0) >= 1}
-    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
-    if capture(service.db, owner_id=user.id, world_id=world_id, actor_id=world_character_id, purpose="image") != binding:
+    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True,
+        basic=not bool({"vision_limit", "vision_enabled"} & data.model_fields_set))
+    if capture_image_settings(service, user=user, world_id=world_id, actor_id=world_character_id) != binding:
         raise ImagePreparationError("generation_source_or_key_changed")
     connection["checked_at"] = datetime.now(UTC).isoformat()
     values.setdefault("profiles", {})[key] = {"options": typed.model_dump(exclude_none=True), "connection": connection}

@@ -382,7 +382,14 @@ class AgentActivityProfileReadinessRead(BaseModel):
     can_view_graph: bool = False
 
 
+class CharacterRegistrationScope(BaseModel):
+    world_id: str
+    world_character_id: str
+    character_id: str
+
+
 class AgentDetailRead(BaseModel):
+    registration_scope: CharacterRegistrationScope | None = None
     character: CharacterRead
     state: CharacterStateRead | None = None
     credential: CredentialRead | None

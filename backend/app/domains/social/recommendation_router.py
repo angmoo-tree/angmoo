@@ -13,7 +13,7 @@ router = APIRouter(prefix="/worlds/{world_id}/recommendation-topics", tags=["rec
 
 def translate_error(exc):
     code = str(exc) if isinstance(exc, TopicPreparationError) else "credential_required"
-    status = 403 if code in {"world_not_owned", "character_not_owned"} else 404 if code in {"world_not_available", "character_not_available"} else 422
+    status = 410 if code == "world_recommendation_topics_retired" else 403 if code in {"world_not_owned", "character_not_owned"} else 404 if code in {"world_not_available", "character_not_available"} else 422
     raise HTTPException(status_code=status, detail=code) from exc
 
 

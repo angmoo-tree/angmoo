@@ -31,6 +31,36 @@ class SituationSources:
     def validate_situation_source(self, manifest, source, **values):
         return self.validate(manifest, source, **values)
 
+    def parent_binding_basis(self, context, original, *, child, now):
+        from app.domains.memory.contracts.situation_source_binding import CanonicalParentBindingBasis
+        post = self.session.get(Post, child.source_id, populate_existing=True)
+        if post is None or self.validate(context, child, now=now).state != "available":
+            raise ValueError("situation_parent_binding_child_changed")
+        parent = self.session.get(Post, post.reply_to_post_id, populate_existing=True) if post.reply_to_post_id else None
+        if parent is None or not parent.body or parent.world_id != context.snapshot.scope.world_id:
+            raise ValueError("situation_parent_binding_parent_missing")
+        kind = MemorySourceTypeV1.REPLY if parent.reply_to_post_id else MemorySourceTypeV1.POST
+        scope = context.snapshot.scope
+        evidence = self.reader.read_evidence(scope=scope, source_type=kind, source_id=parent.id)
+        child_evidence = self.reader.read_evidence(scope=scope, source_type=MemorySourceTypeV1(child.source_type), source_id=post.id)
+        code = memory_evidence_blocked_code(scope=scope, source_type=kind, source_id=parent.id, evidence=evidence)
+        if evidence is None or child_evidence is None:
+            raise ValueError("situation_parent_binding_parent_missing")
+        participants = {scope.subject_world_character_id, evidence.actor_world_character_id, evidence.counterpart_world_character_id} - {None}
+        accessible = (code in {None, "memory_unobserved"} and parent.visibility == "public"
+            and parent.deleted_at is None and parent.report_hidden_at is None
+            and set(active_participant_ids(self.session, participants, scope.world_id)) == participants
+            and not any(block_id(self.session, scope.world_id, scope.subject_world_character_id, identifier)
+                for identifier in participants - {scope.subject_world_character_id}))
+        digest = sha256(parent.body.encode("utf-8")).hexdigest()
+        entry = DeliveredSourceEntry(kind.value, parent.id, evidence.source_digest, evidence.source_digest,
+            digest, original.payload_path, "background", original.ordinal, scope.world_id,
+            actor_id=evidence.actor_world_character_id, counterpart_id=evidence.counterpart_world_character_id,
+            ranges=((0, len(parent.body)),), delivered_ranges=((0, len(parent.body)),),
+            delivery_payload_digest=original.delivery_payload_digest)
+        return CanonicalParentBindingBasis(child, child_evidence.source_digest, post.reply_to_post_id,
+            post.created_at, entry, digest, parent.created_at, accessible)
+
     def describe(self, scope, *, kind, identifier, delivered, path, role, ordinal, target=None,
                  private_thread=None, delivery=None, relationship_basis=None):
         if delivery is not None and (delivery.path != path or delivery.text != delivered):
@@ -106,6 +136,19 @@ class SituationSources:
             raise MemoryScopeError("memory_scope_invalid")
         if source.world_id != scope.world_id:
             return SituationSourceAccess("forbidden", reason="situation_source_scope_forbidden")
+        for binding in getattr(manifest, "source_bindings", ()):
+            if binding.resolved_source == source:
+                child = self.session.get(Post, binding.basis_source_id, populate_existing=True)
+                basis = next((entry for entry in manifest.sources if entry.ordinal == binding.basis_ordinal
+                    and entry.source_id == binding.basis_source_id), None)
+                if (child is None or child.reply_to_post_id != source.source_id or basis is None
+                    or self.validate(manifest, basis, now=now, ancestors=ancestors).state != "available"):
+                    return SituationSourceAccess("changed", reason="situation_parent_binding_child_changed")
+                parent = self.session.get(Post, source.source_id, populate_existing=True)
+                if parent is None or parent.deleted_at is not None:
+                    return SituationSourceAccess("changed", reason="situation_parent_binding_parent_deleted")
+                if sha256(parent.body.encode("utf-8")).hexdigest() != source.delivered_digest:
+                    return SituationSourceAccess("changed", reason="situation_parent_binding_parent_changed")
         if source.thread_id:
             thread = self.session.get(MessageThread, source.thread_id, populate_existing=True)
             if (thread is None or thread.requester_id != scope.owner_id or thread.world_id != scope.world_id

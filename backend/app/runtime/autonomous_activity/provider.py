@@ -140,6 +140,9 @@ class ActivityProvider:
             raise ValueError("activity_input_budget_exceeded")
         from hashlib import sha256
         def record_input(actual_user):
+            from app.domains.social.contracts.today_activity import validate_today_activity_payload
+            final_payload, _ = json.JSONDecoder().raw_decode(actual_user)
+            validate_today_activity_payload(final_payload)
             if getattr(self, "situation_output_active", False):
                 from app.runtime.autonomous_activity.situation_memory import freeze_social_input
                 # JSON recovery feedback follows the original JSON value. The

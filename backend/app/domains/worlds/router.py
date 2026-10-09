@@ -38,7 +38,7 @@ def create_world(
     topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCreatorContextRead:
     try:
-        return world_service.create_world(db, user=user, data=data, on_created=topics.mark_new_subject)
+        return world_service.create_world(db, user=user, data=data, on_created=topics.initialize_world)
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)
         raise AssertionError("unreachable")
@@ -133,7 +133,6 @@ async def publish_world(
             user=user,
             data=data,
         )
-        await topics.prepare_initial_world(db, world_id=world_id, owner_id=user.id)
         return result
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)

@@ -69,12 +69,30 @@ class TodaySocialActivityRecord:
     root_body: str | None = None
     subjective_context: TodaySocialSubjectiveRecord | None = None
     thought: TodaySocialThoughtRecord | None = None
+    parent_post_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None:
             raise ValueError("today_social_activity_timezone_required")
         if not self.record_key or not self.source_id or len(self.source_revision) != 64:
             raise ValueError("today_social_activity_identity_invalid")
+        validate_today_parent_identity({"source_post_id": self.source_post_id,
+            "parent_post_id": self.parent_post_id, "parent_title": self.parent_title, "parent_body": self.parent_body})
+
+
+def validate_today_parent_identity(record) -> None:
+    parent = record.get("parent_post_id")
+    if ((record.get("parent_body") or record.get("parent_title")) and not parent
+        or parent and (not record.get("source_post_id") or parent == record["source_post_id"])):
+        raise ValueError("today_social_activity_parent_identity_invalid")
+
+
+def validate_today_activity_payload(payload) -> None:
+    context = payload.get("context", payload)
+    today = context.get("today_activity", {}) if isinstance(context, dict) else {}
+    if isinstance(today, dict):
+        for record in today.get("records", ()):
+            validate_today_parent_identity(record)
 
 
 @dataclass(frozen=True, slots=True)

@@ -3,10 +3,10 @@ from dataclasses import asdict
 from datetime import datetime, timedelta
 from uuid import uuid4
 from zoneinfo import ZoneInfo
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, update, or_
 
 from app.core.calendar import utc_instant, wall_time
-from app.domains.memory.contracts.activity_situation import stable_digest, VALIDATION_REVISION
+from app.domains.memory.contracts.activity_situation import stable_digest, VALIDATION_REVISION, LEGACY_VALIDATION_REVISION
 from app.domains.memory.contracts.items import normalize_memory_idempotency_key
 from app.domains.memory.exceptions import MemoryConflictError, MemoryValidationError
 from app.domains.memory.models.items import MemoryScopeSettingModel
@@ -63,13 +63,18 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
     legacy_digest = stable_digest({"scope": asdict(setting.scope), "trigger": trigger, "version": expected_version})
     old = session.get(MemorySituationRequest, (setting.id, request_key))
     old_run = session.get(MemorySituationApplyRun, old.run_id) if old and old.run_id else None
-    revision = old_run.settings_snapshot.get("validation_revision", VALIDATION_REVISION) if old_run else VALIDATION_REVISION
-    digest = stable_digest({"scope": asdict(setting.scope), "trigger": trigger, "version": expected_version,
-        "operation": work_kind, "revision": revision})
-    if work_kind == "blocked_recheck":
-        digest = stable_digest({"scope": asdict(setting.scope), "operation": work_kind, "version": expected_version,
-            "receipt_sequence": receipt_sequence, "receipt_version": expected_receipt_version, "revision": revision})
+    revision = old_run.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION) if old_run else VALIDATION_REVISION
+    def digest_for(revision):
+        if work_kind == "blocked_recheck":
+            return stable_digest({"scope": asdict(setting.scope), "operation": work_kind, "version": expected_version,
+                "receipt_sequence": receipt_sequence, "receipt_version": expected_receipt_version, "revision": revision})
+        return stable_digest({"scope": asdict(setting.scope), "trigger": trigger, "version": expected_version,
+            "operation": work_kind, "revision": revision})
+    digest = digest_for(revision)
     if old is not None:
+        # An unfinished request keeps its frozen revision. Reject unknown
+        # revisions before comparing the replay digest or resuming a lease.
+        _require_supported_revision(old_run)
         compatible_legacy = work_kind == "pending_apply" and old.request_digest == legacy_digest
         if old.request_digest != digest and not compatible_legacy:
             raise MemoryConflictError("situation_request_conflict")
@@ -88,11 +93,14 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
     active = session.scalar(select(MemorySituationApplyRun).where(
         MemorySituationApplyRun.scope_setting_id == setting.id,
         MemorySituationApplyRun.state.in_(("pending", "running", "deferred", "error")),
+        # An unsupported revision is a terminal error, not a retryable lease.
+        or_(MemorySituationApplyRun.error_code.is_(None), MemorySituationApplyRun.error_code != "situation_validation_revision_unsupported"),
     ).order_by(MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1))
     if active is not None:
         if (active.work_kind != work_kind or active.settings_snapshot.get("receipt_sequence") != receipt_sequence):
             raise MemoryConflictError("situation_scope_busy")
         _resume_error(session, active.id)
+        digest = digest_for(active.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION))
     if receipt_sequence is not None:
         target = session.get(MemorySituationReceipt, receipt_sequence, populate_existing=True)
         if target is None or target.scope_setting_id != setting.id:
@@ -137,9 +145,19 @@ def _resume_error(session, run_id):
     # An explicit retry reuses its durable cutoff. It never starts a replacement
     # run over arrivals accepted after that cutoff.
     if run_id:
+        old_run = session.get(MemorySituationApplyRun, run_id, populate_existing=True)
+        _require_supported_revision(old_run)
         session.execute(update(MemorySituationApplyRun).where(
             MemorySituationApplyRun.id == run_id, MemorySituationApplyRun.state == "error",
         ).values(state="deferred", error_code=None, lease_token=None, lease_until=None))
+
+
+def _require_supported_revision(run):
+    from app.domains.memory.contracts.activity_situation import SUPPORTED_VALIDATION_REVISIONS
+    if (run is not None and run.state in {"pending", "running", "deferred", "error"}
+        and run.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION)
+        not in SUPPORTED_VALIDATION_REVISIONS):
+        raise MemoryConflictError("situation_validation_revision_unsupported")
 
 
 def claim_run(session, run_id, *, now, lease_seconds=30):

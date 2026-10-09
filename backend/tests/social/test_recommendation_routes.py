@@ -23,11 +23,10 @@ def test_read_is_side_effect_free_and_mutations_reject_foreign_owner(scope):
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
             path = f"/api/v1/worlds/{world.id}/recommendation-topics"
             response = await client.get(path)
-            assert response.status_code == 200 and response.json()["state"] == "pending"
-            assert response.json()["recent_deliveries"] == []
+            assert response.status_code == 410 and response.json()["detail"] == "world_recommendation_topics_retired"
             assert not db.scalar(select(RecommendationPreparation))
             denied = await client.put(path + "/key", json={"world_character_id": wc.id})
-            assert denied.status_code == 403
+            assert denied.status_code == 410
             user.id = "other-owner"
             denied = await client.post(path + "/regenerate", json={"request_id": "safe-test-request"})
             assert denied.status_code == 403

@@ -1,9 +1,13 @@
 """Versioned values for activity-owned situation admission; no I/O or commits."""
+from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from hashlib import sha256
 import json
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.domains.memory.contracts.situation_source_binding import SituationSourceBinding
 
 from app.domains.memory.contracts.scope import MemoryScope
 from app.contracts.activity_situation import SITUATION_POLICY, SituationDraft
@@ -11,7 +15,9 @@ from app.contracts.activity_situation import SITUATION_POLICY, SituationDraft
 SITUATION_REPRESENTATION = "activity_situation_v1"
 DESCRIPTION_LIMIT = 1000
 Lane = Literal["chat", "inbox", "feed", "routine"]
-VALIDATION_REVISION = "situation-validation.v2"
+VALIDATION_REVISION = "situation-validation.v3"
+LEGACY_VALIDATION_REVISION = "situation-validation.v2"
+SUPPORTED_VALIDATION_REVISIONS = frozenset({LEGACY_VALIDATION_REVISION, VALIDATION_REVISION})
 
 
 @dataclass(frozen=True)
@@ -174,7 +180,7 @@ class DeliveredObservationProof:
     receipt_sequence: int
     manifest_digest: str
     entry: DeliveredSourceEntry
-    origin: Literal["situation_delivered", "committed_result"]
+    origin: Literal["situation_delivered", "committed_result", "situation_source_binding"]
 
 
 @dataclass(frozen=True)
@@ -188,6 +194,7 @@ class SituationValidationContext:
     logical_activity_id: str
     lane: Lane
     revision: str = VALIDATION_REVISION
+    source_bindings: tuple[SituationSourceBinding, ...] = ()
 
     @property
     def snapshot(self):
@@ -195,7 +202,8 @@ class SituationValidationContext:
 
     @property
     def sources(self):
-        return self.manifest.sources
+        replacements = {binding.entry_ordinal: binding.resolved_source for binding in self.source_bindings}
+        return tuple(replacements.get(entry.ordinal, entry) for entry in self.manifest.sources)
 
     @property
     def private_thread_id(self):
@@ -206,6 +214,10 @@ class SituationValidationContext:
         return self.manifest.version
 
     def proof_for(self, source):
+        for binding in self.source_bindings:
+            if binding.resolved_source == source:
+                return DeliveredObservationProof(self.receipt_sequence, self.manifest_digest,
+                    source, "situation_source_binding")
         for entry in self.sources:
             if entry == source:
                 if self.version == 2 and entry.delivery_payload_digest != self.manifest.payload_digest:

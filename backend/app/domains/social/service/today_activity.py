@@ -259,6 +259,7 @@ class TodaySocialActivityService:
                 body=None if post is None else post.body,
                 parent_title=None if parent is None else parent.title,
                 parent_body=None if parent is None else parent.body,
+                parent_post_id=None if parent is None else parent.id,
                 root_title=chain[-1].title if chain and len(chain) > 2 else None,
                 root_body=chain[-1].body if chain and len(chain) > 2 else None,
                 subjective_context=subjective.get(event.id),
@@ -307,6 +308,7 @@ class TodaySocialActivityService:
                 body=post.body,
                 parent_title=None if parent is None else parent.title,
                 parent_body=None if parent is None else parent.body,
+                parent_post_id=None if parent is None else parent.id,
                 root_title=chain[-1].title if len(chain) > 2 else None,
                 root_body=chain[-1].body if len(chain) > 2 else None,
             )

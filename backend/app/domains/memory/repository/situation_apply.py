@@ -5,7 +5,7 @@ from uuid import uuid4
 from sqlalchemy import select, update
 
 from app.core.calendar import utc_instant
-from app.domains.memory.contracts.activity_situation import SITUATION_POLICY, VALIDATION_REVISION
+from app.domains.memory.contracts.activity_situation import SITUATION_POLICY, LEGACY_VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS
 from app.domains.memory.contracts.situation_validation import SituationSourceAccess, SituationSourceValidator
 from app.domains.memory.repository.situation_validation import restore_context
 from app.domains.memory.contracts.provenance import MemoryKindV1, MemoryItemStatus
@@ -26,6 +26,12 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
     if not 1 <= page_size <= 100:
         raise ValueError("situation_page_size_invalid")
     run = require_run_fence(session, run_id, token, now)
+    revision = run.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION)
+    if revision not in SUPPORTED_VALIDATION_REVISIONS:
+        run.state, run.error_code = "error", "situation_validation_revision_unsupported"
+        run.lease_token = run.lease_until = None
+        session.flush()
+        return 0
     session.execute(update(MemoryScopeSettingModel).where(MemoryScopeSettingModel.id == run.scope_setting_id).values(id=MemoryScopeSettingModel.id, updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
     run = require_run_fence(session, run_id, token, now)
     pending = (
@@ -50,7 +56,7 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
         receipt.run_id, run.cursor = run.id, receipt.sequence
         if run.work_kind == "blocked_recheck":
             session.add(MemorySituationRecheckAttempt(run_id=run.id, receipt_sequence=receipt.sequence,
-                validation_revision=VALIDATION_REVISION,
+                validation_revision=revision,
                 outcome="applied" if receipt.state == "applied" else "rejected",
                 reason=receipt.error_code, previous_run_id=previous[0], previous_state=previous[1],
                 previous_error_code=previous[2], applied_item_id=receipt.applied_item_id,
@@ -65,7 +71,7 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
             processed(receipt, before_version, previous)
             continue
         try:
-            manifest = restore_context(session, receipt)
+            manifest = restore_context(session, receipt, revision=revision)
             result_sources = manifest.result_sources
         except (AttributeError, ValueError, TypeError, KeyError) as exc:
             code = str(exc) if isinstance(exc, ValueError) and str(exc).startswith("situation_") else "situation_manifest_invalid"
@@ -97,13 +103,21 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                 else:
                     run.skipped_count += 1
                 continue
-            access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]
-            legacy_deleted = run.work_kind == "blocked_recheck" and manifest.version == 1 and any(
-                value.state == "deleted" and source.role == "core" for source, value in access)
-            if (not access or any(value.state not in {"available", "deleted"}
-                or (value.state == "deleted" and source.role == "prior") for source, value in access) or legacy_deleted):
-                receipt.state, receipt.error_code = "blocked", "situation_legacy_source_unavailable" if legacy_deleted else next((value.reason for source, value in access
-                    if value.reason and value.state not in {"available", "deleted"}), "situation_source_changed_or_forbidden")
+            try:
+                # A failed receipt cannot leave a newly inferred binding behind.
+                # Successful bindings and memories still belong to the outer UoW.
+                with session.begin_nested():
+                    from app.domains.memory.repository.situation_source_bindings import prepare_bindings
+                    manifest = prepare_bindings(session, manifest, validator, captured_at=receipt.captured_at, now=now)
+                    access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]
+                    legacy_deleted = run.work_kind == "blocked_recheck" and manifest.version == 1 and any(
+                        value.state == "deleted" and source.role == "core" for source, value in access)
+                    if (not access or any(value.state not in {"available", "deleted"}
+                        or (value.state == "deleted" and source.role == "prior") for source, value in access) or legacy_deleted):
+                        raise ValueError("situation_legacy_source_unavailable" if legacy_deleted else next((value.reason for source, value in access
+                            if value.reason and value.state not in {"available", "deleted"}), "situation_source_changed_or_forbidden"))
+            except ValueError as exc:
+                receipt.state, receipt.error_code = "blocked", str(exc)[:80]
                 run.blocked_count += 1
             else:
                 # The scope row is already write-locked for this page. Count

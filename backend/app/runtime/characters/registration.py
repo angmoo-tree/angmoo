@@ -39,8 +39,17 @@ def validate_copy_target(db, character_id, world_id):
         raise AgentCreationDraftValidationError("이미 이 World에 있는 캐릭터입니다. 기존 프로필을 열어주세요.")
 
 
-def register_draft(db, user, draft, data):
+def _registered_result(db, user, receipt):
     from app.runtime.characters.management import get_agent
+    actor = db.get(WorldCharacter, receipt.world_character_id)
+    if actor is None or actor.character_id != receipt.character_id:
+        raise AgentCreationDraftValidationError("registration_scope_unavailable")
+    result = get_agent(db, user, receipt.character_id)
+    return result.model_copy(update={"registration_scope": schemas.CharacterRegistrationScope(
+        world_id=actor.world_id, world_character_id=actor.id, character_id=actor.character_id)})
+
+
+def register_draft(db, user, draft, data):
     from app.domains.characters.service import media_storage as profile_storage
 
     digest = hashlib.sha256(json.dumps(data.model_dump(), sort_keys=True).encode()).hexdigest()
@@ -48,7 +57,7 @@ def register_draft(db, user, draft, data):
     if receipt:
         if receipt.request_digest != digest:
             raise AgentCreationDraftHandleConflictError("registration_request_changed")
-        return get_agent(db, user, receipt.character_id)
+        return _registered_result(db, user, receipt)
     if draft.source_kind == "external":
         raise AgentCreationDraftValidationError("현재 지원하지 않는 생성 방식입니다. 지원하는 방식을 선택해주세요.")
     if draft.status != "editing" or data.revision != draft.revision:
@@ -79,7 +88,7 @@ def register_draft(db, user, draft, data):
             db.rollback()
             receipt = db.get(models.CharacterRegistrationReceipt, draft.id)
             if receipt and receipt.request_digest == digest:
-                return get_agent(db, user, receipt.character_id)
+                return _registered_result(db, user, receipt)
             raise AgentCreationDraftHandleConflictError("registration_conflict")
         character = models.Character(id=character_id, owner_id=user.id, name=draft.name.strip(), handle=handle,
             one_liner=draft.one_liner, personality=draft.personality, speech_style=draft.speech_style,
@@ -137,11 +146,11 @@ def register_draft(db, user, draft, data):
             path.unlink(missing_ok=True)
         receipt = db.get(models.CharacterRegistrationReceipt, draft.id)
         if receipt and receipt.request_digest == digest:
-            return get_agent(db, user, receipt.character_id)
+            return _registered_result(db, user, receipt)
         raise AgentCreationDraftHandleConflictError("registration_conflict") from exc
     except Exception:
         db.rollback()
         for path in promoted_files:
             path.unlink(missing_ok=True)
         raise
-    return get_agent(db, user, character_id)
+    return _registered_result(db, user, db.get(models.CharacterRegistrationReceipt, draft.id))

@@ -13,9 +13,11 @@ from app.domains.memory.policies.episode_provider_view import episode_provider_r
 from app.domains.memory.repository.situation_admission import admit
 from app.domains.social.models.posts import Post
 from app.runtime.memory.situation_sources import SituationSources
+from app.domains.social.contracts.today_activity import validate_today_activity_payload
 
 
 def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
+    validate_today_activity_payload(payload)
     if state is None:
         raise ValueError("situation_activity_state_missing")
     reader = SituationSources(ctx.db)
@@ -69,7 +71,7 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
             post(record["source_id"], record.get("body") or json.dumps(record, ensure_ascii=False), path, "background")
         else:
             add(kind, record["source_id"], json.dumps(record, ensure_ascii=False), path)
-        for key, field in (("source_post_id", "body"), ("target_post_id", "parent_body"), ("root_post_id", "root_body")):
+        for key, field in (("source_post_id", "body"), ("parent_post_id", "parent_body"), ("root_post_id", "root_body")):
             if record.get(key) and record.get(field):
                 post(record[key], record[field], f"{path}/{field}", "background")
     for index, reply in enumerate(context.get("completed_social_replies", [])):

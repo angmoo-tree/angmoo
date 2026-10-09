@@ -117,7 +117,7 @@ def test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work(
     source_sha256 = hashlib.sha256(source.read_bytes()).hexdigest()
     marker = (tmp_path / "canonical/current-generation.json").read_bytes()
     result = _coordinator(tmp_path).upgrade()
-    assert result.migrated and result.target_version == 32
+    assert result.migrated and result.target_version == 35
     assert result.database_path != source
     assert hashlib.sha256(source.read_bytes()).hexdigest() == source_sha256
     assert (tmp_path / "canonical/previous-generation.json").read_bytes() == marker
@@ -127,7 +127,7 @@ def test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work(
     with engine.connect() as connection:
         assert connection.exec_driver_sql("PRAGMA integrity_check").scalar_one() == "ok"
         assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
-        assert sqlite_schema_contract_digest(connection) == registry.load_sqlite_manifest(32).schema_digest
+        assert sqlite_schema_contract_digest(connection) == registry.load_sqlite_manifest(35).schema_digest
         fk = next(row for row in connection.exec_driver_sql("PRAGMA foreign_key_list(character_draft_import_origins)") if row[3] == "draft_id")
         assert fk[6] == "CASCADE"
         run_input = connection.exec_driver_sql("SELECT input_snapshot FROM agent_runs WHERE id='admitted-run'").scalar_one()
@@ -195,7 +195,7 @@ def test_failed_staging_migration_keeps_source_and_can_resume(tmp_path, monkeypa
     assert (tmp_path / "canonical/current-generation.json").read_bytes() == marker
     assert list((tmp_path / "canonical/generations").iterdir()) == [source.parent]
     monkeypatch.setitem(registry.MIGRATIONS, 28, original)
-    assert _coordinator(tmp_path).upgrade().target_version == 32
+    assert _coordinator(tmp_path).upgrade().target_version == 35
 
 
 def test_semantic_delta_guard_rejects_rewritten_admitted_input(tmp_path, monkeypatch):
@@ -242,7 +242,7 @@ def test_contributor_factory_reopens_recovered_database_and_serves_health(tmp_pa
             assert response.json()["graph"] == "ladybug"
             with app.state.runtime_composition.session_factory() as session:
                 from sqlalchemy import text
-                assert session.execute(text("SELECT schema_version FROM angmoo_schema_version")).scalar_one() == 32
+                assert session.execute(text("SELECT schema_version FROM angmoo_schema_version")).scalar_one() == 35
     finally:
         app.state.dispose_runtime()
 

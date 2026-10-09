@@ -8,6 +8,16 @@ from app.runtime.subject_scope import read_scope_presence
 def capture(db, *, owner_id, world_id, actor_id, purpose):
     if any(value is None for value in read_scope_presence(db, MemoryScope(owner_id, world_id, actor_id))):
         raise CredentialResolutionError("world_credential_scope_unavailable")
+    return _capture_identity(db, owner_id=owner_id, world_id=world_id, actor_id=actor_id, purpose=purpose)
+
+
+def capture_image_settings(service, *, user, world_id, actor_id):
+    """Settings authorization is deliberately separate from execution admission."""
+    service.authorize_credentials(world_id=world_id, world_character_id=actor_id, user=user, basic=True)
+    return _capture_identity(service.db, owner_id=user.id, world_id=world_id, actor_id=actor_id, purpose="image")
+
+
+def _capture_identity(db, *, owner_id, world_id, actor_id, purpose):
     row = world_credentials.find(db, owner_id=owner_id, world_id=world_id, world_character_id=actor_id, purpose=purpose)
     if row is None or (not row.encrypted_secret and not (purpose == "image" and row.provider == "comfyui")):
         raise CredentialResolutionError("world_credential_required")

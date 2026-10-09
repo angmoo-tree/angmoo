@@ -3,7 +3,7 @@ from app.domains.identity.service import world_credentials
 
 
 def read(service, *, world_id, world_character_id, user, purpose):
-    role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user)
+    role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, basic=purpose in {"sns", "image"})
     row = world_credentials.find(service.db, owner_id=user.id, world_id=world_id,
         world_character_id=world_character_id, purpose=purpose)
     result = world_credentials.metadata(row, purpose=purpose)
@@ -28,7 +28,9 @@ def read(service, *, world_id, world_character_id, user, purpose):
 
 def write(service, *, world_id, world_character_id, user, purpose, data, remove=False):
     try:
-        role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
+        from app.domains.identity.service.environment import lock_environment_admission
+        lock_environment_admission(service.db, user.id)
+        role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True, basic=purpose in {"sns", "image"})
         scope = dict(owner_id=user.id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
         if purpose == "image":
             from app.domains.media.models_world_policy import WorldImagePolicy
@@ -83,6 +85,6 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
 
 def read_image_provider(service, *, world_id, world_character_id, user, provider):
     from app.domains.identity.service import world_image_credentials
-    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user)
+    service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, basic=True)
     return world_image_credentials.metadata(service.db, owner_id=user.id, world_id=world_id,
         world_character_id=world_character_id, provider=provider)

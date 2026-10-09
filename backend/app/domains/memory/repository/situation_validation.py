@@ -4,13 +4,16 @@ from dataclasses import asdict
 from app.domains.memory.contracts.activity_situation import (
     DeliveredInputManifest, DeliveredSourceEntry, SituationDraft, SituationValidationContext,
     SITUATION_POLICY, stable_digest,
+    VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS,
 )
 from app.domains.memory.models.activity_situation import MemorySituationManifest
 from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.memory.policies.situation_output import parse_description
 
 
-def restore_context(session, receipt):
+def restore_context(session, receipt, *, revision=VALIDATION_REVISION):
+    if revision not in SUPPORTED_VALIDATION_REVISIONS:
+        raise ValueError("situation_validation_revision_unsupported")
     if receipt.state == "discarded" or receipt.manifest_id is None:
         raise ValueError("situation_discarded")
     stored = session.get(MemorySituationManifest, receipt.manifest_id, populate_existing=True)
@@ -59,5 +62,7 @@ def restore_context(session, receipt):
     if admission is not None and (admission.get("manifest_digest") != stored.content_digest
             or admission.get("result_digest") != stable_digest(result)):
         raise ValueError("situation_execution_binding_invalid")
-    return SituationValidationContext(manifest, receipt.sequence, stored.content_digest, sources,
-        receipt.target_key, receipt.logical_activity_id, receipt.lane)
+    context = SituationValidationContext(manifest, receipt.sequence, stored.content_digest, sources,
+        receipt.target_key, receipt.logical_activity_id, receipt.lane, revision=revision)
+    from app.domains.memory.repository.situation_source_bindings import restore_bindings
+    return restore_bindings(session, context)

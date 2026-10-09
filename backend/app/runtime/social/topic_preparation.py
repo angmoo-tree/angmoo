@@ -62,7 +62,7 @@ def load_scope(db: Session, *, world_id: str, owner_id: str, world_character_id:
     if world_character_id is None:
         if world.owner_user_id != owner_id:
             raise TopicPreparationError("world_not_owned")
-        source = build_world_generation_context(db, world).model_dump(mode="json")
+        raise TopicPreparationError("world_recommendation_topics_retired")
     else:
         wc, character = owned_character(db, world_character_id, owner_id, world_id)
         from app.config import settings
@@ -162,20 +162,8 @@ def prepare_initial_character(db: Session, *, world_id: str, owner_id: str, worl
 
 
 async def prepare_initial_world(db: Session, *, world_id: str, owner_id: str):
-    prep = db.scalar(select(RecommendationPreparation).where(
-        RecommendationPreparation.world_id == world_id,
-        RecommendationPreparation.source_key == "world",
-        RecommendationPreparation.request_id == "initial",
-    ))
-    if prep is None:
-        return
-    prep.request_id = "initial-completed"
-    db.commit()
-    # No key means the already-created World stays pending for its explicit button.
-    try:
-        await regenerate(db, world_id=world_id, owner_id=owner_id, request_id=str(uuid4()))
-    except Exception:
-        db.rollback()
+    # Legacy callers cannot dispatch or apply old World pending/running work.
+    return
 
 
 async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: str,
@@ -291,3 +279,9 @@ def mark_new_subject(db, *, world_id, world_character_id=None):
     from app.domains.relationships.service.policy_activation import activate_policy
     activate_policy(db, world_id=world_id)
     return _mark_new_subject(db, world_id=world_id, world_character_id=world_character_id)
+
+
+def initialize_world(db, *, world_id):
+    from app.domains.relationships.service.policy_activation import activate_policy
+    activate_policy(db, world_id=world_id)
+    ensure_catalog(db, world_id)
