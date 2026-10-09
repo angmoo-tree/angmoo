@@ -1,5 +1,59 @@
 # Angmoo Backend Architecture
 
+## Basic activity settings, SNS parent evidence and World topic retirement (2026-10-10)
+
+WorldCharacters owns the strict `world-activity-settings-v1` projection and its
+eight policy fields. Basic and detailed saves share configuration normalization,
+configuration CAS and the caller's Session. Runtime composes a saved-facts
+activation decision for GET, dashboard and actual ON admission: published World,
+eligible actor, saved policy and SNS purpose/model/key, readiness and maintenance.
+An owned pending/inactive/active autonomous actor with an active membership may
+save basic settings and SNS/image credentials before publication. This exception
+does not grant Chat, vision, graph, general profile or autonomous execution access.
+OFF does not cancel an already admitted activity. Image options, provider vault
+revisions, blank-key preservation and explicit connection checks remain owned by
+Identity/Media. Character registration returns the durable `registration_scope`
+for the atomically registered OFF actor, including idempotent completion replies.
+
+Social's TodayActivityRecord carries `parent_post_id` alongside the delivered
+parent body/title, independently of source/target/root IDs. Both producers reuse
+the parent they already loaded. The final bounded provider payload must retain
+the pair; inconsistent input is rejected before provider submission even when
+Memory is OFF. Runtime captures the actual parent fragment with its payload hash.
+
+Memory owns the typed parent-binding contract, exact pure policy, append-only
+`memory_situation_source_bindings` repository and validation revision v3. The
+Runtime adapter reads canonical Social rows in the same Session through the
+optional typed resolver. Memory imports no Social persistence model. Original
+manifest, admission, call, scope, result and description integrity is checked
+before loading a binding. Historical correction requires the exact parent-body
+path, an unchanged same-record child and its frozen direct-parent relationship,
+the full original parent-body SHA256, delivery ranges/payload and current access.
+No search, similarity, guessed IDs or source mutation is used. The fixed proof
+view serves application, details/correction, recall/hydration, prior memory and
+HotBrief access checks; later child/parent edits, reparenting or access revocation
+still prevent return. A receipt savepoint rolls back tentative bindings on failed
+validation; successful bindings, Memory/evidence, incremental eligibility and
+receipt share the outer UoW. A shared manifest retains its proof until its final
+dependent is removed. Older unfinished v2 runs retain v2 rules; unknown revisions
+stop, and only a new explicit request can use v3. GET/startup/migration never
+recheck blocked receipts. Existing individual/bulk recheck and discard are reused.
+
+Embedded SQLite v35 and Alembic 20261010_0112 add the empty binding table after
+v34/0111. Historical metadata builders/manifests are frozen. Copy/stage/validate/
+promote remains the upgrade boundary; failure preserves the original DB, key and
+selection marker. New accepted memories use existing incremental FTS/vector
+registration and do not prepare the whole historical corpus.
+
+World-level recommendation topic generation is retired after authorization with
+`410 world_recommendation_topics_retired` for GET/key PUT/regenerate POST.
+World create/publication/restart and late results cannot dispatch/apply it.
+Catalog and relationship initialization remain independent. The matching
+dictionary consists of valid character sources (including OFF/inactive actors),
+retains common/World-scoped shared IDs, and excludes World-only/deleted/left
+sources. Actor preparation, maximum six post links, cache invalidation, historic
+PostTopic/epochs and delivery DTOs remain intact. No dependency was added.
+
 ## Image provider vault and supported creation methods (2026-10-09)
 
 Identity owns `WorldImageProviderCredential`, keyed by owner, World, actor,

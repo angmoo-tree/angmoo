@@ -1,5 +1,46 @@
 # Angmoo Frontend Architecture
 
+### Device Home and optional basic activity composition (2026-10-10)
+
+DeviceHome owns its icon grid and World list without the local four-link footer
+or its reserved space. Other local surfaces and the five World tabs retain their
+navigation, scroll ownership and safe-area. Existing runtime navigation owns
+direct-entry fallback and native window routing; no delayed redirect was added.
+Relationships' embedded header uses the Chat/Characters geometry (20px inset,
+12px gap, 48px icon); its graph/depth/evidence remain feature-owned.
+
+Characters owns ActivityPolicyFields shared by basic and detailed settings,
+the strict basic API decoder and BasicActivitySettingsCard. A scoped editor
+identity includes auth/runtime/World/actor; identity changes unmount drafts and
+abort requests. Same-scope refresh reconciles only unedited fields; an explicit
+save re-reads current values and preserves conflicting input until acknowledgement.
+Policy, SNS credential and image settings save independently. Composition joins
+the three feature cards in WorldCharacterBasicSettings and passes that assembly
+through AgentCreateClient's ReactNode render slot. Features do not import another
+feature or Composition. The sixth optional creation step uses the server's
+durable registration_scope, recovers a lost completion response and reloads the
+same receipt without duplicate registration. Done/Skip do not implicitly save or
+enable activity; aggregate dirty/busy guards protect navigation. The existing
+autonomy-setup URL reads the owned Studio list for unpublished actor scopes.
+Studio's link is Activity settings. Published detailed settings reuse the same
+policy/credential/image APIs. SNS save refreshes eligibility from saved facts.
+
+World status composes the stored current_state into the neutral status card:
+state, mood/intensity, full original note and confirmed_at precede name/intro and
+recent/next activity. Only the World identity handle badge is absent; Device
+identity remains unchanged. The active scoped read aborts on auth/runtime/scope
+changes, retains same-scope last-good data on errors, and makes no AI calls,
+writes or polling. Activity-engine settings retain effective source, inheritance,
+explicit V2, CAS and transition notices without state/run presentation.
+
+Plan rows start independently collapsed. Plan/topic summaries have 44px labelled
+chevrons with independent aria-controls/expanded and no settings navigation.
+Topics expand from six to all without a +N or textual collapse control. The
+character-only recommendation panel retains state/model/tags/regenerate/refresh;
+Feed diagnostic/history DOM and World key selection are absent. Studio no longer
+assembles World/character/owner topic tools. Existing delivery/feed DTOs remain
+available for their other consumers. All changed product copy has ko/en entries.
+
 ### World summaries, embedded relationships and saved embedding settings (2026-10-09)
 
 Characters owns the four-row daily-plan presentation and scoped read-only plan
@@ -9,7 +50,8 @@ identity, recent activity, plan, topics, persona and activity summary. Features 
 not import another feature's implementation. `hooks/use-active-scoped-read` owns
 only neutral active/visibility, abort, auth/runtime identity and refresh lifetime;
 the calling feature validates scope, plan versions and the server World timezone.
-Settings retains the existing generation, credential and Feed-detail controls.
+Settings retains the existing generation and credential controls; the 2026-10-10
+contract above removes Feed-detail presentation while preserving its API DTOs.
 
 The World Relationships section and the explicit Character/World graph URL use
 one `WorldApp` composition and Phone shell in both Next and StaticProductRouter.
