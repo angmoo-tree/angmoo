@@ -101,3 +101,29 @@ def test_off_discard_works_for_damaged_proof_without_leaking_description_or_reap
         assert db.get(Post, "recovery-http-post").body == "A calm day."
     client.close()
     engine.dispose()
+
+
+def test_list_reuses_checks_only_within_page_and_rechecks_next_request(monkeypatch):
+    from app.domains.memory.service.source_evidence import SqlAlchemyMemorySourceEvidenceReader
+    client, engine, principal, seeded, rows = fixture()
+    calls = []
+    original = SqlAlchemyMemorySourceEvidenceReader.read_evidence
+    def read(self, **values):
+        calls.append(values["source_id"])
+        return original(self, **values)
+    monkeypatch.setattr(SqlAlchemyMemorySourceEvidenceReader, "read_evidence", read)
+    try:
+        first = client.get(PATH + "/unsaved-experiences", headers=FRONTEND_HEADERS).json()
+        assert len(first["items"]) == 3 and all(item["description"] for item in first["items"])
+        assert calls.count("recovery-http-post") == 1
+        calls.clear()
+        with Session(engine) as db:
+            db.get(Post, "recovery-http-post").report_hidden_at = NOW
+            db.commit()
+        second = client.get(PATH + "/unsaved-experiences", headers=FRONTEND_HEADERS).json()
+        assert second["blocked_count"] == 3
+        assert all(item["description"] is None and item["can_discard"] for item in second["items"])
+        assert calls.count("recovery-http-post") == 1
+    finally:
+        client.close()
+        engine.dispose()

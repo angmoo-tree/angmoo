@@ -7,6 +7,7 @@ from contextlib import contextmanager
 import logging
 import json
 from threading import Event, Lock, RLock, Thread
+from time import monotonic
 from app.core.atomic_json import write_json
 
 from sqlalchemy import event, select
@@ -64,6 +65,8 @@ class EmbeddedMemoryRecallProjection:
         self._stopping = Event()
         self._thread = None
         self._writer = None
+        self._retry_after = 0.0
+        self._retry_delay = 1.0
         self._cursor_path = index.database_path.with_name("rebuild-progress.json")
         self.state = MemoryRecallProjectionState.STOPPED
 
@@ -114,6 +117,10 @@ class EmbeddedMemoryRecallProjection:
             self.advance_rebuild(max_pages=1)
             if self.state is MemoryRecallProjectionState.REBUILDING:
                 self._stopping.wait(0.01)
+            elif self.state is MemoryRecallProjectionState.DEGRADED:
+                # A transient checkout/index failure must not wait forever for
+                # another commit. Persistent failures retry at most every 30s.
+                self._stopping.wait(max(0.01, self._retry_after - monotonic()))
             else:
                 self._wake.wait()
 
@@ -172,6 +179,10 @@ class EmbeddedMemoryRecallProjection:
             raise ValueError("memory_recall_rebuild_page_budget_invalid")
         try:
             with self._work():
+                if self.state is MemoryRecallProjectionState.DEGRADED:
+                    if monotonic() < self._retry_after:
+                        return
+                    self.state = MemoryRecallProjectionState.REBUILDING
                 for _ in range(max_pages):
                     if self._stopping.is_set():
                         return
@@ -194,11 +205,15 @@ class EmbeddedMemoryRecallProjection:
                         self._writer = None
                         self._cursor_path.unlink(missing_ok=True)
                         self.state = MemoryRecallProjectionState.READY
+                        self._retry_delay = 1.0
                         return
                     write_json(self._cursor_path, self._progress)
+                    self._retry_delay = 1.0
         except Exception:
             logger.exception("memory_recall_projection_page_failed")
             self.state = MemoryRecallProjectionState.DEGRADED
+            self._retry_after = monotonic() + self._retry_delay
+            self._retry_delay = min(self._retry_delay * 2, 30.0)
 
     def stop(self) -> None:
         self._stopping.set()

@@ -5,9 +5,12 @@ import threading
 import time
 
 from sqlalchemy import select
+from sqlalchemy import create_engine
+from sqlalchemy.exc import TimeoutError as PoolCheckoutTimeout
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
+from app.models import Base
 from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.runtime.graph_projection.worker import GraphProjectionWorker
 from p7_graph_support import seed_projection_fixture, sqlite_engine
@@ -192,3 +195,48 @@ def test_idle_connectivity_failure_marks_projector_degraded_without_exiting() ->
     )
 
     assert states == ["degraded"]
+
+
+def test_pool_exhaustion_recovers_in_same_loop_and_projects_once(tmp_path) -> None:
+    engine = create_engine(f"sqlite:///{tmp_path / 'projector.sqlite3'}",
+        pool_size=1, max_overflow=0, pool_timeout=0.02)
+    Base.metadata.create_all(engine)
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = seed_projection_fixture(db, suffix="checkout")
+        outbox_id = fixture.outbox.id
+    held = engine.connect()
+    stop, states = threading.Event(), []
+    store = RecordingStore()
+    def observe(state):
+        states.append(state)
+        if state == "degraded":
+            held.close()
+        elif state == "ready":
+            stop.set()
+    try:
+        GraphProjectionWorker(session_factory=_session_factory(engine), store=store,
+            worker_id="checkout-recovery").run_loop(stop_event=stop, state_listener=observe)
+        assert states == ["degraded", "ready"]
+        assert len(store.commands) == 1
+        with Session(engine) as db:
+            row = db.get(models.GraphProjectionOutbox, outbox_id)
+            assert row.status == "succeeded" and row.attempt_count == 1
+    finally:
+        held.close()
+        engine.dispose()
+
+
+def test_repeated_checkout_timeouts_back_off_and_never_report_ready(monkeypatch) -> None:
+    states, delays = [], []
+    class Stop:
+        stopped = False
+        def is_set(self): return self.stopped
+        def wait(self, delay):
+            delays.append(delay)
+            self.stopped = len(delays) == 6
+    worker = GraphProjectionWorker(session_factory=lambda: None, store=RecordingStore(), worker_id="backoff")
+    def unavailable(**kwargs): raise PoolCheckoutTimeout("synthetic checkout timeout")
+    monkeypatch.setattr(worker, "process_batch", unavailable)
+    worker.run_loop(stop_event=Stop(), state_listener=states.append)
+    assert states == ["degraded"] * 6
+    assert delays == [2, 4, 8, 16, 30, 30]

@@ -60,8 +60,8 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
     class Workflows:
         capture_credential = staticmethod(generation_workflows.capture_credential)
         resolve_credential = staticmethod(generation_workflows.resolve_credential)
-        capture_names = staticmethod(lambda *args, **kwargs: {})
-        assert_names_current = staticmethod(lambda *args, **kwargs: None)
+        capture_names = staticmethod(generation_workflows.capture_names)
+        assert_names_current = staticmethod(generation_workflows.assert_names_current)
         today_reader = staticmethod(generation_workflows.today_reader)
         def build(self, session, _material, **kwargs):
             events.append("workflow_build")

@@ -18,7 +18,7 @@ class SituationSourceAccess:
 
 class SituationSourceValidator(Protocol):
     def validate(self, context: SituationValidationContext, source: DeliveredSourceEntry,
-                 *, now: datetime) -> SituationSourceAccess: ...
+                 *, now: datetime, validation=None) -> SituationSourceAccess: ...
 
 
 @runtime_checkable

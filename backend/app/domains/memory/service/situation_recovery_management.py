@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 
 from app.domains.memory.contracts.activity_situation import stable_digest
+from app.domains.memory.contracts.access_validation import MemoryAccessValidation
 from app.domains.memory.exceptions import MemoryConflictError, MemoryValidationError
 from app.domains.memory.models.activity_situation import MemorySituationReceipt
 from app.domains.memory.models.batch import MemoryActivationEpoch
@@ -65,6 +66,7 @@ def list_unsaved(*, scope, db, workflows, cursor=None, limit=20):
         MemorySituationReceipt.sequence.desc()).limit(limit + 1)))
     validator = workflows.situation_validator(db) if workflows.situation_validator else None
     now, items = datetime.now(UTC), []
+    validation = MemoryAccessValidation(db, now)
     discard_busy = live_scope_lease(db, setting.id, now=now)
     for row in rows[:limit]:
         visible = False
@@ -73,7 +75,7 @@ def list_unsaved(*, scope, db, workflows, cursor=None, limit=20):
                 context = restore_context(db, row)
                 entries = (*context.sources, *context.result_sources)
                 visible = context.snapshot.scope == scope and bool(entries) and all(
-                    (access := validator.validate(context, entry, now=now)).state in {"available", "deleted"}
+                    (access := validator.validate(context, entry, now=now, validation=validation)).state in {"available", "deleted"}
                     and not (entry.role == "prior" and access.state == "deleted")
                     for entry in entries)
             except (ValueError, TypeError, KeyError):

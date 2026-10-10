@@ -63,7 +63,8 @@ def configured(tmp_path, provider="nanogpt", model="krea-v2/turbo", cap=4):
         setting = media.read_generation(db, owner, CHARACTER)
         media.write_generation(db, owner, CHARACTER, GenerationSettingsWrite(expected_revision=setting["revision"],
             provider=provider, model=model, auto_enabled=True, daily_limit=cap, installation_daily_limit=cap,
-            appearance="short hair", style="ink", negative="blur", options=options, api_key="only-a-fake-key"),
+            appearance="short hair", style="ink", negative="blur", options=options,
+            api_key=None if provider == "comfyui" else "only-a-fake-key"),
             validated_connection=connection)
         db.commit()
     return sessions, media, fake

@@ -66,9 +66,10 @@ def admit(db, *, post, owner_id, character_id, scene, scene_error, prepare, quot
 
 
 class GenerationWorker:
-    def __init__(self, sessions, assets, execution, *, spool: Path, clock=lambda: datetime.now(timezone.utc)):
+    def __init__(self, sessions, assets, execution, *, spool: Path, clock=lambda: datetime.now(timezone.utc), local_work=None):
         self.sessions, self.assets, self.execution = sessions, assets, execution
         self.spool, self.clock = spool, clock
+        self._local_work = local_work
         self.task = None
         self.stopping = False
         # Bounded recovery buffer for a failed disk write. The durable attempt
@@ -190,7 +191,18 @@ class GenerationWorker:
                 logging.getLogger(__name__).warning("image_worker_local_failure:%s", type(exc).__name__)
             await asyncio.sleep(1)
 
+    async def _local(self, operation, *args):
+        # Runtime supplies an owned bounded worker; synchronous domain fixtures
+        # may execute the same operation directly without transporting Sessions.
+        if self._local_work is None:
+            return operation(*args)
+        return await self._local_work(operation, *args)
+
     async def tick(self):
+        for job_id in await self._local(self._pending_jobs):
+            await self.process(job_id)
+
+    def _pending_jobs(self):
         with self.sessions() as db:
             for manifest in self.spool.glob("*.json"):
                 if not manifest.stem.isdecimal():
@@ -202,8 +214,7 @@ class GenerationWorker:
             jobs = list(db.scalars(select(PostImageGenerationJob.id).where(
                 PostImageGenerationJob.intent_id.is_not(None),
                 PostImageGenerationJob.status.in_(("queued", "running", "result_pending", "result_ready"))).order_by(PostImageGenerationJob.id).limit(8)))
-        for job_id in jobs:
-            await self.process(job_id)
+        return tuple(jobs)
 
     def _spool_paths(self, job_id):
         return self.spool / f"{job_id}.pixels", self.spool / f"{job_id}.json"
@@ -238,6 +249,29 @@ class GenerationWorker:
 
     async def process(self, job_id):
         token = uuid4().hex
+        execution = await self._local(self._prepare_job, job_id, token)
+        if execution is None:
+            return
+        async def submission_started():
+            await self._local(self._submission_started, job_id, token)
+        async def receipt_received(receipt):
+            nonlocal received_receipt
+            received_receipt = receipt
+            await self._local(self._receipt_received, job_id, token, receipt)
+        async def diagnostic_received(value):
+            await self._local(self._diagnostic_received, job_id, token, value)
+        result = None
+        received_receipt = None
+        try:
+            result = await self.execution.submit(execution, on_receipt=receipt_received,
+                on_submit=submission_started, on_diagnostic=diagnostic_received)
+            await self._local(self._receive_result, job_id, token, result)
+        except asyncio.CancelledError:
+            raise  # Submitted work remains recoverable; no cancellation refund.
+        except Exception as exc:
+            await self._local(self._failed_result, job_id, token, exc, result, received_receipt)
+
+    def _prepare_job(self, job_id, token):
         with self.sessions() as db:
             job = db.get(PostImageGenerationJob, job_id)
             if job is None or job.intent_id is None:
@@ -308,102 +342,103 @@ class GenerationWorker:
                 self._fail(db, job, "generation_reservation_missing", release=True)
                 return
             db.commit()
-        async def submission_started():
-            with self.sessions() as submit_db:
-                current = submit_db.get(PostImageGenerationJob, job_id)
-                if current is None or current.status != "running" or current.lease_token != token:
-                    raise ImagePreparationError("image_job_changed_before_submission")
-                # Recheck current ownership/settings immediately before external submission.
-                self.execution.prepare(submit_db, current, submit_db.get(ImageIntent, current.intent_id))
-                reserved = submit_db.scalar(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
-                    ImageGenerationAttempt.status == "reserved"))
-                if reserved is None:
-                    raise ImagePreparationError("generation_reservation_missing")
-                reserved.status = "submitted"
-                self._transition_attempt(submit_db, reserved)
-                current.attempt_count += 1
-                submit_db.commit()
-        async def receipt_received(receipt):
-            nonlocal received_receipt
-            received_receipt = receipt
-            with self.sessions() as receipt_db:
-                current = receipt_db.get(PostImageGenerationJob, job_id)
-                if current and current.lease_token == token:
-                    current.provider_receipt = receipt
-                    for attempt in receipt_db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
-                        ImageGenerationAttempt.status == "submitted")):
-                        attempt.receipt = receipt
-                    receipt_db.commit()
-        result = None
-        received_receipt = None
-        async def diagnostic_received(value):
-            value = diagnostic_projection(value)
-            if value is None:
+        return execution
+
+    def _submission_started(self, job_id, token):
+        with self.sessions() as submit_db:
+            current = submit_db.get(PostImageGenerationJob, job_id)
+            if current is None or current.status != "running" or current.lease_token != token:
+                raise ImagePreparationError("image_job_changed_before_submission")
+            # Recheck current ownership/settings immediately before external submission.
+            self.execution.prepare(submit_db, current, submit_db.get(ImageIntent, current.intent_id))
+            reserved = submit_db.scalar(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
+                ImageGenerationAttempt.status == "reserved"))
+            if reserved is None:
+                raise ImagePreparationError("generation_reservation_missing")
+            reserved.status = "submitted"
+            self._transition_attempt(submit_db, reserved)
+            current.attempt_count += 1
+            submit_db.commit()
+
+    def _receipt_received(self, job_id, token, receipt):
+        with self.sessions() as receipt_db:
+            current = receipt_db.get(PostImageGenerationJob, job_id)
+            if current and current.lease_token == token:
+                current.provider_receipt = receipt
+                for attempt in receipt_db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
+                    ImageGenerationAttempt.status == "submitted")):
+                    attempt.receipt = receipt
+                receipt_db.commit()
+
+    def _diagnostic_received(self, job_id, token, value):
+        value = diagnostic_projection(value)
+        if value is None:
+            return
+        with self.sessions() as diagnostic_db:
+            diagnostic_db.execute(update(PostImageGenerationJob).where(PostImageGenerationJob.id == job_id,
+                PostImageGenerationJob.status == "running", PostImageGenerationJob.lease_token == token)
+                .values(provider_diagnostic_json=json.dumps(value)))
+            diagnostic_db.commit()
+
+    def _receive_result(self, job_id, token, result):
+        pixels_path, manifest_path = self._spool_paths(job_id)
+        with self.sessions() as received_db:
+            current = received_db.get(PostImageGenerationJob, job_id)
+            claimed = received_db.execute(update(PostImageGenerationJob).where(
+                PostImageGenerationJob.id == job_id, PostImageGenerationJob.status == "running",
+                PostImageGenerationJob.lease_token == token).values(status="result_pending"))
+            if current is None or claimed.rowcount != 1:
+                self.received_results.pop(job_id, None)
+                pixels_path.unlink(missing_ok=True)
+                manifest_path.unlink(missing_ok=True)
                 return
-            with self.sessions() as diagnostic_db:
-                diagnostic_db.execute(update(PostImageGenerationJob).where(PostImageGenerationJob.id == job_id,
-                    PostImageGenerationJob.status == "running", PostImageGenerationJob.lease_token == token)
-                    .values(provider_diagnostic_json=json.dumps(value)))
-                diagnostic_db.commit()
-        try:
-            result = await self.execution.submit(execution, on_receipt=receipt_received,
-                on_submit=submission_started, on_diagnostic=diagnostic_received)
-            with self.sessions() as received_db:
-                current = received_db.get(PostImageGenerationJob, job_id)
-                claimed = received_db.execute(update(PostImageGenerationJob).where(
-                    PostImageGenerationJob.id == job_id, PostImageGenerationJob.status == "running",
-                    PostImageGenerationJob.lease_token == token).values(status="result_pending"))
-                if current is None or claimed.rowcount != 1:
-                    self.received_results.pop(job_id, None)
-                    pixels_path.unlink(missing_ok=True)
-                    manifest_path.unlink(missing_ok=True)
-                    return
-                # Hold only a local writer transaction while fencing and
-                # spooling. A deletion cannot finish and then be followed by
-                # a late provider response recreating its private files.
-                self.execution.prepare(received_db, current, received_db.get(ImageIntent, current.intent_id))
-                self.received_results[job_id] = result
-                while len(self.received_results) > 4:
-                    self.received_results.popitem(last=False)
-                current.provider_receipt = result.receipt or current.provider_receipt
-                for attempt in received_db.scalars(select(ImageGenerationAttempt).where(
-                    ImageGenerationAttempt.job_id == job_id, ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
-                    attempt.status = "result_received"
-                    self._transition_attempt(received_db, attempt)
-                metadata = self._write_received(job_id, result)
-                self._persist_result(received_db, current, result.content, metadata)
-            self.received_results.pop(job_id, None)
-        except asyncio.CancelledError:
-            raise  # A submitted job stays recoverable; cancellation never refunds it.
-        except Exception as exc:
-            with self.sessions() as db:
-                current = db.get(PostImageGenerationJob, job_id)
-                if current and current.lease_token == token:
-                    if isinstance(exc, ImagePreparationError):
-                        self.received_results.pop(job_id, None)
-                        for path in self._spool_paths(job_id):
-                            path.unlink(missing_ok=True)
-                        self._fail(db, current, str(exc))
-                    elif result is not None or manifest_path.is_file():
-                        for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
-                            ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
-                            attempt.status = "result_received"
-                            self._transition_attempt(db, attempt)
-                        current.status = "result_pending"
-                        current.lease_until = self.clock()
-                        current.failure_class = "local_result_persistence_pending"
-                        db.commit()
-                    else:
-                        current.provider_receipt = received_receipt or current.provider_receipt
-                        code = str(exc) if isinstance(exc, (ImagePreparationError, ImageSubmissionError)) else "generation_submission_failed"
-                        if value := diagnostic_projection(getattr(exc, "diagnostic", None)):
-                            current.provider_diagnostic_json = json.dumps(value)
-                        self._fail(db, current, code, unknown=getattr(exc, "outcome_unknown", False) or (received_receipt is not None and not isinstance(exc, ImageSubmissionError)),
-                            release=isinstance(exc, ImagePreparationError) and received_receipt is None)
-                elif current is None or current.status in {"cancelled", "failed", "skipped"}:
+            # Hold only a local writer transaction while fencing and
+            # spooling. A deletion cannot finish and then be followed by
+            # a late provider response recreating its private files.
+            self.execution.prepare(received_db, current, received_db.get(ImageIntent, current.intent_id))
+            self.received_results[job_id] = result
+            while len(self.received_results) > 4:
+                self.received_results.popitem(last=False)
+            current.provider_receipt = result.receipt or current.provider_receipt
+            for attempt in received_db.scalars(select(ImageGenerationAttempt).where(
+                ImageGenerationAttempt.job_id == job_id, ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
+                attempt.status = "result_received"
+                self._transition_attempt(received_db, attempt)
+            metadata = self._write_received(job_id, result)
+            self._persist_result(received_db, current, result.content, metadata)
+        self.received_results.pop(job_id, None)
+
+    def _failed_result(self, job_id, token, exc, result, received_receipt):
+        pixels_path, manifest_path = self._spool_paths(job_id)
+        with self.sessions() as db:
+            current = db.get(PostImageGenerationJob, job_id)
+            if current and current.lease_token == token:
+                if isinstance(exc, ImagePreparationError):
                     self.received_results.pop(job_id, None)
                     for path in self._spool_paths(job_id):
                         path.unlink(missing_ok=True)
+                    self._fail(db, current, str(exc))
+                elif result is not None or manifest_path.is_file():
+                    for attempt in db.scalars(select(ImageGenerationAttempt).where(ImageGenerationAttempt.job_id == job_id,
+                        ImageGenerationAttempt.status.in_(("submitted", "outcome_unknown")))):
+                        attempt.status = "result_received"
+                        self._transition_attempt(db, attempt)
+                    current.status = "result_pending"
+                    current.lease_until = self.clock()
+                    current.failure_class = "local_result_persistence_pending"
+                    db.commit()
+                else:
+                    current.provider_receipt = received_receipt or current.provider_receipt
+                    code = str(exc) if isinstance(exc, (ImagePreparationError, ImageSubmissionError)) else "generation_submission_failed"
+                    if value := diagnostic_projection(getattr(exc, "diagnostic", None)):
+                        current.provider_diagnostic_json = json.dumps(value)
+                    self._fail(db, current, code, unknown=getattr(exc, "outcome_unknown", False) or (received_receipt is not None and not isinstance(exc, ImageSubmissionError)),
+                        release=isinstance(exc, ImagePreparationError) and received_receipt is None)
+            elif current is None or current.status in {"cancelled", "failed", "skipped"}:
+                self.received_results.pop(job_id, None)
+                for path in self._spool_paths(job_id):
+                    path.unlink(missing_ok=True)
+
 
     def _persist_result(self, db, job, content, metadata):
         try:

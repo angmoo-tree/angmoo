@@ -11,6 +11,7 @@ from pathlib import Path
 
 from PIL import Image
 from sqlalchemy import select
+from app.core.sqlite_concurrency import SqliteAsyncTaskQueue
 
 from app.domains.characters.models import Character, CharacterCardSource, AgentImageGenerationSetting
 from app.domains.chat.models import MessageThread
@@ -83,7 +84,9 @@ class MediaRuntime:
         self.clients = clients or {"novelai": NovelImageClient(), "nanogpt": ImageApiClient("nanogpt"), "openrouter": ImageApiClient("openrouter")}
         from app.runtime.media.world_vision import WorldVisionPolicies
         self.interpretation = InterpretationService(sessions, self.assets, interpreter or GeminiImageInterpreter(), quota_day=quota_day, policies=WorldVisionPolicies())
-        self.worker = GenerationWorker(sessions, self.assets, self, spool=root / "received-results")
+        self._canonical_work = SqliteAsyncTaskQueue(capacity=4, closed_code="media_canonical_worker_closed")
+        self.worker = GenerationWorker(sessions, self.assets, self, spool=root / "received-results",
+            local_work=self._canonical_work.call)
         self._maintenance_task = None
 
     def read_generation(self, db, user, character_id):
@@ -196,21 +199,27 @@ class MediaRuntime:
         if self._maintenance_task is not None:
             return
         binding.register(self)
+        await self._canonical_work.call(self._startup_maintenance)
+        await self.worker.start()
+        self._maintenance_task = asyncio.create_task(self._maintain())
+
+    def _startup_maintenance(self):
         self.cleanup_deleted_assets()
         with self.sessions() as db:
             self.assets.expire_drafts(db, datetime.now(timezone.utc))
         self.interpretation.recover_elapsed()
-        await self.worker.start()
-        self._maintenance_task = asyncio.create_task(self._maintain())
+
+    def _maintenance(self):
+        with self.sessions() as db:
+            self.assets.expire_drafts(db, datetime.now(timezone.utc))
+        self.interpretation.recover_elapsed()
+        self.cleanup_deleted_assets()
 
     async def _maintain(self):
         while True:
             await asyncio.sleep(60)
             try:
-                with self.sessions() as db:
-                    self.assets.expire_drafts(db, datetime.now(timezone.utc))
-                self.interpretation.recover_elapsed()
-                self.cleanup_deleted_assets()
+                await self._canonical_work.call(self._maintenance)
             except Exception as exc:
                 logging.getLogger(__name__).warning("image_maintenance_failed type=%s", type(exc).__name__)
 
@@ -223,7 +232,9 @@ class MediaRuntime:
             except asyncio.CancelledError:
                 pass
         await self.worker.stop()
+        await self._canonical_work.drain()
         await self.interpretation.close()
+        self._canonical_work.close()
         binding.unregister(self)
 
     def cleanup_deleted_assets(self):

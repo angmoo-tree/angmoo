@@ -7,6 +7,7 @@ import logging
 import threading
 import time
 from typing import Callable
+from sqlalchemy.exc import TimeoutError as PoolCheckoutTimeout
 
 from app.domains.relationships.contracts.outbox import (OutboxPort, ProjectionWorkItem)
 from app.domains.relationships.contracts.projection import (
@@ -279,8 +280,20 @@ class GraphProjectionWorker:
     ) -> None:
         interval = max(1.0, poll_interval_seconds)
         stop = stop_event or threading.Event()
+        retry_delay = interval
         while not stop.is_set():
-            result = self.process_batch(stop_event=stop)
+            try:
+                result = self.process_batch(stop_event=stop)
+            except PoolCheckoutTimeout:
+                # Keep the registered worker alive. Any claimed commands retain
+                # their existing lease/finalize fence and expire normally.
+                logger.warning("graph_projector_canonical_checkout_timeout")
+                if state_listener is not None:
+                    state_listener("degraded")
+                stop.wait(retry_delay)
+                retry_delay = min(retry_delay * 2, max(interval, 30.0))
+                continue
+            retry_delay = interval
             if result.graph_degraded:
                 if state_listener is not None:
                     state_listener("degraded")

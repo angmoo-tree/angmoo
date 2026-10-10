@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import sqlite3
 import time
+import asyncio
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
-from threading import BoundedSemaphore
+from threading import BoundedSemaphore, Lock
 from typing import TypeVar
 
 from sqlalchemy import Connection, Engine
@@ -331,6 +332,59 @@ class SqliteBoundedTaskQueue:
         self.close()
 
 
+def _consume_async_work(waiter):
+    if not waiter.cancelled():
+        waiter.exception()
+
+
+class SqliteAsyncTaskQueue:
+    """Own bounded synchronous work until completion, including cancellation.
+
+    Operations must open and close their own Sessions inside the worker. No
+    request Session or ORM entity may cross this execution boundary.
+    """
+
+    def __init__(self, *, capacity=2, closed_code="sqlite_async_worker_closed"):
+        self._queue = SqliteBoundedTaskQueue(max_workers=1, capacity=capacity)
+        self._lock = Lock()
+        self._futures = set()
+        self.closed = False
+        self._closed_code = closed_code
+
+    async def call(self, operation, *args, **kwargs):
+        if self.closed:
+            raise RuntimeError(self._closed_code)
+        future = self._queue.submit(operation, *args, **kwargs)
+        with self._lock:
+            self._futures.add(future)
+        def complete(done):
+            with self._lock:
+                self._futures.discard(done)
+            if not done.cancelled():
+                done.exception()
+        future.add_done_callback(complete)
+        waiter = asyncio.wrap_future(future)
+        waiter.add_done_callback(_consume_async_work)
+        try:
+            return await asyncio.shield(waiter)
+        except asyncio.CancelledError:
+            future.cancel()  # Running work remains owned; queued work can stop.
+            raise
+
+    async def drain(self):
+        with self._lock:
+            pending = tuple(self._futures)
+        waiters = [asyncio.wrap_future(future) for future in pending]
+        for waiter in waiters:
+            waiter.add_done_callback(_consume_async_work)
+        if waiters:
+            await asyncio.wait(waiters)
+
+    def close(self):
+        self.closed = True
+        self._queue.close(wait=False)
+
+
 def _is_busy_error(exc: BaseException) -> bool:
     code, _ = sqlite_error_identity(exc)
     if code is not None:
@@ -344,6 +398,7 @@ def _is_busy_error(exc: BaseException) -> bool:
 
 
 __all__ = [
+    "SqliteAsyncTaskQueue",
     "SqliteBoundedTaskQueue",
     "SqliteBusyRetryExhausted",
     "SqliteConcurrencyError",

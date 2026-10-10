@@ -1,5 +1,26 @@
 # Angmoo Backend Architecture
 
+## Runtime contention recovery and Media SQL ownership (2026-10-11 LOCAL)
+
+Runtime Media owns a bounded, single-worker `SqliteAsyncTaskQueue`, using the same
+cancellation/drain contract as `MemoryCanonicalWork`. Image job discovery, leased
+preparation, submission/receipt/diagnostic transitions, result persistence and
+maintenance open and close their own Sessions inside that worker. Provider I/O
+stays asynchronous. Request Sessions and ORM entities never cross this boundary;
+ownership/settings rechecks, quotas, result spooling and lease-token fences remain.
+Shutdown stops producers and drains running local work before unregistering Media.
+
+The graph projector retains its registered loop after canonical checkout timeouts
+and reports degraded until a real successful batch/probe. Backoff is bounded at
+30 seconds with the normal runtime polling interval. Memory FTS page failures retry
+without requiring a new commit, retaining 32-item pages and the existing
+build/validate/orphan/promotion fence. Persistent failures remain degraded.
+Unsaved-experience pages share `MemoryAccessValidation` only within one synchronous
+request, Session and timestamp; every later read revalidates current source/access.
+Pool capacity, readiness/health criteria and authorization policies are unchanged.
+
+Evidence: [implementation, tradeoffs and local Docker checks](../docs/verification/docker-runtime-limited-features-20261011.md).
+
 ## Chat participant presentation and historical relationship evidence (2026-10-11 LOCAL)
 
 Chat admission derives `chat_identity_context.v1` from the existing NameBinding v1,
