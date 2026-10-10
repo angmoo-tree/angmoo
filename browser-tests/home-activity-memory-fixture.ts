@@ -16,8 +16,9 @@ export async function installIntegrationFixture(page: Page, isStatic: boolean, b
   const ui = await installUiFixture(page, isStatic, baseURL, language);
   const state = {
     ui, unexpected, draftWorld: false, policyFailure: 0, snsFailure: 0,
-    runtimeFailure: 0, runtimeDelay: 0, runtimeKnown: true, completeFailure: false,
-    completeCalls: 0, registrations: 0, reads: [] as string[], writes: [] as { path: string; body: Record<string, unknown> }[],
+    runtimeFailure: 0, runtimeDelay: 0, runtimeKnown: true, completeFailure: false, draftReadFailure: 0,
+    completeCalls: 0, registrations: 0, registrationScopeFailure: "none" as "none" | "missing" | "world" | "character",
+    reads: [] as string[], writes: [] as { path: string; body: Record<string, unknown> }[],
     mood: "curious", note: "Original state note\n실제 저장된 확인 문장입니다.", confirmedAt: "2026-10-09T08:01:00Z" as string | null,
     engine: "personalized_graph_v2" as string | null, engineVersion: 1,
     transition: "ready" as "ready" | "pending_settlement" | "needs_preparation" | "pending_conversion",
@@ -89,6 +90,7 @@ export async function installIntegrationFixture(page: Page, isStatic: boolean, b
       return reply(failure ? { detail: "synthetic_runtime_unavailable" } : snapshot, failure || 200);
     }
     if (path.startsWith("/agents/drafts")) {
+      if (method === "GET" && state.draftReadFailure) return reply({ detail: "draft_access_forbidden" }, state.draftReadFailure);
       if (method !== "GET") state.writes.push({ path, body });
       if (path === "/agents/drafts" && method === "POST") {
         state.draft = { id: "integration-draft", revision: 1, contract_version: 2, target_world_id: String(body.target_world_id ?? FEED_WORLD),
@@ -104,7 +106,11 @@ export async function installIntegrationFixture(page: Page, isStatic: boolean, b
         if (state.draft.status !== "completed") { state.registrations++; state.draft.status = "completed"; }
         if (state.completeFailure) { state.completeFailure = false; return reply({ detail: "synthetic_response_lost" }, 503); }
         return reply({ character: { id: `character-${WORLD_AGENT}`, name: state.draft.name, execution_mode: "llm" },
-          registration_scope: { world_id: state.draft.target_world_id, world_character_id: WORLD_AGENT, character_id: `character-${WORLD_AGENT}` } });
+          registration_scope: state.registrationScopeFailure === "missing" ? null : {
+            world_id: state.registrationScopeFailure === "world" ? "unexpected-world" : state.draft.target_world_id,
+            world_character_id: WORLD_AGENT,
+            character_id: state.registrationScopeFailure === "character" ? "unexpected-character" : `character-${WORLD_AGENT}`,
+          } });
       }
       if (method === "PATCH") {
         expect(body.revision).toBe(state.draft.revision);

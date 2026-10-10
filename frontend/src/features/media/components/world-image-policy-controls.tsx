@@ -7,6 +7,7 @@ import { SettingsCard } from "@/components/ui/settings-card";
 import { CredentialFields, type SecretKeyMetadata, type SecretMetadata, type SecretProfile } from "@/components/ui/credential-fields";
 import { mergeEditedValue } from "@/lib/state/edited-fields";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiErrorText } from "@/hooks/use-ui-error-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
@@ -60,7 +61,8 @@ function ConflictReview({ policy, onReview }: { policy: ReturnType<typeof usePol
 }
 
 export function WorldVisionControls(props: { worldId: string; actorId: string }) {
-  return <ScopedVisionControls key={`${props.worldId}:${props.actorId}`} {...props} />;
+  const identity = useAuthRuntimeIdentity(`${props.worldId}:${props.actorId}:vision`);
+  return <ScopedVisionControls key={identity} {...props} />;
 }
 function ScopedVisionControls({ worldId, actorId }: { worldId: string; actorId: string }) {
   const t = useUiText("media"), policy = usePolicy(worldId, actorId);
@@ -85,7 +87,8 @@ import { imageUsesServiceKey } from "../utils/image-key-presentation";
 const emptySettings = (): WorldImageSettings => ({ appearance: "", style: "", negative: "", reference_enabled: false, reference_asset_id: null, profiles: {} });
 const modelLabels: Record<string, string> = { "nai-diffusion-4-5-full": "NovelAI V4.5 Full", "krea-v2/turbo": "Krea 2 Turbo", "z-image-turbo": "Z-Image Turbo", "nano-banana-2": "Nano Banana 2", "krea/krea-2-medium-turbo": "Krea 2 Medium Turbo", "google/gemini-3.1-flash-image": "Nano Banana 2", "openai/gpt-image-2.5-flare": "GPT Image 2.5 Flare" };
 export function WorldImageGenerationCard(props: { worldId: string; actorId: string; onBusyChange?: (busy: boolean) => void }) {
-  return <ScopedGenerationCard key={`${props.worldId}:${props.actorId}`} {...props} />;
+  const identity = useAuthRuntimeIdentity(`${props.worldId}:${props.actorId}:image`);
+  return <ScopedGenerationCard key={identity} {...props} />;
 }
 function ScopedGenerationCard({ worldId, actorId, onBusyChange }: { worldId: string; actorId: string; onBusyChange?: (busy: boolean) => void }) {
   const t = useUiText("media"), policy = usePolicy(worldId, actorId);
@@ -98,6 +101,7 @@ function ScopedGenerationCard({ worldId, actorId, onBusyChange }: { worldId: str
   const [credentialBusy, setCredentialBusy] = useState(false);
   const notifyBusy = useEffectEvent((value: boolean) => onBusyChange?.(value));
   useEffect(() => { notifyBusy(policy.busy || uploading || credentialBusy); }, [policy.busy, uploading, credentialBusy]);
+  useEffect(() => () => notifyBusy(false), []);
   const [comfyReferenceSupported, setComfyReferenceSupported] = useState(false);
   useEffect(() => { const controller = new AbortController(); void getCatalog(controller.signal).then(value => { if (!controller.signal.aborted) setCatalog(value); }).catch(() => undefined); return () => controller.abort(); }, []);
   const value = draft ?? (policy.read ? { settings: { ...emptySettings(), ...policy.read.generation_settings }, cap: policy.read.generation_limit, enabled: policy.read.generation_enabled, baseline: policy.read } : null);

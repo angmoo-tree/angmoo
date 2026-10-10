@@ -4,9 +4,8 @@ import { Button } from "./button";
 import { Field, Input, Select } from "./form-controls";
 import { InlineError } from "./feedback";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
-import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 
 export type SecretMetadata = { provider: string; model: string; thinking_level: string | null; has_key: boolean; has_partner_key?: boolean; fingerprint: string | null; revision: number; configuration_revision?: number | null; key_revision?: number | null };
 export type SecretKeyMetadata = { provider: string; has_key: boolean; fingerprint: string | null; key_revision: number };
@@ -32,14 +31,8 @@ const profileKey = (p: SecretProfile | SecretMetadata) => `${p.provider}:${p.mod
 
 /** Write-only input. The caller supplies the authorized owner transport. */
 export function CredentialFields(props: Props) {
-  const { user, sessionRevision } = useAuth();
-  const [runtimeRevision, setRuntimeRevision] = useState(0);
-  useEffect(() => {
-    const changed = () => setRuntimeRevision(value => value + 1);
-    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
-    return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
-  }, []);
-  return <ScopedCredentialFields key={`${props.scopeKey}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} {...props} />;
+  const identity = useAuthRuntimeIdentity(props.scopeKey);
+  return <ScopedCredentialFields key={identity} {...props} />;
 }
 
 function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, onMetadata, onProfileChange, onSaved, onDirtyChange, onBusyChange, children, initialMetadata, showSecretFields, readSelectedKey, onSelectedKey }: Props) {

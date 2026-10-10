@@ -25,6 +25,16 @@ autonomy-setup URL reads the owned Studio list for unpublished actor scopes.
 Studio's link is Activity settings. Published detailed settings reuse the same
 policy/credential/image APIs. SNS save refreshes eligibility from saved facts.
 
+Registration success is distinct from activity-scope recovery. A missing or
+mismatched registration_scope retains the completed receipt and sixth step,
+offers an explicit receipt review, and permits Done/Skip without mounting cards
+for an unverified scope. The neutral use-auth-runtime-identity hook keys creation,
+credential and image-policy component lifetimes by auth session and runtime;
+identity changes discard unsaved inputs, including the Media-owned Partner key,
+and cancel scoped effects. Callers retain their DTO and authorization checks.
+The additional exception and isolation coverage is recorded in the
+[2026-10-10 review](../docs/verification/home-activity-memory-topics-review-20261010.md).
+
 World status composes the stored current_state into the neutral status card:
 state, mood/intensity, full original note and confirmed_at precede name/intro and
 recent/next activity. Only the World identity handle badge is absent; Device

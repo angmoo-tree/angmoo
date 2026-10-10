@@ -1,9 +1,31 @@
 # Angmoo 기능 보존과 현재 코드 읽기 지도
 
-## 2026-10-09 World 요약·관계와 설정의 현재 경로
+## 2026-10-10 기기 홈·활동 설정·SNS 기억 출처·World 주제의 현재 경로
+
+이 절은 아래 10-09 표시 계약을 현재 10-10 구현에 맞게 보완한다. 역사 inventory,
+schema builder, baseline과 당시 검증 수는 재작성하지 않는다.
+
+| 기능 | 현재 소유와 조립 경로 | 보존하는 경계 |
+| --- | --- | --- |
+| 기기 홈·World 탐색 | frontend의 `composition/screens/device-home-shell`과 runtime navigation | 홈의 전역 footer와 전용 여백만 제거. 기존 아이콘·World 목록·다른 화면 복귀·World 5탭 유지 |
+| 기본 활동 설정·ON | `domains/world_characters/service/management`, `schemas/basic_activity`와 runtime activity | 개시 전 현재 소유 캐릭터의 세 카드 read/save 허용. 기존 저장 정책·credential·CAS·ON eligibility 공유, draft ON/일반 실행 권한은 허용하지 않음 |
+| 등록·선택 여섯 번째 단계 | `runtime/characters/registration`, frontend Characters와 `world-character-basic-settings` composition | 원자 OFF 등록·durable receipt·중복 방지. 연결 정보 실패는 등록 완료와 분리해 재확인/건너뛰기, 저장·ON은 명시적 조작만 허용 |
+| 미저장 입력 수명 | 중립 `hooks/use-auth-runtime-identity`와 각 feature의 DTO/abort 검사 | auth/runtime 변경 때 생성·credential·image policy/Partner 키의 미저장 입력 제거. 같은 scope의 편집 충돌과 각 feature의 권한 책임 유지 |
+| 오늘 활동·SNS 입력 | `domains/social/contracts/today_activity`, Social Today 생산자, runtime SNS 입력·상황기억 capture | parent ID/body의 실제 전달 쌍과 source/target/root 의미 유지. 부모 전체 트리·추가 AI·Feed 관찰 합성 없음 |
+| 과거 출처 정정·저장·소비 | Memory typed contracts/policy, `repository/situation_source_bindings`, `situation_apply`, runtime sources | fixed append-only binding·validation revision·같은 Session/UoW·원본 manifest 불변. 조회/정정/검색의 현재 자식·부모 접근 재검증, 기존 개별/전체 재검사·포기·공유 근거 보존 |
+| 스키마·사용자 자료 | SQLite v35 / Alembic 20261010_0112, runtime staged upgrade | 새 binding table 이외 과거 schema/row/암호화 key 보존. 원본 36건은 자동 처리하지 않으며 사본 판독과 원본 적용 구분 |
+| World 주제 종료 | Social recommendation lifecycle/API/catalog·topic dictionary, Creator Studio composition | 접근 검사 후 World 전용 GET/PUT/POST 410. 유효 actor 관심·OFF 출처·shared ID/cache/history/기존 PostTopic 보존. World marker·늦은 result·Studio 전용 도구 종료 |
+| 상태·관계·주제 표시 | Characters/Social/Relationships feature와 World composition, 중립 status card | 저장 mood·메모·확인 시각, 관계 graph·깊이·근거, 최근 활동 내부 scroll 보존. 44px 독립 chevron과 actor 관심 기능 유지, Feed 진단/이력은 해당 설정 DOM에서만 제거하고 DTO 보존 |
+
+제품 코드·로컬 검증의 최초 근거는 [통합 구현 기록](../verification/home-activity-memory-topics-integration-20261010.md),
+64단계 재검토와 예외 보완은 [재검토 기록](../verification/home-activity-memory-topics-review-20261010.md)을 따른다.
+원본 사용자 데이터 적용·실제 AI·CI/PR/main·설치 앱과 별도로 읽는다.
+
+## 2026-10-09 World 요약·관계와 설정 변경 기록
 
 상태 탭의 Characters 일과/ Social 주제는 composition 슬롯에서 조립하며 설정의
-생성·키·Feed 상세와 최근 활동 내부 스크롤을 유지한다. 관계 탭/직접 관계 URL은
+생성·키·당시 Feed 상세와 최근 활동 내부 스크롤을 유지했다. 현재 설정의 Feed 진단
+표시는 위 10-10 계약으로 대체되며 API DTO는 보존한다. 관계 탭/직접 관계 URL은
 `composition/screens/world-app`과 `world-relationships-screen`에서 동일한 Phone 틀을
 사용하고 `features/relationships`의 방향·깊이·근거·정리 표시는 그대로 유지한다.
 신규 외부 생성만 제한하며 기존 외부 캐릭터 읽기·완료 receipt·초안 원문은 보존한다.

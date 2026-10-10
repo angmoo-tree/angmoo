@@ -6,11 +6,12 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText, type UiText } from "@/hooks/use-ui-text";
 
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { confirmProductLeave } from "@/lib/desktop/navigation-guard";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { ApiRequestError } from "@/lib/http/error-contract";
 import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
 import { isTauriDesktopRuntime, navigateDesktopProductRoute } from "@/lib/desktop/product-window";
@@ -42,13 +43,14 @@ function reviewLabel(code: string, uiText: UiText) {
 }
 
 type ActivitySlot = (scope: { worldId: string; actorId: string; onBusyChange: (busy: boolean) => void }) => ReactNode;
-function validateRegistration(result: AgentDetailRead, worldId: string | null) {
+function registrationScope(result: AgentDetailRead, worldId: string | null) {
   const scope = result.registration_scope;
-  if (!scope || scope.character_id !== result.character.id || scope.world_id !== worldId || !scope.world_character_id) throw new Error("등록은 완료됐지만 활동 설정의 연결을 확인하지 못했어요. 등록 결과를 다시 확인해주세요.");
+  return scope && scope.character_id === result.character.id && scope.world_id === worldId && scope.world_character_id ? scope : null;
 }
 export function AgentCreateClient({ renderActivitySettings }: { renderActivitySettings: ActivitySlot }) {
   const query = useRuntimeSearchParams();
-  return <CreationGuide key={query.get("worldId") ?? "default"} renderActivitySettings={renderActivitySettings} />;
+  const identity = useAuthRuntimeIdentity(query.get("worldId") ?? "default");
+  return <CreationGuide key={identity} renderActivitySettings={renderActivitySettings} />;
 }
 
 function CreationGuide({ renderActivitySettings }: { renderActivitySettings: ActivitySlot }) {
@@ -79,6 +81,14 @@ function CreationGuide({ renderActivitySettings }: { renderActivitySettings: Act
   const [confirmCancel, setConfirmCancel] = useState(false);
   const permitCommittedNavigation = useProductLeaveGuard(unsavedInput || Boolean(pendingFile) || busy);
   const requestEpoch = useRef(0);
+  function acceptRegistration(result: AgentDetailRead, registeredDraft: AgentCreationDraftRead) {
+    const scope = registrationScope(result, registeredDraft.target_world_id);
+    setDraft({ ...registeredDraft, status: "completed" });
+    setCreated({ ...result, registration_scope: scope });
+    setStep(5); setUnsavedInput(false); permitCommittedNavigation();
+    setError(scope ? null : uiText("등록은 완료됐지만 활동 설정의 연결을 확인하지 못했어요. 등록 결과를 다시 확인해주세요."));
+  }
+  const acceptRestoredRegistration = useEffectEvent(acceptRegistration);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,8 +109,7 @@ function CreationGuide({ renderActivitySettings }: { renderActivitySettings: Act
             if (value.status === "completed") {
               const result = await completeAgentDraft(value.id, { revision: value.revision });
               if (cancelled || epoch !== requestEpoch.current) return;
-              validateRegistration(result, value.target_world_id);
-              setCreated(result); setStep(5);
+              acceptRestoredRegistration(result, value);
             }
             if (value.source_kind === "card") {
               try {
@@ -220,8 +229,7 @@ function CreationGuide({ renderActivitySettings }: { renderActivitySettings: Act
     try {
       const result = await completeAgentDraft(saved.id, { revision: saved.revision });
       if (epoch !== requestEpoch.current) return;
-      validateRegistration(result, saved.target_world_id);
-      setCreated(result); setStep(5); setUnsavedInput(false); permitCommittedNavigation();
+      acceptRegistration(result, saved);
     } catch (reason) {
       // A lost response may follow a successful commit. Recover the same receipt.
       try { const value = await getAgentDraft(saved.id); if (epoch === requestEpoch.current) setDraft(value); } catch { /* Keep the saved draft for explicit retry. */ }
@@ -251,6 +259,7 @@ function CreationGuide({ renderActivitySettings }: { renderActivitySettings: Act
     <p>{uiText("등록을 마쳤어요. 활동 설정은 선택 사항이며 각 카드에서 별도로 저장해요.")}</p>
     {error && <p role="alert">{error}</p>}
     {created.registration_scope && renderActivitySettings({ worldId: created.registration_scope.world_id, actorId: created.registration_scope.world_character_id, onBusyChange: setSettingsBusy })}
+    {!created.registration_scope && <Button variant="secondary" loading={busy} onClick={() => void perform(finish)}>{uiText("등록 결과 확인")}</Button>}
     <Button loading={busy} disabled={settingsBusy} onClick={() => void perform(returnAfterRegistration)}>{uiText("완료")}</Button>
     <Button variant="secondary" loading={busy} disabled={settingsBusy} onClick={() => void perform(returnAfterRegistration)}>{uiText("건너뛰기")}</Button>
   </section>;
