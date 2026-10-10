@@ -4,6 +4,7 @@
 기준 브랜치는 `feat/0.1.0-release-readiness`, 기준 HEAD는 `0c5eaab04d5067d284ac91b1565d9021ebf9afec`이고 시작 작업 트리는 깨끗했다.
 I00–I60의 구현·관련 검증·변경 범위 검토를 완료했다. 이 기록과 관련 코드만 지정 브랜치의 Signed-off-by 로컬 커밋에 포함한다.
 최종 SHA와 커밋 이후 clean 상태는 workspace 계획의 실행 결과 및 사용자 보고에 남긴다.
+구현 커밋은 `f340963c`이며 110개 관련 파일만 포함했다. 이 기록의 최종 판독 보완도 같은 브랜치의 별도 로컬 커밋으로 보존한다.
 PR·push·CI 워크플로·main 전환/머지·실제 AI 호출·원본 사용자 데이터 쓰기는 하지 않았다.
 
 ## 변경과 보존
@@ -100,7 +101,7 @@ PR·push·CI 워크플로·main 전환/머지·실제 AI 호출·원본 사용�
 | I56 | 관련 표시·미리보기·자르기·완료·신규/가져오기·브랜드·nav·관계 header·사진 첨부 검증 | 완료 | 이 문서의 V01–V35 근거와 별도 미측정 범위 |
 | I57 | 변경 파일 lint·관련 catalog/구조/디자인·자산 고지 검사 | 완료 | 변경된 TypeScript 39개 scoped lint·관련 구조/디자인·라이선스 검사 |
 | I58 | fake 데이터로 ko/en·좁은/넓은 화면·Next/static·오프라인 글꼴 확인 | 완료 | Next/static UI·사진, ko/en, 480/1024/1440px·오프라인 폰트·산출물 빌드 |
-| I59 | diff·완료/미확인·원문 보존 재검토 | 완료 | 관련 diff·원문/데이터 보존·승인 예외 범위·최종 검증 상태 확인 |
+| I59 | diff·완료/미확인·원문 보존 재검토 | 완료 | 관련 diff·원문/데이터 보존·승인 예외 범위·최종 검증 상태 확인. 원문 OFL의 공백 경고는 아래 기록처럼 별도로 구분 |
 | I60 | 지정 브랜치에서 관련 파일만 필요 시 로컬 커밋·결과 보고 | 완료 | 현재 브랜치의 관련 파일만 Signed-off-by 로컬 커밋; 최종 SHA/clean 확인은 workspace 계획의 실행 결과. PR/push/CI/main 없음 |
 
 ## 검증 실행과 선택 근거
@@ -227,8 +228,11 @@ raw 결과/로그/종료 증거는 ignored `artifacts/creator-copy-media-2026101
 - 마지막 사진 소스를 포함한 Next/static 빌드와 restored source-input 설정의 `pnpm exec tsc --noEmit`가 통과했다.
   구조·디자인·catalog·고지 검사의 범위와 기준, canonical screenshot 환경/허용치는 유지했다.
 - 카드 캡처에서 실제 여백·메타 조건부 표시·ko/en 문구와 좁은/넓은 미리보기 배치를 확인했다.
-  scoped lint와 최종 diff whitespace 검사에 실패가 없다. 키·DB·사용자 사진·운영 로그·빌드 산출물은 커밋 대상에 넣지 않는다.
-- 최종 로컬 커밋은 관련 110개 파일로 한정한다. 사용자 서버 3000/18080·운영 Docker·설치 앱은 변경하지 않는다.
+  scoped lint와 제품 코드/작성 문서의 최종 diff whitespace 검사는 통과했다. 전체 신규 파일을 포함한 검사에서는
+  공식 원문 OFL 두 사본(`frontend/src/assets/fonts/quicksand/OFL.txt`, `frontend/public/licenses/Quicksand-OFL.txt`)의 21행 끝 공백만 경고했다.
+  정확한 원문/고지 digest 계약을 지키기 위해 해당 공백은 그대로 보존했다. 이 두 원문만 제외한 diff 검사에 다른 공백 오류는 없다.
+  키·DB·사용자 사진·운영 로그·빌드 산출물은 커밋 대상에 넣지 않는다.
+- 구현 로컬 커밋은 관련 110개 파일로 한정했고, 검증 기록의 이 보완만 별도 로컬 커밋으로 남긴다. 사용자 서버 3000/18080·운영 Docker·설치 앱은 변경하지 않는다.
   이 작업의 3380/3381 preview만 종료하고, 격리 Docker container/network는 정상 종료 뒤 제거했다.
 - 최종 상세 JSON은 `artifacts/creator-copy-final-media-results.json`, `creator-copy-font-profile-results.json`,
   `creator-copy-world-boundary-results.json`, `creator-copy-visual-review-results.json`에도 보존한다.
