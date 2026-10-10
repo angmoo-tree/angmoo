@@ -30,6 +30,7 @@ class TodaySnsActivityAssembler:
         subject_world_character_id: str,
         timezone: str,
         character_labels: dict[str, str],
+        label_reader=None,
         now: datetime,
     ) -> TodaySnsActivitySnapshot:
         if now.tzinfo is None:
@@ -50,6 +51,10 @@ class TodaySnsActivityAssembler:
             complete_through=end_utc,
         )
         entries: list[TodaySnsActivityEntry] = []
+        if label_reader is not None:
+            ids = tuple(dict.fromkeys(identifier for record in source.records for identifier in
+                (record.actor_world_character_id, record.counterpart_world_character_id, *(author for _, author in record.source_authors)) if identifier))
+            character_labels.update({**label_reader(ids[:100]), **character_labels})
         for record in source.records:
             body, body_truncated = _bounded(record.body)
             title, title_truncated = _bounded(record.title, limit=120)
@@ -123,6 +128,9 @@ class TodaySnsActivityAssembler:
                     subjective_context=subjective,
                     thought=None if record.thought is None else record.thought.thought,
                     thought_view=source.thought_view,
+                    actor_id=record.actor_world_character_id,
+                    source_authors=record.source_authors,
+                    counterpart_id=record.counterpart_world_character_id,
                 )
             )
         return TodaySnsActivitySnapshot(
@@ -193,6 +201,9 @@ class TodaySnsSnapshotValidator:
     def __init__(self, reader: TodaySnsActivityReaderPort, character_labels: dict[str, str]) -> None:
         self._assembler = TodaySnsActivityAssembler(reader)
         self._character_labels = dict(character_labels)
+
+    def bind_labels(self, labels):
+        self._character_labels.update(labels)
 
     def assert_current(self, snapshot: TodaySnsActivitySnapshot) -> None:
         try:

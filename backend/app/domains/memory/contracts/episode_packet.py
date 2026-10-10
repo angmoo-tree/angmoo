@@ -14,6 +14,7 @@ from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
 class EpisodeSourceDetail:
     evidence: CanonicalMemoryEvidence
     text: str
+    author_id: str | None = None
 
 
 class EpisodeDetailReader(Protocol):
@@ -35,6 +36,7 @@ class EpisodePacketSource:
     status: Literal["verified", "missing", "changed", "unavailable"]
     start_offset: int = 0
     end_offset: int | None = None
+    author_id: str | None = None
 
     def __post_init__(self):
         if not self.reference or self.status not in {"verified", "missing", "changed", "unavailable"}:

@@ -10,6 +10,8 @@ from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReader
 from app.domains.memory.contracts.inspector import MemoryItemDetail
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
+from app.domains.chat.contracts.relationship_evidence import RelationshipCurrentRead
+from app.domains.memory.contracts.activity_situation import DeliveredInputManifest
 
 
 class RelationshipEvidenceState(Protocol):
@@ -20,6 +22,8 @@ class RelationshipEvidenceState(Protocol):
 
 
 class ChatEvidenceReads(Protocol):
+    def relationships_current(self, db: Session, scope: MemoryScope, locators: tuple[dict, ...]) -> dict[str, RelationshipCurrentRead]: ...
+    def legacy_relationship_manifest(self, db: Session, scope: MemoryScope, request) -> DeliveredInputManifest | None: ...
     def memory_episode_receipt(self, db: Session, scope: MemoryScope, *, item_id: str, text: str) -> tuple[str, dict] | None: ...
     def social_relationship_current(self, db: Session, scope: MemoryScope, locator: dict) -> bool: ...
     def source_reader(self, db: Session) -> MemorySourceEvidenceReaderPort: ...

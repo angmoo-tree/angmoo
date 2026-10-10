@@ -55,7 +55,9 @@ def bounded_episode_packets(packets: tuple[EpisodePacket, ...], *, purpose: str 
                     sources.append({"ref": source.reference, "start_offset": source.start_offset,
                                     "end_offset": source.end_offset, "already_in_context": True})
                 else:
-                    sources.append(asdict(source))
+                    value = asdict(source)
+                    value.pop("author_id")  # Neutral private metadata is never a SNS/model storage ID.
+                    sources.append(value)
                     # Invalid/missing material is not an original-text cache hit.
                     if source.status == "verified":
                         unit_sources.add(key)

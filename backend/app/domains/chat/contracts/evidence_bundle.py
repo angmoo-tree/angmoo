@@ -87,6 +87,9 @@ class EvidenceItem:
     source_succeeded: bool = True
     observable: bool = True
     locator: EvidenceLocator | None = None
+    # Optional, server-verified authors. Not part of v1 text/hash/serialization.
+    author_identities: tuple[tuple[str, str], ...] = ()
+    relationship_projection: dict | None = None
 
     def __post_init__(self) -> None:
         if (

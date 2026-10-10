@@ -12,6 +12,7 @@ from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext
 from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 from app.contracts.activity_situation import SituationDelivery, SituationDraft
+from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
 
 
 class CharacterResponseGeneratorError(RuntimeError):
@@ -53,6 +54,7 @@ class CharacterResponseContextMessage:
     role: str
     content: str
     source_id: str | None = None
+    author_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.role not in {"user", "assistant"} or not self.content.strip():
@@ -74,6 +76,8 @@ class CharacterResponseGeneratorRequest:
     situation_locale: str | None = None
     situation_target: str | None = None
     situation_manifest_factory: Callable[[dict], SituationDelivery] | None = field(default=None, repr=False, compare=False)
+    chat_identity: ChatIdentityContext | None = None
+    relationship_delivery_factory: Callable[[dict, str], dict] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if self.recall_interpretation is not None:
@@ -116,6 +120,7 @@ class CharacterResponseGeneratorResult:
     situation_draft: SituationDraft | None = None
     situation_manifest: SituationDelivery | None = None
     situation_output_digest: str | None = None
+    relationship_delivery: dict | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -147,6 +152,7 @@ class CharacterResponseGenerationResult:
     situation_draft: SituationDraft | None = None
     situation_manifest: SituationDelivery | None = None
     situation_output_digest: str | None = None
+    relationship_delivery: dict | None = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

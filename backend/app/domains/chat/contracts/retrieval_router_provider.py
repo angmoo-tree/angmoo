@@ -7,6 +7,7 @@ from app.domains.chat.contracts.supervisor_selection import SelectionToolCall
 import json
 from typing import Protocol
 from app.domains.relationships.contracts.social_context import SocialContextSnapshot
+from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
 
 from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
@@ -44,6 +45,7 @@ class RetrievalRouterOutputError(RetrievalContractError):
 class RetrievalRouterContextMessage:
     role: str
     content: str
+    author_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.role not in {"user", "assistant"}:
@@ -65,6 +67,7 @@ class RetrievalRouterRequest:
     repair_diagnostic: str | None = None
     social_snapshot: SocialContextSnapshot | None = None
     image_context: str | None = None
+    chat_identity: ChatIdentityContext | None = None
 
     def __post_init__(self) -> None:
         if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):

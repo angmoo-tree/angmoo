@@ -92,7 +92,9 @@ def test_real_chat_finalize_receipt_is_atomic_and_auxiliary_errors_do_not_lose_r
             assert reader.validate(manifest, source, now=datetime.now(UTC)).state == "changed"
 
 
-def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(response_session):
+@pytest.mark.parametrize("new_identity", [False, True])
+@pytest.mark.parametrize("raw_question", ["응.", "지민🙂: 응."])
+def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(response_session, monkeypatch, new_identity, raw_question):
     from app.domains.relationships.models.social import RelationshipState
     from app.domains.relationships.contracts.graph_recall import GraphRecallScope
     from app.domains.relationships.service.graph_recall import GraphRecallService
@@ -113,10 +115,18 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     initial = service.get_or_create(scope)
     setting = service.update(scope, expected_version=initial.version, enabled=True, retention_days=180)
     record = f._request(db, f.RetrievalRoute.CURRENT_CONTEXT)
+    db.get(f.models.MessageMessage, record.user_message_id).content = raw_question
     snapshot = capture(db, owner_id=scope.owner_id, world_id=scope.world_id, actor_id=scope.subject_world_character_id,
         environment=EnvironmentSnapshot(memory_search_locale="ko-KR"), policy="activity_situation")
     request = db.get(f.models.ChatResponseRequest, record.request_id)
     request.node_state_json = json.dumps({**json.loads(request.node_state_json), "_situation_policy": snapshot})
+    if new_identity:
+        from app.contracts.name_binding import NameBindingSnapshot
+        from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext, IDENTITY_KEY
+        binding = NameBindingSnapshot(scope.owner_id, scope.world_id, scope.subject_world_character_id,
+            "Bram", "p-requester", "지민🙂", 0)
+        request.node_state_json = json.dumps({**json.loads(request.node_state_json), "name_binding": binding.to_dict(),
+            IDENTITY_KEY: ChatIdentityContext.from_binding(binding, "p-thread").to_dict()})
     relation = RelationshipState(id="chat-delivered-relation", world_id=scope.world_id,
         actor_world_character_id=scope.subject_world_character_id, target_world_character_id="p-requester", version=6,
         interaction_count=1, last_metric_at=now)
@@ -131,6 +141,7 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     social_service.assert_current(social)
     text = social.context_text
     command = replace(f._command(f.SqlAlchemyResponseLifecycleRepository(db).get_request(record.request_id)), social_snapshot=social)
+    command = replace(command, preflight=replace(command.preflight, user_message=raw_question))
     delivered = []
     class Router(f._Router):
         async def route(self, command, **kwargs):
@@ -148,6 +159,18 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     workflow = f._workflow(db, f.RetrievalRoute.CURRENT_CONTEXT, Generator(), router=Router(f.RetrievalRoute.CURRENT_CONTEXT))
     workflow._situation_memory = ChatSituationMemory(db)
     workflow._social_context_provider = social_service
+    if new_identity:
+        from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
+        from app.integrations.llm.character_response_generator import DirectLlmCharacterResponseGenerator
+        from app.domains.chat.service.character_response import CharacterResponseGenerationService
+        from app.integrations import direct_llm
+        native_calls = []
+        async def generate(**kwargs):
+            native_calls.append(kwargs)
+            return direct_llm.DirectLlmResponse(text="", parsed={"text": "알겠어.", "situation_description": "상대와 약속을 확인했다."}, usage={}, finish_reason="STOP")
+        monkeypatch.setattr(direct_llm, "generate_text", generate)
+        material = CredentialMaterial("fixture", "google", "gemini-3.1-flash-lite", "fixture", CredentialPurpose.MESSAGE_LLM, "fake")
+        workflow._character_response = CharacterResponseGenerationService(DirectLlmCharacterResponseGenerator(material))
     events = asyncio.run(f._collect(workflow.run(command)))
     receipt = db.scalar(select(MemorySituationReceipt))
     assert receipt is not None and receipt.state == "pending", (events, delivered)
@@ -158,10 +181,19 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     source = next(source for source in frozen.sources if source.source_type == "RELATIONSHIP")
     assert source.relationship_basis.version == 6 and relation.version == 7
     # The same prepared metadata also survives a read-after-prepare race.
-    race = workflow._situation_memory.freeze(command, f.EvidenceBundleAssembler().current_context(
-        request_id=record.request_id, request_scope_hash=command.request.request_scope_hash),
-        {"latest_user_message": command.preflight.user_message, "social_context": {"context": text}})
-    assert next(source for source in race.sources if source.source_type == "RELATIONSHIP").relationship_basis.version == 6
+    if not new_identity:
+        race = workflow._situation_memory.freeze(command, f.EvidenceBundleAssembler().current_context(
+            request_id=record.request_id, request_scope_hash=command.request.request_scope_hash),
+            {"latest_user_message": command.preflight.user_message, "social_context": {"context": text}})
+        assert next(source for source in race.sources if source.source_type == "RELATIONSHIP").relationship_basis.version == 6
+    else:
+        assert len(native_calls) == 1
+        prompt = native_calls[0]["user_prompt"]
+        assert frozen.payload_digest == sha256(prompt.encode()).hexdigest()
+        chat_source = next(entry for entry in frozen.sources if entry.source_id == str(record.user_message_id))
+        assert chat_source.payload_path == "/latest_user_message/content"
+        assert chat_source.delivered_digest == sha256(raw_question.encode()).hexdigest()
+        assert chat_source.delivery_payload_digest == frozen.payload_digest
     get_or_create_settings(db, setting.id, timezone="Asia/Seoul", now=now)
     saved = request_run(db, setting, trigger="manual", request_key="chat-proof-save-001", expected_version=1, now=now)
     token = claim_run(db, saved.run_id, now=now)
@@ -172,3 +204,11 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     assert db.get(MemoryItem, receipt.applied_item_id) is not None
     assert db.scalar(select(func.count()).select_from(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id == receipt.applied_item_id)) == 2
     assert SituationSources(db).validate(restore_context(db, receipt), source, now=now).state == "available"
+    context = restore_context(db, receipt)
+    original = next(entry for entry in context.sources if entry.source_id == str(record.user_message_id))
+    assert SituationSources(db).validate(context, original, now=now).state == "available"
+    assert db.get(f.models.MessageMessage, record.user_message_id).content == raw_question
+    if new_identity:
+        from app.runtime.chat.message_composition import evidence_service
+        read = evidence_service.get_world_response_evidence(db, db.get(f.models.User, "p-owner"), "p-world", "p-thread", record.request_id)
+        assert read.current_context[0].availability == "available" and read.current_context[0].relationship_change == "changed"

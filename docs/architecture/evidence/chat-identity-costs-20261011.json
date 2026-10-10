@@ -1,0 +1,76 @@
+{
+  "environment": "Windows Python 3.13, isolated in-memory SQLite; graph intentionally unavailable; no network/provider calls",
+  "input": {
+    "baseline": {
+      "objects": 35,
+      "keys": 107,
+      "depth": 4,
+      "logical_json_bytes": 15380,
+      "system_bytes": 3609,
+      "user_prompt_bytes": 15515,
+      "native_input_bytes": 20356,
+      "native_shape": [
+        7,
+        12,
+        5
+      ],
+      "assembly": {
+        "median_ms": 0.086,
+        "p95_ms": 0.093
+      }
+    },
+    "after": {
+      "objects": 48,
+      "keys": 182,
+      "depth": 4,
+      "logical_json_bytes": 17482,
+      "system_bytes": 4613,
+      "user_prompt_bytes": 17617,
+      "native_input_bytes": 23756,
+      "native_shape": [
+        7,
+        12,
+        5
+      ],
+      "assembly": {
+        "median_ms": 0.193,
+        "p95_ms": 0.343
+      }
+    }
+  },
+  "relationship_12_plus_12": {
+    "sql_counts": {
+      "baseline": [
+        403
+      ],
+      "after": [
+        34
+      ]
+    },
+    "read_timings": {
+      "baseline": {
+        "median_ms": 152.008,
+        "p95_ms": 183.463
+      },
+      "after": {
+        "median_ms": 18.476,
+        "p95_ms": 20.801
+      }
+    },
+    "dto_bytes": {
+      "baseline": 11980,
+      "after": 11296
+    },
+    "available_items": {
+      "baseline": 24,
+      "after": 24
+    },
+    "proof_bytes": 21526
+  },
+  "selected_name_sql_counts": [
+    2,
+    2,
+    2
+  ],
+  "extra_ai_calls": 0
+}

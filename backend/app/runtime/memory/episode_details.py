@@ -104,7 +104,7 @@ class RuntimeEpisodeDetailReader:
             else:
                 # Non-text activities are typed canonical execution records.
                 text = canonical.deterministic_summary
-            result[(kind, identifier)] = EpisodeSourceDetail(canonical, text)
+            result[(kind, identifier)] = EpisodeSourceDetail(canonical, text, canonical.actor_world_character_id)
         return result
 
     def read_situation_sources(self, *, scope, identities, context, entries, now):
@@ -124,7 +124,7 @@ class RuntimeEpisodeDetailReader:
                 text = self.session.get(MessageMessage, int(entry.source_id), populate_existing=True).content
             else:
                 text = access.evidence.deterministic_summary
-            result[identity] = EpisodeSourceDetail(access.evidence, text)
+            result[identity] = EpisodeSourceDetail(access.evidence, text, access.evidence.actor_world_character_id)
         return result
 
     def read_thoughts(self, *, scope, references):

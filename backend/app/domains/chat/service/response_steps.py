@@ -5,7 +5,7 @@ from app.contracts.search_diagnostics import evidence_lineage
 
 import asyncio
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
 
@@ -175,12 +175,24 @@ class ResponseWorkflowSteps:
     async def route_and_resolve(self, state: ResponseGraphState) -> ResponseGraphState:
         command = self.command
         record = self.progress.record
-        record = self._transition(record, ResponseRequestState.PREFLIGHTED)
+        identity_state = {}
+        if command.chat_identity is not None:
+            from app.domains.chat.contracts.chat_identity_context import IDENTITY_KEY
+            if command.today_sns_snapshot is not None:
+                retained = {entry["ref"] for entry in command.today_sns_snapshot.router_view()["entries"]}
+                ids = tuple(dict.fromkeys(identifier for entry in command.today_sns_snapshot.entries if entry.opaque_reference in retained for identifier in
+                    (entry.actor_id, entry.counterpart_id) if identifier and identifier not in command.chat_identity.names))
+                labels = {key: value for key, value in command.character_labels.items() if key in ids}
+                command = replace(command, chat_identity=command.chat_identity.extend(labels))
+                self.command = command
+            identity_state[IDENTITY_KEY] = command.chat_identity.to_dict()
+        record = self._transition(record, ResponseRequestState.PREFLIGHTED, node_state=identity_state)
         record = self._transition(record, ResponseRequestState.ROUTING)
         routing = await self._router.route(
             command.preflight,
             recent_context=command.router_context,
             **({"social_snapshot": command.social_snapshot} if command.social_snapshot is not None else {}),
+            **({"chat_identity": command.chat_identity} if command.chat_identity is not None else {}),
             today_sns_context=(
                 None
                 if command.today_sns_snapshot is None
@@ -277,6 +289,7 @@ class ResponseWorkflowSteps:
             CanonicalRetrievalCommand(
                 user_message=command.preflight.user_message,
                 image_context=command.preflight.image_context,
+                chat_identity=command.chat_identity,
                 thread_id=record.thread_id,
                 intent=routing.intent,
                 resolved=routing.resolved,
@@ -317,6 +330,7 @@ class ResponseWorkflowSteps:
             GraphRetrievalCommand(
                 user_message=command.preflight.user_message,
                 image_context=command.preflight.image_context,
+                chat_identity=command.chat_identity,
                 intent=routing.intent,
                 resolved=routing.resolved,
                 call_tracker=routing.call_tracker,
@@ -331,6 +345,7 @@ class ResponseWorkflowSteps:
             node_state={"graph_metrics": _safe_metrics(result.metrics)},
             call_tracker=result.call_tracker,
         )
+        command = self._bind_graph_names(command, result)
         bundle = self._evidence.graph(
             request_scope_hash=record.request_scope_hash,
             result=result,
@@ -358,6 +373,7 @@ class ResponseWorkflowSteps:
             BothRetrievalCommand(
                 user_message=command.preflight.user_message,
                 image_context=command.preflight.image_context,
+                chat_identity=command.chat_identity,
                 thread_id=record.thread_id,
                 intent=routing.intent,
                 resolved=routing.resolved,
@@ -387,6 +403,7 @@ class ResponseWorkflowSteps:
             },
             call_tracker=result.call_tracker,
         )
+        command = self._bind_graph_names(command, result.graph)
         bundle = self._evidence.both(
             request_scope_hash=record.request_scope_hash,
             result=result,
@@ -470,6 +487,15 @@ class ResponseWorkflowSteps:
         candidates = ()
         interpretation = None
         response_state = {}
+        if command.chat_identity is not None:
+            from app.domains.chat.contracts.chat_identity_context import IDENTITY_KEY
+            identifiers = tuple(dict.fromkeys(identifier for item in bundle.items
+                for _, identifier in item.author_identities if identifier not in command.chat_identity.names))
+            labels = command.identity_labels(identifiers) if identifiers and command.identity_labels else {}
+            identity = command.chat_identity.extend(labels)
+            command = replace(command, chat_identity=identity)
+            self.command = command
+            response_state[IDENTITY_KEY] = identity.to_dict()
         if command.recall_mode is ChatRecallMode.SOCIAL_HYBRID:
             if routing.interpretation is None:
                 raise RetrievalContractError("hybrid_interpretation_missing")
@@ -480,8 +506,9 @@ class ResponseWorkflowSteps:
                 or counts["retrieval_router"] not in (1, 2)
                 or (counts["retrieval_router"] == 2 and tracker["repair_node"] != "retrieval_router")):
                 raise RetrievalContractError("hybrid_generation_budget_exceeded")
-            response_state = {"recall_interpretation": interpretation.manifest(),
+            response_state.update({"recall_interpretation": interpretation.manifest(),
                 "hybrid_normal_generation_calls": 2, "final_response_kind": None}
+            )
         record = self._transition(record, ResponseRequestState.RESPONSE_GENERATING,
             call_tracker=tracker, node_state=response_state)
         if routing.clarification is not None:
@@ -516,8 +543,10 @@ class ResponseWorkflowSteps:
                 recall_interpretation=interpretation,
                 thought_finalizer=self._thought_finalizer,
                 situation_locale=situation,
+                chat_identity=command.chat_identity,
                 situation_target=command.request.response_slot_id if situation else None,
                 situation_manifest_factory=(lambda payload: self._situation_memory.freeze(command, bundle, payload)) if situation else None,
+                relationship_delivery_factory=self._relationship_delivery_factory(command, bundle),
                 today_sns_manifest=(
                     None
                     if command.today_sns_snapshot is None
@@ -544,6 +573,35 @@ class ResponseWorkflowSteps:
         )
         self.progress.call_tracker = response.call_tracker
         return {**state, "phase": ResponsePhase.COMPLETE, "response": response}
+
+    def _bind_graph_names(self, command, result):
+        if command.chat_identity is None or result is None or result.execution is None:
+            return command
+        identifiers = set()
+        for graph in result.execution.results:
+            for relation in graph.relationships:
+                identifiers.update((relation.actor_world_character_id, relation.target_world_character_id))
+            for event in graph.evidence:
+                identifiers.update((event.actor_world_character_id, event.target_world_character_id))
+        identifiers.discard(None)
+        unresolved = tuple(sorted(identifiers - command.chat_identity.names.keys()))
+        labels = command.identity_labels(unresolved) if unresolved and command.identity_labels else {}
+        identity = command.chat_identity.extend(labels)
+        command = replace(command, chat_identity=identity, character_labels={**command.character_labels, **identity.names})
+        self.command = command
+        return command
+
+    @staticmethod
+    def _relationship_delivery_factory(command, bundle):
+        from app.domains.chat.contracts.relationship_evidence import RelationshipEvidenceBinding
+        from app.domains.chat.relationship_evidence_policy import capture_delivery
+        from app.domains.chat.service.social_context_inspector import social_context_inspector
+        binding = RelationshipEvidenceBinding.for_request(command.request,
+            owner_id=command.preflight.owner_id, world_id=command.preflight.world_id,
+            actor_id=command.preflight.responding_world_character_id,
+            requester_id=command.preflight.requester_world_character_id)
+        return lambda payload, prompt: capture_delivery(binding, bundle, command.social_snapshot,
+            payload, prompt, command.chat_identity, social_context_inspector(command.social_snapshot))
 
 
 def _safe_metrics(value: Any) -> dict[str, Any]:

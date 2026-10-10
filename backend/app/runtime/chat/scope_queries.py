@@ -107,6 +107,30 @@ def responding_world_character(
     return row
 
 
+def _world_chat_roles_statement(world_id):
+    return (
+        select(WorldCharacter, Character)
+        .join(Character, Character.id == WorldCharacter.character_id)
+        .join(WorldMembership, (WorldMembership.id == WorldCharacter.membership_id)
+            & (WorldMembership.world_id == WorldCharacter.world_id))
+        .where(WorldCharacter.world_id == world_id,
+            ((WorldCharacter.status == "active") | ((WorldCharacter.control_mode == "owner_controlled") & (WorldCharacter.status == "inactive"))),
+            WorldMembership.status == "active", Character.deleted_at.is_(None),
+            Character.moderation_status == "active")
+    )
+
+
+def world_chat_roles(db: Session, identifiers: set[str], *, world_id: str):
+    """Bounded batch using exactly the single-role access filters."""
+    if not identifiers:
+        return {}
+    if len(identifiers) > 25:
+        raise ValueError("chat_role_batch_limit")
+    return {row[0].id: row for row in db.execute(
+        _world_chat_roles_statement(world_id).where(WorldCharacter.id.in_(identifiers))
+        .execution_options(populate_existing=True))}
+
+
 def world_chat_role(
     db: Session,
     world_character_id: str,
@@ -115,23 +139,7 @@ def world_chat_role(
     expected_owner_id: str | None = None,
     lock_scope: bool = False,
 ) -> tuple[WorldCharacter, Character] | None:
-    statement = (
-        select(WorldCharacter, Character)
-        .join(Character, Character.id == WorldCharacter.character_id)
-        .join(
-            WorldMembership,
-            (WorldMembership.id == WorldCharacter.membership_id)
-            & (WorldMembership.world_id == WorldCharacter.world_id),
-        )
-        .where(
-            WorldCharacter.id == world_character_id,
-            WorldCharacter.world_id == world_id,
-            ((WorldCharacter.status == "active") | ((WorldCharacter.control_mode == "owner_controlled") & (WorldCharacter.status == "inactive"))),
-            WorldMembership.status == "active",
-            Character.deleted_at.is_(None),
-            Character.moderation_status == "active",
-        )
-    )
+    statement = _world_chat_roles_statement(world_id).where(WorldCharacter.id == world_character_id)
     if expected_owner_id is not None:
         statement = statement.where(
             WorldCharacter.control_mode == "owner_controlled",

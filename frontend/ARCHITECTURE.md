@@ -1,5 +1,20 @@
 # Angmoo Frontend Architecture
 
+### Historical Chat evidence and Studio preview layout (2026-10-11 LOCAL)
+
+Memory owns the strict additive world-chat-evidence.v1 decoder, safe frozen relationship
+projection, three comparison states, and separate retrieval/current/legacy notices.
+WorldChatEvidenceInspector retains its World/thread/request/open key, abort cleanup and
+shared Dialog scroll/focus behavior; presentation text stays in both Memory ko/en catalogs.
+This LOCAL surface reuses the same feature component in Next and StaticProductRouter.
+WorldCreator's image-preview container remains one column at every width, with the home
+icon before the full-width World preview. The existing outer Studio form/aside grid and
+crop/upload/draft guards remain unchanged. WorldBanner receives the original canonical
+asset URL and owns its authenticated display resolution; an already-resolved blob is
+not passed through its canonical URL validator again.
+
+Evidence: [implementation and scoped checks](../docs/verification/chat-identity-evidence-preview-20261011.md).
+
 ### Device Home and optional basic activity composition (2026-10-10)
 
 DeviceHome owns its icon grid and World list without the local four-link footer

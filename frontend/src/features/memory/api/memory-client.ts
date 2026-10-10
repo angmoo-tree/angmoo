@@ -391,6 +391,7 @@ export function getWorldChatEvidence(
       !["available", "degraded"].includes(read.capability) ||
       !Array.isArray(read.items) ||
       read.items.length > 12 ||
+      !evidenceLimitationsMatch(read) ||
         read.items.some((item) => !chatEvidenceMatches(item, worldId)) ||
         (read.current_context !== undefined && (!Array.isArray(read.current_context) ||
           read.current_context.length > 12 || read.current_context.some((item) =>
@@ -530,6 +531,7 @@ function chatEvidenceMatches(value: unknown, worldId: string) {
     typeof item.reference === "string" &&
     ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity", "episode_memory", "current_image_analysis"].includes(item.kind) &&
     episodeDetailMatches(item.episode) &&
+    relationshipFieldsMatch(item) &&
     typeof item.label === "string" &&
     (item.excerpt === null || typeof item.excerpt === "string") &&
     (item.occurred_at === null || typeof item.occurred_at === "string") &&
@@ -602,3 +604,4 @@ export async function retryMemoryConsolidation(worldId: string, subjectId: strin
   await requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/batch-run/${encodeURIComponent(requestId)}/retry`,
     { method: "POST", body: JSON.stringify({ idempotency_key: key }) });
 }
+import { evidenceLimitationsMatch, relationshipFieldsMatch } from "../utils/chat-evidence-presentation";

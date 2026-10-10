@@ -57,6 +57,9 @@ class TodaySnsActivityEntry:
     subjective_context: TodaySnsSubjectiveContext | None
     thought: ActivityThought | None = None
     thought_view: bool = False
+    actor_id: str | None = None
+    counterpart_id: str | None = None
+    source_authors: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None or len(self.source_revision) != 64:

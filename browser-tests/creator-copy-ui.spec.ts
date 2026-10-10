@@ -10,7 +10,7 @@ async function studio(page: Page, staticShell: boolean, baseURL: string, languag
   const world = { id: FEED_WORLD, slug: "fixture-world", name: "Draft World", tagline: "A small synthetic town",
     setting_description: "A small town where synthetic characters exchange stories.", daily_life_description: "Characters read and share their ordinary days.",
     genre_tags: ["Everyday"], tone_tags: [], timezone: "Asia/Seoul", language: "ko", visibility: "private", join_policy: "private",
-    additional_generation_guidance: "", places: [], roles: [], daypart_profiles: [], rules: [], glossary: [], banner_media_id: null, icon_media_id: null,
+    additional_generation_guidance: "", places: [], roles: [], daypart_profiles: [], rules: [], glossary: [], banner_media_id: null as string | null, icon_media_id: null,
     banner_alt_text: "", status: "draft", definition_version: 1, row_version: 1, contract_version: "world-v1", contract_hash: "a".repeat(64),
     readiness_status: "publish_ready", created_at: "2026-10-10T00:00:00Z", updated_at: "2026-10-10T00:00:00Z", archived_at: null };
   const context = () => ({ world, membership_role: "owner", readiness: { world_id: world.id, definition_version: 1, row_version: world.row_version,
@@ -39,8 +39,55 @@ for (const language of ["ko", "en"] as const) {
   const en = language === "en";
   const catalog = { ...JSON.parse(readFileSync(`../frontend/src/features/worlds/locales/${language}.json`, "utf8")), ...JSON.parse(readFileSync(`../frontend/src/features/characters/locales/${language}.json`, "utf8")) };
   const t = (key: string) => catalog[key] ?? key;
+  test(`single column preview preserves banner and draft controls ${language}`, async ({ page }, info) => {
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
+    await page.goto(`/studio/worlds/${FEED_WORLD}`);
+    const previews = page.locator("[data-world-image-previews]"); await expect(previews).toBeVisible();
+    const form = page.locator("section").filter({ has: page.getByRole("heading", { name: t("필수 세계관 설정"), exact: true }) }).last();
+    await form.getByLabel(new RegExp(`^${t("World 이름")}`)).fill("Very long World name ".repeat(4));
+    await form.getByLabel(new RegExp(`^${t("한 줄 소개")}`)).fill("A long introduction with ordinary spaces ".repeat(5));
+    await form.getByLabel(new RegExp(`^${t("장르 태그")}`)).fill("Everyday,Adventure,Mystery"); await form.getByLabel(new RegExp(`^${t("장르 태그")}`)).blur();
+    for (const width of [360, 768, 1440, 768]) {
+      await page.setViewportSize({ width, height: 900 });
+      const boxes = await previews.evaluate(element => [element, ...element.children].map(node => { const box = node.getBoundingClientRect(); return { x: box.x, y: box.y, width: box.width, bottom: box.bottom }; }));
+      expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom + 20);
+      expect(Math.abs(boxes[2].width - boxes[0].width)).toBeLessThanOrEqual(2);
+      expect(Math.abs(boxes[2].x - boxes[0].x)).toBeLessThanOrEqual(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+      const banner = previews.locator("[data-world-banner]"); await expect(banner).toHaveAttribute("data-world-banner", "default");
+      const box = (await banner.boundingBox())!; expect(Math.abs(box.height - Math.min(280, Math.max(160, width * .27)))).toBeLessThanOrEqual(2);
+      await expect(banner.locator("img")).toHaveAttribute("src", /world-default-banner\.svg/);
+      await expect(previews.getByText("Adventure", { exact: true })).toBeVisible();
+      await previews.scrollIntoViewIfNeeded(); await page.screenshot({ path: info.outputPath(`column-${language}-${width}.png`) });
+    }
+    await expect(page.getByLabel(t("아이콘 선택"), { exact: true })).toBeEnabled(); await expect(page.getByLabel(t("배너 선택"), { exact: true })).toBeEnabled();
+    expect(state.writes).toEqual([]);
+  });
+  test(`single column preview registered and failed banner ${language}`, async ({ page }, info) => {
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
+    state.world.banner_media_id = "/api/v1/media/assets/synthetic-banner/content";
+    const image = Buffer.from(await page.evaluate(() => { const canvas = document.createElement("canvas"); canvas.width = 16; canvas.height = 8; const ctx = canvas.getContext("2d")!; ctx.fillStyle = "#809e92"; ctx.fillRect(0, 0, 16, 8); return canvas.toDataURL("image/png").split(",")[1]; }), "base64");
+    await page.route("**/media/assets/synthetic-banner/content", route => route.fulfill({ contentType: "image/png", body: image }));
+    await page.goto(`/studio/worlds/${FEED_WORLD}`);
+    const previews = page.locator("[data-world-image-previews]");
+    const banner = previews.locator("[data-world-banner]");
+    await expect(banner).toHaveAttribute("data-world-banner", "registered");
+    for (const width of [360, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      const boxes = await previews.evaluate(element => [element, ...element.children].map(node => { const box = node.getBoundingClientRect(); return { y: box.y, width: box.width, bottom: box.bottom }; }));
+      expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom + 20);
+      expect(Math.abs(boxes[2].width - boxes[0].width)).toBeLessThanOrEqual(2);
+      await expect(banner.locator("img")).toHaveCSS("object-fit", "cover");
+    }
+    state.world.banner_media_id = "/api/v1/media/assets/failed-banner/content";
+    await page.route("**/media/assets/failed-banner/content", route => route.fulfill({ status: 404 }));
+    await page.reload();
+    await expect(banner).toHaveAttribute("data-world-banner", "default");
+    await expect(banner.locator("img")).toHaveAttribute("src", /world-default-banner\.svg/);
+    expect(state.writes).toEqual([]);
+  });
   test(`World crop file size boundaries ${language}`, async ({ page }, info) => {
-    const state = await studio(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     await page.goto(`/studio/worlds/${FEED_WORLD}`);
     const input = page.getByLabel(t("아이콘 선택"), { exact: true }), dialog = page.getByRole("dialog");
     function photo(size: number) {
@@ -59,7 +106,7 @@ for (const language of ["ko", "en"] as const) {
     await expect(dialog).toHaveCount(0); expect(state.writes).toEqual([]);
   });
   test(`package export keeps confirmations, preview and delivery ${language}`, async ({ page }, info) => {
-    await studio(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     const strings = JSON.parse(readFileSync(`../frontend/src/features/world-packages/locales/${language}.json`, "utf8"));
     const pt = (key: string) => strings[key] ?? key;
     const writes: { path: string; body: unknown; token?: string }[] = [];
@@ -103,7 +150,7 @@ for (const language of ["ko", "en"] as const) {
     expect(writes.at(-1)).toMatchObject({ path: "/world-package-exports/synthetic-export/download", token: "synthetic-download-token" });
   });
   test(`studio draft metadata eight combinations and readiness ${language}`, async ({ page }, info) => {
-    const state = await studio(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     await page.goto(`/studio/worlds/${FEED_WORLD}`);
     const previews = page.locator("[data-world-image-previews]"); await expect(previews).toBeVisible();
     const form = page.locator("section").filter({ has: page.getByRole("heading", { name: t("필수 세계관 설정"), exact: true }) }).last();
@@ -128,7 +175,7 @@ for (const language of ["ko", "en"] as const) {
   });
 
   test(`world crop cancel, dimensions, conflict retention and latest revision ${language}`, async ({ page }, info) => {
-    const state = await studio(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     await page.goto(`/studio/worlds/${FEED_WORLD}`);
     const original = readFileSync("fixtures/photos/normal.jpg");
     const inputs = [page.getByLabel(t("아이콘 선택"), { exact: true }), page.getByLabel(t("배너 선택"), { exact: true })];
@@ -158,7 +205,7 @@ for (const language of ["ko", "en"] as const) {
   });
 
   for (const mode of ["off", "on", "blocked", "failure"] as const) test(`creation completion actions ${mode} ${language}`, async ({ page }, info) => {
-    const state = await installIntegrationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await installIntegrationFixture(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     state.draft = { id: "integration-draft", revision: 1, contract_version: 2, target_world_id: FEED_WORLD, source_kind: "direct", status: "completed", provider: "google", model: "gemini-3.1-flash-lite", thinking_level: "high", key_fingerprint: null,
       name: "Registered synthetic character", handle: "registered", one_liner: "", worldview: "Synthetic description", personality: "", speech_style: "", character_background: "", topic_preferences: "", safety_rules: "", image_style: "", appearance_prompt: "", avatar_temp_url: null, banner_temp_url: null, persona_enhance_available_at: null, media_generation_available_at: null, expires_at: "2026-10-11T00:00:00Z", created_at: "2026-10-10T00:00:00Z", updated_at: "2026-10-10T00:00:00Z" };
     state.ui.management.credentials.set(`${FEED_WORLD}:${WORLD_AGENT}:sns`, { purpose: "sns", provider: "google", model: "gemini-3.1-flash-lite", thinking_level: "high", has_key: mode !== "blocked", revision: 1, fingerprint: "synthetic" });

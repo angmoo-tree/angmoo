@@ -33,11 +33,19 @@ class ChatSituationMemory:
                 target=command.request.response_slot_id if role == "core" else None,
                 private_thread=command.request.thread_id, relationship_basis=basis,
                 delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)))
-        add("CHAT_MESSAGE", str(command.request.user_message_id), payload["latest_user_message"], "/latest_user_message")
+        latest = payload["latest_user_message"]
+        if isinstance(latest, dict) and latest["content"] != f"{latest['name']}: {command.preflight.user_message}":
+            raise ValueError("situation_chat_presentation_changed")
+        add("CHAT_MESSAGE", str(command.request.user_message_id), command.preflight.user_message,
+            "/latest_user_message/content" if isinstance(latest, dict) else "/latest_user_message")
         for index, context in enumerate(command.response_context):
             if context.source_id is None:
                 raise ValueError("situation_context_identity_missing")
-            add("CHAT_MESSAGE", context.source_id, payload["recent_context"][index]["content"], f"/recent_context/{index}/content")
+            presented = payload["recent_context"][index]
+            expected = f"{presented['name']}: {context.content}" if "name" in presented else context.content
+            if presented["content"] != expected:
+                raise ValueError("situation_chat_presentation_changed")
+            add("CHAT_MESSAGE", context.source_id, context.content, f"/recent_context/{index}/content")
         for index, item in enumerate(bundle.items):
             locator = item.locator
             if locator is None:

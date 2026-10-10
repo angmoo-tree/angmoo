@@ -103,6 +103,7 @@ class CharacterResponseGenerationService:
             situation_draft=result.situation_draft,
             situation_manifest=result.situation_manifest,
             situation_output_digest=result.situation_output_digest,
+            relationship_delivery=result.relationship_delivery,
         )
 
 

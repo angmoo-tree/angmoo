@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from time import monotonic
-from app.contracts.read_deadline import bounded_read
 
 from sqlalchemy.orm import Session
 
@@ -13,7 +11,7 @@ from app.domains.chat import models, schemas
 from app.domains.chat.contracts import ResponseRequestState
 from app.domains.chat.contracts.context import ChatUser
 from app.domains.chat.contracts.evidence_reads import ChatEvidenceReads
-from app.domains.chat.exceptions import MessageForbiddenError, MessageNotFoundError
+from app.domains.chat.exceptions import MessageNotFoundError
 from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
@@ -24,6 +22,12 @@ from app.domains.memory.service.management import MemoryNotFoundError
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.chat.contracts.relationship_evidence import (
+    DELIVERY_KEY, RelationshipEvidenceBinding, RelationshipCurrentRead, RelationshipEvidenceRead,
+)
+from app.domains.chat.relationship_evidence_policy import (
+    validate_delivery, historical_read, restore_legacy_relationships,
+)
 
 
 class EvidenceService:
@@ -59,6 +63,8 @@ class EvidenceService:
         snapshot = metadata.get("_evidence_inspector_v1")
         current_snapshot = metadata.get("_social_context_inspector_v1")
         current_raw = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
+        if not isinstance(current_raw, list):
+            current_raw = []
         if isinstance(current_raw, list) and current_raw:
             capability = "degraded" if capability == "degraded" else "available"
         if capability not in {"available", "degraded"} or not isinstance(
@@ -76,26 +82,24 @@ class EvidenceService:
             subject_world_character_id=thread.responding_world_character_id,
         )
         source_reader = self.reads.source_reader(db)
+        relationship_reads, read_limitations = self._relationship_reads(
+            db, scope, thread, record, snapshot, current_snapshot)
         items = [
-            self._chat_evidence_item(db, scope, raw, source_reader=source_reader, thread_id=thread.id)
+            self._chat_evidence_item(db, scope, raw, source_reader=source_reader, thread_id=thread.id,
+                relationship_read=relationship_reads.get(("items", raw.get("ref"))))
             for raw in raw_items[:12]
             if isinstance(raw, dict)
         ]
         current_items = []
-        current_deadline = monotonic() + 2.0
         for raw in current_raw[:12]:
             if not isinstance(raw, dict):
                 continue
-            locator = raw.get("locator") or {}
-            validate = getattr(self.reads, "social_relationship_current", None)
-            remaining = current_deadline - monotonic()
-            valid = False
-            if validate is not None and remaining > 0:
-                with bounded_read(remaining):
-                    valid = validate(db, scope, locator)
-            item = self._chat_evidence_item(db, scope, raw if valid else {**raw, "locator": None}, source_reader=source_reader)
+            item = self._chat_evidence_item(db, scope, raw, source_reader=source_reader,
+                relationship_read=relationship_reads.get(("current_context", raw.get("ref"))))
             current_items.append(item)
         visible_items = items + current_items
+        if any(item.kind != "graph_relationship" and item.availability != "available" for item in visible_items):
+            read_limitations.add("current_unavailable")
         current_capability = (
             "available"
             if capability == "available"
@@ -110,7 +114,50 @@ class EvidenceService:
             capability=current_capability,
             items=items,
             current_context=current_items,
+            retrieval_limitations=_retrieval_limitations(metadata),
+            read_limitations=sorted(read_limitations),
         )
+
+    def _relationship_reads(self, db, scope, thread, record, snapshot, current_snapshot):
+        current_items = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
+        sections = {"items": snapshot["items"][:12],
+            "current_context": current_items[:12] if isinstance(current_items, list) else []}
+        raw_relations = {(section, raw["ref"]): raw for section, values in sections.items()
+            for raw in values if isinstance(raw, dict) and raw.get("kind") == "graph_relationship" and isinstance(raw.get("ref"), str)}
+        if not raw_relations:
+            return {}, set()
+        binding = RelationshipEvidenceBinding.for_request(record, owner_id=scope.owner_id,
+            world_id=scope.world_id, actor_id=scope.subject_world_character_id,
+            requester_id=thread.requester_world_character_id)
+        try:
+            if DELIVERY_KEY in record.response_metadata:
+                proof = validate_delivery(record.response_metadata[DELIVERY_KEY], binding=binding,
+                    capture=record.node_state.get("_relationship_delivery_capture"), inspector=snapshot,
+                    current_inspector=current_snapshot)
+                delivered = {(item.section, item.reference): item for item in proof.items}
+            else:
+                reader = getattr(self.reads, "legacy_relationship_manifest", None)
+                manifest = reader(db, scope, record) if reader else None
+                delivered = restore_legacy_relationships(manifest, snapshot, binding)
+        except (ValueError, TypeError, KeyError, AttributeError):
+            delivered = {}
+        locators = tuple(raw_relations[key]["locator"] for key in delivered)
+        current = {}
+        if locators:
+            reader = getattr(self.reads, "relationships_current", None)
+            try:
+                current = reader(db, scope, locators) if reader else {}
+            except Exception:
+                current = {}
+        reads, reasons = {}, set()
+        for key, raw in raw_relations.items():
+            item = delivered.get(key)
+            value = RelationshipEvidenceRead(reason="historical_unverified") if item is None else historical_read(
+                item, current.get(item.state_id, RelationshipCurrentRead(False, reason="read_unavailable")))
+            if value.reason:
+                reasons.add(value.reason)
+            reads[key] = (value, None if value.reason else item.projection)
+        return reads, reasons
 
     def _chat_evidence_item(
         self,
@@ -120,6 +167,7 @@ class EvidenceService:
         *,
         source_reader: MemorySourceEvidenceReaderPort,
         thread_id: str | None = None,
+        relationship_read=None,
     ) -> schemas.WorldChatEvidenceItemRead:
         kind = raw.get("kind")
         if kind not in {
@@ -142,9 +190,11 @@ class EvidenceService:
         related_name = None
         direction = None
         episode = None
+        relationship_change = None
+        relationship_projection = None
         label = {
             "canonical_source": "기억 근거",
-            "graph_relationship": "현재 관계",
+            "graph_relationship": "답변 당시 관계",
             "graph_event": "관계 사건",
             "today_sns_activity": "오늘 SNS 활동",
             "episode_memory": "상황 기억",
@@ -300,39 +350,16 @@ class EvidenceService:
                 )
                 direction = "contextual" if related_name else None
         elif locator_kind == "graph_relationship":
-            state = self.reads.relationship_state(db, locator.get("source_id"))
             actor = locator.get("actor_world_character_id")
             target = locator.get("target_world_character_id")
-            if (
-                state is not None
-                and state.world_id == scope.world_id
-                and (state.actor_world_character_id == actor)
-                and (state.target_world_character_id == target)
-                and (
-                    locator.get("source_revision") is None
-                    or str(state.version) == locator.get("source_revision")
-                )
-            ):
-                try:
-                    self.thread_service._world_chat_role(
-                        db, actor, world_id=scope.world_id
-                    )
-                    self.thread_service._world_chat_role(
-                        db, target, world_id=scope.world_id
-                    )
-                    blocked = self.thread_service._world_characters_are_blocked(
-                        db, scope.world_id, actor, target
-                    )
-                except (MessageNotFoundError, MessageForbiddenError):
-                    blocked = True
-                if not blocked:
-                    availability = "available"
-                    related_id, direction = _related_direction(
-                        scope.subject_world_character_id, actor, target, None
-                    )
-                    related_name = self.reads.world_character_name(
-                        db, related_id, world_id=scope.world_id
-                    )
+            value, projection = relationship_read or (RelationshipEvidenceRead(reason="historical_unverified"), None)
+            if value.change is not None:
+                availability = "available"
+                relationship_change, relationship_projection = value.change, projection
+                related_name = value.name
+                _, direction = _related_direction(scope.subject_world_character_id, actor, target, None)
+                # Private social JSON carries IDs. Expose only the verified safe projection.
+                text = (projection.get("perception") or "") if projection is not None else value.excerpt or ""
         return schemas.WorldChatEvidenceItemRead(
             reference=reference,
             kind=kind,
@@ -344,6 +371,8 @@ class EvidenceService:
             direction=direction,
             canonical_href=href,
             episode=episode,
+            relationship_change=relationship_change,
+            relationship_projection=relationship_projection,
         )
 
 
@@ -357,6 +386,18 @@ def _optional_datetime(value: Any) -> datetime | None:
     return (
         parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
     )
+
+
+def _retrieval_limitations(metadata):
+    from app.domains.chat.contracts.response_request import RetrievalAxis, DegradedReason
+    if "partial_axes" not in metadata or "degraded_reason" not in metadata:
+        return None
+    axes, reason = metadata["partial_axes"], metadata["degraded_reason"]
+    if (type(axes) is not list or len(axes) > 3 or any(type(axis) is not str for axis in axes) or len(set(axes)) != len(axes)
+            or any(axis not in {value.value for value in RetrievalAxis} for axis in axes)
+            or (reason is not None and reason not in {value.value for value in DegradedReason})):
+        return None
+    return {"partial_axes": axes, "degraded_reason": reason}
 
 
 def _related_direction(

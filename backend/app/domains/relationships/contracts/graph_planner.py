@@ -73,6 +73,7 @@ class GraphPlannerRequest:
     repair_diagnostic: str | None = None
     graph_queries: tuple[GraphQueryRequirement, ...] = ()
     image_context: str | None = None
+    chat_participants: dict | None = None
 
     def __post_init__(self) -> None:
         if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):

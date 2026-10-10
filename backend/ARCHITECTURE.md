@@ -1,5 +1,28 @@
 # Angmoo Backend Architecture
 
+## Chat participant presentation and historical relationship evidence (2026-10-11 LOCAL)
+
+Chat admission derives `chat_identity_context.v1` from the existing NameBinding v1,
+freezes the actual World requester/responding identities for the request, and rejects
+damaged or mismatched namespaces before provider work. Runtime batches only selected
+effective World names. Neutral episode/Today values carry private, verified source
+authors from the original Post or Thread role; shared SNS packet serialization and
+legacy source hashes exclude those identities. Integrations adds only Chat presentation
+names and selected opaque participant links, preserving raw source text and provider
+message/schema contracts. One final payload feeds serialization and both delivery captures.
+
+Chat finalize binds `relationship-evidence-delivery.v2` to request, scope, generation,
+slot, attempt and actual JSON/user-prompt digests in the existing canonical UoW. It is
+independent of Memory enablement or receipt processing. Committed evidence reads validate
+the retained proof and current canonical authorization through Runtime, on the caller's
+Session, without graph projection or writes. A normal later version/view change displays
+verified frozen facts as changed; lower versions, damaged facts or lost access do not.
+Only retained, bound legacy delivery material can recover a historical graph excerpt.
+The public v1 DTO adds safe projections/change status and separates original retrieval
+limitations from current read limitations; private proofs and IDs are not exposed.
+
+Evidence: [implementation and scoped checks](../docs/verification/chat-identity-evidence-preview-20261011.md).
+
 ## Memory validation and runtime responsiveness (2026-10-10 LOCAL)
 
 Memory keeps current scope, participants, blocks, private-thread access, delivered

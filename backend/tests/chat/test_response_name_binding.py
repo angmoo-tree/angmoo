@@ -32,7 +32,14 @@ def test_chat_resolves_before_first_delta_and_stream_storage_memory_match(respon
     repository = SqlAlchemyResponseLifecycleRepository(db)
     record = repository.get_request(accepted.response_request.request_id)
     binding = read_name_binding(record.node_state)
+    from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
+    frozen_identity = ChatIdentityContext.read(record.node_state)
+    assert frozen_identity.requester.name == "민식"
     rename_profile(db, "p-world", owner.id, "민수")
+    duplicate = generation_service.accept_world_message(db, owner, "p-world", "p-thread",
+        WorldChatMessageCreate(content="오늘은 어땠어?", idempotency_key="bound-chat-request"))
+    assert duplicate.response_request.request_id == record.request_id
+    assert ChatIdentityContext.read(repository.get_request(record.request_id).node_state) == frozen_identity
     class Generator(_Generator):
         async def generate(self, request):
             assert "민식" in request.profile.worldview and "민수" not in request.profile.worldview
@@ -55,6 +62,9 @@ def test_chat_resolves_before_first_delta_and_stream_storage_memory_match(respon
     assert message.content == deltas == "민식, 반가워. `{{user}}`는 코드 예시야."
     assert len(memory.sources) == 1
     assert memory.sources[0].assistant_message_id == message.id
+    fresh = generation_service.accept_world_message(db, owner, "p-world", "p-thread",
+        WorldChatMessageCreate(content="새 이름으로 이야기하자.", idempotency_key="next-bound-chat-request"))
+    assert ChatIdentityContext.read(repository.get_request(fresh.response_request.request_id).node_state).requester.name == "민수"
 
 
 @pytest.mark.parametrize("tail_invalid", [False, True])

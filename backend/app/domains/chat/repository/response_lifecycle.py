@@ -473,6 +473,24 @@ class SqlAlchemyResponseLifecycleRepository:
             if any(item["kind"] != "graph_relationship" or item["axes"] for item in snapshot["items"]):
                 raise GenerationContractError("response_social_inspector_invalid")
             metadata_payload["_social_context_inspector_v1"] = snapshot
+        from app.domains.chat.contracts.chat_identity_context import IDENTITY_KEY
+        if IDENTITY_KEY in self._decode_json(existing.node_state_json) and payload.relationship_delivery is None and any(
+                item.get("kind") == "graph_relationship" for snapshot in
+                (payload.evidence_inspector_snapshot, payload.social_context_inspector_snapshot) if snapshot for item in snapshot.get("items", [])):
+            raise GenerationContractError("response_relationship_delivery_required")
+        if payload.relationship_delivery is not None:
+            from app.domains.chat.contracts.relationship_evidence import DELIVERY_KEY, RelationshipEvidenceBinding
+            from app.domains.chat.relationship_evidence_policy import validate_delivery
+            thread = self._session.get(MessageThread, existing.thread_id)
+            binding = RelationshipEvidenceBinding.for_request(self._to_record(existing),
+                owner_id=thread.requester_id, world_id=thread.world_id,
+                actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id)
+            validate_delivery(payload.relationship_delivery, binding=binding,
+                capture=self._decode_json(existing.node_state_json).get("_relationship_delivery_capture"),
+                inspector=payload.evidence_inspector_snapshot, current_inspector=payload.social_context_inspector_snapshot)
+            if tracker.get("physical_counts", {}).get("character_response_generator") not in (1, 2):
+                raise GenerationContractError("response_relationship_delivery_call_invalid")
+            metadata_payload[DELIVERY_KEY] = payload.relationship_delivery
         metadata_json = _json_payload(metadata_payload)
         try:
             with self._session.begin_nested():

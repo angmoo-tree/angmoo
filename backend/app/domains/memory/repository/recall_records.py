@@ -94,6 +94,7 @@ def _canonical_source_record(
         metadata={
             "evidence_id": evidence.id,
             "source_digest": evidence.source_digest,
+            "source_author": canonical.actor_world_character_id,
             "memory_kind": item.memory_kind,
         },
     )

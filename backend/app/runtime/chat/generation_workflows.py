@@ -62,6 +62,7 @@ from app.integrations.llm import (
 )
 from app.runtime.chat.evidence_reads import today_reader as today_reader
 from app.runtime.chat import name_binding
+from app.domains.world_characters.service.configuration import batch_effective_profiles
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
 from app.runtime.chat.situation_memory import ChatSituationMemory
 from app.runtime.chat.response_graph import LangGraphResponseExecutor
@@ -186,7 +187,7 @@ def build(
     )
     canonical = ToolPlanningService("CANONICAL", canonical)
     graph = ToolPlanningService("GRAPH", graph)
-    character_labels = _character_labels(db, world_id)
+    character_labels = {}
     workflow = ResponseGenerationWorkflowService(
         graph_executor=LangGraphResponseExecutor(),
         lifecycle=lifecycle,
@@ -215,7 +216,8 @@ def build(
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
         situation_memory=ChatSituationMemory(db),
         recall_mode=recall_mode,
-        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
+        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels,
+            label_reader=lambda ids: character_names(db, world_id, ids)),
         today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(
             db, character_labels
         ),
@@ -223,15 +225,23 @@ def build(
     return GenerationExecution(workflow, character_labels)
 
 
-def _character_labels(db: Session, world_id: str) -> dict[str, str]:
-    rows = db.execute(
-        select(WorldCharacter.id, Character.name)
+def character_names(db: Session, world_id: str, identifiers) -> dict[str, str]:
+    """Bounded profiles of already selected IDs, with existing active filters."""
+    ids = tuple(dict.fromkeys(identifiers))
+    if len(ids) > 100:
+        raise ValueError("chat_identity_limit")
+    if not ids:
+        return {}
+    rows = db.scalars(
+        select(WorldCharacter.id)
         .join(Character, Character.id == WorldCharacter.character_id)
         .where(
             WorldCharacter.world_id == world_id,
+            WorldCharacter.id.in_(ids),
             WorldCharacter.status == "active",
             Character.deleted_at.is_(None),
             Character.moderation_status == "active",
         )
     ).all()
-    return {identifier: name for identifier, name in rows}
+    return {identifier: profile.display_name for identifier, profile in
+        batch_effective_profiles(db, world_id=world_id, world_character_ids=rows).items()}

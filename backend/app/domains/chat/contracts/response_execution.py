@@ -26,6 +26,7 @@ from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapsh
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.relationships.contracts.social_context import SocialContextSnapshot
+from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
 
 
 class ResponseExecutionError(GenerationContractError):
@@ -67,6 +68,8 @@ class ResponseWorkflowCommand:
     social_snapshot: SocialContextSnapshot | None = None
     name_binding_validator: Callable[[], None] | None = None
     image_evidence: ChatImageEvidence | None = None
+    chat_identity: ChatIdentityContext | None = None
+    identity_labels: Callable[[tuple[str, ...]], Mapping[str, str]] | None = None
 
     def __post_init__(self) -> None:
         if self.image_evidence is not None and (self.image_evidence.owner_id != self.preflight.owner_id or self.image_evidence.thread_id != self.preflight.thread_id):

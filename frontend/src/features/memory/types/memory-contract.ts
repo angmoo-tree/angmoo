@@ -112,6 +112,11 @@ export type WorldChatEvidenceItemRead = {
   related_character: string | null;
   direction: "incoming" | "outgoing" | "contextual" | null;
   canonical_href: string | null;
+  relationship_change?: "same" | "changed" | "not_checked" | null;
+  relationship_projection?: {
+    familiarity: number; affinity: number; trust: number; tension: number; interactions: number;
+    relationship_label: string | null; perception: string | null;
+  } | null;
 };
 
 export type WorldChatEvidenceRead = {
@@ -122,4 +127,6 @@ export type WorldChatEvidenceRead = {
   capability: "available" | "degraded";
   items: WorldChatEvidenceItemRead[];
   current_context?: WorldChatEvidenceItemRead[];
+  retrieval_limitations?: { partial_axes: ("canonical" | "graph" | "image")[]; degraded_reason: string | null } | null;
+  read_limitations?: ("historical_unverified" | "current_unavailable" | "read_unavailable")[] | null;
 };

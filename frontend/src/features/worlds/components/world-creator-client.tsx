@@ -501,13 +501,13 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
                 {!context ? <span className="text-xs font-bold text-[#98a2b3]">{uiText("이미지를 고르려면 먼저 초안을 저장해주세요.")}</span> : null}
               </div>
               <p className="text-xs text-text-muted">{uiText("이미지는 5MB 이하로 선택하고, 표시할 부분을 조절한 뒤 적용해주세요. 이름과 소개는 초안 저장으로 저장해요.")}</p>
-              <div className="grid min-w-0 gap-6 md:grid-cols-[160px_minmax(0,1fr)]" data-world-image-previews>
+              <div className="grid min-w-0 grid-cols-1 gap-6" data-world-image-previews>
                 <div><h3 className="mb-4 font-bold">{uiText("기기 홈 미리보기")}</h3>
                   <div role="list"><AppIcon label={definition.name.trim()} visual={<AppIconVisual source={worldIconUrl} name={definition.name.trim()} />} visualBackground={appIconBackground(context?.world.id)} /></div>
                 </div>
                 <div className="min-w-0 overflow-hidden rounded-2xl border border-border-subtle">
                   <h3 className="p-4 font-bold">{uiText("World 화면 미리보기")}</h3>
-                  <WorldBanner source={worldBannerUrl} alt={context?.world.banner_alt_text || uiText("World 배너")} />
+                  <WorldBanner source={context?.world.banner_media_id ?? null} alt={context?.world.banner_alt_text || uiText("World 배너")} />
                   {(definition.name.trim() || definition.genre_tags.length || definition.tone_tags.length || definition.tagline.trim()) ? <div className="space-y-3 p-4">
                     {definition.name.trim() ? <h4 className="text-xl font-bold break-words">{definition.name.trim()}</h4> : null}
                     {definition.genre_tags.length || definition.tone_tags.length ? <div className="flex flex-wrap gap-2">{[...definition.genre_tags, ...definition.tone_tags].map((tag, index) => <Badge key={`${index}:${tag}`}>{tag}</Badge>)}</div> : null}

@@ -340,10 +340,12 @@ class _Router:
         *,
         recent_context,
         today_sns_context=None,
+        chat_identity=None,
         now,
         deadline_at,
     ):
         del recent_context
+        self.chat_identity = chat_identity
         self.today_context = today_sns_context
         self.calls += 1
         intent = _intent(self.route_name)

@@ -142,6 +142,13 @@ class SqlAlchemyEpisodeHybridReader:
                 metadata = {"item_version": str(item.version), "memory_kind": item.memory_kind,
                     "episode_packet": "v1", "partial": str(value["partial"]).lower(),
                     "followup_truncated": str(updates.truncated).lower()}
+                # Only source refs actually retained after packet budgeting.
+                retained = {source.get("reference", source.get("ref")) for unit in value["units"] for source in unit["sources"]}
+                metadata["source_authors"] = json.dumps([
+                    [episode_provider_reference("source", source.reference), source.author_id]
+                    for unit in packet.units for source in unit.sources
+                    if source.status == "verified" and source.author_id and
+                    episode_provider_reference("source", source.reference) in retained], separators=(",", ":"))
                 output.append(CanonicalRecallRecord(f"memory-item:{item.id}", RecallDocumentKind.MEMORY_ITEM,
                     item.id, json.dumps(value, ensure_ascii=False, separators=(",", ":")), _aware(item.valid_from),
                     memory_item_id=item.id, counterpart_world_character_id=item.counterpart_world_character_id,

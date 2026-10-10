@@ -84,6 +84,7 @@ class RetrievalRoutingService:
         recent_context: tuple[RetrievalRouterContextMessage, ...] = (),
         today_sns_context: dict | None = None,
         social_snapshot=None,
+        chat_identity=None,
         now: datetime,
         deadline_at: datetime,
     ) -> RetrievalRoutingResult:
@@ -99,10 +100,11 @@ class RetrievalRoutingService:
             user_message=command.user_message,
             image_context=command.image_context,
             recent_context=recent_context,
-            responding_character_name=scope.responding_character_name,
+            responding_character_name=chat_identity.responder.name if chat_identity else scope.responding_character_name,
             world_language=scope.world_language,
             today_sns_context=today_sns_context,
             social_snapshot=social_snapshot,
+            chat_identity=chat_identity,
         )
 
         first_physical = 0

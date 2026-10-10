@@ -1,6 +1,7 @@
 """Code-owned bounded coordination for the P8-L BOTH retrieval route."""
 
 from __future__ import annotations
+from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
 
 import asyncio
 
@@ -55,6 +56,7 @@ class BothRetrievalCommand:
     call_tracker: Mapping[str, Any]
     graph_projection_enabled: bool = True
     image_context: str | None = None
+    chat_identity: ChatIdentityContext | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -375,6 +377,7 @@ class BothRetrievalWorkflowCoordinator:
             CanonicalRetrievalCommand(
                 user_message=command.user_message,
                 image_context=command.image_context,
+                chat_identity=command.chat_identity,
                 thread_id=command.thread_id,
                 intent=command.intent,
                 resolved=command.resolved,
@@ -399,6 +402,7 @@ class BothRetrievalWorkflowCoordinator:
             GraphRetrievalCommand(
                 user_message=command.user_message,
                 image_context=command.image_context,
+                chat_identity=command.chat_identity,
                 intent=command.intent,
                 resolved=command.resolved,
                 call_tracker=command.call_tracker,

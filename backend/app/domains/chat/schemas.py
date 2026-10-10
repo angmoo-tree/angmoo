@@ -277,6 +277,21 @@ class WorldChatEvidenceSummaryRead(BaseModel):
 from app.domains.memory.schemas import EpisodeDetailRead
 
 
+class RelationshipEvidenceProjectionRead(BaseModel):
+    familiarity: int = Field(ge=0, le=100)
+    affinity: int = Field(ge=-100, le=100)
+    trust: int = Field(ge=-100, le=100)
+    tension: int = Field(ge=0, le=100)
+    interactions: int = Field(ge=0)
+    relationship_label: str | None = None
+    perception: str | None = None
+
+
+class ChatRetrievalLimitationsRead(BaseModel):
+    partial_axes: list[Literal["canonical", "graph", "image"]] = Field(max_length=3)
+    degraded_reason: Literal["canonical_unavailable", "graph_unavailable", "retrieval_timeout", "no_accepted_evidence"] | None = None
+
+
 class WorldChatEvidenceItemRead(BaseModel):
     reference: str
     kind: Literal[
@@ -295,6 +310,8 @@ class WorldChatEvidenceItemRead(BaseModel):
     direction: Literal["incoming", "outgoing", "contextual"] | None = None
     canonical_href: str | None = None
     episode: EpisodeDetailRead | None = None
+    relationship_change: Literal["same", "changed", "not_checked"] | None = None
+    relationship_projection: RelationshipEvidenceProjectionRead | None = None
 
 
 class WorldChatEvidenceRead(BaseModel):
@@ -305,6 +322,8 @@ class WorldChatEvidenceRead(BaseModel):
     capability: Literal["available", "degraded"]
     items: list[WorldChatEvidenceItemRead]
     current_context: list[WorldChatEvidenceItemRead] = Field(default_factory=list, max_length=12)
+    retrieval_limitations: ChatRetrievalLimitationsRead | None = None
+    read_limitations: list[Literal["historical_unverified", "current_unavailable", "read_unavailable"]] | None = Field(default=None, max_length=3)
 
 
 class WorldChatMessageAcceptRead(BaseModel):

@@ -45,12 +45,14 @@ class SocialContextService:
     deadline here prevents further queries after the activity budget expires.
     """
 
-    def __init__(self, read: Callable[[GraphRecallQuery], GraphRecallResult], *,
+    def __init__(self, read: Callable[[GraphRecallQuery], GraphRecallResult], *, label_reader=None, name_policy=display_name,
                  limits: SocialContextLimits | None = None,
                  clock: Callable[[], float] = monotonic) -> None:
         self._read = read
         self._limits = limits or SocialContextLimits()
         self._clock = clock
+        self._label_reader = label_reader
+        self._name_policy = name_policy
 
     def prepare(self, scope: GraphRecallScope, *, labels: Mapping[str, str],
                 counterpart_id: str | None = None,
@@ -96,6 +98,10 @@ class SocialContextService:
             if result.truncated:
                 reasons.add("candidate_limit")
             group = []
+            if self._label_reader is not None:
+                resolved = self._label_reader(tuple(row.target_world_character_id for row in result.relationships))
+                # Frozen participant/additional names win over fresh profile reads.
+                labels = {**resolved, **labels}
             for relation in result.relationships:
                 name = labels.get(relation.target_world_character_id)
                 if (relation.world_id != scope.world_id
@@ -105,7 +111,7 @@ class SocialContextService:
                     excluded += 1
                     continue
                 item = SocialContextItem(
-                    relation, display_name(name),
+                    relation, self._name_policy(name),
                     (reason,), result.source.value,
                 )
                 key = relation.relationship_state_id

@@ -18,7 +18,7 @@ class Details:
 
     def read_sources(self, *, scope, identities):
         self.calls.append(identities)
-        return {key: EpisodeSourceDetail(value, "원문") for key, value in self.values.items() if key in identities}
+        return {key: EpisodeSourceDetail(value, "원문", "verified-author") for key, value in self.values.items() if key in identities}
 
     def read_thoughts(self, *, scope, references):
         return {}
@@ -36,6 +36,7 @@ def test_episode_manifest_reads_all_sources_and_keeps_missing_partial(memory_ses
     assert len(reader.calls) == 1
     assert len(reader.calls[0]) == 2
     assert all(s.status == "verified" for u in complete[0].units for s in u.sources)
+    assert all(s.author_id == "verified-author" for u in complete[0].units for s in u.sources)
     reader.values = {("POST", "0"): values[("POST", "0")]}
     partial = repo.read(scope=setting.scope, item_ids=ids, now=NOW)
     assert len(partial) == 1
@@ -45,6 +46,7 @@ def test_episode_manifest_reads_all_sources_and_keeps_missing_partial(memory_ses
     missing = repo.read(scope=setting.scope, item_ids=ids, now=NOW)
     assert len(missing) == 1
     assert all(s.text is None for u in missing[0].units for s in u.sources)
+    assert all(s.author_id is None for u in missing[0].units for s in u.sources)
     calls = len(reader.calls)
     assert repo.read(scope=MemoryScope("other", setting.scope.world_id, setting.scope.subject_world_character_id), item_ids=ids, now=NOW) == ()
     assert len(reader.calls) == calls
@@ -58,6 +60,7 @@ def test_source_changed_and_database_error_are_not_a_normal_zero_result(memory_s
     repo = SqlAlchemyEpisodePackets(memory_session, detail_reader=reader)
     result = repo.read(scope=setting.scope, item_ids=ids, now=NOW)
     assert all(s.status == "changed" for u in result[0].units for s in u.sources)
+    assert all(s.author_id is None for u in result[0].units for s in u.sources)
     def failed(**kwargs):
         raise OperationalError("read failed", {}, None)
     reader.read_sources = failed

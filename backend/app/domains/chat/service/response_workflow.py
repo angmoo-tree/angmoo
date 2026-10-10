@@ -150,6 +150,23 @@ class ResponseGenerationWorkflowService:
             from app.contracts.name_binding import read_name_binding, NameBindingError
             from app.domains.characters.service.prompt_persona import request_persona, request_activity_thought
             name_binding = read_name_binding(record.node_state)
+            from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
+            identity = ChatIdentityContext.read(record.node_state)
+            if identity is not None:
+                identity.assert_scope(command.preflight.owner_id, command.preflight.world_id, record.thread_id,
+                    command.preflight.requester_world_character_id, command.preflight.responding_world_character_id)
+                if name_binding is None:
+                    raise NameBindingError("chat_identity_binding_missing")
+                if identity.requester.name != ChatIdentityContext.from_binding(name_binding, record.thread_id).requester.name or identity.responder.name != ChatIdentityContext.from_binding(name_binding, record.thread_id).responder.name:
+                    raise NameBindingError("chat_identity_binding_mismatch")
+                command = replace(command, chat_identity=identity,
+                    character_labels={**command.character_labels, **identity.names})
+                bind_labels = getattr(self._social_context_provider, "bind_labels", None)
+                if bind_labels:
+                    bind_labels(identity.names)
+                bind_today = getattr(self._today_snapshot_validator, "bind_labels", None)
+                if bind_today:
+                    bind_today(command.character_labels)
             if name_binding is not None:
                 if (name_binding.owner_id, name_binding.world_id, name_binding.actor_world_character_id,
                     name_binding.user_world_character_id) != (command.preflight.owner_id, command.preflight.world_id,
@@ -173,6 +190,9 @@ class ResponseGenerationWorkflowService:
                     command.preflight.responding_world_character_id,
                 ), counterpart_id=command.preflight.requester_world_character_id)
                 command = replace(command, recall_mode=self._recall_mode, social_snapshot=snapshot)
+                if identity is not None:
+                    identity = identity.extend({item.relationship.target_world_character_id: item.display_name for item in snapshot.items})
+                    command = replace(command, chat_identity=identity)
                 observe("social_context_prepared", snapshot_id="s-"+snapshot.snapshot_id,
                         content_hash="h-"+snapshot.content_hash, status=snapshot.status,
                         candidates=snapshot.candidate_count, excluded=snapshot.excluded_count,
@@ -250,7 +270,12 @@ class ResponseGenerationWorkflowService:
                 record,
                 ResponseRequestState.RESPONSE_STREAMING,
                 node_state={
-                    "character_response_metrics": _character_response_metrics(response)
+                    "character_response_metrics": _character_response_metrics(response),
+                    **({"_relationship_delivery_capture": {
+                        "digest": response.relationship_delivery["digest"],
+                        "payload_digest": response.relationship_delivery["payload_digest"],
+                        "prompt_digest": response.relationship_delivery["prompt_digest"],
+                    }} if response.relationship_delivery is not None else {}),
                 },
                 call_tracker=response.call_tracker,
             )
@@ -333,6 +358,7 @@ class ResponseGenerationWorkflowService:
                     metadata=metadata,
                     evidence_inspector_snapshot=bundle.inspector_snapshot(),
                     social_context_inspector_snapshot=_social_context_inspector(command.social_snapshot),
+                    relationship_delivery=response.relationship_delivery,
                 ),
                 now=datetime.now(UTC),
             )

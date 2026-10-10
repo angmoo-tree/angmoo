@@ -70,6 +70,8 @@ class TodaySocialActivityRecord:
     subjective_context: TodaySocialSubjectiveRecord | None = None
     thought: TodaySocialThoughtRecord | None = None
     parent_post_id: str | None = None
+    # Canonical authors only; excluded from the existing provider/hash views.
+    source_authors: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None:

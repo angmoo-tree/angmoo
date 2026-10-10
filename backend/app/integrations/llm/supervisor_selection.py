@@ -128,8 +128,14 @@ def control_selection_system_prompt(options=SelectionArgumentOptions()):
     return prompt + MULTILINGUAL_SELECTION_POLICY
 
 
+def _identity_instructions(request):
+    from app.integrations.llm.chat_input_presentation import CHAT_PARTICIPANT_INSTRUCTIONS
+    return "\n" + CHAT_PARTICIPANT_INSTRUCTIONS if request.chat_identity else ""
+
+
 def selection_prompt(request):
-    return json.dumps({
+    from app.integrations.llm.chat_input_presentation import router_view
+    return json.dumps(router_view({
         "world_language": request.world_language,
         "responding_character_name": request.responding_character_name,
         "recent_context": [{"role": x.role, "content": x.content} for x in request.recent_context],
@@ -138,7 +144,7 @@ def selection_prompt(request):
         "user_message": request.user_message,
         **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
         "repair_validation_code": request.repair_diagnostic,
-    }, ensure_ascii=False)
+    }, request), ensure_ascii=False)
 
 
 def selection_system_prompt():
@@ -209,7 +215,7 @@ class DirectLlmSupervisorSelectionProvider:
                     items=len(request.social_snapshot.items))
             response = await direct_llm.generate_text(
                 api_key=material.reveal(), context=context, tracker=tracker,
-                system_prompt=control_selection_system_prompt(options) if self._native_controls else selection_system_prompt(), user_prompt=selection_prompt(request),
+                system_prompt=(control_selection_system_prompt(options) if self._native_controls else selection_system_prompt()) + _identity_instructions(request), user_prompt=selection_prompt(request),
                 tools=control_selection_tools(options) if self._native_controls else selection_tools(), require_tool_call=self._native_controls, max_output_tokens=policy.max_output_tokens,
                 timeout_seconds=30.0, thinking_level=policy.thinking_level,
             )
