@@ -304,5 +304,18 @@
   "comfy_server_key_not_supported": "ComfyUI server authentication keys cannot be registered.",
   "comfy_server_key_retired": "This ComfyUI server key has been retired. Save the service settings without a server key.",
   "world_image_key_revision_conflict": "The key for this service was changed elsewhere. Check its latest status before saving again.",
-  "다시 시도": "Try again"
+  "다시 시도": "Try again",
+  "JPG, PNG, WebP 또는 HEIF·HEIC 사진을 선택해주세요.": "Choose a JPG, PNG, WebP, HEIF, or HEIC photo.",
+  "사진 준비 시간이 너무 길어 중단했어요. 더 작은 사진을 선택해주세요.": "Photo preparation took too long and was stopped. Choose a smaller photo.",
+  "사진 준비 취소": "Cancel photo preparation",
+  "사진 해상도가 너무 커요. 16,384px 이하, 전체 64메가픽셀 이하로 선택해주세요.": "The photo resolution is too high. Choose a photo within 16,384 pixels per side and 64 megapixels in total.",
+  "사진을 읽지 못했어요. 손상되지 않은 사진을 다시 선택해주세요.": "The photo could not be read. Choose an undamaged photo.",
+  "사진을 첨부하지 못했어요. 입력한 내용과 이전 사진은 유지돼요.": "The photo could not be attached. Your text and previous photo are preserved.",
+  "움직이는 이미지나 동영상은 첨부할 수 없어요. 사진 한 장을 선택해주세요.": "Animations and videos cannot be attached. Choose one still photo.",
+  "원본 사진은 20MB 이하로 선택해주세요.": "Choose an original photo up to 20 MB.",
+  "원본은 20MB까지 선택할 수 있어요. 필요하면 첨부용 사본을 조절하며 원본은 그대로 유지돼요.": "Choose an original up to 20 MB. An attachment copy is adjusted when needed; the original stays unchanged.",
+  "이 사진 형식을 변환하지 못했어요. JPG 또는 PNG로 다시 선택해주세요.": "This photo format could not be converted. Choose a JPG or PNG instead.",
+  "이미지를 인식할 수 없어요. 이미지 인식 설정을 확인하거나 사진을 제거해주세요.": "The image cannot be recognized. Check image recognition settings or remove the photo.",
+  "첨부할 사진을 준비하는 중…": "Preparing the attachment photo…",
+  "첨부할 사진을 준비하지 못했어요. 더 작은 사진을 선택해주세요.": "The attachment photo could not be prepared. Choose a smaller photo."
 }

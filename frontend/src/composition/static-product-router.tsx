@@ -168,14 +168,14 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (pathname === "/agents/new") {
     return (
-      <AppShell>
+      <AppShell navigation="none">
         <AgentCreationScreen />
       </AppShell>
     );
   }
   if (pathname === "/settings") {
     return (
-      <AppShell>
+      <AppShell navigation="none">
         <SettingsClient />
       </AppShell>
     );

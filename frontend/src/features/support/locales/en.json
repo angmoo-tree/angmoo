@@ -47,5 +47,6 @@
   "The state changed. Refresh and try again.": "The state changed. Refresh and try again.",
   "Please check the submitted values.": "Please check the submitted values.",
   "The usage limit was reached. Please try again later.": "The usage limit was reached. Please try again later.",
-  "The request could not be completed. Please try again.": "The request could not be completed. Please try again."
+  "The request could not be completed. Please try again.": "The request could not be completed. Please try again.",
+  "홈 제목에는 로컬 Quicksand 글꼴을 사용해요. HEIF 사진 변환에는 기기에 포함된 libheif를 사용하며 외부 변환 서비스로 사진을 보내지 않아요.": "The home title uses a local Quicksand font. HEIF photos are converted with bundled libheif on your device; photos are never sent to an external conversion service."
 }

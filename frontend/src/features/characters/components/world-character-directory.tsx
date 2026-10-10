@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 import { Activity, ChevronRight, Power, PowerOff, RotateCcw, Users } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -125,12 +126,8 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
 
   return (
     <section ref={root} className={styles.directory} data-world-character-surface="list" data-character-dashboard="world-management">
-      <header className={styles.directoryHeading}>
-        <span className={styles.headingIcon} data-world-character-directory-icon><Users aria-hidden="true" size={21} /></span>
-        <div><h2>{uiText("이 World의 앵무")}</h2>
-          <span className={styles.directoryMeta}>{read ? uiText("현재 참여 중인 캐릭터 {{count}}명", { count: formatNumber(read.summary.total) }) : uiText("Character 목록을 불러오는 중")}</span>
-        </div>
-      </header>
+      <SectionHeading icon={<Users aria-hidden="true" size={21} />} title={uiText("이 World의 앵무")}
+        description={read ? uiText("현재 참여 중인 캐릭터 {{count}}명", { count: formatNumber(read.summary.total) }) : uiText("Character 목록을 불러오는 중")} />
       {read ? <p className={cardStyles.summary} data-character-summary>{uiText("World 캐릭터 집계", {
         total: formatNumber(read.summary.total), enabled: formatNumber(read.summary.enabled), disabled: formatNumber(read.summary.disabled), users: formatNumber(read.summary.users),
       })}</p> : null}

@@ -293,7 +293,7 @@ function WorldSection({
         postId={postId}
         worldId={worldId}
         feedHeader={<WorldFeedHeader ownerActor={ownerActor} worldId={worldId} />}
-        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} renderLayout={input.renderLayout} />}
+        renderImagePicker={input => <ImagePicker preparationPolicy="user-photo" scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} renderLayout={input.renderLayout} />}
         imageStatus={GenerationStatus}
       />
     );

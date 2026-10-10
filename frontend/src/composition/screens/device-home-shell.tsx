@@ -18,7 +18,6 @@ export function DeviceHomeShell({
   const header = (
     <header className={styles.header}>
       <div>
-        <div className={styles.eyebrow}>Local Device</div>
         <h1 className={styles.title}>{title}</h1>
       </div>
       {status}

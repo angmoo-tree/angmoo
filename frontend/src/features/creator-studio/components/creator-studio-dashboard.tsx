@@ -18,10 +18,10 @@ export type CreatorStudioAuthStatus =
   | "unauthenticated";
 
 const GROUPS: readonly { id: StudioGroupId; label: string; description: string }[] = [
-  { id: "live", label: "실행 중인 World", description: "Device Home에서 열 수 있어요" },
-  { id: "draft", label: "작성 중", description: "공개 준비를 마쳐야 해요" },
-  { id: "private", label: "비공개", description: "Studio에서만 관리해요" },
-  { id: "archived", label: "보관됨", description: "Device Home에는 표시하지 않아요" },
+  { id: "live", label: "공개한 World", description: "기기 홈에서 열 수 있어요." },
+  { id: "draft", label: "작성 중", description: "필수 항목을 채우고 공개를 준비해요." },
+  { id: "private", label: "비공개", description: "비공개 World를 관리해요." },
+  { id: "archived", label: "보관됨", description: "기기 홈에는 표시되지 않아요." },
 ];
 
 export function CreatorStudioDashboard({
@@ -60,21 +60,21 @@ export function CreatorStudioDashboard({
   }, [worlds]);
 
   if (authStatus === "checking" || (authStatus === "authenticated" && loading)) {
-    return <StudioNotice title={uiText("World 목록을 불러오는 중입니다")} />;
+    return <StudioNotice title={uiText("World 목록을 불러오는 중…")} />;
   }
   if (authStatus === "unauthenticated") {
     return (
-      <StudioNotice title={uiText("로컬 owner 연결이 필요합니다")}>
+      <StudioNotice title={uiText("Studio를 사용하려면 먼저 연결해주세요.")}>
         <Link
           className={styles.secondaryAction}
           href={`/login?returnTo=${encodeURIComponent(PRODUCT_ROUTES.studio)}`}
         >
-          {uiText("owner 연결")}</Link>
+          {uiText("연결하기")}</Link>
       </StudioNotice>
     );
   }
   if (error) {
-    return <StudioNotice title={uiText("Creator Studio를 열지 못했습니다")} />;
+    return <StudioNotice title={uiText("Creator Studio를 열지 못했어요.")} />;
   }
 
   return (
@@ -84,11 +84,11 @@ export function CreatorStudioDashboard({
           <p className={styles.eyebrow}>WORLD WORKSPACE</p>
           <h1 className={styles.title}>{uiText("내 World")}</h1>
           <p className={styles.description}>
-            {uiText("초안부터 공개까지 한곳에서 관리합니다. Studio 목록은 이 설치의 local owner와 활성 creator membership 범위만 읽습니다.")}</p>
+            {uiText("World를 만들고, 초안을 저장하고, 공개까지 관리해요.")}</p>
         </div>
         <div className={styles.actions}>
           <Link className={styles.secondaryAction} href={PRODUCT_ROUTES.studioImport}>
-            {uiText("Package 가져오기")}</Link>
+            {uiText("World 패키지 가져오기")}</Link>
           <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
             {uiText("새 World 만들기")}</Link>
         </div>
@@ -96,8 +96,8 @@ export function CreatorStudioDashboard({
 
       {worlds.length === 0 ? (
         <section className={styles.empty}>
-          <h2>{uiText("아직 만든 World가 없습니다")}</h2>
-          <p>{uiText("첫 World를 만들고 공개 준비를 마치면 Device Home에 앱이 나타납니다.")}</p>
+          <h2>{uiText("아직 만든 World가 없어요.")}</h2>
+          <p>{uiText("첫 World를 만들고 공개하면 기기 홈에서 열 수 있어요.")}</p>
           <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
             {uiText("World 초안 시작")}</Link>
         </section>
@@ -131,14 +131,14 @@ function WorldCard({ world }: { world: WorldSurfaceItem }) {
       <div className={styles.worldCardHeader}>
         <div>
           <h3>{world.name}</h3>
-          <p>{world.tagline || uiText("한 줄 소개가 아직 없습니다.")}</p>
+          <p>{world.tagline || uiText("한 줄 소개가 아직 없어요.")}</p>
         </div>
         <span className={styles.status}>{uiText(statusLabel(world))}</span>
       </div>
       <div className={styles.meta}>
-        <span>{world.visibility}</span>
-        <span>{world.readiness_status}</span>
-        <span>{world.membership_role}</span>
+        <span>{uiText(({ private: "비공개", unlisted: "목록에 표시하지 않음", public: "공개" } as const)[world.visibility] ?? "공개 범위 확인 필요")}</span>
+        <span>{uiText(({ not_ready: "작성 중", publish_ready: "공개 준비 완료", stale: "다시 확인 필요" } as const)[world.readiness_status as "not_ready" | "publish_ready" | "stale"] ?? "공개 준비 확인 필요")}</span>
+        <span>{uiText(({ owner: "소유자", editor: "편집자", member: "참여자" } as const)[world.membership_role as "owner" | "editor" | "member"] ?? "참여 권한 확인 필요")}</span>
       </div>
       <div className={styles.actions}>
         <Link className={styles.secondaryAction} href={studioWorldRoute(world.world_id)}>
@@ -174,6 +174,6 @@ function statusLabel(world: WorldSurfaceItem): string {
   if (world.status === "archived") return "보관됨";
   if (world.launchable) return "공개됨";
   if (world.visibility === "private" && world.status === "published") return "비공개";
-  if (world.readiness_status === "stale") return "재검증 필요";
+  if (world.readiness_status === "stale") return "다시 확인 필요";
   return "초안";
 }

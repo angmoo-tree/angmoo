@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function NewAgentPage() {
   return (
-    <AppShell>
+    <AppShell navigation="none">
       <AgentCreationScreen />
     </AppShell>
   );

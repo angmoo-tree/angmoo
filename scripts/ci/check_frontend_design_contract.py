@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_POLICY = ROOT / "security/frontend_design_policy.json"
 HEX_SHA = re.compile(r"^[0-9a-f]{40}$")
 ABSOLUTE_WINDOWS_DRIVE_PATH = re.compile(r"(?i)(?<![A-Za-z0-9_])[a-z]:[\\/]")
-ABSOLUTE_WINDOWS_UNC_PATH = re.compile(r"\\\\[^\\/\s`\"']+[\\/][^\\/\s`\"']+")
+ABSOLUTE_WINDOWS_UNC_PATH = re.compile(r"\\\\[A-Za-z0-9_][A-Za-z0-9_.-]*[\\/][^\\/\s`\"']+")
 ABSOLUTE_UNIX_HOME_PATH = re.compile(
     r"(?:^|[\s`\"'(=])(?:~[/\\]|/(?:home|Users|workspace)/[^/\s`\"']+|/mnt/[A-Za-z]/)"
 )
@@ -791,7 +791,38 @@ def _static_direct_open_routes(path: Path) -> list[str]:
     return re.findall(r'"([^"\r\n]+)"', match.group(1))
 
 
+def _reviewed_local_assets(policy: dict[str, Any]) -> tuple[set[str], set[str], set[str]]:
+    """Validate exact approved offline fonts and synthetic test assets, not globs."""
+    font_paths, font_stylesheets, fixture_paths = set(), set(), set()
+    registry = _load_json(ROOT / "security/license_policy.json")
+    for item in policy.get("reviewed_local_fonts", []):
+        path = _repository_path(item["path"], label="reviewed font")
+        record = next((asset for asset in registry.get("assets", []) if asset.get("path") == item["path"]), None)
+        if not record or record.get("license_expression") != "OFL-1.1" or hashlib.sha256(path.read_bytes()).hexdigest() != record.get("sha256"):
+            raise ValueError("reviewed offline font must match its licensed asset digest")
+        stylesheet = _repository_path(item["stylesheet"], label="font stylesheet")
+        text = stylesheet.read_text(encoding="utf-8")
+        blocks = re.findall(r"@font-face\s*\{([^}]+)\}", text, re.DOTALL)
+        urls = re.findall(r'url\([\"\']?([^\"\')]+)[\"\']?\)', "".join(blocks))
+        if len(blocks) != 1 or len(urls) != 1 or (stylesheet.parent / urls[0]).resolve() != path.resolve():
+            raise ValueError("reviewed font face must use its exact local asset")
+        if item["family"] not in blocks[0] or "font-display: swap" not in blocks[0] or f'"{item["family"]}", var(--font-sans)' not in text:
+            raise ValueError("reviewed font needs its family, swap and system fallback")
+        source_notice = _repository_path(item["source_notice"], label="font source notice").read_bytes()
+        public_notice = _repository_path(item["public_notice"], label="font public notice").read_bytes()
+        if source_notice != public_notice or b"SIL OPEN FONT LICENSE Version 1.1" not in source_notice:
+            raise ValueError("reviewed font must preserve and ship its original OFL notice")
+        font_paths.add(item["path"]); font_stylesheets.add(item["stylesheet"])
+    for item in policy.get("diagnostic_fixture_assets", []):
+        path = _repository_path(item["path"], label="synthetic diagnostic photo")
+        if not item["path"].startswith("browser-tests/fixtures/photos/") or hashlib.sha256(path.read_bytes()).hexdigest() != item["sha256"]:
+            raise ValueError("diagnostic photo must be an exact reviewed synthetic fixture")
+        fixture_paths.add(item["path"])
+    return font_paths, font_stylesheets, fixture_paths
+
+
 def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
+    reviewed_fonts, reviewed_font_stylesheets, diagnostic_photos = _reviewed_local_assets(policy)
     browser = policy["browser_harness"]
     package_path = _repository_path(browser["package"], label="browser package")
     lockfile_path = _repository_path(browser["lockfile"], label="browser lockfile")
@@ -849,6 +880,7 @@ def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
         if path.is_file()
         and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
         and not ignored_browser_parts.intersection(path.parts)
+        and path.relative_to(ROOT).as_posix() not in diagnostic_photos
     )
 
     forbidden_matches: list[dict[str, str]] = []
@@ -874,6 +906,8 @@ def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
         text = path.read_text(encoding="utf-8")
         for marker in ("next/font", "@font-face", "fonts.googleapis.com"):
             if marker in text:
+                if marker == "@font-face" and path.relative_to(ROOT).as_posix() in reviewed_font_stylesheets:
+                    continue
                 remote_font_markers.append(
                     {"marker": marker, "path": path.relative_to(ROOT).as_posix()}
                 )
@@ -890,6 +924,7 @@ def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
         and path.suffix.lower() in {".eot", ".otf", ".ttf", ".woff", ".woff2"}
         and "node_modules" not in path.parts
         and "out" not in path.parts
+        and not any(part == ".next" or part.startswith(".next-") for part in path.parts)
     )
     license_policy = _load_json(ROOT / "security/license_policy.json")
     frontend_assets: list[dict[str, Any]] = []
@@ -1024,7 +1059,9 @@ def _build_report(policy: dict[str, Any]) -> dict[str, Any]:
             "schema": foundation["schema"],
         },
         "source_dependency_audit": {
-            "bundled_font_files": bundled_font_files,
+            "bundled_font_files": [path for path in bundled_font_files if path not in reviewed_fonts],
+            "reviewed_local_fonts": sorted(reviewed_fonts),
+            "diagnostic_fixture_assets": sorted(diagnostic_photos),
             "licensed_frontend_assets": frontend_assets,
             "remote_font_markers": remote_font_markers,
             "sibling_runtime_dependency": False,

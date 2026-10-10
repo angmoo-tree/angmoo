@@ -191,17 +191,20 @@ export function uploadWorldBanner(
     alt_text: string;
   },
   mediaType: "banner" | "icon" = "banner",
+  signal?: AbortSignal,
 ) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "POST",
     body: data,
+    signal,
   });
 }
 
-export function removeWorldBanner(worldId: string, rowVersion: number, mediaType: "banner" | "icon" = "banner") {
+export function removeWorldBanner(worldId: string, rowVersion: number, mediaType: "banner" | "icon" = "banner", signal?: AbortSignal) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "DELETE",
     body: { row_version: rowVersion },
+    signal,
   });
 }
 

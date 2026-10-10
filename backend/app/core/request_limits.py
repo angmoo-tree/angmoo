@@ -17,7 +17,7 @@ _LORE_UPLOAD_PATH = re.compile(r"^/api/v1/agents/[^/]+/lore-sources/?$")
 _DRAFT_MEDIA_PATH = re.compile(r"^/api/v1/agents/drafts/[^/]+/media/?$")
 _CARD_UPLOAD_PATH = re.compile(r"^/api/v1/agents/drafts/[^/]+/card/?$")
 _PROFILE_MEDIA_PATH = re.compile(r"^/api/v1/agents/[^/]+/media/?$")
-_WORLD_MEDIA_PATH = re.compile(r"^/api/v1/worlds/[^/]+/(?:my-profile/media|icon|banner)/?$")
+_WORLD_MEDIA_PATH = re.compile(r"^/api/v1/worlds/[^/]+/(?:my-profile/media|icon|banner|world-characters/[^/]+/profile/media)/?$")
 _IMAGE_SEED_PATH = re.compile(
     r"^/api/v1/agents/[^/]+/image-settings/seed/?$"
 )
@@ -64,8 +64,8 @@ class RequestBodyLimitMiddleware:
 
 def request_body_limit(*, path: str, method: str) -> int:
     normalized_method = method.upper()
-    if normalized_method == "POST" and path.rstrip("/") == "/api/v1/media/assets":
-        return 14 * 1024 * 1024 + 256 * 1024
+    if normalized_method == "POST" and re.fullmatch(r"/api/v1/media/assets/?", path):
+        return 14 * 1024 * 1024
     if normalized_method == "POST" and _WORLD_MEDIA_PATH.fullmatch(path):
         return PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES
     if normalized_method == "POST" and _CARD_UPLOAD_PATH.fullmatch(path):

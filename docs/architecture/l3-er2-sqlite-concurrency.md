@@ -81,3 +81,34 @@ zero.
 PR F still owns FTS5/search parity and PR G owns offline PostgreSQL-to-SQLite
 migration, restore, rollback, disk-full handling, and full oracle parity. No
 SQLite canonical cutover is authorized by this contract.
+
+## 2026-10-10 current SQLite runtime and recovery extension
+
+The preceding ER2 paragraphs describe that historical stage, not the current runtime.
+The injected session engine now selects the existing SQLite scheduler adapter for
+SQLite, retaining other-dialect composition. Owner/epoch/expiry CAS remains canonical;
+expired same-owner acquisition also increments epoch. Lease operations use short
+BEGIN IMMEDIATE, rollback and fresh reads, at most four BUSY attempts/250ms, per-call
+50ms busy timeout and restoration. LOCKED and other errors are not BUSY retries.
+Canonical connection-pool checkout is also bounded at 50ms; general busy_timeout stays
+5000ms. The tradeoff is earlier failure under pool pressure rather than unbounded
+lease-worker delay. Existing outbox/manual-write callers are separately regressed.
+
+The one-worker/four-capacity lease executor creates connections inside its thread,
+expires queued work after one second and tracks actual concurrent Future completion.
+Cancellation alone is not drain completion. One scheduler runner owns recovery:
+DEGRADED stops new ticks, drains work, heartbeats the same valid owner/epoch or obtains
+an expired lease's new epoch, respecting another owner. Backoff 1/2/4/8/10 seconds is
+stop-interruptible. A supervisor does not independently restart it. Live unsettled
+children prevent finish/restart, and cleanup does not mask the primary error.
+Committed tick windows prevent effect replay after finish failure. No missed-window
+burst, schema/migration, activity limit or AI policy change is introduced.
+
+Scheduler health requires READY plus a live heartbeat owner/epoch/expiry proof.
+Recovery/fatal/expired proof yields503; verified recovery yields200; projector policy
+is retained. Diagnostics exclude SQL, keys and conversation content. The incident's
+actual lock-holder remains unidentified; Chat is not assumed to be its cause.
+Temporary SQLite tests and isolated final-source Docker fake ticks establish local
+mechanical recovery only. Original app containers/data, installed-app identity,
+real-AI behavior and physical-device USER CHECK are separate. See the
+[implementation/verification record](../verification/creator-studio-copy-media-scheduler-20261010.md).

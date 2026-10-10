@@ -206,6 +206,8 @@ function isCharacterCardUpload(path: string[], method: string) {
 }
 
 function requestBodyLimit(path: string[], method: string) {
+  if (method === "POST" && path.length === 2 && path[0] === "media" && path[1] === "assets") return 14 * 1024 * 1024;
+  if (isWorldProfileMediaUpload(path, method)) return PROFILE_MEDIA_PROXY_MAX_BYTES;
   if (isCharacterCardUpload(path, method)) {
     return CHARACTER_CARD_PROXY_MAX_BYTES;
   }
@@ -216,6 +218,13 @@ function requestBodyLimit(path: string[], method: string) {
     return PROFILE_MEDIA_PROXY_MAX_BYTES;
   }
   return DEFAULT_PROXY_MAX_BYTES;
+}
+
+function isWorldProfileMediaUpload(path: string[], method: string) {
+  if (method !== "POST" || path[0] !== "worlds" || !path[1] || path.some(segment => !segment || segment.includes("/"))) return false;
+  return path.length === 3 && ["icon", "banner"].includes(path[2]) ||
+    path.length === 4 && path[2] === "my-profile" && path[3] === "media" ||
+    path.length === 6 && path[2] === "world-characters" && path[4] === "profile" && path[5] === "media";
 }
 
 async function readStreamedRequestBody(request: Request, maxBytes: number) {

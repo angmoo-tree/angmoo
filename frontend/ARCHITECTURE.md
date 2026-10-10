@@ -691,3 +691,27 @@ ko/en은 기존 namespace와 안정된 hook을 사용하고 locale 변경은 dra
 Character/model 및 World/actor/profile 별 component key와 AbortSignal로 늦은 분석 결과를 격리한다. legacy는 조회 시 전환하지 않으며 명시적 전환만 v2 node_value 모드로 바꾼다. UI는 필요한 role만 보여주고 object_info 후보가 없으면 자유 입력을 제공한다. `/system_stats` 연결·앱 입력 준비·후보 조회 상태를 구분하며 서버의 실행 가능성 검사를 UI에서 재현하지 않는다. Next와 static은 동일 editor/status/error/types를 사용한다. 상세 진단은 plain text로 렌더링하며 성공한 작업의 warning도 확인할 수 있다.
 
 조립·소유권·credential transport는 기존 위치를 유지한다. JSON과 API 키를 localStorage에 보관하거나 다른 캐릭터 키를 가져오지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)을 참조한다.
+
+## Creator Studio 표시·공용 사진 준비 (2026-10-10 LOCAL)
+
+Studio 목록은 Creator Studio, World 편집/신규·저장된 공개 준비 결과와 draft 미리보기는 Worlds,
+가져오기/내보내기 승인은 World Packages가 소유한다. 앱 안내만 ko/en으로 바꾸며 사용자 본문,
+고급 JSON, digest 승인, CAS/revision·권한 계약은 원래 feature에 남긴다.
+
+AppIconVisual·SectionHeading·ImageCropDialog와 utils/image-crop.ts는 표시·canvas 계산만 소유하는
+중립 컴포넌트다. WorldBanner는 Worlds 내부에서 소개/편집 미리보기가 공유한다. 선택/자르기
+취소는 저장하지 않고 적용 때만 기존 version-aware API를 호출한다. 생성 마지막 단계는
+기존 Characters controller를 composition slot으로 받아 명시 ON 후 이동한다. 다른 설정의
+ON/OFF·독립 저장은 보존한다. feature 직접 import나 새 facade를 만들지 않는다.
+
+AppShell navigation="none"은 /settings와 /agents/new의 Next/static 조립에만 적용한다.
+Home Quicksand wordmark는 로컬 번들과 원문 고지를 제공하며 일반 UI 글꼴은 보존한다.
+Media의 bounded Worker는 게시글/Chat 사진만 처리한다. 원본 20MiB·최종 10MiB/4096px·요청
+14MiB, 30초/6회/동시1개와 조기 픽셀 제한을 공통 적용한다. auth/runtime/World/thread 변경과
+취소/unmount 때 Worker·HTTP·late response를 정리한다. Social 공개/Chat 전송과 실제 asset
+preflight/인식 책임은 기존 소유자에 남긴다. World/프로필 5MiB와 네 POST 8,262,144 bytes는
+별도 계약이다. [자산·코덱 계약](../docs/operations/local-photo-codec.md)과
+[검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 따른다.
+
+TypeScript는 제품 소스와 생성된 Next route 타입을 검사한다. 정적 산출물인 `out`과
+`static-shell/out`은 입력 소스가 아니므로 제외한다. 사진 Worker 원본의 타입 검사는 유지한다.

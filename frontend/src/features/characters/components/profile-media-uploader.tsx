@@ -3,12 +3,13 @@ import { useUiText } from "@/hooks/use-ui-text";
 import { useUiErrorText } from "@/hooks/use-ui-error-text";
 
 
-import { Check, ImageIcon, Loader2, Upload } from "lucide-react";
+import { ImageIcon, Loader2, Upload } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
+import { ImageCropDialog } from "@/components/media/image-crop-dialog";
+import { cropToBlob, blobToBase64, type CropState } from "@/utils/image-crop";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
@@ -17,12 +18,6 @@ import { usePrivateMediaUrl } from "@/hooks/use-private-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 type MediaKind = "avatar" | "banner";
-
-type CropState = {
-  scale: number;
-  offsetX: number;
-  offsetY: number;
-};
 
 const SPECS: Record<MediaKind, { width: number; height: number; label: string }> = {
   avatar: { width: 768, height: 768, label: "아바타" },
@@ -86,7 +81,7 @@ export function ProfileMediaUploader({
       return;
     }
     if (nextFile.size > MAX_MEDIA_BYTES) {
-      setError(uiText("이미지는 5MB 이하만 사용할 수 있습니다."));
+      setError(uiText("이미지는 5MB 이하로 선택해주세요."));
       return;
     }
 
@@ -156,7 +151,7 @@ export function ProfileMediaUploader({
           <UploadButton
             inputId={bannerInputId}
             label={uiText("배너 업로드")}
-            disabled={disabled}
+            disabled={disabled || uploading}
             onChange={(event) => handleFileChange("banner", event)}
             className="absolute right-4 top-4 bg-surface-base shadow-[var(--shadow-summary)]"
           />
@@ -181,7 +176,7 @@ export function ProfileMediaUploader({
             <UploadButton
               inputId={avatarInputId}
               label={uiText("아바타 업로드")}
-              disabled={disabled}
+              disabled={disabled || uploading}
               onChange={(event) => handleFileChange("avatar", event)}
             />
           </div>
@@ -191,54 +186,8 @@ export function ProfileMediaUploader({
       {error && !draft ? <p role="alert" className="mt-3 text-sm font-bold text-text-danger">{error}</p> : null}
 
       {draft ? (
-        <Dialog open title={`${uiText(SPECS[draft.kind].label)} ${uiText("자르기")}`} closeLabel={uiText("닫기")} closeOnBackdrop={false} closeOnEscape={!uploading}
-          closeButtonAttributes={{ disabled: uploading }} onOpenChange={open => { if (!open && !uploading) closeCropper(); }}>
-            <div
-              className={`relative mx-auto overflow-hidden rounded-[var(--radius-control)] bg-surface-muted ${
-                draft.kind === "avatar" ? "aspect-square w-full max-w-[360px]" : "aspect-[3/1] w-full"
-              }`}
-            >
-              <CropPreview
-                bitmap={draft.bitmap}
-                naturalSize={draft.naturalSize}
-                spec={spec}
-                crop={crop}
-              />
-            </div>
-
-            <div className="mt-5 grid gap-4">
-              <Slider
-                label={uiText("확대")}
-                min={1}
-                max={3}
-                step={0.05}
-                value={crop.scale}
-                onChange={(value) => setCrop((current) => ({ ...current, scale: value }))}
-              />
-              <Slider
-                label={uiText("가로")}
-                min={-45}
-                max={45}
-                step={1}
-                value={crop.offsetX}
-                onChange={(value) => setCrop((current) => ({ ...current, offsetX: value }))}
-              />
-              <Slider
-                label={uiText("세로")}
-                min={-45}
-                max={45}
-                step={1}
-                value={crop.offsetY}
-                onChange={(value) => setCrop((current) => ({ ...current, offsetY: value }))}
-              />
-            </div>
-
-            {error ? <p role="alert" className="mt-3 text-text-danger">{error}</p> : null}
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={() => closeCropper()} disabled={uploading}>{uiText("취소")}</Button>
-              <Button type="button" onClick={() => void handleUpload()} loading={uploading} disabled={disabled}><Check size={17} aria-hidden="true" />{uiText("저장")}</Button>
-            </div>
-        </Dialog>
+        <ImageCropDialog bitmap={draft.bitmap} spec={spec} crop={crop} onCrop={setCrop} onApply={() => void handleUpload()} onCancel={() => closeCropper()}
+          busy={uploading} disabled={disabled || uploading} error={error} labels={{ title: `${uiText(SPECS[draft.kind].label)} ${uiText("자르기")}`, close: uiText("닫기"), zoom: uiText("확대"), horizontal: uiText("가로"), vertical: uiText("세로"), apply: uiText("저장"), cancel: uiText("취소"), applying: uiText("이미지를 적용하는 중…") }} />
       ) : null}
     </div>
   );
@@ -297,122 +246,4 @@ function UploadButton({
       />
     </>
   );
-}
-
-function Slider({
-  label,
-  min,
-  max,
-  step,
-  value,
-  onChange,
-}: {
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <label className="grid gap-2">
-      <span className="text-[13px] font-extrabold text-text-secondary">{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="min-h-11 w-full accent-action-primary"
-      />
-    </label>
-  );
-}
-
-function CropPreview({
-  bitmap,
-  naturalSize,
-  spec,
-  crop,
-}: {
-  bitmap: ImageBitmap;
-  naturalSize: { width: number; height: number };
-  spec: { width: number; height: number };
-  crop: CropState;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.width = spec.width;
-    canvas.height = spec.height;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    drawCroppedImage(context, bitmap, naturalSize, spec, crop);
-  }, [bitmap, crop, naturalSize, spec]);
-
-  return <canvas ref={canvasRef} aria-hidden="true" className="h-full w-full" />;
-}
-
-async function cropToBlob(
-  bitmap: ImageBitmap,
-  naturalSize: { width: number; height: number },
-  spec: { width: number; height: number },
-  crop: CropState,
-) {
-  const canvas = document.createElement("canvas");
-  canvas.width = spec.width;
-  canvas.height = spec.height;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("이미지를 처리하지 못했습니다.");
-
-  drawCroppedImage(context, bitmap, naturalSize, spec, crop);
-
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("이미지를 저장하지 못했습니다."));
-      },
-      "image/webp",
-      0.8,
-    );
-  });
-}
-
-function drawCroppedImage(
-  context: CanvasRenderingContext2D,
-  bitmap: ImageBitmap,
-  naturalSize: { width: number; height: number },
-  spec: { width: number; height: number },
-  crop: CropState,
-) {
-  context.clearRect(0, 0, spec.width, spec.height);
-  const baseScale = Math.max(spec.width / naturalSize.width, spec.height / naturalSize.height);
-  const drawWidth = naturalSize.width * baseScale * crop.scale;
-  const drawHeight = naturalSize.height * baseScale * crop.scale;
-  const centerX = spec.width * (0.5 + crop.offsetX / 100);
-  const centerY = spec.height * (0.5 + crop.offsetY / 100);
-
-  context.drawImage(
-    bitmap,
-    centerX - drawWidth / 2,
-    centerY - drawHeight / 2,
-    drawWidth,
-    drawHeight,
-  );
-}
-
-function blobToBase64(blob: Blob) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      resolve(result.includes(",") ? result.split(",")[1] : result);
-    };
-    reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
-    reader.readAsDataURL(blob);
-  });
 }

@@ -31,7 +31,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "form-action 'self'",
   [
-    "script-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
     ...developmentScriptSources,
     "https://accounts.google.com",
     "https://challenges.cloudflare.com",

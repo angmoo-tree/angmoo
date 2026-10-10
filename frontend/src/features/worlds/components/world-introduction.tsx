@@ -1,22 +1,19 @@
 "use client";
 
-import Image from "next/image";
+import { WorldBanner } from "./world-banner";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
 import { useAuth } from "@/hooks/use-auth";
-import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 import { useUiText } from "@/hooks/use-ui-text";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
-import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 import { getWorld } from "../api/worlds";
 import type { WorldAppWorldRead } from "../types/world-app";
 import type { WorldRead } from "../types/worlds";
 import styles from "./world-introduction.module.css";
 
-const DEFAULT_BANNER = "/world-default-banner.svg";
 
 export function WorldIntroduction({ world, characters, myProfile }: {
   world: WorldAppWorldRead; characters: ReactNode; myProfile: ReactNode;
@@ -68,16 +65,6 @@ export function WorldIntroduction({ world, characters, myProfile }: {
       </InlineError> : <p role="status" className={styles.feedback}>{uiText("World 소개를 불러오는 중…")}</p>}
     </div>
   </section>;
-}
-
-function WorldBanner({ source, alt }: { source: string | null; alt: string }) {
-  const uiText = useUiText("worlds");
-  const resolved = useRuntimeMediaUrl(safeSameOriginMediaUrl(source));
-  const [failed, setFailed] = useState<string | null>(null);
-  const actual = Boolean(resolved && resolved !== failed);
-  return <div className={styles.banner} data-world-banner={actual ? "registered" : "default"}>
-    <Image src={actual ? resolved! : DEFAULT_BANNER} alt={actual ? alt : uiText("World 기본 배너")} fill unoptimized priority sizes="(max-width: 960px) 100vw, 960px" onError={() => { if (actual) setFailed(resolved); }} />
-  </div>;
 }
 
 function WorldAbout({ world }: { world: WorldRead }) {

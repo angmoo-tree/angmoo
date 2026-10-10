@@ -819,3 +819,37 @@ Character와 World runtime은 실제 장면·negative·참조 scope를 조립하
 자동 출력은 JavaScript Object.values 키 순서의 첫 images 배열 첫 항목을 선택한다. explicit v2도 지정 노드 첫 항목이며 legacy는 기존 단일 출력 규칙을 보존한다. 잘못된 첫 결과를 두 번째 이미지로 대체하지 않는다. 제출 오류는 receipt 유무와 HTTP 상태로 알려진 실패/미확정 상태를 구분하며, history 실행 오류·완료 후 이미지 없음은 종료 상태다.
 
 `schemas.py`와 `integrations/comfy_diagnostics.py`는 whitelist·민감값 가림·20항목/16 KiB 진단을 담당한다. Social worker가 동일 lease의 receipt와 nullable 진단을 짧은 transaction으로 저장하고 spool 복구 시 재사용한다. Alembic 0110 및 embedded SQLite v33은 새 진단 컬럼만 추가하며 v32 이하 manifest를 바꾸지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)은 모의 원본 재사용, 실제 무모델 ComfyUI 통신, 미측정 AI/설치 환경을 구분한다.
+
+## SQLite scheduler와 사진 요청 경계 (2026-10-10 LOCAL)
+
+실제 주입 Session의 engine dialect가 sqlite면 기존 SqliteSchedulerLeaseRepository를 사용한다.
+다른 dialect의 ORM port는 보존한다. lease의 acquire/heartbeat/begin/finish/release는 짧은
+BEGIN IMMEDIATE와 owner/epoch/expiry 조건부 갱신을 유지하며 만료된 같은 owner도 새 epoch를
+받는다. DB 작업은 Session/connection을 worker 안에서 만들고 bounded executor(worker1,
+capacity4, queued deadline1초)로 event loop와 분리한다. 실제 Future 종료를 추적하며 await
+취소만으로 drain 완료를 판정하지 않는다.
+
+BUSY code의 하위8bit만 재시도한다. LOCKED/IOERR/FULL/불명 오류를 일반 재시도하지 않는다.
+최대4회/총250ms/개별 busy timeout50ms, rollback 뒤 새 transaction에서 현재 값을 읽고
+원래 timeout을 복원한다. canonical connection pool checkout도 50ms로 제한한다. 이 값은
+풀 포화 시 빨리 실패하는 비용을 감수하고 lease 작업의 무제한 대기를 막는 선택이며 기존
+일반 SQLite busy_timeout 5000ms를 전역으로 바꾸지 않는다.
+
+재시도 소진 뒤 한 runner가 DEGRADED로 신규 tick을 멈추고 작업을 drain한다. 자기 유효
+owner/epoch는 실제 heartbeat 후 재개하며 만료는 새 generation, 다른 유효 owner는 대기한다.
+1/2/4/8/10초 backoff는 stop으로 중단한다. supervisor의 별도 재시작 loop는 제거하여 recovery
+소유자를 하나로 둔다. 완료 tick의 begin 장부를 보존해 finish 실패 뒤 효과를 재생하지 않는다.
+보조 task가 실제로 끝나지 않으면 FAILED와 최초 오류를 유지하고 새 tick/runner를 만들지 않는다.
+release 실패는 최초 오류와 별도로 기록하고 stale owner는 expiry/fence로 차단한다.
+
+health는 scheduler READY 표시에 더해 유효 owner/epoch/expiry의 실제 heartbeat proof를 확인한다.
+DEGRADED/FAILED/만료는503, 복구 확인 뒤200이다. projector 기존 정책은 유지한다. 진단은
+단계·안전한 code·시도/queue/transaction 시간·owner/epoch만 기록하며 SQL/본문/키를 출력하지 않는다.
+원래 incident의 잠금 소유 작업은 미확정이며 Chat이 원인이라고 추정하지 않는다.
+
+사진은 기존 Media 서버 재검증/UoW를 보존하고 정확한 POST media/assets 요청만14MiB로 맞춘다.
+World 네 POST는 기존8,262,144 bytes, 파일5MiB를 유지한다. 프런트 로컬 HEIF 변환은 서버의
+원본 HEIF 수용이나 인식/생성 정책 변경이 아니다. schema/migration/과거manifest를 바꾸지 않는다.
+[동시성 계약](../docs/architecture/l3-er2-sqlite-concurrency.md),
+[사진 계약](../docs/operations/local-photo-codec.md),
+[검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.

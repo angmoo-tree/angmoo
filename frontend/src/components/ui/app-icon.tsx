@@ -38,7 +38,7 @@ export function AppIcon({
         {visual}
         {badge ? <span className={styles.badge}>{badge}</span> : null}
       </span>
-      <span className={styles.label}>{label}</span>
+      {label.trim() ? <span className={styles.label}>{label}</span> : null}
     </>
   );
 

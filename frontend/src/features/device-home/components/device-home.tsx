@@ -3,12 +3,13 @@ import { useUiText } from "@/hooks/use-ui-text";
 
 
 import Link from "next/link";
-import { BrainCircuit, Cog, Globe2, Hammer, Plus } from "lucide-react";
+import { BrainCircuit, Cog, Hammer, Plus } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { PRODUCT_ROUTES, worldAppRoute } from "@/lib/navigation/product-routes";
+import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visual";
 import { AppIcon } from "@/components/ui/app-icon";
 import { Button } from "@/components/ui/button";
 
@@ -37,13 +38,6 @@ const FIXED_BACKGROUNDS = {
   "world-import": "var(--color-state-running-surface)",
   memory: "var(--color-state-degraded-surface)",
 } as const;
-
-const WORLD_BACKGROUNDS = [
-  "var(--color-brand-soft)",
-  "var(--color-state-running-surface)",
-  "var(--color-state-warning-surface)",
-  "var(--color-state-degraded-surface)",
-] as const;
 
 const WORLD_LAUNCH_TONE_CLASSES = {
   disabled: styles.worldLaunchBadgeDisabled,
@@ -184,7 +178,7 @@ function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
           </span>
         </>
       }
-      visualBackground={worldBackground(world.world_id)}
+      visualBackground={appIconBackground(world.world_id)}
     />
   );
 }
@@ -192,22 +186,7 @@ function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
 function WorldVisual({ world }: { world: WorldSurfaceItem }) {
   const bannerUrl = safeSameOriginMediaUrl(world.icon_media_id);
   const resolvedBannerUrl = useRuntimeMediaUrl(bannerUrl);
-  if (resolvedBannerUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        alt=""
-        className={styles.worldBanner}
-        src={resolvedBannerUrl}
-      />
-    );
-  }
-  const initial = Array.from(world.name.trim())[0];
-  return initial ? (
-    <span className={styles.worldInitial}>{initial}</span>
-  ) : (
-    <Globe2 size={31} strokeWidth={2.1} />
-  );
+  return <AppIconVisual source={resolvedBannerUrl} name={world.name} />;
 }
 
 function HomeMessage({
@@ -233,12 +212,4 @@ function HomeMessage({
       {action}
     </section>
   );
-}
-
-function worldBackground(worldId: string): string {
-  let hash = 0;
-  for (const character of worldId) {
-    hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
-  }
-  return WORLD_BACKGROUNDS[hash % WORLD_BACKGROUNDS.length];
 }

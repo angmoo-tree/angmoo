@@ -11,7 +11,7 @@ from threading import BoundedSemaphore
 from typing import TypeVar
 
 from sqlalchemy import Connection, Engine
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, TimeoutError as PoolCheckoutTimeout
 from sqlalchemy.orm import Session
 
 from app.exceptions import (
@@ -67,7 +67,7 @@ def run_sqlite_immediate(
     monotonic: Callable[[], float] = time.monotonic,
     observer: SqliteWriteObserver | None = None,
 ) -> T:
-    """Run one short writer transaction with bounded busy/locked retry.
+    """Run one short writer transaction with bounded SQLITE_BUSY retry.
 
     ``BEGIN IMMEDIATE`` reserves the single SQLite writer before any canonical
     state is read.  Domain adapters still use state-conditioned UPDATE clauses
@@ -108,6 +108,8 @@ def run_sqlite_immediate(
                         raise
                 finally:
                     _set_busy_timeout(driver, previous_timeout_ms)
+        except PoolCheckoutTimeout as exc:
+            raise SqliteTaskQueueFull("sqlite_connection_checkout_deadline") from exc
         except OperationalError as exc:
             if not _is_busy_error(exc):
                 raise
@@ -333,8 +335,12 @@ def _is_busy_error(exc: BaseException) -> bool:
     code, _ = sqlite_error_identity(exc)
     if code is not None:
         return code & 0xFF == sqlite3.SQLITE_BUSY
-    text = str(getattr(exc, "orig", exc)).lower()
-    return "database is locked" in text or "database is busy" in text
+    original = getattr(exc, "orig", exc)
+    # Only the legacy SQLite driver messages are a fallback. SQLITE_LOCKED and
+    # unrelated exceptions containing these words must never trigger a retry.
+    return isinstance(original, sqlite3.OperationalError) and str(original).lower().strip() in {
+        "database is locked", "database is busy",
+    }
 
 
 __all__ = [

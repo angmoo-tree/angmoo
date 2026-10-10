@@ -1481,3 +1481,33 @@ LOCAL 화면의 기존 설정 카드·semantic border/background/text/shadow와 
 긴 JSON은 monospaced textarea 안에서 스크롤하고 위치 목록도 내부 스크롤한다. 명시적 label-for 및 오류 aria-describedby를 사용하며 invalid 원문을 보존한다. 후보 조회 실패는 입력을 계속할 수 있는 안내로 표시한다. 서버 연결 확인은 이미지 생성 성공으로 표현하지 않는다. 오류 정보는 접힌 plain-text 상세이며 prompt/key/Base64를 표시하지 않는다. ko/en 문구를 함께 관리한다.
 
 이번 LOCAL 진단 캡처는 360/1440 화면과 Next/static·ko/en 동작 확인에 사용한다. screenshot 호출 목록 42개, canonical PNG 11개 및 pixel threshold는 구분하며 기존 PNG·기준을 변경하지 않는다. Windows 기능 시험은 Linux canonical visual PASS나 native USER CHECK를 의미하지 않는다.
+
+## 2026-10-10 LOCAL 승인 적용
+
+사용자 Creator Studio 계획 I00–I60의 표시 변경이다. 기존 역사/Hosted/Gate 기록은 보존하며
+이번 로컬 결과를 CI·설치 앱·사용자 확인 완료로 합치지 않는다.
+
+- 앱 안내의 원시 enum/P1/P2/품질 등급/버전/hash 노출만 정리한다. 사용자 본문과 고급 JSON,
+  필수/선택 입력, 원래 권한·저장·승인 기능은 보존한다. ko/en 모두 적용하고 한국어는
+  자연스러운 해요체, 제목/버튼은 간결한 명사형을 사용한다.
+- Home wordmark만 Quicksand Bold 700·1.35rem·brand-accent #ff6b6b로 표현한다. 공식 source pin,
+  정확한 licensed hash와 원문 OFL을 등록하고 로컬 번들로 제공한다. 일반 UI는 system stack이다.
+- /settings·/agents/new는 명시 AppShell navigation=none으로 조립한다. 빈 footer/예약 공간도
+  제외하며 다른 local 탐색과 World 탭, 생성 완료 세 버튼·safe-area·인증은 보존한다.
+- Character directory h2와 embedded Relationship h1만 neutral SectionHeading을 공유한다.
+  48px/radius17px 아이콘 배경·21px icon·gap12/padding20/border-bottom과 실제 제목
+  1.45rem/400/line1.5/margin2px, 설명 .73rem/750/line1.5/margin3px를 공통 사용한다.
+  standalone 관계 페이지와 관계 본문은 기존 표시를 유지한다.
+- World 아이콘/배너 preview는 실제 Home icon/World banner 표시를 공유하고 draft의 이름·태그·
+  소개를 즉시 반영한다. 빈 메타 영역을 생략하며 저장된 공개 준비와 draft를 구분한다.
+  기존 프로필의 공용 crop UI/계산을 사용하고 적용만 사진을 저장한다. 취소/실패는 draft와
+  기존 사진을 보존한다. icon768²·banner1024×384·WebP0.8·실제 MIME/5MiB를 확인한다.
+- 게시글/Chat 사진의 로컬 준비 단계와 ko/en 오류만 추가한다. 원본·최종·요청 상한과 Worker/
+  WASM 자산은 [코덱 계약](../docs/operations/local-photo-codec.md)을 따른다. 사진 처리만으로
+  게시/Chat/AI가 실행되지 않는다. World/프로필은 별도 기존 5MiB 계약이다.
+
+디자인 검사에는 정확한 Quicksand 자산/원문 고지와 다섯 합성 진단 사진만 명시 등록한다.
+그 외 remote font·미등록 asset 제한과 기존 11개 canonical snapshot·diff 허용치는 유지한다.
+새 진단 screenshot 호출 수와 raw-color의 실제 감소만 baseline에 반영하며 허용치를 넓히지
+않는다. [LOCAL 근거](../docs/architecture/frontend-design-reference.md)와
+[구현·검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.

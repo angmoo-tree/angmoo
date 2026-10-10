@@ -27,19 +27,19 @@ import { StatusChip } from "@/components/ui/status";
 
 const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
 const SETUP_LABELS: Record<StudioWorldCharacterRead["activity_setup_state"], string> = {
-  not_started: "P2 준비 전",
-  generated: "P2 후보 생성됨",
-  approved: "P2 승인 완료",
+  not_started: "활동 준비 전",
+  generated: "활동 준비 확인 필요",
+  approved: "활동 준비 완료",
   unavailable_for_owner_controlled: "자동 활동 대상 아님",
 };
 
 const CANDIDATE_REASON_LABELS: Record<string, string> = {
   already_linked: "이미 이 World에 연결되어 있습니다.",
   character_moderation_inactive: "현재 연결할 수 없는 검토 상태입니다.",
-  local_execution_mode_unsupported: "외부 연결 앵무는 P2 자율활동 준비 대상이 아닙니다.",
+  local_execution_mode_unsupported: "외부 연결 캐릭터는 여기에서 자율활동을 준비할 수 없어요.",
   world_character_ineligible: "이 World의 기존 참여 상태 때문에 연결할 수 없습니다.",
   world_character_left_restore_unsupported:
-    "이 World에서 제거된 이력이 있습니다. 이번 최소 패치에서는 재참여를 지원하지 않습니다.",
+    "이 World에서 제거된 캐릭터의 재참여는 아직 지원하지 않아요.",
 };
 
 function requestKey(prefix: string) {
@@ -49,12 +49,12 @@ function requestKey(prefix: string) {
   return `${prefix}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
 }
 
-function apiErrorMessage(error: unknown, fallback: string) {
+function apiErrorMessage(error: unknown, fallback: string, t: ReturnType<typeof useUiText>) {
   if (!(error instanceof StudioWorldCharacterApiError)) return fallback;
   const labels: Record<string, string> = {
     character_not_owned: "내가 소유한 캐릭터만 처리할 수 있습니다.",
     confirmation_name_mismatch: "확인 이름이 캐릭터 이름과 일치하지 않습니다.",
-    creator_role_required: "World owner 또는 editor 권한이 필요합니다.",
+    creator_role_required: "이 World를 편집할 권한이 필요해요.",
     owner_controlled_world_character_protected:
       "내 World 프로필은 이 화면에서 제거할 수 없습니다.",
     role_required: "World 역할을 선택해 주세요.",
@@ -74,7 +74,7 @@ function apiErrorMessage(error: unknown, fallback: string) {
     world_not_published: "World를 먼저 발행한 뒤 캐릭터를 연결해 주세요.",
     world_reference_invalid: "선택한 World 역할을 다시 확인해 주세요.",
   };
-  return labels[error.detail] ?? error.detail;
+  return labels[error.detail] ? t(labels[error.detail]) : fallback;
 }
 
 export function StudioWorldCharacterList({
@@ -149,7 +149,7 @@ export function StudioWorldCharacterList({
           setResult({
             key: listRequestKey,
             items: [],
-            error: apiErrorMessage(reason, uiText("이 World의 캐릭터를 불러오지 못했습니다.")),
+            error: apiErrorMessage(reason, uiText("이 World의 캐릭터를 불러오지 못했습니다."), uiText),
           });
         }
       });
@@ -191,6 +191,7 @@ export function StudioWorldCharacterList({
           error: apiErrorMessage(
             reason,
             uiText("연결할 수 있는 내 캐릭터를 불러오지 못했습니다."),
+            uiText,
           ),
         });
       });
@@ -231,7 +232,7 @@ export function StudioWorldCharacterList({
       refreshList();
       if (createdCharacterId) router.replace(returnTo);
     } catch (reason) {
-      setActionError(apiErrorMessage(reason, uiText("캐릭터를 이 World에 연결하지 못했습니다.")));
+      setActionError(apiErrorMessage(reason, uiText("캐릭터를 이 World에 연결하지 못했습니다."), uiText));
     } finally {
       setActionBusy(false);
     }
@@ -290,7 +291,7 @@ export function StudioWorldCharacterList({
       setConfirmationName("");
       refreshList();
     } catch (reason) {
-      setActionError(apiErrorMessage(reason, uiText("이 World에서 캐릭터를 제거하지 못했습니다.")));
+      setActionError(apiErrorMessage(reason, uiText("이 World에서 캐릭터를 제거하지 못했습니다."), uiText));
     } finally {
       setActionBusy(false);
     }
@@ -302,7 +303,7 @@ export function StudioWorldCharacterList({
         <div>
           <p className="text-lg font-black text-text-strong">{uiText("이 World의 캐릭터")}</p>
           <p className="mt-1 text-sm font-medium leading-6 text-text-secondary">
-            {uiText("자율활동 검증용 캐릭터를 만들거나 연결하고, 현재 World 참여만 안전하게 종료합니다.")}</p>
+            {uiText("이 World에 캐릭터를 추가하고 활동 설정을 관리해요.")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -343,7 +344,7 @@ export function StudioWorldCharacterList({
             <div>
               <p className="text-sm font-black text-text-strong">{uiText("현재 World에 연결")}</p>
               <p className="mt-1 text-xs font-medium leading-5 text-text-secondary">
-                {uiText("연결만으로 provider 호출이나 공개 글·관계 변화는 생기지 않습니다.")}</p>
+                {uiText("연결한 뒤 활동 설정에서 API 키와 활동 방식을 정할 수 있어요. 연결만으로 자율활동이 켜지지는 않아요.")}</p>
             </div>
             <IconButton label={uiText("연결 패널 닫기")} onClick={() => setCandidateOpen(false)}>
               <X className="size-5" />
@@ -468,9 +469,9 @@ export function StudioWorldCharacterList({
                   label={item.control_mode === "autonomous" ? uiText("자율 Character") : uiText("내 조종 Character")}
                   tone={item.control_mode === "autonomous" ? "running" : "neutral"}
                 />
-                <StatusChip label={uiText(SETUP_LABELS[item.activity_setup_state])} tone={item.activity_setup_state === "approved" ? "healthy" : "waiting"} />
+                <StatusChip label={uiText(SETUP_LABELS[item.activity_setup_state] ?? "활동 준비 상태 확인 필요")} tone={item.activity_setup_state === "approved" ? "healthy" : "waiting"} />
                 <StatusChip label={uiText("자율활동 {{value0}}", {value0: item.autonomous_enabled ? "ON" : "OFF"})} tone={item.autonomous_enabled ? "running" : "disabled"} />
-                <StatusChip label={worldCharacterStatusLabel(item.status)} tone={item.status === "active" ? "healthy" : "neutral"} />
+                <StatusChip label={uiText(worldCharacterStatusLabel(item.status))} tone={item.status === "active" ? "healthy" : "neutral"} />
               </div>
             </article>
           ))}

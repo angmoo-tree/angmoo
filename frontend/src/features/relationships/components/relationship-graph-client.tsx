@@ -1,4 +1,5 @@
 "use client";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { SettingsCard } from "@/components/ui/settings-card";
 import { Network, GitBranch, List, FileSearch } from "lucide-react";
 import { relationshipGraphLayout } from "../utils/graph-layout";
@@ -180,10 +181,7 @@ export function RelationshipGraphClient({
       className={embedded ? "min-w-0 pb-6" : "mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6"}
       data-product-content="relationship-graph"
     >
-      {embedded ? <header className={styles.header}>
-        <span className={styles.icon}><Network size={20} aria-hidden="true" /></span>
-        <div className={styles.identity}><h1>{uiText("이 World의 관계")}</h1><p>{uiText("저장된 경험에서 이어진 관계를 확인해요.")}</p></div>
-      </header> : <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
+      {embedded ? <SectionHeading level={1} icon={<Network size={21} aria-hidden="true" />} title={uiText("이 World의 관계")} description={uiText("저장된 경험에서 이어진 관계를 확인해요.")} /> : <SettingsCard elevated headingLevel={1} title={uiText("World 관계망")} description={uiText("캐릭터가 상대를 바라보는 방향과 관계 근거를 확인해요.")} icon={<Network size={20} />}>
         {provider === "ladybug" ? <details><summary>{uiText("관계 데이터 정보")}</summary><p>{uiText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")}</p></details> : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link

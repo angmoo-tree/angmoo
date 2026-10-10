@@ -822,3 +822,23 @@ ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 `features/characters/components/personalized-activity-panel.tsx`의 engine 선택과 전환 안내는 **LOCAL** 작성이다. 기존 같은 feature·semantic form/status 토큰·44px control·focus 스타일을 사용한다. 지원되지 않는 current 신규 선택만 제거하며 역사 current/abandoned와 backend의 pending_settlement/needs_preparation/pending_conversion 상태는 표시한다. hosted asset·raw color·별도 route나 static 전용 구현은 추가하지 않는다.
 
 같은 `browser-tests/personalized-activity-fixture.ts`를 Next와 static에서 각 1회 실행했다. 실제 payload의 current/abandoned·준비 필요 상태, V2 쓰기/상속 null·expected_version, OFF 보존·keyboard focus·390px overflow와 control 크기를 확인했다. Windows 로컬 진단 PNG를 검토했으며 고정 Linux pixel baseline 또는 실제 사용자 USER CHECK로 대체하지 않는다. frontend architecture/design checker, lint/typecheck, 일반/static build의 로컬 결과는 `docs/verification/sns-v2-routine-io-retirement-20261002.md`에 기록한다.
+
+## 2026-10-10 LOCAL user-approved extension
+
+The Creator Studio I00–I60 plan authorizes authored-copy cleanup, conditional World
+icon/banner draft previews and a shared neutral crop display/calculation. It retains
+feature-owned auth/revisions and package digest approval. The Home wordmark alone
+uses locally bundled Quicksand Bold 700, exact Google Fonts source/hash/OFL registration
+and existing coral brand token. All other typography keeps the offline system stack.
+Settings and creation explicitly omit local bottom navigation in Next/static;
+other navigation is preserved. Character directory/embedded Relationship alone share
+SectionHeading, retaining their h2/h1 semantics and the measured 400 title weight.
+
+World Feed and Chat share Media's bounded local photo Worker/HEIF preparation and
+feedback. Input/output/request limits remain separate from the World/profile crop
+contract. See [codec/source/rights contract](../operations/local-photo-codec.md) and
+[local verification](../verification/creator-studio-copy-media-scheduler-20261010.md).
+These are LOCAL extensions, not post-common Hosted code transplants. Exact registered
+font and diagnostic fixture hashes are accepted by the design checker; remote fonts,
+unreviewed assets, canonical snapshot/diff rules and historical Gates remain intact.
+No canonical screenshots are replaced with Windows diagnostic images.

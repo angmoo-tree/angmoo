@@ -37,9 +37,14 @@ export async function uploadImage(file: File, scopeKind: "character" | "thread" 
   if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) throw new ImageUploadInputError("image_file_unsupported");
   const data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
+    const abort = () => { reader.abort(); reject(new DOMException("Aborted", "AbortError")); };
+    if (signal?.aborted) { abort(); return; }
+    signal?.addEventListener("abort", abort, { once: true });
+    reader.onloadend = () => signal?.removeEventListener("abort", abort);
     reader.onerror = () => reject(new ImageUploadInputError("image_file_read_failed"));
     reader.onload = () => resolve(String(reader.result).split(",")[1]);
     reader.readAsDataURL(file);
   });
+  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   return apiRequest<Asset>("/media/assets", { method: "POST", signal, body: { scope_kind: scopeKind, scope_id: scopeId, content_type: file.type, data_base64: data } });
 }

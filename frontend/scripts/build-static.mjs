@@ -41,5 +41,6 @@ for (const asset of [
   cpSync(join(publicRoot, asset), join(productOutput, asset));
 }
 cpSync(join(frontendRoot, "src", "app", "icon.svg"), join(productOutput, "icon.svg"));
+cpSync(join(publicRoot, "licenses"), join(productOutput, "licenses"), { recursive: true });
 
 console.log(`Angmoo Tauri static shell exported to ${productOutput}`);

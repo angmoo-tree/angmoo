@@ -521,6 +521,10 @@ def runtime_health(request: Request) -> dict[str, object]:
             observed = observations.get(component)
             if observed is None or observed.state not in allowed:
                 raise RuntimeError(f"{component}_not_ready")
+            if component == "scheduler":
+                from app.runtime.resident.scheduler import scheduler_is_ready
+                if observed.state != RuntimeComponentState.READY or not scheduler_is_ready(composition.settings):
+                    raise RuntimeError("scheduler_not_ready")
 
         graph = borrow_runtime_graph_client(composition.settings)
         if graph is None:
