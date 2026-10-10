@@ -21,10 +21,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
         self._queries = queries
         self._situation_validator = situation_validator
 
-    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset()):
+    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
         if self._situation_validator is None:
             raise ValueError("situation_source_validator_missing")
-        return self._situation_validator(manifest, source, now=now, ancestors=ancestors)
+        return self._situation_validator(manifest, source, now=now, ancestors=ancestors, validation=validation)
 
     def read_evidence(
         self, *, scope: MemoryScope, source_type: MemorySourceTypeV1, source_id: str

@@ -1,5 +1,37 @@
 # Angmoo Backend Architecture
 
+## Memory validation and runtime responsiveness (2026-10-10 LOCAL)
+
+Memory keeps current scope, participants, blocks, private-thread access, delivered
+proof, source digests, prior versions and cycle checks. `MemoryAccessValidation`
+belongs to one synchronous read operation with one Session and timestamp; it
+memoizes shared lineage and canonical facts only inside that operation. It must
+never be retained on a reader, Session, runtime or index, or reused across writes,
+provider waits or later requests. Final canonical hydration and post-provider
+application still perform fresh validation.
+
+Runtime owns the execution boundary. The FTS after-commit listener only enqueues
+bounded identifiers and never waits for a projection lock, opens a new Session or
+revalidates history on the HTTP/scheduler loop. One owned worker reconciles current
+SQLite rows, drains committed edits, and rebuilds in 32-item pages with the existing
+build/validate/orphan/promotion fence. Overflow requests a bounded rebuild;
+restart reconciliation recovers an interrupted in-memory queue. Canonical recall
+still rejects stale or forbidden candidates while derived work catches up.
+Whole-library FTS rebuilds keep the existing `MemoryRecallPreparing` fence until
+validation and promotion finish.
+
+The situation consumer and vector source lookup use a single-worker bounded
+`MemoryCanonicalWork` queue per runtime. Sessions open and close inside the worker;
+only immutable documents/results cross the boundary. Cancellation keeps running
+futures owned and shutdown drains them before disposing the canonical engine.
+Situation application retains its cutoff, admission, source and lease checks in
+16-receipt transactions. Dirty briefs advance one scope per transaction with a
+cursor that also advances past invalid scopes. Quit preparation/fencing uses the
+same serialized worker and search drain includes queued FTS commits. Provider I/O
+and the vector's final canonical write fence keep their existing contracts. The
+scheduler lease TTL, heartbeat checks and Compose health contract are unchanged.
+[Implementation, tradeoffs and local Docker validation](../docs/verification/docker-backend-memory-startup-20261010.md)
+
 ## SNS stored-text comparison and immutable result recovery (2026-10-10)
 
 Social owns the strict `social-visible-text.v1` expected-output projection and

@@ -97,6 +97,8 @@ class SqlAlchemyMemoryRecallDocumentSource:
             ):
                 evidence_by_item.setdefault(evidence.memory_item_id, []).append(evidence)
             reader = self._source_reader_factory(session)
+            from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+            validation = MemoryAccessValidation(session, now)
             result: dict[str, tuple[MemoryRecallDocument, ...]] = {}
             for item in items:
                 result[item.id] = self._documents_for_item(
@@ -106,6 +108,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     evidences=evidence_by_item.get(item.id, []),
                     now=now,
                     episode_only=self._episode_only,
+                    validation=validation,
                 )
             return result
 
@@ -158,13 +161,14 @@ class SqlAlchemyMemoryRecallDocumentSource:
         evidences: list[MemoryItemEvidence],
         now: datetime,
         episode_only: bool = False,
+        validation=None,
     ) -> tuple[MemoryRecallDocument, ...]:
         scope = _item_scope(item)
         setting = _scope_setting(session, scope)
         if setting is None or not setting.enabled or not _item_retrievable(item, now):
             return ()
         from app.domains.memory.repository.episode_privacy import currently_accessible
-        if not currently_accessible(session, reader, scope, item, now):
+        if not currently_accessible(session, reader, scope, item, now, validation=validation):
             return ()
         from app.domains.memory.repository.situation_reads import representation
         item_representation = representation(session, item)

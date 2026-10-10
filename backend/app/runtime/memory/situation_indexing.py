@@ -40,7 +40,7 @@ class SituationSearchDrain:
             fts_state = self.fts.state.value
             if fts_state in {"degraded", "stopped"}:
                 return False
-            if not pending and fts_state == "ready":
+            if not pending and fts_state == "ready" and self.fts.is_caught_up:
                 return True
             if self.hybrid.read_status() in {"degraded", "vector_unavailable"}:
                 return False

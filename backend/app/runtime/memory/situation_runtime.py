@@ -79,7 +79,8 @@ class SituationRuntime:
             return "situation_claim_conflict"
         try:
             with self.session_factory() as db:
-                apply_page(db, memory_repository(db), SituationSources(db, result_basis=self.result_basis), run_id=run_id, token=token, now=datetime.now(UTC))
+                apply_page(db, memory_repository(db), SituationSources(db, result_basis=self.result_basis),
+                    run_id=run_id, token=token, now=datetime.now(UTC), page_size=16)
                 db.commit()
             return "situation_page_applied"
         except MemoryCapacityReached:

@@ -71,9 +71,10 @@ class _SourceQueries:
 class RuntimeEpisodeDetailReader:
     def __init__(self, session): self.session = session
 
-    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset()):
+    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
         from app.runtime.memory.situation_sources import SituationSources
-        return SituationSources(self.session).validate(manifest, source, now=now, ancestors=ancestors)
+        return SituationSources(self.session).validate(manifest, source, now=now,
+            ancestors=ancestors, validation=validation)
 
     def read_evidence(self, *, scope, source_type, source_id):
         from app.runtime.memory.source_composition import source_evidence_reader

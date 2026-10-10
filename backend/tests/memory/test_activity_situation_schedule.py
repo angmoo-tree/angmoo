@@ -220,7 +220,7 @@ def test_two_file_backed_requesters_coalesce_and_only_one_claims(stack, tmp_path
 
 
 @pytest.mark.parametrize("slow", [False, True])
-def test_native_quit_applies_receipts_and_fences_slow_search_without_generation(stack, slow):
+def test_native_quit_applies_receipts_and_fences_slow_search_without_generation(stack, slow, tmp_path):
     from app.runtime.memory.batch_runtime import MemoryBatchRuntime
     from app.runtime.memory.shutdown import MemoryShutdownCoordinator
     db, scope, setting, _ = stack
@@ -229,7 +229,14 @@ def test_native_quit_applies_receipts_and_fences_slow_search_without_generation(
     db.commit()
     def forbidden(*args):
         raise AssertionError("quit must not generate new descriptions or relationship reviews")
-    runtime = MemoryBatchRuntime(sessionmaker(db.bind), forbidden,
+    import sqlite3
+    from sqlalchemy import create_engine
+    path = tmp_path / "native-quit.sqlite3"
+    with sqlite3.connect(path) as destination:
+        db.connection().connection.driver_connection.backup(destination)
+    engine = create_engine(f"sqlite:///{path}")
+    factory = sessionmaker(engine)
+    runtime = MemoryBatchRuntime(factory, forbidden,
         generation_policy="activity_situation", idle_work=forbidden)
     class Search:
         fenced = False
@@ -247,5 +254,7 @@ def test_native_quit_applies_receipts_and_fences_slow_search_without_generation(
     asyncio.run(close())
     assert coordinator.status() == {"phase": "EXIT_READY", "deferred": slow}
     assert search.fenced
-    db.expire_all()
-    assert db.get(MemorySituationReceipt, saved.sequence).state == "applied"
+    with factory() as current:
+        assert current.get(MemorySituationReceipt, saved.sequence).state == "applied"
+    asyncio.run(runtime.stop())
+    engine.dispose()

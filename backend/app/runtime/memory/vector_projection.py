@@ -31,6 +31,8 @@ class MemoryVectorProjection:
         self._cycle_clean = True
         self._eligible_clean = self._cleanup_complete = False
         self._tick_failed = False
+        from app.runtime.memory.canonical_work import MemoryCanonicalWork
+        self._canonical = MemoryCanonicalWork()
 
     def _prepare_attempts(self):
         if self._attempts_ready:
@@ -74,7 +76,9 @@ class MemoryVectorProjection:
                 self.index.delete(doc_id)
             return "disabled" if retained else "ineligible"
         scope, config, digest, version = work
-        documents = self._source.documents_for_item_ids((item_id,)).get(item_id, ())
+        documents = (await self._canonical.call(self._source.documents_for_item_ids, (item_id,))).get(item_id, ())
+        if self._closing:
+            return "deferred"
         document = next((doc for doc in documents if doc.kind is RecallDocumentKind.MEMORY_ITEM), None)
         if document is None or hashlib.sha256(document.text.encode("utf-8")).hexdigest() != digest:
             self.index.delete(doc_id)
@@ -247,6 +251,9 @@ class MemoryVectorProjection:
 
     async def start(self):
         self._closing = False
+        if self._canonical.closed:
+            from app.runtime.memory.canonical_work import MemoryCanonicalWork
+            self._canonical = MemoryCanonicalWork()
         self.index.open()
         self.status = "ready"
         if self._task is None:
@@ -275,3 +282,5 @@ class MemoryVectorProjection:
             await asyncio.gather(self._task, return_exceptions=True)
             self._task = None
         self.status = "stopped"
+        await self._canonical.drain()
+        self._canonical.close()

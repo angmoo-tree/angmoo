@@ -93,6 +93,9 @@ class MemoryBatchRuntime:
         self.stop_event = asyncio.Event()
         self.lock = asyncio.Lock()
         self.task = None
+        from app.runtime.memory.canonical_work import MemoryCanonicalWork
+        self._canonical = MemoryCanonicalWork() if self.situations is not None else None
+        self._brief_cursor = ""
 
     async def start(self) -> None:
         if self.task is not None and not self.task.done():
@@ -100,6 +103,9 @@ class MemoryBatchRuntime:
         if self.situations is None:
             install_memory_delivery(self.session_factory)
         self.stop_event.clear()
+        if self._canonical is not None and self._canonical.closed:
+            from app.runtime.memory.canonical_work import MemoryCanonicalWork
+            self._canonical = MemoryCanonicalWork()
         self.task = asyncio.create_task(self._loop(), name="memory-batch-worker")
 
     async def _loop(self) -> None:
@@ -132,18 +138,8 @@ class MemoryBatchRuntime:
         async with self.lock:
             from app.runtime.memory.foreground_priority import chat_is_active
             if self.situations is not None:
+                result = await self._canonical.call(self._situation_tick, shutdown=shutdown)
                 closing = shutdown or self.situations.quit_identity is not None
-                if not closing:
-                    with self.session_factory() as db:
-                        if chat_is_active(db, now=datetime.now(UTC)):
-                            return "memory_foreground_deferred"
-                self.situations.prepare(shutdown=closing)
-                result = self.situations.tick()
-                if not closing:
-                    from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
-                    with self.session_factory() as db:
-                        rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
-                            settings_type=MemorySituationProcessingSetting)
                 if result == "memory_batch_queue_empty" and self.idle_work is not None and not closing:
                     return await self.idle_work()
                 return result
@@ -189,6 +185,35 @@ class MemoryBatchRuntime:
                 )
             return result
 
+    def _situation_tick(self, *, shutdown):
+        from app.runtime.memory.foreground_priority import chat_is_active
+        closing = shutdown or self.situations.quit_identity is not None
+        if not closing:
+            with self.session_factory() as db:
+                if chat_is_active(db, now=datetime.now(UTC)):
+                    return "memory_foreground_deferred"
+        self.situations.prepare(shutdown=closing)
+        result = self.situations.tick()
+        if not closing:
+            from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
+            with self.session_factory() as db:
+                # One scope per transaction; the cursor includes invalid/dirty
+                # scopes so a poisoned brief cannot starve other characters.
+                self._brief_cursor = rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
+                    settings_type=MemorySituationProcessingSetting, limit=1, after=self._brief_cursor)
+        return result
+
+    async def prepare_async(self, *, shutdown=False):
+        if self._canonical is not None:
+            await self._canonical.call(self.prepare, shutdown=shutdown)
+        else:
+            self.prepare(shutdown=shutdown)
+
+    async def fence_async(self):
+        if self.situations is not None:
+            return await self._canonical.call(self.situations.fence)
+        return False
+
     async def pause(self) -> None:
         self.stop_event.set()
         if self.task is not None:
@@ -198,7 +223,11 @@ class MemoryBatchRuntime:
             except asyncio.CancelledError:
                 pass
             self.task = None
+        if self._canonical is not None:
+            await self._canonical.drain()
 
     async def stop(self) -> None:
         await self.pause()
+        if self._canonical is not None:
+            self._canonical.close()
         uninstall_memory_delivery(self.session_factory)

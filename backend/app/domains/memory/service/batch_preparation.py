@@ -180,7 +180,7 @@ def enqueue_scope(
 
 
 def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None,
-                   settings_type=MemoryBatchSetting) -> None:
+                   settings_type=MemoryBatchSetting, limit=16, after="") -> str:
     repository = dependencies.consolidation_repository(session)
     reader = source_reader or dependencies.source_reader(session)
     memory = dependencies.memory_repository(session)
@@ -193,8 +193,10 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
         .where(
             settings_type.brief_dirty.is_(True),
             MemoryScopeSettingModel.enabled.is_(True),
+            settings_type.scope_setting_id > after,
         )
-        .limit(16)
+        .order_by(settings_type.scope_setting_id)
+        .limit(limit)
     ).all()
     for config in configs:
         snapshot = repository.get_scope_setting_by_id(config.scope_setting_id)
@@ -246,3 +248,4 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
             )
         config.brief_dirty = False
     session.commit()
+    return configs[-1].scope_setting_id if configs else ""

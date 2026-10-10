@@ -33,7 +33,7 @@ class CanonicalMemoryEvidence:
 
 
 class MemorySourceEvidenceReaderPort(Protocol):
-    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset()): ...
+    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None): ...
     def read_evidence(
         self,
         *,

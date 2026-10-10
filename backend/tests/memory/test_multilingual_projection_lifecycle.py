@@ -44,6 +44,7 @@ def test_cancel_restart_reconciles_offline_correction_and_deletion_before_search
     first.start(background=False)
     try:
         assert first.state is MemoryRecallProjectionState.REBUILDING
+        first.advance_rebuild(max_pages=1)
         cursor = json.loads(first._cursor_path.read_text())
         assert cursor["phase"] == "build" and cursor["cursor"]
         with pytest.raises(MemoryRecallPreparing):
@@ -96,7 +97,7 @@ def test_committed_edit_during_rebuild_uses_same_fence_and_small_transaction(run
             item.version += 1
             db.commit()
         complete(projection)
-        assert pages and max(pages) == 100
+        assert pages and max(pages) == 32
         hits = index.search(MemoryRecallSearchQuery(scope, "art", (RecallDocumentKind.MEMORY_ITEM,), 10))
         assert [hit.memory_item_id for hit in hits] == [identifier]
         assert hits[0].snippet == "New art. No party agreement for A-17."

@@ -75,7 +75,7 @@ class MemoryShutdownCoordinator:
                     self.quiesce(), min(5, max(0, deadline - time.monotonic() - 5))
                 )
             self.phase = "PREPARING"
-            self.memory.prepare(shutdown=True)
+            await self._prepare_memory()
             self.phase = "CONSOLIDATING"
             for _ in range(8):
                 remaining = (
@@ -106,7 +106,9 @@ class MemoryShutdownCoordinator:
             situations = getattr(self.memory, "situations", None)
             if situations is not None:
                 try:
-                    self.deferred = situations.fence() or self.deferred
+                    fence = getattr(self.memory, "fence_async", None)
+                    fenced = await fence() if fence is not None else situations.fence()
+                    self.deferred = fenced or self.deferred
                 except Exception:
                     self.deferred = True
             # Fence even providers which ignore cancellation. Their old lease
@@ -138,10 +140,17 @@ class MemoryShutdownCoordinator:
                 self.deferred = True
             try:
                 # This records pending cutoffs even on immediate exit. No AI.
-                self.memory.prepare(shutdown=True)
+                await self._prepare_memory()
             except Exception:
                 self.deferred = True
             self.phase = "EXIT_READY"
+
+    async def _prepare_memory(self):
+        prepare = getattr(self.memory, "prepare_async", None)
+        if prepare is not None:
+            await prepare(shutdown=True)
+        else:
+            self.memory.prepare(shutdown=True)
 
 
 def _consume(task):

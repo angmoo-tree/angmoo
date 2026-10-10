@@ -136,9 +136,25 @@ class SituationSources:
             relationship_basis=relationship_basis,
             delivery_payload_digest=delivery.payload_digest if delivery is not None else None)
 
-    def validate(self, manifest, source, *, now, ancestors=frozenset()):
+    def validate(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
+        from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+        validation = validation if validation is not None else MemoryAccessValidation(self.session, now)
+        validation.check_context(self.session, now)
+        if source.source_type == "MEMORY_ITEM":
+            # Prior checks remain ancestry-aware, including on a cached DAG.
+            return self._validate(manifest, source, now=now, ancestors=ancestors, validation=validation)
+        key = (id(manifest), source)
+        if key not in validation.sources:
+            validation.manifests[id(manifest)] = manifest
+            validation.sources[key] = self._validate(manifest, source, now=now,
+                ancestors=ancestors, validation=validation)
+        return validation.sources[key]
+
+    def _validate(self, manifest, source, *, now, ancestors, validation):
         scope = manifest.snapshot.scope
-        if any(value is None for value in read_scope_presence(self.session, scope)):
+        if scope not in validation.scopes:
+            validation.scopes[scope] = all(value is not None for value in read_scope_presence(self.session, scope))
+        if not validation.scopes[scope]:
             raise MemoryScopeError("memory_scope_invalid")
         if source.world_id != scope.world_id:
             return SituationSourceAccess("forbidden", reason="situation_source_scope_forbidden")
@@ -148,7 +164,7 @@ class SituationSources:
                 basis = next((entry for entry in manifest.sources if entry.ordinal == binding.basis_ordinal
                     and entry.source_id == binding.basis_source_id), None)
                 if (child is None or child.reply_to_post_id != source.source_id or basis is None
-                    or self.validate(manifest, basis, now=now, ancestors=ancestors).state != "available"):
+                    or self.validate(manifest, basis, now=now, ancestors=ancestors, validation=validation).state != "available"):
                     return SituationSourceAccess("changed", reason="situation_parent_binding_child_changed")
                 parent = self.session.get(Post, source.source_id, populate_existing=True)
                 if parent is None or parent.deleted_at is not None:
@@ -161,8 +177,15 @@ class SituationSources:
                 or thread.responding_world_character_id != scope.subject_world_character_id):
                 return SituationSourceAccess("forbidden", reason="situation_thread_forbidden")
         participants = {scope.subject_world_character_id, source.actor_id, source.counterpart_id} - {None}
-        if set(active_participant_ids(self.session, participants, scope.world_id)) != participants or any(
-            block_id(self.session, scope.world_id, scope.subject_world_character_id, identifier)
+        participant_key = (scope.world_id, frozenset(participants))
+        if participant_key not in validation.participants:
+            validation.participants[participant_key] = frozenset(active_participant_ids(self.session, participants, scope.world_id))
+        for identifier in participants - {scope.subject_world_character_id}:
+            key = (scope.world_id, scope.subject_world_character_id, identifier)
+            if key not in validation.blocks:
+                validation.blocks[key] = block_id(self.session, *key) is not None
+        if validation.participants[participant_key] != participants or any(
+            validation.blocks[(scope.world_id, scope.subject_world_character_id, identifier)]
             for identifier in participants - {scope.subject_world_character_id}):
             return SituationSourceAccess("forbidden", reason="situation_participant_forbidden")
         if source.source_type == "ROUTINE_ACTIVITY":
@@ -220,14 +243,18 @@ class SituationSources:
                 or not item_retrievable(item, now)):
                 return SituationSourceAccess("changed", reason="situation_prior_changed")
             from app.domains.memory.repository.episode_privacy import currently_accessible
-            if not currently_accessible(self.session, self, scope, item, now, ancestors=ancestors):
+            if not currently_accessible(self.session, self, scope, item, now,
+                    ancestors=ancestors, validation=validation):
                 return SituationSourceAccess("forbidden", reason="situation_prior_forbidden")
             return SituationSourceAccess("available")
         try:
             kind = MemorySourceTypeV1(source.source_type)
         except ValueError:
             return SituationSourceAccess("forbidden", reason="situation_source_type_forbidden")
-        current = self.reader.read_evidence(scope=scope, source_type=kind, source_id=source.source_id)
+        key = (scope, kind.value, source.source_id)
+        if key not in validation.evidence:
+            validation.evidence[key] = self.reader.read_evidence(scope=scope, source_type=kind, source_id=source.source_id)
+        current = validation.evidence[key]
         if source.source_type in {"POST", "REPLY"}:
             post = self.session.get(Post, source.source_id, populate_existing=True)
             if post is not None and (post.world_id != scope.world_id or post.report_hidden_at is not None or post.visibility != "public"):

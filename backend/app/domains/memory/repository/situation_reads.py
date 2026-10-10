@@ -77,12 +77,15 @@ def read_manifest(session, info):
     return context, context.result_sources
 
 
-def situation_accessible(session, reader, scope, item, info, now, *, ancestors):
+def situation_accessible(session, reader, scope, item, info, now, *, ancestors, validation=None):
     if info.policy_version != SITUATION_POLICY or item.id in ancestors:
         return False
     validate = getattr(reader, "validate_situation_source", None)
     if validate is None:
         return False
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    validation = validation if validation is not None else MemoryAccessValidation(session, now)
+    validation.check_context(session, now)
     try:
         material = read_manifest(session, info)
         if material is None:
@@ -94,7 +97,7 @@ def situation_accessible(session, reader, scope, item, info, now, *, ancestors):
         if not entries:
             return False
         for entry in entries:
-            access = validate(manifest, entry, now=now, ancestors=ancestors | {item.id})
+            access = validate(manifest, entry, now=now, ancestors=ancestors | {item.id}, validation=validation)
             if access.state not in {"available", "deleted"} or (entry.role == "prior" and access.state == "deleted"):
                 return False
         return True

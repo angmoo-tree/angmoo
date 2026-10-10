@@ -38,6 +38,15 @@ from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 NOW = datetime(2026, 9, 1, 12, tzinfo=UTC)
 
 
+def drain_projection(projection):
+    # Deterministic worker steps; canonical commit only enqueues derived work.
+    for _ in range(200):
+        projection.advance_rebuild(max_pages=1)
+        if projection.state is MemoryRecallProjectionState.READY:
+            return
+    pytest.fail("projection did not finish its bounded pages")
+
+
 @pytest.fixture
 def runtime_factory(tmp_path: Path):
     database_path = tmp_path / "canonical.sqlite3"
@@ -435,7 +444,8 @@ def test_after_commit_projection_tombstones_off_and_ignores_rollback(
         index=index,
         session_factory=runtime_factory,
     )
-    projection.start()
+    projection.start(background=False)
+    drain_projection(projection)
     assert projection.state is MemoryRecallProjectionState.READY
     initial_doctor = index.doctor()
     assert initial_doctor.searchable_document_count == 2
@@ -466,6 +476,7 @@ def test_after_commit_projection_tombstones_off_and_ignores_rollback(
             retention_days=setting.retention_days,
         )
         session.commit()
+    drain_projection(projection)
     assert projection.state is MemoryRecallProjectionState.READY
     doctor = index.doctor()
     assert doctor.searchable_document_count == 0
@@ -490,6 +501,7 @@ def test_after_commit_projection_tombstones_off_and_ignores_rollback(
             retention_days=setting.retention_days,
         )
         session.commit()
+    drain_projection(projection)
     assert index.doctor().searchable_document_count == 2
 
     with runtime_factory() as session:
@@ -505,6 +517,7 @@ def test_after_commit_projection_tombstones_off_and_ignores_rollback(
             now=NOW,
         )
         session.commit()
+    drain_projection(projection)
     deleted_doctor = index.doctor()
     assert deleted_doctor.searchable_document_count == 0
     assert deleted_doctor.tombstone_count == 2
@@ -523,7 +536,8 @@ def test_owner_correction_and_delete_refresh_projection_after_commit(
         index=index,
         session_factory=runtime_factory,
     )
-    projection.start()
+    projection.start(background=False)
+    drain_projection(projection)
 
     with runtime_factory() as session:
         repository = SqlAlchemyMemoryRepository(session)
@@ -546,6 +560,7 @@ def test_owner_correction_and_delete_refresh_projection_after_commit(
         replacement_id = corrected.item.id
         session.commit()
 
+    drain_projection(projection)
     corrected_hits = index.search(
         MemoryRecallSearchQuery(
             scope=scope,
@@ -572,6 +587,7 @@ def test_owner_correction_and_delete_refresh_projection_after_commit(
         )
         session.commit()
 
+    drain_projection(projection)
     assert not index.search(
         MemoryRecallSearchQuery(
             scope=scope,
