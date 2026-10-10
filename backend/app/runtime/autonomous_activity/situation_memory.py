@@ -159,6 +159,11 @@ def participant(lane, state, target):
             if expected == "post":
                 expected_output["title"] = written.get("title")
                 actual_output["title"] = post_row.title if post_row else None
+        from app.domains.social.utils.situation_output import stored_output
+        raw_digest = stable_digest(expected_output)
+        # Final base output is already validated. An invalid internal draft is
+        # an integrity error, never an empty-string formatting equivalence.
+        expected_output = stored_output(expected_output)
         planned_digest, final_digest = stable_digest(expected_output), stable_digest(actual_output)
         result_sources = ()
         if expected in {"reply", "post"} and post_row is not None:
@@ -185,5 +190,14 @@ def participant(lane, state, target):
             counterpart_id=next((row.get("counterpart_id") for row in state.get("candidates", []) if row["target_id"] == target), None))
         from dataclasses import replace
         value = replace(value, result_sources=result_sources, thought_reference=f"social:{thought_id}" if thought_id else None)
-        admit(session, manifest=manifest, draft=draft, result=value, now=datetime.now(UTC))
+        receipt = admit(session, manifest=manifest, draft=draft, result=value, now=datetime.now(UTC))
+        from app.runtime.diagnostics.situation_observation import after_receipt_commit
+        try:
+            after_receipt_commit(session, getattr(lane, "tracker", None), receipt, decision=decision, override=override,
+                raw_digest=raw_digest, normalized_digest=planned_digest, actual_digest=final_digest)
+        except Exception:
+            # Canonical receipts remain authoritative when optional diagnostics
+            # cannot be staged. Export compares DB receipts with commit events.
+            import logging
+            logging.getLogger(__name__).warning("situation_observation_staging_failed")
     return apply

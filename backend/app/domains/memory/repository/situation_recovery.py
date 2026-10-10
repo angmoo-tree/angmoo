@@ -77,6 +77,8 @@ def discard(session, setting, *, sequence, expected_version, request_key, now):
     if changed.rowcount != 1:
         raise MemoryConflictError("situation_receipt_version_conflict")
     session.expire(receipt)
+    from app.domains.memory.models.situation_result_binding import MemorySituationResultBinding
+    session.execute(delete(MemorySituationResultBinding).where(MemorySituationResultBinding.receipt_sequence == sequence))
     shared = session.scalar(select(MemorySituationReceipt.sequence).where(
         MemorySituationReceipt.manifest_id == manifest_id).limit(1))
     if shared is None:

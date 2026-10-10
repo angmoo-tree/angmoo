@@ -73,7 +73,7 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryBatchRuntime:
-    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, activity_provider_factory=None, episode_prior_search=None, idle_work=None) -> None:
+    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, activity_provider_factory=None, episode_prior_search=None, idle_work=None, data_root=None) -> None:
         # Preserve safe success/attempt measurements without enabling verbose
         # SDK logging or changing application-wide log levels.
         logging.getLogger("app.domains.memory.service.batch_selection").setLevel(logging.INFO)
@@ -84,7 +84,7 @@ class MemoryBatchRuntime:
             raise ValueError("memory_generation_policy_invalid")
         self.generation_policy = generation_policy
         from app.runtime.memory.situation_runtime import SituationRuntime
-        self.situations = SituationRuntime(session_factory) if generation_policy == "activity_situation" else None
+        self.situations = SituationRuntime(session_factory, data_root=data_root) if generation_policy == "activity_situation" else None
         self.episode_provider_factory = episode_provider_factory
         self.activity_provider_factory = activity_provider_factory
         self.episode_prior_search = episode_prior_search

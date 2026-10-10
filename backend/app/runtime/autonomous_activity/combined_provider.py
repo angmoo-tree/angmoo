@@ -223,14 +223,41 @@ class CombinedActivityProvider(ActivityProvider):
                 self.ledger.reserve(f"{node}:json")
             recovery_admitted = True
         kwargs["before_json_retry"] = before_retry
+        correlation = {}
+        if self.situation_output_active:
+            from app.runtime.diagnostics.situation_observation import output_shape, safe_event, stage_attempt
+            stage_id = stage_attempt.get()
+            def observed_targets(value):
+                if lane == "routine":
+                    return ("routine-post",)
+                if writing:
+                    return tuple(row["source"]["target_id"] for row in (self.situation_state or {}).get("assignments", []))
+                base = value.get("decision", value)
+                known = {row.get("target_id") for row in (self.situation_state or {}).get("candidates", [])}
+                return tuple(row.get("target_id") for row in base.get("decisions", [])
+                    if isinstance(row, dict) and row.get("target_id") in known and row.get("action") not in {None, "no_action"}) if isinstance(base, dict) else ()
+            def facts(value, attempt):
+                fields = ("decision", "draft") if self.mode == "combined" and planning else tuple(key for key in value if key != "situations")
+                current = {**attempt, "lane": lane, "node": kwargs["node"], "stage_attempt_id": stage_id,
+                    "input_payload_hash": self.situation_manifest.payload_digest,
+                    "writer_replaced": writing and self.repairing, **output_shape(value, observed_targets(value), base_fields=fields)}
+                return safe_event(current)
+            def before(value, attempt):
+                self.tracker._notify("situation_output_shape", facts(value, attempt))
+            def after(value, base, attempt):
+                current = facts(value, attempt)
+                correlation.clear()
+                correlation.update({key: current.get(key) for key in ("lane", "node", "stage_attempt_id", "call_order", "provider_call_order", "json_attempt", "input_payload_hash", "writer_replaced")})
+                self.tracker._notify("situation_output_parsed", current)
+            kwargs["on_json_object"], kwargs["on_json_validated"] = before, after
         result = await super().call(**kwargs)
         if planning and self.situation_output_active:
-            result = {**result, "_situation_manifest": self.situation_manifest.to_dict()}
+            result = {**result, "_situation_manifest": self.situation_manifest.to_dict(), "_situation_attempt": correlation}
             if self.mode == "split":
                 result["_situations"] = self.separate_situations
         if writing and self.situation_output_active:
             self.situation_writer_results.append({"manifest": self.situation_manifest.to_dict(),
-                "situations": self.separate_situations, "output": result})
+                "situations": self.separate_situations, "output": result, "attempt": correlation})
         if recovery_admitted and recovery_reason == "comment_intent_missing":
             result = {**result, "_json_recovery_receipt": {
                 "reason": recovery_reason, "attempt": 2, "node": kwargs["node"]}}

@@ -11,15 +11,16 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 35
-SOURCE_ALEMBIC_REVISION = "20261010_0112"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 111
-EXPECTED_CANONICAL_TABLE_COUNT = 171
+SQLITE_SCHEMA_VERSION = 36
+SOURCE_ALEMBIC_REVISION = "20261010_0113"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 112
+EXPECTED_CANONICAL_TABLE_COUNT = 172
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
 SITUATION_V32_TABLES = ("memory_situation_recheck_attempts",)
 SITUATION_V35_TABLES = ("memory_situation_source_bindings",)
+SITUATION_V36_TABLES = ("memory_situation_result_bindings",)
 
 ACTIVITY_V19_TABLES = (
     "world_character_activity_states", "world_character_state_receipts",
@@ -144,7 +145,7 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES + SITUATION_V36_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -763,8 +764,14 @@ def build_sqlite_v33_metadata() -> MetaData:
 
 
 def build_sqlite_v34_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v35_metadata()
     metadata.remove(metadata.tables["memory_situation_source_bindings"])
+    return metadata
+
+
+def build_sqlite_v35_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["memory_situation_result_bindings"])
     return metadata
 
 

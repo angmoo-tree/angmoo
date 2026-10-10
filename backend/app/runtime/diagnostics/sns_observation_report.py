@@ -100,7 +100,10 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
             f"FROM agent_slots s JOIN world_characters c ON c.character_id=s.assigned_character_id "
             f"WHERE c.world_id=? AND c.id IN ({placeholders})", (world_id, *chosen))]
     session_id = "sns-" + uuid4().hex
+    from app.runtime.diagnostics.situation_observation import CAPABILITY
     manifest = {"schema_version": SCHEMA_VERSION, "session_id": session_id,
+                "capabilities": [CAPABILITY], "situation_event_limit_bytes": 16 * 1024,
+                "situation_observation_available": True,
                 "world_id": world_id, "world_timezone": world_timezone, "actor_ids": chosen,
                 "started_at": now.isoformat(), "ends_at": (now + timedelta(minutes=minutes)).isoformat(),
                 "tail_ends_at": (now + timedelta(minutes=minutes + tail_minutes)).isoformat(),
@@ -306,6 +309,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         runs, effects = _canonical_rows(db, manifest, included)
         scheduler_runs = _scheduler_rows(db, manifest)
         preparations = _preparation_rows(db, manifest)
+        from app.runtime.diagnostics.situation_coverage import canonical_receipts
+        situation_receipts, situation_canonical = canonical_receipts(db, manifest, included)
     errors: list[dict] = []
     call_events = []
     for item in events:
@@ -521,6 +526,18 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
     _atomic_json(destination / "coverage.json", coverage)
+    from app.runtime.diagnostics.situation_coverage import coverage as situation_coverage
+    situation_events, situation_summary = situation_coverage(manifest, events, situation_receipts,
+        damaged=damaged, dropped=dropped, canonical=situation_canonical)
+    try:
+        _jsonl(destination / "situation-evidence.jsonl", situation_events)
+        _atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
+    except OSError:
+        situation_summary.update(situation_evidence_complete=False, export_error="situation_export_failed")
+        try:
+            _atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
+        except OSError:
+            pass  # Missing auxiliary files mean UNKNOWN, never complete.
     events_dir = destination / "events"
     events_dir.mkdir(exist_ok=True)
     for path in directory.glob("events-*.jsonl"):

@@ -21,12 +21,18 @@ from app.runtime.memory.source_queries import block_id, active_participant_ids
 
 
 class SituationSources:
-    def __init__(self, session, *, reader=None):
+    def __init__(self, session, *, reader=None, result_basis=None):
         self.session = session
+        self.result_basis = result_basis
         self.reader = reader if reader is not None else SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries)
 
     def read_evidence(self, **values):
         return self.reader.read_evidence(**values)
+
+    def result_binding_basis(self, admission, *, now):
+        if self.result_basis is None:
+            raise ValueError("situation_result_basis_missing")
+        return self.result_basis.resolve(self.session, admission)
 
     def validate_situation_source(self, manifest, source, **values):
         return self.validate(manifest, source, **values)

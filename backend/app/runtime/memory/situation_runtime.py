@@ -16,8 +16,10 @@ from app.runtime.memory.situation_sources import SituationSources
 
 
 class SituationRuntime:
-    def __init__(self, session_factory):
+    def __init__(self, session_factory, *, data_root=None):
         self.session_factory = session_factory
+        from app.runtime.memory.situation_result_basis import CheckpointResultBasis
+        self.result_basis = CheckpointResultBasis(data_root / "runtime/activity/activity-checkpoints.sqlite" if data_root is not None else None)
         self.quit_identity = None
 
     def prepare(self, *, shutdown=False):
@@ -77,7 +79,7 @@ class SituationRuntime:
             return "situation_claim_conflict"
         try:
             with self.session_factory() as db:
-                apply_page(db, memory_repository(db), SituationSources(db), run_id=run_id, token=token, now=datetime.now(UTC))
+                apply_page(db, memory_repository(db), SituationSources(db, result_basis=self.result_basis), run_id=run_id, token=token, now=datetime.now(UTC))
                 db.commit()
             return "situation_page_applied"
         except MemoryCapacityReached:

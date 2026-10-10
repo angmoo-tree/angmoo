@@ -66,7 +66,8 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
                 return result
             try:
-                result = await callback(state)
+                from app.runtime.diagnostics.situation_observation import in_stage
+                result = await in_stage(callback, state, stage_attempt_id)
             except BaseException as exc:
                 from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
                 if isinstance(exc, ActivityRetryGuardError):
@@ -167,7 +168,8 @@ def build_autonomous_graph(*, lanes: dict[str, LanePorts], load_context: Node,
                 except Exception:
                     pass
             try:
-                result = await callback(state)
+                from app.runtime.diagnostics.situation_observation import in_stage
+                result = await in_stage(callback, state, stage_attempt_id)
             except BaseException as exc:
                 if observe is not None:
                     try:

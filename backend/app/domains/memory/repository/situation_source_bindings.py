@@ -3,7 +3,7 @@ from dataclasses import replace
 from datetime import datetime
 from sqlalchemy import select
 from app.core.calendar import utc_instant
-from app.domains.memory.contracts.activity_situation import DeliveredSourceEntry, VALIDATION_REVISION
+from app.domains.memory.contracts.activity_situation import DeliveredSourceEntry, PARENT_BINDING_REVISIONS
 from app.domains.memory.contracts.situation_source_binding import SituationSourceBinding
 from app.domains.memory.contracts.situation_validation import SituationParentBindingResolver
 from app.domains.memory.models.situation_source_binding import MemorySituationSourceBinding
@@ -11,7 +11,7 @@ from app.domains.memory.policies.situation_source_binding import candidate_child
 
 
 def restore_bindings(session, context):
-    if context.revision != VALIDATION_REVISION:
+    if context.revision not in PARENT_BINDING_REVISIONS:
         return context
     bindings = []
     for row in session.scalars(select(MemorySituationSourceBinding).where(
@@ -26,7 +26,7 @@ def restore_bindings(session, context):
 
 
 def prepare_bindings(session, context, validator, *, captured_at, now):
-    if context.revision != VALIDATION_REVISION:
+    if context.revision not in PARENT_BINDING_REVISIONS:
         return context
     if not isinstance(validator, SituationParentBindingResolver):
         return context

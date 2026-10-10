@@ -130,8 +130,10 @@ from app.runtime.migrations.sqlite_versions import situation_recovery_v32
 from app.runtime.migrations.sqlite_versions import comfy_diagnostics_v33
 from app.runtime.migrations.sqlite_versions import image_provider_vault_v34
 from app.runtime.migrations.sqlite_versions import situation_source_binding_v35
+from app.runtime.migrations.sqlite_versions import situation_result_binding_v36
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    35: situation_result_binding_v36.upgrade,
     34: situation_source_binding_v35.upgrade,
     33: image_provider_vault_v34.upgrade,
     32: comfy_diagnostics_v33.upgrade,
@@ -169,6 +171,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    35: SqliteMigrationContract(source_version=35, target_version=36, name="situation_result_binding", mutable_identity_tables=situation_result_binding_v36.MUTABLE_IDENTITY_TABLES, capture=situation_result_binding_v36.capture_delta, verify=situation_result_binding_v36.verify_delta),
     34: SqliteMigrationContract(source_version=34, target_version=35, name="situation_source_binding", mutable_identity_tables=situation_source_binding_v35.MUTABLE_IDENTITY_TABLES, capture=situation_source_binding_v35.capture_delta, verify=situation_source_binding_v35.verify_delta),
     33: SqliteMigrationContract(source_version=33, target_version=34, name="image_provider_vault", mutable_identity_tables=image_provider_vault_v34.MUTABLE_IDENTITY_TABLES, capture=image_provider_vault_v34.capture_delta, verify=image_provider_vault_v34.verify_delta),
     32: SqliteMigrationContract(source_version=32, target_version=33, name="comfy_safe_diagnostics", mutable_identity_tables=comfy_diagnostics_v33.MUTABLE_IDENTITY_TABLES, capture=comfy_diagnostics_v33.capture_delta, verify=comfy_diagnostics_v33.verify_delta),

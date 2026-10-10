@@ -267,6 +267,7 @@ def create_app(
                     composition.session_factory, owner, model, thinking
                 ),
                 generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
+                data_root=composition.config.data_paths.root,
                 episode_provider_factory=lambda owner, model, thinking: memory_provider(
                     composition.session_factory, owner, model, thinking, episode=True),
                 activity_provider_factory=lambda batch: subject_memory_provider(

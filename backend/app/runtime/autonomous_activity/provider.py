@@ -103,7 +103,8 @@ class ActivityProvider:
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
                    before_provider_request: Callable[[int], Awaitable[None]] | None = None,
                    before_admitted_request: Callable[[], None] | None = None,
-                   on_input_receipt: Callable[[dict], None] | None = None):
+                   on_input_receipt: Callable[[dict], None] | None = None,
+                   on_json_object=None, on_json_validated=None):
         from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
         system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
         # Remove optional whole units before rejecting an oversized required
@@ -160,6 +161,7 @@ class ActivityProvider:
             if getattr(self.tracker, "observer", None) is None:
                 return
             self.tracker._notify("input_manifest", {
+                "situation_expected": getattr(self, "situation_output_active", False),
                 "node": node, "lane": lane, "input_chars": len(system) + len(actual_user),
                 "schema_sha256": sha256(json.dumps(schema, sort_keys=True, default=str).encode()).hexdigest(),
                 "prompt_sha256": sha256(system.encode()).hexdigest(),
@@ -237,6 +239,7 @@ class ActivityProvider:
                 before_provider_request=guard_request,
                 request_preparer=prepare_request if token_budget else None,
                 on_request_submission=submitted_request,
+                on_json_object=on_json_object, on_json_validated=on_json_validated,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None and dispatched:

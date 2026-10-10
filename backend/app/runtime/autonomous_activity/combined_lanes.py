@@ -126,7 +126,7 @@ class CombinedGeneration:
                 normalized = {"replies": [{**row, "target_id": assignments[row["task_id"]]}
                     for row in output.get("reply_task_results", [])]}
             for target, draft in receipt["situations"].items():
-                overrides[target] = {"manifest": receipt["manifest"], "draft": draft, "normalized": normalized}
+                overrides[target] = {"manifest": receipt["manifest"], "draft": draft, "normalized": normalized, "attempt": receipt.get("attempt", {})}
         if overrides:
             result["decision"] = {**state["decision"], "_situation_overrides": overrides}
         return result

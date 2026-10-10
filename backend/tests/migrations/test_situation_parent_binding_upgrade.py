@@ -70,7 +70,7 @@ def test_populated_forward_upgrade_matches_orm_and_preserves_all_old_rows(tmp_pa
 def test_historical_builders_keep_frozen_schema_contract(tmp_path, version):
     register_models()
     engine = create_engine(f"sqlite:///{tmp_path / f'v{version}.sqlite3'}")
-    metadata = schema.build_sqlite_baseline_metadata() if version == 35 else getattr(schema, f"build_sqlite_v{version}_metadata")()
+    metadata = getattr(schema, f"build_sqlite_v{version}_metadata")()
     metadata.create_all(engine)
     with engine.begin() as connection:
         schema.create_schema_version_table(connection)
@@ -102,5 +102,5 @@ def test_staging_failure_preserves_db_key_and_selected_generation(tmp_path, monk
     assert not list(controller.generations.glob(".*.tmp-*"))
     monkeypatch.setitem(registry.MIGRATIONS, 34, original_upgrade)
     upgraded = coordinator.upgrade()
-    assert upgraded.source_version == 34 and upgraded.target_version == 35
+    assert upgraded.source_version == 34 and upgraded.target_version == 36
     assert sha256(path.read_bytes()).hexdigest() == original and secret.read_bytes() == key

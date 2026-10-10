@@ -1,5 +1,34 @@
 # Angmoo Backend Architecture
 
+## SNS stored-text comparison and immutable result recovery (2026-10-10)
+
+Social owns the strict `social-visible-text.v1` expected-output projection and
+reuses its existing title/body sanitizers once. Runtime compares the selected
+final draft in that representation with the independently stored Post in the
+caller-owned Session. Actions, targets, effects and substantive content remain
+separate guards; Chat text does not use this Social projection.
+
+Memory separates restored immutable admission material from trusted validation
+context. Only an explicit, lease-fenced v4 blocked recheck can approve an
+append-only result binding after exact original planned/final hashes, source,
+scope and access checks. Runtime supplies a bounded read-only checkpoint basis
+through a typed port. Receipt, manifest and prior v2/v3 rules remain immutable;
+v3 parent bindings continue to work. Successful proofs and memories share the
+existing outer UoW, failed checks roll back tentative proofs, and reads restore
+the saved proof without checkpoint I/O. The proof retains its original run ID
+when mutable processing history is pruned. Current source/access guards remain.
+
+SQLite v36 / Alembic 20261010_0113 adds the empty result-binding table after
+v35/0112, preserving frozen prior metadata and staged upgrade failure behavior.
+The auxiliary `situation-observation.v1` capability uses the existing opt-in,
+bounded SNS recorder; Memory's pure parser owns structural interpretation.
+Physical/JSON/stage attempts and final Writer selection are explicit. Committed
+receipt diagnostics follow the existing outer commit and never own a commit.
+Auxiliary export completeness is independent of core schema3 completeness and
+AI quality. External PowerShell/Python collectors stay outside app workers,
+read canonical data without mutation and terminate after bounded finalization.
+[Implementation and scoped validation](../docs/verification/sns-result-normalization-observation-20261010.md)
+
 ## Basic activity settings, SNS parent evidence and World topic retirement (2026-10-10)
 
 WorldCharacters owns the strict `world-activity-settings-v1` projection and its

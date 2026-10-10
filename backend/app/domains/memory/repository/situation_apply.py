@@ -7,7 +7,7 @@ from sqlalchemy import select, update
 from app.core.calendar import utc_instant
 from app.domains.memory.contracts.activity_situation import SITUATION_POLICY, LEGACY_VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS
 from app.domains.memory.contracts.situation_validation import SituationSourceAccess, SituationSourceValidator
-from app.domains.memory.repository.situation_validation import restore_context
+from app.domains.memory.repository.situation_validation import restore_admission, complete_context
 from app.domains.memory.contracts.provenance import MemoryKindV1, MemoryItemStatus
 from app.domains.memory.exceptions import MemoryCapacityReached, MemoryConflictError, MemoryScopeError
 from app.domains.memory.models.batch import MemoryActivationEpoch
@@ -71,15 +71,20 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
             processed(receipt, before_version, previous)
             continue
         try:
-            manifest = restore_context(session, receipt, revision=revision)
-            result_sources = manifest.result_sources
+            admission = restore_admission(session, receipt, revision=revision)
+            # A formatting proof can only be approved in the fenced recheck
+            # savepoint below. Ordinary pending work never resolves history.
+            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck"
+                    and revision == "situation-validation.v4"):
+                complete_context(session, admission, revision=revision)
+            result_sources = admission.result_sources
         except (AttributeError, ValueError, TypeError, KeyError) as exc:
             code = str(exc) if isinstance(exc, ValueError) and str(exc).startswith("situation_") else "situation_manifest_invalid"
             receipt.state, receipt.error_code = "blocked", code[:80]
             processed(receipt, before_version, previous)
             run.blocked_count += 1
             continue
-        snapshot = manifest.snapshot
+        snapshot = admission.manifest.snapshot
         setting = memory.get_scope_setting(snapshot.scope)
         epoch = session.get(MemoryActivationEpoch, receipt.activation_epoch, populate_existing=True)
         if (setting is None or not setting.enabled or setting.version != receipt.scope_version
@@ -107,6 +112,10 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                 # A failed receipt cannot leave a newly inferred binding behind.
                 # Successful bindings and memories still belong to the outer UoW.
                 with session.begin_nested():
+                    if admission.requires_result_binding:
+                        from app.domains.memory.repository.situation_result_bindings import prepare_binding
+                        prepare_binding(session, admission, validator, revision=revision, run_id=run.id, now=now)
+                    manifest = complete_context(session, admission, revision=revision)
                     from app.domains.memory.repository.situation_source_bindings import prepare_bindings
                     manifest = prepare_bindings(session, manifest, validator, captured_at=receipt.captured_at, now=now)
                     access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]

@@ -331,6 +331,12 @@ class SNSAttempt:
                   exc=exc, caused_by_event_id=caused_by)
 
     def tracker_event(self, kind: str, payload: dict) -> None:
+        from app.runtime.diagnostics.situation_observation import CAPABILITY, SITUATION_EVENTS, safe_event
+        if kind in SITUATION_EVENTS:
+            if CAPABILITY not in self.manifest.get("capabilities", []):
+                return
+            self.emit(kind, lane=code(payload.get("lane")), node=code(payload.get("node")), details=safe_event(payload))
+            return
         if kind == "provider_response":
             if self.manifest["schema_version"] < 3:
                 return
@@ -410,6 +416,7 @@ class SNSAttempt:
             return
         if kind == "input_manifest":
             self.emit("input_manifest", lane=code(payload.get("lane")), node=code(payload.get("node")), details={
+                "situation_expected": payload.get("situation_expected") is True,
                 "input_chars": numbers(payload.get("input_chars")),
                 "schema_sha256": code(payload.get("schema_sha256")),
                 "prompt_sha256": code(payload.get("prompt_sha256")),
@@ -643,7 +650,9 @@ class SNSObserver:
                     artifact_bytes = None
                     payload["details"]["artifact_status"] = "truncated"
                 encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-                if len(encoded.encode("utf-8")) > EVENT_LIMIT:
+                from app.runtime.diagnostics.situation_observation import SITUATION_EVENTS
+                event_limit = 16 * 1024 if payload.get("event_type") in SITUATION_EVENTS else EVENT_LIMIT
+                if len(encoded.encode("utf-8")) > event_limit:
                     payload = {**payload, "details": {"truncated": True}}
                 self.queue.put_nowait((session_id, payload, artifact_bytes))
                 self._queued_artifact_bytes += len(artifact_bytes or b"")

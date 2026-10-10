@@ -15,9 +15,10 @@ from app.contracts.activity_situation import SITUATION_POLICY, SituationDraft
 SITUATION_REPRESENTATION = "activity_situation_v1"
 DESCRIPTION_LIMIT = 1000
 Lane = Literal["chat", "inbox", "feed", "routine"]
-VALIDATION_REVISION = "situation-validation.v3"
+VALIDATION_REVISION = "situation-validation.v4"
+PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", VALIDATION_REVISION})
 LEGACY_VALIDATION_REVISION = "situation-validation.v2"
-SUPPORTED_VALIDATION_REVISIONS = frozenset({LEGACY_VALIDATION_REVISION, VALIDATION_REVISION})
+SUPPORTED_VALIDATION_REVISIONS = frozenset({LEGACY_VALIDATION_REVISION, *PARENT_BINDING_REVISIONS})
 
 
 @dataclass(frozen=True)
