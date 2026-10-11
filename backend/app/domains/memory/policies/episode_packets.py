@@ -4,9 +4,21 @@ from dataclasses import asdict
 import json
 
 from app.domains.memory.contracts.episode_packet import (
-    EpisodePacket, EpisodePacketDelivery, EPISODE_PACKET_VERSION,
+    EpisodePacket, EpisodePacketDelivery, EpisodePacketSource, EPISODE_PACKET_VERSION,
     CHAT_PACKET_LIMIT, CHAT_PACKET_CHARACTERS, SNS_PACKET_LIMIT, SNS_PACKET_CHARACTERS,
 )
+
+
+def episode_source_payload(source: EpisodePacketSource) -> dict[str, object]:
+    """The v1 delivered-source shape; canonical author metadata stays private."""
+    return {
+        "reference": source.reference,
+        "role": source.role,
+        "text": source.text,
+        "status": source.status,
+        "start_offset": source.start_offset,
+        "end_offset": source.end_offset,
+    }
 
 
 def bounded_episode_packets(packets: tuple[EpisodePacket, ...], *, purpose: str = "chat") -> EpisodePacketDelivery:
@@ -55,9 +67,7 @@ def bounded_episode_packets(packets: tuple[EpisodePacket, ...], *, purpose: str 
                     sources.append({"ref": source.reference, "start_offset": source.start_offset,
                                     "end_offset": source.end_offset, "already_in_context": True})
                 else:
-                    value = asdict(source)
-                    value.pop("author_id")  # Neutral private metadata is never a SNS/model storage ID.
-                    sources.append(value)
+                    sources.append(episode_source_payload(source))
                     # Invalid/missing material is not an original-text cache hit.
                     if source.status == "verified":
                         unit_sources.add(key)

@@ -32,6 +32,14 @@ legacy source hashes exclude those identities. Integrations adds only Chat prese
 names and selected opaque participant links, preserving raw source text and provider
 message/schema contracts. One final payload feeds serialization and both delivery captures.
 
+Memory owns the explicit `episode-packet.v1` delivered-source projection. Packet
+serialization and SNS snapshot currentness comparison share that same projection;
+private canonical author metadata never becomes model input or an accidental
+source-change signal. Current scope/access, source digest/status, delivered text,
+role/range, thought and follow-up checks remain; unexpected delivery fields fail
+the exact comparison. This requires no stored-data rewrite or provider call.
+Evidence: [SNS currentness regression and scoped Docker checks](../docs/verification/sns-memory-source-currentness-20261011.md).
+
 Chat finalize binds `relationship-evidence-delivery.v2` to request, scope, generation,
 slot, attempt and actual JSON/user-prompt digests in the existing canonical UoW. It is
 independent of Memory enablement or receipt processing. Committed evidence reads validate

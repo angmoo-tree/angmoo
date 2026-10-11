@@ -10,7 +10,7 @@ from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePacke
 from app.domains.memory.repository.episode_candidates import SqlAlchemyEpisodeCandidates
 from app.domains.memory.policies.episode_provider_view import episode_provider_view
 from app.domains.memory.policies.episode_provider_view import episode_provider_reference
-from app.domains.memory.policies.episode_packets import bounded_episode_packets
+from app.domains.memory.policies.episode_packets import bounded_episode_packets, episode_source_payload
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 
@@ -83,7 +83,7 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
                     if source.status != "verified" or any(previous_source.get(k) != getattr(source, k)
                         for k in ("start_offset", "end_offset")):
                         raise ValueError("activity_memory_source_changed")
-                elif previous_source != asdict(source):
+                elif previous_source != episode_source_payload(source):
                     raise ValueError("activity_memory_source_changed")
 
 
