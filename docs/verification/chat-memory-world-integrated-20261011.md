@@ -90,8 +90,9 @@ Memory는 자기 ORM을 읽고 Runtime source batch는 Post/Reply/Message/Thread
 | 기존 World lifecycle 종합 node | **기존 실패**; 이미지 처리 뒤 RecommendationPreparation 부재. 변경 전 HEAD archive도 같은 NoResultFound | `test_creator_route_lifecycle_and_stable_conflict`; 현재 CAS/icon/archive는 위 별도2nodes로 검증 |
 | 격리 Docker 최종 큰 묶음 | **120 passed, 6 skipped**, 121.62s | network none/read-only source/tmpfs DB; 실제 Runtime factory·FTS·worker 포함 |
 | 마지막 변경 및 추가된 대표 큐·World HTTP의 Docker 관련 묶음 | **10 passed**, 37.49s | 같은 격리 image의 `test_canonical_worker.py`, `test_hybrid_recall.py`, `test_world_media_preservation.py` |
-| Next/static World/Feed/Chat/profile 및 첨부 회귀 | 서로 다른 **46개 사례 통과**; 한 초기 22묶음의 4개 strict locator 실패는 World 카드로 범위를 좁혀 재검증 | 18 기존 성공 + 20 추가 성공 + 4 runtime scope + 4 transport/remove. crop4 재실행은 합산하지 않음 |
-| 마지막 World transport/remove+crop 묶음 | **8 passed**, 24.9s | `browser-results.json`; ko/en × Next/static |
+| Next/static World/Feed/Chat/profile 및 첨부 회귀 | 서로 다른 **54개 사례 통과**; 한 초기 22묶음의 4개 strict locator 실패는 World 카드로 범위를 좁혀 재검증 | 18 기존 성공 + 20 추가 성공 + 4 runtime scope + 4 transport/remove + 8 new World guard/error/first save. crop4 재실행은 합산하지 않음 |
+| World transport/remove+crop 묶음 | **8 passed**, 24.9s | ko/en × Next/static; crop4 재실행 합산0 |
+| 최종 새 World image guard/field error/첫 초안 저장 | **8 passed**, 13.4s | 최종 `browser-results.json`; ko/en × Next/static, create1/image0·정상 편집 주소 전환 |
 | 진단 export Node | **6 passed** | `frontend/scripts/test-chat-diagnostics.mjs` |
 | 관련 ESLint | errors/warnings 0 | 수정한 8개 frontend 파일만 |
 | locale | **16 namespaces, 2598 source keys parity** | `frontend/scripts/check-ui-catalog.mjs` |
@@ -244,3 +245,11 @@ World390px rendered screenshot을 직접 확인했고, 360/390/768/1440의 순�
 - 기존 구조4원인 및 World 추천준비 기대값/이전 dependency freeze는 별도의 기존 부채다. 이번 변경이 이를 고쳤다고 말하지 않는다. 기능 실패를 validation PASS/새 allowlist로 숨기지 않았다.
 - 사용자 원본 World에서의 직접 이미지 편집/실제 모바일·설치 앱 USER CHECK는 미실행이다.
 - 원계획과 사용자 기존 이력, 원본 container/volume/data, 기존 Next 서버는 보존한다.
+
+## 로컬 종료 기록
+
+- 구현 커밋: `618096aee7d27af4efc3f0d646d68e59b6d512a1` (`fix(chat): decouple advisory hints and bound canonical memory reads`), 변경 파일79개를 명시 선택했다.
+- 후속 증거 커밋은 새 World guard/첫 저장의 관련 시험8개와 시험 수집 범위를 보완하고, 이 구현 커밋의 정확한 Git blob/SHA를 이용해 두 Feed 기대값만 append-only `post_refactor_contract_changes.json`에 등록하고 이 종료 기록을 보완한다. 커밋의 자기 SHA를 파일 안에 추정해 쓰지 않으며 `git log -2`로 실제 최종 커밋을 확인한다.
+- 두 기존 기대값은 approved placeholder 한 문장 외 변경0이며, PNG/visual tolerance/dependency 변경0을 확인했다. 전역 dependency freeze의 package/lock 두 이전 불일치는 그대로다.
+- 원계획 A/B hash는 보존하고 workspace 통합 계획의 상태/80단계 ledger 링크만 갱신했다.
+- I78 로컬 선택 commit, I79 구현·자동 검증·Docker·제한/미관찰 분리 보고로 종료한다. 외부 Git 작업은0이다.

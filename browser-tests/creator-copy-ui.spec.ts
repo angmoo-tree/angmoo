@@ -15,7 +15,7 @@ async function studio(page: Page, staticShell: boolean, baseURL: string, languag
     readiness_status: "publish_ready", created_at: "2026-10-10T00:00:00Z", updated_at: "2026-10-10T00:00:00Z", archived_at: null };
   const context = () => ({ world, membership_role: "owner", readiness: { world_id: world.id, definition_version: 1, row_version: world.row_version,
     contract_version: "world-v1", contract_hash: world.contract_hash, required_fields: {}, optional_setting_count: 0, quality_tier: "CORE", issues: [], ready_for_publish: true, evaluated_at: world.updated_at } });
-  const state = { world, base, writes: [] as { path: string; body: any }[], imageFailure: 0 };
+  const state = { world, base, context, writes: [] as { path: string; body: any }[], imageFailure: 0 };
   const handler = async (route: any) => {
     const request = route.request(), path = new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/, ""), method = request.method();
     if (path === `/worlds/${FEED_WORLD}/creator-context`) return route.fulfill({ json: context() });
@@ -272,6 +272,29 @@ for (const language of ["ko", "en"] as const) {
     await expect(previews.getByRole("button", { name: t("아이콘 업로드"), exact: true })).toBeEnabled();
     await expect(previews.getByRole("button", { name: t("아이콘 제거"), exact: true })).toHaveCount(0);
     await expect(page.getByText(t("이미지를 저장했어요."), { exact: true })).toHaveCount(0);
+    expect(state.writes).toEqual([]);
+  });
+
+  test(`new World first draft enables upload after normal navigation ${language}`, async ({ page }, info) => {
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
+    const creates: any[] = [];
+    const handler = async (route: any) => {
+      const request = route.request(), path = new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+      if (path !== "/worlds" || request.method() !== "POST") return route.fallback();
+      const body = request.postDataJSON(); creates.push(body); Object.assign(state.world, body);
+      return route.fulfill({ json: state.context() });
+    };
+    await page.route("**/api/backend/**", handler); await page.route("http://127.0.0.1:8080/api/v1/**", handler);
+    await page.goto("/studio/worlds/new");
+    const previews = page.locator("[data-world-image-previews]");
+    await expect(previews.getByRole("button", { name: t("아이콘 업로드"), exact: true })).toBeDisabled();
+    await expect(previews.getByRole("button", { name: t("배너 업로드"), exact: true })).toBeDisabled();
+    await page.getByLabel(new RegExp(`^${t("World 이름")}`)).fill("New synthetic World");
+    await page.getByRole("button", { name: t("초안 저장"), exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/studio/worlds/${FEED_WORLD}/?$`));
+    await expect(previews.getByRole("button", { name: t("아이콘 업로드"), exact: true })).toBeEnabled();
+    await expect(previews.getByRole("button", { name: t("배너 업로드"), exact: true })).toBeEnabled();
+    expect(creates).toHaveLength(1); expect(creates[0].name).toBe("New synthetic World");
     expect(state.writes).toEqual([]);
   });
 

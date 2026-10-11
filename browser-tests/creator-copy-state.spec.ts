@@ -53,15 +53,15 @@ for (const language of ["ko", "en"] as const) {
     await expect(page.getByRole("heading", { name: t("새 World 만들기"), exact: true })).toBeVisible();
     const save = page.getByRole("button", { name: t("초안 저장"), exact: true });
     await expect(save).toBeDisabled(); await verifyCreatorResponsive(page);
-    await expect(page.getByLabel(t("아이콘 선택"), { exact: true })).toBeDisabled();
-    await expect(page.getByLabel(t("배너 선택"), { exact: true })).toBeDisabled();
+    await expect(page.getByLabel(t("아이콘 업로드"), { exact: true })).toBeDisabled();
+    await expect(page.getByLabel(t("배너 업로드"), { exact: true })).toBeDisabled();
     const form = page.locator("section").filter({ has: page.getByRole("heading", { name: t("필수 세계관 설정"), exact: true }) }).last();
     const name = form.getByLabel(new RegExp(`^${t("World 이름")}`)); await name.fill("Only a draft name");
     await expect(save).toBeEnabled(); await save.click();
     await expect(page.getByText(t("입력값과 형식을 확인해 주세요."), { exact: true })).toBeVisible(); await expect(name).toHaveValue("Only a draft name");
     expect(writes).toHaveLength(1); expect(writes[0].name).toBe("Only a draft name");
     await expect(page.getByText(/private validator detail|internal_field/, { exact: true })).toHaveCount(0);
-    await expect(page.getByLabel(t("아이콘 선택"), { exact: true })).toBeDisabled();
+    await expect(page.getByLabel(t("아이콘 업로드"), { exact: true })).toBeDisabled();
   });
   test(`package preview, digest approval, cancel, blocking and success ${language}`, async ({ page }, info) => {
     await installIntegrationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);

@@ -41034,6 +41034,28 @@
       "removed_bindings": [],
       "contracts": [],
       "orm_tables": []
+    },
+    {
+      "id": "chat-memory-world-feed-copy-20261011",
+      "implementation_commit": "c7f540cd95c4ba8955f7b1c87da7d5bbf9fc9a3e",
+      "reason": "User-approved Feed body placeholder change to current user authorship; only the matching Next/static expectation text changes. Image limits, states, snapshots and dependencies remain unchanged.",
+      "review": "docs/verification/chat-memory-world-integrated-20261011.md: I52/I73, V28; ko/en Next/static Feed and Chat browser cases, media preservation and exact one-sentence diff.",
+      "source_blobs": {
+        "browser-tests/product-shell.spec.ts": "68f49b57f826e7abb0bc6d7d0ed9d0efc570bb8b",
+        "browser-tests/static-product-shell.spec.ts": "29cc20c18ee7ccd11483218923ea47a4e874fb6a"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/product-shell.spec.ts",
+          "before_sha256": "e7d54fdbdcf7e6e5cc6652bc52c33cf1cd94d63b4185cc53ee6fd7bed2bf38a1",
+          "after_sha256": "2e8c24dcd3badf095b23c093556ae05dcef1099ec305ef84b34ef6d1edd7e7f6"
+        },
+        {
+          "source": "browser-tests/static-product-shell.spec.ts",
+          "before_sha256": "3f72d7c03098a3a90ef5121de9da2a6c3a976d31c00ac8d7dd86ef0b8d11af96",
+          "after_sha256": "de4366b2077efac7b3da08669c32b0c28d5cd415faf29d88f699512250849f60"
+        }
+      ]
     }
   ]
 }
