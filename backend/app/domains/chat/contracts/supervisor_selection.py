@@ -2,13 +2,29 @@
 from copy import deepcopy
 from dataclasses import dataclass, field, replace
 import json
+import unicodedata
 
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.contracts.retrieval_router import (
     parse_retrieval_intent_payload, retrieval_router_response_schema, ROUTER_INTENTS,
 )
 from app.domains.chat.contracts.workflow_recipe import workflow_recipe_for_intent
-from app.domains.chat.contracts.reference_observation import reference_call, reference_inputs
+from app.domains.chat.contracts.reference_observation import reference_call, reference_inputs, name_failure
+from app.domains.chat.contracts.person_roles import PERSON_ROLES, person_role_description
+
+NAME_SELECTION_PROTOCOL = "selection-args.hybrid.v2"
+LEGACY_HYBRID_PROTOCOL = "selection-args.hybrid.v1"
+SELECTION_PROTOCOL_KEY = "_selection_protocol"
+
+
+def read_selection_protocol(metadata):
+    """Absent historical marker stays legacy; a present damaged marker fails closed."""
+    if SELECTION_PROTOCOL_KEY not in metadata:
+        return None
+    value = metadata[SELECTION_PROTOCOL_KEY]
+    if value not in (NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL):
+        raise RetrievalContractError("selection_protocol_invalid")
+    return value
 
 TOOL_NAMES = frozenset({"CANONICAL", "GRAPH"})
 CONTROL_NAMES = frozenset({"USE_CONTEXT", "REQUEST_CLARIFICATION"})
@@ -29,8 +45,12 @@ class SelectionArgumentOptions:
     graph_query_contract: bool = False
     social_context_mode: bool = False
     hybrid_recall: bool = False
+    named_entities: bool = False
 
     def __post_init__(self):
+        if type(self.named_entities) is not bool or (self.named_entities and
+            (not self.hybrid_recall or self.positional_entity_refs or self.graph_query_contract)):
+            raise ValueError("selection_argument_options_invalid")
         if type(self.hybrid_recall) is not bool or (self.hybrid_recall and not self.social_context_mode):
             raise ValueError("selection_argument_options_invalid")
         if type(self.social_context_mode) is not bool or (self.social_context_mode and self.graph_query_contract):
@@ -47,7 +67,7 @@ class SelectionArgumentOptions:
     @property
     def version(self):
         if self.hybrid_recall:
-            return "selection-args.hybrid.v1"
+            return NAME_SELECTION_PROTOCOL if self.named_entities else LEGACY_HYBRID_PROTOCOL
         if self.social_context_mode:
             return "selection-args.social.v1"
         if self.graph_query_contract:
@@ -128,6 +148,23 @@ def execution_arguments_schema(*, graph_query_contract=False, hybrid_recall=Fals
 def model_arguments_schema(options: SelectionArgumentOptions = SelectionArgumentOptions()) -> dict:
     schema = tool_arguments_schema()
     properties = schema["properties"]
+    if options.named_entities:
+        entity = properties["entities"]["items"]
+        del entity["properties"]["ref"]
+        entity["required"].remove("ref")
+        entity["additionalProperties"] = False
+        entity["properties"]["role"]["description"] = person_role_description()
+        properties["entities"]["maxItems"] = 4
+        properties["entities"]["description"] = "People interpreted from the original question and supplied context. Write exact names or explicit @handles, and one role per unique name; an empty list is valid."
+        relation = properties["relationship"]
+        relation["description"] = "Null when no relationship meaning is needed or its counterpart is unspecified. Otherwise copy from_name and to_name exactly from declared mention values; preserve direction and never invent a counterpart."
+        relation["additionalProperties"] = False
+        for endpoint in ("from", "to"):
+            del relation["properties"][endpoint]
+            relation["required"].remove(endpoint)
+            relation["properties"][endpoint + "_name"] = {"type": "string", "minLength": 1, "maxLength": 160,
+                "description": "Exact name copied from an entities mention, including its case and internal spaces."}
+            relation["required"].append(endpoint + "_name")
     if options.hybrid_recall:
         properties["search_text"] = {"type": "string", "minLength": 1, "maxLength": 4000,
             "description": "Standalone recall query preserving the user's entities, event and context. Not SQL, an FTS expression or a tool plan."}
@@ -157,7 +194,7 @@ def model_arguments_schema(options: SelectionArgumentOptions = SelectionArgument
     return schema
 
 
-def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validation_step=None):
+def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validation_step=None, exact_mentions=False):
     if not calls:
         payload = json.loads(text)
         if not isinstance(payload, dict) or set(payload) != _expected_keys({*SEMANTIC_FIELDS, "control", "clarification_slot"}, payload):
@@ -165,7 +202,7 @@ def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validati
         control = payload.pop("control")
         if control not in {"CURRENT_CONTEXT", "CLARIFICATION"}:
             raise RetrievalContractError("retrieval_intent_decision_route_mismatch")
-        return parse_retrieval_intent_payload({**payload, "version":"retrieval-intent.v1", "decision":control, "route":control}, validation_step=validation_step)
+        return parse_retrieval_intent_payload({**payload, "version":"retrieval-intent.v1", "decision":control, "route":control}, validation_step=validation_step, exact_mentions=exact_mentions)
     if text.strip() or len(calls) > 2 or len({c.call_id for c in calls}) != len(calls):
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
     if len({c.name for c in calls}) != len(calls) or any(c.name not in TOOL_NAMES for c in calls):
@@ -180,13 +217,17 @@ def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validati
     return parse_retrieval_intent_payload({
         **arguments, "version": "retrieval-intent.v1", "decision": "RETRIEVAL",
         "route": "BOTH" if len(calls) == 2 else calls[0].name, "clarification_slot": None,
-    }, validation_step=validation_step)
+    }, validation_step=validation_step, exact_mentions=exact_mentions)
 
 
 def control_arguments_schema(name: str, options: SelectionArgumentOptions = SelectionArgumentOptions()) -> dict:
     if name not in CONTROL_NAMES:
         raise ValueError("unknown_selection_control")
     schema = model_arguments_schema(options)
+    if options.named_entities:
+        # All three controls travel in one request. Define roles once, on
+        # CANONICAL, rather than repeating the definitions in every tool.
+        schema["properties"]["entities"]["items"]["properties"]["role"]["description"] = "Use the person role meanings defined by CANONICAL."
     if options.hybrid_recall:
         del schema["properties"]["search_text"]
         schema["required"].remove("search_text")
@@ -273,9 +314,9 @@ def parse_control_selection(
         intent = parse_selection(json.dumps({
             **payload, "control": "CLARIFICATION" if clarify else "CURRENT_CONTEXT",
             "clarification_slot": payload.get("clarification_slot"),
-        }), (), validation_step=trace.step)
+        }), (), validation_step=trace.step, exact_mentions=options.named_entities)
     else:
-        intent = parse_selection(text, calls, validation_step=trace.step)
+        intent = parse_selection(text, calls, validation_step=trace.step, exact_mentions=options.named_entities)
     if options.graph_query_contract:
         queries = graph_queries_items[0]
         if any(c.name == "GRAPH" for c in calls) and not queries:
@@ -288,6 +329,8 @@ def parse_control_selection(
 
 def _normalize_model_arguments(payload, *, both, options, trace):
     arguments = deepcopy(payload)
+    if options.named_entities:
+        _normalize_names(arguments, trace)
     if options.positional_entity_refs:
         trace.step("entities", "running")
         entities = arguments["entities"]
@@ -319,6 +362,55 @@ def _normalize_model_arguments(payload, *, both, options, trace):
         arguments["coordination_hint"] = workflow_recipe_for_intent(meaning).recipe.value if both else None
         trace.step("coordination", "pass")
     return arguments
+
+
+def _normalize_names(arguments, trace):
+    """Validate the new wire before generating any server-owned reference."""
+    trace.step("entities", "running")
+    entities = arguments["entities"]
+    if type(entities) is not list or len(entities) > 4:
+        name_failure("entities", reason="list_bound_invalid")
+        raise RetrievalContractError("retrieval_router_entities_invalid")
+    names = {}
+    for index, entity in enumerate(entities, 1):
+        if type(entity) is not dict or set(entity) != {"mention", "role"}:
+            name_failure("entities", reason="entry_keys_invalid", index=index - 1)
+            raise RetrievalContractError("retrieval_router_entity_keys_invalid")
+        name = _exact_person_name(entity["mention"], index=index - 1)
+        if name in names:
+            name_failure("entities.mention", reason="duplicate_name", index=index - 1)
+            raise RetrievalContractError("retrieval_router_entities_invalid")
+        if type(entity["role"]) is not str or entity["role"] not in PERSON_ROLES:
+            name_failure("entities.role", reason="closed_enum_mismatch", index=index - 1)
+            raise RetrievalContractError("retrieval_router_entity_role_unknown")
+        names[name] = f"entity-{index}"
+        entity.update(mention=name, ref=names[name])
+    trace.step("entities", "pass")
+    trace.step("relationship", "running")
+    relation = arguments["relationship"]
+    if relation is not None:
+        if type(relation) is not dict or set(relation) != {"perspective", "from_name", "to_name", "dimension", "requested_polarity"}:
+            name_failure("relationship", reason="entry_keys_invalid")
+            raise RetrievalContractError("retrieval_router_relationship_keys_invalid")
+        endpoints = []
+        for key in ("from_name", "to_name"):
+            name = _exact_person_name(relation[key], field_path="relationship." + key)
+            if name not in names:
+                name_failure("relationship." + key, reason="undeclared_name")
+                raise RetrievalContractError("retrieval_intent_relationship_unbound")
+            endpoints.append(name)
+        relation.pop("from_name")
+        relation.pop("to_name")
+        relation.update({"from": names[endpoints[0]], "to": names[endpoints[1]]})
+    # Remaining perspective/dimension/self/direction checks belong to the existing parser.
+
+
+def _exact_person_name(value, *, field_path="entities.mention", index=None):
+    if (type(value) is not str or not value.strip() or len(value) > 160
+        or any(unicodedata.category(c) in {"Cc", "Cs", "Zl", "Zp"} for c in value)):
+        name_failure(field_path, reason="name_bound_or_type_invalid", index=index)
+        raise RetrievalContractError("retrieval_router_relationship_invalid" if field_path.startswith("relationship") else "retrieval_router_entity_mention_invalid")
+    return value.strip()
 
 
 def effective_calls(request_id: str, intent, proposed: tuple[SelectionToolCall, ...]):

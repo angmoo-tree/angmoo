@@ -59,6 +59,10 @@ from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.worlds.service.character_entry import get_character_entry_world
 from app.domains.world_characters.contracts.configuration import configuration_from_request
 from app.domains.world_characters.service.configuration import configuration_for_actor
+from app.domains.chat.contracts.supervisor_selection import (
+    NAME_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, read_selection_protocol,
+)
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
 RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
@@ -223,11 +227,16 @@ class GenerationService:
         if later_user_message is not None:
             raise MessageValidationError("latest_retryable_response_required")
         prior_metadata = json.loads(prior.node_state_json)
+        prior_protocol = read_selection_protocol(prior_metadata)
         self._validate_request_names(db, user, thread, SqlAlchemyResponseLifecycleRepository(db).get_request(prior.request_id))
         # Retry the admitted input, including historical namespaces. Current
         # World edits must not replace a saved name or introduce a new snapshot.
-        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1")
+        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy")
             if key in prior_metadata}
+        if settings.CHAT_RECALL_MODE == "social_hybrid" and "chat_identity_context.v1" in prior_metadata:
+            retry_metadata[SELECTION_PROTOCOL_KEY] = NAME_SELECTION_PROTOCOL
+        elif prior_protocol is not None:
+            retry_metadata[SELECTION_PROTOCOL_KEY] = prior_protocol
         if "_world_configuration" in prior_metadata:
             self._request_configuration(thread, prior_metadata)
             retry_metadata["_world_configuration"] = prior_metadata["_world_configuration"]
@@ -333,6 +342,8 @@ class GenerationService:
         metadata["_situation_policy"] = self.memory_policy(db, owner_id=user.id,
             world_id=thread.world_id, actor_id=thread.responding_world_character_id,
             environment=EnvironmentSnapshot.from_dict(metadata["_environment"])) if self.memory_policy else None
+        if settings.CHAT_RECALL_MODE == "social_hybrid":
+            metadata[SELECTION_PROTOCOL_KEY] = NAME_SELECTION_PROTOCOL
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -545,6 +556,17 @@ class GenerationService:
         try:
             self._validate_request_names(db, user, thread, record)
             configuration = self._request_configuration(thread, record.node_state)
+            protocol = read_selection_protocol(record.node_state)
+            if protocol is not None and runtime_settings.CHAT_RECALL_MODE != "social_hybrid":
+                raise RetrievalContractError("selection_protocol_mode_mismatch")
+            if protocol == NAME_SELECTION_PROTOCOL and "chat_identity_context.v1" not in record.node_state:
+                raise RetrievalContractError("selection_protocol_identity_required")
+        except RetrievalContractError:
+            async for event in self._fail_before_workflow(db, record,
+                failure_class="selection_protocol_invalid", retryable=False,
+                reason=ResponseTerminalReason.CONTRACT_INVALID):
+                yield event
+            return
         except (MessageValidationError, NameBindingError):
             async for event in self._fail_before_workflow(db, record,
                 failure_class="world_configuration_snapshot_invalid", retryable=False,

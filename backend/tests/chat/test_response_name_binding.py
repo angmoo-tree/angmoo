@@ -17,9 +17,11 @@ from tests.chat.test_p8_l_p_evidence_response_streaming import response_session,
 
 @pytest.fixture(autouse=True)
 def legacy_memory_hook(monkeypatch):
-    # These assertions exercise the historical producer port, not situation admission.
+    # These assertions exercise the historical producer and legacy Router ports.
+    # New name-based admission is tested with the production composition separately.
     from app.config import settings
     monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "legacy")
+    monkeypatch.setattr(settings, "CHAT_RECALL_MODE", "legacy_checkpoint")
 
 
 @pytest.mark.parametrize("invalid", [False, True])

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from hashlib import sha256
 from app.domains.relationships.policies.interpretation_prompt import METRIC_INSTRUCTIONS, with_metric_schema
 
@@ -30,12 +31,14 @@ CHARACTER_RESPONSE_TIMEOUT_SECONDS = 45.0
 class DirectLlmCharacterResponseGenerator:
     """Write one answer from a frozen bundle without any retrieval authority."""
 
-    def __init__(self, material: CredentialMaterial, *, thought_enabled: bool = False, relationship_enabled: bool = False) -> None:
+    def __init__(self, material: CredentialMaterial, *, thought_enabled: bool = False, relationship_enabled: bool = False,
+                 before_named_provider: Callable[[], None] | None = None) -> None:
         if material.purpose is not CredentialPurpose.MESSAGE_LLM:
             raise ValueError("character_response_message_credential_required")
         self._material = material
         self._thought_enabled = thought_enabled
         self._relationship_enabled = relationship_enabled
+        self._before_named_provider = before_named_provider
 
     async def generate(
         self,
@@ -77,6 +80,12 @@ class DirectLlmCharacterResponseGenerator:
                 sources=tuple(replace(source, delivery_payload_digest=prompt_digest)
                     if source.delivery_payload_digest is not None else source for source in manifest.sources))
         metric_prompt = (METRIC_INSTRUCTIONS + "\nCurrent Chat counterpart target_ref=counterpart_1; current user message new_evidence_refs=[current_message]. recent_context is context, not a new event.") if self._relationship_enabled else ""
+        from app.domains.chat.contracts.recall_interpretation import NAMED_ADMISSION_REVISION
+        if (request.recall_interpretation is not None and request.recall_interpretation.revision == NAMED_ADMISSION_REVISION
+            and self._before_named_provider is not None):
+            # Final source capture may read SQLite. The runtime's existing UoW
+            # closes those reads after capture, before the actual network await.
+            self._before_named_provider()
         try:
             result = await direct_llm.generate_text(
                 api_key=self._material.reveal(),
@@ -229,6 +238,14 @@ def _system_prompt(request: CharacterResponseGeneratorRequest) -> str:
             "If evidence is missing or an axis failed, say that you cannot clearly recall; do not infer that you never did it or suggest the user confused you with someone else solely from that miss. "
             "A specific record that an event was cancelled or an action was not done supports that negative statement; missing records do not."
         )
+        from app.domains.chat.contracts.recall_interpretation import NAMED_ADMISSION_REVISION
+        if request.recall_interpretation is not None and request.recall_interpretation.revision == NAMED_ADMISSION_REVISION:
+            from app.domains.chat.contracts.person_roles import person_role_description
+            prompt += (
+                "\nFor questions about actual relationships or past activities and experiences, connect relevant evidence in the supplied context and materials to the people and direction requested by the original question. "
+                + person_role_description()
+                + " These roles are proposed interpretations: compare them with the original question, context and evidence, not verified facts or permissions. Use requested_direction for proposed relationship direction, not roles alone."
+            )
     return prompt + ("\n" + CHAT_PARTICIPANT_INSTRUCTIONS + "\nWrite the next reply from the responding character's perspective. Write only the reply body in the text field. Do not add a speaker-name prefix or simulate the user's next message." if request.chat_identity is not None else "")
 
 

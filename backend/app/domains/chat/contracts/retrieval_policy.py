@@ -87,6 +87,18 @@ class RetrievalEntityCandidate:
 class RetrievalEntityResolution:
     ref: str
     candidates: tuple[RetrievalEntityCandidate, ...]
+    complete: bool = True
+    named: bool = False
+
+    @property
+    def status(self):
+        if not self.complete:
+            return "unavailable"
+        if not self.candidates:
+            return "unmatched"
+        if any(not c.safe_for_clarification for c in self.candidates):
+            return "unavailable"
+        return "resolved" if len(self.candidates) == 1 else "multiple"
 
 
 class RetrievalPolicyResolverPort(Protocol):
@@ -97,6 +109,8 @@ class RetrievalPolicyResolverPort(Protocol):
         scope: CanonicalRetrievalScope,
         mentions: tuple[tuple[str, str], ...],
     ) -> tuple[RetrievalEntityResolution, ...]: ...
+
+    def resolve_named_entity_mentions(self, scope, mentions, *, chat_identity) -> tuple[RetrievalEntityResolution, ...]: ...
 
 
 __all__ = [

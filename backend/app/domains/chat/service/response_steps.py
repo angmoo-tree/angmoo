@@ -175,6 +175,8 @@ class ResponseWorkflowSteps:
     async def route_and_resolve(self, state: ResponseGraphState) -> ResponseGraphState:
         command = self.command
         record = self.progress.record
+        from app.domains.chat.contracts.supervisor_selection import read_selection_protocol
+        protocol = read_selection_protocol(record.node_state)
         identity_state = {}
         if command.chat_identity is not None:
             from app.domains.chat.contracts.chat_identity_context import IDENTITY_KEY
@@ -193,6 +195,7 @@ class ResponseWorkflowSteps:
             recent_context=command.router_context,
             **({"social_snapshot": command.social_snapshot} if command.social_snapshot is not None else {}),
             **({"chat_identity": command.chat_identity} if command.chat_identity is not None else {}),
+            **({"selection_protocol": protocol} if protocol is not None else {}),
             today_sns_context=(
                 None
                 if command.today_sns_snapshot is None

@@ -188,6 +188,8 @@ def build(
     canonical = ToolPlanningService("CANONICAL", canonical)
     graph = ToolPlanningService("GRAPH", graph)
     character_labels = {}
+    unit_of_work = SupervisorResponseWorkflowUnitOfWork(db,
+        relationship_world_id=world_id if relationship_enabled else None)
     workflow = ResponseGenerationWorkflowService(
         graph_executor=LangGraphResponseExecutor(),
         lifecycle=lifecycle,
@@ -202,6 +204,7 @@ def build(
             ),
             policy=SqlAlchemyRetrievalPolicyResolver(db),
             recall_mode=recall_mode,
+            before_named_provider=unit_of_work.checkpoint,
         ),
         canonical=canonical,
         graph=graph,
@@ -209,10 +212,11 @@ def build(
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
             DirectLlmCharacterResponseGenerator(
-                material, **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
+                material, before_named_provider=unit_of_work.checkpoint,
+                **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
             )
         ),
-        unit_of_work=SupervisorResponseWorkflowUnitOfWork(db, relationship_world_id=world_id if relationship_enabled else None),
+        unit_of_work=unit_of_work,
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
         situation_memory=ChatSituationMemory(db),
         recall_mode=recall_mode,

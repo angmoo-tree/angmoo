@@ -22,7 +22,7 @@ _TEXT_FIELDS = frozenset({"status", "check", "validation_code", "normalized_code
     "dimension_state", "polarity_state", "from_ref", "to_ref", "from_resolution", "to_resolution",
     "dimension", "polarity", "perspective", "aggregation_kind", "aggregation_target",
     "intent", "time_scope_state", "coordination_state", "execution_state", "ranking",
-    "expected_values_supplied", "changed_fields", "shape_check", "from_is_subject", "to_is_subject", "wire_stage", "entities_stage", "relationship_stage", "meaning_stage", "coordination_stage", "agreement_stage"})
+    "expected_values_supplied", "changed_fields", "shape_check", "schema_protocol", "from_is_subject", "to_is_subject", "wire_stage", "entities_stage", "relationship_stage", "meaning_stage", "coordination_stage", "agreement_stage"})
 _NUMBER_FIELDS = frozenset({"step", "call", "tool_count", "response_chars", "entity_count", "extra_keys",
     "missing_keys", "max_output_tokens", "timeout_seconds", "input_tokens", "output_tokens", "thought_tokens",
     "total_tokens", "physical_attempts", "logical_calls", "limit", "max_hops", "depth", "plan_steps",

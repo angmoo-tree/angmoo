@@ -5,8 +5,9 @@ from app.domains.chat.contracts.retrieval_router import (
     ROUTER_RELATIONSHIP_DIMENSIONS, ROUTER_RELATIONSHIP_POLARITIES,
     ROUTER_AGGREGATION_TARGETS,
 )
+from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL
 
-_FIELDS = {"intent", "entities", "relationship", "time_scope", "aggregation", "coordination_hint", "clarification_slot", "graph_queries"}
+_FIELDS = {"intent", "entities", "relationship", "time_scope", "aggregation", "coordination_hint", "clarification_slot", "graph_queries", "search_text"}
 _REL_FIELDS = {"perspective", "from", "to", "dimension", "requested_polarity"}
 _TOOLS = {"CANONICAL", "GRAPH", "USE_CONTEXT", "REQUEST_CLARIFICATION"}
 _BUILTINS = {"responding_character", "requester_character"}
@@ -53,6 +54,8 @@ def _endpoint(value, refs):
 def selection_attempt(request, response, *, error=None, physical_attempts=0,
                       model="unknown", provider="unknown", thinking_level="unknown", max_output_tokens=0, validation_trace=None):
     phase = "repair" if request.repair_diagnostic is not None else "first"
+    protocol = closed(request.selection_protocol, {NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL}, absent="legacy")
+    named = protocol == NAME_SELECTION_PROTOCOL
     code = _code(error) if error is not None else "valid"
     normalized = normalize_router_validation_code(code) if error is not None else "valid"
     calls = getattr(response, "tool_calls", ()) if response is not None else ()
@@ -74,7 +77,8 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
              "response_state": response_state, "response_observed": response is not None,
              "tool_count": len(calls), "response_chars": len(getattr(response, "text", "")),
              "physical_attempts": physical_attempts, "max_output_tokens": max_output_tokens,
-             "timeout_seconds": 30, "provider": provider, "model": model, "thinking_level": thinking_level, **metrics}
+             "timeout_seconds": 30, "provider": provider, "model": model, "thinking_level": thinking_level,
+             "schema_protocol": protocol, **metrics}
     emit("selection_attempt", axis="supervisor", phase=phase, basic=basic,
          **{k: v for k, v in basic.items() if k != "response_observed"},
          normalized_code=normalized, repair_code=(request.repair_diagnostic if normalize_router_validation_code(request.repair_diagnostic) != "router_validation_unknown" else "unknown")
@@ -102,17 +106,21 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
             row["entity_count"] = len(entities)
             for i, entity in enumerate(entities[:4], 1):
                 if type(entity) is dict:
-                    row[f"entity_{i}_ref"] = alias("ref", entity.get("ref"))
+                    if not named:
+                        row[f"entity_{i}_ref"] = alias("ref", entity.get("ref"))
                     row[f"entity_{i}_role"] = closed(entity.get("role"), ROUTER_ENTITY_ROLES)
         relation = args.get("relationship")
         if type(relation) is dict:
-            row["missing_keys"] = len(_REL_FIELDS - set(relation))
-            row["extra_keys"] += len(set(relation) - _REL_FIELDS)
-            for source, target in (("perspective", "perspective_state"), ("from", "from_state"), ("to", "to_state"),
+            from_field, to_field = ("from_name", "to_name") if named else ("from", "to")
+            relation_fields = (_REL_FIELDS - {"from", "to"}) | {from_field, to_field}
+            row["missing_keys"] = len(relation_fields - set(relation))
+            row["extra_keys"] += len(set(relation) - relation_fields)
+            for source, target in (("perspective", "perspective_state"), (from_field, "from_state"), (to_field, "to_state"),
                                    ("dimension", "dimension_state"), ("requested_polarity", "polarity_state")):
                 row[target] = shape(relation.get(source), present=source in relation)
-            row["from_ref"], row["from_resolution"] = _endpoint(relation.get("from"), refs)
-            row["to_ref"], row["to_resolution"] = _endpoint(relation.get("to"), refs)
+            if not named:
+                row["from_ref"], row["from_resolution"] = _endpoint(relation.get("from"), refs)
+                row["to_ref"], row["to_resolution"] = _endpoint(relation.get("to"), refs)
             row["perspective"] = closed(relation.get("perspective"), {"responding_character"})
             row["dimension"] = closed(relation.get("dimension"), ROUTER_RELATIONSHIP_DIMENSIONS, absent="null")
             row["polarity"] = closed(relation.get("requested_polarity"), ROUTER_RELATIONSHIP_POLARITIES, absent="null")
