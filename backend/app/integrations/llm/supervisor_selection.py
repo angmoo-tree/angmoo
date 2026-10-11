@@ -10,7 +10,7 @@ from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.contracts.supervisor_selection import (
     SelectionArgumentOptions, SelectionToolCall, SelectionValidationTrace,
     parse_selection, parse_control_selection, model_arguments_schema, control_arguments_schema,
-    NAME_SELECTION_PROTOCOL,
+    NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL,
 )
 from app.domains.chat.contracts.supervisor_prompts import SUPERVISOR_SYSTEM_PROMPT, CANONICAL_DESCRIPTION, GRAPH_DESCRIPTION, MULTILINGUAL_SELECTION_POLICY
 from app.domains.chat.policies import resolve_world_chat_model_execution_policy
@@ -84,6 +84,17 @@ def control_selection_system_prompt(options=SelectionArgumentOptions()):
                 "A mention of morning or evening alone does not imply today. Use time_scope=null unless the user or supplied context actually restricts the event to a date or period. "
                 "Set relationship to null for ordinary actions unless an actual relationship dimension is requested; preserve action direction in search_text. "
                 "Retrieve relevant memories once; the final response generator decides whether the evidence answers the question or needs clarification."
+            )
+        if options.advisory_hints:
+            prompt = prompt.replace(
+                "Entity refs use lowercase letters, digits and hyphens; responding_character and requester_character are built-in endpoints. ",
+                "Optionally list interpreted person names and roles in entities as advisory data; omit it when unhelpful. Do not write refs or relationship pairs. ",
+            ).replace(
+                "Entity-list refs must be fresh aliases such as entity-1, entity-2; never use responding_character or requester_character as an entity-list ref. ",
+                "Choose a person role from the shared role meanings according to the question's focus. Regardless of language, use the supplied chat_participants.user.name exactly for the current user's mention, without translation or transliteration. ",
+            ).replace(
+                "Set relationship to null for ordinary actions unless an actual relationship dimension is requested; preserve action direction in search_text. ",
+                "Person hints are not facts, permissions or search filters. Preserve action and relationship direction in search_text. ",
             )
         return prompt + MULTILINGUAL_SELECTION_POLICY
     core = SUPERVISOR_SYSTEM_PROMPT.replace("CURRENT_CONTEXT control outcome", "USE_CONTEXT function").replace("CLARIFICATION control outcome", "REQUEST_CLARIFICATION function")
@@ -211,7 +222,8 @@ class DirectLlmSupervisorSelectionProvider:
         if request.selection_protocol is not None:
             if not self._native_controls or not options.hybrid_recall:
                 raise RetrievalContractError("selection_protocol_mode_mismatch")
-            options = replace(options, named_entities=request.selection_protocol == NAME_SELECTION_PROTOCOL)
+            options = replace(options, named_entities=request.selection_protocol == NAME_SELECTION_PROTOCOL,
+                advisory_hints=request.selection_protocol == ADVISORY_SELECTION_PROTOCOL)
         policy = resolve_world_chat_model_execution_policy(material.model, material.thinking_level)
         tracker = direct_llm.RunLlmTracker(max_calls=2)
         context = direct_llm.DirectLlmCallContext(

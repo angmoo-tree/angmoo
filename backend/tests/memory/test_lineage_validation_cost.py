@@ -58,12 +58,17 @@ def test_shared_prior_dag_validates_each_item_once_and_keeps_every_source_check(
         assert sum(calls.values()) <= len(nodes), "shared lineage was repeatedly expanded"
         return original(**values)
     monkeypatch.setattr(reader, "read_evidence", read)
-    assert currently_accessible(db, reader, scope, nodes[-1], NOW)
-    # One root plus both nodes of each preceding level: no source was skipped.
-    assert calls[post.id] == len(nodes) - 1
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    validation = MemoryAccessValidation(db, NOW)
+    assert currently_accessible(db, reader, scope, nodes[-1], NOW, validation=validation)
+    # Every reachable node applies its own restriction to the same fresh fact.
+    # Source rows are read once in this operation, not once per path or node.
+    assert len(validation.completed) == len(nodes) - 1
+    assert validation.memo_hits > 0
+    assert calls[post.id] == 1
 
 
-@pytest.mark.parametrize("change", ["source-body", "source-hidden", "subject-inactive", "prior-version", "prior-deleted", "cycle"])
+@pytest.mark.parametrize("change", ["source-body", "source-hidden", "subject-inactive", "prior-version", "prior-deleted", "prior-source-digest", "cycle"])
 def test_same_session_and_reader_recheck_changes_after_success(stack, change):
     db, scope, post, nodes, reader = lineage(stack, levels=4)
     assert currently_accessible(db, reader, scope, nodes[-1], NOW)
@@ -78,6 +83,11 @@ def test_same_session_and_reader_recheck_changes_after_success(stack, change):
         nodes[0].version += 1
     elif change == "prior-deleted":
         nodes[0].status, nodes[0].deleted_at = "deleted", NOW
+    elif change == "prior-source-digest":
+        restriction = db.get(MemoryEpisodeRestriction, nodes[0].id)
+        sources = json.loads(restriction.sources_json)
+        sources[0]["digest"] = "0" * 64
+        restriction.sources_json = json.dumps(sources)
     else:
         db.get(MemoryEpisodeRestriction, nodes[0].id).priors_json = json.dumps([
             {"id": nodes[-1].id, "version": nodes[-1].version}])

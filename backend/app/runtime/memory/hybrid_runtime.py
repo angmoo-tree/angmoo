@@ -26,6 +26,8 @@ class UnavailableVectorAxis:
 class MemoryHybridRuntime:
     def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1", episode_only=False):
         self._factory = session_factory
+        from app.runtime.memory.canonical_worker import DeadlineSessionFactory, CanonicalReadWorker
+        canonical_sessions = DeadlineSessionFactory(session_factory)
         self._episode_only = episode_only
         self.projection = None
         self.vector_axis = UnavailableVectorAxis()
@@ -34,11 +36,13 @@ class MemoryHybridRuntime:
         if episode_only:
             from app.domains.memory.repository.episode_hybrid_recall import SqlAlchemyEpisodeHybridReader
             from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
-            reader = SqlAlchemyEpisodeHybridReader(session_factory, detail_reader_factory=RuntimeEpisodeDetailReader)
+            reader = SqlAlchemyEpisodeHybridReader(canonical_sessions, detail_reader_factory=RuntimeEpisodeDetailReader,
+                access_observer=canonical_sessions.record_access)
         else:
-            reader = SqlAlchemyHybridCanonicalReader(session_factory, source_reader_factory=source_evidence_reader,
-                canonical=canonical_recall_repository(session_factory))
-        self.service = HybridRecallService(fts=self.fts, vector=self, canonical=reader)
+            reader = SqlAlchemyHybridCanonicalReader(canonical_sessions, source_reader_factory=source_evidence_reader,
+                canonical=canonical_recall_repository(canonical_sessions))
+        self.canonical_worker = CanonicalReadWorker(canonical_sessions, reader)
+        self.service = HybridRecallService(fts=self.fts, vector=self, canonical=self.canonical_worker)
         self._generations = VectorGenerations(data_paths.search / "memory-vectors", bundled_vector_index)
 
     async def search(self, request, *, deadline):
@@ -75,6 +79,7 @@ class MemoryHybridRuntime:
         self.status = "ready"
 
     async def stop(self):
+        await self.canonical_worker.stop()
         if self.projection is not None:
             await self.projection.stop()
         self.vector_axis = UnavailableVectorAxis()

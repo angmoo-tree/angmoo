@@ -25,17 +25,18 @@ class RestoredSituationAdmission:
         return self.result["planned_output_digest"] != self.result["final_output_digest"]
 
 
-def restore_admission(session, receipt, *, revision=VALIDATION_REVISION):
+def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validation=None):
+    get = (lambda model, key: session.get(model, key, populate_existing=True)) if validation is None else validation.get
     if revision not in SUPPORTED_VALIDATION_REVISIONS:
         raise ValueError("situation_validation_revision_unsupported")
     if receipt.state == "discarded" or receipt.manifest_id is None:
         raise ValueError("situation_discarded")
-    stored = session.get(MemorySituationManifest, receipt.manifest_id, populate_existing=True)
+    stored = get(MemorySituationManifest, receipt.manifest_id)
     if stored is None or stable_digest(stored.payload) != stored.content_digest or stored.id != stored.content_digest:
         raise ValueError("situation_manifest_integrity_invalid")
     manifest = DeliveredInputManifest.from_dict(stored.payload)
     snapshot = manifest.snapshot
-    setting = session.get(MemoryScopeSettingModel, receipt.scope_setting_id, populate_existing=True)
+    setting = get(MemoryScopeSettingModel, receipt.scope_setting_id)
     if setting is None or (setting.owner_id, setting.world_id, setting.subject_world_character_id) != (
         snapshot.scope.owner_id, snapshot.scope.world_id, snapshot.scope.subject_world_character_id):
         raise ValueError("situation_receipt_scope_mismatch")
@@ -78,18 +79,18 @@ def restore_admission(session, receipt, *, revision=VALIDATION_REVISION):
     return RestoredSituationAdmission(receipt, manifest, stored.content_digest, result, sources)
 
 
-def complete_context(session, admission, *, revision=VALIDATION_REVISION):
+def complete_context(session, admission, *, revision=VALIDATION_REVISION, validation=None):
     if admission.requires_result_binding:
         from app.domains.memory.repository.situation_result_bindings import stored_binding
-        if stored_binding(session, admission, revision=revision) is None:
+        if stored_binding(session, admission, revision=revision, validation=validation) is None:
             raise ValueError("situation_success_binding_invalid")
     receipt = admission.receipt
     context = SituationValidationContext(admission.manifest, receipt.sequence,
         admission.manifest_digest, admission.result_sources, receipt.target_key,
         receipt.logical_activity_id, receipt.lane, revision=revision)
     from app.domains.memory.repository.situation_source_bindings import restore_bindings
-    return restore_bindings(session, context)
+    return restore_bindings(session, context, validation=validation)
 
 
-def restore_context(session, receipt, *, revision=VALIDATION_REVISION):
-    return complete_context(session, restore_admission(session, receipt, revision=revision), revision=revision)
+def restore_context(session, receipt, *, revision=VALIDATION_REVISION, validation=None):
+    return complete_context(session, restore_admission(session, receipt, revision=revision, validation=validation), revision=revision, validation=validation)

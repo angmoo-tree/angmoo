@@ -8,27 +8,52 @@ from app.domains.memory.models.activity_situation import MemoryActivitySituation
 from app.domains.memory.repository.situation_reads import read_manifest, situation_accessible
 
 
-def read_situation_packet(session, reader, scope, item, info, now):
-    material = read_manifest(session, info)
+def exact_source_entries(session, info, manifest, rows, *, validation=None):
+    """No other item, ordinal, source, digest or range can supply this proof."""
+    from app.domains.memory.models.items import MemoryItemEvidence
+    expected = {entry.ordinal: entry for entry in (*manifest.sources, *manifest.result_sources)}
+    entries = []
+    for row in rows:
+        entry = DeliveredSourceEntry.from_dict(row.source)
+        if (row.memory_item_id != info.memory_item_id or row.ordinal != entry.ordinal
+                or expected.get(entry.ordinal) != entry):
+            raise ValueError("situation_detail_source_binding_invalid")
+        if row.evidence_id is not None:
+            evidence = session.get(MemoryItemEvidence, row.evidence_id) if validation is None else validation.get(MemoryItemEvidence, row.evidence_id)
+            if (evidence is None or evidence.memory_item_id != info.memory_item_id
+                or (evidence.source_type, evidence.source_id, evidence.source_digest) !=
+                   (entry.source_type, entry.source_id, entry.source_digest)):
+                raise ValueError("situation_detail_evidence_binding_invalid")
+        entries.append(entry)
+    return entries
+
+
+def read_situation_packet(session, reader, scope, item, info, now, *, validation=None):
+    material = read_manifest(session, info, validation=validation)
     if material is None:
         return None
     manifest, _ = material
-    if not situation_accessible(session, reader, scope, item, info, now, ancestors=frozenset()):
+    if not situation_accessible(session, reader, scope, item, info, now, ancestors=frozenset(), validation=validation):
         # An owner can inspect the stored summary, but inspection never bypasses
         # any background input's current access boundary to disclose originals.
         return EpisodePacket(item.id, item.summary, "activity_situation_v1", ())
-    rows = list(session.scalars(select(MemoryActivitySituationSource).where(
+    rows = (list(validation.collections[("situation_sources", info.memory_item_id)])
+        if validation is not None and ("situation_sources", info.memory_item_id) in validation.collections
+        else list(session.scalars(select(MemoryActivitySituationSource).where(
         MemoryActivitySituationSource.memory_item_id == info.memory_item_id).order_by(
-            MemoryActivitySituationSource.ordinal).limit(101)))
+            MemoryActivitySituationSource.ordinal).limit(101))))
+    rows.sort(key=lambda row: row.ordinal)
     truncated = len(rows) > 100
-    entries = [DeliveredSourceEntry.from_dict(row.source)
-        for row in rows[:100]]
-    access = {entry.ordinal: reader.validate_situation_source(manifest, entry, now=now) for entry in entries}
+    try:
+        entries = exact_source_entries(session, info, manifest, rows[:100], validation=validation)
+    except (ValueError, TypeError, KeyError):
+        return EpisodePacket(item.id, item.summary, "activity_situation_v1", ())
+    access = {entry.ordinal: reader.validate_situation_source(manifest, entry, now=now, validation=validation) for entry in entries}
     identities = tuple(dict.fromkeys((entry.source_type, entry.source_id) for entry in entries
         if access[entry.ordinal].state == "available" and access[entry.ordinal].evidence is not None))
     source_reader = getattr(reader, "read_situation_sources", None)
     originals = (reader.read_sources(scope=scope, identities=identities) if source_reader is None else
-        source_reader(scope=scope, identities=identities, context=manifest, entries=tuple(entries), now=now))
+        source_reader(scope=scope, identities=identities, context=manifest, entries=tuple(entries), now=now, validation=validation))
     sources = []
     for entry in entries:
         status = access[entry.ordinal].state

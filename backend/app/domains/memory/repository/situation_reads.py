@@ -2,25 +2,43 @@
 from sqlalchemy import select
 
 from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, DeliveredSourceEntry, SITUATION_POLICY
-from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemorySituationReceipt, MemorySituationManifest
+from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemoryActivitySituationSource, MemorySituationReceipt, MemorySituationManifest
 from app.domains.memory.models.items import MemoryItem
 from app.domains.memory.repository.situation_validation import restore_context
 
 
-def situation_origin(session, item):
+def situation_origin(session, item, *, validation=None):
+    if validation is not None and item.id in validation.origins:
+        return validation.origins[item.id]
+    get = session.get if validation is None else validation.get
     visited = set()
     row = item
-    for _ in range(32):
+    while row is not None:
         if row.id in visited:
-            return None
+            raise ValueError("situation_correction_lineage_invalid")
         visited.add(row.id)
-        info = session.get(MemoryActivitySituationInfo, row.id)
+        info = get(MemoryActivitySituationInfo, row.id)
         if info is not None:
+            if validation is not None:
+                validation.origins[item.id] = info
             return info
-        row = session.scalar(select(MemoryItem).where(MemoryItem.superseded_by_id == row.id,
-            MemoryItem.owner_id == item.owner_id, MemoryItem.world_id == item.world_id,
-            MemoryItem.subject_world_character_id == item.subject_world_character_id))
+        sources = validation.collections.get(("situation_sources", row.id)) if validation is not None else None
+        if sources is None:
+            sources = tuple(session.scalars(select(MemoryActivitySituationSource).where(
+                MemoryActivitySituationSource.memory_item_id == row.id).limit(1)))
+        if sources:
+            # A lost origin cannot turn remaining situation proof into legacy access.
+            raise ValueError("situation_correction_lineage_invalid")
+        parents = (validation.collections.get(("correction_parents", row.id)) if validation is not None else None)
+        if parents is None:
+            parents = tuple(session.scalars(select(MemoryItem).where(MemoryItem.superseded_by_id == row.id)))
+        parents = tuple(parent for parent in parents if (parent.owner_id, parent.world_id, parent.subject_world_character_id) == (item.owner_id, item.world_id, item.subject_world_character_id))
+        if len(parents) > 1:
+            raise ValueError("situation_correction_lineage_invalid")
+        row = parents[0] if parents else None
         if row is None:
+            if validation is not None:
+                validation.origins[item.id] = None
             return None
     return None
 
@@ -59,22 +77,31 @@ def copy_correction_origin(session, old, replacement):
             ordinal=row.ordinal, evidence_id=None, source=dict(row.source), state=row.state))
 
 
-def representation(session, item):
-    if situation_origin(session, item) is not None:
+def representation(session, item, *, validation=None):
+    if situation_origin(session, item, validation=validation) is not None:
         return "activity_situation_v1"
     from app.domains.memory.models.episode import MemoryEpisodeInfo
-    return "episode_v1" if session.get(MemoryEpisodeInfo, item.id) is not None else "legacy_summary"
+    return "episode_v1" if (session.get(MemoryEpisodeInfo, item.id) if validation is None else validation.get(MemoryEpisodeInfo, item.id)) is not None else "legacy_summary"
 
 
-def read_manifest(session, info):
-    receipt = session.get(MemorySituationReceipt, info.receipt_sequence)
+def read_manifest(session, info, *, validation=None):
+    if validation is not None and info.receipt_sequence in validation.restored:
+        return validation.restored[info.receipt_sequence]
+    receipt = session.get(MemorySituationReceipt, info.receipt_sequence) if validation is None else validation.get(MemorySituationReceipt, info.receipt_sequence)
     if receipt is None or receipt.state != "applied" or receipt.policy_version != SITUATION_POLICY:
+        if validation is not None:
+            validation.restored[info.receipt_sequence] = None
         return None
     try:
-        context = restore_context(session, receipt)
+        context = restore_context(session, receipt, validation=validation)
     except (ValueError, TypeError, KeyError):
+        if validation is not None:
+            validation.restored[info.receipt_sequence] = None
         return None
-    return context, context.result_sources
+    material = context, context.result_sources
+    if validation is not None:
+        validation.restored[info.receipt_sequence] = material
+    return material
 
 
 def situation_accessible(session, reader, scope, item, info, now, *, ancestors, validation=None):
@@ -87,7 +114,7 @@ def situation_accessible(session, reader, scope, item, info, now, *, ancestors, 
     validation = validation if validation is not None else MemoryAccessValidation(session, now)
     validation.check_context(session, now)
     try:
-        material = read_manifest(session, info)
+        material = read_manifest(session, info, validation=validation)
         if material is None:
             return False
         manifest, results = material

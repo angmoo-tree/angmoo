@@ -36,7 +36,9 @@ def memory_detail(
     *,
     item_id: str,
 ) -> MemoryItemDetail:
-    return MemoryReadService(SqlAlchemyMemoryRepository(db), source_reader).detail(
+    from app.runtime.memory.situation_detail import situation_detail
+    return MemoryReadService(SqlAlchemyMemoryRepository(db), source_reader,
+        situation_detail_reader=lambda scope, item_id, now: situation_detail(db, scope, item_id, now)).detail(
         scope, item_id=item_id
     )
 

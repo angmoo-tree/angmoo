@@ -474,7 +474,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
               id="world-owner-post-body"
               maxLength={4000}
               onChange={(event) => setBody(event.target.value)}
-              placeholder={uiText("내가 조종하는 앵무의 말로 이야기를 적어보세요")}
+              placeholder={uiText("본문을 적어주세요")}
               required
               readOnly={busy}
               rows={3}

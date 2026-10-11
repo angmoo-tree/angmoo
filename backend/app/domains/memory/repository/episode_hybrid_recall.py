@@ -26,9 +26,10 @@ def _aware(value):
 
 
 class SqlAlchemyEpisodeHybridReader:
-    def __init__(self, session_factory, *, detail_reader_factory, clock=None):
+    def __init__(self, session_factory, *, detail_reader_factory, clock=None, access_observer=None):
         self.factory, self.details = session_factory, detail_reader_factory
         self.clock = clock or (lambda: datetime.now(UTC))
+        self.access_observer = access_observer
 
     def revalidate(self, request, candidates):
         if len(candidates) > 50:
@@ -58,6 +59,22 @@ class SqlAlchemyEpisodeHybridReader:
                     MemoryActivitySituationSource.memory_item_id.in_(rows))):
                     if source.source.get("source_type") in types:
                         matching.add(source.memory_item_id)
+            from app.domains.memory.repository.access_batch import prepare_access
+            eligible = tuple(item for item in rows.values() if _item_retrievable(item, now) and any(
+                ranked.candidate.memory_item_id == item.id
+                and ranked.candidate.kind is RecallDocumentKind.MEMORY_ITEM
+                and RecallDocumentKind.MEMORY_ITEM in request.kinds
+                and ranked.candidate.document_id == f"memory-item:{item.id}"
+                and ranked.candidate.canonical_source_id == item.id
+                and ranked.version == item.version
+                and ranked.content_hash == sha256(item.summary.encode()).hexdigest()
+                for ranked in candidates) and (request.thread_id is None or item.thread_id == request.thread_id)
+                and (matching is None or item.id in matching)
+                and (request.counterpart_world_character_id is None
+                     or item.counterpart_world_character_id == request.counterpart_world_character_id
+                     or any(request.counterpart_world_character_id in {e.actor_world_character_id, e.target_world_character_id}
+                            for e in evidence_by_item.get(item.id, ()))))
+            validation = prepare_access(db, eligible, now, reader=self.details(db))
             result, seen = [], set()
             from app.domains.memory.repository.episode_privacy import currently_accessible
             privacy_reader = self.details(db)
@@ -65,7 +82,6 @@ class SqlAlchemyEpisodeHybridReader:
                 candidate = ranked.candidate
                 item = rows.get(candidate.memory_item_id)
                 if (item is None or not _item_retrievable(item, now) or _item_scope(item) != request.scope
-                    or not currently_accessible(db, privacy_reader, request.scope, item, now)
                     or candidate.kind is not RecallDocumentKind.MEMORY_ITEM
                     or RecallDocumentKind.MEMORY_ITEM not in request.kinds
                     or candidate.document_id != f"memory-item:{item.id}" or candidate.canonical_source_id != item.id
@@ -83,12 +99,17 @@ class SqlAlchemyEpisodeHybridReader:
                 # Episode time is its canonical experience time, never the time
                 # a later raw source happened to be hydrated for this request.
                 occurred = _aware(item.valid_from)
-                item_representation = representation(db, item)
+                try:
+                    item_representation = representation(db, item, validation=validation)
+                except ValueError:
+                    continue
                 times = [occurred] if item_representation == "activity_situation_v1" else [_aware(e.source_created_at) for e in material] or [occurred]
                 # These are observed/source times, not dates mentioned in text.
                 # A multi-day episode overlaps a query if its material interval does.
                 if (request.occurred_from is not None and max(times) < request.occurred_from
                     or request.occurred_to is not None and min(times) >= request.occurred_to):
+                    continue
+                if not currently_accessible(db, privacy_reader, request.scope, item, now, validation=validation):
                     continue
                 seen.add(item.id)
                 result.append(CanonicalRecallRecord(f"memory-item:{item.id}", RecallDocumentKind.MEMORY_ITEM,
@@ -96,6 +117,8 @@ class SqlAlchemyEpisodeHybridReader:
                     counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
                     metadata={"item_version": str(item.version), "memory_kind": item.memory_kind,
                               "representation": item_representation}))
+            if self.access_observer is not None:
+                self.access_observer(validation.metrics())
             return tuple(result)
 
     def axis_request(self, request):
@@ -118,8 +141,10 @@ class SqlAlchemyEpisodeHybridReader:
                 and snapshots[row.memory_item_id].summary == row.text)
             candidate_reader = SqlAlchemyEpisodeCandidates(db, source_reader=self.details(db))
             updates = candidate_reader.collect_followups(scope=request.scope, seed_ids=ids, now=now)
+            from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+            validation = MemoryAccessValidation(db, now)
             packets = SqlAlchemyEpisodePackets(db, detail_reader=self.details(db)).read(
-                scope=request.scope, item_ids=updates.item_ids, now=now)
+                scope=request.scope, item_ids=updates.item_ids, now=now, validation=validation)
             packets = tuple(replace(packet, followup_truncated=updates.truncated) for packet in packets)
             delivery = bounded_episode_packets(episode_provider_view(packets))
             lineage("hydrate", "count", count=len(packets))
@@ -161,4 +186,6 @@ class SqlAlchemyEpisodeHybridReader:
                 hydrated_memory_ids=updates.item_ids,
                 item_revisions=updates.item_revisions, link_probes=updates.link_probes,
                 traversal_truncated=updates.truncated, captured_at=now)
+            if self.access_observer is not None:
+                self.access_observer(validation.metrics())
             return HybridHydrationResult(tuple(output), tuple(receipts), snapshot)

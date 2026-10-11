@@ -160,19 +160,19 @@ class SituationSources:
             return SituationSourceAccess("forbidden", reason="situation_source_scope_forbidden")
         for binding in getattr(manifest, "source_bindings", ()):
             if binding.resolved_source == source:
-                child = self.session.get(Post, binding.basis_source_id, populate_existing=True)
+                child = validation.get(Post, binding.basis_source_id)
                 basis = next((entry for entry in manifest.sources if entry.ordinal == binding.basis_ordinal
                     and entry.source_id == binding.basis_source_id), None)
                 if (child is None or child.reply_to_post_id != source.source_id or basis is None
                     or self.validate(manifest, basis, now=now, ancestors=ancestors, validation=validation).state != "available"):
                     return SituationSourceAccess("changed", reason="situation_parent_binding_child_changed")
-                parent = self.session.get(Post, source.source_id, populate_existing=True)
+                parent = validation.get(Post, source.source_id)
                 if parent is None or parent.deleted_at is not None:
                     return SituationSourceAccess("changed", reason="situation_parent_binding_parent_deleted")
                 if sha256(parent.body.encode("utf-8")).hexdigest() != source.delivered_digest:
                     return SituationSourceAccess("changed", reason="situation_parent_binding_parent_changed")
         if source.thread_id:
-            thread = self.session.get(MessageThread, source.thread_id, populate_existing=True)
+            thread = validation.get(MessageThread, source.thread_id)
             if (thread is None or thread.requester_id != scope.owner_id or thread.world_id != scope.world_id
                 or thread.responding_world_character_id != scope.subject_world_character_id):
                 return SituationSourceAccess("forbidden", reason="situation_thread_forbidden")
@@ -189,8 +189,8 @@ class SituationSources:
             for identifier in participants - {scope.subject_world_character_id}):
             return SituationSourceAccess("forbidden", reason="situation_participant_forbidden")
         if source.source_type == "ROUTINE_ACTIVITY":
-            row = self.session.get(DailyActivityPlanItem, source.source_id, populate_existing=True)
-            plan = self.session.get(DailyActivityPlan, row.plan_id, populate_existing=True) if row else None
+            row = validation.get(DailyActivityPlanItem, source.source_id)
+            plan = validation.get(DailyActivityPlan, row.plan_id) if row else None
             if plan is None:
                 return SituationSourceAccess("deleted")
             if plan.world_id != scope.world_id or plan.world_character_id != scope.subject_world_character_id:
@@ -198,7 +198,7 @@ class SituationSources:
             return SituationSourceAccess("available") if routine_digest(row) == source.source_digest else SituationSourceAccess(
                 "changed", reason="situation_routine_changed")
         if source.source_type == "ACTIVITY_PROPOSAL":
-            row = self.session.get(ActivityProposal, source.source_id, populate_existing=True)
+            row = validation.get(ActivityProposal, source.source_id)
             if row is None:
                 return SituationSourceAccess("deleted")
             if row.world_id != scope.world_id:
@@ -206,8 +206,8 @@ class SituationSources:
             return SituationSourceAccess("available") if proposal_digest(row) == source.source_digest else SituationSourceAccess(
                 "changed", reason="situation_proposal_changed")
         if source.source_type == "IMAGE_INTERPRETATION":
-            row = self.session.get(ImageInterpretation, source.source_id, populate_existing=True)
-            asset = self.session.get(MediaAsset, row.asset_id, populate_existing=True) if row else None
+            row = validation.get(ImageInterpretation, source.source_id)
+            asset = validation.get(MediaAsset, row.asset_id) if row else None
             if row is None or asset is None:
                 return SituationSourceAccess("deleted")
             if row.owner_id != scope.owner_id or not asset_owned(asset, scope, source.thread_id):
@@ -215,7 +215,7 @@ class SituationSources:
             return SituationSourceAccess("available") if interpretation_digest(row) == source.source_digest and asset.revision == row.asset_revision else SituationSourceAccess(
                 "changed", reason="situation_interpretation_changed")
         if source.source_type == "RELATIONSHIP":
-            row = self.session.get(RelationshipState, source.source_id, populate_existing=True)
+            row = validation.get(RelationshipState, source.source_id)
             if (row is None or row.world_id != scope.world_id
                     or row.actor_world_character_id != scope.subject_world_character_id
                     or row.actor_world_character_id != source.actor_id or row.target_world_character_id != source.counterpart_id):
@@ -228,7 +228,7 @@ class SituationSources:
             return SituationSourceAccess("available") if relationship_digest(row) == source.source_digest else SituationSourceAccess(
                 "changed", reason="situation_legacy_relationship_basis_missing")
         if source.source_type == "IMAGE_ASSET":
-            row = self.session.get(MediaAsset, source.source_id, populate_existing=True)
+            row = validation.get(MediaAsset, source.source_id)
             if row is None:
                 return SituationSourceAccess("deleted")
             if not asset_owned(row, scope, source.thread_id):
@@ -236,8 +236,10 @@ class SituationSources:
             return SituationSourceAccess("available") if row.content_hash == source.source_digest and str(row.revision) == source.source_version else SituationSourceAccess(
                 "changed", reason="situation_image_changed")
         if source.source_type == "MEMORY_ITEM":
-            item = self.session.get(MemoryItem, source.source_id, populate_existing=True)
-            if (item is None or str(item.version) != source.source_version
+            item = validation.get(MemoryItem, source.source_id)
+            if (item is None or item.thread_id != source.thread_id
+                or (item.thread_id is not None and item.thread_id != manifest.private_thread_id)
+                or str(item.version) != source.source_version
                 or sha256(item.summary.encode()).hexdigest() != source.source_digest
                 or (item.owner_id, item.world_id, item.subject_world_character_id) != (scope.owner_id, scope.world_id, scope.subject_world_character_id)
                 or not item_retrievable(item, now)):
@@ -256,18 +258,18 @@ class SituationSources:
             validation.evidence[key] = self.reader.read_evidence(scope=scope, source_type=kind, source_id=source.source_id)
         current = validation.evidence[key]
         if source.source_type in {"POST", "REPLY"}:
-            post = self.session.get(Post, source.source_id, populate_existing=True)
+            post = validation.get(Post, source.source_id)
             if post is not None and (post.world_id != scope.world_id or post.report_hidden_at is not None or post.visibility != "public"):
                 return SituationSourceAccess("forbidden", reason="situation_post_forbidden")
             if post is None or post.deleted_at is not None:
                 return SituationSourceAccess("deleted")
         elif source.source_type == "CHAT_MESSAGE":
-            message = self.session.get(MessageMessage, int(source.source_id), populate_existing=True)
-            thread = self.session.get(MessageThread, source.thread_id, populate_existing=True)
+            message = validation.get(MessageMessage, int(source.source_id))
+            thread = validation.get(MessageThread, source.thread_id)
             if message is None or (thread is not None and thread.deleted_at is not None):
                 return SituationSourceAccess("deleted")
         elif source.source_type == "SOCIAL_EVENT":
-            event = self.session.get(SocialEvent, source.source_id, populate_existing=True)
+            event = validation.get(SocialEvent, source.source_id)
             if event is None:
                 return SituationSourceAccess("deleted")
             if event.world_id != scope.world_id:

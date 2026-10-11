@@ -9,6 +9,7 @@ from app.domains.memory.contracts.recall import MemoryRecallCandidate
 from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence
 from app.domains.memory.repository.recall import SqlAlchemyMemoryRecallDocumentSource
 from app.domains.memory.repository.recall_records import _item_scope
+from app.domains.memory.policies.retrievability import item_retrievable
 
 
 class SqlAlchemyHybridCanonicalReader:
@@ -24,21 +25,47 @@ class SqlAlchemyHybridCanonicalReader:
         with self._factory() as session:
             reader = self._reader(session)
             documents = {}
-            for item_id in dict.fromkeys(row.candidate.memory_item_id for row in candidates):
-                item = session.get(MemoryItem, item_id)
-                if item is None or _item_scope(item) != request.scope:
-                    if item is not None:
-                        scope_rejected.add(item_id)
+            from app.domains.memory.repository.access_batch import prepare_access
+            now = datetime.now(UTC)
+            rows = {item.id: item for item in session.scalars(select(MemoryItem).where(MemoryItem.id.in_(
+                [row.candidate.memory_item_id for row in candidates])))}
+            # Cheap exclusions do not erase their original diagnostic meaning.
+            # No source/proof for a foreign-scope item enters the access batch.
+            scope_rejected.update(item.id for item in rows.values() if _item_scope(item) != request.scope)
+            for ranked in candidates:
+                item = rows.get(ranked.candidate.memory_item_id)
+                if item is None or not item_retrievable(item, now):
+                    reason = "missing"
+                elif item.id in scope_rejected:
+                    reason = "scope"
+                elif item.version != ranked.version:
+                    reason = "version"
+                elif ranked.candidate.kind not in request.kinds or (request.thread_id is not None and item.thread_id != request.thread_id):
+                    reason = "filter"
+                else:
                     continue
-                evidences = list(session.scalars(select(MemoryItemEvidence).where(
-                    MemoryItemEvidence.memory_item_id == item.id).order_by(MemoryItemEvidence.id).limit(20)))
+                rejection_reasons[ranked.candidate.document_id] = reason
+            items = tuple(item for item in rows.values() if item.id not in scope_rejected and item_retrievable(item, now) and any(
+                ranked.candidate.memory_item_id == item.id and ranked.version == item.version
+                and ranked.candidate.kind in request.kinds for ranked in candidates)
+                and (request.thread_id is None or item.thread_id == request.thread_id))
+            validation = prepare_access(session, items, now, reader=reader)
+            evidence = {}
+            for row in session.scalars(select(MemoryItemEvidence).where(
+                    MemoryItemEvidence.memory_item_id.in_([item.id for item in items])).order_by(MemoryItemEvidence.id)):
+                evidence.setdefault(row.memory_item_id, []).append(row)
+            for item in items:
+                if _item_scope(item) != request.scope:
+                    scope_rejected.add(item.id)
+                    continue
                 for document in SqlAlchemyMemoryRecallDocumentSource._documents_for_item(
-                    session=session, reader=reader, item=item, evidences=evidences, now=datetime.now(UTC)):
+                    session=session, reader=reader, item=item, evidences=evidence.get(item.id, [])[:20], now=now,
+                    validation=validation):
                     documents[document.document_id] = document
             for ranked in candidates:
                 doc = documents.get(ranked.candidate.document_id)
                 if doc is None or doc.memory_item_id != ranked.candidate.memory_item_id:
-                    rejection_reasons[ranked.candidate.document_id] = "scope" if ranked.candidate.memory_item_id in scope_rejected else "missing"
+                    rejection_reasons.setdefault(ranked.candidate.document_id, "missing")
                     continue
                 if (int(doc.metadata["item_version"]) != ranked.version
                     or hashlib.sha256(doc.text.encode("utf-8")).hexdigest() != ranked.content_hash):

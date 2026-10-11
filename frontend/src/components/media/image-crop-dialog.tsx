@@ -1,13 +1,13 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { drawCroppedImage, type CropState, type CropSpec } from "@/utils/image-crop";
 
 type Labels = { title: string; close: string; zoom: string; horizontal: string; vertical: string; apply: string; cancel: string; applying: string };
-export function ImageCropDialog({ bitmap, spec, crop, onCrop, onApply, onCancel, busy, disabled = false, error, labels }: {
+export function ImageCropDialog({ bitmap, spec, crop, onCrop, onApply, onCancel, busy, disabled = false, error, labels, recoveryAction }: {
   bitmap: ImageBitmap; spec: CropSpec; crop: CropState; onCrop: (value: CropState) => void;
-  onApply: () => void; onCancel: () => void; busy: boolean; disabled?: boolean; error?: string | null; labels: Labels;
+  onApply: () => void; onCancel: () => void; busy: boolean; disabled?: boolean; error?: string | null; labels: Labels; recoveryAction?: ReactNode;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -32,6 +32,7 @@ export function ImageCropDialog({ bitmap, spec, crop, onCrop, onApply, onCancel,
     </div>
     {error ? <p role="alert" className="mt-3 text-text-danger">{error}</p> : null}
     <div className="mt-5 flex flex-wrap justify-end gap-2">
+      {recoveryAction}
       <Button type="button" variant="secondary" onClick={onCancel} disabled={busy}>{labels.cancel}</Button>
       <Button type="button" onClick={onApply} loading={busy} loadingLabel={labels.applying} disabled={disabled}>{labels.apply}</Button>
     </div>

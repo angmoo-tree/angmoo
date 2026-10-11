@@ -13,7 +13,6 @@ import {
   Save,
   Send,
   ShieldCheck,
-  Trash2,
   X,
 } from "lucide-react";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -22,6 +21,7 @@ import type { ReactNode } from "react";
 
 import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { Button } from "@/components/ui/button";
 import { ImageCropDialog } from "@/components/media/image-crop-dialog";
 import { AppIcon } from "@/components/ui/app-icon";
 import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visual";
@@ -185,6 +185,9 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
   const [notice, setNotice] = useState<string | null>(null);
   const dirty = JSON.stringify(definition) !== JSON.stringify(context ? worldToDefinition(context) : EMPTY_DEFINITION);
   const [imageDraft, setImageDraft] = useState<{ bitmap: ImageBitmap; kind: "icon" | "banner" } | null>(null);
+  const iconInput = useRef<HTMLInputElement>(null);
+  const bannerInput = useRef<HTMLInputElement>(null);
+  const [imageConflict, setImageConflict] = useState(false);
   const imageRef = useRef<typeof imageDraft>(null);
   const imageRequest = useRef<AbortController | null>(null);
   const imageEpoch = useRef(0);
@@ -332,7 +335,7 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
       if (epoch !== imageEpoch.current || !isCurrentAuthRequestScope(scope)) { bitmap.close(); return; }
       imageRef.current?.bitmap.close();
       const next = { bitmap, kind }; imageRef.current = next; setImageDraft(next);
-      setCrop(INITIAL_CROP); setCropError(null);
+      setCrop(INITIAL_CROP); setCropError(null); setImageConflict(false);
     } catch { if (epoch === imageEpoch.current) setError(uiText("이미지를 읽지 못했어요. 다른 이미지를 선택해주세요.")); }
     finally { if (epoch === imageEpoch.current) { imageBusy.current = false; setPending(null); } }
   }
@@ -350,6 +353,20 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
       if (!current()) return;
       setContext(next); imageRef.current?.bitmap.close(); imageRef.current = null; setImageDraft(null);
       setNotice(uiText("이미지를 저장했어요."));
+    } catch (reason) { if (current()) { setCropError(uiText(errorMessage(reason))); setImageConflict(reason instanceof WorldApiError && reason.status === 409); } }
+    finally { if (current()) { imageBusy.current = false; setPending(null); } }
+  }
+
+  async function refreshImageVersion() {
+    if (!context || pending || imageBusy.current) return;
+    const epoch = imageEpoch.current, scope = captureAuthRequestScope(), id = context.world.id;
+    const controller = new AbortController(); imageRequest.current = controller;
+    const current = () => epoch === imageEpoch.current && !controller.signal.aborted && isCurrentAuthRequestScope(scope);
+    imageBusy.current = true; setPending("image-refresh");
+    try {
+      const next = await getWorldCreatorContext(id, controller.signal);
+      if (!current() || next.world.id !== id) return;
+      setContext(next); setImageConflict(false); setCropError(null);
     } catch (reason) { if (current()) setCropError(uiText(errorMessage(reason))); }
     finally { if (current()) { imageBusy.current = false; setPending(null); } }
   }
@@ -487,27 +504,27 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
             ) : null}
 
             <Panel title={uiText("World 아이콘·배너 (선택)")} description={uiText("아이콘과 배너를 고르고, 기기 홈과 World 화면에 표시되는 모습을 확인해요. 나중에도 바꿀 수 있어요.")}>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className={secondaryButtonClass}>{uiText("아이콘 선택")}<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => { void selectImage(event.target.files?.[0] ?? null, "icon"); event.target.value = ""; }} /></label>
-                {context?.world.icon_media_id && <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner("icon")}>{uiText("아이콘 제거")}</button>}
-                <label className={secondaryButtonClass}>
-                  {pending === "banner" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-                  {uiText("배너 선택")}<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => { void selectImage(event.target.files?.[0] ?? null, "banner"); event.target.value = ""; }} />
-                </label>
-                {context?.world.banner_media_id ? (
-                  <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner()}>
-                    <Trash2 className="size-4" /> {uiText("배너 제거")}</button>
-                ) : null}
-                {!context ? <span className="text-xs font-bold text-[#98a2b3]">{uiText("이미지를 고르려면 먼저 초안을 저장해주세요.")}</span> : null}
-              </div>
-              <p className="text-xs text-text-muted">{uiText("이미지는 5MB 이하로 선택하고, 표시할 부분을 조절한 뒤 적용해주세요. 이름과 소개는 초안 저장으로 저장해요.")}</p>
+              <input ref={iconInput} type="file" accept="image/png,image/jpeg,image/webp" hidden aria-label={uiText("아이콘 업로드")} disabled={!context || pending !== null} onChange={(event) => { void selectImage(event.target.files?.[0] ?? null, "icon"); event.target.value = ""; }} />
+              <input ref={bannerInput} type="file" accept="image/png,image/jpeg,image/webp" hidden aria-label={uiText("배너 업로드")} disabled={!context || pending !== null} onChange={(event) => { void selectImage(event.target.files?.[0] ?? null, "banner"); event.target.value = ""; }} />
+              {!context ? <p className="text-xs text-text-muted">{uiText("이미지를 고르려면 먼저 초안을 저장해주세요.")}</p> : null}
+              <p className="text-xs text-text-muted">{uiText("이미지는 적용하면 저장돼요. 이름과 소개는 초안 저장으로 저장해요.")}</p>
               <div className="grid min-w-0 grid-cols-1 gap-6" data-world-image-previews>
                 <div><h3 className="mb-4 font-bold">{uiText("기기 홈 미리보기")}</h3>
                   <div role="list"><AppIcon label={definition.name.trim()} visual={<AppIconVisual source={worldIconUrl} name={definition.name.trim()} />} visualBackground={appIconBackground(context?.world.id)} /></div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button type="button" variant="secondary" disabled={!context || pending !== null} onClick={() => iconInput.current?.click()}>{uiText("아이콘 업로드")}</Button>
+                    {context?.world.icon_media_id && <Button type="button" variant="danger" disabled={pending !== null} onClick={() => void handleRemoveBanner("icon")}>{uiText("아이콘 제거")}</Button>}
+                  </div>
                 </div>
                 <div className="min-w-0 overflow-hidden rounded-2xl border border-border-subtle">
                   <h3 className="p-4 font-bold">{uiText("World 화면 미리보기")}</h3>
-                  <WorldBanner source={context?.world.banner_media_id ?? null} alt={context?.world.banner_alt_text || uiText("World 배너")} />
+                  <div className="relative">
+                    <WorldBanner source={context?.world.banner_media_id ?? null} alt={context?.world.banner_alt_text || uiText("World 배너")} />
+                    <div className="absolute right-3 top-3 flex flex-wrap justify-end gap-2">
+                      <Button type="button" variant="secondary" disabled={!context || pending !== null} onClick={() => bannerInput.current?.click()}><ImagePlus className="mr-2 size-4" aria-hidden="true" />{uiText("배너 업로드")}</Button>
+                      {context?.world.banner_media_id && <Button type="button" variant="danger" disabled={pending !== null} onClick={() => void handleRemoveBanner()}>{uiText("배너 제거")}</Button>}
+                    </div>
+                  </div>
                   {(definition.name.trim() || definition.genre_tags.length || definition.tone_tags.length || definition.tagline.trim()) ? <div className="space-y-3 p-4">
                     {definition.name.trim() ? <h4 className="text-xl font-bold break-words">{definition.name.trim()}</h4> : null}
                     {definition.genre_tags.length || definition.tone_tags.length ? <div className="flex flex-wrap gap-2">{[...definition.genre_tags, ...definition.tone_tags].map((tag, index) => <Badge key={`${index}:${tag}`}>{tag}</Badge>)}</div> : null}
@@ -532,7 +549,8 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
             </div>
           </aside>
         </div>
-        {imageDraft ? <ImageCropDialog bitmap={imageDraft.bitmap} spec={imageDraft.kind === "icon" ? { width: 768, height: 768 } : { width: 1024, height: 384 }} crop={crop} busy={pending === "banner"} error={cropError}
+        {imageDraft ? <ImageCropDialog bitmap={imageDraft.bitmap} spec={imageDraft.kind === "icon" ? { width: 768, height: 768 } : { width: 1024, height: 384 }} crop={crop} busy={pending === "banner" || pending === "image-refresh"} error={cropError} disabled={imageConflict}
+          recoveryAction={imageConflict ? <Button type="button" variant="secondary" disabled={pending !== null} onClick={() => void refreshImageVersion()}>{uiText("현재 이미지 상태 새로고침")}</Button> : undefined}
           labels={{ title: uiText(imageDraft.kind === "icon" ? "아이콘 자르기" : "배너 자르기"), close: uiText("닫기"), zoom: uiText("확대"), horizontal: uiText("가로 위치"), vertical: uiText("세로 위치"), cancel: uiText("취소"), apply: uiText("적용"), applying: uiText("이미지를 적용하는 중…") }}
           onCrop={setCrop} onApply={() => void applyImage()} onCancel={cancelImage} /> : null}
 
@@ -666,7 +684,7 @@ const largeTextareaClass = `${textareaClass} min-h-44`;
 const primaryButtonClass = "inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-sm font-extrabold text-white transition hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-50";
 const secondaryButtonClass = "inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#d0d5dd] bg-white px-5 text-sm font-extrabold text-[#344054] transition hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-50";
 const publishButtonClass = "inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#ff6b6b] px-5 text-sm font-extrabold text-white transition hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-50";
-const dangerButtonClass = "inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#fda29b] bg-white px-5 text-sm font-extrabold text-[#b42318] transition hover:bg-[#fff5f5] disabled:opacity-50";
+
 const smallButtonClass = "inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-[#d0d5dd] bg-white px-4 text-xs font-extrabold text-[#344054] transition hover:bg-[#f9fafb]";
 const detailsClass = "rounded-[20px] border border-[#e1e5eb] bg-[#fbfcfd] p-4 open:bg-[#f8fafc]";
 const summaryClass = "cursor-pointer list-none text-sm font-extrabold text-[#344054] marker:hidden";

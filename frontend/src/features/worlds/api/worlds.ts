@@ -138,8 +138,8 @@ export function createWorld(data: WorldDraftCreate) {
   });
 }
 
-export function getWorldCreatorContext(worldId: string) {
-  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"));
+export function getWorldCreatorContext(worldId: string, signal?: AbortSignal) {
+  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"), { signal });
 }
 
 export async function getWorld(worldId: string, options: { signal?: AbortSignal } = {}) {

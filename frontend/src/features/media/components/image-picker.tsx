@@ -81,7 +81,6 @@ function ScopedImagePicker({ scopeKind, scopeId, value, onChange, disabled = fal
     {value ? <Button type="button" variant="ghost" disabled={disabled} onClick={() => { controller.current?.abort(); selected.current = null; void discardDraft(value.id).catch(() => undefined); onChange(null); setError(null); }}>{uiText("사진 제거")}</Button> : null}
   </>;
   const feedback = <>
-    {preparationPolicy === "user-photo" ? <p className="text-xs text-text-muted">{uiText("원본은 20MB까지 선택할 수 있어요. 필요하면 첨부용 사본을 조절하며 원본은 그대로 유지돼요.")}</p> : null}
     {busy ? <><p role="status">{uiText(preparing ? "첨부할 사진을 준비하는 중…" : "사진을 업로드하고 확인하는 중…")}</p><Button type="button" variant="ghost" onClick={() => controller.current?.abort()}>{uiText("사진 준비 취소")}</Button></> : null}
     {error ? <InlineError>{error}{requireRecognition ? <a href="/settings">{uiText("이미지 인식 설정 열기")}</a> : null}</InlineError> : null}
   </>;

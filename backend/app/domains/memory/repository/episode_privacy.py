@@ -20,6 +20,7 @@ def currently_accessible(session, reader, scope, item, now, *, ancestors=frozens
     validation.check_context(session, now)
     key = (scope, item.id, item.version)
     if key in validation.completed:
+        validation.memo_hits += 1
         return validation.completed[key]
     allowed = _currently_accessible(session, reader, scope, item, now,
         ancestors=ancestors, validation=validation)
@@ -29,18 +30,21 @@ def currently_accessible(session, reader, scope, item, now, *, ancestors=frozens
 
 def _currently_accessible(session, reader, scope, item, now, *, ancestors, validation):
     from app.domains.memory.repository.situation_reads import situation_origin, situation_accessible
-    situation = situation_origin(session, item)
+    try:
+        situation = situation_origin(session, item, validation=validation)
+    except ValueError:
+        return False
     if situation is not None:
         return situation_accessible(session, reader, scope, item, situation, now,
             ancestors=ancestors, validation=validation)
-    info = session.get(MemoryEpisodeInfo, item.id)
+    info = validation.get(MemoryEpisodeInfo, item.id)
     if info is None or info.policy_version == "episode-selection.v1":
         return True
     if info.policy_version != ACTIVITY_POLICY_VERSION:
         return False
     if item.id in ancestors or not _item_retrievable(item, now):
         return False
-    row = session.get(MemoryEpisodeRestriction, item.id)
+    row = validation.get(MemoryEpisodeRestriction, item.id)
     if row is None or row.thread_id != item.thread_id or row.mode not in {"public", "private_thread"}:
         return False
     if (row.mode == "private_thread") != (row.thread_id is not None):
@@ -51,13 +55,16 @@ def _currently_accessible(session, reader, scope, item, now, *, ancestors, valid
             return False
         for source in sources:
             kind = MemorySourceTypeV1(source["type"])
-            current = reader.read_evidence(scope=scope, source_type=kind, source_id=source["id"])
+            key = scope, kind.value, source["id"]
+            if key not in validation.evidence:
+                validation.evidence[key] = reader.read_evidence(scope=scope, source_type=kind, source_id=source["id"])
+            current = validation.evidence[key]
             if (current is None or memory_evidence_blocked_code(scope=scope, source_type=kind,
                 source_id=source["id"], evidence=current) or current.source_digest != source["digest"]
                 or (current.thread_id is not None and current.thread_id != row.thread_id)):
                 return False
         for ref in priors:
-            prior = session.get(MemoryItem, ref["id"])
+            prior = validation.get(MemoryItem, ref["id"])
             if (prior is None or prior.version != ref["version"]
                 or (prior.owner_id, prior.world_id, prior.subject_world_character_id)
                 != (scope.owner_id, scope.world_id, scope.subject_world_character_id)

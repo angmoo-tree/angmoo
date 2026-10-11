@@ -19,7 +19,7 @@ class SqlAlchemyEpisodePackets:
     def __init__(self, session, *, detail_reader):
         self.session, self.reader = session, detail_reader
 
-    def read(self, *, scope, item_ids, now, require_enabled=True):
+    def read(self, *, scope, item_ids, now, require_enabled=True, validation=None):
         ids = tuple(dict.fromkeys(item_ids))
         if len(ids) > 50:
             raise ValueError("episode_packet_candidate_limit")
@@ -35,17 +35,19 @@ class SqlAlchemyEpisodePackets:
                 MemoryItem.subject_world_character_id == scope.subject_world_character_id,
                 MemoryScopeSettingModel.enabled.is_(True) if require_enabled else True)).all()
         from app.domains.memory.repository.episode_privacy import currently_accessible
+        from app.domains.memory.repository.access_batch import prepare_access
+        validation = prepare_access(self.session, rows, now, reader=self.reader, validation=validation)
         items = {row.id: row for row in rows if _item_retrievable(row, now) and (
-            not require_enabled or currently_accessible(self.session, self.reader, scope, row, now))}
+            not require_enabled or currently_accessible(self.session, self.reader, scope, row, now, validation=validation))}
         if not items:
             return ()
         from app.domains.memory.repository.situation_reads import situation_origin
         from app.domains.memory.repository.situation_packets import read_situation_packet
         situations = {}
         for identifier, item in tuple(items.items()):
-            situation = situation_origin(self.session, item)
+            situation = situation_origin(self.session, item, validation=validation)
             if situation is not None:
-                packet = read_situation_packet(self.session, self.reader, scope, item, situation, now)
+                packet = read_situation_packet(self.session, self.reader, scope, item, situation, now, validation=validation)
                 if packet is not None:
                     situations[identifier] = packet
                 del items[identifier]

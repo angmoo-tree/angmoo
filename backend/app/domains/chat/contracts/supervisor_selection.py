@@ -13,6 +13,7 @@ from app.domains.chat.contracts.reference_observation import reference_call, ref
 from app.domains.chat.contracts.person_roles import PERSON_ROLES, person_role_description
 
 NAME_SELECTION_PROTOCOL = "selection-args.hybrid.v2"
+ADVISORY_SELECTION_PROTOCOL = "selection-args.hybrid.v3"
 LEGACY_HYBRID_PROTOCOL = "selection-args.hybrid.v1"
 SELECTION_PROTOCOL_KEY = "_selection_protocol"
 
@@ -22,7 +23,7 @@ def read_selection_protocol(metadata):
     if SELECTION_PROTOCOL_KEY not in metadata:
         return None
     value = metadata[SELECTION_PROTOCOL_KEY]
-    if value not in (NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL):
+    if value not in (NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL):
         raise RetrievalContractError("selection_protocol_invalid")
     return value
 
@@ -46,8 +47,12 @@ class SelectionArgumentOptions:
     social_context_mode: bool = False
     hybrid_recall: bool = False
     named_entities: bool = False
+    advisory_hints: bool = False
 
     def __post_init__(self):
+        if type(self.advisory_hints) is not bool or (self.advisory_hints and
+            (not self.hybrid_recall or self.named_entities or self.positional_entity_refs or self.graph_query_contract)):
+            raise ValueError("selection_argument_options_invalid")
         if type(self.named_entities) is not bool or (self.named_entities and
             (not self.hybrid_recall or self.positional_entity_refs or self.graph_query_contract)):
             raise ValueError("selection_argument_options_invalid")
@@ -67,6 +72,8 @@ class SelectionArgumentOptions:
     @property
     def version(self):
         if self.hybrid_recall:
+            if self.advisory_hints:
+                return ADVISORY_SELECTION_PROTOCOL
             return NAME_SELECTION_PROTOCOL if self.named_entities else LEGACY_HYBRID_PROTOCOL
         if self.social_context_mode:
             return "selection-args.social.v1"
@@ -148,6 +155,16 @@ def execution_arguments_schema(*, graph_query_contract=False, hybrid_recall=Fals
 def model_arguments_schema(options: SelectionArgumentOptions = SelectionArgumentOptions()) -> dict:
     schema = tool_arguments_schema()
     properties = schema["properties"]
+    if options.advisory_hints:
+        del properties["relationship"]
+        schema["required"].remove("relationship")
+        schema["required"].remove("entities")
+        properties["entities"] = {"type": "array", "description":
+            "Optional advisory person names and roles; omission does not prevent a response. No IDs or relationship pairs.",
+            "items": {"type": "object", "properties": {
+                "mention": {"type": "string", "description": "Person name interpreted from the original question and context."},
+                "role": {"type": "string", "description": person_role_description(), "enum": sorted(PERSON_ROLES)},
+            }}}
     if options.named_entities:
         entity = properties["entities"]["items"]
         del entity["properties"]["ref"]
@@ -224,7 +241,7 @@ def control_arguments_schema(name: str, options: SelectionArgumentOptions = Sele
     if name not in CONTROL_NAMES:
         raise ValueError("unknown_selection_control")
     schema = model_arguments_schema(options)
-    if options.named_entities:
+    if options.named_entities or options.advisory_hints:
         # All three controls travel in one request. Define roles once, on
         # CANONICAL, rather than repeating the definitions in every tool.
         schema["properties"]["entities"]["items"]["properties"]["role"]["description"] = "Use the person role meanings defined by CANONICAL."
@@ -244,6 +261,8 @@ def parse_control_selection(
 ):
     """Every outcome is native; retrieval and controls cannot be mixed."""
     trace = trace or SelectionValidationTrace()
+    if options.advisory_hints:
+        return _parse_advisory_selection(text, calls, options, trace)
     trace.step("wire", "running")
     if text.strip() or not calls or len(calls) > 2:
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
@@ -325,6 +344,47 @@ def parse_control_selection(
     reference_inputs(intent.payload(), "validated_intent")
     return replace(intent, search_text=search_text,
                    coordination_source="code" if options.code_coordination else intent.coordination_source)
+
+
+def _parse_advisory_selection(text, calls, options, trace):
+    """A direct v3 core parser; hints never enter the v2 entity validator."""
+    from app.domains.chat.contracts.person_hints import normalize_person_hints
+    trace.step("wire", "running")
+    if text.strip() or len(calls) != 1:
+        raise RetrievalContractError("retrieval_router_payload_keys_invalid")
+    call = calls[0]
+    if not call.call_id or len(call.call_id) > 256:
+        raise RetrievalContractError("retrieval_router_payload_keys_invalid")
+    if call.name not in {"CANONICAL", *CONTROL_NAMES}:
+        raise RetrievalContractError("retrieval_router_route_unknown")
+    raw = call.arguments()
+    required = {"intent", "time_scope", "aggregation"}
+    if not options.code_coordination:
+        required.add("coordination_hint")
+    if call.name == "CANONICAL":
+        required.add("search_text")
+    if call.name == "REQUEST_CLARIFICATION":
+        required.add("clarification_slot")
+    if type(raw) is not dict or not required <= set(raw) or set(raw) - required - {"entities", "activity_kinds"}:
+        raise RetrievalContractError("retrieval_router_payload_keys_invalid")
+    hints = normalize_person_hints(raw.get("entities"))
+    trace.applicable.update(entities=bool(hints.hints), relationship=False, coordination=False)
+    # The old core meaning parser owns intent/time/aggregation. Supply its
+    # explicit empty entity/relationship adapter, never catch a v2 rejection.
+    clarify = call.name == "REQUEST_CLARIFICATION"
+    payload = {**raw, "entities": [], "relationship": None, "coordination_hint": raw.get("coordination_hint"),
+        "version": "retrieval-intent.v1", "decision": "CLARIFICATION" if clarify else
+        "CURRENT_CONTEXT" if call.name == "USE_CONTEXT" else "RETRIEVAL",
+        "route": "CLARIFICATION" if clarify else "CURRENT_CONTEXT" if call.name == "USE_CONTEXT" else "CANONICAL",
+        "clarification_slot": raw.get("clarification_slot")}
+    query = payload.pop("search_text", None)
+    if call.name == "CANONICAL" and (type(query) is not str or not query.strip() or len(query) > 4000):
+        raise RetrievalContractError("retrieval_search_text_invalid")
+    intent = parse_retrieval_intent_payload(payload, validation_step=trace.step)
+    trace.step("wire", "pass")
+    trace.step("agreement", "pass")
+    return replace(intent, version="retrieval-intent.v3", person_hints=hints, search_text=query,
+        coordination_source="code" if options.code_coordination else "model")
 
 
 def _normalize_model_arguments(payload, *, both, options, trace):

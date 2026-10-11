@@ -74,6 +74,12 @@ class MemoryItemDetail:
     episode: dict | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class SituationDetailMaterial:
+    evidence: tuple[MemoryEvidenceRead, ...]
+    episode: dict | None
+
+
 __all__ = [
     "MAX_MEMORY_READ_EVIDENCE_ITEMS",
     "MAX_MEMORY_READ_PAGE_SIZE",

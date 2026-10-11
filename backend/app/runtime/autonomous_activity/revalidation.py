@@ -20,7 +20,7 @@ def _rows(value):
     return tuple(tuple(row) for row in value)
 
 
-def _assert_snapshot_current(db, *, scope, result, snapshot, now):
+def _assert_snapshot_current(db, *, scope, result, snapshot, now, validation=None):
     if (not isinstance(snapshot, dict) or snapshot.get("schema_version") != 1
             or snapshot.get("policy_version") != "episode-followups-v1"
             or snapshot.get("scope") != asdict(scope)
@@ -48,7 +48,7 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
     if not result.get("packets"):
         return
     packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(
-        scope=scope, item_ids=ids, now=now)
+        scope=scope, item_ids=ids, now=now, validation=validation)
     fresh_by_ref = {packet.reference: packet for packet in episode_provider_view(packets)}
     for old in result["packets"]:
         fresh = fresh_by_ref.get(old.get("ref"))
@@ -90,10 +90,12 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
 def assert_memories_current(db, *, owner_id, world_id, actor_id, memories, validations=None):
     scope = MemoryScope(owner_id, world_id, actor_id)
     now = datetime.now(UTC)
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    validation = MemoryAccessValidation(db, now)
     for target, result in memories.items():
         snapshot = (validations or {}).get(target)
         if snapshot is not None:
-            _assert_snapshot_current(db, scope=scope, result=result, snapshot=snapshot, now=now)
+            _assert_snapshot_current(db, scope=scope, result=result, snapshot=snapshot, now=now, validation=validation)
             continue
         ids = tuple(result.get("ranked_memory_ids", ()))
         if not ids or not result.get("packets"):
@@ -117,7 +119,7 @@ def assert_memories_current(db, *, owner_id, world_id, actor_id, memories, valid
                 MemoryEpisodeLink.created_at > threshold).limit(1))
             if new_item or new_link:
                 raise ValueError("activity_memory_followup_changed")
-        packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(scope=scope, item_ids=ids, now=now)
+        packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(scope=scope, item_ids=ids, now=now, validation=validation)
         refreshed = bounded_episode_packets(episode_provider_view(packets)).packets
         by_ref = {p["ref"]: p for p in refreshed}
         for old in result["packets"]:

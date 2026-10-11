@@ -60,7 +60,7 @@ from app.domains.worlds.service.character_entry import get_character_entry_world
 from app.domains.world_characters.contracts.configuration import configuration_from_request
 from app.domains.world_characters.service.configuration import configuration_for_actor
 from app.domains.chat.contracts.supervisor_selection import (
-    NAME_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, read_selection_protocol,
+    NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, read_selection_protocol,
 )
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 
@@ -234,7 +234,7 @@ class GenerationService:
         retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy")
             if key in prior_metadata}
         if settings.CHAT_RECALL_MODE == "social_hybrid" and "chat_identity_context.v1" in prior_metadata:
-            retry_metadata[SELECTION_PROTOCOL_KEY] = NAME_SELECTION_PROTOCOL
+            retry_metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
         elif prior_protocol is not None:
             retry_metadata[SELECTION_PROTOCOL_KEY] = prior_protocol
         if "_world_configuration" in prior_metadata:
@@ -343,7 +343,7 @@ class GenerationService:
             world_id=thread.world_id, actor_id=thread.responding_world_character_id,
             environment=EnvironmentSnapshot.from_dict(metadata["_environment"])) if self.memory_policy else None
         if settings.CHAT_RECALL_MODE == "social_hybrid":
-            metadata[SELECTION_PROTOCOL_KEY] = NAME_SELECTION_PROTOCOL
+            metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -559,7 +559,7 @@ class GenerationService:
             protocol = read_selection_protocol(record.node_state)
             if protocol is not None and runtime_settings.CHAT_RECALL_MODE != "social_hybrid":
                 raise RetrievalContractError("selection_protocol_mode_mismatch")
-            if protocol == NAME_SELECTION_PROTOCOL and "chat_identity_context.v1" not in record.node_state:
+            if protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and "chat_identity_context.v1" not in record.node_state:
                 raise RetrievalContractError("selection_protocol_identity_required")
         except RetrievalContractError:
             async for event in self._fail_before_workflow(db, record,

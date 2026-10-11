@@ -18,7 +18,7 @@ from app.config import Settings, settings
 from app.contracts.environment import EnvironmentSnapshot
 from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext, IDENTITY_KEY
 from app.domains.chat.contracts.generation_lifecycle import GenerationEventType
-from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, LEGACY_HYBRID_PROTOCOL
+from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, LEGACY_HYBRID_PROTOCOL
 from app.domains.chat.schemas import WorldChatMessageCreate, WorldChatRetryCreate
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.activity_situation import MemorySituationReceipt, MemorySituationManifest
@@ -28,7 +28,7 @@ from app.runtime.memory.composition import memory_repository
 from app.providers.contracts import ProviderToolCall
 
 
-def admission(db, monkeypatch, *, memory=False, question="Bram은 나를 어떻게 생각해?"):
+def admission(db, monkeypatch, *, memory=False, question="Bram은 나를 어떻게 생각해?", protocol=NAME_SELECTION_PROTOCOL):
     setup_names(db)
     monkeypatch.setattr(settings, "CHAT_RECALL_MODE", "social_hybrid")
     monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "activity_situation")
@@ -47,6 +47,13 @@ def admission(db, monkeypatch, *, memory=False, question="Bram은 나를 어떻�
     data = WorldChatMessageCreate(content=question, idempotency_key="named-admission-fixture-key")
     owner = db.get(f.models.User, "p-owner")
     accepted = generation_service.accept_world_message(db, owner, "p-world", "p-thread", data)
+    # Legacy lifecycle fixtures explicitly replay their admitted v2 protocol.
+    if protocol is not None:
+        row = db.get(f.models.ChatResponseRequest, accepted.response_request.request_id)
+        state = json.loads(row.node_state_json)
+        state[SELECTION_PROTOCOL_KEY] = protocol
+        row.node_state_json = json.dumps(state)
+        db.commit()
     return owner, accepted, data
 
 
@@ -88,7 +95,7 @@ def test_protocol_replay_and_explicit_retry_preserve_the_original_admission(resp
     retry = generation_service.retry_world_response(db, owner, "p-world", "p-thread", retry_data)
     repeated = generation_service.retry_world_response(db, owner, "p-world", "p-thread", retry_data)
     new = metadata(db, retry.response_request.request_id)
-    assert new[SELECTION_PROTOCOL_KEY] == NAME_SELECTION_PROTOCOL
+    assert new[SELECTION_PROTOCOL_KEY] == ADVISORY_SELECTION_PROTOCOL
     for key in ("name_binding_policy", "name_binding", "_world_credential", IDENTITY_KEY,
                 "_world_configuration", "_environment", "_situation_policy"):
         assert new[key] == old[key]

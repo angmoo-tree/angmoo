@@ -171,7 +171,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
         if not currently_accessible(session, reader, scope, item, now, validation=validation):
             return ()
         from app.domains.memory.repository.situation_reads import representation
-        item_representation = representation(session, item)
+        item_representation = representation(session, item, validation=validation)
         summary_only = episode_only or item_representation == "activity_situation_v1"
         current: list[tuple[MemoryItemEvidence, CanonicalMemoryEvidence]] = []
         for row in (() if summary_only else evidences):

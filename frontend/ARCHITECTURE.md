@@ -1,5 +1,26 @@
 # Angmoo Frontend Architecture
 
+## World image editing and scoped search diagnostics (2026-10-11 LOCAL)
+
+`features/worlds` owns same-page icon/banner editing in Creator Studio. Explicit
+semantic Buttons open the corresponding file input synchronously and reuse the
+common `ImageCropDialog`/conversion functions. The common dialog exposes an optional
+recovery-action slot, without importing Worlds or Characters. Profile upload remains
+owned by Characters. Existing World upload/remove APIs, creator access and row-version
+checks remain; image success updates image/version state without resetting unsaved
+World definition fields. A conflict retains the crop and requires explicit refresh
+and apply. Scope epochs/abort guards and bitmap cleanup reject late results.
+
+Next and the static shell use the same feature. Existing World editing stays on its
+URL; a new World's first draft save retains its normal navigation. Home preview then
+World preview stays in one column. Social owns the body placeholder; Media removes
+only its fixed original-size paragraph and retains preparation/recognition/error UI.
+All changed visible strings have ko/en counterparts. Chat owns typed, optional
+canonical-read diagnostics, export field allowlists and unknown values for old or
+unfinished reads. No raw worker/connection/private source data is added to export.
+
+Evidence: [local integrated verification](../docs/verification/chat-memory-world-integrated-20261011.md).
+
 ### Historical Chat evidence and Studio preview layout (2026-10-11 LOCAL)
 
 Memory owns the strict additive world-chat-evidence.v1 decoder, safe frozen relationship

@@ -2944,7 +2944,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   );
   await expect(bodyInput).toHaveAttribute(
     "placeholder",
-    "내가 조종하는 캐릭터의 말로 이야기를 적어보세요",
+    "본문을 적어주세요",
   );
   await expect(submitPost).toBeDisabled();
   expect(await titleInput.evaluate((element) => document.activeElement === element)).toBe(false);

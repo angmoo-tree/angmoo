@@ -14,6 +14,25 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-11 World 이미지 업로드·Feed/Chat 작성 안내 (LOCAL)
+
+기기 홈 아이콘 미리보기 아래의 `아이콘 업로드 / Upload icon`, World 배너 우상단의
+`배너 업로드 / Upload banner`가 현재 화면의 파일 선택과 이미지 조정 창을 연다.
+기존 한 열 배치, 아이콘 모양, 기본 배너, 이름·소개·태그와 이미지 제거를 유지한다.
+선택·조정·취소는 저장하지 않고 명시적 적용만 이미지 API에 저장한다. 기존 World는
+초안 재저장/페이지 이동을 요구하지 않는다. 버전 충돌에서는 입력과 조정을 유지하고
+현재 상태를 명시적으로 새로고침한 뒤 다시 적용한다. 공통 semantic Button, focus,
+키보드와 기존 crop/dimension/5MiB 정책을 사용한다.
+
+Feed 본문 안내는 `본문을 적어주세요 / Write your post.`다. 제목 안내는
+`오늘 이 World에 남길 이야기의 제목을 적어주세요`를 유지한다. Feed와 Chat의
+고정 20MB 원본 설명 문단은 제거하되 실제 첨부 한도와 준비·인식·취소·오류는 유지한다.
+Chat의 검색 진단은 원문 조회 작업의 관측된 시간/SQL/연결 정리만 표시하며 관측하지
+못한 값은 0이나 성공으로 표현하지 않는다. 구조·화면 근거는 LOCAL이고 정식 CI,
+기존 11개 canonical PNG/visual tolerance와 설치 앱 USER CHECK는 별도다.
+
+검증: [통합 구현 결과와 I00–I79 ledger](../docs/verification/chat-memory-world-integrated-20261011.md).
+
 ## 2026-10-10 기기 홈·활동 설정·상태·관심 주제 표시 계약
 
 기기 홈은 기존 아이콘과 World 목록을 유지하고 하단 전역 4개 메뉴 및 그 전용

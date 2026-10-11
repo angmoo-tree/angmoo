@@ -10,7 +10,7 @@ async function studio(page: Page, staticShell: boolean, baseURL: string, languag
   const world = { id: FEED_WORLD, slug: "fixture-world", name: "Draft World", tagline: "A small synthetic town",
     setting_description: "A small town where synthetic characters exchange stories.", daily_life_description: "Characters read and share their ordinary days.",
     genre_tags: ["Everyday"], tone_tags: [], timezone: "Asia/Seoul", language: "ko", visibility: "private", join_policy: "private",
-    additional_generation_guidance: "", places: [], roles: [], daypart_profiles: [], rules: [], glossary: [], banner_media_id: null as string | null, icon_media_id: null,
+    additional_generation_guidance: "", places: [], roles: [], daypart_profiles: [], rules: [], glossary: [], banner_media_id: null as string | null, icon_media_id: null as string | null,
     banner_alt_text: "", status: "draft", definition_version: 1, row_version: 1, contract_version: "world-v1", contract_hash: "a".repeat(64),
     readiness_status: "publish_ready", created_at: "2026-10-10T00:00:00Z", updated_at: "2026-10-10T00:00:00Z", archived_at: null };
   const context = () => ({ world, membership_role: "owner", readiness: { world_id: world.id, definition_version: 1, row_version: world.row_version,
@@ -24,6 +24,8 @@ async function studio(page: Page, staticShell: boolean, baseURL: string, languag
       const body = request.postDataJSON(); state.writes.push({ path, body }); expect(body.row_version).toBe(world.row_version);
       if (/\/(icon|banner)$/.test(path)) {
         if (state.imageFailure) return route.fulfill({ status: state.imageFailure, json: { detail: "world_row_version_conflict" } });
+        const kind = path.endsWith("/icon") ? "icon" : "banner";
+        world[`${kind}_media_id`] = method === "DELETE" ? null : `/api/v1/media/assets/synthetic-${kind}/content`;
         world.row_version++;
         return route.fulfill({ json: context() });
       }
@@ -47,7 +49,7 @@ for (const language of ["ko", "en"] as const) {
     await form.getByLabel(new RegExp(`^${t("World 이름")}`)).fill("Very long World name ".repeat(4));
     await form.getByLabel(new RegExp(`^${t("한 줄 소개")}`)).fill("A long introduction with ordinary spaces ".repeat(5));
     await form.getByLabel(new RegExp(`^${t("장르 태그")}`)).fill("Everyday,Adventure,Mystery"); await form.getByLabel(new RegExp(`^${t("장르 태그")}`)).blur();
-    for (const width of [360, 768, 1440, 768]) {
+    for (const width of [360, 390, 768, 1440, 768]) {
       await page.setViewportSize({ width, height: 900 });
       const boxes = await previews.evaluate(element => [element, ...element.children].map(node => { const box = node.getBoundingClientRect(); return { x: box.x, y: box.y, width: box.width, bottom: box.bottom }; }));
       expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom + 20);
@@ -60,7 +62,7 @@ for (const language of ["ko", "en"] as const) {
       await expect(previews.getByText("Adventure", { exact: true })).toBeVisible();
       await previews.scrollIntoViewIfNeeded(); await page.screenshot({ path: info.outputPath(`column-${language}-${width}.png`) });
     }
-    await expect(page.getByLabel(t("아이콘 선택"), { exact: true })).toBeEnabled(); await expect(page.getByLabel(t("배너 선택"), { exact: true })).toBeEnabled();
+    await expect(previews.getByRole("button", { name: t("아이콘 업로드"), exact: true })).toBeEnabled(); await expect(previews.getByRole("button", { name: t("배너 업로드"), exact: true })).toBeEnabled();
     expect(state.writes).toEqual([]);
   });
   test(`single column preview registered and failed banner ${language}`, async ({ page }, info) => {
@@ -72,7 +74,7 @@ for (const language of ["ko", "en"] as const) {
     const previews = page.locator("[data-world-image-previews]");
     const banner = previews.locator("[data-world-banner]");
     await expect(banner).toHaveAttribute("data-world-banner", "registered");
-    for (const width of [360, 768, 1440]) {
+    for (const width of [360, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const boxes = await previews.evaluate(element => [element, ...element.children].map(node => { const box = node.getBoundingClientRect(); return { y: box.y, width: box.width, bottom: box.bottom }; }));
       expect(boxes[2].y).toBeGreaterThanOrEqual(boxes[1].bottom + 20);
@@ -89,7 +91,7 @@ for (const language of ["ko", "en"] as const) {
   test(`World crop file size boundaries ${language}`, async ({ page }, info) => {
     const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     await page.goto(`/studio/worlds/${FEED_WORLD}`);
-    const input = page.getByLabel(t("아이콘 선택"), { exact: true }), dialog = page.getByRole("dialog");
+    const input = page.getByLabel(t("아이콘 업로드"), { exact: true }), dialog = page.getByRole("dialog");
     function photo(size: number) {
       const image = readFileSync("fixtures/photos/normal.jpg"), comments: Buffer[] = []; let extra = size - image.length;
       while (extra) { const length = Math.min(extra, 65537), part = Buffer.alloc(length); part[0] = 255; part[1] = 254; part.writeUInt16BE(length - 2, 2); comments.push(part); extra -= length; }
@@ -178,10 +180,18 @@ for (const language of ["ko", "en"] as const) {
     const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
     await page.goto(`/studio/worlds/${FEED_WORLD}`);
     const original = readFileSync("fixtures/photos/normal.jpg");
-    const inputs = [page.getByLabel(t("아이콘 선택"), { exact: true }), page.getByLabel(t("배너 선택"), { exact: true })];
+    const inputs = [page.getByLabel(t("아이콘 업로드"), { exact: true }), page.getByLabel(t("배너 업로드"), { exact: true })];
+    const beforeUrl = page.url();
+    const originalName = "Unsaved World name";
+    const name = page.getByLabel(new RegExp(`^${t("World 이름")}`)); await name.fill(originalName);
+    const chooserPromise = page.waitForEvent("filechooser");
+    const upload = page.getByRole("button", { name: t("아이콘 업로드"), exact: true });
+    await upload.focus(); await page.keyboard.press("Enter");
+    const chooser = await chooserPromise;
+    await chooser.setFiles({ name: "crop.jpg", mimeType: "image/jpeg", buffer: original });
     const dialog = page.getByRole("dialog");
-    await inputs[0].setInputFiles({ name: "crop.jpg", mimeType: "image/jpeg", buffer: original });
     await expect(dialog).toBeVisible(); expect(state.writes).toEqual([]);
+    expect(page.url()).toBe(beforeUrl); await expect(name).toHaveValue(originalName);
     await dialog.getByRole("button", { name: en ? "Cancel" : "취소", exact: true }).click();
     await expect(dialog).toHaveCount(0); expect(state.writes).toEqual([]);
     for (const [index, kind, width, height] of [[0, "icon", 768, 768], [1, "banner", 1024, 384]] as const) {
@@ -190,7 +200,9 @@ for (const language of ["ko", "en"] as const) {
       const preview = await dialog.locator("canvas").evaluate((canvas: HTMLCanvasElement) => [...canvas.getContext("2d")!.getImageData(20,20,1,1).data]);
       state.imageFailure = 409; await dialog.getByRole("button", { name: en ? "Apply" : "적용", exact: true }).click();
       await expect(dialog.getByRole("alert")).toBeVisible(); await expect(slider).toHaveValue("2"); await expect(dialog).toBeVisible();
-      state.imageFailure = 0; await dialog.getByRole("button", { name: en ? "Apply" : "적용", exact: true }).click(); await expect(dialog).toHaveCount(0);
+      state.imageFailure = 0; await dialog.getByRole("button", { name: t("현재 이미지 상태 새로고침"), exact: true }).click();
+      await expect(dialog.getByRole("alert")).toHaveCount(0); await expect(slider).toHaveValue("2");
+      await dialog.getByRole("button", { name: en ? "Apply" : "적용", exact: true }).click(); await expect(dialog).toHaveCount(0);
       const body = state.writes.at(-1)!.body; expect(body.content_type).toBe("image/webp");
       const pixels = await page.evaluate(async ({ data, mime }) => { const bytes = Uint8Array.from(atob(data), x => x.charCodeAt(0)); const image = await createImageBitmap(new Blob([bytes], { type: mime }));
         const canvas = document.createElement("canvas"); canvas.width=image.width; canvas.height=image.height; const c=canvas.getContext("2d")!; c.drawImage(image,0,0);
@@ -199,9 +211,68 @@ for (const language of ["ko", "en"] as const) {
       expect(state.writes.at(-1)!.path).toBe(`/worlds/${FEED_WORLD}/${kind}`);
       writeFileSync(info.outputPath(`${kind}.webp`), Buffer.from(body.data_base64, "base64"));
     }
+    expect(page.url()).toBe(beforeUrl); await expect(name).toHaveValue(originalName);
     expect(state.writes).toHaveLength(4);
     await inputs[0].setInputFiles({ name: "too-large.jpg", mimeType: "image/jpeg", buffer: Buffer.alloc(5 * 1024 * 1024 + 1) });
     await expect(dialog).toHaveCount(0); expect(state.writes).toHaveLength(4);
+  });
+
+  test(`World image transport failure and removal preserve unsaved definition ${language}`, async ({ page }, info) => {
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
+    state.world.icon_media_id = "/api/v1/media/assets/synthetic-icon/content";
+    state.world.banner_media_id = "/api/v1/media/assets/synthetic-banner/content";
+    await page.route("**/media/assets/synthetic-*/content", route => route.fulfill({ contentType: "image/jpeg", body: readFileSync("fixtures/photos/normal.jpg") }));
+    await page.goto(`/studio/worlds/${FEED_WORLD}`);
+    const beforeUrl = page.url(), previews = page.locator("[data-world-image-previews]");
+    const form = page.locator("section").filter({ has: page.getByRole("heading", { name: t("필수 세계관 설정"), exact: true }) }).last();
+    const name = form.getByLabel(new RegExp(`^${t("World 이름")}`));
+    const intro = form.getByLabel(new RegExp(`^${t("한 줄 소개")}`));
+    await name.fill("Retained unsaved name"); await intro.fill("Retained unsaved introduction");
+    await page.getByLabel(t("아이콘 업로드"), { exact: true }).setInputFiles("fixtures/photos/normal.jpg");
+    const dialog = page.getByRole("dialog"), apply = dialog.getByRole("button", { name: en ? "Apply" : "적용", exact: true });
+    await expect(dialog).toBeVisible(); await dialog.getByLabel(t("확대"), { exact: true }).fill("2");
+    state.imageFailure = 500; await apply.click();
+    await expect(dialog.getByRole("alert")).toBeVisible(); await expect(dialog.getByLabel(t("확대"), { exact: true })).toHaveValue("2");
+    await expect(previews.getByRole("button", { name: t("아이콘 제거"), exact: true })).toBeVisible();
+    await expect(name).toHaveValue("Retained unsaved name"); await expect(intro).toHaveValue("Retained unsaved introduction");
+    await dialog.getByRole("button", { name: en ? "Cancel" : "취소", exact: true }).click();
+    state.imageFailure = 0;
+    for (const kind of ["icon", "banner"] as const) {
+      const remove = previews.getByRole("button", { name: t(kind === "icon" ? "아이콘 제거" : "배너 제거"), exact: true });
+      await remove.click(); await expect(remove).toHaveCount(0);
+      expect(state.writes.at(-1)).toMatchObject({ path: `/worlds/${FEED_WORLD}/${kind}`, body: { row_version: kind === "icon" ? 1 : 2 } });
+      await expect(name).toHaveValue("Retained unsaved name"); await expect(intro).toHaveValue("Retained unsaved introduction");
+      expect(page.url()).toBe(beforeUrl);
+    }
+    await expect(previews.locator("[data-world-banner]")).toHaveAttribute("data-world-banner", "default");
+    expect(state.writes).toHaveLength(3); // Failed apply and two image-only removals; no draft write.
+  });
+
+  test(`World image pending apply cannot leak across runtime scope ${language}`, async ({ page }, info) => {
+    const state = await studio(page, info.project.name !== "next", String(info.project.use.baseURL), language);
+    const requests: string[] = []; let release!: () => void;
+    const blocked = new Promise<void>(resolve => { release = resolve; });
+    const handler = async (route: any) => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+      if (path !== `/worlds/${FEED_WORLD}/icon` || route.request().method() !== "POST") return route.fallback();
+      requests.push(path); await blocked;
+      try { await route.fulfill({ json: { world: { ...state.world, icon_media_id: "/api/v1/media/assets/late-scope/content", row_version: 999 }, membership_role: "owner", readiness: null } }); }
+      catch { /* The abandoned request may already be aborted by the component. */ }
+    };
+    await page.route("**/api/backend/**", handler); await page.route("http://127.0.0.1:8080/api/v1/**", handler);
+    await page.goto(`/studio/worlds/${FEED_WORLD}`);
+    await page.getByLabel(t("아이콘 업로드"), { exact: true }).setInputFiles("fixtures/photos/normal.jpg");
+    const dialog = page.getByRole("dialog"); await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: en ? "Apply" : "적용", exact: true }).click();
+    await expect.poll(() => requests.length).toBe(1);
+    await page.evaluate(() => window.dispatchEvent(new Event("angmoo:desktop-runtime-config-changed")));
+    await expect(dialog).toHaveCount(0);
+    const previews = page.locator("[data-world-image-previews]"); await expect(previews).toBeVisible();
+    release();
+    await expect(previews.getByRole("button", { name: t("아이콘 업로드"), exact: true })).toBeEnabled();
+    await expect(previews.getByRole("button", { name: t("아이콘 제거"), exact: true })).toHaveCount(0);
+    await expect(page.getByText(t("이미지를 저장했어요."), { exact: true })).toHaveCount(0);
+    expect(state.writes).toEqual([]);
   });
 
   for (const mode of ["off", "on", "blocked", "failure"] as const) test(`creation completion actions ${mode} ${language}`, async ({ page }, info) => {

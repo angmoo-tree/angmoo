@@ -5,7 +5,7 @@ from app.domains.chat.contracts.retrieval_router import (
     ROUTER_RELATIONSHIP_DIMENSIONS, ROUTER_RELATIONSHIP_POLARITIES,
     ROUTER_AGGREGATION_TARGETS,
 )
-from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL
+from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL
 
 _FIELDS = {"intent", "entities", "relationship", "time_scope", "aggregation", "coordination_hint", "clarification_slot", "graph_queries", "search_text"}
 _REL_FIELDS = {"perspective", "from", "to", "dimension", "requested_polarity"}
@@ -54,8 +54,8 @@ def _endpoint(value, refs):
 def selection_attempt(request, response, *, error=None, physical_attempts=0,
                       model="unknown", provider="unknown", thinking_level="unknown", max_output_tokens=0, validation_trace=None):
     phase = "repair" if request.repair_diagnostic is not None else "first"
-    protocol = closed(request.selection_protocol, {NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL}, absent="legacy")
-    named = protocol == NAME_SELECTION_PROTOCOL
+    protocol = closed(request.selection_protocol, {NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL}, absent="legacy")
+    named = protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL}
     code = _code(error) if error is not None else "valid"
     normalized = normalize_router_validation_code(code) if error is not None else "valid"
     calls = getattr(response, "tool_calls", ()) if response is not None else ()
@@ -72,6 +72,8 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
     if validation_trace is not None:
         for key in ("wire", "entities", "relationship", "meaning", "coordination", "agreement"):
             stages[key + "_stage"] = closed(validation_trace.stages.get(key), {"running", "pass", "fail", "not_evaluated"})
+    if protocol == ADVISORY_SELECTION_PROTOCOL:
+        stages["relationship_stage"] = "not_applicable"
     basic = {"status": "rejected" if error is not None else "validated", "validation_code": code,
              "field_path": _PATHS.get(code, "not_identified"), "finish_reason": reason,
              "response_state": response_state, "response_observed": response is not None,
@@ -97,11 +99,17 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
                "field_path": _PATHS.get(code, "not_identified"), "validation_code": code,
                "intent": closed(args.get("intent"), ROUTER_INTENTS),
                "entities_state": shape(entities, present="entities" in args),
-               "relationship_state": shape(args.get("relationship"), present="relationship" in args),
+               "relationship_state": ("not_applicable" if protocol == ADVISORY_SELECTION_PROTOCOL else
+                   shape(args.get("relationship"), present="relationship" in args)),
                "aggregation_state": shape(args.get("aggregation"), present="aggregation" in args),
                "time_scope_state": shape(args.get("time_scope"), present="time_scope" in args),
                "coordination_state": shape(args.get("coordination_hint"), present="coordination_hint" in args),
                "extra_keys": len(set(args) - _FIELDS)}
+        if protocol == ADVISORY_SELECTION_PROTOCOL:
+            from app.domains.chat.contracts.person_hints import normalize_person_hints
+            hints = normalize_person_hints(entities)
+            row.update(hint_state=hints.state, hints_reviewed=hints.reviewed,
+                hints_delivered=len(hints.hints), hints_excluded=hints.excluded)
         if type(entities) is list:
             row["entity_count"] = len(entities)
             for i, entity in enumerate(entities[:4], 1):

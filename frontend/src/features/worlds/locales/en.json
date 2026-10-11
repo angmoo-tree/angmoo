@@ -205,5 +205,9 @@
   "입력값과 형식을 확인해 주세요.": "Check the values and format.",
   "장르 태그를 1~5개 입력해 주세요.": "Enter 1–5 genre tags.",
   "필수 세계관 설정을 먼저 완성해 주세요.": "Complete the required World settings first.",
-  "한 줄 소개는 10~160자로 작성해 주세요.": "Enter an introduction of 10–160 characters."
+  "한 줄 소개는 10~160자로 작성해 주세요.": "Enter an introduction of 10–160 characters.",
+  "아이콘 업로드": "Upload icon",
+  "배너 업로드": "Upload banner",
+  "이미지는 적용하면 저장돼요. 이름과 소개는 초안 저장으로 저장해요.": "Images are saved when you apply them. Save the draft to save the name and introduction.",
+  "현재 이미지 상태 새로고침": "Refresh current images"
 }

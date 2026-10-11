@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from app.domains.chat.contracts.supervisor_selection import (
-    SelectionToolCall, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL,
+    SelectionToolCall, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL,
 )
 import json
 from typing import Protocol
@@ -73,9 +73,9 @@ class RetrievalRouterRequest:
     selection_protocol: str | None = None
 
     def __post_init__(self) -> None:
-        if self.selection_protocol not in (None, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL):
+        if self.selection_protocol not in (None, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL):
             raise RetrievalContractError("selection_protocol_invalid")
-        if self.selection_protocol == NAME_SELECTION_PROTOCOL and self.chat_identity is None:
+        if self.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and self.chat_identity is None:
             raise RetrievalContractError("selection_protocol_identity_required")
         if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):
             raise RetrievalContractError("retrieval_image_context_invalid")

@@ -157,7 +157,6 @@
   "로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.": "Check local runtime status, then retry.",
   "대화 목록으로": "Back to chats",
   "후보": "Candidates",
-  "취소": "Cancel",
   "켜짐 · 남은 요청 {{value0}}개": "On · {{value0}} requests remaining",
   "확인 불가": "Unavailable",
   "{{value0}}의 World 프로필 열기": "Open {{value0}} World profile",
@@ -216,5 +215,8 @@
   "기억과 진단 보기": "Open memory and diagnostics",
   "메시지 보내는 중": "Sending message",
   "대화 제한 정책 업데이트가 필요해요": "The conversation limit policy needs an update",
-  "서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.": "The server returned the previous conversation limit. Check the server update status."
+  "서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.": "The server returned the previous conversation limit. Check the server update status.",
+  "기억 원문 확인 작업": "Canonical memory read",
+  "SQL 조회 횟수": "SQL query count",
+  "소요 시간 / 대기 시간 / 연결 정리": "Elapsed time / wait time / connection cleanup"
 }

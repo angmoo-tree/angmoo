@@ -14,6 +14,7 @@ import re
 from typing import Any
 from app.domains.chat.contracts.reference_observation import reference_failure
 from app.domains.relationships.contracts.graph_requirements import GraphQueryRequirement, validate_graph_queries
+from app.domains.chat.contracts.person_hints import PersonHints
 
 
 RETRIEVAL_INTENT_VERSION = "retrieval-intent.v1"
@@ -169,6 +170,7 @@ class RetrievalIntentEnvelope:
     graph_queries: tuple[GraphQueryRequirement, ...] = ()
     search_text: str | None = None
     activity_kinds: tuple[str, ...] = ()
+    person_hints: PersonHints | None = None
 
     def __post_init__(self) -> None:
         if (not isinstance(self.activity_kinds, tuple) or len(self.activity_kinds) > 8
@@ -180,8 +182,13 @@ class RetrievalIntentEnvelope:
             raise RetrievalContractError("retrieval_search_text_invalid")
         if self.coordination_source not in {"model", "code"}:
             raise RetrievalContractError("retrieval_intent_coordination_source_invalid")
-        if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2"}:
+        if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2", "retrieval-intent.v3"}:
             raise RetrievalContractError("retrieval_intent_version_mismatch")
+        if (self.version == "retrieval-intent.v3") != (self.person_hints is not None):
+            raise RetrievalContractError("retrieval_intent_hints_revision_invalid")
+        if self.person_hints is not None and (not isinstance(self.person_hints, PersonHints)
+            or self.entities or self.relationship is not None or self.graph_queries):
+            raise RetrievalContractError("retrieval_intent_hints_revision_invalid")
         if self.graph_queries:
             if self.version != "retrieval-intent.v2":
                 raise RetrievalContractError("retrieval_intent_version_mismatch")
@@ -214,6 +221,7 @@ class RetrievalIntentEnvelope:
 
     def payload(self) -> dict[str, Any]:
         return {
+            **({"person_hints": self.person_hints.payload()} if self.person_hints is not None else {}),
             **({"activity_kinds": list(self.activity_kinds)} if self.activity_kinds else {}),
             **({"search_text": self.search_text} if self.search_text is not None else {}),
             **({"graph_queries": [q.payload() for q in self.graph_queries]} if self.version == "retrieval-intent.v2" else {}),

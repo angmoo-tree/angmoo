@@ -1,44 +1,53 @@
 # Angmoo Backend Architecture
 
-## Chat name-based selection and role interpretation (2026-10-11 LOCAL)
+## Chat advisory interpretation and fresh canonical reads (2026-10-11 LOCAL)
 
 New `social_hybrid` Chat admissions freeze the server-owned
-`_selection_protocol=selection-args.hybrid.v2`. Supervisor writes only `mention`
-and `role` per person and nullable `from_name`/`to_name` relationship endpoints.
-The pure Chat contract validates exact keys, bounds, roles, unique names and
-declared endpoints before adapting to existing server-owned internal entity refs,
-intent hashes and executor arguments. Input participant/author refs are separate
-trusted presentation links and remain unchanged. Models cannot select actual IDs
-or authorize retrieval through names or roles.
+`_selection_protocol=selection-args.hybrid.v3`. The three native functions keep
+their core execution contracts; an optional `entities` list supplies person names
+and nullable roles only. There is no relationship-pair or model-created ref field.
+Chat owns bounded pure normalization (scan 32, deliver 4, name 160), immutable
+`person-hints.v1` and request/identity/core/evidence binding in `hybrid-admission.v3`.
+Invalid hints are omitted or partly retained without repair or response failure.
+Core search text, scope, ranking, permissions and actual source proof still fail
+when invalid. Hints do not rewrite queries or filter the authorized memory set.
 
-Runtime projects effective World display names/handles with up to five candidates
-and one overflow sentinel per mention, unioned with admitted participant/selected
-author IDs. Chat policy deduplicates IDs and rechecks current eligibility/blocks
-in the caller's Session. Incomplete or forbidden candidate sets never produce a
-unique binding; matching names in other Worlds, global-name fallback, translation
-and fuzzy guessing are excluded. Valid unresolved names and absent relationships
-remain advisory in hybrid recall, whose Memory scope stays on the authorized
-responding character.
+Only frozen requester/responder names (and actually supplied handles) can confirm
+a hint, without additional person lookup SQL. Other names remain `not_checked`.
+CRG reads usable names/roles/status alongside the complete original question,
+verified participants and authorized evidence. It preserves actual fact/direction,
+uncertainty and persona rules and can interpret the question when hints are absent.
+Common role and speaker/quotation definitions are reused; English instructions do
+not change situation descriptions' admitted `memory_search_locale`. One final
+payload still feeds both situation and relationship delivery captures.
 
-`hybrid-admission.v2` binds immutable names, roles, resolution and requested
-direction to request, question, intent, resolved envelope and frozen evidence.
-CRG receives names/roles and named direction, without candidate IDs or internal
-entity refs, and uses the shared role meanings as interpretation rather than facts
-or permissions. English prompt additions preserve the common speaker/quotation,
-fact, uncertainty, persona and private-state rules. Situation descriptions still
-use the admitted `memory_search_locale`, independent of these instructions or the
-visible reply's language. One final payload feeds both existing delivery captures.
+Historical v1/v2 schemas, names/endpoint validators and hashes remain supported.
+Pending/idempotent requests retain their admitted protocol. An explicit retry with
+retained identity creates a new v3 attempt preserving question, model, environment,
+settings, identity and situation policy; history without identity keeps its old
+contract. Damaged markers/identity fail before provider work. Both v3 Supervisor
+and CRG awaits checkpoint caller read transactions; leases and final fences remain.
 
-Provider schema/options are local to each request and its bounded repair. Missing
-protocol metadata retains historical behavior; present damaged markers fail before
-provider work. Original failed requests, source proofs and v1 interpretation hashes
-are immutable. Explicit retry with retained identity admits a new v2 request while
-preserving original names, model, settings, environment, situation policy and slot;
-historical retries without identity retain their historical contract. The existing
-canonical UoW checkpoints scope/source reads before the two v2 provider awaits,
-while cancellation, deadlines, lease/final access fences and atomic effects remain.
+Memory owns `MemoryAccessValidation` and batched Memory rows/bindings/unique prior
+nodes, scoped to one read Session and one timestamp. Runtime owns foreign current
+Post/Reply/Chat/routine/image facts through injected read ports. Cycles are checked
+before completed-node memoization; each receipt/manifest/ordinal/range is validated.
+Candidate, hydration and final provider/application guards each open fresh contexts.
+Owner detail and Chat inspection share exact situation entry resolution, including
+nullable evidence and corrections. A damaged situation origin cannot become legacy
+Feed authorization. Memory OFF permits owner inspection, without source ACL bypass.
+Original links are only canonical World POST/REPLY routes.
 
-Evidence: [implementation, scoped checks and bounded-read measurements](../docs/verification/chat-named-selection-20261011.md).
+Production hybrid recall uses a separate Runtime canonical worker (one worker,
+capacity eight). Queue wait, axes, validation and hydration share one absolute
+deadline; SNS includes its semaphore wait in the existing 15 seconds. Sessions
+open inside the worker, SQLite progress/busy limits are restored in finally,
+cancelled running futures remain owned, and shutdown drains before engine dispose.
+Only immutable results and bounded diagnostics cross back to the parent. SQL,
+completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
+when not observed. No request collector or Session crosses the thread boundary.
+
+Evidence: [integrated implementation and scoped verification](../docs/verification/chat-memory-world-integrated-20261011.md).
 
 ## Runtime contention recovery and Media SQL ownership (2026-10-11 LOCAL)
 

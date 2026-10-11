@@ -12,9 +12,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.domains.chat.contracts.reference_observation import resolved_references
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.recall_interpretation import (
-    HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
+    HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
 )
-from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL
+from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL
 
 from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
 from app.domains.chat.contracts.resolved_envelope import (
@@ -167,7 +167,12 @@ class RetrievalRoutingService:
         )
         mentions_to_resolve = tuple((entity.ref, entity.mention) for entity in intent.entities)
         named = selection_protocol == NAME_SELECTION_PROTOCOL
-        if named:
+        advisory = selection_protocol == ADVISORY_SELECTION_PROTOCOL
+        if advisory:
+            if intent.person_hints is None or chat_identity is None:
+                raise RetrievalContractError("recall_interpretation_hints_invalid")
+            resolutions = ()
+        elif named:
             resolutions = self._policy.resolve_named_entity_mentions(scope, mentions_to_resolve, chat_identity=chat_identity)
         else:
             resolutions = self._policy.resolve_entity_mentions(scope, mentions_to_resolve)
@@ -293,7 +298,7 @@ class RetrievalRoutingService:
             thinking_level=provider_result.thinking_level,
             max_output_tokens=provider_result.max_output_tokens,
             finish_reason=provider_result.finish_reason,
-            admission_policy=((NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION)
+            admission_policy=((ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION)
                 if self._recall_mode is ChatRecallMode.SOCIAL_HYBRID else "legacy"),
             route_change_reason=(clarification.slot if clarification is not None
                 and intent.route != original_intent.route else sufficiency_guard_reason),
@@ -316,8 +321,10 @@ class RetrievalRoutingService:
                 time_expression=None if intent.time_scope is None else intent.time_scope.expression,
                 time_status=time_outcome, direction_status=direction_outcome,
                 time_bounds=None if time_from is None else (time_from, time_to),
-                revision=NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION,
+                revision=ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION,
                 person_roles=tuple(entity.role for entity in intent.entities) if named else (),
+                person_hints=intent.person_hints.confirm_participants(chat_identity) if advisory else None,
+                identity_digest=chat_identity.to_dict()["digest"] if advisory else None,
             )
         return RetrievalRoutingResult(
             intent=intent,
@@ -336,7 +343,7 @@ class RetrievalRoutingService:
         *,
         timeout_seconds: float,
     ):
-        if request.selection_protocol == NAME_SELECTION_PROTOCOL and self._before_named_provider is not None:
+        if request.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and self._before_named_provider is not None:
             # The existing transaction owner closes canonical admission reads;
             # no Session or commit policy belongs in the provider adapter.
             self._before_named_provider()

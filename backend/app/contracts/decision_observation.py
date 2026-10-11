@@ -30,7 +30,8 @@ _NUMBER_FIELDS = frozenset({"step", "call", "tool_count", "response_chars", "ent
 _CODE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_.-]{0,95}$")
 _REF_TEXT = frozenset({"value_type", "features_complete", "first_lower", "has_uppercase", "has_underscore", "has_space", "has_non_ascii", "has_other", "ref_alias"})
 _TEXT_FIELDS |= _REF_TEXT | frozenset("received_" + k for k in _REF_TEXT) | frozenset({"input_stage", "failure_reason", "same_endpoint", "normalization_changed"})
-_NUMBER_FIELDS |= frozenset({"entity_index", "value_length", "received_value_length"})
+_NUMBER_FIELDS |= frozenset({"entity_index", "value_length", "received_value_length", "hints_reviewed", "hints_delivered", "hints_excluded"})
+_TEXT_FIELDS |= frozenset({"hint_state"})
 
 
 def closed(value, allowed, *, absent="not_reported"):

@@ -1,0 +1,24 @@
+{
+  "1": {
+    "sql": 32,
+    "ms": 14.04,
+    "unique_nodes": 2,
+    "memo_hits": 0
+  },
+  "10": {
+    "sql": 32,
+    "ms": 20.404,
+    "unique_nodes": 11,
+    "memo_hits": 9
+  },
+  "50": {
+    "sql": 32,
+    "ms": 43.532,
+    "unique_nodes": 51,
+    "memo_hits": 49
+  },
+  "detail": {
+    "sql": 44,
+    "ms": 21.436
+  }
+}

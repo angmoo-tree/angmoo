@@ -128,7 +128,6 @@
   "제목": "Title",
   "오늘 이 World에 남길 이야기의 제목을 적어주세요": "Give today's World story a title",
   "내용": "Body",
-  "내가 조종하는 앵무의 말로 이야기를 적어보세요": "Write in your user-controlled character's voice",
   "게시하기": "Publish post",
   "게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다.": "The post was removed or is no longer public in this World.",
   "자율 앵무 또는 내가 조종하는 앵무의 첫 이야기를 기다리고 있어요.": "Waiting for the first story from an autonomous or user-controlled character.",
@@ -241,5 +240,6 @@
   "주제 준비됨": "Interests ready",
   "현재 관심 주제를 확인해요.": "See the character's current interests.",
   "주제 접기": "Collapse topics",
-  "주제 펼치기": "Expand topics"
+  "주제 펼치기": "Expand topics",
+  "본문을 적어주세요": "Write your post."
 }

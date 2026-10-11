@@ -8,12 +8,14 @@ from app.domains.memory.models.situation_result_binding import MemorySituationRe
 from app.domains.memory.policies.situation_result_binding import approve, verify
 
 
-def stored_binding(session, admission, *, revision):
+def stored_binding(session, admission, *, revision, validation=None):
     if revision != RESULT_BINDING_REVISION:
         return None
-    rows = list(session.scalars(select(MemorySituationResultBinding).where(
+    rows = ([row for row in validation.collections[("result_bindings", admission.receipt.sequence)] if row.validation_revision == revision]
+        if validation is not None and ("result_bindings", admission.receipt.sequence) in validation.collections
+        else list(session.scalars(select(MemorySituationResultBinding).where(
         MemorySituationResultBinding.receipt_sequence == admission.receipt.sequence,
-        MemorySituationResultBinding.validation_revision == revision)))
+        MemorySituationResultBinding.validation_revision == revision))))
     if len(rows) > 1:
         raise ValueError("situation_result_binding_invalid")
     if not rows:

@@ -10,12 +10,15 @@ from app.domains.memory.models.situation_source_binding import MemorySituationSo
 from app.domains.memory.policies.situation_source_binding import candidate_child, resolve_parent_binding, verify_parent_binding
 
 
-def restore_bindings(session, context):
+def restore_bindings(session, context, *, validation=None):
     if context.revision not in PARENT_BINDING_REVISIONS:
         return context
     bindings = []
-    for row in session.scalars(select(MemorySituationSourceBinding).where(
-            MemorySituationSourceBinding.manifest_id == context.manifest_digest)):
+    rows = (validation.collections[("source_bindings", context.manifest_digest)]
+        if validation is not None and ("source_bindings", context.manifest_digest) in validation.collections
+        else session.scalars(select(MemorySituationSourceBinding).where(
+            MemorySituationSourceBinding.manifest_id == context.manifest_digest)))
+    for row in rows:
         binding = SituationSourceBinding(row.manifest_id, row.entry_ordinal, row.resolution_policy,
             row.original_entry_digest, row.basis_ordinal, row.basis_source_id, row.basis_source_digest,
             DeliveredSourceEntry.from_dict(row.resolved_source), utc_instant(row.resolved_at).isoformat(), row.resolution_digest)

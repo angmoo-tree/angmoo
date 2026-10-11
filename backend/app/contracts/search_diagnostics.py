@@ -94,6 +94,17 @@ class SearchLineage(SafeModel):
         "character_budget", "available", "degraded", "other"] | None = None
 
 
+class CanonicalReadDiagnostic(SafeModel):
+    stage: Literal["revalidate", "hydrate"]
+    wait_ms: Duration | None = None
+    elapsed_ms: Duration | None = None
+    sql_count: Count | None = None
+    unique_nodes: Count | None = None
+    memo_hits: Count | None = None
+    cleaned: bool | None = None
+    status: Literal["completed", "deadline", "cancelled", "unavailable"] = "completed"
+
+
 class SearchDiagnosticTrace(SafeModel):
     version: Literal["search-diagnostic-trace.v1"] = "search-diagnostic-trace.v1"
     coverage: Literal["complete", "partial"] = "complete"
@@ -104,6 +115,7 @@ class SearchDiagnosticTrace(SafeModel):
     lineage_edges_dropped: Count = 0
     aliases_dropped: Count = 0
     detail_rows_dropped: Count = 0
+    canonical_reads: tuple[CanonicalReadDiagnostic, ...] = Field(default=(), max_length=2)
 
 
 @dataclass
@@ -115,6 +127,7 @@ class SearchTraceCollector:
     stage_dropped: int = 0
     edge_dropped: int = 0
     alias_dropped: int = 0
+    canonical_reads: list = field(default_factory=list)
 
     def alias(self, kind, identity):
         if identity is None:
@@ -157,7 +170,7 @@ class SearchTraceCollector:
             t.terminal_state not in {"disabled"} and not t.terminal_observed for t in self.terminals.values())
         return SearchDiagnosticTrace(coverage="partial" if partial else "complete",
             stages=tuple(self.stages.values()), terminals=tuple(self.terminals.values()),
-            lineage=tuple(self.edges), stage_events_dropped=dropped,
+            lineage=tuple(self.edges), canonical_reads=tuple(self.canonical_reads), stage_events_dropped=dropped,
             lineage_edges_dropped=self.edge_dropped, aliases_dropped=self.alias_dropped).model_dump(mode="json")
 
 
@@ -192,6 +205,21 @@ def record_identity(record):
         "record_ref": ("r", record.reference),
         "source_ref": ("s", (record.source_type.value if record.source_type is not None else record.kind.value, record.canonical_source_id)),
     }
+
+
+def canonical_read(receipt=None, *, stage=None, status="completed"):
+    target = collector()
+    if target is None:
+        return
+    try:
+        row = (CanonicalReadDiagnostic(stage=receipt.stage, wait_ms=receipt.wait_ms,
+            elapsed_ms=receipt.elapsed_ms, sql_count=min(receipt.sql_count, 1_000_000_000), cleaned=receipt.cleaned,
+            unique_nodes=receipt.unique_nodes, memo_hits=receipt.memo_hits)
+            if receipt is not None else CanonicalReadDiagnostic(stage=stage, status=status))
+        if len(target.canonical_reads) < 2:
+            target.canonical_reads.append(row)
+    except (ValueError, TypeError):
+        target.stage_dropped += 1
 
 
 def trace_payload():

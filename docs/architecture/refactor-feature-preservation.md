@@ -283,3 +283,32 @@ AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계�
 AR-B8 LocalBot A5는 실제 18행동/읽기와 18HTTP를 own service/router로 닫는다. 이전 LocalBot 72정의 split의 실제 목적지·소비자와 Identity deps 원본의 Authorization 2/Bot 인증 1 분할을 갱신했다. 기존 원본 snapshot/assertion은 불변이며 typed 협력은 같은 Session·nullable 조회·오류객체·deferred commit·quota/rollback·aftercommit image 요청을 보존한다. G07 route inventory는 module 필드 26개만 현재 owner로 전환했다. B5/G5/G06 최종 합류와 원본 source introduction은 root 순차 통합 범위다.
 
 </details>
+
+## 2026-10-11 Chat·Memory·World 통합 변경의 보존 경계 (LOCAL)
+
+신규 Chat v3는 관계 쌍과 검색용 ref 작성 요구를 없애고 인물 이름·역할을
+선택적 보조 자료로 전달한다. legacy v1/v2 marker/hash·재개·이력은 그대로이며,
+identity가 보존된 명시 retry만 새 v3 attempt를 만든다. 원래 질문과 독립 검색문,
+실제 참가자·출처·권한 및 상황 설명 언어를 보존한다. 공통 role/발화자 지침을
+재사용하고 Supervisor/CRG await의 실제 checkpoint를 유지한다.
+
+Memory read batch/memo는 같은 operation·Session·now에만 적용한다. prior/correction
+cycle·private 전파와 current item/source 검증을 유지하고, 후보/hydrate/모델 전후 guard는
+새로 판정한다. Runtime의 한 worker/capacity8 안에서만 Session을 열고 deadline·취소,
+SQLite hook 정리·drain 후 dispose를 수행한다. HTTP/Chat 상황 상세는 exact 연결과
+공통 current-source 판정을 사용하며 손상된 상황 origin의 legacy fallback은 금지한다.
+
+Worlds는 기존 API/row_version/권한·이미지 형식/크기를 유지하면서 semantic Button과
+공통 crop으로 같은 페이지에서 이미지 작업을 마친다. 미저장 이름·소개·태그와
+충돌 시 crop을 보존한다. 공통 crop의 recovery slot은 feature 의존을 추가하지 않는다.
+Feed/Chat은 요청된 placeholder/고정 설명만 바꾸고 실제 첨부·상태·오류 정책은 유지한다.
+기존 canonical PNG11개·visual tolerance·dependency·원계획은 변경하지 않았다.
+
+현재 소스의 import/design inventory를 갱신했다. 변경 전 실제 HEAD AST와 비교해
+backend 신규 위반은 0이며 기존 deep import2/cycle2는 남아 있다. frontend 전역
+dependency freeze2개도 현재 변경과 분리한다. 두 Feed placeholder 시험의 기대값은
+사용자가 승인한 문구 교체만 정확히 provenance 기록으로 연결한다. 이를 기존 전역
+검사 PASS나 설치 앱/실제 모델 품질 PASS로 표현하지 않는다.
+
+80단계·원계획 A54/B32 대응, 관련 회귀·격리 Docker·성능·미관찰·복구 근거는
+[통합 구현 결과](../verification/chat-memory-world-integrated-20261011.md)에 기록한다.
