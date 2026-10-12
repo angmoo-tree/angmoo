@@ -36785,6 +36785,17 @@
         "tests/test_registration_fence_preservation.py": {},
         "tests/test_retired_world_topic_view_evidence.py": {}
       }
+    },
+    {
+      "commit": "2297f3dadf9cfcf7f57d592701980f342c472b60",
+      "feature_id": "AR-RELEASE-READINESS-REPORT",
+      "reason": "Capture the first committed public preparation report; CI, deployment and real-provider results remain distinct",
+      "tracked_files": {
+        "docs/verification/release-readiness-pr-ci-20261013.md": "3b7105b5a65ed54ed5d3ca529b4ab052bbc9d865"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
