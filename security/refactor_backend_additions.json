@@ -36841,6 +36841,107 @@
       "test_suppressions": {
         "tests/test_late_product_change_evidence.py": {}
       }
+    },
+    {
+      "commit": "8360a295f1f8badb1f0e9a0c82c7954294645164",
+      "feature_id": "AR-STREAMING-SECURITY-HISTORY",
+      "reason": "Fail closed on malformed or partial Git object responses while retaining every history blob/path and secret detection",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_security_secret_scan.py::test_batch_stream_drains_each_object_and_checks_every_path",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[1111111111111111111111111111111111111111 missing\\n]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[2222222222222222222222222222222222222222 blob 1\\na\\n]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[1111111111111111111111111111111111111111 blob -1\\n]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[1111111111111111111111111111111111111111 blob wrong\\n]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[1111111111111111111111111111111111111111 blob 8\\nshort]",
+        "tests/test_security_secret_scan.py::test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process[1111111111111111111111111111111111111111 blob 1\\na!]",
+        "tests/test_security_secret_scan.py::test_batch_stream_requires_successful_git_exit"
+      ],
+      "test_assertions": {
+        "tests/test_security_secret_scan.py": {
+          "BatchProcess::__init__": [
+            "assert size >= 0, 'whole-history reads are forbidden'"
+          ],
+          "BatchProcess::wait": [],
+          "BatchProcess::poll": [],
+          "BatchProcess::kill": [],
+          "test_batch_stream_drains_each_object_and_checks_every_path": [
+            "assert process.requests == [(first + '\\n').encode(), (second + '\\n').encode()]",
+            "assert report.files_scanned == 3",
+            "assert report.fatal_findings and all((f.source == 'unsafe.env' for f in report.fatal_findings))",
+            "assert not process.killed and process.stdin.closed and process.stdout.closed"
+          ],
+          "test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process": [
+            "pytest.raises(RuntimeError)",
+            "assert process.killed and process.stdin.closed and process.stdout.closed"
+          ],
+          "test_batch_stream_requires_successful_git_exit": [
+            "pytest.raises(RuntimeError, match='git cat-file failed')",
+            "assert process.stdin.closed and process.stdout.closed"
+          ],
+          "_git": [
+            "assert result.returncode == 0, result.stderr"
+          ],
+          "_init_repo": [],
+          "_png_bytes": [],
+          "test_exact_allowlist_is_scoped_to_path_rule_and_value": [
+            "assert not allowed",
+            "assert {finding.rule for finding in wrong_path} == {'google-api-key', 'sensitive-env-assignment'}"
+          ],
+          "test_credentialed_database_url_stops_before_json_delimiters": [
+            "assert match is not None",
+            "assert scanner._match_value(rule, match) == value"
+          ],
+          "test_path_normalization_preserves_leading_dot_file_names": [
+            "assert scanner.normalize_path('./.gitleaks.toml') == '.gitleaks.toml'"
+          ],
+          "test_public_email_rule_skips_only_reserved_domains": [
+            "assert reserved == []",
+            "assert [finding.rule for finding in real] == ['email-address']"
+          ],
+          "test_root_scan_includes_json_lock_svg_and_public_pii": [
+            "assert 'openai-api-key' in rules",
+            "assert 'google-api-key' in rules",
+            "assert 'svg-metadata' in rules",
+            "assert 'svg-embedded-remote-content' in rules",
+            "assert 'email-address' in rules",
+            "assert report.files_scanned == 4"
+          ],
+          "test_root_scan_requires_exact_asset_hash_and_rejects_sensitive_metadata": [
+            "assert not clean_report.fatal_findings",
+            "assert metadata_report.fatal_findings == []",
+            "assert {finding.rule for finding in metadata_report.findings} == {'asset-tool-metadata'}",
+            "assert {finding.rule for finding in private_metadata_report.fatal_findings} == {'asset-sensitive-metadata'}",
+            "assert 'asset-sha256-mismatch' in {finding.rule for finding in mismatch_report.fatal_findings}"
+          ],
+          "test_root_scan_rejects_archives_unclassified_binary_and_generated_directories": [
+            "assert 'forbidden-public-file' in rules",
+            "assert 'unclassified-binary' in rules",
+            "assert 'forbidden-export-directory' in rules"
+          ],
+          "test_root_scan_fails_closed_when_a_file_cannot_be_read": [
+            "assert [finding.rule for finding in report.fatal_findings] == ['file-read-failed']"
+          ],
+          "test_git_tree_scans_committed_blob_instead_of_worktree_file": [
+            "assert {finding.rule for finding in report.fatal_findings} == {'openai-api-key'}",
+            "assert report.findings[0].ref is not None",
+            "assert report.findings[0].ref.startswith('blob=')"
+          ],
+          "test_unlimited_history_scan_finds_secret_deleted_from_head": [
+            "assert not head.fatal_findings",
+            "assert 'google-api-key' in {finding.rule for finding in history.fatal_findings}"
+          ],
+          "test_report_output_never_contains_matched_secret": [
+            "assert secret not in output",
+            "assert 'config.json' in output",
+            "assert 'rule=openai-api-key' in output"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_security_secret_scan.py": {}
+      }
     }
   ]
 }
