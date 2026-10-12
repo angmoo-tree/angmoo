@@ -7,9 +7,7 @@ from app.domains.chat.contracts.relationship_evidence import (
     RelationshipEvidenceDelivery, RelationshipDeliveredItem, RelationshipEvidenceRead, digest, validate_projection,
 )
 from app.domains.relationships.contracts.social_context import SocialContextItem
-from app.domains.relationships.policies.social_context_validation import (
-    facts_digest, social_context_row,
-)
+from app.domains.relationships.service.social_context_evidence import project_social_context_evidence
 
 
 def capture_delivery(binding, bundle, snapshot, payload, prompt, identity=None, current_inspector=None):
@@ -35,13 +33,13 @@ def capture_delivery(binding, bundle, snapshot, payload, prompt, identity=None, 
         raw_items = current_inspector["items"]
         for index, (item, raw) in enumerate(zip(snapshot.items, raw_items, strict=True)):
             relation = item.relationship
-            row = social_context_row(item)
+            row, fact_digest = project_social_context_evidence(item)
             fragment = json.dumps(row, ensure_ascii=False, separators=(",", ":"))
             if fragment + "\n" not in snapshot.context_text:
                 raise ValueError("relationship_evidence_row_missing")
             items.append(RelationshipDeliveredItem("current_context", raw["ref"], relation.relationship_state_id,
                 relation.actor_world_character_id, relation.target_world_character_id, relation.relationship_version,
-                relation.view_version, facts_digest(item), "social", item.display_name,
+                relation.view_version, fact_digest, "social", item.display_name,
                 f"/social_context/context/row/{index}", fragment, digest(fragment), digest(raw),
                 {key: row[key] for key in ("familiarity", "affinity", "trust", "tension", "interactions", "relationship_label", "perception")}))
     return RelationshipEvidenceDelivery(binding, digest(payload), sha256(prompt.encode()).hexdigest(), tuple(items)).to_dict()
@@ -91,7 +89,7 @@ def historical_read(item, current):
     if relation.relationship_version < item.version or relation.view_version < item.view_version:
         return RelationshipEvidenceRead(reason="historical_unverified")
     if relation.relationship_version == item.version and relation.view_version == item.view_version:
-        actual = facts_digest(SocialContextItem(relation, item.name, (), "canonical")) if item.basis == "social" else relation.delivery_facts_digest()
+        actual = project_social_context_evidence(SocialContextItem(relation, item.name, (), "canonical"))[1] if item.basis == "social" else relation.delivery_facts_digest()
         if actual != item.facts_digest:
             return RelationshipEvidenceRead(reason="historical_unverified")
         change = "same"

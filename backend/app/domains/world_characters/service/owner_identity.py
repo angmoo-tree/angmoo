@@ -110,10 +110,9 @@ class OwnerControlledIdentityService:
         current = self.get(world_id=world_id, current_user_id=current_user_id)
         if current.version != data.version:
             raise OwnerControlledIdentityConflictError("profile_version_conflict")
-        from app.domains.worlds.models import World
+        from app.domains.worlds.service.character_entry import lock_character_entry_world_write
         # Serialize media creation with the deletion intent before writing bytes.
-        locked = self._db.execute(update(World).where(World.id == world_id).values(row_version=World.row_version))
-        if locked.rowcount != 1:
+        if not lock_character_entry_world_write(self._db, world_id):
             raise OwnerWorldRequiredError(world_id)
         url = save_profile_media(character_id=current.character_id, media_type=data.media_type,
             content_type=data.content_type, data_base64=data.data_base64)

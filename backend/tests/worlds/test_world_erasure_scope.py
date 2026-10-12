@@ -9,7 +9,7 @@ from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeleti
 from app.domains.worlds.service import deletion
 from app.domains.worlds.contracts_deletion import WorldDeletionError
 from app.runtime.world_deletion.worker import WorldDeletionWorker
-from app.runtime.world_deletion.ports import stop_admission
+from app.runtime.world_deletion.canonical_erasure import stop_admission
 from worlds.test_world_deletion import environment, admitted, finish, command
 
 

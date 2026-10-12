@@ -16,15 +16,15 @@ const context = vm.createContext({
 const cache = new Map();
 function load(name) {
   if (cache.has(name)) return cache.get(name).exports;
-  const module = { exports: {} }; cache.set(name, module);
+  const moduleRecord = { exports: {} }; cache.set(name, moduleRecord);
   const source = fs.readFileSync(path.join(root, name), "utf8");
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const require = name => {
     assert.equal(name, "@/lib/runtime/runtime-config");
     return load("lib/runtime/runtime-config.ts");
   };
-  vm.runInContext(`(function(module,exports,require){${code}\n})`, context, { filename: name })(module, module.exports, require);
-  return module.exports;
+  vm.runInContext(`(function(module,exports,require){${code}\n})`, context, { filename: name })(moduleRecord, moduleRecord.exports, require);
+  return moduleRecord.exports;
 }
 const runtime = load("lib/runtime/runtime-config.ts");
 const safe = load("lib/media/safe-media-url.ts").safeSameOriginMediaUrl;

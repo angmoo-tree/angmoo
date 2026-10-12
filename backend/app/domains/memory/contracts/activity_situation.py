@@ -4,14 +4,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from hashlib import sha256
 import json
-from typing import Literal, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from app.domains.memory.contracts.situation_source_binding import SituationSourceBinding
+from typing import Literal
 
 from app.domains.memory.contracts.scope import MemoryScope
 from app.contracts.activity_situation import SITUATION_POLICY, SituationDraft
 
+PARENT_BINDING_POLICY = "sns-today-parent-binding.v1"
 SITUATION_REPRESENTATION = "activity_situation_v1"
 DESCRIPTION_LIMIT = 1000
 Lane = Literal["chat", "inbox", "feed", "routine"]
@@ -138,6 +136,30 @@ class DeliveredSourceEntry:
         if material.get("relationship_basis") is not None:
             material["relationship_basis"] = RelationshipDeliveryBasis(**material["relationship_basis"])
         return cls(**material)
+
+
+@dataclass(frozen=True)
+class SituationSourceBinding:
+    manifest_id: str
+    entry_ordinal: int
+    resolution_policy: str
+    original_entry_digest: str
+    basis_ordinal: int
+    basis_source_id: str
+    basis_source_digest: str
+    resolved_source: DeliveredSourceEntry
+    resolved_at: str
+    resolution_digest: str
+
+    def material(self):
+        value = asdict(self)
+        value.pop("resolution_digest")
+        return value
+
+    def check_integrity(self):
+        if self.resolution_policy != PARENT_BINDING_POLICY or stable_digest(self.material()) != self.resolution_digest:
+            raise ValueError("situation_parent_binding_integrity_invalid")
+
 
 
 @dataclass(frozen=True)

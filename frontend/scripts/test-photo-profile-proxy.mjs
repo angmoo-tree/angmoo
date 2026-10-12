@@ -7,8 +7,6 @@ import { createServer as createNetServer } from "node:net";
 import { fileURLToPath } from "node:url";
 
 const defaultLimit = 1024 * 1024;
-const cardLimit = 28_000_000 + 256 * 1024;
-const cardPath = "/api/backend/agents/drafts/draft-test/card";
 const received = [];
 
 const upstream = createServer(async (request, response) => {

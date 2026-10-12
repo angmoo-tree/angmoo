@@ -2,6 +2,8 @@
   "schema_version": 1,
   "description": "Reviewed old-to-new paths. The source/test baseline is never regenerated after a move.",
   "files": {
+    "backend/app/runtime/world_deletion/ports.py": "backend/app/runtime/world_deletion/canonical_erasure.py",
+    "backend/app/runtime/world_deletion/composition.py": "backend/app/runtime/world_deletion_composition.py",
     "backend/app/domains/device_home/api/routes.py": "backend/app/domains/device_home/router.py",
     "backend/app/domains/device_home/api/device_home_schemas.py": "backend/app/domains/device_home/schemas.py",
     "backend/app/domains/device_home/application/list_local_world_apps.py": "backend/app/domains/device_home/service.py",

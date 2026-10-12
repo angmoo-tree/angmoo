@@ -146,7 +146,7 @@ def main():
         if args.mode == "stage":
             from app.domains.worlds.service.deletion import accept
             from app.domains.worlds.contracts_deletion import WorldDeletionCommand
-            from app.runtime.world_deletion.ports import stop_admission
+            from app.runtime.world_deletion.canonical_erasure import stop_admission
             with app.state.runtime_composition.session_factory() as db:
                 accept(db, TARGET, OWNER, WorldDeletionCommand(expected_row_version=1, confirmed_name="Integration target",
                     consent=True, idempotency_key="synthetic-stage-request"), stop_admission=stop_admission)

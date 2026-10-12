@@ -154,6 +154,17 @@ def load(root: Path, *, reader=None) -> list[dict]:
                             for target in (node.targets if isinstance(node, ast.Assign) else [node.target])))]
             if definitions(before) != [removed["before_ast"]] or definitions(after) or definitions((root / source).read_text(encoding="utf-8-sig")):
                 raise ValueError("removed binding preimage or actual absence differs")
+    # Evidence can be appended after its implementation was committed. Ledger
+    # append order is immutable audit history; it is not the product timeline.
+    # Use actual Git topology only after every record's ancestry and exact
+    # committed preimage have passed the checks above. No dates or IDs order a
+    # transition, and a missing source remains an error rather than an omission.
+    if len(records) > 1:
+        timeline = git("rev-list", "--reverse", "--topo-order", "HEAD").decode().splitlines()
+        positions = {commit: position for position, commit in enumerate(timeline)}
+        if any(record["implementation_commit"] not in positions for record in records):
+            raise ValueError("product change source absent from committed timeline")
+        return sorted(records, key=lambda record: positions[record["implementation_commit"]])
     return records
 
 

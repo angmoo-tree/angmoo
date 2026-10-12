@@ -5,16 +5,16 @@ Unknown schema changes require an explicit inventory update and regression.
 """
 import json
 from pathlib import Path
-from sqlalchemy import and_, or_, select, literal, func
-from app.runtime.persistence.model_registration import register_models
+from sqlalchemy import MetaData, and_, or_, select, literal, func
+from app.models import Base
 
 
 OWNERS = ("routines", "world_characters", "relationships", "characters", "memory", "chat", "social", "media", "identity", "worlds", "world_packages")
 
 
 class ErasureInventory:
-    def __init__(self):
-        self.tables = register_models().tables
+    def __init__(self, metadata=None):
+        self.tables = (Base.metadata if metadata is None else metadata).tables
         root = Path(__file__).resolve().parents[2] / "domains"
         self.rules = {}
         for owner in OWNERS:
@@ -22,6 +22,24 @@ class ErasureInventory:
             if payload["owner"] != owner or payload["version"] != 1:
                 raise ValueError("world_erasure_inventory_invalid")
             self.rules.update(payload["tables"])
+        if not set(self.rules).issubset(self.tables):
+            raise ValueError("world_erasure_metadata_incomplete")
+
+    @classmethod
+    def for_connection(cls, connection):
+        """Use registered descriptors, or reflect the cold migration schema.
+
+        Reflection supplies SQL descriptors only; reviewed owner rules still
+        determine every deletion predicate and never expand from new FKs.
+        """
+        try:
+            return cls()
+        except ValueError as exc:
+            if str(exc) != "world_erasure_metadata_incomplete":
+                raise
+        metadata = MetaData()
+        metadata.reflect(bind=connection)
+        return cls(metadata)
 
     def predicate(self, name, world_id, *, table=None):
         t = self.tables[name] if table is None else table

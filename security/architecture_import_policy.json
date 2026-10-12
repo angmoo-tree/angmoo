@@ -260,6 +260,7 @@
       "app.domains.relationships.service.proposals",
       "app.domains.relationships.service.replay",
       "app.domains.relationships.service.routine_interactions",
+      "app.domains.relationships.service.social_context_evidence",
       "app.domains.relationships.service.source_posts",
       "app.domains.relationships.service.sqlite_projection_state",
       "app.domains.relationships.service.state",
@@ -554,6 +555,7 @@
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
       "app.domains.worlds.service.definition",
+      "app.domains.worlds.service.deletion",
       "app.domains.worlds.service.foundation",
       "app.domains.worlds.service.projection_sources"
     ],

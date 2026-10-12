@@ -1,7 +1,7 @@
 """Compose erasure with the app's existing SQL, media, FTS and graph owners."""
 from app.config import settings
 from app.database import SessionLocal
-from app.runtime.world_deletion.ports import ScopedWorldErasure, stop_admission
+from app.runtime.world_deletion.canonical_erasure import ScopedWorldErasure, stop_admission
 from app.runtime.world_deletion.worker import WorldDeletionWorker
 from app.runtime.world_deletion.http_gate import WorldDeletionHttpGate
 

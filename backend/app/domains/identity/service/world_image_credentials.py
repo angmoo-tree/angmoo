@@ -64,7 +64,7 @@ def _write(db, *, owner_id, world_id, world_character_id, provider, raw, expecte
 
 
 def select_provider(db, *, owner_id, world_id, world_character_id, data):
-    from .world_credentials import find as current, _preserve_revision, metadata as selected_metadata
+    from .world_credential_state import find as current, _preserve_revision, metadata as selected_metadata
     scope = dict(owner_id=owner_id, world_id=world_id, world_character_id=world_character_id)
     row = current(db, **scope, purpose="image")
     if data.expected_revision != (row.revision if row else 0):
@@ -119,7 +119,7 @@ def _revoke_snapshots(db, current, provider):
 
 
 def delete_provider(db, *, owner_id, world_id, world_character_id, data):
-    from .world_credentials import find as selected, metadata as selected_metadata, _preserve_revision
+    from .world_credential_state import find as selected, metadata as selected_metadata, _preserve_revision
     scope = dict(owner_id=owner_id, world_id=world_id, world_character_id=world_character_id)
     current = selected(db, **scope, purpose="image")
     if current is None or current.revision != data.expected_revision:

@@ -10,7 +10,7 @@ from app.domains.worlds.models import World, WorldMembership, OwnerDefaultWorld
 from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeletionCleanupItem
 from app.domains.worlds.contracts_deletion import WorldDeletionCommand, WorldDeletionError
 from app.domains.worlds.service import deletion
-from app.runtime.world_deletion.ports import ScopedWorldErasure, stop_admission
+from app.runtime.world_deletion.canonical_erasure import ScopedWorldErasure, stop_admission
 from app.runtime.world_deletion.worker import WorldDeletionWorker
 from worlds.test_creator_routes import _user
 

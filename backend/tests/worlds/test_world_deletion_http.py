@@ -9,7 +9,7 @@ from app.core.security import hash_token
 from app.domains.worlds.router_deletion import router
 from app.domains.worlds.router import router as world_router
 from app.runtime.world_deletion.http_gate import WorldDeletionHttpGate
-from app.runtime.world_deletion.ports import stop_admission
+from app.runtime.world_deletion.canonical_erasure import stop_admission
 from worlds.test_creator_routes import _request
 from worlds.test_world_deletion import environment, command, finish
 

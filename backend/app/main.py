@@ -465,7 +465,7 @@ def create_app(
                 coordinator=runtime_app.state.memory_shutdown,
             )
         runtime_app.state.world_package_import_committer = world_package_import_committer
-        from app.runtime.world_deletion.composition import configure_world_deletion
+        from app.runtime.world_deletion_composition import configure_world_deletion
         configure_world_deletion(runtime_app, composition)
         runtime_app.state.dispose_runtime = dispose_runtime if composition is not None else None
         runtime_app.state.restore_process_settings = (
