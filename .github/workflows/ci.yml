@@ -171,6 +171,9 @@ jobs:
       - name: Lint
         run: pnpm lint
         working-directory: frontend
+      - name: Verify patched Next root discovery and active link rule
+        run: pnpm test:next-root-glob
+        working-directory: frontend
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
