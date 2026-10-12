@@ -240,6 +240,26 @@ def validate_situation_policy_composition(path, original_source, current_source,
         raise ValueError("Chat actual service construction changed")
 
 
+def validate_world_stream_product_change(path, original_source, current_source, matches):
+    """Retain HTTP/auth/DI framing around the committed erasure stream change.
+
+    Retirement does not freeze a product endpoint's body forever. Only this
+    named stream can use exact committed definition evidence, and its arguments,
+    decorators, return type and every surrounding module binding stay frozen.
+    """
+    original, current = ast.parse(original_source), ast.parse(current_source)
+    name = "stream_world_response_events"
+    before = [node for node in original.body if isinstance(node, ast.FunctionDef) and node.name == name]
+    after = [node for node in current.body if isinstance(node, ast.FunctionDef) and node.name == name]
+    if len(before) == len(after) == 1:
+        old_frame, new_frame = copy.deepcopy(before[0]), copy.deepcopy(after[0])
+        old_frame.body = new_frame.body = [ast.Pass()]
+        if dump(old_frame) == dump(new_frame) and matches(path, name, before[0], after[0]):
+            original.body[original.body.index(before[0])] = after[0]
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual stream HTTP/auth/dependency frame or committed body changed")
+
+
 def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if enabled is False or enabled is None:
         return None
@@ -357,6 +377,8 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
             validate_message_settings_retirement(
                 actual_route, original_route, current_route, matches,
             )
+        elif actual_route == "backend/app/domains/chat/router/world_chat_response.py":
+            validate_world_stream_product_change(actual_route, original_route, current_route, matches)
         elif dump(ast.parse(original_route)) != dump(ast.parse(current_route)):
             raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
     dependency = "backend/app/domains/chat/dependencies.py"
