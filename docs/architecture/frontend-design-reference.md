@@ -1,5 +1,14 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-13 World deletion dialog: **LOCAL** reuse of the existing semantic
+Dialog, Button and Field/Input. The World feature owns the compact target and
+deletion/preservation summary, bordered name confirmation and optional collapsed
+package-export slot. Header/actions stay visible while the body scrolls. Next
+and static share the same controller; backend confirmation, scope, default SNS
+protection and response-loss idempotency remain unchanged. No external assets,
+fonts, dependencies or raw colors are added. Verification is recorded in
+`docs/verification/world-delete-dialog-20261013.md`.
+
 2026-10-12 image recovery: **LOCAL** preservation of the existing ProfileAvatar,
 World preview and shared crop UI. Exact API serialization, guarded World reads and
 scoped blob transport restore actual images without new copy, colors, assets or
