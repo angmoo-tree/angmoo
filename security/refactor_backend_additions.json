@@ -36796,6 +36796,51 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "ea94bc34cbb81ea26f8a4aa20c72ce2825e32831",
+      "feature_id": "AR-COMPRESSED-HISTORY-READ",
+      "reason": "Real Git cache boundary and fresh candidate/provenance negative regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_late_product_change_evidence.py::test_pinned_history_bytes_stay_exact_while_new_head_is_revalidated",
+        "tests/test_late_product_change_evidence.py::test_warm_history_never_accepts_changed_candidate_prefix",
+        "tests/test_late_product_change_evidence.py::test_warm_native_history_does_not_hide_injected_reader_or_other_repo"
+      ],
+      "test_assertions": {
+        "tests/test_late_product_change_evidence.py": {
+          "committed_history_fixture": [],
+          "test_pinned_history_bytes_stay_exact_while_new_head_is_revalidated": [
+            "assert changes.committed_history_bytes(tmp_path, old_object) == original",
+            "assert changes.load(tmp_path) == [first]",
+            "assert changes.load(tmp_path) == [first, second]",
+            "assert changes.committed_history_bytes(tmp_path, old_object) == original",
+            "pytest.raises(ValueError, match='exact committed ledger')"
+          ],
+          "test_warm_history_never_accepts_changed_candidate_prefix": [
+            "assert changes.load(tmp_path) == [first]",
+            "pytest.raises(ValueError, match='append-only')"
+          ],
+          "test_warm_native_history_does_not_hide_injected_reader_or_other_repo": [
+            "assert changes.load(tmp_path) == [first]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(subprocess.CalledProcessError)"
+          ],
+          "test_late_evidence_uses_real_git_topology_without_rewriting_or_skipping_steps": [
+            "pytest.raises(ValueError, match='chain preimage')",
+            "assert manifest.read_bytes() == before",
+            "assert [item['implementation_commit'] for item in ordered] == [early, late]",
+            "assert payload['records'] == [late_record, early_record]",
+            "assert changes.frontend_matches(source, 'v1\\n', 'v3\\n', ordered)",
+            "assert not changes.frontend_matches(source, 'v1\\n', 'unrecorded\\n', ordered)",
+            "pytest.raises(ValueError, match='committed preimage')",
+            "pytest.raises(ValueError, match='append-only')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_late_product_change_evidence.py": {}
+      }
     }
   ]
 }
