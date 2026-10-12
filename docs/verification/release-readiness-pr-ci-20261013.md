@@ -1,0 +1,150 @@
+# Release readiness integration evidence — 2026-10-13
+
+This report distinguishes committed source, focused local regressions, hosted CI,
+platform review, deployment and real-provider quality. This is the pre-publication
+preparation snapshot at 2026-10-13 08:09 KST. Pending items are not PASS; exact final
+head/base and completed CI outcomes are recorded in the PR and workspace execution
+ledger rather than inferred from this earlier snapshot.
+
+## Source and preservation
+
+- Repository: `angmoo-tree/angmoo`; branch: `feat/0.1.0-release-readiness`.
+- Original unpublished source HEAD: `9a2c9040e8a750433005f200998dfa7a187acc09`.
+- Public base observed during preparation: `97102c98e67781e306103cacbd2a4bba325d15f2`.
+- Original source is retained in the local `backup/release-readiness-20261013-pre-pr`
+  branch. It is not pushed as part of the PR.
+- The author explicitly certified the 60 missing DCO trailers and approved the
+  unpublished history repair. The 70 logical commits retain order, author and
+  product code/test/asset trees; only missing trailers and exact references in the
+  two unpublished provenance ledgers changed. Official DCO validation passed on
+  the independent replay clone. Public history and frozen checkpoints remained
+  unchanged. Historical source SHAs in old reports remain historical.
+- CI preparation fixes are separate signed commits after that replay. Late
+  evidence retains immutable ledger order, verifies real source blob/parent
+  preimages and ancestry, then follows actual Git topology. It does not use dates,
+  arbitrary aliases, allowlists or omitted transitions to excuse drift.
+- Preparation implementation source: `2e87d02d11f885bc4a04f8060e484b67fb1a2226`.
+  The official source/API/ORM/assertion stages completed; the last full collection
+  reported two obsolete unparameterized node IDs. Exact original-case mappings
+  now retain their expanded matrices, with 6296 protected current identities and
+  6296 collected tests. Both expanded matrices passed (6 cases). Final committed
+  metadata/source validation must pass before publication and in required CI.
+  Historical collection targets relevant changed test files; the final official
+  checker still collects the entire current corpus and checks every protected
+  lineage. Collection is not test execution.
+- Completing the missing historical AST/assertion evidence increases the Git
+  ledger size and validation cost. Existing entries remain append-only; immutable
+  source-object caching and streaming historical ledger reads bound memory while
+  retaining the comparisons. This cost is recorded rather than hiding missing
+  evidence with a new current-tree baseline.
+
+## Scope of the integration
+
+The branch consolidates World-owned credentials and settings, private memory
+batching and durable situations, Chat participant/evidence handling and optional
+person hints, source revalidation and timeout recovery, Creator Studio/profile
+media, World deletion with default SNS protection and reusable character
+foundations, Comfy workflow compatibility, Partner transport and Windows managed
+key/CSP protection. Original feature plans and their existing verification reports
+describe each implementation and its measured boundaries.
+
+Preparation corrected actual ownership problems rather than relaxing architecture
+rules: shared credential state has a lower owner, situation value types have a
+single dependency direction, Chat consumes a supported Relationships operation
+and a neutral retained-manifest port, Worlds owns its write lock, and concrete
+erasure/upper composition are separate from low-level fences/model registration.
+Cold migrations can reflect SQL descriptors but reviewed deletion rules still
+determine scope and an incomplete schema fails.
+
+The preservation checker now recognizes two existing product changes through
+closed, exact committed proofs. World stream termination can change its body
+while all HTTP authentication/dependency/route/argument/return bindings remain
+protected. Model registration retains the one canonical Base and direct owner
+imports, with only the committed SQLite `after_create` write-fence hook allowed.
+The retired World topic view requires its actual deletion preimage, supported
+owner/behavior sources and absence of active consumers. Arbitrary hook, route,
+primitive, source or dialect changes still fail. The old scheduler recovery and
+Comfy Partner tests are mapped one-to-one to their actual renamed tests; exact
+parent/child assertion transitions preserve the approved single recovery owner
+and retired server-key contracts.
+
+The World recommendation fixture now verifies the retained catalog and absence of
+retired World topic preparation. A separate route fixture verifies current
+translation/Studio route bindings rather than an obsolete `P1` heading. API
+unknown-field, authorization and version assertions are retained.
+
+The image loader/proxy lint defects were fixed without changing their HTTP and
+payload assertions. `sharp` changed from 0.35.4 to 0.35.5; Next and its ESLint
+configuration changed from 16.3.6 to 16.3.8. These are compatible security patches;
+native install-script policy remains disabled. They address
+[GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w) and
+[GHSA-cjq9-62q9-8jv4](https://github.com/advisories/GHSA-cjq9-62q9-8jv4).
+Lockfiles and the deterministic third-party notice match actual packages.
+
+The exact full-tree CI audit also exposed the unresolved `braces` advisory
+[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm).
+The registry has no 3.0.4 release despite that generic audit suggestion. Instead
+of an audit exclusion, the single pinned Next lint consumer uses
+`tinyglobby`0.2.17's `globSync` API. A checksum-bound pnpm patch specifies literal
+directory expansion and absolute-path handling to preserve its old behavior,
+including Windows drives. The regression executes the actual Next root helper
+and its internal-link rule: valid roots/links stay accepted and invalid internal
+anchors are still reported. The vulnerable dependency is absent from the lock
+tree; 16 unused development dependencies were removed. The accepted maintenance
+cost is reviewing this small pinned patch when upgrading the Next lint plugin.
+The regression is wired into hosted frontend CI. Production dependencies and
+application UI remain independent of this lint-only substitution.
+
+## Focused local validation
+
+| Validation | Result and limits |
+| --- | --- |
+| Scoped backend ownership/credentials/situation/evidence/World lifecycle/erasure/graph files | Initial run: 199 passed, 1 failed, 1 optional cost benchmark skipped. The obsolete heading failure was corrected and its exact HTTP/source-contract node passed separately. No new skip was added. |
+| Existing provenance negatives, real Git late-evidence chain and cold erasure descriptor/fence tests | 22 passed. Missing transitions, modified source preimages and rewritten ledger history remain rejected. |
+| Authenticated stream frame proof negatives | 5 passed; altered decorators, dependency/arguments and surrounding bindings remain rejected. |
+| Registration fence and retired World topic view proof, including existing model preservation cases | 35 passed; missing/wrong proof, unsafe hooks/providers/dialects and active retired consumers remain rejected. |
+| Single recovery-owner and Comfy Partner contract regressions | 20 passed; synthetic transport, no GPU or external provider call. |
+| Expanded Chat situation delivery and native graph erasure original cases | 6 passed; all added identity/question/event-free cases remain protected. |
+| Backend architecture | PASS: 1518 modules, 6540 internal edges, 0 legacy exceptions. |
+| Frontend lint/type/catalog | PASS; catalog: 16 namespaces and 2617 source keys with key/parameter/plural parity. |
+| Frontend ownership/design | PASS: 14 features; raw-color inventory 1157 in 35 files, 18 surfaces, 0 route gaps, 61 existing screenshot mappings. This is not a new visual user review. |
+| World image URL/token/exact profile payload script | PASS. |
+| Profile photo proxy HTTP/headers/chunks/CSRF script | PASS against a synthetic upstream and isolated Next server. |
+| Next 16.3.8 production and static shell builds | PASS, no production key or provider call. |
+| Production dependency audit | PASS: no known vulnerabilities in the audited production dependency tree. |
+| Python frozen-lock audit with uv 0.12.5 | PASS: 85 packages, no known vulnerabilities or adverse project statuses at the audit time. |
+| Full dependency audit and pinned Next root/link-rule regression | PASS on the local Windows runtime; no advisory exclusion or severity change. Hosted Linux execution is still pending. |
+| Dependency/project license and deterministic notice | PASS: Python 85, Node 67, 5 existing conditional reviews; GPL identity retained. |
+| Generated architecture/L4/deferred/embedded inventories | Refreshed by official generators and checked. Frozen migration/checkpoint/visual evidence was not regenerated. |
+| Current source secret/privacy scan with asset inspectors | 0 fatal findings. Existing audit-only asset/vocabulary classifications are recorded separately; no current-tree finding was suppressed. |
+| Full reachable source history scan | 17872 files, 61 binary audits, 57 audit-only findings, 0 fatal findings. Historical asset/vocabulary classifications remain visible rather than suppressed. |
+| Hosted required PR and exact merge-SHA main CI | **PENDING**. |
+| Target-OS CI and explicit final-head platform owner review | **PENDING**. |
+
+The optional `ANGMOO_MEASURE_CHAT_IDENTITY_COSTS` benchmark was not enabled. Its
+preserved baseline comparison was not represented as a performance PASS. The
+local run did not execute the entire backend/browser corpus; required hosted
+suites and Windows installer child matrices retain their full scope.
+
+## Isolation and remaining boundaries
+
+Validation used synthetic profiles/Worlds, temporary SQLite/graph/media roots,
+fake/none providers and network-disabled backend containers. User dotenv, API
+keys, conversations, installed data and active Docker volumes were not copied
+into fixtures or published artifacts. Pinned pnpm 11.22.0 and Python 3.13 were
+used; the isolated Windows dependency environment was materialized with uv
+0.12.5. Source-only checks performed before that environment existed are not
+mistaken for full runtime/asset checks.
+
+No existing user app container was restarted, rebuilt or replaced. The user can
+continue observing the existing fixed Docker image without source watch. No tag,
+release, installed-app update, real model image generation, GPU/model install,
+Partner payment or paid AI/embedding call was performed. Previous Comfy decoder
+verification and real-AI/user-quality observations retain their original limits.
+
+World deletion remains irreversible after admission and protects the default SNS
+binding, other World scopes, shared character foundations and initial managed
+media. Schema changes use shipped versioned migrations; deployment and data
+rollback are independent of this Git integration. Platform-shell approval and
+post-merge CI receipts are recorded in the workspace execution plan rather than
+rewriting `main` to add a completion claim.
