@@ -274,6 +274,9 @@ def git_bytes(*args: str, root: Path = ROOT) -> bytes:
     # Mutable refs, working-tree reads, and injected subprocess readers always
     # execute again. No candidate file, HEAD, ancestry-to-HEAD or failure is
     # memoized. Cache identity also includes the absolute repository path.
+    if (subprocess.run is _NATIVE_GIT_RUN and len(args) == 2 and args[0] == "show"
+            and re.fullmatch(r"[0-9a-f]{40}:" + re.escape(product_changes.MANIFEST), args[1])):
+        return product_changes.committed_history_bytes(root, args[1])
     if subprocess.run is _NATIVE_GIT_RUN and immutable_git_read(args):
         return _immutable_git_bytes(args, str(root.resolve()))
     return _read_git(args, root)

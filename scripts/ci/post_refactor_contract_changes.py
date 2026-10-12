@@ -15,8 +15,22 @@ import hashlib
 from pathlib import Path
 import re
 import subprocess
+import zlib
 
 MANIFEST = "security/post_refactor_contract_changes.json"
+
+
+@lru_cache(maxsize=32)
+def _compressed_git_history(root: str, object_path: str) -> bytes:
+    # Store compressed immutable bytes, never parsed/validated candidate state.
+    return zlib.compress(subprocess.check_output(["git", "show", object_path], cwd=root), level=1)
+
+
+def committed_history_bytes(root: Path, object_path: str) -> bytes:
+    """Read one pinned ledger object exactly, with bounded compressed storage."""
+    if not re.fullmatch(r"[0-9a-f]{40}:" + re.escape(MANIFEST), object_path):
+        raise ValueError("history cache requires an exact committed ledger object")
+    return zlib.decompress(_compressed_git_history(str(root.resolve()), object_path))
 
 
 @lru_cache(maxsize=8192)
@@ -53,13 +67,12 @@ def load(root: Path, *, reader=None) -> list[dict]:
         return _committed_git(str(root.resolve()), head, args)
 
     def git(*args: str) -> bytes:
-        # History documents can each be tens of MiB. Stream their bytes into
-        # the same append-only comparison without retaining every historical
-        # version in either the per-load or process-wide source-object cache.
+        # Reuse only compressed, pinned historical bytes. Parse and compare the
+        # complete prefix again; the candidate and current owners remain fresh.
         if len(args) == 2 and args[0] == "show" and args[1].endswith(":" + MANIFEST):
             if reader is not None:
                 return reader(*args, root=root)
-            return subprocess.check_output(["git", *args], cwd=root)
+            return committed_history_bytes(root, args[1])
         return cached_git(*args)
 
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
