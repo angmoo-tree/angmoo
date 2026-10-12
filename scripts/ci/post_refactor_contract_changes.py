@@ -20,7 +20,7 @@ import zlib
 MANIFEST = "security/post_refactor_contract_changes.json"
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=128)
 def _compressed_git_history(root: str, object_path: str) -> bytes:
     # Store compressed immutable bytes, never parsed/validated candidate state.
     return zlib.compress(subprocess.check_output(["git", "show", object_path], cwd=root), level=1)
