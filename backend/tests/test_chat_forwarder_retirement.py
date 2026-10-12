@@ -21,6 +21,11 @@ def signed_reader():
     cache = {}
 
     def read(*args, root):
+        # History is rechecked for every validation without retaining every
+        # multi-MiB manifest in this injected reader. Immutable source objects
+        # still share the same cache; no assertion or provenance check is skipped.
+        if len(args) == 2 and args[0] == "show" and args[1].endswith(":security/post_refactor_contract_changes.json"):
+            return subprocess.check_output(["git", *args], cwd=REPO)
         if args not in cache:
             cache[args] = subprocess.check_output(["git", *args], cwd=REPO)
         return cache[args]
