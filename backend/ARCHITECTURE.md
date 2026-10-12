@@ -1,5 +1,23 @@
 # Angmoo Backend Architecture
 
+## World image reads and own-profile media contracts (2026-10-12 LOCAL)
+
+Worlds owns current icon/banner pixel reads in `service/media.py`. Both the
+retained `/media/worlds/{world_id}/{filename}` and API
+`/api/v1/worlds/{world_id}/media/{filename}` paths reuse this service and the
+existing World read policy. Active membership grants the existing private/draft
+read; anonymous access is only published public/unlisted. Current persisted image
+reference, bounded filename, World directory and symlink checks precede FileResponse.
+Main composes the compatibility router; common public media mounts do not expose
+the World directory or private asset/draft/candidate directories. Reads use
+private/no-store responses and preserve existing files, URLs, package IO and schema.
+
+Own-profile upload keeps its strict four-field schema, owner and version guards.
+Worlds frontend serializes only those fields from the shared Characters crop
+payload. The identity response projection includes its existing handle/banner
+fields so saved values survive upload and reload; no new stored field is added.
+Evidence: [focused image recovery](../docs/verification/world-image-recovery-20261012.md).
+
 ## Chat advisory interpretation and fresh canonical reads (2026-10-11 LOCAL)
 
 New `social_hybrid` Chat admissions freeze the server-owned

@@ -247,6 +247,8 @@ def identity_read(
         version=snapshot.version,
         profile=OwnerControlledProfileRead(
             display_name=snapshot.profile.display_name,
+            handle=snapshot.profile.handle,
+            banner_url=snapshot.profile.banner_url,
             avatar_url=snapshot.profile.avatar_url,
             intro=snapshot.profile.intro,
             role_key=snapshot.profile.role_key,

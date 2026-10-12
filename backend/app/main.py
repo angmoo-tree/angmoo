@@ -426,6 +426,8 @@ def create_app(
             create_public_api_router(extension.routers if extension else ()),
             prefix=runtime_settings.api_v1_prefix,
         )
+        from app.domains.worlds.router import legacy_media_router
+        runtime_app.include_router(legacy_media_router)
         mount_public_media(
             runtime_app,
             runtime_settings,

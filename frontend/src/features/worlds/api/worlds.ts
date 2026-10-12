@@ -50,7 +50,15 @@ export function patchMyProfile(worldId: string, data: { version: number; display
 }
 
 export function uploadMyProfileMedia(worldId: string, data: { version: number; media_type: "avatar" | "banner"; content_type: string; data_base64: string }) {
-  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/media"), { method: "POST", body: data });
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/media"), {
+    method: "POST",
+    body: {
+      version: data.version,
+      media_type: data.media_type,
+      content_type: data.content_type,
+      data_base64: data.data_base64,
+    },
+  });
 }
 
 export class WorldApiError extends Error {

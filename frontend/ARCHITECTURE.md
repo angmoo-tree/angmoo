@@ -1,5 +1,18 @@
 # Angmoo Frontend Architecture
 
+## World and own-profile image transport (2026-10-12 LOCAL)
+
+Worlds API owns exact four-field serialization for own-profile uploads. Shared
+Characters crop payloads retain filename for their existing consumers. The common
+runtime media transport maps retained `/media/worlds/...` references to the guarded
+World image API via the Next proxy or static sidecar. Safe media validation keeps
+the original relative reference until the hook performs the scoped authenticated
+fetch and creates a blob. Auth/runtime changes invalidate fetched blobs; late
+responses and unmount revoke them. Other public media, private assets and default
+images retain their existing transport. The same features serve Next/static;
+no layout, visible copy, dependencies or canonical visual assets change.
+Evidence: [focused image recovery](../docs/verification/world-image-recovery-20261012.md).
+
 ## World image editing and scoped search diagnostics (2026-10-11 LOCAL)
 
 `features/worlds` owns same-page icon/banner editing in Creator Studio. Explicit

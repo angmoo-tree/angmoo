@@ -24,7 +24,8 @@ export function safeSameOriginMediaUrl(
     const relative = `${parsed.pathname}${parsed.search}${parsed.hash}`;
     // Keep authenticated asset paths relative until the runtime media owner
     // fetches them with the current session/launch scope and creates its blob.
-    return isAssetContent ? relative : resolveRuntimeMediaUrl(relative);
+    return isAssetContent || parsed.pathname.startsWith("/media/worlds/")
+      ? relative : resolveRuntimeMediaUrl(relative);
   } catch {
     return null;
   }

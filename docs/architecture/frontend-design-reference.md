@@ -1,5 +1,13 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-12 image recovery: **LOCAL** preservation of the existing ProfileAvatar,
+World preview and shared crop UI. Exact API serialization, guarded World reads and
+scoped blob transport restore actual images without new copy, colors, assets or
+Hosted behavior. Two functional screenshot capture sites are explicitly inventoried;
+all eleven canonical PNGs and visual thresholds remain unchanged. Related Next/static
+behavior and actual Docker source sync are separate from installed-app USER CHECK.
+Evidence: `docs/verification/world-image-recovery-20261012.md`.
+
 2026-10-09 World summaries, graph and settings: **LOCAL** reuse of existing
 SettingsCard, ProfileAvatar, WorldApp/Device scroll ownership, semantic coral
 icons, controls and dialogs. New plan/topic summaries reuse feature presentation;

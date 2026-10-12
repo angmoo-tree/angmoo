@@ -1,7 +1,7 @@
 {
-  "edge_count": 6467,
-  "external_import_count": 4389,
-  "module_count": 1501,
+  "edge_count": 6474,
+  "external_import_count": 4393,
+  "module_count": 1502,
   "modules": [
     {
       "external_imports": [],
@@ -15788,6 +15788,7 @@
       "external_imports": [
         "__future__",
         "fastapi",
+        "fastapi.responses",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -15797,7 +15798,8 @@
         "app.database",
         "app.domains.worlds.schemas",
         "app.domains.worlds.service",
-        "app.domains.worlds.service.default_space"
+        "app.domains.worlds.service.default_space",
+        "app.domains.worlds.service.media"
       ],
       "module": "app.domains.worlds.router",
       "path": "backend/app/domains/worlds/router.py",
@@ -15946,6 +15948,23 @@
       ],
       "module": "app.domains.worlds.service.generation_context",
       "path": "backend/app/domains/worlds/service/generation_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pathlib",
+        "re",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.media.contracts",
+        "app.domains.worlds.exceptions",
+        "app.domains.worlds.service.creator",
+        "app.integrations.media.files"
+      ],
+      "module": "app.domains.worlds.service.media",
+      "path": "backend/app/domains/worlds/service/media.py",
       "wildcard_imports": []
     },
     {
@@ -16637,6 +16656,7 @@
         "app.domains.runtime.contracts.status",
         "app.domains.runtime.service.components",
         "app.domains.world_packages.storage.import_media",
+        "app.domains.worlds.router",
         "app.runtime.account_deletion",
         "app.runtime.autonomous_activity.binding",
         "app.runtime.autonomous_activity.checkpoint_maintenance",
