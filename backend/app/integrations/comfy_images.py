@@ -11,7 +11,7 @@ from PIL import Image
 from app.domains.media.generation_contracts import (ComfyOptions, ComfyWorkflow, PlaceholderWorkflow,
     ImagePreparationError, ImageSubmissionError, ImageResult)
 from app.domains.media.service.comfy_workflows import (analyze_graph, bounded_json, freeze_comfy_request,
-    output_policy, prepare_values, render_workflow, required_roles, select_comfy_workflow, validate_app_workflow, validate_base_url, TOKENS)
+    output_policy, prepare_values, render_workflow, required_roles, select_comfy_workflow, validate_app_workflow, validate_base_url, partner_submission_target, TOKENS)
 from app.integrations.image_api import ImageHttp
 from app.integrations.comfy_diagnostics import diagnostic
 from app.integrations.media.images import validate_generated_media_content
@@ -81,6 +81,7 @@ class ComfyImageClient:
     async def validate(self, options, key=None, *, has_reference=True):
         if key:
             raise ImagePreparationError("comfy_server_key_retired")
+        partner_submission_target(self.base, options.partner_auth)
         if options.workflow is None:
             raise ImagePreparationError("comfy_workflow_required")
         analyses = {}
@@ -118,12 +119,14 @@ class ComfyImageClient:
         if key:
             raise ImagePreparationError("comfy_server_key_retired")
         options = ComfyOptions.model_validate(request.options)
-        if options.partner_auth and not partner_key:
-            raise ImagePreparationError("comfy_partner_key_required")
         deadline = time.monotonic() + timeout
         warning = None
         sensitive = [key, partner_key, request.positive, request.negative]
+        target = None
         if receipt is None:
+            target = partner_submission_target(self.base, options.partner_auth)
+            if options.partner_auth and not partner_key:
+                raise ImagePreparationError("comfy_partner_key_required")
             request = freeze_comfy_request(request, has_reference=reference is not None)
             snapshot = request.comfy_execution
             workflow = getattr(options, snapshot.selected_path)
@@ -139,7 +142,7 @@ class ComfyImageClient:
                     sensitive.append(values["reference"])
                 else:
                     info = inspect_image_bytes(reference, max_bytes=10 * 1024 * 1024)
-                    upload = await self.http.request("POST", self.base + "/upload/image", key=key,
+                    upload = await self.http.request("POST", target + "/upload/image", key=key,
                         files={"image": (f"angmoo-reference.{info.extension}", reference, info.content_type)}, data={"type": "input", "overwrite": "false"})
                     payload = upload.json()
                     filename, folder = payload.get("name"), payload.get("subfolder", "")
@@ -152,7 +155,7 @@ class ComfyImageClient:
             body = bounded_json(payload)
             if on_submit:
                 await on_submit()
-            response = await self.http.request("POST", self.base + "/prompt", key=key, content=body,
+            response = await self.http.request("POST", target + "/prompt", key=key, content=body,
                 headers={"Content-Type": "application/json"}, error_body_limit=32 * 1024)
             try:
                 payload = response.json()
@@ -174,7 +177,8 @@ class ComfyImageClient:
         else:
             policy = request.comfy_execution.output if request.comfy_execution else output_policy(options.workflow)
         try:
-            result = await self.retrieve(receipt, policy, key=key, deadline=deadline, sensitive=sensitive)
+            result = await self.retrieve(receipt, policy, key=key, deadline=deadline, sensitive=sensitive,
+                base_url=target)
             return replace(result, diagnostic=warning)
         except ImageSubmissionError as exc:
             terminal = exc.code in {"comfy_execution_failed", "comfy_no_image_output", "comfy_selected_output_missing", "comfy_output_shape_invalid", "generated_media_invalid"}
@@ -190,12 +194,13 @@ class ComfyImageClient:
             raise ImageSubmissionError("comfy_upload_response_invalid" if upload else "comfy_output_shape_invalid", stage="output")
         return name, folder
 
-    async def retrieve(self, receipt, output_node, *, key, deadline, sensitive=()):
+    async def retrieve(self, receipt, output_node, *, key, deadline, sensitive=(), base_url=None):
         if key:
             raise ImagePreparationError("comfy_server_key_retired")
         policy = {"mode": "legacy_single", "node_id": output_node} if isinstance(output_node, str) else output_node
+        base = self.base if base_url is None else base_url
         while time.monotonic() < deadline:
-            response = await self.http.request("GET", self.base + "/history/" + quote(receipt, safe=""), key=key, timeout=min(15, max(1, deadline - time.monotonic())))
+            response = await self.http.request("GET", base + "/history/" + quote(receipt, safe=""), key=key, timeout=min(15, max(1, deadline - time.monotonic())))
             try:
                 history = response.json()
                 item = history.get(receipt) if isinstance(history, dict) else None
@@ -212,7 +217,7 @@ class ComfyImageClient:
                 if completed or ("status" not in item and outputs):
                     image = select_image(outputs, policy)
                     name, folder = self._descriptor(image)
-                    response = await self.http.request("GET", self.base + "/view", key=key,
+                    response = await self.http.request("GET", base + "/view", key=key,
                         params={"filename": name, "subfolder": folder, "type": image["type"]})
                     mime = response.headers.get("content-type", "").split(";")[0]
                     try:

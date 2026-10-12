@@ -20,6 +20,7 @@ RUN pnpm install --frozen-lockfile
 
 FROM dependencies AS development
 COPY --chown=node:node frontend ./
+COPY --chown=node:node docs/agent_guide.md docs/agent_guide.en.md /docs/
 RUN mkdir -p /app/.next
 EXPOSE 3000
 CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
@@ -28,6 +29,7 @@ FROM dependencies AS build
 ARG ANGMOO_API_BASE_URL=http://backend:8080
 ENV ANGMOO_API_BASE_URL=${ANGMOO_API_BASE_URL}
 COPY --chown=node:node frontend ./
+COPY --chown=node:node docs/agent_guide.md docs/agent_guide.en.md /docs/
 RUN pnpm build
 
 FROM ${NODE_IMAGE} AS runtime
@@ -53,9 +55,10 @@ ENV NODE_ENV=production \
     ANGMOO_API_BASE_URL=http://backend:8080
 
 WORKDIR /app
-COPY --from=build --chown=node:node /app/public ./public
+COPY --from=build --chown=node:node /app/public ./app/public
 COPY --from=build --chown=node:node /app/.next/standalone ./
-COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/.next/static ./app/.next/static
+COPY --from=build --chown=node:node /docs/ ./docs/
 
 RUN rm -rf \
       /opt/yarn-v1.22.22 \
@@ -71,4 +74,4 @@ USER node
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=6 \
   CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
-CMD ["node", "server.js"]
+CMD ["node", "app/server.js"]

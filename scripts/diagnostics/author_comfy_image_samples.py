@@ -36,8 +36,30 @@ def make(reference=False):
             "source": "Angmoo independently authored API graph", "docs": "https://docs.comfy.org/development/comfyui-server/comms_routes"}}
 
 
+def make_api(reference=False):
+    """Keep the historical config builder intact; export just an API graph."""
+    sample = make(reference)
+    graph = deepcopy(sample["workflow"]["prompt"])
+    tokens = {"positive": "%prompt%", "negative": "%negative_prompt%", "model": "%model%",
+        "width": "%width%", "height": "%height%", "steps": "%steps%", "cfg": "%scale%",
+        "sampler": "%sampler%", "scheduler": "%scheduler%", "seed": "%seed%",
+        "denoise": "%denoise%", "reference": "%char_avatar%"}
+    for role, binding in sample["workflow"]["bindings"].items():
+        graph[binding["node_id"]]["inputs"][binding["input_name"]] = tokens[role]
+    if reference:
+        graph["8"]["class_type"] = "ETN_LoadImageBase64"
+    return graph
+
+
 if __name__ == "__main__":
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--format",choices=("config","api_json"),default="config")
+    selected=parser.parse_args().format
     ROOT.mkdir(parents=True, exist_ok=True)
     for reference in (False, True):
-        (ROOT / f"comfy-{'reference' if reference else 'text'}.json").write_text(json.dumps(make(reference), ensure_ascii=False, indent=2) + "\n", "utf-8")
+        name=f"comfy-{'api-' if selected=='api_json' else ''}{'reference' if reference else 'text'}.json"
+        content=json.dumps(make_api(reference) if selected=='api_json' else make(reference), ensure_ascii=False, indent=2) + "\n"
+        if selected=='api_json':(ROOT / name).write_bytes(content.encode("utf-8"))
+        else:(ROOT / name).write_text(content,"utf-8")
     print("Authored text and reference samples. No model installation or API call.")

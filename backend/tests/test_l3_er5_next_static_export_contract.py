@@ -58,13 +58,16 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
         "WorldAppRouteClient",
         "WorldCreatorClient",
         "WorldCharacterAutonomySetupClient",
-        "RelationshipGraphClient",
         "AgentDetailClient",
         "PostListClient",
         "PostDetailClient",
         "SettingsClient",
     ):
         assert marker in router
+    # The World section owns the graph through composition; a direct static
+    # router import would now cross the screen boundary.
+    assert "WorldRelationshipsScreen" in _read("frontend/src/composition/screens/world-app.tsx")
+    assert "RelationshipGraphClient" in _read("frontend/src/composition/screens/world-relationships-screen.tsx")
 
 
 def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() -> None:

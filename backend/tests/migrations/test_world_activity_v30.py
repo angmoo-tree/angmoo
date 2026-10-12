@@ -40,14 +40,24 @@ def populated_v29(tmp_path, *, invalid_key=False, duplicate_key=False):
     from app.domains.characters.models import AgentImageGenerationSetting
     from app.domains.memory.models.batch import MemoryBatchProfile
     from app.domains.world_characters.models import WorldCharacter
-    from memory.test_p8_l_o_memory_consolidation import _stack
+    from memory.test_p8_l_o_memory_consolidation import _seed_world
+    from app.domains.memory.models.items import MemoryScopeSettingModel
     register_models()
     engine = create_engine(f"sqlite:///{tmp_path / 'populated-v29.sqlite3'}")
     build_sqlite_v29_metadata().create_all(engine)
     with engine.begin() as connection:
         create_schema_version_table(connection)
     with Session(engine) as db:
-        scope, setting, *_ = _stack(db)
+        # Seed the historical schema directly. The current memory service also
+        # reads v32 deletion tables, which did not exist in this v29 database.
+        scope = _seed_world(db)
+        from environment_fixture_support import seed_environment
+        seed_environment(db, scope.owner_id)
+        setting = MemoryScopeSettingModel(id="v29-fixture-setting", owner_id=scope.owner_id,
+            world_id=scope.world_id, subject_world_character_id=scope.subject_world_character_id,
+            enabled=True, retention_days=180, provider_mode="none", version=2)
+        db.add(setting)
+        db.flush()
         character = db.get(WorldCharacter, scope.subject_world_character_id).character_id
         aad = security.SecretScope(owner_id=scope.owner_id, character_id=character, provider="google", purpose="agent")
         encrypted = "invalid-envelope" if invalid_key else security.encrypt_secret("synthetic-sns-key", scope=aad)
@@ -96,8 +106,13 @@ def test_populated_transition_keeps_original_aad_configuration_and_independent_p
         kwargs = dict(owner_id=scope.owner_id, world_id=scope.world_id, world_character_id=scope.subject_world_character_id)
         assert world_credentials.resolve(db, **kwargs, purpose="sns").reveal() == "synthetic-sns-key"
         assert world_credentials.find(db, **kwargs, purpose="sns").aad_character_id == character
-        image, partner = world_credentials.resolve_image_keys(db, **kwargs)
-        assert image.reveal() == "synthetic-comfy-server" and partner == "synthetic-comfy-partner"
+        # Test v30 migration bytes with its envelope contract, rather than the
+        # current send-time policy that deliberately rejects general server keys.
+        from app.core import security
+        image = world_credentials.find(db, **kwargs, purpose="image")
+        original = json.loads(security.decrypt_secret(image.encrypted_secret,scope=security.SecretScope(
+            owner_id=scope.owner_id,character_id=image.aad_character_id,provider=image.provider,purpose=image.aad_purpose)))
+        assert original == {"version":"comfy-secrets.v1","key":"synthetic-comfy-server","partner":"synthetic-comfy-partner"}
         assert not world_credentials.find(db, **kwargs, purpose="chat")
         policy = db.get(WorldImagePolicy, scope.subject_world_character_id)
         assert policy.generation_limit == 12 and policy.vision_limit is None and not policy.vision_enabled

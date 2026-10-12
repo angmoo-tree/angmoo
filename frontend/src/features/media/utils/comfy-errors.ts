@@ -21,6 +21,7 @@ const messages: Record<string, string> = {
   comfy_url_invalid: "ComfyUI 서버의 기본 주소를 확인해 주세요. 사용자 정보·쿼리·fragment는 사용할 수 없습니다.",
   comfy_connection_invalid: "ComfyUI 서버 연결을 확인하지 못했습니다.",
   comfy_partner_key_required: "Partner 인증을 사용하려면 별도의 Comfy 계정 API 키를 저장해 주세요.",
+  comfy_partner_https_required: "원격 서버에 Comfy 계정 키를 보내려면 HTTPS 주소를 사용해 주세요.",
   comfy_prompt_rejected: "ComfyUI가 작업을 접수하지 못했습니다.",
   comfy_prompt_response_invalid: "접수 결과를 확인해야 합니다. 같은 작업을 다시 제출하지 않습니다.",
   comfy_execution_failed: "ComfyUI에서 작업 실행에 실패했습니다.",
@@ -28,8 +29,8 @@ const messages: Record<string, string> = {
   comfy_selected_output_missing: "지정한 노드에 이미지 결과가 없습니다.",
   comfy_output_shape_invalid: "첫 이미지 결과의 파일 정보를 확인하지 못했습니다. 다른 결과로 바꾸지 않습니다.",
   generated_media_invalid: "첫 이미지 결과의 형식이나 크기를 확인하지 못했습니다. 다른 결과로 바꾸지 않습니다.",
-  provider_http_401: "ComfyUI 서버 인증 키를 확인해 주세요.",
-  provider_http_403: "ComfyUI 서버 접속 권한을 확인해 주세요.",
+  provider_http_401: "ComfyUI 서버 접근과 Partner 계정 조건을 확인해 주세요.",
+  provider_http_403: "ComfyUI 서버 접근과 Partner 계정 조건을 확인해 주세요.",
   reference_pixels_invalid: "참조 이미지의 형식이나 크기를 확인해 주세요.",
   generation_reference_changed: "참조 이미지의 권한이나 버전이 바뀌었습니다. 설정을 다시 확인해 주세요.",
 };

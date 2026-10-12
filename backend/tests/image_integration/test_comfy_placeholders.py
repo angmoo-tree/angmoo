@@ -223,7 +223,9 @@ def test_submission_diagnostics_redact_selected_fields_and_receipt_warning_survi
         {"type": "invalid", "message": "actual caller scene server-secret", "inputs": {"key": "server-secret"}, "traceback": ["forbidden"]}]}}}
     http = transport(submitted=httpx.Response(200, json=payload)); warnings = []
     async def warn(value): warnings.append(value)
-    result = asyncio.run(ComfyImageClient(options().base_url, http).generate(request(), "server-secret", None, on_receipt=received, on_diagnostic=warn))
+    config = options(partner_auth=True)
+    result = asyncio.run(ComfyImageClient(config.base_url, http).generate(request(config), None, None,
+        partner_key="server-secret", on_receipt=received, on_diagnostic=warn))
     assert result.diagnostic["kind"] == "warning" and warnings == [result.diagnostic]
     encoded = json.dumps(result.diagnostic)
     assert "actual caller scene" not in encoded and "server-secret" not in encoded and "forbidden" not in encoded and "inputs" not in encoded

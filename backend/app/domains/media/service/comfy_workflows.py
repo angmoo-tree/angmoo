@@ -4,10 +4,11 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import ipaddress
 import math
 import secrets
 from dataclasses import replace
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from ..generation_contracts import (BoundWorkflow, ComfyExecution, ComfyOptions,
     ComfyWorkflow, EffectiveReference, GenerationRequest, ImagePreparationError,
@@ -35,6 +36,37 @@ def validate_base_url(value):
     if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username is not None or parsed.password is not None or parsed.query or parsed.fragment or (port is not None and not 1 <= port <= 65535) or any(char.isspace() for char in value):
         raise ImagePreparationError("comfy_url_invalid")
     return value.rstrip("/")
+
+
+def partner_submission_target(value: str, partner_auth: bool) -> str:
+    """Classify the actual new-submission target without changing saved URLs."""
+    base = validate_base_url(value)
+    if not partner_auth:
+        return base
+    parsed = urlsplit(base)
+    if parsed.scheme == "https":
+        return base
+    if parsed.hostname == "localhost":
+        host = "127.0.0.1" + (f":{parsed.port}" if parsed.port is not None else "")
+        return urlunsplit((parsed.scheme, host, parsed.path, "", ""))
+    try:
+        address = ipaddress.ip_address(parsed.hostname)
+    except ValueError:
+        address = None
+    if address is not None and ((address.version == 4 and address.is_loopback) or address == ipaddress.IPv6Address("::1")):
+        return base
+    raise ImagePreparationError("comfy_partner_https_required")
+
+
+def validate_partner_configuration(options, *, previous, auto_enabled, new_key=False):
+    """A historical OFF profile may be read/cleared, but never newly activated."""
+    if not options.partner_auth:
+        return
+    unchanged_off = (not auto_enabled and not new_key and previous is not None
+        and previous.get("active") is True
+        and ComfyOptions.model_validate(previous.get("options", {})).model_dump(exclude_none=True) == options.model_dump(exclude_none=True))
+    if not unchanged_off:
+        partner_submission_target(options.base_url, True)
 
 
 def bounded_json(value, *, limit=MAX_SUBMIT_BYTES):
@@ -129,10 +161,21 @@ def analyze_graph(graph, *, source_json=None):
         "source_digest": hashlib.sha256((source_json.encode("utf-8") if source_json is not None else bounded_json(graph))).hexdigest()}
 
 
-def analyze_source(source_json, input_mode="placeholders"):
+def analyze_source(source_json, input_mode="placeholders", *, retained_contract=None):
     if input_mode not in {"placeholders", "node_bindings"}:
         raise ImagePreparationError("comfy_input_mode_invalid")
     result = analyze_graph(strict_json(source_json), source_json=source_json)
+    if retained_contract is not None:
+        if retained_contract.legacy_output_node is not None:
+            workflow=ComfyWorkflow(prompt=result["prompt"],bindings=retained_contract.bindings or {},
+                output_node=retained_contract.legacy_output_node,reference_required=retained_contract.reference_required)
+        elif input_mode == "node_bindings":
+            workflow=BoundWorkflow(input_mode=input_mode,prompt=result["prompt"],bindings=retained_contract.bindings or {},
+                **({"output":retained_contract.output} if retained_contract.output is not None else {}))
+        else:
+            workflow=PlaceholderWorkflow(input_mode=input_mode,prompt=result["prompt"],
+                **({"output":retained_contract.output} if retained_contract.output is not None else {}))
+        validate_app_workflow(workflow)
     return {**result, "input_mode": input_mode}
 
 
@@ -238,7 +281,7 @@ def freeze_comfy_request(request, *, has_reference=None):
     if request.provider != "comfyui" or request.comfy_execution is not None:
         return request
     options = ComfyOptions.model_validate(request.options)
-    validate_base_url(options.base_url)
+    partner_submission_target(options.base_url, options.partner_auth)
     workflow = select_comfy_workflow(options, has_reference=bool(request.reference.asset_id) if has_reference is None else has_reference)
     values = prepare_values(options, workflow, positive=request.positive, negative=request.negative, execute=True)
     clip_mode = options.clip_skip_value_mode or ("node_value" if options.options_schema_version is None else "skip_count")

@@ -1037,3 +1037,27 @@ manifest와 기존 사용자 자료는 migration에서 재작성하지 않는다
 payload/hash/delivery·Vision·언어/사실/페르소나·호출 수 정책은 유지한다.
 
 [통합 구현·검증 원장](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.
+
+## ComfyUI 전송과 관리 키 보호 (2026-10-12, LOCAL)
+
+Media의 순수 Partner 주소 정책을 Character/World 저장·새 실행 freeze·integration의 마지막 송신에
+조립한다. ON은 검증된 HTTPS 또는 정확한 loopback만 허용하고, localhost HTTP 새 송신만 127.0.0.1로
+일시 고정한다. 저장 주소·base path·port는 유지한다. OFF의 keyless HTTP와 소유/폐기/lease 조건을
+충족한 receipt history/view는 신규 키 전송과 분리한다. 일반 서버 Authorization은 부활시키지 않는다.
+HTTP는 TLS 검증과 redirect/downgrade 금지를 유지한다. 보안 규칙을 역사 DTO 읽기 전체에 넣지 않는다.
+
+예시 config의 구 응답/파일은 유지하고 format=api_json만 순수 graph를 추가한다. sample/raw analyze는
+credential/runtime/외부 통신 없이 수행한다. 보존한 binding/output 검사는 기존 workflow validator를
+통해 수행한다. renderer/seed/CLIP/metadata 제거 Base64/output/receipt snapshot 의미는 유지한다.
+
+`core/secret_file_access.py`는 중립적인 관리 파일 접근 helper다. Windows API는 지연 로딩하고,
+현재 계정의 실제 read-open과 DACL/최종 물리 경로를 검사한다. 부족한 관리 key/필요 디렉터리만 보호한다.
+최초/임시 파일은 첫 쓰기 전에 보호하고 완성된 파일만 overwrite 없는 atomic link로 게시한다.
+부모 디렉터리 handle을 유지해 rename/reparse 교체를 막는다. 복잡한 ACL이나 미확인은 원본을 남기고
+안전한 오류로 종료한다. 소유권 변경·DPAPI 전환·키 교체·전체 AppData ACL 변경은 하지 않는다.
+helper는 contributor/sidecar 시작과 관리 키 migration에만 조립하며 활동마다 검사하지 않는다.
+원래 키·암호문 AAD·명시 migration secret source는 유지한다.
+
+패키징 metadata는 관리 key/temp·환경 파일·SQLite/private backup sentinel을 거절한다.
+실제 설치의 key ACL은 읽기 전용 조사이며 소스/fixture PASS와 설치 반영은 별개다.
+[검증·미측정 경계](../docs/verification/comfy-security-20261012.md)를 참조한다.

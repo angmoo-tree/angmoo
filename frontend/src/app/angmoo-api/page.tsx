@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import {AppShell} from '@/composition/shells/app-shell';
-import {AngmooApiContent} from '@/features/support/components/angmoo-api-content';
+import {AngmooApiServerContent} from '@/features/support/components/angmoo-api-server-content';
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "앵무 API | Angmoo",
@@ -9,4 +9,4 @@ export const metadata: Metadata = {
     canonical: "/angmoo-api",
   },
 };
-export default function AngmooApiPage(){ return <AppShell><AngmooApiContent /></AppShell>; }
+export default function AngmooApiPage(){ return <AppShell><AngmooApiServerContent /></AppShell>; }

@@ -81,7 +81,7 @@ class ImageHttp:
         owned = self.client is None
         client = self.client or httpx.AsyncClient(follow_redirects=False, trust_env=False)
         try:
-            async with client.stream(method, url, headers=headers, timeout=timeout, **kwargs) as response:
+            async with client.stream(method, url, headers=headers, timeout=timeout, follow_redirects=False, **kwargs) as response:
                 if response.status_code >= 300 and error_body_limit is None:
                     # Never put remote bodies, URLs with secrets or headers into exceptions.
                     raise ImageSubmissionError(f"provider_http_{response.status_code}", outcome_unknown=method == "POST" and response.status_code >= 500)

@@ -22,6 +22,11 @@
       "media_type": "image/png"
     },
     {
+      "path": "backend/tests/image_integration/fixtures/comfy-reference.png",
+      "sha256": "4a9e1bf4ac7ce7adadb07ad15443ea165607b7b6411dad6bdfdc91a33225e722",
+      "media_type": "image/png"
+    },
+    {
       "path": "frontend/src/app/icon.svg",
       "sha256": "ec8143b994f25f023422c55e3898ef46ed686db919625ba7e4ba28a133a57593",
       "media_type": "image/svg+xml"

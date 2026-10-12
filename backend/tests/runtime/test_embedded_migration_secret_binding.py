@@ -13,7 +13,7 @@ from app.core import security
 from app.runtime.contributor_backend import _prepare_contributor_data_root
 from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeError
 from app.runtime.migrations.generation import EmbeddedGenerationController
-from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest, SQLITE_SCHEMA_VERSION
 from app.runtime.persistence.sqlite_schema import sqlite_schema_digest
 from migrations.test_world_activity_v30 import populated_v29
 
@@ -74,9 +74,9 @@ def test_contributor_upgrade_authenticates_each_root_without_changing_process_se
         original = [_digest(p) for p in (database, secret, media)]
         result = _prepare_contributor_data_root(root)
         assert result.canonical.source_version == 29
-        assert result.canonical.target_version == 32
+        assert result.canonical.target_version == SQLITE_SCHEMA_VERSION
         assert [_digest(p) for p in (database, secret, media)] == original
-        assert controller.current()["data_version"] == 32
+        assert controller.current()["data_version"] == SQLITE_SCHEMA_VERSION
         credentials = _read_credentials(result.canonical.database_path)
         assert [r[0] for r in credentials] == ["image", "sns"]
         for credential_purpose, provider, envelope, character, purpose in credentials:
@@ -86,7 +86,9 @@ def test_contributor_upgrade_authenticates_each_root_without_changing_process_se
                                            provider=provider, purpose=purpose),
             )
             if credential_purpose == "image":
-                assert json.loads(raw) == {"version": "comfy-secrets.v1", "key": "synthetic-comfy-server",
+                # v35 deliberately retires the old general Comfy server key;
+                # the original v29 DB/envelope and the Partner key stay intact.
+                assert json.loads(raw) == {"version": "comfy-secrets.v1", "key": "",
                                            "partner": "synthetic-comfy-partner"}
             else:
                 assert raw == "synthetic-sns-key"

@@ -1,8 +1,8 @@
 import { apiRequest } from "@/lib/http/api-request";
-import type { Asset, Catalog, GenerationSettings, GenerationWrite, InterpretationSettings, Workflow, WorkflowAnalysis, UsageSettings, GenerationJob } from "../types/media";
+import type { Asset, Catalog, GenerationSettings, GenerationWrite, InterpretationSettings, Workflow, WorkflowAnalysis, UsageSettings, GenerationJob, ApiGraph, RetainedComfyContract } from "../types/media";
 
 export const getCatalog = (signal?: AbortSignal) => apiRequest<Catalog>("/media/catalog", { signal });
-export const analyzeComfyWorkflow = (source_json: string, input_mode: "placeholders" | "node_bindings", signal?: AbortSignal) => apiRequest<WorkflowAnalysis>("/media/comfy-workflows/analyze", { method: "POST", body: { source_json, input_mode }, signal });
+export const analyzeComfyWorkflow = (source_json: string, input_mode: "placeholders" | "node_bindings", signal?: AbortSignal, retained_contract?: RetainedComfyContract) => apiRequest<WorkflowAnalysis>("/media/comfy-workflows/analyze", { method: "POST", body: { source_json, input_mode, ...(retained_contract ? {retained_contract} : {}) }, signal });
 export const getUsage = (signal?: AbortSignal) => apiRequest<UsageSettings>("/media/usage-settings", { signal });
 export const saveUsage = (data: { expected_revision: number; daily_limit: number }) => apiRequest<UsageSettings>("/media/usage-settings", { method: "PUT", body: data });
 const generationJobPath = (worldId: string, postId: string) => `/media/worlds/${encodeURIComponent(worldId)}/posts/${encodeURIComponent(postId)}/image-generation`;
@@ -20,6 +20,7 @@ export const saveInterpretation = (data: InterpretationSettings & { expected_rev
 export const discardDraft = (id: string) => apiRequest<void>(`/media/assets/${encodeURIComponent(id)}`, { method: "DELETE" });
 export const preflightImage = (id: string, signal?: AbortSignal) => apiRequest<{ allowed: boolean; reason: string | null; settings_path?: string }>(`/media/assets/${encodeURIComponent(id)}/preflight`, { signal });
 export const getComfySample = (kind: "text" | "reference") => apiRequest<{ workflow: Workflow; values: Record<string, string | number>; dependencies: { nodes: string[]; models: string[] } }>(`/media/comfy-samples/${kind}`);
+export const getComfyApiSample = (kind: "text" | "reference", signal?: AbortSignal) => apiRequest<ApiGraph>(`/media/comfy-samples/${kind}?format=api_json`, {signal});
 
 const IMAGE_INPUT_MESSAGES = {
   image_file_unsupported: "Choose a still PNG, JPEG, or WebP image up to 10 MiB.",

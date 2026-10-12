@@ -18,10 +18,10 @@ from app.domains.identity.service.environment import snapshot
 from app.domains.social.models.image_intents import ImageGenerationAttempt, ImageIntent
 from app.domains.social.models.posts import PostImageGenerationJob, Post
 from app.runtime.world_credential_binding import capture
-from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, select_comfy_workflow, validate_app_workflow, validate_base_url
+from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, select_comfy_workflow, validate_app_workflow, validate_base_url, partner_submission_target
 
 
-def validate_settings(value, *, previous=None):
+def validate_settings(value, *, previous=None, active_profile=None, auto_enabled=False):
     from app.domains.media.schemas import WorldGenerationSettings
     parsed = WorldGenerationSettings.model_validate(value).model_dump()
     if parsed.get("legacy_reference") != (previous or {}).get("legacy_reference"):
@@ -39,6 +39,10 @@ def validate_settings(value, *, previous=None):
         typed = (NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions).model_validate(options)
         if provider == "comfyui":
             validate_base_url(typed.base_url)
+            old_options = (previous or {}).get("profiles", {}).get(key, {}).get("options")
+            same_options = old_options is not None and ComfyOptions.model_validate(old_options).model_dump(exclude_none=True) == typed.model_dump(exclude_none=True)
+            if not same_options or (auto_enabled and key == active_profile):
+                partner_submission_target(typed.base_url, typed.partner_auth)
             for workflow in (typed.workflow, typed.text_workflow):
                 if workflow is not None:
                     validate_app_workflow(workflow)

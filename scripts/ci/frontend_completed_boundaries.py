@@ -33,8 +33,10 @@ def check_completed_frontend(source_root: Path) -> list[str]:
         text = path.read_text(encoding="utf-8")
         owner = feature(key)
         parts = key.split("/")
-        if not key.startswith((*COMMON, "app/", "composition/", "features/", "testing/", "static-shell/app/", "shared/")):
+        if key != "proxy" and not key.startswith((*COMMON, "app/", "composition/", "features/", "testing/", "static-shell/app/", "shared/")):
             errors.append(f"[frontend_unclassified_source] {key}")
+        if key == "proxy" and re.match(r"\s*['\"]use client['\"]", text):
+            errors.append("[frontend_proxy_must_be_server] proxy")
         if key.startswith("shared/") or (owner and (key.endswith("/public") or len(parts) > 2 and parts[2] in {"ui", "model"})):
             errors.append(f"[frontend_completed_legacy_file] {key}")
         if not is_test_path(key) and COMPUTED_IMPORT.search(text):
@@ -59,6 +61,8 @@ def check_completed_frontend(source_root: Path) -> list[str]:
             if target not in files and target + "/index" in files:
                 target += "/index"
             edges.append((key, target))
+            if key == "proxy" and not target.startswith("lib/security/"):
+                errors.append(f"[frontend_proxy_imports_product] {key} -> {target}")
             if key.startswith(("composition/", "static-shell/")) and target.startswith("app/"):
                 errors.append(f"[frontend_composition_imports_app] {key} -> {target}")
             if key.startswith(COMMON) and target.startswith("static-shell/"):

@@ -40,6 +40,14 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
                 raise ValueError("world_image_policy_revision_conflict")
             before = world_credentials.find(service.db, **scope)
             selected_provider = before.provider if before else None
+            if not remove and data.provider == "comfyui" and not data.clear_partner_key:
+                from app.domains.media.generation_contracts import ComfyOptions
+                from app.domains.media.service.comfy_workflows import partner_submission_target
+                profile=((policy.generation_settings if policy else {}) or {}).get("profiles",{}).get(f"comfyui:{data.model}")
+                if profile and (before is None or before.provider != data.provider or before.model != data.model
+                    or (data.partner_api_key is not None and data.partner_api_key.get_secret_value().strip())):
+                    typed=ComfyOptions.model_validate(profile.get("options",{}))
+                    partner_submission_target(typed.base_url,typed.partner_auth)
             result = world_image_credentials.delete_provider(service.db, owner_id=user.id, world_id=world_id,
                 world_character_id=world_character_id, data=data) if remove else world_credentials.save(service.db, **scope, data=data)
             if policy is not None and (not remove or (data.provider or selected_provider) == selected_provider):

@@ -54,6 +54,10 @@ class EmbeddedDataUpgradeCoordinator:
         self._fallback_generation = fallback_generation
 
     def upgrade(self, *, retention_owner=None) -> EmbeddedDataUpgradeResult:
+        managed_secret=self._paths.secrets / "app-secret"
+        if managed_secret.is_file():
+            from app.core.secret_file_access import protect_existing_secret
+            protect_existing_secret(managed_secret,protect_parent=True)
         secret_before = _file_sha256(self._paths.secrets / "app-secret")
         media_before = _tree_fingerprint(self._paths.media)
         with EmbeddedUpgradeLock(

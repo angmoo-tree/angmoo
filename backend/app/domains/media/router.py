@@ -142,16 +142,16 @@ def delete_draft(asset_id: str, request: Request, db: Session = Depends(get_db),
 
 
 @router.get("/media/comfy-samples/{kind}")
-def comfy_sample(kind: str, user=Depends(get_current_user)):
-    if kind not in {"text", "reference"}:
+def comfy_sample(kind: str, format: str = "config", user=Depends(get_current_user)):
+    if kind not in {"text", "reference"} or format not in {"config", "api_json"}:
         raise HTTPException(404)
-    return json.loads((Path(__file__).parent / "samples" / f"comfy-{kind}.json").read_text("utf-8"))
+    return json.loads((Path(__file__).parent / "samples" / f"comfy-{'api-' if format=='api_json' else ''}{kind}.json").read_text("utf-8"))
 
 
 @router.post("/media/comfy-workflows/analyze", response_model=WorkflowAnalysis, dependencies=[Depends(require_local_frontend_request)])
 def analyze_comfy(data: ComfyAnalysisWrite, user=Depends(get_current_user)):
     try:
-        return analyze_source(data.source_json, data.input_mode)
+        return analyze_source(data.source_json, data.input_mode, retained_contract=data.retained_contract)
     except ImagePreparationError as exc:
         raise HTTPException(422, detail=str(exc)) from None
 

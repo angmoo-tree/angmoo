@@ -31,7 +31,11 @@ def write(service, *, world_id, world_character_id, user, data):
             from app.runtime.media.world_generation import validate_settings
             from app.runtime.media.binding import current
             old = service.db.get(WorldImagePolicy, world_character_id)
-            changes["generation_settings"] = validate_settings(changes["generation_settings"], previous=old.generation_settings if old else {})
+            from app.domains.identity.service.world_credentials import find as selected_image
+            selected=selected_image(service.db,owner_id=user.id,world_id=world_id,world_character_id=world_character_id,purpose="image")
+            changes["generation_settings"] = validate_settings(changes["generation_settings"], previous=old.generation_settings if old else {},
+                active_profile=f"{selected.provider}:{selected.model}" if selected else None,
+                auto_enabled=changes.get("generation_enabled",old.generation_enabled if old else False))
             asset_id = changes["generation_settings"].get("reference_asset_id")
             if asset_id:
                 media = current()
@@ -50,6 +54,11 @@ def write(service, *, world_id, world_character_id, user, data):
                 values = changes.get("generation_settings", old_policy.generation_settings)
                 profile = values.get("profiles", {}).get(f'{binding["provider"]}:{binding["model"]}', {})
                 connection = profile.get("connection") or {}
+                if binding["provider"] == "comfyui":
+                    from app.domains.media.generation_contracts import ComfyOptions
+                    from app.domains.media.service.comfy_workflows import partner_submission_target
+                    typed=ComfyOptions.model_validate(profile.get("options",{}))
+                    partner_submission_target(typed.base_url,typed.partner_auth)
                 if not connection.get("ready") or (binding["provider"] == "novelai" and profile.get("options", {}).get("mode", "opus_free") == "opus_free" and not connection.get("opus_verified")):
                     raise ImagePreparationError("generation_connection_unverified")
                 return resolve_image_keys(service.db, owner_id=user.id, world_id=world_id, world_character_id=world_character_id)

@@ -735,7 +735,7 @@ ko/en은 기존 namespace와 안정된 hook을 사용하고 locale 변경은 dra
 
 ## 공통 ComfyUI 편집 화면 (2026-10-09)
 
-`features/media/components/comfy-editor.tsx`가 Character 생성 설정과 World 이미지 설정이 공통 사용하는 JSON 가져오기/편집·위치 안내·필요 값·후보·고급 출력 UI를 소유한다. `api/media-client.ts`의 인증된 분석 endpoint를 사용하며 입력 원문은 화면의 draft로 남기고, 분석된 graph만 부모 설정 draft로 전달한다. invalid 원문은 지우지 않고 저장을 막는다. 파일 import와 paste는 같은 분석 경로이며 중복 JSON 키 검사는 Backend raw decoder의 책임이다.
+`features/media/components/comfy-editor.tsx`가 Character 생성 설정과 World 이미지 설정이 공통 사용하는 JSON 가져오기/편집·위치 안내·필요 값·후보·고급 출력 UI를 소유한다. `api/media-client.ts`의 인증된 분석 endpoint를 사용하며 입력 원문은 화면의 draft로 남기고, 분석된 graph만 부모 설정 draft로 전달한다. invalid 원문은 지우지 않고 저장을 막는다. 파일/예시 교체와 textarea edit/paste는 같은 Backend raw decoder를 사용하지만, 교체는 선택 경로의 binding/output을 초기화하고 편집은 유효한 기존 설정을 보존한다. 중복 JSON 키와 보존한 연결·출력의 검사는 Backend 책임이다.
 
 Character/model 및 World/actor/profile 별 component key와 AbortSignal로 늦은 분석 결과를 격리한다. legacy는 조회 시 전환하지 않으며 명시적 전환만 v2 node_value 모드로 바꾼다. UI는 필요한 role만 보여주고 object_info 후보가 없으면 자유 입력을 제공한다. `/system_stats` 연결·앱 입력 준비·후보 조회 상태를 구분하며 서버의 실행 가능성 검사를 UI에서 재현하지 않는다. Next와 static은 동일 editor/status/error/types를 사용한다. 상세 진단은 plain text로 렌더링하며 성공한 작업의 warning도 확인할 수 있다.
 
@@ -782,3 +782,25 @@ Dialog는 저장명/version·이름 입력·영구 consent를 사용하며 dirty
 취소는 요청0과 trigger focus 복귀를 보장한다. 응답 유실은 동일 command/key로 확인하고 202는
 완료가 아니다. owner status/active list로 복원하고 실패 retry는 동일 작업을 사용한다. 작업 단계의
 가짜 퍼센트나 완료를 표시하지 않는다. 모든 추가/변경 사용자 문구는 같은 ko/en catalog에 둔다.
+
+## ComfyUI 교체·배포 CSP·Guide 언어 경계 (2026-10-12, LOCAL)
+
+Media의 파일/예시 교체와 편집은 같은 서버 분석 API를 사용하고, `utils/comfy-editor-draft.ts`는
+교체 후 작은 설정 전환과 직렬화만 담당한다. graph parser/실행 검사를 복제하지 않는다.
+교체는 선택 경로를 placeholders/auto output으로 바꾸며, legacy의 다른 경로와 global CLIP 의미를
+보존한다. edit는 binding/output을 서버에서 다시 확인한다. 읽기 시작·분석·같은 파일 재선택은
+revision/AbortSignal과 path·Character/World·auth/runtime 수명에 묶고, locale은 draft를 재설정하지 않는다.
+예시 다운로드는 draft/저장/키 읽기/외부 생성과 분리된 인증된 read다.
+
+Next 16의 `src/proxy.ts`는 서버 전용 framework adapter다. 공통 CSP helper만 import할 수 있고
+feature/composition을 import하지 않는다. `lib/security/csp.ts`는 `server-only`로 보호한다.
+요청마다 새 nonce를 만들고 client CSP/x-nonce를 덮어써 request와 enforcing response에 전달한다.
+Root layout은 connection()으로 동적 HTML을 유지하고 nonce HTML은 private,no-store다.
+정적 셸은 이 서버 root/Proxy/helper를 import하지 않으며 Tauri의 별도 CSP를 유지한다.
+
+Support는 server-only 문서 loader/server component와 locale client view를 분리한다.
+Guide의 ko/en은 고정 literal 파일 읽기이며 frontend tracing/Docker/static 복사에도 둘 다 포함한다.
+`/agent_guide.md` 기본 KO와 lang=ko|en 계약을 유지한다. 정적 셸의 `/angmoo-api` 미지원 계약은 유지한다.
+영어 Guide도 기존 외부 bot의 한국어 공개 출력, auth/route/payload 의미를 바꾸지 않는다.
+
+[LOCAL 검증·실행 원장](../docs/verification/comfy-security-20261012.md)을 참조한다.

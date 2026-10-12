@@ -1547,3 +1547,20 @@ World 삭제에는 기존 semantic danger Button/Dialog와 취소 기본 focus·
 실제 삭제 중/완료/실패/조회 실패를 구분한다. 새 보관/복원 화면이나 외부 디자인 자산은 추가하지 않는다.
 
 [LOCAL 통합 검증](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.
+
+## ComfyUI 예시와 안전한 연결 안내 (2026-10-12, LOCAL)
+
+기본 입력은 실행용 API JSON과 자리표시자다. 파일 가져오기/예시 사용은 선택 경로의 입력 연결과
+출력을 초기화하고 편집창 수정은 유효한 기존 연결을 보존한다는 안내를 함께 표시한다.
+다운로드는 독립 버튼이고 적용·저장·생성을 하지 않는다. 모델은 실제 설치 이름을 사용자가 지정한다.
+참조 예시는 ETN_LoadImageBase64 추가 노드와 PNG Base64 계약을 적용 전에 알리고 자동 설치하지 않는다.
+기존 직접 입력/출력은 고급 설정에서 유지한다. 기존 공통 Button/focus/44px/좁은 화면/scroll을 사용한다.
+
+Partner ON은 지정 서버에 계정 키가 전달된다는 신뢰 안내와 HTTPS/정확한 loopback 요구를 ko/en으로
+표시한다. localhost HTTP의 일시적인 IPv4 송신과 IPv6-only [::1] 입력도 설명한다. 저장 거절이 키나
+URL·graph draft를 지우거나 Partner를 자동 OFF로 바꾸지 않는다.
+API 안내는 UI 언어와 같은 Guide 원문/미리보기를 제공하고 JSON/Markdown은 안전한 pre 텍스트다.
+
+Comfy 연속 시험의 LOCAL 진단 capture 1개를 추가해 screenshot call inventory는 60개다.
+기존 canonical PNG 11개, pinned Linux 환경, raw color 기준, 25-pixel/0.1 diff 기준은 바꾸지 않는다.
+[관련 검증](../docs/verification/comfy-security-20261012.md)은 설치 앱/실모델/USER CHECK와 구분한다.

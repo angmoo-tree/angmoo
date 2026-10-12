@@ -50,9 +50,17 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
         raise ImagePreparationError("model_not_supported")
     option_type = NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions
     typed = option_type.model_validate(data.options)
+    profiles = json.loads(row.generation_profiles_json)
+    key = profile_key(provider, model, typed.model_dump(exclude_none=True))
+    previous = profiles.get(key)
     if provider == "comfyui":
-        from app.domains.media.service.comfy_workflows import validate_app_workflow, validate_base_url
+        from app.domains.media.service.comfy_workflows import validate_app_workflow, validate_base_url, validate_partner_configuration
         validate_base_url(typed.base_url)
+        withdrawing_key = data.clear_partner_api_key and data.partner_api_key is None and not data.auto_enabled
+        newly_selected = (row.generation_provider,row.generation_model) != (provider,model)
+        if not withdrawing_key:
+            validate_partner_configuration(typed,previous=None if newly_selected else previous,auto_enabled=data.auto_enabled,
+                new_key=bool(data.partner_api_key and data.partner_api_key.get_secret_value().strip()))
         for workflow in (typed.workflow, typed.text_workflow):
             if workflow is not None:
                 validate_app_workflow(workflow)
@@ -63,9 +71,6 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
         asset = assets.owned(db, owner_id=user.id, asset_id=data.reference_asset_id, scope_kind="character", scope_id=character_id)
         if asset.state == "draft":
             assets.attach(db, owner_id=user.id, asset_id=asset.id, scope_kind="character", scope_id=character_id)
-    profiles = json.loads(row.generation_profiles_json)
-    key = profile_key(provider, model, options)
-    previous = profiles.get(key)
     connection = validated_connection or (previous or {}).get("connection")
     if provider == "comfyui" and previous and options != previous.get("options"):
         connection = validated_connection

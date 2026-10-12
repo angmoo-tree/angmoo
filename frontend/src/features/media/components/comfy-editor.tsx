@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
-import { analyzeComfyWorkflow, getComfySample } from "../api/media-client";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { analyzeComfyWorkflow, getComfyApiSample } from "../api/media-client";
 import type { Connection, WorkflowInput, WorkflowAnalysis, VersionedWorkflow, OutputPolicy } from "../types/media";
 import { comfyFailure } from "../utils/comfy-errors";
+import { replaceComfyGraph, retainedComfyContract, serializeComfyGraph } from "../utils/comfy-editor-draft";
 import styles from "./media-settings.module.css";
 
 type Path = "workflow" | "text_workflow";
@@ -20,16 +22,27 @@ const workflowAt = (options: Options, path: Path) => options[path] as WorkflowIn
 const modeOf = (workflow?: WorkflowInput) => workflow && "input_mode" in workflow ? workflow.input_mode : "node_bindings";
 const sourceOf = (workflow?: WorkflowInput) => workflow ? JSON.stringify(workflow.prompt, null, 2) : "";
 
-export function ComfyEditor({ options, connection, onChange, onValidityChange, onReferenceSupportChange, disabled = false }: {
+type ComfyEditorProps = {
   options: Options; connection?: Connection | null; onChange: (next: Options) => void;
-  onValidityChange?: (valid: boolean) => void; onReferenceSupportChange?: (supported: boolean) => void; disabled?: boolean;
-}) {
+  onValidityChange?: (valid: boolean) => void; onReferenceSupportChange?: (supported: boolean) => void; disabled?: boolean;scopeKey?:string;
+};
+export function ComfyEditor(props:ComfyEditorProps){
+  const identity=useAuthRuntimeIdentity(props.scopeKey??"comfy-editor");
+  return <ScopedComfyEditor key={identity} {...props}/>;
+}
+function ScopedComfyEditor({ options, connection, onChange, onValidityChange, onReferenceSupportChange, disabled = false }:ComfyEditorProps) {
   const t = useUiText("media"), id = useId();
   const [path, setPath] = useState<Path>("workflow");
   const [raw, setRaw] = useState<Record<Path, string>>(() => ({ workflow: sourceOf(workflowAt(options, "workflow")), text_workflow: sourceOf(workflowAt(options, "text_workflow")) }));
   const acceptedRaw = useRef(raw);
   const [analyses, setAnalyses] = useState<Partial<Record<Path, WorkflowAnalysis>>>({});
-  const [errors, setErrors] = useState<Partial<Record<Path, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<Path, unknown>>>({});
+  const [downloadError,setDownloadError]=useState<unknown>(null);
+  const intents=useRef<Partial<Record<Path,"replace">>>({});
+  const readRevision=useRef(0),analysisController=useRef<AbortController|null>(null),sampleController=useRef<AbortController|null>(null);
+  const [operationRevision,setOperationRevision]=useState(0);
+  const [readable,setReadable]=useState<Record<Path,boolean>>({workflow:true,text_workflow:true});
+  const downloads=useRef(new Set<AbortController>()),urls=useRef(new Set<string>());
   const [valid, setValid] = useState(false), [analyzing, setAnalyzing] = useState(false);
   const [advanced, setAdvanced] = useState(false);
   const latest = useRef({ options, onChange, onValidityChange });
@@ -37,12 +50,18 @@ export function ComfyEditor({ options, connection, onChange, onValidityChange, o
   const workflow = workflowAt(options, path), legacy = options.options_schema_version !== 2 && Boolean(workflowAt(options, "workflow"));
   const mode = workflow ? modeOf(workflow) : "placeholders";
   const primaryMode = modeOf(workflowAt(options, "workflow")), fallbackMode = modeOf(workflowAt(options, "text_workflow"));
+  const primaryContract=JSON.stringify(retainedComfyContract(workflowAt(options,"workflow")));
+  const fallbackContract=JSON.stringify(retainedComfyContract(workflowAt(options,"text_workflow")));
+  useEffect(()=>()=>{readRevision.current++;analysisController.current?.abort();sampleController.current?.abort();for(const request of downloads.current)request.abort();for(const url of urls.current)URL.revokeObjectURL(url);},[]);
+  function invalidatePending(blockSource?:Path){readRevision.current++;analysisController.current?.abort();sampleController.current?.abort();if(blockSource)setReadable(previous=>({...previous,[blockSource]:false}));setOperationRevision(readRevision.current);setValid(false);setAnalyzing(true);latest.current.onValidityChange?.(false);return readRevision.current;}
   useProductLeaveGuard(paths.some(item => raw[item] !== acceptedRaw.current[item]));
   useEffect(() => {
     const controller = new AbortController();
+    analysisController.current=controller;
     setValid(false); setAnalyzing(true); latest.current.onValidityChange?.(false);
     const timer = setTimeout(() => {
       void Promise.all(paths.map(async item => {
+        if(!readable[item])return false;
         const source = raw[item];
         if (!source) {
           setAnalyses(previous => ({ ...previous, [item]: undefined }));
@@ -51,25 +70,28 @@ export function ComfyEditor({ options, connection, onChange, onValidityChange, o
         try {
           if (new TextEncoder().encode(source).length > 2 * 1024 * 1024) throw new Error("size");
           const current = workflowAt(latest.current.options, item);
-          const analyzed = await analyzeComfyWorkflow(source, current ? modeOf(current) : "placeholders", controller.signal);
+          const replacing=intents.current[item]==="replace";
+          const analyzed = await analyzeComfyWorkflow(source, replacing?"placeholders":current ? modeOf(current) : "placeholders", controller.signal,
+            replacing?undefined:retainedComfyContract(current));
           if (controller.signal.aborted) return false;
           setAnalyses(previous => ({ ...previous, [item]: analyzed }));
           setErrors(previous => ({ ...previous, [item]: undefined }));
           acceptedRaw.current = { ...acceptedRaw.current, [item]: source };
           // Keep legacy contracts and the exact draft until an explicit edit is accepted.
-          if (JSON.stringify(analyzed.prompt) !== JSON.stringify(current?.prompt)) {
+          if (replacing || JSON.stringify(analyzed.prompt) !== JSON.stringify(current?.prompt)) {
             const base = latest.current.options;
             const hasLegacy = base.options_schema_version !== 2 && Boolean(workflowAt(base, "workflow"));
             const replacement: WorkflowInput = current ? { ...current, prompt: analyzed.prompt } : hasLegacy
               ? { prompt: analyzed.prompt, bindings: {}, output_node: Object.keys(analyzed.prompt)[0], reference_required: false }
               : { input_mode: "placeholders", prompt: analyzed.prompt, output: { mode: "auto_first_image" } };
-            const next = { ...base, [item]: replacement, ...(!current && !hasLegacy && base.options_schema_version !== 2 ? { options_schema_version: 2, clip_skip_value_mode: "skip_count" } : {}) };
+            const next = replacing?replaceComfyGraph(base,item,analyzed):{ ...base, [item]: replacement, ...(!current && !hasLegacy && base.options_schema_version !== 2 ? { options_schema_version: 2, clip_skip_value_mode: "skip_count" } : {}) };
+            delete intents.current[item];
             latest.current.options = next;
             latest.current.onChange(next);
           }
           return true;
         } catch (error) {
-          if (!controller.signal.aborted) setErrors(previous => ({ ...previous, [item]: comfyFailure(error, t, t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요.")) }));
+          if (!controller.signal.aborted) setErrors(previous => ({ ...previous, [item]: error }));
           return false;
         }
       })).then(results => {
@@ -80,7 +102,7 @@ export function ComfyEditor({ options, connection, onChange, onValidityChange, o
       });
     }, 350);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [raw, primaryMode, fallbackMode, t]);
+  }, [raw, primaryMode, fallbackMode, primaryContract, fallbackContract, path, operationRevision,readable]);
   const values = (options.values ?? {}) as Record<string, string | number>;
   const analysis = analyses[path];
   const roles = [...new Set(paths.flatMap(item => {
@@ -95,6 +117,7 @@ export function ComfyEditor({ options, connection, onChange, onValidityChange, o
   function changeWorkflow(next: WorkflowInput) { onChange({ ...options, [path]: next }); }
   function changeMode(next: "placeholders" | "node_bindings") {
     if (!workflow || legacy) return;
+    invalidatePending();
     const output = "output" in workflow ? workflow.output : { mode: "explicit_node" as const, node_id: workflow.output_node };
     changeWorkflow(next === "placeholders" ? { input_mode: next, prompt: workflow.prompt, output }
       : { input_mode: next, prompt: workflow.prompt, output, bindings: "bindings" in workflow ? workflow.bindings : {} });
@@ -120,35 +143,51 @@ export function ComfyEditor({ options, connection, onChange, onValidityChange, o
     onChange({ ...options, values: nextValues, [path]: "input_mode" in next ? next : { ...next, reference_required: Boolean(bindings.reference) } });
   }
   async function sample(kind: "text" | "reference") {
+    const target=path,ticket=invalidatePending(path),abort=new AbortController();sampleController.current=abort;
     try {
-      const loaded = await getComfySample(kind);
-      const next: Options = { ...options, values: { ...values, ...loaded.values } };
-      const graph = options.options_schema_version === 2
-        ? { input_mode: "node_bindings" as const, prompt: loaded.workflow.prompt, bindings: loaded.workflow.bindings, output: { mode: "explicit_node" as const, node_id: loaded.workflow.output_node } }
-        : loaded.workflow;
-      next[path] = graph; onChange(next); setRaw(previous => ({ ...previous, [path]: sourceOf(graph) }));
-    } catch (error) { setErrors(previous => ({ ...previous, [path]: comfyFailure(error, t, t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요.")) })); }
+      const graph=await getComfyApiSample(kind,abort.signal);
+      if(abort.signal.aborted||ticket!==readRevision.current)return;
+      intents.current[target]="replace";setRaw(previous=>({...previous,[target]:serializeComfyGraph(graph)}));setReadable(previous=>({...previous,[target]:true}));
+    } catch (error) {if(!abort.signal.aborted&&ticket===readRevision.current){setErrors(previous=>({...previous,[target]:error}));setAnalyzing(false);}}
+  }
+  async function downloadSample(kind:"text"|"reference"){
+    const abort=new AbortController();downloads.current.add(abort);setDownloadError(null);
+    try{
+      const graph=await getComfyApiSample(kind,abort.signal);if(abort.signal.aborted)return;
+      const url=URL.createObjectURL(new Blob([serializeComfyGraph(graph)],{type:"application/json;charset=utf-8"}));urls.current.add(url);
+      const anchor=document.createElement("a");anchor.href=url;anchor.download=`comfy-api-${kind}.json`;anchor.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);urls.current.delete(url);},0);
+    }catch(error){if(!abort.signal.aborted)setDownloadError(error);}finally{downloads.current.delete(abort);}
   }
   const output = workflow && "output" in workflow ? workflow.output : undefined;
   function changeOutput(next: OutputPolicy) { if (workflow && "output" in workflow) changeWorkflow({ ...workflow, output: next } as VersionedWorkflow); }
   return <div className={styles.panel} aria-label={t("ComfyUI workflow 입력")}>
     <h4>{t("ComfyUI workflow 입력")}</h4>
     <label>{t("서버 주소")}<input disabled={disabled} value={String(options.base_url ?? "http://127.0.0.1:8188")} onChange={event => onChange({ ...options, base_url: event.target.value })} /></label>
+    <p>{t("ComfyUI에서 내보낸 API JSON을 가져오거나, 선택 예시로 시작할 수 있어요.")}</p>
+    <p>{t("파일을 가져오거나 예시를 사용하면 이 경로의 입력 연결과 출력 선택이 초기화돼요. 편집창 수정은 기존 설정을 유지해요.")}</p>
     <p className={styles.note}>{t("ComfyUI 서버의 기본 주소를 입력해 주세요. API 경로는 Angmoo가 붙입니다.")}</p>
-    <div className={styles.actions}>{paths.map(item => <Button key={item} type="button" variant="secondary" aria-pressed={path === item} onClick={() => setPath(item)}>{t(item === "workflow" ? "기본 workflow 입력" : "참조 없는 텍스트 경로 입력")}</Button>)}</div>
+    {Boolean(options.partner_auth)?<><p>{t("Comfy 계정 키는 지정한 ComfyUI 서버에 전달돼요. 신뢰할 수 있는 서버만 사용해 주세요.")}</p><p>{t("같은 기기의 ComfyUI는 127.0.0.1 또는 ::1 주소로 HTTP 연결할 수 있어요.")}</p><p>{t("Partner 인증으로 HTTP localhost에 연결할 때는 127.0.0.1을 사용해요. IPv6 전용 서버라면 [::1] 주소를 사용해 주세요.")}</p></>:null}
+    <div className={styles.actions}>{paths.map(item => <Button key={item} type="button" variant="secondary" aria-pressed={path === item} onClick={() => {invalidatePending();setPath(item);setRaw(previous=>({...previous}));}}>{t(item === "workflow" ? "기본 workflow 입력" : "참조 없는 텍스트 경로 입력")}</Button>)}</div>
     <p>{t("참조가 없을 때 생성 제출 전에 사용할 텍스트 경로를 설정합니다. 생성 실패 후 자동 전환하지 않습니다.")}</p>
     <label>{t("API workflow 파일")}<input type="file" accept="application/json,.json" disabled={disabled} onChange={event => {
       const file = event.target.files?.[0], target = path;
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) { setErrors(previous => ({ ...previous, [target]: t("워크플로 또는 응답이 지원 크기를 넘었습니다.") })); return; }
-      void file.text().then(source => setRaw(previous => ({ ...previous, [target]: source }))).catch(() => setErrors(previous => ({ ...previous, [target]: t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요.") })));
+      event.target.value="";const ticket=invalidatePending(target);
+      if (file.size > 2 * 1024 * 1024) { setErrors(previous => ({ ...previous, [target]: "워크플로 또는 응답이 지원 크기를 넘었습니다." }));setAnalyzing(false);return; }
+      void file.text().then(source => {if(ticket===readRevision.current){intents.current[target]="replace";setRaw(previous=>({...previous,[target]:source}));setReadable(previous=>({...previous,[target]:true}));}}).catch(error => {if(ticket===readRevision.current){setErrors(previous=>({...previous,[target]:error}));setAnalyzing(false);}});
     }} /></label>
-    <label htmlFor={`${id}-json`}>{t("불러온 API workflow JSON")}</label><textarea id={`${id}-json`} className={styles.jsonEditor} spellCheck={false} rows={10} disabled={disabled} value={raw[path]} onChange={event => { setValid(false); onValidityChange?.(false); setRaw(previous => ({ ...previous, [path]: event.target.value })); }} aria-invalid={Boolean(errors[path])} aria-describedby={errors[path] ? `${id}-json-error` : undefined} />
-    {errors[path] ? <div id={`${id}-json-error`}><InlineError>{errors[path]}</InlineError></div> : null}
+    <label htmlFor={`${id}-json`}>{t("불러온 API workflow JSON")}</label><textarea id={`${id}-json`} className={styles.jsonEditor} spellCheck={false} rows={10} disabled={disabled} value={raw[path]} onChange={event => { invalidatePending();delete intents.current[path];setReadable(previous=>({...previous,[path]:true}));setRaw(previous => ({ ...previous, [path]: event.target.value })); }} aria-invalid={Boolean(errors[path])} aria-describedby={errors[path] ? `${id}-json-error` : undefined} />
+    {Boolean(errors[path]) ? <div id={`${id}-json-error`}><InlineError>{typeof errors[path]==="string"?t(errors[path] as string):comfyFailure(errors[path],t,t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요."))}</InlineError></div> : null}
     <p role="status">{t(analyzing ? "JSON 분석 중…" : valid ? "JSON 분석 완료" : "JSON 입력을 확인해 주세요.")}</p>
-    <div className={styles.actions}><Button type="button" variant="ghost" disabled={disabled} onClick={() => void sample("text")}>{t("텍스트 예시")}</Button>{path === "workflow" ? <Button type="button" variant="ghost" disabled={disabled} onClick={() => void sample("reference")}>{t("참조 예시")}</Button> : <Button type="button" variant="ghost" disabled={disabled} onClick={() => { const next = { ...options }; delete next.text_workflow; onChange(next); setRaw(previous => ({ ...previous, text_workflow: "" })); }}>{t("텍스트 경로 제거")}</Button>}</div>
+    <div className={styles.actions}><Button type="button" variant="ghost" disabled={disabled} onClick={() => void sample("text")}>{t("텍스트 예시 사용")}</Button>{path === "workflow" ? <Button type="button" variant="ghost" disabled={disabled} onClick={() => void sample("reference")}>{t("참조 이미지 예시 사용")}</Button> : <Button type="button" variant="ghost" disabled={disabled} onClick={() => {invalidatePending();delete intents.current.text_workflow;const next={...options};delete next.text_workflow;onChange(next);setRaw(previous=>({...previous,text_workflow:""}));}}>{t("텍스트 경로 제거")}</Button>}</div>
+    <p>{t("이 예시는 이미지와 텍스트를 함께 사용하며 ComfyUI의 ETN_LoadImageBase64 노드가 필요해요. Angmoo가 노드를 설치하지는 않아요.")}</p>
+    <div className={styles.actions}><Button type="button" variant="ghost" disabled={disabled} onClick={()=>void downloadSample("text")}>{t("텍스트 예시 JSON 다운로드")}</Button><Button type="button" variant="ghost" disabled={disabled} onClick={()=>void downloadSample("reference")}>{t("참조 예시 JSON 다운로드")}</Button></div>
+    {Boolean(downloadError)?<InlineError>{comfyFailure(downloadError,t,t("JSON을 확인하지 못했습니다. 입력한 내용을 수정해 주세요."))}</InlineError>:null}
+    <p>{t("기존 노드 바인딩은 고급 설정에서 계속 사용할 수 있어요.")}</p>
     {legacy ? <><p>{t("기존 직접 입력 설정입니다. 입력한 값이 그대로 전달됩니다.")}</p><Button type="button" variant="secondary" disabled={!valid || disabled} onClick={convertLegacy}>{t("기존 설정을 새 형식으로 전환")}</Button></> : workflow ? <label>{t("입력 모드")}<select value={mode} disabled={disabled} onChange={event => changeMode(event.target.value as "placeholders" | "node_bindings")}><option value="placeholders">{t("자리표시자 입력")}</option><option value="node_bindings">{t("노드 입력 직접 지정")}</option></select></label> : null}
     <p className={styles.note}>{t("자리표시자는 Angmoo 설정값을 사용합니다. SillyTavern 설정은 자동으로 가져오지 않으며 JSON의 고정 값은 유지됩니다.")}</p>
+    <p>{t("설치된 모델의 이름을 선택하거나 입력해 주세요.")}</p>
     {workflow && "bindings" in workflow ? <details open={legacy}><summary>{t("고급 입력 연결")}</summary>{supported.map(role => {
       const selected = workflow.bindings[role], node = selected ? workflow.prompt[selected.node_id] : undefined;
       return <div className={`${styles.row} ${styles.binding}`} key={role}><label>{role} · {t("입력 노드")}<select value={selected?.node_id ?? ""} disabled={disabled} onChange={event => { const nodeId = event.target.value; bind(role, nodeId, nodeId ? Object.keys(workflow.prompt[nodeId].inputs)[0] ?? "" : ""); }}><option value="">{t("연결 안 함")}</option>{Object.entries(workflow.prompt).map(([nodeId, item]) => <option key={nodeId} value={nodeId}>{nodeId} · {item.class_type}</option>)}</select></label>{selected && node ? <label>{t("입력 위치")}<select disabled={disabled} value={selected.input_name} onChange={event => bind(role, selected.node_id, event.target.value)}>{Object.keys(node.inputs).map(name => <option key={name}>{name}</option>)}</select></label> : null}</div>;

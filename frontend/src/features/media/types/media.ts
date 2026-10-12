@@ -19,6 +19,7 @@ export type ApiGraph = Record<string, { class_type: string; inputs: Record<strin
 export type Bindings = Record<string, { node_id: string; input_name: string }>;
 export type Workflow = { prompt: ApiGraph; bindings: Bindings; output_node: string; reference_required: boolean };
 export type OutputPolicy = { mode: "auto_first_image" } | { mode: "explicit_node"; node_id: string };
+export type RetainedComfyContract = {bindings?: Bindings; output?: OutputPolicy; legacy_output_node?: string; reference_required?: boolean};
 export type VersionedWorkflow = { input_mode: "placeholders"; prompt: ApiGraph; output: OutputPolicy } | { input_mode: "node_bindings"; prompt: ApiGraph; bindings: Bindings; output: OutputPolicy };
 export type WorkflowInput = Workflow | VersionedWorkflow;
 export type WorkflowAnalysis = { input_mode: "placeholders" | "node_bindings"; prompt: ApiGraph; supported_tokens: Record<string, string>; used_roles: string[]; prompt_applied: boolean; reference_required: boolean; source_digest: string;
