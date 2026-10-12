@@ -2,7 +2,7 @@
 
 대상은 workspace의 `10-12 ComfyUI 예시·워크플로 호환과 Partner 키 전송·Windows 보호·CSP·영어 안내 통합 코드 구현 세부 계획.md` I00–I67 및 V00–V33이다. 실행 기간은 2026-10-12–13이며, 제품 시작점은 `feat/0.1.0-release-readiness`, `6d6c6b7487547624365be24dbbd86f20b3707ebf`, clean tree였다. 이 브랜치의 제품 소스와 문서만 수정하고 로컬 커밋한다. push/PR/원격 CI/main merge/fetch/pull/rebase, 설치·배포·사용자 Docker/ComfyUI 재시작은 수행하지 않는다.
 
-필수 구현과 관련 검증을 완료했다. I61은 준비된 격리 ComfyUI가 제공되지 않아 조건 검토를 마치고 실제 custom node/HTTP 실행을 **미측정**으로 남긴다. 설치 앱의 안전성·실모델 품질·USER CHECK·Termux를 fixture PASS로 표시하지 않는다.
+필수 구현과 관련 검증을 완료했다. I61의 실제 custom node/HTTP 실행은 **미측정**이다. 최초 조사에서 기존 진단용 ComfyUI를 찾지 못했으나 사용자 요청에 따른 재확인에서 해당 환경과 기본 노드 계약을 확인했다. 필요한 ETN custom node와 모델이 없으므로 실제 decoder 실행·전체 생성은 여전히 미측정이며, 정정 근거는 §9에 기록한다. 설치 앱의 안전성·실모델 품질·USER CHECK·Termux를 fixture PASS로 표시하지 않는다.
 
 ## 1. 실제 변경과 보존
 
@@ -59,7 +59,7 @@ Next와 static은 정확한 frontend origin으로 **각각 fresh fixture backend
 - key 자체도 최종 physical handle 경로를 확인했고 현재 token의 read-open은 가능했다. DACL에는 보호 기준에 맞지 않는 일반 주체 grant가 남아 **unsafe_access=true**였다. 실제 설치 key/ACL/소유자/데이터는 변경하지 않았다. 새 소스/fixture 보호 PASS가 기존 설치본에 적용됐다고 주장하지 않는다.
 - Windows ordinary access는 실제 restricted-token AccessCheck로 확인했다. 다른 Windows 계정을 생성하거나 프로세스를 impersonate하지 않았다. portable IO 분리는 real file IO+permission-call port로 확인했으며 실제 Linux filesystem ACL 측정과는 구분한다.
 - LOCAL 비용: 관리 key 생성 약 43.307ms, 기존 key inspection 평균 약 0.997ms(10회). helper 호출자는 startup/managed migration이며 Chat/SNS 매 활동에 검사하지 않는다. warm production `/login` 5회 HTTP는 평균 약 16.72ms, nonce는 5개 모두 달랐다. 이 수치는 배포 벤치마크가 아니다. dynamic HTML/no-store에 따른 SSR/cache 비용을 수용한다.
-- V31: 이미 준비된 **격리** ComfyUI/custom node가 없어 실제 decoder 실행은 미측정이다. 사용자 ComfyUI/GPU를 호출하거나 노드/model을 설치하지 않았다.
+- V31: 재확인에서 기존 진단용 ComfyUI를 찾았고 실제 기본 노드 입력·출력 계약을 대조했다. 해당 환경에는 ETN custom node와 모델이 없어 실제 decoder HTTP 실행은 미측정이다. 사용자 ComfyUI/GPU 추론이나 노드/model 설치는 수행하지 않았다. §9의 기본 노드 대조를 decoder HTTP 실행 성공으로 표시하지 않는다.
 - V32: 실제 GPU 품질, 사용자 node/model 버전, Partner 실제 인증/결제, 설치 native CSP 적용, 현재 후보 Windows payload, 직접 USER CHECK, 전체 공개 보안 감사는 미측정이다.
 - V33: Termux 권한/CA/browser/재시작/Doze는 후속 배포 범위다.
 
@@ -215,6 +215,26 @@ fixture server는 fresh root만 받으며 재사용/사용자 설치 root를 거
 | V28 | 관련 계약 PASS | ON unsafe/OFF keyless·세 ref mode·withdrawal/receipt 교차 |
 | V29 | 관련 계약 PASS | Next/static text download→file→real save→admit→render→PNG pixels |
 | V30 | 관련 계약 PASS | Next/static reference의 독립 실제 연속·Base64/scene·PNG pixels |
-| V31 | 조건 검토 완료 · 미측정 | 준비된 격리 Comfy/custom node 없음; 실행/설치/GPU 없음 |
+| V31 | 조건 검토 완료 · decoder HTTP 미측정 | 기존 진단용 Comfy 재확인·기본 노드 대조 PASS; ETN node/model 없음. §9 참조 |
 | V32 | 미측정 경계 기록 완료 | 실모델/Partner 결제/설치 CSP·후보·USER CHECK·전체 감사 분리 |
 | V33 | 명시적 유예 | Termux 후속 배포/권한/CA/Doze 범위 |
+
+## 9. 기존 진단용 ComfyUI 재확인과 보고 정정 — 2026-10-13
+
+사용자가 Codex 작업 파일에 기존 ComfyUI가 있다고 지적해 파일 위치와 실행 환경을 재확인했다. 최초 보고의 "준비된 격리 ComfyUI가 없다"는 표현은 기존 폴더를 찾지 못한 조사 결과를 존재하지 않는 것으로 확대했으며, 아래 사실로 정정한다.
+
+- 실제 경로: `D:/project_code/angmoo-workspace/.local-diagnostics/comfyui-live-20261001`.
+- 소스 version `0.38.0`, Git HEAD `33ee2b36d2d6e8f25cfc796b774ca387917b98de`. 기존 소스 작업 트리는 clean이다.
+- 기존 `.venv/Scripts/python.exe`를 직접 실행해 Python `3.12.13`, torch `2.14.1+cpu`, Pillow `12.3.0`, aiohttp `3.14.3`, frontend package `1.53.6`의 설치를 확인했다. 패키지를 추가하거나 변경하지 않았다.
+- `custom_nodes`에는 기본 example 파일과 websocket saver만 있고 `ETN_LoadImageBase64` 구현은 없다. checkpoints/vae에는 0-byte 안내 파일 외에 모델이 없고, 별도 `extra_model_paths.yaml`도 없다. 현재 18289 포트는 listen하지 않으며, 10-09의 기존 격리 CPU 실행·종료 기록은 남아 있다.
+
+기존 Python에서 ComfyUI의 정상 CLI argument parsing을 켜고 `--cpu`, `--disable-all-custom-nodes`, `--disable-api-nodes`로 core `nodes.NODE_CLASS_MAPPINGS` 및 실제 `INPUT_TYPES`/`RETURN_TYPES`를 읽었다. 두 새 예시의 필수 입력·입력 이름·고정 combo 값·확인 가능한 link type을 대조했다. 첫 직접 import 프로브는 argument parsing을 켜지 않아 CPU 옵션이 적용되지 않았고 CUDA 초기화 오류로 종료했다. 같은 main의 argument parsing 진입점을 사용해 재실행했으며 ComfyUI 코드나 검사를 우회·수정하지 않았다.
+
+| 예시 | 실제로 확인한 기본 노드 | 입력 계약 대조 | 출력 연결 타입 대조 | 결과·제약 |
+| --- | --- | --- | --- | --- |
+| `comfy-api-text.json` | 7/7 | 22개 | 9개 | 불일치 없음. 실제 선택 가능한 checkpoint 0개 |
+| `comfy-api-reference.json` | 8/9 | 26개 | 11개 | 확인한 기본 노드 불일치 없음. `ETN_LoadImageBase64` 누락; 해당 노드 연결의 실제 구현은 미검증 |
+
+프로브의 최종 `issues`는 빈 목록이고 exit code는 0이다. 이는 실제 ComfyUI 소스와 실행 Python을 사용한 계약 대조이며, `POST /prompt` 실행·`/history`·`/view`·ETN Base64 decoder·모델 로딩·GPU 추론·완성 이미지 생성은 수행하지 않았다. placeholder는 Angmoo가 실행 시 실제 값으로 치환하는 예시 계약을 유지하며 모델 선택 가능성을 가짜 값으로 통과시키지 않았다. 기존 Angmoo 연속 시험과 이 기본 노드 대조는 실제 완성 이미지 생성 품질 증거와 별개다.
+
+이 정정은 기존 111개 backend 시험·Next/static 회귀의 성공 결과를 변경하지 않는다. V31은 decoder HTTP 미측정, V32는 실제 모델/Partner/설치 품질 미측정으로 유지한다. 실행 환경·결과는 ignored `artifacts/comfy-security-20261012/existing-comfy-followup.json`에 기록했고, 기존 ComfyUI·Angmoo 제품 코드는 변경하지 않았다.
