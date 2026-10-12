@@ -47553,6 +47553,23 @@
           "after_ast": "FunctionDef(name='signed_reader', args=arguments(), body=[Assign(targets=[Name(id='cache', ctx=Store())], value=Dict()), FunctionDef(name='read', args=arguments(vararg=arg(arg='args'), kwonlyargs=[arg(arg='root')], kw_defaults=[None]), body=[If(test=BoolOp(op=And(), values=[Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='args', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=2)]), Compare(left=Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value='show')]), Call(func=Attribute(value=Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value=1), ctx=Load()), attr='endswith', ctx=Load()), args=[Constant(value=':security/post_refactor_contract_changes.json')])]), body=[Return(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='proof', ctx=Load()), attr='_product_change_module', ctx=Load())), attr='committed_history_bytes', ctx=Load()), args=[Name(id='REPO', ctx=Load()), Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value=1), ctx=Load())]))]), If(test=Compare(left=Name(id='args', ctx=Load()), ops=[NotIn()], comparators=[Name(id='cache', ctx=Load())]), body=[Assign(targets=[Subscript(value=Name(id='cache', ctx=Load()), slice=Name(id='args', ctx=Load()), ctx=Store())], value=Call(func=Attribute(value=Name(id='subprocess', ctx=Load()), attr='check_output', ctx=Load()), args=[List(elts=[Constant(value='git'), Starred(value=Name(id='args', ctx=Load()), ctx=Load())], ctx=Load())], keywords=[keyword(arg='cwd', value=Name(id='REPO', ctx=Load()))]))]), Return(value=Subscript(value=Name(id='cache', ctx=Load()), slice=Name(id='args', ctx=Load()), ctx=Load()))]), Return(value=Name(id='read', ctx=Load()))], decorator_list=[Call(func=Attribute(value=Name(id='pytest', ctx=Load()), attr='fixture', ctx=Load()), keywords=[keyword(arg='scope', value=Constant(value='module'))])])"
         }
       ]
+    },
+    {
+      "id": "readiness-measured-history-working-set",
+      "implementation_commit": "0302d3b78cf65df500e10f002b117e274c6d15c8",
+      "reason": "The actual ledger has 100 committed versions; a 32-entry LRU cycles and misses. Retain the measured set with a bounded 128-entry compressed cache",
+      "review": "Exact immutable bytes only; all mutable candidate, reader, source and prefix validations remain fresh. Capacity is a resource bound, not a validation exemption",
+      "source_blobs": {
+        "scripts/ci/post_refactor_contract_changes.py": "2a8a67f842413eebebc69c8a9eb1035a75238016"
+      },
+      "definitions": [
+        {
+          "source": "scripts/ci/post_refactor_contract_changes.py",
+          "symbol": "_compressed_git_history",
+          "before_ast": "FunctionDef(name='_compressed_git_history', args=arguments(args=[arg(arg='root', annotation=Name(id='str', ctx=Load())), arg(arg='object_path', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Attribute(value=Name(id='zlib', ctx=Load()), attr='compress', ctx=Load()), args=[Call(func=Attribute(value=Name(id='subprocess', ctx=Load()), attr='check_output', ctx=Load()), args=[List(elts=[Constant(value='git'), Constant(value='show'), Name(id='object_path', ctx=Load())], ctx=Load())], keywords=[keyword(arg='cwd', value=Name(id='root', ctx=Load()))])], keywords=[keyword(arg='level', value=Constant(value=1))]))], decorator_list=[Call(func=Name(id='lru_cache', ctx=Load()), keywords=[keyword(arg='maxsize', value=Constant(value=32))])], returns=Name(id='bytes', ctx=Load()))",
+          "after_ast": "FunctionDef(name='_compressed_git_history', args=arguments(args=[arg(arg='root', annotation=Name(id='str', ctx=Load())), arg(arg='object_path', annotation=Name(id='str', ctx=Load()))]), body=[Return(value=Call(func=Attribute(value=Name(id='zlib', ctx=Load()), attr='compress', ctx=Load()), args=[Call(func=Attribute(value=Name(id='subprocess', ctx=Load()), attr='check_output', ctx=Load()), args=[List(elts=[Constant(value='git'), Constant(value='show'), Name(id='object_path', ctx=Load())], ctx=Load())], keywords=[keyword(arg='cwd', value=Name(id='root', ctx=Load()))])], keywords=[keyword(arg='level', value=Constant(value=1))]))], decorator_list=[Call(func=Name(id='lru_cache', ctx=Load()), keywords=[keyword(arg='maxsize', value=Constant(value=128))])], returns=Name(id='bytes', ctx=Load()))"
+        }
+      ]
     }
   ]
 }
