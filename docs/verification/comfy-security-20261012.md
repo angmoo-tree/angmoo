@@ -2,7 +2,7 @@
 
 대상은 workspace의 `10-12 ComfyUI 예시·워크플로 호환과 Partner 키 전송·Windows 보호·CSP·영어 안내 통합 코드 구현 세부 계획.md` I00–I67 및 V00–V33이다. 실행 기간은 2026-10-12–13이며, 제품 시작점은 `feat/0.1.0-release-readiness`, `6d6c6b7487547624365be24dbbd86f20b3707ebf`, clean tree였다. 이 브랜치의 제품 소스와 문서만 수정하고 로컬 커밋한다. push/PR/원격 CI/main merge/fetch/pull/rebase, 설치·배포·사용자 Docker/ComfyUI 재시작은 수행하지 않는다.
 
-필수 구현과 관련 검증을 완료했다. I61의 실제 custom node/HTTP 실행은 **미측정**이다. 최초 조사에서 기존 진단용 ComfyUI를 찾지 못했으나 사용자 요청에 따른 재확인에서 해당 환경과 기본 노드 계약을 확인했다. 필요한 ETN custom node와 모델이 없으므로 실제 decoder 실행·전체 생성은 여전히 미측정이며, 정정 근거는 §9에 기록한다. 설치 앱의 안전성·실모델 품질·USER CHECK·Termux를 fixture PASS로 표시하지 않는다.
+필수 구현과 관련 검증을 완료했다. 최초 조사에서 기존 진단용 ComfyUI를 찾지 못한 사유는 §9에서 정정했다. 이후 사용자 추가 요청에 따라 별도 시험 환경에 필요한 노드만 준비하고 **I61/V31의 실제 decoder·HTTP 실행까지 완료**했다(§10). AI 이미지 모델 사용·GPU 추론·Partner 결제 시험은 사용자 지시로 제외한다. 실제 설치 앱·USER CHECK·Termux를 이 성공으로 표시하지 않는다.
 
 ## 1. 실제 변경과 보존
 
@@ -59,7 +59,7 @@ Next와 static은 정확한 frontend origin으로 **각각 fresh fixture backend
 - key 자체도 최종 physical handle 경로를 확인했고 현재 token의 read-open은 가능했다. DACL에는 보호 기준에 맞지 않는 일반 주체 grant가 남아 **unsafe_access=true**였다. 실제 설치 key/ACL/소유자/데이터는 변경하지 않았다. 새 소스/fixture 보호 PASS가 기존 설치본에 적용됐다고 주장하지 않는다.
 - Windows ordinary access는 실제 restricted-token AccessCheck로 확인했다. 다른 Windows 계정을 생성하거나 프로세스를 impersonate하지 않았다. portable IO 분리는 real file IO+permission-call port로 확인했으며 실제 Linux filesystem ACL 측정과는 구분한다.
 - LOCAL 비용: 관리 key 생성 약 43.307ms, 기존 key inspection 평균 약 0.997ms(10회). helper 호출자는 startup/managed migration이며 Chat/SNS 매 활동에 검사하지 않는다. warm production `/login` 5회 HTTP는 평균 약 16.72ms, nonce는 5개 모두 달랐다. 이 수치는 배포 벤치마크가 아니다. dynamic HTML/no-store에 따른 SSR/cache 비용을 수용한다.
-- V31: 재확인에서 기존 진단용 ComfyUI를 찾았고 실제 기본 노드 입력·출력 계약을 대조했다. 해당 환경에는 ETN custom node와 모델이 없어 실제 decoder HTTP 실행은 미측정이다. 사용자 ComfyUI/GPU 추론이나 노드/model 설치는 수행하지 않았다. §9의 기본 노드 대조를 decoder HTTP 실행 성공으로 표시하지 않는다.
+- V31: 사용자 추가 요청으로 격리 runtime에 ETN 노드만 준비해 실제 decoder→scale→save·HTTP/history/view 및 Angmoo client 복구를 완료했다. §10의 실제 통신 PASS를 모델 생성 품질로 확대하지 않는다. AI 모델 설치·로딩·추론·GPU·유료 호출은 없다.
 - V32: 실제 GPU 품질, 사용자 node/model 버전, Partner 실제 인증/결제, 설치 native CSP 적용, 현재 후보 Windows payload, 직접 USER CHECK, 전체 공개 보안 감사는 미측정이다.
 - V33: Termux 권한/CA/browser/재시작/Doze는 후속 배포 범위다.
 
@@ -172,7 +172,7 @@ fixture server는 fresh root만 받으며 재사용/사용자 설치 root를 거
 | I58 | graph 가져오기와 Partner 정책·keyless HTTP·OFF/key 삭제·receipt의 교차 회귀를 실행한다. | 완료 | 관련 backend/browser/두 연속 사례·구조검사 |
 | I59 | 텍스트 예시의 필수 연속 사용자 시나리오를 실행한다. | 완료 | 관련 backend/browser/두 연속 사례·구조검사 |
 | I60 | 참조 예시의 필수 연속 사용자 시나리오를 독립 실행한다. | 완료 | 관련 backend/browser/두 연속 사례·구조검사 |
-| I61 | 이미 준비된 격리 ComfyUI에서 추가 노드의 실제 decoder 통신 검증 가능 여부를 판단·수행한다. | 조건 검토 완료 · 실제 V31 미측정 | 관련 backend/browser/두 연속 사례·구조검사 |
+| I61 | 이미 준비된 격리 ComfyUI에서 추가 노드의 실제 decoder 통신 검증 가능 여부를 판단·수행한다. | 추가 요청 검증 완료 · 실제 V31 PASS | §10 실제 CPU Comfy/노드·Angmoo client·합성 PNG·HTTP |
 | I62 | 관련 구조·디자인·catalog·typecheck·변경 파일 lint·diff·privacy 검사를 실행한다. | 완료 | 관련 backend/browser/두 연속 사례·구조검사 |
 | I63 | 실제 설치 identity/ACL·후보 payload/CSP와 미확인 출시 근거를 재검토한다. | 조사/대조 완료 · 설치 적용/후보 별도 | 설치/조건부 근거·아키텍처/LOCAL·실행 원장·선별 로컬 Git |
 | I64 | architecture/design/LOCAL·사용자 안내에 실제 구현과 출처·Termux 유예를 기록한다. | 완료 | 설치/조건부 근거·아키텍처/LOCAL·실행 원장·선별 로컬 Git |
@@ -215,8 +215,8 @@ fixture server는 fresh root만 받으며 재사용/사용자 설치 root를 거
 | V28 | 관련 계약 PASS | ON unsafe/OFF keyless·세 ref mode·withdrawal/receipt 교차 |
 | V29 | 관련 계약 PASS | Next/static text download→file→real save→admit→render→PNG pixels |
 | V30 | 관련 계약 PASS | Next/static reference의 독립 실제 연속·Base64/scene·PNG pixels |
-| V31 | 조건 검토 완료 · decoder HTTP 미측정 | 기존 진단용 Comfy 재확인·기본 노드 대조 PASS; ETN node/model 없음. §9 참조 |
-| V32 | 미측정 경계 기록 완료 | 실모델/Partner 결제/설치 CSP·후보·USER CHECK·전체 감사 분리 |
+| V31 | 실제 decoder HTTP PASS | 별도 CPU runtime에 ETN node만 준비·변환/저장·HTTP·복구/오류 검증. §10 참조 |
+| V32 | 경계 기록 완료 · 실모델 시험 사용자 제외 | AI 모델/Partner 유료 호출 제외; 설치 CSP·후보·USER CHECK·전체 감사 분리 |
 | V33 | 명시적 유예 | Termux 후속 배포/권한/CA/Doze 범위 |
 
 ## 9. 기존 진단용 ComfyUI 재확인과 보고 정정 — 2026-10-13
@@ -237,4 +237,42 @@ fixture server는 fresh root만 받으며 재사용/사용자 설치 root를 거
 
 프로브의 최종 `issues`는 빈 목록이고 exit code는 0이다. 이는 실제 ComfyUI 소스와 실행 Python을 사용한 계약 대조이며, `POST /prompt` 실행·`/history`·`/view`·ETN Base64 decoder·모델 로딩·GPU 추론·완성 이미지 생성은 수행하지 않았다. placeholder는 Angmoo가 실행 시 실제 값으로 치환하는 예시 계약을 유지하며 모델 선택 가능성을 가짜 값으로 통과시키지 않았다. 기존 Angmoo 연속 시험과 이 기본 노드 대조는 실제 완성 이미지 생성 품질 증거와 별개다.
 
-이 정정은 기존 111개 backend 시험·Next/static 회귀의 성공 결과를 변경하지 않는다. V31은 decoder HTTP 미측정, V32는 실제 모델/Partner/설치 품질 미측정으로 유지한다. 실행 환경·결과는 ignored `artifacts/comfy-security-20261012/existing-comfy-followup.json`에 기록했고, 기존 ComfyUI·Angmoo 제품 코드는 변경하지 않았다.
+이 시점의 정정은 기존 111개 backend 시험·Next/static 회귀의 성공 결과를 변경하지 않았고 V31은 미측정이었다. 당시 실행 환경·결과는 ignored `artifacts/comfy-security-20261012/existing-comfy-followup.json`에 보존했다. 이후 별도의 사용자 추가 요청으로 수행한 실제 V31 결과는 아래 §10이 최신 판정이다.
+
+## 10. 모델 없는 실제 ComfyUI 추가 검증 — 2026-10-13
+
+사용자는 ComfyUI 환경이 없어 못 했던 검증을 추가 수행하되 **AI 이미지 모델을 사용하는 검증은 하지 말라**고 요청했다. 최초 I61/V31의 설치 제외 조건에서 필요한 노드의 준비만 별도 시험 환경으로 확장했고, 모델 다운로드·로딩·샘플링·VAE encode/decode·CLIP 실행·GPU 추론·Partner 인증/결제는 수행하지 않았다. 기존 사용자 ComfyUI·모델·워크플로·Python 환경과 설치된 Angmoo는 변경하지 않는다.
+
+기존 ComfyUI 0.38.0/HEAD `33ee2b36d2d6e8f25cfc796b774ca387917b98de`와 CPU Python을 재사용했다. 공식 Acly 노드의 앞서 검사한 commit `b3ae4aa2d98f6ac4284ddbe261e3559c94bd652b`를 HTTPS로 받아 새 ignored 시험 root에만 준비했다. archive는 1,200,046 bytes, 확장 소스 1,357,326 bytes이며 SHA-256은 `90c54628e93e8ecbb4e5086bd39f5beca27b95defcb5f42d0c28620c34214635`다. `nodes.py` SHA-256 `296330305db27e8b457c7b26856dff2fb5fcdf232612a1a7b3ca3c2a85124474`를 실행 전에 확인했다. 모델 파일·archive path escape·symlink는 거절하며 외부 노드 소스를 제품 코드/asset에 포함하지 않는다.
+
+재현 도구 `scripts/diagnostics/verify_comfy_decoder_live.py`는 fresh owned root만 허용하고 별도 `--base-directory`, 빈 models directory, loopback `127.0.0.1:18290`, CPU, API node 비활성화, 해당 custom node 폴더만 whitelist, 기존 로컬 frontend를 사용한다. 선택적 번역 패키지가 없어 schema 조회 시 번역 패키지 다운로드도 없다. Python 의존 패키지 추가·모델 준비·유료 AI 서비스 호출은 하지 않았다. HTTP 관찰 도구는 요청을 실제 `ImageHttp`로 전달하며 모든 제출을 decoder/scale/save 세 class로 제한한다. 성공 응답·노드 실행·출력 이미지는 mock하지 않는다.
+
+원본 참조 예시의 8번 decoder·9번 scaler를 그대로 재사용하고, 7번 SaveImage의 입력만 scaler 출력에 연결한 **모델 없는 검증 graph**를 사용했다. 두 전체 예시를 AI 생성에 제출한 시험은 아니다. 실제 Angmoo `ComfyImageClient`와 freeze/render/reference 처리에서 합성 metadata가 있는 16×16 green PNG를 PNG Base64로 준비하고 실제 ComfyUI에 제출했다.
+
+| 검증 | 실제 결과 |
+| --- | --- |
+| 실제 `/object_info`의 두 전체 예시 노드 계약 | text 7/7 노드·22개 입력·9개 link, reference 9/9 노드·27개 입력·12개 link 대조 PASS. checkpoint 선택지는 빈 목록 |
+| 실제 `ETN_LoadImageBase64` 등록/입력/출력 | STRING `image`, IMAGE slot 0 확인 및 실행 PASS |
+| PNG metadata 제거·decoder→ImageScale→SaveImage | 실제 입력 metadata 제거, 16×16→64×48 RGB green pixel 보존 PASS |
+| 실제 `/prompt`→`/history/{id}`→`/view` | 정상 제출 1회, 실제 success history와 PNG 반환 PASS |
+| Angmoo의 기존 receipt 결과 복구 | 같은 PNG bytes 반환, 복구의 추가 prompt 0회, key·Partner 전송 없음 PASS |
+| 존재하지 않는 입력 link | 실제 HTTP 400, receipt 없음 PASS |
+| Base64 안의 잘못된 PNG | 실제 실행 error history, Angmoo `comfy_execution_failed`, image output 없음 PASS |
+| 모델/실행 경계와 종료 | 모델 node 제출 0, 모델 파일 0, GPU 추론 없음, 유료 호출 0, 자신의 서버/18290 포트 종료 확인 |
+
+정상 1회·거절된 잘못된 graph 1회·접수 후 디코딩 실패 1회로 실제 POST는 총 3회다. 실패 history의 PIL 오류는 의도한 negative case이며 정상 결과가 아니다. runtime의 Comfy output PNG는 정상 변환의 1개만 생성됐다. 실제 결과 PNG SHA-256은 `ed3620582c5eed3e8f4b09ea566060567086fe95d1f9a2bfea4470a6e9c32b57`다. 기존 Comfy Git 작업 트리는 종료 후에도 clean이고 기존 custom_nodes/venv를 수정하지 않았다.
+
+근거는 ignored `artifacts/comfy-decoder-live-20261013/node-source.json`, `run-01/report.json`, `run-01/server.log`, `run-01/decoded-result.png`다. JSON report는 graph hash·class·HTTP path/status·receipt·pixel·종료 결과만 기록하며 PNG Base64·key·사용자 데이터는 넣지 않는다. 재현 시 기존 node source를 제공하고 새로운 run root를 지정한다.
+
+```powershell
+$env:PYTHONPATH='backend'
+uv run --project backend --no-sync python scripts/diagnostics/verify_comfy_decoder_live.py `
+  --comfy-root D:/project_code/angmoo-workspace/.local-diagnostics/comfyui-live-20261001 `
+  --node-source artifacts/comfy-decoder-live-20261013/vendor/comfyui-tooling-nodes `
+  --run-root artifacts/comfy-decoder-live-20261013/fresh-run `
+  --port 18290
+```
+
+추가 검증은 실제 도구 실행, Python 구문 검사, Git whitespace, 변경 두 파일에 한정한 secret/privacy export 검사(`files=2 binary_audited=0 findings=0 fatal=0`)를 통과했다. I/V 원장은 68개/34개 ID를 각각 한 번 유지한다. 제품 동작 변경이 없어 기존 backend/frontend/browser 전체 시험이나 이미 통과한 회귀를 반복하지 않았다.
+
+V31은 이제 실제 통신 PASS다. 두 전체 예시의 AI 모델 생성 품질은 사용자 제외 범위로 남기며, 이 검증을 실제 model compatibility/생성 품질·Partner 결제·Windows 후보 설치본 적용·USER CHECK·Termux PASS로 확대하지 않는다. 검증 도구·문서만 로컬 커밋하며 PR/원격 CI/main merge/배포는 수행하지 않는다.
