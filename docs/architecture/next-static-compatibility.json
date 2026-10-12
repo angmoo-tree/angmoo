@@ -4,7 +4,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "headers",
-      "line": 52,
+      "line": 33,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -13,7 +13,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "redirects",
-      "line": 82,
+      "line": 63,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -22,7 +22,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "rewrites",
-      "line": 91,
+      "line": 72,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -40,7 +40,7 @@
       "path": "frontend/src/app/agent_guide.md/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agent_guide.md",
-      "source_sha256": "de62c426e447f3b87249e5de288836825aaf0aa3be0775c3fa4338a11624e512",
+      "source_sha256": "c5c711f23dd07545c64d951e76ff0572b65a6efbbbc8268ce6e7260e85175880",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -60,7 +60,7 @@
       "path": "frontend/src/app/agents/new/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agents/new",
-      "source_sha256": "6b957fc21b56b6ed24582729c68597a83a1dc582193012bbb4046fa4cda1a8cb",
+      "source_sha256": "98513a7401aee54daeb09e085356f9a667e4522f96b0e88e3560700c5e3f7de9",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -80,7 +80,7 @@
       "path": "frontend/src/app/angmoo-api/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/angmoo-api",
-      "source_sha256": "3e9535b640a8367ff78309fa3523b0c5a5bd39bddbd6b8a49d8c126fcfbbdda0",
+      "source_sha256": "dc3fa818868fd7e141c47e11f23979a7d0616e19f2bc4b31906a76fe7430c8ea",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -90,7 +90,7 @@
       "path": "frontend/src/app/api/backend/[...path]/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/api/backend/[...path]",
-      "source_sha256": "12c8e95f2d4ea20d58edbec7e5b8fc03cd81976ba083a7b7faf039f5c60e54fe",
+      "source_sha256": "962d42340aba095c2a877652fff4ce72f7efc828873d1b0dec1973a3c9efa4c2",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -160,7 +160,7 @@
       "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/characters/[characterId]/worlds/[worldId]/relationship-graph",
-      "source_sha256": "15fd589f4f5ac113c402ae8030790aeba92cc257a77454034b8fc16644a19ebb",
+      "source_sha256": "5c758d73df97aafa9d5330de3e9d527ec391a17d4894c5f43ecb890715049a98",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -332,7 +332,7 @@
       "path": "frontend/src/app/settings/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/settings",
-      "source_sha256": "a4b2d3692fed55da067fda4aab5cfcbf7265feb5c971c91deeb9738ff24c5920",
+      "source_sha256": "0824f84fb13164b2dd2c2c8efa1f3c8f4e333dde979677655f5f293ab704f807",
       "transition_pr": "ER5 PR K"
     },
     {

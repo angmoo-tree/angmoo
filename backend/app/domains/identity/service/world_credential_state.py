@@ -52,4 +52,3 @@ def _comfy_secrets(raw):
     if value["key"]:
         raise CredentialResolutionError("comfy_server_key_retired")
     return value
-

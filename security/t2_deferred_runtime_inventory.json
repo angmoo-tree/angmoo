@@ -121,6 +121,15 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
+      "path": "docs/agent_guide.en.md"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
       "path": "docs/agent_guide.md"
     },
     {

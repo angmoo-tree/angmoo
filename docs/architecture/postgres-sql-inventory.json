@@ -1100,7 +1100,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/runtime/service/sqlite_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a529e3220db7144aa2f845f2b2152de76bf5d8d5ce0bb01425af75c2c0b4741e",
+      "source_sha256": "dcce1fa5607ade4c726fff589e5cf00c14ce965ad841ff9b5b5df6880f958189",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1123,15 +1123,15 @@
     {
       "markers": {
         "driver_or_url": [
-          220,
-          245,
-          296
+          223,
+          248,
+          299
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/models/posts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "ac615379926181de8f71467089cd188d1f1e5267ab6b578e836d8b460cde9834",
+      "source_sha256": "b155816d3c6719fbb4849c1b44dc6eaf18eb93714d7409960b124eb72faf4d36",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1345,13 +1345,13 @@
     {
       "markers": {
         "row_lock": [
-          59
+          63
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/worlds/service/creator.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0a31fbbce8b2c12a8eff0747ad1dfcf046b1336416353d10010f779ffb0f3e50",
+      "source_sha256": "82c7e33f36171f99520520edf42c252ee1125b03c6195cc918259ce9c7fdcac9",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1400,19 +1400,19 @@
           44,
           52,
           81,
-          143
+          151
         ],
         "row_lock": [
           45,
           56,
           82,
-          144
+          152
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/scope_queries.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "bdba4756c9aaf52255df29b6b39dc33ff902c1f465fdc7d50ba115500888d25d",
+      "source_sha256": "020908621ba90fcc1f85e691745d264e48df6115d0f856b8e8639dea13da85bd",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1479,18 +1479,18 @@
     {
       "markers": {
         "driver_or_url": [
-          111,
-          112,
-          113,
-          355,
-          356,
-          357
+          115,
+          116,
+          117,
+          360,
+          361,
+          362
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "6879f2065984178116a07dc245877e5ad404e3dab95b4b86a73cd4e61aeb7082",
+      "source_sha256": "24c19990fab6ecea6b329205ae9324273f102f299351db18dc86b1f2c8aa5b86",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

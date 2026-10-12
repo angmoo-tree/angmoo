@@ -310,7 +310,9 @@ def test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes() -> No
     navigation = (frontend_root / "utils" / "safe-navigation.ts").read_text(
         encoding="utf-8"
     )
-    assert "World Creator · P1" in client
+    assert 'useUiText("worlds")' in client
+    assert "PRODUCT_ROUTES.studioNewWorld" in client
+    assert "studioWorldRoute(worldId)" in client
     assert "activity-templates" not in client
     assert "^\\/worlds\\/new$" in navigation
     assert "creator\\/$" not in navigation

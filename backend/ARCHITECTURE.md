@@ -1061,3 +1061,29 @@ helper는 contributor/sidecar 시작과 관리 키 migration에만 조립하며 
 패키징 metadata는 관리 key/temp·환경 파일·SQLite/private backup sentinel을 거절한다.
 실제 설치의 key ACL은 읽기 전용 조사이며 소스/fixture PASS와 설치 반영은 별개다.
 [검증·미측정 경계](../docs/verification/comfy-security-20261012.md)를 참조한다.
+
+## Release readiness ownership corrections (2026-10-13, LOCAL)
+
+`identity/service/world_credential_state.py` owns the common credential row reads,
+revision preservation and sealed Comfy payload interpretation. General and image
+credential services depend on it in one direction while retaining the caller's
+Session, authorization, purpose, version and AAD checks.
+
+Relationships exposes `service/social_context_evidence.py` as a supported pure
+projection/validation operation for already authorized immutable social context.
+Chat does not import Relationships' private policy. Its historical evidence read
+port describes only the retained manifest values it consumes; Runtime supplies
+the concrete Memory manifest and keeps proof/World checks. Memory's situation
+binding value and policy constant live with its activity contracts; the binding
+policy module depends on those values without a reverse type dependency.
+
+Worlds owns `service/character_entry.py::lock_character_entry_world_write`, which
+serializes an already authorized profile write with deletion admission in the
+same transaction. It neither grants access nor increments the World version.
+`runtime/world_deletion/canonical_erasure.py` is the concrete canonical erasure
+adapter. The protocol stays in the World contracts. Application-level assembly
+lives in `runtime/world_deletion_composition.py` above low-level persistence and
+fence helpers. Cold migration fence installation can reflect existing SQL
+descriptors; explicit domain erasure rules still determine scope and an
+incomplete descriptor set fails. It does not register models through a reverse
+dependency or infer deletion policy from newly discovered foreign keys.

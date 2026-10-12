@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4275,
-      "internal_edge_count": 6249,
+      "external_import_count": 4446,
+      "internal_edge_count": 6540,
       "legacy_import_exception_count": 0,
-      "module_count": 1465,
+      "module_count": 1518,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -706,6 +706,14 @@
             ],
             "module": "app.domains.relationships.service.social_context",
             "path": "backend/app/domains/relationships/service/social_context.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.social_context",
+              "app.domains.relationships.policies.social_context_validation"
+            ],
+            "module": "app.domains.relationships.service.social_context_evidence",
+            "path": "backend/app/domains/relationships/service/social_context_evidence.py"
           },
           {
             "imports": [
@@ -1729,6 +1737,8 @@
           {
             "imports": [
               "app.domains.media.contracts",
+              "app.domains.media.schemas",
+              "app.domains.media.service.comfy_workflows",
               "app.domains.social.models.image_intents",
               "app.domains.social.models.posts",
               "app.domains.social.service.generation_usage"
@@ -2192,6 +2202,13 @@
             "imports": [],
             "module": "app.domains.social.utils.manual_inbox",
             "path": "backend/app/domains/social/utils/manual_inbox.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.utils.text"
+            ],
+            "module": "app.domains.social.utils.situation_output",
+            "path": "backend/app/domains/social/utils/situation_output.py"
           },
           {
             "imports": [],
@@ -3101,7 +3118,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 20,
+      "candidate_consumer_edge_count": 19,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -3123,8 +3140,7 @@
           "frontend/src/features/relationships/components/relationship-review-panel.tsx"
         ],
         "frontend/src/features/relationships/components/relationship-graph-client.tsx": [
-          "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "frontend/src/composition/static-product-router.tsx"
+          "frontend/src/composition/screens/world-relationships-screen.tsx"
         ],
         "frontend/src/features/relationships/types/relationship-graph.ts": [
           "frontend/src/features/relationships/api/relationship-graph.ts",
@@ -3192,13 +3208,12 @@
             "metadata"
           ],
           "imports": [
+            "@/composition/screens/world-app-screen",
             "@/config/seo",
-            "@/features/relationships/components/relationship-graph-client",
-            "@/features/relationships/components/relationship-graph-frame",
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "15fd589f4f5ac113c402ae8030790aeba92cc257a77454034b8fc16644a19ebb"
+          "sha256": "5c758d73df97aafa9d5330de3e9d527ec391a17d4894c5f43ecb890715049a98"
         },
         {
           "exports": [
@@ -3286,10 +3301,12 @@
           ],
           "imports": [
             "../utils/graph-layout",
+            "./relationship-graph-client.module.css",
             "./relationship-graph-node",
             "./relationship-review-panel",
             "@/components/ui/button",
             "@/components/ui/feedback",
+            "@/components/ui/section-heading",
             "@/components/ui/settings-card",
             "@/components/ui/status",
             "@/features/relationships/api/relationship-graph",
@@ -3307,7 +3324,7 @@
             "react"
           ],
           "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-          "sha256": "c58bc1ea7016b53503c70acf19ddfe2616f0700321a9eefc258e346b6df4e8db"
+          "sha256": "001a46a8c8f76189f35f265337c1fa20f2aba32fe5f524433b28b3cabb0ca8bd"
         },
         {
           "exports": [
@@ -3390,7 +3407,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
-          "sha256": "3a0effb205deb22d7c8518f93292ee123b69c63845f14734de57714e79acb8d7"
+          "sha256": "ea6bad9141774f6672b6c01def55d345ba66bf7db11734d972bbca78c56313ab"
         }
       ],
       "planned_feature_allowlist": [
@@ -3445,7 +3462,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "e810c47c6220a0039723753e7390f3ed249c3d04b432de8b9ca4a292ac1eb34c"
+        "sha256": "de4366b2077efac7b3da08669c32b0c28d5cd415faf29d88f699512250849f60"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -3459,7 +3476,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "305197a4dce0132607ab419abac81f74b854cc438362a18bc917d23e855d50f9"
+        "sha256": "45027895306e6e1dae10d1161e028e5c624b1921c500120ad2bbac0452f4730b"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3471,7 +3488,7 @@
       },
       {
         "path": "backend/tests/relationships/test_graph_projection_worker.py",
-        "sha256": "fdaaca7f280e98d13e95f94a773100bb6259e0c0358f3ba9e5e754a3cee15810"
+        "sha256": "9c8aaa36825ac75a9301771712a0f8194f15755587d5392d7a23b9678b8a5ea9"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
@@ -3518,11 +3535,13 @@
         "sha256": "aed01497163fa24346b3fd62f7ec5ba4728d09192758488fef750b7199a4cda9"
       }
     ],
-    "parity_test_node_count": 100,
+    "parity_test_node_count": 102,
     "parity_test_nodes": [
       "backend/tests/relationships/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
       "backend/tests/relationships/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
       "backend/tests/relationships/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_pool_exhaustion_recovers_in_same_loop_and_projects_once",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_repeated_checkout_timeouts_back_off_and_never_report_ready",
       "backend/tests/relationships/test_graph_projection_worker.py::test_shutdown_drains_inflight_and_returns_unstarted_claims_to_pending",
       "backend/tests/relationships/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row",
       "backend/tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
@@ -3709,7 +3728,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "8a58da3fb8f2d575d6d62021f00cb8f61ce3b455de4d25ae21ffba7267f438a2"
+        "sha256": "eaab59358abe00f823266d30c85e9d9ea52c42c6f1af01554ede5b81a2d58dcf"
       },
       "steps": [
         {
