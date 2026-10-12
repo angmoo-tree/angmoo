@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "owner": "worlds",
+  "tables": {
+    "world_daypart_profiles": {
+      "world_column": "world_id"
+    },
+    "world_glossary_terms": {
+      "world_column": "world_id"
+    },
+    "world_memberships": {
+      "world_column": "world_id"
+    },
+    "world_places": {
+      "world_column": "world_id"
+    },
+    "world_roles": {
+      "world_column": "world_id"
+    },
+    "world_rules": {
+      "world_column": "world_id"
+    }
+  }
+}

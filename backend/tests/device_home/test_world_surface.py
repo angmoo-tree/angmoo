@@ -232,6 +232,20 @@ def test_creator_studio_surface_includes_only_owner_managed_worlds() -> None:
         "draft": "world_not_published",
         "archived": "world_archived",
     }
+    assert all(item["can_delete"] is True and item["is_default_space"] is False for item in items)
+
+
+def test_owner_membership_cannot_forge_root_deletion_capability() -> None:
+    client, engine, principal = _fixture()
+    owner, _ = _seed(engine, principal)
+    with Session(engine) as db:
+        db.add(_membership("forged-owner-membership",world_id="foreign",user_id=owner.id,role="owner"))
+        db.commit()
+    response=client.get("/api/v1/worlds/mine?surface=creator_studio")
+    assert response.status_code==200
+    for item in response.json()["items"]:
+        if item["world_id"]=="foreign":
+            assert item["can_delete"] is False
 
 
 def test_surface_requires_session_and_claimed_installation_owner() -> None:

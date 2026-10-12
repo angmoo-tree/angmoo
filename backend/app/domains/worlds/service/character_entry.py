@@ -12,6 +12,9 @@ from app.domains.worlds.service.definition import refresh_world_contract
 
 
 def get_character_entry_world(db: Session, world_id: str):
+    from app.domains.worlds.service.deletion import is_deleting
+    if is_deleting(db, world_id):
+        return None
     return db.get(models.World, world_id)
 
 

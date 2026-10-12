@@ -21,7 +21,7 @@ from app.domains.chat.contracts.character_response_generator import (
 )
 from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.integrations import direct_llm
-from app.integrations.llm.chat_input_presentation import conversation_view, add_identity_links, CHAT_PARTICIPANT_INSTRUCTIONS
+from app.integrations.llm.chat_input_presentation import conversation_view, add_identity_links, CHAT_PARTICIPANT_INSTRUCTIONS, with_current_image_instructions
 
 
 CHARACTER_RESPONSE_MAX_OUTPUT_TOKENS = WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS
@@ -249,7 +249,10 @@ def _system_prompt(request: CharacterResponseGeneratorRequest) -> str:
                    if request.recall_interpretation.revision == ADVISORY_ADMISSION_REVISION else
                    "Use requested_direction for proposed relationship direction, not roles alone.")
             )
-    return prompt + ("\n" + CHAT_PARTICIPANT_INSTRUCTIONS + "\nWrite the next reply from the responding character's perspective. Write only the reply body in the text field. Do not add a speaker-name prefix or simulate the user's next message." if request.chat_identity is not None else "")
+    return with_current_image_instructions(
+        prompt + ("\n" + CHAT_PARTICIPANT_INSTRUCTIONS + "\nWrite the next reply from the responding character's perspective. Write only the reply body in the text field. Do not add a speaker-name prefix or simulate the user's next message." if request.chat_identity is not None else ""),
+        present=any(item.kind.value == "current_image_analysis" for item in request.evidence.items),
+    )
 
 
 def _user_payload(request: CharacterResponseGeneratorRequest) -> dict:

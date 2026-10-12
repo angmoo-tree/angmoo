@@ -94,7 +94,7 @@ export function requestValidationFields(detail: unknown) {
   );
 }
 
-async function apiRequest<T>(path: string, options: RequestOptions = {}) {
+export async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, ...rest } = options;
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,

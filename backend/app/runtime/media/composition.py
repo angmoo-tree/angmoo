@@ -27,6 +27,7 @@ from app.domains.media.service.interpretation import InterpretationService
 from app.domains.routines.service.tick_schedule import APP_TIMEZONE
 from app.domains.social.service.image_intent_generation import GenerationWorker, admit, source_revision
 from app.domains.worlds.models import World
+from app.domains.world_characters.models import WorldCharacter
 from app.integrations.comfy_images import ComfyImageClient
 from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, restore_generation_request, select_comfy_workflow
 from app.integrations.image_api import ImageApiClient
@@ -41,6 +42,17 @@ def quota_day(at):
 
 
 def authorize_scope(db, owner_id, kind, scope_id):
+    from app.domains.worlds.service.deletion import is_deleting
+    if kind in {"world", "thread", "world_character"}:
+        world_id = scope_id if kind == "world" else None
+        if kind == "thread":
+            bound = db.get(MessageThread, scope_id)
+            world_id = bound.world_id if bound else None
+        elif kind == "world_character":
+            bound = db.get(WorldCharacter, scope_id)
+            world_id = bound.world_id if bound else None
+        if world_id and is_deleting(db, world_id):
+            raise InvalidProfileMediaError("world_deleting")
     if kind == "character":
         character = db.get(Character, scope_id)
         valid = character is not None and character.owner_id == owner_id and character.deleted_at is None
@@ -53,7 +65,6 @@ def authorize_scope(db, owner_id, kind, scope_id):
         if valid:
             authorize_scope(db, owner_id, "world", thread.world_id)
     elif kind == "world_character":
-        from app.domains.world_characters.models import WorldCharacter
         actor = db.get(WorldCharacter, scope_id)
         valid = actor is not None and actor.status == "active"
         if valid:

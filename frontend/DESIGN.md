@@ -1530,3 +1530,20 @@ LOCAL 화면의 기존 설정 카드·semantic border/background/text/shadow와 
 새 진단 screenshot 호출 수와 raw-color의 실제 감소만 baseline에 반영하며 허용치를 넓히지
 않는다. [LOCAL 근거](../docs/architecture/frontend-design-reference.md)와
 [구현·검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.
+
+## Chat 이미지 대기·World 사용/삭제 표시 (2026-10-12 LOCAL)
+
+정상 이미지 인식과 응답 대기는 약300ms 후 기존 입력 중/Typing·캐릭터명 status·aria-hidden 점
+애니메이션 하나로 표시한다. accepted만으로 내리지 않고 유효 delta/실제 terminal/scope 종료에서
+정리한다. 인식 실패와 명시 재시도/text-only의 안내는 유지한다. reduced-motion을 존중한다.
+
+Studio는 visibility와 분리해 사용 가능한 World/작성 중/보관됨을 표시한다. 사용 시작은 World의
+기존 published 준비 검사를 이용하며 자율활동 ON과 별개다. 일반 목록에 접근 범위 배지를 추가하지
+않고 실제 ACL/visibility는 유지한다. 기본 SNS는 서버 binding으로 표시·보호하며 이름으로 추측하지 않는다.
+
+World 삭제에는 기존 semantic danger Button/Dialog와 취소 기본 focus·focus trap·44px 조작을 쓴다.
+대상 저장명과 World별 기록 삭제, 최초 원본/초기 이미지·타 World/공용 설정 보존을 ko/en으로 설명한다.
+선택적인 기존 export는 전체 기록 백업이나 필수 단계로 표현하지 않는다. 접수 이후 취소/복원은 없고
+실제 삭제 중/완료/실패/조회 실패를 구분한다. 새 보관/복원 화면이나 외부 디자인 자산은 추가하지 않는다.
+
+[LOCAL 통합 검증](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.

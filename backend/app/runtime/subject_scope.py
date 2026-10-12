@@ -5,6 +5,9 @@ from app.models import Base
 from app.domains.memory.contracts.scope import MemoryScope
 
 def read_scope_presence(session: Session, scope: MemoryScope) -> tuple[str | None, str | None, str | None]:
+    from app.domains.worlds.service.deletion import is_deleting
+    if is_deleting(session, scope.world_id):
+        return None, None, None
     users = Base.metadata.tables["users"]
     worlds = Base.metadata.tables["worlds"]
     world_characters = Base.metadata.tables["world_characters"]

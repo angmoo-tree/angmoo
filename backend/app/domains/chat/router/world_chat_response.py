@@ -221,7 +221,18 @@ def stream_world_response_events(
             memory_recall_service=memory_recall_service,
             runtime_settings=runtime_settings,
         )
+        track = getattr(request.app.state, "track_world_stream", None)
+        if track:
+            events = track(world_id, events)
         async for event in events:
+            from app.domains.worlds.service.deletion import is_deleting
+            from app.database import SessionLocal
+            sessions = composition.session_factory if composition is not None else SessionLocal
+            with sessions() as scope_db:
+                deleting = is_deleting(scope_db, world_id)
+            if deleting:
+                await events.aclose()
+                return  # No synthetic success/terminal event for a deleted scope.
             payload = {
                 "protocol_version": event.protocol_version,
                 "request_id": event.request_id,

@@ -764,3 +764,21 @@ preflight/인식 책임은 기존 소유자에 남긴다. World/프로필 5MiB�
 
 TypeScript는 제품 소스와 생성된 Next route 타입을 검사한다. 정적 산출물인 `out`과
 `static-shell/out`은 입력 소스가 아니므로 제외한다. 사진 Worker 원본의 타입 검사는 유지한다.
+
+## Chat·World 삭제 수명 (2026-10-12 LOCAL)
+
+Chat은 기존 TypingPresence 하나로 이미지 인식부터 응답 대기까지 표시한다. 같은 generationScope의
+재연결은 보이는 표시를 유지하며 새 request/attempt에 이전 상태를 전달하지 않는다. 종료 event 없이
+닫힌 stream은 실제 status로 복구하며 completed를 합성하지 않는다. 정상 실패/text-only/retry와
+NDJSON·identity 검증은 유지한다. 실제 World 삭제 오류만 처리 중 표시·scope를 종료한다.
+
+Worlds가 삭제 DTO/API/Dialog/controller/progress와 read-only 삭제 watch를 소유한다. Composition이
+Studio·World 편집·선택적 기존 package export를 render slot으로 조립한다. Memory는 순수 scope
+검사 callback을 Composition에서 받아 다른 feature를 직접 import하지 않는다. server-confirmed
+삭제가 확인되면 열린 scope를 종료하지만 통신 실패를 삭제로 취급하거나 다른 World로 이동하지 않는다.
+auth/runtime identity로 controller를 재생성하고 타 World의 입력·blob·원본 선택 경로는 유지한다.
+
+Dialog는 저장명/version·이름 입력·영구 consent를 사용하며 dirty 설정을 저장하지 않는다. 접수 전
+취소는 요청0과 trigger focus 복귀를 보장한다. 응답 유실은 동일 command/key로 확인하고 202는
+완료가 아니다. owner status/active list로 복원하고 실패 retry는 동일 작업을 사용한다. 작업 단계의
+가짜 퍼센트나 완료를 표시하지 않는다. 모든 추가/변경 사용자 문구는 같은 ko/en catalog에 둔다.

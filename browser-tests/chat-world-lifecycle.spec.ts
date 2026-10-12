@@ -1,0 +1,170 @@
+import { test, expect } from "@playwright/test";
+const WORLD = "019f0000-0000-7000-8000-000000000001";
+for (const language of ["ko", "en"] as const) {
+  test.describe(`lifecycle ${language}`, () => {
+    test.beforeEach(async ({page, request, baseURL}, info) => {
+      await request.get(`${baseURL}/__phase/reset?language=${language}`);
+      if (info.project.name === "static") await page.addInitScript(url => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {profile:"tauri-static",apiBaseUrl:url,graphProvider:"ladybug",launchToken:"phase-fixture-token-0000000000000"} }), baseURL);
+      await page.route("**/*", route => new URL(route.request().url()).origin === new URL(String(baseURL)).origin ? route.fallback() : route.abort("blockedbyclient"));
+    });
+    test(`Chat typing remains in one slot through accepted and delta ${language}`, async ({page, request, baseURL}) => {
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      const typing = page.getByRole("status", { name: language === "ko" ? "Bram가 응답을 입력하고 있습니다." : "Bram is preparing a response." });
+      await expect(typing).toBeVisible();
+      await expect(typing).toHaveCount(1);
+      await expect(page.getByText(language === "ko" ? "입력 중" : "Typing", {exact:true})).toBeVisible();
+      await request.get(`${baseURL}/__phase/accepted`);
+      await expect(typing).toBeVisible();
+      await request.get(`${baseURL}/__phase/delta`);
+      await expect(typing).toHaveCount(0);
+      await expect(page.getByText("Fixture reply.", {exact:true})).toHaveCount(1);
+      await request.get(`${baseURL}/__phase/completed`);
+      await expect(page.getByText("Fixture reply.", {exact:true})).toHaveCount(1);
+      expect((await (await request.get(`${baseURL}/__phase/audit`)).json()).requestCount).toBe(1);
+    });
+    test(`World lifecycle ready private grouping and cancellation ${language}`, async ({page, request, baseURL}) => {
+      await page.goto("/studio");
+      await expect(page.getByRole("heading", {name:language === "ko" ? "사용 가능한 World" : "Ready Worlds", exact:true})).toBeVisible();
+      const card = page.getByRole("article").filter({has:page.getByRole("heading", {name:"Fixture 1",exact:true})});
+      await card.getByRole("button", {name:language === "ko" ? "World 삭제" : "Delete World",exact:true}).click();
+      const dialog=page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button", {name:language === "ko" ? "취소" : "Cancel",exact:true})).toBeFocused();
+      await dialog.getByRole("button", {name:language === "ko" ? "취소" : "Cancel",exact:true}).click();
+      expect((await (await request.get(`${baseURL}/__phase/audit`)).json()).deletes).toBe(0);
+      await expect(card.getByRole("button", {name:language === "ko" ? "World 삭제" : "Delete World",exact:true})).toBeFocused();
+    });
+    test(`World lifecycle permanent confirmation accepted and completed ${language}`, async ({page, request, baseURL}) => {
+      await page.goto("/studio");
+      const card = page.getByRole("article").filter({has:page.getByRole("heading", {name:"Fixture 1",exact:true})});
+      await card.getByRole("button", {name:language === "ko" ? "World 삭제" : "Delete World",exact:true}).click();
+      const dialog=page.getByRole("dialog");
+      await expect(dialog.getByRole("button", {name:language === "ko" ? "영구 삭제" : "Permanently delete",exact:true})).toBeDisabled();
+      await dialog.getByRole("textbox").fill("Fixture 1");
+      await dialog.getByRole("checkbox").check();
+      await dialog.getByRole("button", {name:language === "ko" ? "영구 삭제" : "Permanently delete",exact:true}).click();
+      await expect(dialog).not.toBeVisible();
+      await expect(page.getByText(language === "ko" ? "World 삭제 중…" : "Deleting World…", {exact:true})).toBeVisible();
+      await expect(card).toHaveCount(0);
+      await request.get(`${baseURL}/__phase/delete-complete`);
+      await expect(page.getByText(language === "ko" ? "World를 삭제했어요." : "World deleted.", {exact:true})).toBeVisible();
+      expect((await (await request.get(`${baseURL}/__phase/audit`)).json()).deletes).toBe(1);
+    });
+    test(`World lifecycle state groups capabilities and optional export ${language}`,async({page,request,baseURL})=>{
+      await request.get(`${baseURL}/__phase/catalog`);
+      const writes:string[]=[];
+      page.on("request",request=>{if(["POST","PUT","PATCH","DELETE"].includes(request.method())&&/\/api\/(?:backend|v1)\/(?:worlds|world-packages)/.test(request.url()))writes.push(request.url());});
+      await page.goto("/studio");
+      const group=(name:string)=>page.locator("section").filter({has:page.getByRole("heading",{name,exact:true})});
+      const ready=group(language==="ko"?"사용 가능한 World":"Ready Worlds");
+      const drafts=group(language==="ko"?"작성 중":"Drafts");
+      const archived=group(language==="ko"?"보관됨":"Archived");
+      await expect(ready.getByRole("article")).toHaveCount(4);
+      await expect(drafts.getByRole("article")).toHaveCount(2);
+      await expect(archived.getByRole("article")).toHaveCount(1);
+      for(const name of ["Editor World","Unknown capability"]){
+        const card=page.getByRole("article").filter({has:page.getByRole("heading",{name,exact:true})});
+        await expect(card.getByRole("button",{name:language==="ko"?"World 삭제":"Delete World",exact:true})).toBeDisabled();
+      }
+      const sns=page.getByRole("article").filter({has:page.getByRole("heading",{name:"SNS",exact:true})});
+      await expect(sns.getByText(language==="ko"?"기본 SNS World는 삭제할 수 없어요.":"The default SNS World cannot be deleted.",{exact:true})).toBeVisible();
+      const card=ready.getByRole("article").filter({has:page.getByRole("heading",{name:"Fixture 1",exact:true})});
+      await card.getByRole("button",{name:language==="ko"?"World 삭제":"Delete World",exact:true}).click();
+      const dialog=page.getByRole("dialog");
+      await expect(dialog.getByText(language==="ko"?"패키지 내보내기는 World 구성을 보관하는 기능이며, 전체 활동 기록 백업은 아니에요.":"Package export preserves the World configuration; it is not a complete backup of activity history.",{exact:true})).toBeVisible();
+      await expect(dialog.getByRole("heading",{name:language==="ko"?"Package 내보내기":"Export package",exact:true})).toBeVisible();
+      await dialog.getByRole("button",{name:language==="ko"?"취소":"Cancel",exact:true}).click();
+      expect(writes).toEqual([]);
+    });
+    test(`Chat typing reconnect refresh and deleted World do not revive the slot ${language}`, async ({page,request,baseURL})=>{
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      const typing=page.getByRole("status",{name:language==="ko"?"Bram가 응답을 입력하고 있습니다.":"Bram is preparing a response."});
+      await expect(typing).toBeVisible();
+      await request.get(`${baseURL}/__phase/disconnect`);
+      await expect.poll(async()=> (await(await request.get(`${baseURL}/__phase/audit`)).json()).requestCount).toBeGreaterThan(1);
+      await expect(typing).toHaveCount(1);
+      await page.reload();
+      await expect(typing).toHaveCount(1);
+      await request.get(`${baseURL}/__phase/world-delete`);
+      await expect(page.getByText(language==="ko"?"이 World를 삭제 중이에요.":"This World is being deleted.",{exact:true})).toBeVisible();
+      await expect(typing).toHaveCount(0);
+      await expect(page.getByRole("button",{name:language==="ko"?"다시 시도":"Try again",exact:true})).toHaveCount(0);
+      await request.get(`${baseURL}/__phase/delta`);
+      await expect(page.getByText("Fixture reply.",{exact:true})).toHaveCount(0);
+    });
+    test(`Chat typing analysis failure has ordinary retry without terminal revival ${language}`, async({page,request,baseURL})=>{
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      await expect(page.getByText(language==="ko"?"입력 중":"Typing",{exact:true})).toBeVisible();
+      await request.get(`${baseURL}/__phase/failed`);
+      await expect(page.getByText(language==="ko"?"입력 중":"Typing",{exact:true})).toHaveCount(0);
+      await expect(page.getByRole("button",{name:language==="ko"?"사진 없이 이 텍스트로 진행":"Continue with this text without the image",exact:true})).toBeVisible();
+      await page.reload();
+      await expect(page.getByText(language==="ko"?"입력 중":"Typing",{exact:true})).toHaveCount(0);
+    });
+    test(`World lifecycle response loss GET failure and same job retry ${language}`, async({page,request,baseURL})=>{
+      await page.goto("/studio");
+      const card=page.getByRole("article").filter({has:page.getByRole("heading",{name:"Fixture 1",exact:true})});
+      await card.getByRole("button",{name:language==="ko"?"World 삭제":"Delete World",exact:true}).click();
+      const dialog=page.getByRole("dialog");
+      await dialog.getByRole("textbox").fill("Fixture 1");await dialog.getByRole("checkbox").check();
+      await request.get(`${baseURL}/__phase/lose-delete`);
+      await dialog.getByRole("button",{name:language==="ko"?"영구 삭제":"Permanently delete",exact:true}).click();
+      await expect(dialog.getByRole("status")).toBeVisible();
+      await dialog.getByRole("button",{name:language==="ko"?"영구 삭제":"Permanently delete",exact:true}).click();
+      await expect(dialog).not.toBeVisible();
+      let audit=await(await request.get(`${baseURL}/__phase/audit`)).json();
+      expect(audit.deletes).toBe(1);expect(new Set(audit.deleteKeys).size).toBe(1);
+      await request.get(`${baseURL}/__phase/receipt-unavailable`);
+      await expect(page.getByText(language==="ko"?"삭제 상태를 확인하지 못했어요.":"Could not check deletion status.",{exact:true})).toBeVisible();
+      await expect(page.getByText(language==="ko"?"World를 삭제했어요.":"World deleted.",{exact:true})).toHaveCount(0);
+      await request.get(`${baseURL}/__phase/receipt-unavailable?enabled=false`);await request.get(`${baseURL}/__phase/delete-failed`);
+      await page.getByRole("button",{name:language==="ko"?"삭제 다시 시도":"Retry deletion",exact:true}).click();
+      await expect.poll(async()=> (await(await request.get(`${baseURL}/__phase/audit`)).json()).retryCount).toBe(1);
+      await request.get(`${baseURL}/__phase/delete-complete`);
+      await expect(page.getByText(language==="ko"?"World를 삭제했어요.":"World deleted.",{exact:true})).toBeVisible();
+      audit=await(await request.get(`${baseURL}/__phase/audit`)).json();expect(audit.retryCount).toBe(1);
+    });
+    test(`World lifecycle narrow keyboard reduced motion preserves labels ${language}`,async({page,request,baseURL})=>{
+      await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:"reduce"});
+      await page.goto("/studio");
+      const card=page.getByRole("article").filter({has:page.getByRole("heading",{name:"Fixture 1",exact:true})});
+      await card.getByRole("button",{name:language==="ko"?"World 삭제":"Delete World",exact:true}).focus();await page.keyboard.press("Enter");
+      const dialog=page.getByRole("dialog");await expect(dialog).toBeVisible();
+      await expect(dialog.getByRole("button",{name:language==="ko"?"취소":"Cancel",exact:true})).toBeFocused();
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+      await page.keyboard.press("Escape");await expect(dialog).not.toBeVisible();
+      expect((await(await request.get(`${baseURL}/__phase/audit`)).json()).deletes).toBe(0);
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      const typing=page.getByRole("status",{name:language==="ko"?"Bram가 응답을 입력하고 있습니다.":"Bram is preparing a response."});
+      await expect(typing).toBeVisible();await expect(typing.locator('[aria-hidden="true"]')).toHaveCount(1);
+      await page.screenshot({path:`../artifacts/chat-world-lifecycle-20261012/browser/typing-narrow-${language}.png`,fullPage:true});
+    });
+    test(`Chat typing fast reply avoids a flash and leaving the scope discards old events ${language}`,async({page,request,baseURL})=>{
+      await request.get(`${baseURL}/__phase/idle`);
+      await page.addInitScript(()=>{Object.assign(window,{__typingSeen:false});new MutationObserver(()=>{if(document.querySelector('[role="status"][aria-label$="response."],[role="status"][aria-label$="있습니다."]'))Object.assign(window,{__typingSeen:true});}).observe(document,{subtree:true,childList:true});});
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      await page.getByRole("textbox").fill("Fast fixture question");
+      await page.getByRole("button",{name:language==="ko"?"메시지 보내기":"Send message",exact:true}).click();
+      await expect(page.getByText("Fixture reply.",{exact:true})).toHaveCount(1);
+      expect(await page.evaluate(()=>Reflect.get(window,"__typingSeen"))).toBe(false);
+      await page.goto("/studio");
+      await request.get(`${baseURL}/__phase/delta`);
+      await expect(page.getByText("Fixture reply.",{exact:true})).toHaveCount(0);
+      await expect(page.getByText(language==="ko"?"입력 중":"Typing",{exact:true})).toHaveCount(0);
+    });
+    test(`World lifecycle focus requires actual deletion before closing open content ${language}`,async({page,request,baseURL})=>{
+      await page.goto(`/worlds/${WORLD}/chat/thread-phase`);
+      const typing=page.getByText(language==="ko"?"입력 중":"Typing",{exact:true});
+      await expect(typing).toBeVisible();
+      await request.get(`${baseURL}/__phase/world-unavailable`);
+      await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+      await expect(typing).toBeVisible();
+      await request.get(`${baseURL}/__phase/world-delete`);
+      await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+      await expect(page.getByText(language==="ko"?"이 World는 더 이상 사용할 수 없어요.":"This World is no longer available.",{exact:true})).toBeVisible();
+      await expect(page.getByText("Look at this photo.",{exact:true})).toHaveCount(0);
+      await expect(typing).toHaveCount(0);
+      expect(new URL(page.url()).pathname).toBe(`/worlds/${WORLD}/chat/thread-phase`);
+    });
+  });
+}

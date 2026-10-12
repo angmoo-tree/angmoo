@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "owner": "media",
+  "tables": {
+    "image_interpretation_attempts": {
+      "joins": [
+        {
+          "columns": [
+            "interpretation_id"
+          ],
+          "target_table": "image_interpretations",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "image_interpretations": {
+      "joins": [
+        {
+          "columns": [
+            "asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "media_assets": {
+      "special": "media_scope"
+    },
+    "world_image_attempts": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_image_policies": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  }
+}

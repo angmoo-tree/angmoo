@@ -35,6 +35,7 @@ import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacte
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
 import { getLocalWorldApp, getOwnerControlledActor, WorldAppApiError } from "@/features/worlds/api/world-app-client";
 import { ensureMyProfile, WorldApiError } from "@/features/worlds/api/worlds";
+import {WorldDeletionBoundary} from "@/features/worlds/hooks/use-world-deletion-watch";
 import { WORLD_APP_SECTIONS, worldAppSectionRoute, type WorldAppSection, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { WorldAppShell } from "@/composition/shells/world-app-shell";
 import { WorldRelationshipsScreen } from "@/composition/screens/world-relationships-screen";
@@ -73,7 +74,7 @@ export function WorldApp(props: WorldAppProps) {
     window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
     return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, invalidate);
   }, []);
-  return <WorldAppContent key={`${props.worldId}:${props.authStatus}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} {...props} />;
+  return <WorldDeletionBoundary key={`${props.worldId}:${props.authStatus}:${user?.id ?? ""}:${sessionRevision}:${runtimeRevision}`} worldId={props.worldId} enabled={props.authStatus==="authenticated"}><WorldAppContent {...props} /></WorldDeletionBoundary>;
 }
 
 function WorldAppContent({

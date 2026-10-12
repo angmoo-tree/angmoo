@@ -53,6 +53,7 @@ export type MemoryWorkspaceProps = {
   initialMemoryId?: string;
   initialSubjectId?: string;
   initialWorldId?: string;
+  verifyWorldScope?: (worldId:string,signal:AbortSignal)=>Promise<boolean|null>;
 } & MemoryScopeLoaders;
 
 type OwnerMutation =
@@ -69,6 +70,7 @@ export function MemoryWorkspace({
   initialWorldId,
   getLocalWorldSurface,
   listWorldCharacterProfiles,
+  verifyWorldScope,
 }: MemoryWorkspaceProps) {
   const formatNumber = useUiNumberFormatter();
   const formatDate = useUiDateFormatter();
@@ -100,6 +102,23 @@ export function MemoryWorkspace({
   const mutationLockRef = useRef(false);
   const active = useRef(true), generation = useRef(0);
   const operations = useRef(new Set<AbortController>());
+  useEffect(()=>{
+    if(!worldId||!verifyWorldScope||phase!=="ready")return;
+    const abort=new AbortController(),scope=captureAuthRequestScope();let reading=false;
+    async function check(){
+      if(reading||document.visibilityState==="hidden")return;reading=true;
+      try {const available=await verifyWorldScope!(worldId,abort.signal);
+        if(!abort.signal.aborted&&isCurrentAuthRequestScope(scope)&&available===false){
+          generation.current++;operations.current.forEach(operation=>operation.abort());
+          setSetting(null);setList(null);setDetail(null);setCharacters([]);setPhase("empty-scope");
+          setCorrectionOpen(false);setDeleteOpen(false);setMutationFailure(null);
+        }
+      }finally{reading=false;}
+    }
+    const focus=()=>void check();window.addEventListener("focus",focus);document.addEventListener("visibilitychange",focus);
+    const timer=setInterval(focus,15_000);
+    return()=>{abort.abort();clearInterval(timer);window.removeEventListener("focus",focus);document.removeEventListener("visibilitychange",focus);};
+  },[worldId,phase,verifyWorldScope]);
   useEffect(() => {
     active.current = true;
     const pending = operations.current;

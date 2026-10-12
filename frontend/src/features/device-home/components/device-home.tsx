@@ -56,6 +56,12 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
   const worldLoading = worldRead.revision !== worldRequestRevision;
   const worldError = worldLoading ? null : worldRead.error;
   const worlds = worldLoading ? [] : worldRead.items;
+  useEffect(()=>{
+    if(authStatus!=="authenticated")return;
+    const refresh=()=>{if(document.visibilityState!=="hidden")setWorldRequestRevision(value=>value+1);};
+    window.addEventListener("focus",refresh);document.addEventListener("visibilitychange",refresh);
+    return()=>{window.removeEventListener("focus",refresh);document.removeEventListener("visibilitychange",refresh);};
+  },[authStatus]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") {
@@ -65,6 +71,7 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
     (ensureDefaultSpace ? ensureDefaultSpace() : Promise.resolve())
       .then(() => getLocalWorldSurface("device_home", { signal: controller.signal }))
       .then((surface) => {
+        if(controller.signal.aborted)return;
         setWorldRead({
           error: null,
           items: surface.items,
@@ -72,6 +79,7 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
         });
       })
       .catch((reason: unknown) => {
+        if(controller.signal.aborted)return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setWorldRead({
           error:

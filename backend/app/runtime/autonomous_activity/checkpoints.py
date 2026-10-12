@@ -39,3 +39,40 @@ def backup_checkpoint(data_directory: Path, destination: Path):
             with sqlite3.connect(destination) as backup:
                 original.backup(backup)
     return True
+
+
+def erase_activity_checkpoint(data_directory: Path, activity_id: str) -> None:
+    """Use the SDK's exact-thread erasure and fence a late checkpoint writer."""
+    from langgraph.checkpoint.sqlite import SqliteSaver
+    from app.runtime.migrations.generation import EmbeddedUpgradeLock
+    if not activity_id or len(activity_id) > 100:
+        raise ValueError("checkpoint_activity_identity_invalid")
+    root = data_directory.resolve()
+    directory = root / "runtime" / "activity"
+    for node in (directory, *directory.parents):
+        if node == root:
+            break
+        if node.is_symlink() or node.is_junction():
+            raise ValueError("checkpoint_erasure_path_link")
+    directory.mkdir(parents=True, exist_ok=True)
+    source = directory / "activity-checkpoints.sqlite"
+    if directory.is_symlink() or directory.is_junction() or source.is_symlink() or source.is_junction():
+        raise ValueError("checkpoint_erasure_path_link")
+    thread_id = f"activity:{activity_id}"
+    with EmbeddedUpgradeLock(directory / "checkpoint-maintenance.lock"):
+        with SqliteSaver.from_conn_string(str(source)) as saver:
+            saver.setup()
+            with saver.cursor() as cursor:
+                cursor.execute("CREATE TABLE IF NOT EXISTS angmoo_erased_checkpoint_threads(thread_id TEXT PRIMARY KEY)")
+                for table in ("checkpoints", "writes"):
+                    for event in ("INSERT", "UPDATE"):
+                        scopes = "thread_id=NEW.thread_id" if event == "INSERT" else "thread_id IN (NEW.thread_id,OLD.thread_id)"
+                        cursor.execute(f'CREATE TRIGGER IF NOT EXISTS angmoo_erased_{table}_{event.lower()} BEFORE {event} ON {table} '
+                            f"WHEN EXISTS(SELECT 1 FROM angmoo_erased_checkpoint_threads WHERE {scopes}) "
+                            "BEGIN SELECT RAISE(ABORT, 'world_deleting'); END")
+                cursor.execute("INSERT INTO angmoo_erased_checkpoint_threads VALUES(?) ON CONFLICT DO NOTHING", (thread_id,))
+            saver.delete_thread(thread_id)
+            with saver.cursor(transaction=False) as cursor:
+                for table in ("checkpoints", "writes"):
+                    if cursor.execute(f"SELECT 1 FROM {table} WHERE thread_id=? LIMIT 1", (thread_id,)).fetchone():
+                        raise ValueError("checkpoint_erasure_not_acknowledged")

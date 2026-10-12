@@ -1004,3 +1004,36 @@ World 네 POST는 기존8,262,144 bytes, 파일5MiB를 유지한다. 프런트 �
 [동시성 계약](../docs/architecture/l3-er2-sqlite-concurrency.md),
 [사진 계약](../docs/operations/local-photo-codec.md),
 [검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.
+
+## World 영속 삭제와 이미지 출처 설명 (2026-10-12)
+
+Worlds의 `contracts_deletion`/`models_deletion`/`service/deletion`은 canonical owner membership,
+소유자 ID, 기본 SNS binding, 저장명·row_version·명시 consent·idempotency를 확인한다. 삭제 의도와
+admission 차단은 같은 UoW이며 receipt는 membership 정리 후에도 immutable owner만 읽는다.
+명령 키와 확인 내용은 digest로 저장한다. 기본 SNS 이름·소개·태그·이미지는 계속 편집할 수 있다.
+
+각 도메인의 `repository/world_erasure.json`은 검토한 정리 범위를 동결한다. Runtime은 이를
+canonical SQL에 연결하고, 부모 정리 전 exact PK/file/index/checkpoint ID를 journal에 기록한다.
+실행 중 공개 효과 정산 후 최대100개 단위로 정리한다. lease epoch CAS와 SQLite INSERT/UPDATE
+fence는 오래된 reader/provider의 새 효과를 거절하며 FK/source 검증을 끄지 않는다. 운영 lease의
+정산과 새 lease 획득을 구분한다. 타 World의 같은 Character·slot은 중지하지 않는다.
+
+불변 `CharacterImportSnapshot`/origin·identity·owner·초기 이미지는 World별 현재 설정/기록과
+별도로 보존한다. 마지막 World 등록이 사라지면 Characters 소유 함수가 원본으로 표시 캐시를
+복구한다. 선택·복사·명시적 등록은 기존 ownership/eligibility 경로를 사용하며 가짜 home/actor,
+현재 설정 재캡처·자동 등록·자율활동 ON·기억 이관을 만들지 않는다.
+
+worker는 autonomy OFF에도 lifespan에서 실행하고 failed/retry_wait에 같은 cursor/fence를 남긴다.
+timeout은 공개 효과의 정산 증명이 아니다. FTS/Vec1/graph와 SDK checkpoint의 정확한 제거를
+확인하기 전 완료하지 않는다. 퇴역 SNS FTS도 기존 파일만 정리하며 검색 lane을 재활성화하지
+않는다. Checkpoint SDK의 delete_thread와 content-free thread fence로 늦은 저장을 차단한다.
+파일의 resolved root·symlink/junction·공유/최초 원본 참조를 검사하며 전체 root를 삭제하지 않는다.
+공식 SQLite v37/Alembic `20261012_0114`는 빈 작업 테이블과 쓰기 fence를 추가한다. v36 source
+manifest와 기존 사용자 자료는 migration에서 재작성하지 않는다. native graph schema는 유지한다.
+
+현재 첨부 이미지가 있을 때 Supervisor/CRG 시스템 지침에 공통 영어 설명을 한 번 조합한다.
+`untrusted_current_image_observation`와 frozen evidence의 kind `current_image_analysis`를 실제
+현재 사용자 메시지에 연결하고, 발신을 촬영/피사체 신원의 증명으로 취급하지 않는다. 이전 이미지,
+payload/hash/delivery·Vision·언어/사실/페르소나·호출 수 정책은 유지한다.
+
+[통합 구현·검증 원장](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.

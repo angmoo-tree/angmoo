@@ -50,6 +50,9 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
         async def route(self, command, **kwargs):
             events.append("router")
             assert bool(command.image_context) == expect_image
+            # The current request protocol is forwarded by the real workflow;
+            # this legacy deterministic fake has no native tool contract.
+            self.selection_protocol = kwargs.pop("selection_protocol", None)
             return await super().route(command, **kwargs)
     class Generator(_Generator):
         async def generate(self, request):
@@ -63,6 +66,7 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
         capture_names = staticmethod(generation_workflows.capture_names)
         assert_names_current = staticmethod(generation_workflows.assert_names_current)
         today_reader = staticmethod(generation_workflows.today_reader)
+        character_names = staticmethod(generation_workflows.character_names)
         def build(self, session, _material, **kwargs):
             events.append("workflow_build")
             actual = _workflow(session, route, generator, router=router,

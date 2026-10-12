@@ -316,6 +316,7 @@ def world_read(db: Session, world: models.World) -> schemas.WorldRead:
     from app.domains.identity.service.environment import snapshot
     places, roles, dayparts, rules, glossary = load_definition_parts(db, world)
     return schemas.WorldRead(
+        is_default_space=db.scalar(select(models.OwnerDefaultWorld.owner_id).where(models.OwnerDefaultWorld.world_id == world.id)) is not None,
         runtime_timezone=snapshot(db, world.owner_user_id).timezone,
         icon_media_id=world.icon_media_id,
         id=world.id,

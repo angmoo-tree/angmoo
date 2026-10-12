@@ -8,5 +8,5 @@ function renderWorldTools(worldId: string, roles: WorldRoleInput[]) {
   return <><StudioWorldCharacterList worldId={worldId} roles={roles} /><WorldPackageExportPanel worldId={worldId} /></>;
 }
 export function WorldCreatorClient({ worldId }: { worldId?: string }) {
-  return <WorldDefinitionEditor worldId={worldId} renderWorldTools={renderWorldTools} renderMyProfile={(id) => <LocalMyProfileEditor worldId={id} />} />;
+  return <WorldDefinitionEditor worldId={worldId} renderWorldTools={renderWorldTools} renderDeleteExport={id => <WorldPackageExportPanel worldId={id} />} renderMyProfile={(id) => <LocalMyProfileEditor worldId={id} />} />;
 }

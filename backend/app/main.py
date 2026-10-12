@@ -126,6 +126,7 @@ def create_lifespan(
         activity_runtime_binding = getattr(runtime_app.state, "activity_runtime_binding", None)
         maintenance = getattr(runtime_app.state, "checkpoint_maintenance", None)
         media_runtime = getattr(runtime_app.state, "media_runtime", None)
+        deletion_worker = getattr(runtime_app.state, "world_deletion_worker", None)
         configuration_registered = False
         extension_started = False
         component_manager = None
@@ -171,6 +172,8 @@ def create_lifespan(
                 await memory_hybrid_runtime.start()
             if media_runtime is not None and getattr(runtime_app.state, "media_worker_enabled", False):
                 await media_runtime.start()
+            if deletion_worker is not None:
+                await deletion_worker.start()
             yield
         finally:
             shutdown_error = None
@@ -182,7 +185,7 @@ def create_lifespan(
                 runtime_app.state.runtime_cleanup_incomplete = True
             finally:
                 try:
-                    for worker in (media_runtime, memory_hybrid_runtime, memory_runtime, component_manager):
+                    for worker in (deletion_worker, media_runtime, memory_hybrid_runtime, memory_runtime, component_manager):
                         if worker is None:
                             continue
                         try:
@@ -462,6 +465,8 @@ def create_app(
                 coordinator=runtime_app.state.memory_shutdown,
             )
         runtime_app.state.world_package_import_committer = world_package_import_committer
+        from app.runtime.world_deletion.composition import configure_world_deletion
+        configure_world_deletion(runtime_app, composition)
         runtime_app.state.dispose_runtime = dispose_runtime if composition is not None else None
         runtime_app.state.restore_process_settings = (
             dispose_runtime if composition is not None else None

@@ -27,6 +27,10 @@ import { AppIcon } from "@/components/ui/app-icon";
 import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visual";
 import { blobToBase64, cropToBlob, INITIAL_CROP, PROFILE_MEDIA_MAX_BYTES, type CropState } from "@/utils/image-crop";
 import { WorldBanner } from "./world-banner";
+import { WorldDeleteControl } from "./world-delete-control";
+import { WorldDeletionProgress } from "./world-deletion-progress";
+import type { WorldDeletionReceipt } from "../types/world-deletion";
+import {useWorldDeletionWatch} from "../hooks/use-world-deletion-watch";
 import { PRODUCT_ROUTES, studioWorldRoute } from "@/lib/navigation/product-routes";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
@@ -166,16 +170,18 @@ function newIdempotencyKey() {
   return `world-create-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-type CreatorProps = { worldId?: string; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode; renderMyProfile: (worldId: string) => ReactNode };
+type CreatorProps = { worldId?: string; renderDeleteExport?: (worldId: string) => ReactNode; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode; renderMyProfile: (worldId: string) => ReactNode };
 export function WorldCreatorClient(props: CreatorProps) {
   const identity = useAuthRuntimeIdentity(props.worldId ?? "new-world");
   return <WorldCreatorEditor key={identity} {...props} />;
 }
-function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: CreatorProps) {
+function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile, renderDeleteExport }: CreatorProps) {
+  const [deletionReceipt, setDeletionReceipt] = useState<WorldDeletionReceipt | null>(null);
   const uiText = useUiText("worlds");
   const { environment, ready: environmentReady, errorCode: environmentError } = useUserEnvironment();
   const router = useRouter();
   const { status: authStatus } = useAuth();
+  const scopeClosed=useWorldDeletionWatch(worldId,authStatus==="authenticated"&&!deletionReceipt);
   const idempotencyKey = useRef(newIdempotencyKey());
   const [context, setContext] = useState<WorldCreatorContext | null>(null);
   const [definition, setDefinition] = useState<WorldDefinition>(EMPTY_DEFINITION);
@@ -196,11 +202,12 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
   const [cropError, setCropError] = useState<string | null>(null);
   const permitCommittedNavigation = useProductLeaveGuard(dirty || Boolean(imageDraft) || pending !== null);
   useEffect(() => () => { imageEpoch.current++; imageRequest.current?.abort(); imageRef.current?.bitmap.close(); }, []);
+  useEffect(()=>{if(scopeClosed){imageEpoch.current++;imageRequest.current?.abort();imageRef.current?.bitmap.close();}},[scopeClosed]);
   const presentError = useEffectEvent((reason: unknown) => setError(uiText(errorMessage(reason))));
   const worldBannerUrl = useRuntimeMediaUrl(
-    safeSameOriginMediaUrl(context?.world.banner_media_id),
+    scopeClosed?null:safeSameOriginMediaUrl(context?.world.banner_media_id),
   );
-  const worldIconUrl = useRuntimeMediaUrl(safeSameOriginMediaUrl(context?.world.icon_media_id));
+  const worldIconUrl = useRuntimeMediaUrl(scopeClosed?null:safeSameOriginMediaUrl(context?.world.icon_media_id));
 
   const returnPath = worldId
     ? studioWorldRoute(worldId)
@@ -289,8 +296,8 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
       setContext((current) => (current ? { ...current, readiness } : current));
       setNotice(
         readiness.ready_for_publish
-          ? uiText("저장한 내용은 공개할 준비가 되었어요.")
-          : uiText("공개 전에 아래 항목을 확인해주세요."),
+          ? uiText("저장한 내용은 사용할 준비가 되었어요.")
+          : uiText("사용 시작 전에 아래 항목을 확인해주세요."),
       );
     } catch (nextError) {
       setError(uiText(errorMessage(nextError)));
@@ -311,7 +318,7 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
       );
       setContext(published);
       setDefinition(worldToDefinition(published));
-      setNotice(uiText("World를 공개했어요."));
+      setNotice(uiText("World를 사용할 수 있어요."));
     } catch (nextError) {
       setError(uiText(errorMessage(nextError)));
     } finally {
@@ -412,6 +419,8 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
     );
   }
 
+  if (deletionReceipt) return <WorldDeletionProgress initial={deletionReceipt} />;
+  if(scopeClosed)return <p role="status">{uiText("이 World는 더 이상 사용할 수 없어요.")}</p>;
   return (
     <div
       className="min-h-screen bg-[#f7f8fa] px-4 py-8 md:px-8"
@@ -443,7 +452,7 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
               </div>
               {context ? (
                 <div className="flex flex-wrap gap-2 text-xs font-extrabold">
-                  <Badge>{uiText(context.world.status === "published" ? "공개됨" : context.world.status === "archived" ? "보관됨" : "초안")}</Badge>
+                  <Badge>{uiText(context.world.status === "published" ? "사용 가능" : context.world.status === "archived" ? "보관됨" : "작성 중")}</Badge>
                 </div>
               ) : null}
             </div>
@@ -542,9 +551,11 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile }: Crea
                 <button type="button" className={primaryButtonClass} disabled={pending !== null || definition.name.trim().length < 2} onClick={() => void handleSave()}>
                   {pending === "save" ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} {uiText("초안 저장")}</button>
                 <button type="button" className={secondaryButtonClass} disabled={!context || pending !== null} onClick={() => void handleValidate()}>
-                  <ShieldCheck className="size-4" /> {uiText("공개 준비 확인")}</button>
+                  <ShieldCheck className="size-4" /> {uiText("사용 준비 확인")}</button>
                 <button type="button" className={publishButtonClass} disabled={pending !== null || context?.world.status === "published"} onClick={() => void handlePublish()}>
-                  {pending === "publish" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} {uiText("World 공개")}</button>
+                  {pending === "publish" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} {uiText("World 사용 시작")}</button>
+                {context ? <WorldDeleteControl worldId={context.world.id} canDelete={pending === null && context.world.can_delete}
+                  isDefaultSpace={context.world.is_default_space} renderExport={renderDeleteExport} onAccepted={receipt => { cancelImage(); setDeletionReceipt(receipt); }} /> : null}
               </div>
             </div>
           </aside>
@@ -641,10 +652,10 @@ function ReadinessCard({ context, dirty }: { context: WorldCreatorContext | null
     <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-[var(--shadow-summary)]">
       <div className="flex items-center gap-3">
         {readiness?.ready_for_publish ? <CheckCircle2 className="size-6 text-[#12b76a]" /> : <AlertTriangle className="size-6 text-[#f79009]" />}
-        <div><h2 className="font-black text-[#101828]">{uiText("공개 준비")}</h2><p className="text-xs font-extrabold text-[#667085]">{uiText(readiness?.ready_for_publish ? "저장한 내용은 공개 준비 완료" : "확인할 항목이 있어요")}</p></div>
+        <div><h2 className="font-black text-[#101828]">{uiText("사용 준비")}</h2><p className="text-xs font-extrabold text-[#667085]">{uiText(readiness?.ready_for_publish ? "저장한 내용은 사용 준비 완료" : "확인할 항목이 있어요")}</p></div>
       </div>
       {!context ? <p className="mt-4 text-sm font-medium leading-6 text-[#667085]">{uiText("이름을 입력해 초안을 저장한 뒤, 나머지 항목을 채워주세요.")}</p> : null}
-      {dirty ? <p className="mt-4 text-sm" role="status">{uiText("아직 저장하지 않은 변경이 있어요. 공개 준비는 마지막으로 저장한 내용을 기준으로 확인해요.")}</p> : null}
+      {dirty ? <p className="mt-4 text-sm" role="status">{uiText("아직 저장하지 않은 변경이 있어요. 사용 준비는 마지막으로 저장한 내용을 기준으로 확인해요.")}</p> : null}
       <IssueList issues={readiness?.issues ?? []} />
       {readiness ? <p className="mt-4 text-xs font-bold text-[#667085]">{uiText("선택 항목 {{count}}개 작성됨", {count: readiness.optional_setting_count})}</p> : null}
     </div>

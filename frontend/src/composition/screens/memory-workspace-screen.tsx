@@ -10,6 +10,7 @@ import { listWorldCharacterProfiles } from "@/features/characters/api/world-char
 import { getLocalWorldSurface } from "@/features/device-home/api/device-home-client";
 import { MemoryWorkspace, type MemoryWorkspaceProps } from "@/features/memory/components/memory-workspace";
 import type { MemoryScopeLoaders } from "@/features/memory/types/scope-options";
+import {readWorldLiveness} from "@/features/worlds/hooks/use-world-deletion-watch";
 
 export function MemoryWorkspaceScreen(props: Omit<MemoryWorkspaceProps, keyof MemoryScopeLoaders>) {
   const { status, user, sessionRevision, refresh } = useAuth();
@@ -32,5 +33,5 @@ export function MemoryWorkspaceScreen(props: Omit<MemoryWorkspaceProps, keyof Me
     </main>;
   }
   const identity = JSON.stringify([user.id, sessionRevision, runtimeRevision, props.initialWorldId, props.initialSubjectId]);
-  return <MemoryWorkspace key={identity} {...props} getLocalWorldSurface={getLocalWorldSurface} listWorldCharacterProfiles={listWorldCharacterProfiles} />;
+  return <MemoryWorkspace key={identity} {...props} verifyWorldScope={readWorldLiveness} getLocalWorldSurface={getLocalWorldSurface} listWorldCharacterProfiles={listWorldCharacterProfiles} />;
 }

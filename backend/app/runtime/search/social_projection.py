@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 import logging
+from threading import RLock
 
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -112,8 +113,13 @@ class EmbeddedSocialSearchProjection:
         self._factory = session_factory
         self._source = _SqlAlchemySocialSearchDocumentSource(session_factory)
         self._listening = False
+        self._work_lock = RLock()
 
     def start(self) -> None:
+        with self._work_lock:
+            self._start()
+
+    def _start(self) -> None:
         register_social_search(
             self.index,
             state=SocialSearchState.REBUILDING,
@@ -182,6 +188,42 @@ class EmbeddedSocialSearchProjection:
                 pending.add(entity.id)
 
     def _after_commit(self, session: Session) -> None:
+        with self._work_lock:
+            self._sync_committed(session)
+
+    def erase_world(self, world_id: str) -> bool:
+        # Serialize canonical reads and writes with erasure, so a previously
+        # read document cannot reappear after the deletion acknowledgement.
+        with self._work_lock:
+            # The current SNS pipeline does not start this retired projection.
+            # Existing managed generations still contain private text and need
+            # erasure; do not start/re-subscribe the retired search lane.
+            from app.runtime.search.sqlite_fts5 import SqliteFts5Settings
+            from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+            root = self.index.database_path.parents[1]
+            try:
+                directories = tuple(root.iterdir())
+            except FileNotFoundError:
+                return True
+            complete = True
+            for directory in directories:
+                if directory.is_symlink() or directory.is_junction():
+                    raise ValueError("social_search_generation_link")
+                path = directory / "angmoo-search.sqlite3"
+                try:
+                    path.stat()
+                except FileNotFoundError:
+                    continue
+                image = SqliteFts5SearchIndex(StaticRuntimeDataPath(root.parent.parent),
+                    settings=SqliteFts5Settings(generation=directory.name))
+                image.open()
+                try:
+                    complete = image.erase_world(world_id) and complete
+                finally:
+                    image.close()
+            return complete
+
+    def _sync_committed(self, session: Session) -> None:
         post_ids = tuple(session.info.pop(_PENDING_POST_IDS, ()))
         if not post_ids:
             return

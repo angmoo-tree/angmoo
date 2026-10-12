@@ -30,6 +30,8 @@ class WorldSurfaceItem:
     launchable: bool
     launch_block_reason: WorldLaunchBlockReason | None
     icon_media_id: str | None = None
+    can_delete: bool = False
+    is_default_space: bool = False
 
 
 @dataclass(frozen=True)

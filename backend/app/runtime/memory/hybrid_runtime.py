@@ -53,6 +53,27 @@ class MemoryHybridRuntime:
             return "degraded"
         return self.status
 
+    def erase_items(self, identifiers):
+        """Remove exact registrations from every retained disposable generation."""
+        root = self._generations.root / "generations"
+        try:
+            generations = tuple(root.iterdir())
+        except FileNotFoundError:
+            return
+        # Permission/IO failure must propagate instead of an empty glob being
+        # mistaken for a completed erasure. Never follow external links.
+        for directory in generations:
+            if directory.is_symlink() or directory.is_junction():
+                raise ValueError("memory_vector_generation_link")
+            path = directory / "vectors.sqlite3"
+            try:
+                path.stat()
+            except FileNotFoundError:
+                continue
+            index = self._generations._index(path.parent.name)
+            index.open()
+            index.erase_items(identifiers)
+
     async def start(self):
         try:
             active, staging = self._generations.open()

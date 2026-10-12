@@ -472,7 +472,7 @@ for(const content of ["", "사진 없이도 이 질문에 답해 줘."]){
   });
 }
 
-test("accepted image analysis shows waiting separately before any stream result",async({page},info)=>{
+test("Chat typing shows one pending indicator before any image stream result",async({page},info)=>{
   const staticShell=info.project.name==="static";
   await fixtures(page,staticShell);const data=recoveryChat("사진을 봐 줘.","waiting");
   let release:(()=>void)|undefined;
@@ -486,7 +486,8 @@ test("accepted image analysis shows waiting separately before any stream result"
   });
   try{
     await page.goto(`/worlds/${uiDWorld().world_id}/chat/thread-image`);
-    await expect(page.getByText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.",{exact:true})).toBeVisible();
+    await expect(page.getByText("입력 중",{exact:true})).toBeVisible();
+    await expect(page.getByText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.",{exact:true})).toHaveCount(0);
     await expect(page.getByRole("button",{name:"사진 없이 이 텍스트로 진행"})).toHaveCount(0);
   }finally{release?.();}
 });

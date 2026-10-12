@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "owner": "chat",
+  "tables": {
+    "chat_message_thoughts": {
+      "joins": [
+        {
+          "columns": [
+            "request_id"
+          ],
+          "target_table": "chat_response_requests",
+          "target_columns": [
+            "request_id"
+          ]
+        },
+        {
+          "columns": [
+            "message_id"
+          ],
+          "target_table": "message_messages",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "chat_response_requests": {
+      "joins": [
+        {
+          "columns": [
+            "thread_id"
+          ],
+          "target_table": "message_threads",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "chat_retrieval_diagnostics": {
+      "joins": [
+        {
+          "columns": [
+            "request_id"
+          ],
+          "target_table": "chat_response_requests",
+          "target_columns": [
+            "request_id"
+          ]
+        }
+      ]
+    },
+    "message_attachments": {
+      "joins": [
+        {
+          "columns": [
+            "interpretation_id"
+          ],
+          "target_table": "image_interpretations",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "message_messages": {
+      "joins": [
+        {
+          "columns": [
+            "thread_id"
+          ],
+          "target_table": "message_threads",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "message_threads": {
+      "world_column": "world_id"
+    }
+  }
+}

@@ -3,11 +3,12 @@ from app.domains.worlds.service.scheduling import reschedule_world_autonomy_slot
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
 import re
 import unicodedata
 from typing import Any, Callable, Protocol, TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -54,6 +55,9 @@ def get_world(
     *,
     lock_for_update: bool = False,
 ) -> models.World:
+    from app.domains.worlds.service.deletion import is_deleting
+    if is_deleting(db, world_id):
+        raise WorldNotFoundError(world_id)
     statement = select(models.World).where(models.World.id == world_id)
     if lock_for_update:
         statement = statement.with_for_update()
@@ -379,8 +383,9 @@ def _creator_context(
     world: models.World,
     membership: models.WorldMembership,
 ) -> schemas.WorldCreatorContextRead:
+    reading = world_definitions.world_read(db, world)
     return schemas.WorldCreatorContextRead(
-        world=world_definitions.world_read(db, world),
+        world=reading.model_copy(update={"can_delete": membership.role == "owner" and world.owner_user_id == membership.user_id and not reading.is_default_space}),
         membership_role=membership.role,
         readiness=world_definitions.evaluate_world_readiness(db, world),
     )
@@ -404,10 +409,14 @@ def seed_world(
     existing = db.scalar(
         select(models.World).where(
             models.World.owner_user_id == user.id,
-            models.World.create_idempotency_key == data.idempotency_key,
+            models.World.create_idempotency_key.in_((data.idempotency_key,
+                "erased:" + hashlib.sha256(data.idempotency_key.encode()).hexdigest())),
         )
     )
     if existing is not None:
+        from app.domains.worlds.service.deletion import is_deleting
+        if is_deleting(db, existing.id):
+            raise WorldNotFoundError(existing.id)
         membership = get_active_membership(db, world_id=existing.id, user_id=user.id)
         if membership is None or membership.role != "owner":
             raise WorldMembershipRequiredError(existing.id)
@@ -669,6 +678,12 @@ def upload_world_banner(
         raise WorldRowVersionConflictError(world_id)
     media_field = "icon_media_id" if media_type == "icon" else "banner_media_id"
     old_media = getattr(world, media_field)
+    # Acquire the canonical writer before filesystem IO. An admitted erasure
+    # increments this version, and its DB fence rejects a cached live reader.
+    locked = db.execute(update(models.World).where(models.World.id == world_id,
+        models.World.row_version == data.row_version).values(row_version=models.World.row_version))
+    if locked.rowcount != 1:
+        raise WorldRowVersionConflictError(world_id)
     try:
         new_media = world_banner_storage.save_world_banner(
             world_id=world.id,

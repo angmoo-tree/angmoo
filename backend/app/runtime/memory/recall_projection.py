@@ -128,6 +128,26 @@ class EmbeddedMemoryRecallProjection:
         """Large committed changes schedule bounded work, not a request-time scan."""
         self._enqueue(full_sync=True)
 
+    def erase_memory_items(self, identifiers):
+        """Serialize erasure with source reads, delayed writes and promotion."""
+        with self._work():
+            self.index.erase_memory_items(identifiers)
+            if self._writer is not None:
+                self._writer.erase_memory_items(identifiers)
+            # Retained disposable images are part of managed projection cleanup.
+            for path in (self.index.rollback_path, self.index.staging_path):
+                if not path.exists():
+                    continue
+                image = object.__new__(type(self.index))
+                image.settings, image.database_path = self.index.settings, path
+                image.staging_path, image.rollback_path = path.with_suffix(".unused-stage"), path.with_suffix(".unused-rollback")
+                image._lock, image._opened = RLock(), False
+                image.open()
+                try:
+                    image.erase_memory_items(identifiers)
+                finally:
+                    image.close()
+
     def _begin_rebuild(self):
         with self._rebuild_lock:
             if self._writer is None:

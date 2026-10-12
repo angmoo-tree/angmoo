@@ -16,6 +16,7 @@ from app.domains.chat.contracts.supervisor_prompts import SUPERVISOR_SYSTEM_PROM
 from app.domains.chat.policies import resolve_world_chat_model_execution_policy
 from app.domains.identity.contracts import CredentialPurpose
 from app.integrations import direct_llm
+from app.integrations.llm.chat_input_presentation import with_current_image_instructions
 from app.providers.contracts import ProviderToolDefinition
 from app.domains.chat.contracts.selection_diagnostics import selection_attempt
 from app.domains.chat.contracts.reference_observation import reference_attempt
@@ -240,7 +241,9 @@ class DirectLlmSupervisorSelectionProvider:
                     items=len(request.social_snapshot.items))
             response = await direct_llm.generate_text(
                 api_key=material.reveal(), context=context, tracker=tracker,
-                system_prompt=(control_selection_system_prompt(options) if self._native_controls else selection_system_prompt()) + _identity_instructions(request), user_prompt=selection_prompt(request),
+                system_prompt=with_current_image_instructions(
+                    (control_selection_system_prompt(options) if self._native_controls else selection_system_prompt()) + _identity_instructions(request),
+                    present=bool(request.image_context)), user_prompt=selection_prompt(request),
                 tools=control_selection_tools(options) if self._native_controls else selection_tools(), require_tool_call=self._native_controls, max_output_tokens=policy.max_output_tokens,
                 timeout_seconds=30.0, thinking_level=policy.thinking_level,
             )

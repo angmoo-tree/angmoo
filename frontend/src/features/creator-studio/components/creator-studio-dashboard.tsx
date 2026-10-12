@@ -11,25 +11,32 @@ import { PRODUCT_ROUTES, studioWorldRoute, worldAppRoute } from "@/lib/navigatio
 
 import styles from "./creator-studio-dashboard.module.css";
 
-type StudioGroupId = "live" | "draft" | "private" | "archived";
+type StudioGroupId = "live" | "draft" | "archived";
 export type CreatorStudioAuthStatus =
   | "checking"
   | "authenticated"
   | "unauthenticated";
 
 const GROUPS: readonly { id: StudioGroupId; label: string; description: string }[] = [
-  { id: "live", label: "공개한 World", description: "기기 홈에서 열 수 있어요." },
-  { id: "draft", label: "작성 중", description: "필수 항목을 채우고 공개를 준비해요." },
-  { id: "private", label: "비공개", description: "비공개 World를 관리해요." },
+  { id: "live", label: "사용 가능한 World", description: "기기 홈에서 열 수 있어요." },
+  { id: "draft", label: "작성 중", description: "필수 항목을 채우고 사용을 준비해요." },
   { id: "archived", label: "보관됨", description: "기기 홈에는 표시되지 않아요." },
 ];
 
 export function CreatorStudioDashboard({
   authStatus,
   getLocalWorldSurface,
+  renderWorldActions,
+  deletionProgress,
+  refreshRevision = 0,
+  excludedWorldIds = [],
 }: {
   authStatus: CreatorStudioAuthStatus;
   getLocalWorldSurface: StudioWorldLoader;
+  renderWorldActions?: (world: WorldSurfaceItem) => ReactNode;
+  deletionProgress?: ReactNode;
+  refreshRevision?: number;
+  excludedWorldIds?: readonly string[];
 }) {
   const uiText = useUiText("creator-studio");
   const [worlds, setWorlds] = useState<WorldSurfaceItem[]>([]);
@@ -40,8 +47,9 @@ export function CreatorStudioDashboard({
     if (authStatus !== "authenticated") return;
     const controller = new AbortController();
     getLocalWorldSurface("creator_studio", { signal: controller.signal })
-      .then((surface) => setWorlds(surface.items))
+      .then((surface) => { if (!controller.signal.aborted) { setWorlds(surface.items); setError(false); } })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setError(true);
       })
@@ -49,15 +57,15 @@ export function CreatorStudioDashboard({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [authStatus, getLocalWorldSurface]);
+  }, [authStatus, getLocalWorldSurface, refreshRevision]);
 
   const grouped = useMemo(() => {
     const next = new Map<StudioGroupId, WorldSurfaceItem[]>(
       GROUPS.map((group) => [group.id, []]),
     );
-    for (const world of worlds) next.get(groupFor(world))?.push(world);
+    for (const world of worlds) if (!excludedWorldIds.includes(world.world_id)) next.get(groupFor(world))?.push(world);
     return next;
-  }, [worlds]);
+  }, [worlds, excludedWorldIds]);
 
   if (authStatus === "checking" || (authStatus === "authenticated" && loading)) {
     return <StudioNotice title={uiText("World 목록을 불러오는 중…")} />;
@@ -84,7 +92,7 @@ export function CreatorStudioDashboard({
           <p className={styles.eyebrow}>WORLD WORKSPACE</p>
           <h1 className={styles.title}>{uiText("내 World")}</h1>
           <p className={styles.description}>
-            {uiText("World를 만들고, 초안을 저장하고, 공개까지 관리해요.")}</p>
+            {uiText("World를 만들고, 초안을 저장하고, 사용을 시작해요.")}</p>
         </div>
         <div className={styles.actions}>
           <Link className={styles.secondaryAction} href={PRODUCT_ROUTES.studioImport}>
@@ -94,10 +102,11 @@ export function CreatorStudioDashboard({
         </div>
       </header>
 
+      {deletionProgress}
       {worlds.length === 0 ? (
         <section className={styles.empty}>
           <h2>{uiText("아직 만든 World가 없어요.")}</h2>
-          <p>{uiText("첫 World를 만들고 공개하면 기기 홈에서 열 수 있어요.")}</p>
+          <p>{uiText("첫 World의 사용을 시작하면 기기 홈에서 열 수 있어요.")}</p>
           <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
             {uiText("World 초안 시작")}</Link>
         </section>
@@ -113,7 +122,7 @@ export function CreatorStudioDashboard({
                   <span>{uiText(group.description)} · {items.length}</span>
                 </div>
                 <div className={styles.worldGrid}>
-                  {items.map((world) => <WorldCard key={world.world_id} world={world} />)}
+                  {items.map((world) => <WorldCard key={world.world_id} world={world} actions={renderWorldActions?.(world)} />)}
                 </div>
               </section>
             );
@@ -124,7 +133,7 @@ export function CreatorStudioDashboard({
   );
 }
 
-function WorldCard({ world }: { world: WorldSurfaceItem }) {
+function WorldCard({ world, actions }: { world: WorldSurfaceItem; actions?: ReactNode }) {
   const uiText = useUiText("creator-studio");
   return (
     <article className={styles.worldCard}>
@@ -136,11 +145,11 @@ function WorldCard({ world }: { world: WorldSurfaceItem }) {
         <span className={styles.status}>{uiText(statusLabel(world))}</span>
       </div>
       <div className={styles.meta}>
-        <span>{uiText(({ private: "비공개", unlisted: "목록에 표시하지 않음", public: "공개" } as const)[world.visibility] ?? "공개 범위 확인 필요")}</span>
-        <span>{uiText(({ not_ready: "작성 중", publish_ready: "공개 준비 완료", stale: "다시 확인 필요" } as const)[world.readiness_status as "not_ready" | "publish_ready" | "stale"] ?? "공개 준비 확인 필요")}</span>
+        <span>{uiText(({ not_ready: "작성 중", publish_ready: "사용 준비 완료", stale: "다시 확인 필요" } as const)[world.readiness_status as "not_ready" | "publish_ready" | "stale"] ?? "사용 준비 확인 필요")}</span>
         <span>{uiText(({ owner: "소유자", editor: "편집자", member: "참여자" } as const)[world.membership_role as "owner" | "editor" | "member"] ?? "참여 권한 확인 필요")}</span>
       </div>
       <div className={styles.actions}>
+        {actions}
         <Link className={styles.secondaryAction} href={studioWorldRoute(world.world_id)}>
           {uiText("편집")}</Link>
         {world.launchable ? (
@@ -163,17 +172,15 @@ function StudioNotice({ title, children }: { title: string; children?: ReactNode
 
 function groupFor(world: WorldSurfaceItem): StudioGroupId {
   if (world.status === "archived") return "archived";
-  if (world.status !== "published" || world.readiness_status !== "publish_ready") {
+  if (!world.launchable || world.status !== "published" || world.readiness_status !== "publish_ready") {
     return "draft";
   }
-  if (world.visibility === "private") return "private";
   return "live";
 }
 
 function statusLabel(world: WorldSurfaceItem): string {
   if (world.status === "archived") return "보관됨";
-  if (world.launchable) return "공개됨";
-  if (world.visibility === "private" && world.status === "published") return "비공개";
+  if (world.launchable) return "사용 가능";
   if (world.readiness_status === "stale") return "다시 확인 필요";
-  return "초안";
+  return "작성 중";
 }
