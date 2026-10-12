@@ -898,7 +898,16 @@ class LadybugRelationshipProjection:
         with self._access_lock:
             if isinstance(command, NoGraphMutationCommand):
                 return "noop"
-            world_id = command.event.world_id if isinstance(command, RelationshipStateProjectionCommand) else command.world_id
+            if isinstance(command, RelationshipStateProjectionCommand):
+                world_id = (
+                    command.event.world_id
+                    if command.event is not None
+                    else command.world_id
+                )
+            else:
+                world_id = command.world_id
+            if not world_id:
+                raise LadybugProjectionError("world_missing")
             erased = self._execute("MATCH (meta:ProjectionMeta {id: $id}) RETURN count(meta)",
                 {"id": "world-erasure:" + world_id})
             if erased and int(erased[0][0]):
@@ -937,9 +946,7 @@ class LadybugRelationshipProjection:
                 self._merge_event(event)
                 parameters = _event_parameters(event)
             else:
-                if not command.world_id:
-                    raise LadybugProjectionError("world_missing")
-                parameters = {"world_id": command.world_id}
+                parameters = {"world_id": world_id}
             parameters.update(
                 {
                     "actor_world_character_id": command.actor_world_character_id,
