@@ -124,6 +124,25 @@ def load(root: Path, *, reader=None) -> list[dict]:
                 for path in folder.rglob("*"):
                     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".jsx", ".css"} and imported.search(path.read_text(encoding="utf-8")):
                         raise ValueError("retired style still has an active consumer")
+        for removed in record.get("retired_frontend_product_views", []):
+            source = removed["source"]
+            owners = ("frontend/src/composition/screens/world-creator-screen.tsx",
+                      "backend/app/domains/social/recommendation_router.py",
+                      "backend/tests/social/test_world_topics_retirement.py",
+                      "browser-tests/home-activity-memory.spec.ts")
+            if (source != "frontend/src/composition/screens/world-recommendation-tools.tsx"
+                    or any(owner not in record["source_blobs"] for owner in owners)):
+                raise ValueError("retired World topic view requires exact consumer, owner and behavior evidence")
+            before = git("show", f"{commit}^:{source}").decode("utf-8")
+            if (text_digest(before) != removed["before_sha256"]
+                    or git("ls-tree", commit, "--", source).strip() or (root / source).exists()):
+                raise ValueError("retired World topic view preimage or actual absence differs")
+            imported = re.compile(r"\bWorldRecommendationTools\b|world-recommendation-tools")
+            for folder in (root / "frontend/src", root / "frontend/static-shell/app"):
+                for path in folder.rglob("*"):
+                    if (path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".jsx"}
+                            and imported.search(path.read_text(encoding="utf-8"))):
+                        raise ValueError("retired World topic view still has an active consumer")
         for removed in record.get("retired_native_chrome", []):
             source = removed["source"]
             owners = ("desktop/src-tauri/src/lib.rs", "desktop/src-tauri/src/window_policy.rs",

@@ -535,6 +535,44 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]], asgi_mo
     return ast.dump(Paths().visit(ast.parse(fragment)), include_attributes=False)
 
 
+def validated_registration_owner_imports(tree: ast.Module, function: ast.FunctionDef, records: list[dict]) -> list[ast.Import]:
+    """Retain direct registration with the exact committed SQLite fence hook."""
+    path = "backend/app/runtime/persistence/model_registration.py"
+    body = [node for node in function.body if not (isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str))]
+    hook = ast.parse('''
+if not event.contains(Base.metadata, "after_create", install_canonical_write_fences):
+    event.listen(Base.metadata, "after_create", install_canonical_write_fences)
+''').body[0]
+    callback = ast.parse('''
+def install_canonical_write_fences(target, connection, **kwargs):
+    if connection.dialect.name == "sqlite" and "world_deletion_requests" in inspect(connection).get_table_names():
+        from app.runtime.world_deletion.fences import install_fences
+        install_fences(connection)
+''').body[0]
+    extras = [node for node in body[:-1] if not isinstance(node, ast.Import)]
+    if extras:
+        actual = ast.dump(function, include_attributes=False)
+        evidence = any(change["source"] == path and change["symbol"] == "register_models"
+                       and product_changes.normalize_ast_dump(change["after_ast"]) == actual
+                       for record in records for change in record.get("definitions", []))
+        callbacks = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                     and node.name == "install_canonical_write_fences"]
+        imports = [node for node in tree.body if isinstance(node, ast.ImportFrom)
+                   and node.module == "sqlalchemy" and node.level == 0]
+        primitive_names = {alias.name for node in imports for alias in node.names if alias.asname is None}
+        if (len(extras) != 1 or ast.dump(extras[0]) != ast.dump(hook) or not evidence
+                or len(callbacks) != 1 or ast.dump(callbacks[0]) != ast.dump(callback)
+                or not {"event", "inspect"}.issubset(primitive_names)
+                or any(_scope_binding_counts(tree.body)[name] != 1
+                       for name in ("event", "inspect", "install_canonical_write_fences"))):
+            raise ValueError("registration fence requires exact committed hook and unshadowed primitives")
+    imports = [node for node in body[:-1] if isinstance(node, ast.Import)]
+    if len(imports) + len(extras) != len(body) - 1:
+        raise ValueError("registration must directly import owners and return the shared metadata")
+    return imports
+
+
 def validated_model_facade_retirements(moves: dict[str, str], files: dict[str, str],
                                       snapshots: list[dict], root: Path = ROOT, *, approved_changes=None) -> dict[str, str]:
     """Validate removal of pure ORM aliases before changing their existence test.
@@ -596,9 +634,12 @@ def validated_model_facade_retirements(moves: dict[str, str], files: dict[str, s
     if registration_function.decorator_list or ast.dump(registration_function.args) != ast.dump(ast.parse("def register_models(): pass").body[0].args):
         raise ValueError("model registration must remain an undecorated no-argument function")
     body = plain(functions[0])
-    if not body or ast.dump(body[-1]) != ast.dump(ast.parse("return Base.metadata").body[0]) or any(not isinstance(n, ast.Import) for n in body[:-1]):
+    if not body or ast.dump(body[-1]) != ast.dump(ast.parse("return Base.metadata").body[0]):
         raise ValueError("registration must directly import owners and return the shared metadata")
-    registered = {a.name for n in body[:-1] for a in n.names if a.asname is None}
+    imports = validated_registration_owner_imports(
+        registration_tree, registration_function, approved_changes or [],
+    )
+    registered = {a.name for n in imports for a in n.names if a.asname is None}
 
     for old, target in moves.items():
         old_path, target_path = module_path(old), module_path(target)
@@ -803,7 +844,7 @@ def _retired_chrome_sources(approved_changes: list[dict] | None) -> set[str]:
     # load() already verifies the committed deletion, exact preimage and
     # surviving owners. All stock views use the same explicit retirements.
     return {item["source"] for record in approved_changes or []
-            for field in ("retired_frontend_styles", "retired_native_chrome")
+            for field in ("retired_frontend_styles", "retired_native_chrome", "retired_frontend_product_views")
             for item in record.get(field, [])}
 
 
