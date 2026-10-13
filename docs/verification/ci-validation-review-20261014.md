@@ -19,6 +19,18 @@ The current-risk decisions and replacement tests are in [the CI guide](../operat
 
 Frontend Next/static/shell checks, synthetic providers and installation fixtures are retained because they cover real delivery paths. Supported predecessors remain the entire schema-derived range (currently 1–36); shared PE bytes are verified once while each database fixture remains independently writable. An old schema or synthetic test input is not itself grounds for deletion.
 
+## Measured build and preparation evidence
+
+The baseline setup-uv-only source is `3e6fbc129fffdc58d49dbd97284585459bae84eb`. Its complete Windows run took 54m03s, including a 34m47s build job, and produced 3,036,420,468 artifact bytes. Both supported-upgrade partitions passed the exact v1–v36 coverage check. This is the baseline, not evidence for the new installer fixture implementation.
+
+The initial new-fixture run at `15f7309d2d7da31c9b4efcc54299e6e2a49e7cd5` completed its build in 29m04s; fixture preparation took approximately 178 seconds versus the baseline's 403 seconds. Uploaded artifacts through clean-install/recovery completion totaled 624,379,315 bytes, approximately 79% less. The shared payload was verified against each independent version fixture. [Build, clean-install and recovery results](https://github.com/angmoo-tree/angmoo/actions/runs/38463646153) passed, but this run was superseded after the corrected source was pushed while upgrade partitions were still pending. It is **not** a complete new-matrix PASS. Runner wait, actual execution and source changes must remain separate in the final comparison.
+
+The corrected implementation source is `f5e573d66f380a3e12182c17d652388b216f9d69`. Its [Core run](https://github.com/angmoo-tree/angmoo/actions/runs/38469556807) records checkout `c19201ca9d047aeabccbcea05b20c7c9e59e84a6`, tree `00ce987bfea99f4feb8e03da1f6fb4641df1ef62`, attempt 1. Frontend reports confirm 244 passed and 12 existing skipped cases across 11 XML reports. Local Smoke, migration, governance and native checks passed; final full backend and installation results are recorded separately when complete. A partial success is not a release approval.
+
+## Hosted documentation-scope check
+
+This documentation-only follow-up records the measured transition evidence separately from the implementation PR. It also exercises the actual GitHub `not_applicable` path: source-controlled impact selection must omit unrelated backend/frontend/installer workers while all 11 required result names still conclude successfully with explicit reasons. Governance remains enabled. Local selection tests alone do not establish that the hosted skipped-worker graph works; its actual run results must be collected before this scope check is marked complete.
+
 ## Completion boundary
 
 During hosted execution of `8c68292d`, Local Smoke's ten-request SQLite test encountered the existing 250 ms bounded busy response at `BEGIN IMMEDIATE`. A local run reproduced the same admission-contract issue in its outbox companion. The fixture now verifies permitted busy responses separately from successful claims, preserves the single-write/owner invariant, and checks explicit duplicate redelivery after contention. A held-writer case proves no partial write on refusal. Production concurrency policy is unchanged. Full success still requires rerunning the affected final source.
