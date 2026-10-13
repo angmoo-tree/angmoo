@@ -24,6 +24,9 @@ def main() -> int:
     args = parser.parse_args()
     if Path.cwd().resolve() != (ROOT / "backend").resolve():
         raise ValueError("backend_shard_requires_backend_working_directory")
+    # Match `python -m pytest`: a script launch otherwise places scripts/ci,
+    # rather than the verified backend working directory, on sys.path.
+    sys.path.insert(0, str(ROOT / "backend"))
     if re.fullmatch(r"[0-9a-f]{40}", args.source_sha) is None:
         raise ValueError("backend_shard_source_invalid")
     git = lambda *values: subprocess.check_output(["git", *values], cwd=ROOT, text=True).strip()

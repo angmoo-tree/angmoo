@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 
 import pytest
 from test_t2_ci_policy import checker as ci_policy
@@ -61,6 +62,40 @@ def test_four_real_pytest_sessions_cover_each_original_case_exactly_once(complet
     assert result["skipped"] == 0
     assert result["shards"] == 4
     assert all(report["selected_nodes"] for report in completed_partitions)
+
+
+def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus(tmp_path):
+    root = tmp_path / "actual-cli-repository"
+    scripts = root / "scripts/ci"
+    backend = root / "backend"
+    scripts.mkdir(parents=True)
+    (backend / "app").mkdir(parents=True)
+    (backend / "tests").mkdir()
+    for name in ("run_backend_shard.py", "backend_shard_contract.py"):
+        shutil.copyfile(ROOT / "scripts/ci" / name, scripts / name)
+    (backend / "uv.lock").write_text("synthetic locked fixture\n", encoding="utf-8")
+    (backend / "app/__init__.py").write_text("VALUE = 17\n", encoding="utf-8")
+    (backend / "tests/test_corpus.py").write_text("from app import VALUE\n\n" + "\n\n".join(
+        f"def test_case_{index}():\n    assert VALUE == 17 and {index} >= 0" for index in range(80)), encoding="utf-8")
+    for command in (["init", "--quiet"], ["config", "user.name", "Synthetic fixture"],
+                    ["config", "user.email", "fixture@example.test"], ["add", "."],
+                    ["-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "synthetic CLI fixture"]):
+        subprocess.run(["git", *command], cwd=root, check=True, capture_output=True)
+    sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env.pop("PYTEST_ADDOPTS", None)
+    env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    reports = []
+    for index in range(contract.SHARD_COUNT):
+        result = subprocess.run([sys.executable, str(scripts / "run_backend_shard.py"),
+            "--index", str(index), "--source-sha", sha], cwd=backend, env=env,
+            capture_output=True, text=True, timeout=40)
+        assert result.returncode == 0, result.stdout + result.stderr
+        reports.append(json.loads((backend / ".ci/backend-shard-report.json").read_text()))
+    coverage = contract.verify_reports(reports, source_sha=sha, checkout_sha=sha)
+    assert coverage["collected"] == coverage["covered"] == coverage["passed"] == 80
+    assert coverage["skipped"] == 0
 
 
 @pytest.mark.parametrize("mutation", ["missing_shard", "duplicate_shard", "wrong_source",

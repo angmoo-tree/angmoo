@@ -354,3 +354,12 @@ The retained public-runtime surface test is also aligned to the actual227 paths
 and282 operations, explicitly requiring all eleven additions while preserving
 every existing private/retired-route denial. A related preflight/public-contract
 run identified this stale count before the next hosted corpus execution.
+
+The `af123e06` preflight passed, but its actual partition CLI collected only2323
+items with377 import errors: a file-launched runner had `scripts/ci` on `sys.path`
+instead of the backend directory supplied by `python -m pytest`. The runner now
+adds only its verified backend working directory before collection. A real CLI
+test creates an isolated Git/backend/app fixture, clears inherited PYTHONPATH and
+runs all four original scripts against80 importing cases, then verifies exact
+complete coverage. Product imports, test selection and failure handling are
+unchanged; collection failure remains a failing result.
