@@ -9,7 +9,7 @@ This record distinguishes selection comparison from a successful full test run. 
 - The recommended and executed job maps were identical: full backend, frontend, migration, three local smoke paths, Windows build, native, host development and full installer. CI/helper changes conservatively required every scope. The four backend partitions, frontend, migration and native/installer preparation actually started. Existing required names remain result gates; governance remains unconditional.
 - This comparison established that activation does not omit a scope for this change. It did **not** establish a full PASS: an old test required exactly four installer artifact references and failed after the representative consumer was added. It now validates source/attempt identity for each actual consumer and its hosted sentinel. Artifact-policy tests now use the frontend worker and the backend aggregate's actual upload condition. No failing product assertion was removed.
 - The initial malformed Actions event key was repaired separately. The policy parser now recognizes YAML 1.2 booleans and rejects `true:` as an event key.
-- Active mode is enabled after this comparison. This PR still selects full because it changes shared CI/build policy. Scoped selection has separate positive/negative tests, including real collection, empty individual partitions, missing nodes, wrong attempts and failure/cancellation propagation. The final full result is required independently.
+- Active mode is enabled after this comparison. The implementation PR still selects full because it changes shared CI/build policy. Scoped selection has separate positive/negative tests, including real collection, empty individual partitions, missing nodes, wrong attempts and failure/cancellation propagation. The final-source proof below is independent of this observer comparison.
 
 ## Test decisions and measured cost
 
@@ -33,7 +33,7 @@ This documentation-only follow-up records the measured transition evidence separ
 
 ## Completion boundary
 
-During hosted execution of `8c68292d`, Local Smoke's ten-request SQLite test encountered the existing 250 ms bounded busy response at `BEGIN IMMEDIATE`. A local run reproduced the same admission-contract issue in its outbox companion. The fixture now verifies permitted busy responses separately from successful claims, preserves the single-write/owner invariant, and checks explicit duplicate redelivery after contention. A held-writer case proves no partial write on refusal. Production concurrency policy is unchanged. Full success still requires rerunning the affected final source.
+During hosted execution of `8c68292d`, Local Smoke's ten-request SQLite test encountered the existing 250 ms bounded busy response at `BEGIN IMMEDIATE`. A local run reproduced the same admission-contract issue in its outbox companion. The fixture now verifies permitted busy responses separately from successful claims, preserves the single-write/owner invariant, and checks explicit duplicate redelivery after contention. A held-writer case proves no partial write on refusal. Production concurrency policy is unchanged. The affected paths passed on the final source described below.
 
 The baseline event journals quantify 117 retired replay/count nodes across the four partitions: 598.42, 724.26, 672.87 and 837.70 worker-seconds respectively (2,833.25 summed worker-seconds). These run in parallel; the sum is not elapsed-time savings. This supports removing completed historical obligations instead of increasing the partition count.
 
@@ -41,4 +41,28 @@ The `15f7309d` full run also exposed the P8-L-D inventory generator's remaining 
 
 That source's other backend failures were the current ER0 inventory's stale installer-checker and Dockerfile digests. The official generator updated exactly those two records; historical migrations and predecessor inventories were not rewritten. The combined current-matrix/ER0/inventory regressions then passed 41 local tests. The full hosted corpus completed 6,328 nodes with these three metadata failures; it is a failure baseline, not the final successful result.
 
-At this commit, final hosted full execution, human platform review of the narrow setup-uv PR, normal merges, post-merge checks and fixed-main candidate verification remain pending. Local focused tests and observer selection are not substitutes. The live run ledger and raw local evidence are under `artifacts/ci-modernization-20261014/`; final measured timings and remote results will be appended after completion. No release is published and no developer installation or user data is modified.
+## Final implementation source and scope proof
+
+[PR #368](https://github.com/angmoo-tree/angmoo/pull/368) received explicit human platform approval for exact source `3e6fbc129fffdc58d49dbd97284585459bae84eb` after all 11 required checks and the Windows v1-v36 matrix passed. It merged normally as `4e9cfdd82e959b158156b18a16dc44b52e794b57`. Dependabot closed the equivalent setup-uv PR #350 automatically. The intermediate main still used the old Vec1 helper and encountered HTTP 503 in Local Smoke; that failure is retained as evidence and is not claimed as a successful main run.
+
+Final [PR #369](https://github.com/angmoo-tree/angmoo/pull/369) source `812762b94ddcf4800a19db66353d68b5c205805e` passed every applicable workflow and all 11 protected checks. It includes the final required-frontend gate correction: a selected Windows product build must succeed even in a build-only profile. The added negative tests reject missing, skipped, cancelled and failed selected builds and weakened workflow dependencies. No product runtime code, product timeout or application lockfile was changed.
+
+- [Core CI](https://github.com/angmoo-tree/angmoo/actions/runs/38475919299), attempt 1: checkout `e66b6a3cb6cb3256f260aa1e81aa536684e8a1bb`, tree `3cfc0c7cb09a212bff32db44f2abfcbbfb1cf5ce`; all 6,339 collected nodes selected and covered once across four partitions, 6,273 passed and 66 existing skips. Frontend reports contain 244 passes and 12 existing skips. Added current-risk regressions mean the final corpus is 45 nodes smaller than the 6,384-node baseline; 117 retired nodes is not the net count change.
+- [Windows Installer](https://github.com/angmoo-tree/angmoo/actions/runs/38475919325), attempt 1: downloaded reports prove the exact v1-v36 union and idempotence for the same source/run/attempt. Clean install/runtime, recovery, build and aggregate passed. The separate representative worker is not applicable because its endpoints are included in full.
+- [Local Smoke](https://github.com/angmoo-tree/angmoo/actions/runs/38475919255), [Security and Governance](https://github.com/angmoo-tree/angmoo/actions/runs/38475919471), [Windows Host](https://github.com/angmoo-tree/angmoo/actions/runs/38475919380), native and CodeQL checks passed. Local Windows Vec1 cold/warm build/load/query also passed 11 focused cases.
+- Documentation-only source `d59766e8e3342e9dc05630af143ce31fb3deabb8` in [PR #370](https://github.com/angmoo-tree/angmoo/pull/370) exercised actual hosted N/A gates with explicit path/profile reasons: all 11 required names passed, governance really ran, and unrelated heavy workers were not executed. This scope proof is not full product validation.
+
+PR #369 merged normally as `590d4ff0258d2206b24e0edc994f9640a0f00bc4`. The existing strict main ruleset and all 11 check names remain unchanged; no administrator override was used. The [PR #370 closeout](https://github.com/angmoo-tree/angmoo/pull/370) records the actual main runs, candidate file identities and final documentation-only main state. Those results belong to their own source SHA rather than inheriting a PR pass.
+
+## Measured cost
+
+| Comparable scope | Baseline | Completed implementation samples |
+| --- | --- | --- |
+| Full Core workflow elapsed | 31m05s at `3e6fbc12` | 19m32s at `f5e573d6`; 23m28s at final `812762b9` |
+| Full Windows workflow elapsed | 54m03s | 48m47s at `f5e573d6`; 51m07s at final `812762b9` |
+| Full Windows artifact bytes | 3,036,420,468 | 624,384,698 and 624,376,278 respectively, about 79.44% less |
+| Actual documentation-only required graph | Not measured with old policy | 9m46s at `d59766e8`, including governance; Core/Smoke/Installer scope graphs took 39s/38s/46s |
+
+Workflow elapsed includes orchestration and runner startup. It is not the sum of parallel job times. These are limited observed samples, not a universal 10-20 minute target or a promise for every PR. Full installation still takes roughly 50 minutes; the major ordinary-change benefit comes from running it only when selected by product risk. Creation-to-job-start latency is not labelled pure queue time. Failed and cancelled attempts remain separate from these successful comparisons.
+
+The [CI operation guide](../operations/ci-validation.md) describes fixed-source manual full validation, scheduled full runs and source/attempt-safe retries. Exact local evidence is retained in `artifacts/ci-modernization-20261014/`. No release is published and no developer installation or user data is modified by this transition. A configured future schedule, MSI build, automated NSIS test and direct user acceptance remain distinct claims.

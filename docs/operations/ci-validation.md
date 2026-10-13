@@ -28,6 +28,8 @@ This audit removes obsolete migration-proof obligations, not product behavior. I
 | Frontend/browser fixtures | Retain Next/static, narrow viewport, locale and visual fixture checks. `ui-foundation` and fake providers are test infrastructure, not unused product features. They cover distinct shipped entry paths. |
 | Native/installer matrices | Retain supported data predecessors, failure recovery, data/key preservation and Defender diagnostics. Separate execution timing and transfer payloads; old schemas are still supported user data. |
 
+Native Runtime Spike remains an optional compatibility experiment. Its workflow is filtered to its own workflow, experiment, contract and documentation paths, or an explicit manual request; it is neither a shipped product component nor an always-required product gate. This transition does not retire that separately maintained experiment.
+
 No deletion percentage or 10–20 minute time cap is a requirement. Rebalance shards only if measured remaining skew warrants it. Preserve previous proof records in Git rather than creating another immutable test-name census.
 
 ## Download trust and preparation reuse
@@ -36,7 +38,16 @@ No deletion percentage or 10–20 minute time cap is a requirement. Rebalance sh
 
 ## Release validation
 
-PR/main success and release-candidate validation are separate states. Select a fixed main commit and run the full candidate workflow. Record its source/tree, run/attempt, supported predecessor union, installer hashes, SBOM/provenance and signing status. Publish only the exact validated final files; rebuilding or signing changes bytes and requires identity reconciliation and applicable checks. These workflows do not automatically publish a release or install into a developer's existing Angmoo profile.
+PR/main success and release-candidate validation are separate states. Use the following sequence for a release candidate:
+
+1. Select and record one commit already on main. In Actions, run **Core CI**, **Local Smoke** and **Windows Installer** with `profile=full`, and retain the applicable governance/security results. The installer workflow alone does not run the complete Python and browser corpus.
+2. `Run workflow` selects a branch/ref. If main can advance between requests, freeze a validation branch at the chosen main commit and use it for all three workflows. Do not create a `v*` release tag merely to request verification: release-tag publication is a separate workflow.
+3. Verify that every completed run reports the chosen source SHA and its own checkout tree/run/attempt. Require full backend coverage, frontend results, selected smoke jobs and the complete supported predecessor union. Another source, a cancelled attempt or a narrow/N/A profile cannot complete this set.
+4. An already completed main push that selected full may supply the same exact-source evidence. Do not repeat all work solely to change its event label to `workflow_dispatch`; record the event that actually ran.
+5. Verify the actual NSIS/MSI files against `SHA256SUMS`, SPDX SBOM and provenance. Verify GitHub attestations against the repository, source/ref and installer workflow. Record Authenticode status separately. Full automated installation currently executes NSIS clean install/runtime, recovery and every supported schema predecessor; building and hashing MSI does not claim actual MSI installation or hands-on UX approval.
+6. Publish only the exact validated final files after the separate release decision. Rebuilding or signing changes bytes and requires identity reconciliation and applicable checks. These verification workflows do not automatically publish a release or install into a developer's existing Angmoo profile.
+
+Core, Local Smoke and Windows Installer also schedule full validation on Mondays at 03:23 UTC (12:23 Korea time). The schedule definition proves configuration, not that a future cron run has already executed. A later documentation-only main commit can have justified N/A results while the release candidate remains the earlier explicitly recorded full-validated commit.
 
 ## Recovery and evidence
 
