@@ -428,7 +428,7 @@ regexes = [
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
-description = "Exact release-integration public source Git blobs independently verified at signed source commits; not credentials; reviewed 2026-10-06"
+description = "Exact release-integration public source Git blobs independently verified at signed source commits; not credentials; reviewed 2026-10-13"
 condition = "AND"
 regexTarget = "line"
 paths = [
@@ -451,11 +451,12 @@ regexes = [
   '''^\s*"backend/security/secret_scan_allowlist\.json":\s*"cdfa774f0fa21b50ab29e7ed9ae345f79a737729",?\s*$''',
   '''^\s*"backend/tests/test_t2_secret_allowlist\.py":\s*"fd6be4d63213ad086e7096d9a7c2f4d23cba13fc",?\s*$''',
   '''^\s*"backend/security/secret_scan_allowlist\.json":\s*"238944f9a08254cb18035aab4d58d9ae18900ee9",?\s*$''',
+  '''^\s*"backend/tests/world_characters/test_world_key_execution\.py":\s*"6266e382e8a87f9f534bd048e935adc9427340f5",?\s*$''',
 ]
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
-description = "Exact release-integration provenance test vectors independently verified as public committed Git blob IDs; not credentials; reviewed 2026-10-06"
+description = "Exact release-integration provenance test vectors independently verified as public committed Git blob IDs; not credentials; reviewed 2026-10-13"
 condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)backend/tests/test_release_gitleaks_provenance\.py$''']
@@ -477,6 +478,7 @@ regexes = [
   '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/security/secret_scan_allowlist\.json',\ 'cdfa774f0fa21b50ab29e7ed9ae345f79a737729',\ 'c10ee037a1b13851d54b52e38be1a8fac4d28607'\),\s*$''',
   '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/tests/test_t2_secret_allowlist\.py',\ 'fd6be4d63213ad086e7096d9a7c2f4d23cba13fc',\ 'c10ee037a1b13851d54b52e38be1a8fac4d28607'\),\s*$''',
   '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/security/secret_scan_allowlist\.json',\ '238944f9a08254cb18035aab4d58d9ae18900ee9',\ '20332573326b98ec66fc57f6d3b728ec4156b9b1'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/tests/world_characters/test_world_key_execution\.py',\ '6266e382e8a87f9f534bd048e935adc9427340f5',\ '6482483a0995321fc5525d8e5db3df349c8e6df4'\),\s*$''',
 ]
 
 [[allowlists]]

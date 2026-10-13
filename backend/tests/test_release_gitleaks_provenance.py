@@ -24,6 +24,7 @@ EVIDENCE = (
     ('security/post_refactor_contract_changes.json', 'backend/security/secret_scan_allowlist.json', 'cdfa774f0fa21b50ab29e7ed9ae345f79a737729', 'c10ee037a1b13851d54b52e38be1a8fac4d28607'),
     ('security/post_refactor_contract_changes.json', 'backend/tests/test_t2_secret_allowlist.py', 'fd6be4d63213ad086e7096d9a7c2f4d23cba13fc', 'c10ee037a1b13851d54b52e38be1a8fac4d28607'),
     ('security/post_refactor_contract_changes.json', 'backend/security/secret_scan_allowlist.json', '238944f9a08254cb18035aab4d58d9ae18900ee9', '20332573326b98ec66fc57f6d3b728ec4156b9b1'),
+    ('security/post_refactor_contract_changes.json', 'backend/tests/world_characters/test_world_key_execution.py', '6266e382e8a87f9f534bd048e935adc9427340f5', '6482483a0995321fc5525d8e5db3df349c8e6df4'),
 )
 
 def groups():

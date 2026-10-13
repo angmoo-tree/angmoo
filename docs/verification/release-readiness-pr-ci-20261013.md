@@ -447,3 +447,19 @@ The subsequent P8-L-D inventory/matrix checks and four-case module rerun passed.
 Frontend lint/type/ownership/design and backend import/
 runtime contract checks passed. Final committed preservation/privacy checks,
 expanded native matrix, full new-head CI and human review remain separate Gates.
+
+The `67db47ac` committed preservation/DCO gates passed: current/protected6368,
+items37 and frontend324. Isolated Linux related regressions passed28. Its custom
+current-tree/unlimited-history scans found fatal0 (3619/18059 files; audit32/65).
+Pinned Gitleaks then rejected one public source blob-ID line in the appended
+provenance: the exact `test_world_key_execution.py` object at6482483a, independently
+verified by Git. No credential material was found in that candidate.
+
+The existing source-provenance scanner contract now includes only that exact
+manifest path, source-key/blob full line and its exact test vector. Existing rules
+and scan scope remain enabled. All26 allowlist/provenance/image review regressions
+passed, including actual committed blob/ancestry and negative changed value,
+path, key and appended data. The real pinned scanner accepted the exact public
+line and rejected all four altered boundary cases. This is a reviewed public
+object classification, without a whole-file or generic hash exemption. Updated
+exact-head preservation and full scanner execution remain required before push.
