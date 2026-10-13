@@ -463,3 +463,29 @@ path, key and appended data. The real pinned scanner accepted the exact public
 line and rejected all four altered boundary cases. This is a reviewed public
 object classification, without a whole-file or generic hash exemption. Updated
 exact-head preservation and full scanner execution remain required before push.
+
+The `06552230` full hosted Core corpus passed:6302 passed/66 existing skips,
+all6368 nodes covered by four completed reports with identical source/tree/Python/
+lock identities. Frontend passed244 with12 existing skips, and all other required
+governance/local/Windows Core/Host checks passed. Real clean install and failure
+recovery also passed. The single sequential v1-v36 upgrade job completed33 native
+predecessor verifications, then reached its unchanged30-minute deadline before
+finishing the whole matrix. Its cancelled result and failed installer aggregate
+remain failures, without treating partial progress as success.
+
+Native upgrades now use two independent hosted Windows runners at the same
+30-minute limit. The source registry partitions all36 readable predecessors into
+v1-v18 and v19-v36. Each retains the exact existing installer, scoped synthetic
+archive validation, actual manifest version, verifier and target-reinstall
+idempotence checks. Recovery remains separate. Content-free receipts contain only
+exact source/run/attempt, completed versions and idempotence; the original required
+installer Gate additionally requires both exact sets and their full unique union.
+
+Related22 cases passed, including16 new exact coverage, missing/duplicated/
+reordered versions, wrong source/run/attempt, unfinished/idempotence and private
+extra-field negatives. Real CLI selection/union passed and missing/wrong-attempt
+receipts were rejected. PowerShell parsed without errors; current CI policy and
+full readable-predecessor wiring passed. This increases isolation and one runner
+allocation while preserving total native test scope, product data and all prior
+assertions. Final source/proof and new exact-head hosted/native execution remain
+required before human review/Ready/merge.

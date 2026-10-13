@@ -82,6 +82,8 @@ param(
     [string]$Verifier,
     [Parameter(Mandatory = $true)]
     [string]$RunSentinel,
+    [ValidateSet('all', 'first', 'second')]
+    [string]$UpgradePartition = 'all',
     [ValidateSet('All', 'Upgrade', 'Recovery')]
     [string]$Mode = 'All'
 )
@@ -120,6 +122,8 @@ if (
 ) {
     throw 'windows_installer_hosted_sentinel_invalid'
 }
+
+$coverageTool = Join-Path $PSScriptRoot 'windows_installer_upgrade_coverage.py'
 
 foreach ($required in @(
     $Installer,
@@ -161,7 +165,8 @@ foreach ($required in @(
     $SupportedV36FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
-    $Verifier
+    $Verifier,
+    $coverageTool
 )) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
         throw "windows_installer_supported_upgrade_input_missing:$required"
@@ -326,352 +331,622 @@ if (Test-Path -LiteralPath $legacyRoot) {
 
 try {
     if ($Mode -in @('All', 'Upgrade')) {
-        $supportedManifest = Restore-IsolatedFixture $SupportedV1FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        $selectedJson = & $Python $coverageTool --select-partition $UpgradePartition
+        if ($LASTEXITCODE -ne 0) { throw 'windows_installer_partition_selection_failed' }
+        $selectedVersions = @($selectedJson | ConvertFrom-Json)
+        if ($selectedVersions.Count -eq 0) { throw 'windows_installer_empty_partition' }
+        $completedVersions = [System.Collections.Generic.List[int]]::new()
+        if ($selectedVersions -contains 1) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV1FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 1) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(1)
+            Write-Output "windows_installer_supported_predecessor_verified:v1"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV2FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 2) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV2FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 2) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(2)
+            Write-Output "windows_installer_supported_predecessor_verified:v2"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV3FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 3) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV3FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 3) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(3)
+            Write-Output "windows_installer_supported_predecessor_verified:v3"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV4FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 4) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV4FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 4) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(4)
+            Write-Output "windows_installer_supported_predecessor_verified:v4"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV5FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV6FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV7FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 5) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV5FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 5) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(5)
+            Write-Output "windows_installer_supported_predecessor_verified:v5"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV8FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 6) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV6FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 6) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(6)
+            Write-Output "windows_installer_supported_predecessor_verified:v6"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV9FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 7) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV7FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 7) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(7)
+            Write-Output "windows_installer_supported_predecessor_verified:v7"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV10FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 8) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV8FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 8) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(8)
+            Write-Output "windows_installer_supported_predecessor_verified:v8"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV11FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 9) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV9FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 9) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(9)
+            Write-Output "windows_installer_supported_predecessor_verified:v9"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV12FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 10) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV10FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 10) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(10)
+            Write-Output "windows_installer_supported_predecessor_verified:v10"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV13FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 11) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV11FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 11) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(11)
+            Write-Output "windows_installer_supported_predecessor_verified:v11"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV14FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 12) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV12FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 12) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(12)
+            Write-Output "windows_installer_supported_predecessor_verified:v12"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV15FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 13) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV13FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 13) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(13)
+            Write-Output "windows_installer_supported_predecessor_verified:v13"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV16FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 14) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV14FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 14) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(14)
+            Write-Output "windows_installer_supported_predecessor_verified:v14"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV17FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 15) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV15FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 15) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(15)
+            Write-Output "windows_installer_supported_predecessor_verified:v15"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV18FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 16) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV16FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 16) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(16)
+            Write-Output "windows_installer_supported_predecessor_verified:v16"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV19FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 17) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV17FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 17) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(17)
+            Write-Output "windows_installer_supported_predecessor_verified:v17"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV20FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 18) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV18FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 18) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(18)
+            Write-Output "windows_installer_supported_predecessor_verified:v18"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV21FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 19) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV19FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 19) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(19)
+            Write-Output "windows_installer_supported_predecessor_verified:v19"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV22FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV23FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 20) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV20FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 20) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(20)
+            Write-Output "windows_installer_supported_predecessor_verified:v20"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV24FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV25FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV26FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 21) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV21FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 21) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(21)
+            Write-Output "windows_installer_supported_predecessor_verified:v21"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV27FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 22) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV22FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 22) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(22)
+            Write-Output "windows_installer_supported_predecessor_verified:v22"
+        }
 
-        $supportedManifest = Restore-IsolatedFixture $SupportedV28FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV29FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV30FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV31FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV32FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV33FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV34FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV35FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
-        $supportedManifest = Restore-IsolatedFixture $SupportedV36FixtureArchive
-        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
-            ConvertFrom-Json
-        Invoke-Installer 0
-        Invoke-Verifier `
-            $supportedManifest `
-            'upgraded' `
-            ([int]$supportedContract.source_data_version) `
-            ([int]$supportedContract.ladybug_source_data_version)
+        if ($selectedVersions -contains 23) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV23FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 23) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(23)
+            Write-Output "windows_installer_supported_predecessor_verified:v23"
+        }
+
+        if ($selectedVersions -contains 24) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV24FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 24) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(24)
+            Write-Output "windows_installer_supported_predecessor_verified:v24"
+        }
+
+        if ($selectedVersions -contains 25) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV25FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 25) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(25)
+            Write-Output "windows_installer_supported_predecessor_verified:v25"
+        }
+
+        if ($selectedVersions -contains 26) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV26FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 26) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(26)
+            Write-Output "windows_installer_supported_predecessor_verified:v26"
+        }
+
+        if ($selectedVersions -contains 27) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV27FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 27) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(27)
+            Write-Output "windows_installer_supported_predecessor_verified:v27"
+        }
+
+        if ($selectedVersions -contains 28) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV28FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 28) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(28)
+            Write-Output "windows_installer_supported_predecessor_verified:v28"
+        }
+
+        if ($selectedVersions -contains 29) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV29FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 29) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(29)
+            Write-Output "windows_installer_supported_predecessor_verified:v29"
+        }
+
+        if ($selectedVersions -contains 30) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV30FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 30) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(30)
+            Write-Output "windows_installer_supported_predecessor_verified:v30"
+        }
+
+        if ($selectedVersions -contains 31) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV31FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 31) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(31)
+            Write-Output "windows_installer_supported_predecessor_verified:v31"
+        }
+
+        if ($selectedVersions -contains 32) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV32FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 32) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(32)
+            Write-Output "windows_installer_supported_predecessor_verified:v32"
+        }
+
+        if ($selectedVersions -contains 33) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV33FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 33) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(33)
+            Write-Output "windows_installer_supported_predecessor_verified:v33"
+        }
+
+        if ($selectedVersions -contains 34) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV34FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 34) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(34)
+            Write-Output "windows_installer_supported_predecessor_verified:v34"
+        }
+
+        if ($selectedVersions -contains 35) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV35FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 35) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(35)
+            Write-Output "windows_installer_supported_predecessor_verified:v35"
+        }
+
+        if ($selectedVersions -contains 36) {
+            $supportedManifest = Restore-IsolatedFixture $SupportedV36FixtureArchive
+            $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+                ConvertFrom-Json
+            if ([int]$supportedContract.source_data_version -ne 36) {
+                throw 'windows_installer_selected_predecessor_mismatch'
+            }
+            Invoke-Installer 0
+            Invoke-Verifier `
+                $supportedManifest `
+                'upgraded' `
+                ([int]$supportedContract.source_data_version) `
+                ([int]$supportedContract.ladybug_source_data_version)
+            $completedVersions.Add(36)
+            Write-Output "windows_installer_supported_predecessor_verified:v36"
+        }
 
         # The exact installer must be idempotent after the supported v3 -> v4
         # World-scoped Chat, v4 -> v5 Memory, and v5 -> v6 response lifecycle
@@ -723,6 +998,23 @@ try {
         if ($actualGraphGenerations -cne $graphGenerations) {
             throw 'windows_installer_idempotent_ladybug_generation_created'
         }
+        if (($completedVersions -join ',') -cne ($selectedVersions -join ',')) {
+            throw 'windows_installer_partition_coverage_incomplete'
+        }
+        if ($env:GITHUB_RUN_ATTEMPT -notmatch '^[1-9][0-9]*$') {
+            throw 'windows_installer_upgrade_attempt_missing'
+        }
+        $receiptPath = Join-Path $runnerTemp "angmoo-supported-upgrade-$UpgradePartition.json"
+        @{
+            schema = 'windows-installer-upgrade-coverage.v1'
+            status = 'completed'
+            source_sha = $env:SOURCE_SHA
+            run_id = $env:GITHUB_RUN_ID
+            run_attempt = $env:GITHUB_RUN_ATTEMPT
+            partition = $UpgradePartition
+            versions = @($completedVersions.ToArray())
+            idempotent = $true
+        } | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $receiptPath -Encoding utf8
         Write-Output 'windows_installer_supported_upgrade_matrix_pass'
     }
 

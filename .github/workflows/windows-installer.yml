@@ -595,12 +595,16 @@ jobs:
             desktop/src-tauri/target/release/bundle/msi/*.msi
 
   windows-installer-supported-upgrade:
-    name: windows-installer-supported-upgrade
+    name: windows-installer-supported-upgrade (${{ matrix.partition }})
     needs: release-candidate
     runs-on: windows-latest
     # v1-v28 each runs real NSIS, followed by the idempotent re-install check.
     # Twenty minutes ended after v24 passed but before that final check.
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        partition: [first, second]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -739,7 +743,17 @@ jobs:
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
             -RunSentinel $sentinel `
+            -UpgradePartition ${{ matrix.partition }} `
             -Mode Upgrade
+
+      - name: Upload exact native upgrade coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-${{ matrix.partition }}
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/angmoo-supported-upgrade-${{ matrix.partition }}.json
 
   windows-installer-failure-recovery:
     name: windows-installer-failure-recovery
@@ -1625,3 +1639,20 @@ jobs:
             test "$result" = "success"
           done
           echo "windows_installer_required_matrix_pass"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-*
+          merge-multiple: true
+          path: .ci/windows-upgrade-reports
+      - name: Require exact native predecessor union
+        run: >-
+          python scripts/ci/windows_installer_upgrade_coverage.py
+          --directory .ci/windows-upgrade-reports
+          --source-sha "$SOURCE_SHA"
+          --run-id "$GITHUB_RUN_ID"
+          --run-attempt "$GITHUB_RUN_ATTEMPT"
