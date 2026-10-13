@@ -45,6 +45,29 @@ def test_current_exact_allowlist_metadata_passes() -> None:
     assert checker.validate() == []
 
 
+def test_pr365_scanner_canary_is_exact_in_value_path_rule_and_source_evidence(tmp_path):
+    spec = importlib.util.spec_from_file_location("pr365_canary_scanner", REPO_ROOT / "scripts/security_secret_scan.py")
+    scanner = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = scanner
+    spec.loader.exec_module(scanner)
+    allowlist = scanner.load_allowlist(checker.DEFAULT_PATH)
+    value = "sk-" + "123456789012345678901234567890"
+    for path in checker.PR365_CANARY_PATHS:
+        assert list(scanner.scan_text(path, value, allowlist=allowlist)) == []
+        assert {f.rule for f in scanner.scan_text(path, value + "1", allowlist=allowlist)} == {"openai-api-key"}
+    assert {f.rule for f in scanner.scan_text("backend/real_credentials.py", value, allowlist=allowlist)} == {"openai-api-key"}
+    payload = json.loads(checker.DEFAULT_PATH.read_text(encoding="utf-8"))
+    index = next(i for i, row in enumerate(payload["entries"])
+                 if row.get("evidence_commit") == checker.PR365_CANARY_EVIDENCE["evidence_commit"])
+    for field, wrong in (("value", value + "1"), ("path", "backend/real_credentials.py"),
+                         ("rule", "google-api-key"), ("evidence_git_blob", "0" * 40)):
+        changed = json.loads(json.dumps(payload))
+        changed["entries"][index][field] = wrong
+        path = tmp_path / "changed.json"
+        path.write_text(json.dumps(changed), encoding="utf-8")
+        assert checker.validate(path)
+
+
 def test_gitleaks_card_credential_form_exception_requires_exact_source_and_line() -> None:
     config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
     entry = next(item for item in config["allowlists"]

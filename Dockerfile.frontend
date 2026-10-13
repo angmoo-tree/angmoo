@@ -15,6 +15,7 @@ RUN mkdir -p "${COREPACK_HOME}" \
 
 FROM base AS dependencies
 COPY --chown=node:node frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
+COPY --chown=node:node frontend/patches ./patches
 USER node
 RUN pnpm install --frozen-lockfile
 

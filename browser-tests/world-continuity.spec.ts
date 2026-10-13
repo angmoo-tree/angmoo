@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { continuityAgentDetail } from "./continuity-fixture";
 import { installIntegrationFixture } from "./home-activity-memory-fixture";
 import { WORLD_AGENT } from "./world-character-management-fixture";
 import { FEED_WORLD } from "./world-feed-fixture";
