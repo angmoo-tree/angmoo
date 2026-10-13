@@ -350,3 +350,7 @@ remain owner-only, and pure workflow analysis requires an authenticated session.
 The full route/auth/object-ID and mutation-surface security assertions remain;
 their exact current mutation count is149 with all four added POST/PATCH/DELETE
 operations explicitly required. No runtime authentication or API scope changes.
+The retained public-runtime surface test is also aligned to the actual227 paths
+and282 operations, explicitly requiring all eleven additions while preserving
+every existing private/retired-route denial. A related preflight/public-contract
+run identified this stale count before the next hosted corpus execution.

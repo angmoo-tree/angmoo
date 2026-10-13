@@ -53,8 +53,21 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 218
-    assert len(operations) == 271
+    assert len(paths) == 227
+    assert len(operations) == 282
+    assert {
+        ("GET", "/api/v1/agents/{character_id}/generation-provider-key/{provider}"),
+        ("POST", "/api/v1/media/comfy-workflows/analyze"),
+        ("GET", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/image-provider-key/{provider}"),
+        ("GET", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/activity-settings"),
+        ("PATCH", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/activity-settings"),
+        ("GET", "/api/v1/worlds/{world_id}/media/{filename}"),
+        ("GET", "/api/v1/worlds/{world_id}/deletion-preview"),
+        ("DELETE", "/api/v1/worlds/{world_id}"),
+        ("GET", "/api/v1/world-deletions"),
+        ("GET", "/api/v1/world-deletions/{request_id}"),
+        ("POST", "/api/v1/world-deletions/{request_id}/retry"),
+    } <= operations
     assert {
         ("GET", "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/unsaved-experiences"),
         ("POST", "/api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/recheck"),
