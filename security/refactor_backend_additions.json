@@ -40491,6 +40491,72 @@
         "tests/world_characters/test_world_key_execution.py": {},
         "tests/worlds/test_transition_contracts.py": {}
       }
+    },
+    {
+      "commit": "8e6ef22179743989e41d1d1a8b15431e58bc9227",
+      "feature_id": "AR-NATIVE-INSTALLER-COMPLETE-PARTITION-COVERAGE",
+      "reason": "Exact content-free native predecessor union and source/run/attempt with original real NSIS and idempotence checks and negative incomplete/private/report-identity regressions",
+      "tracked_files": {
+        "backend/tests/test_windows_installer_upgrade_coverage.py": "f471663ce86968956adda9bb2e01085d02643c45",
+        "scripts/ci/windows_installer_upgrade_coverage.py": "1ff01d8454e78aa3569fdbc24f47b5b9552f555a"
+      },
+      "test_nodes": [
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_partitions_cover_current_registry_without_overlap",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[missing]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[duplicate_partition]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[missing_version]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[duplicated_version]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[reordered_versions]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[different_source]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[different_run]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[different_attempt]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[no_idempotence]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[unfinished]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports[extra_private_data]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_partition_rejects_invalid_selection[versions0-first]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_partition_rejects_invalid_selection[versions1-second]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_partition_rejects_invalid_selection[versions2-unsupported]",
+        "tests/test_windows_installer_upgrade_coverage.py::test_native_upgrade_hosted_wiring_preserves_bounds_actions_and_exact_union"
+      ],
+      "test_assertions": {
+        "tests/test_windows_installer_upgrade_coverage.py": {
+          "reports": [],
+          "test_native_upgrade_partitions_cover_current_registry_without_overlap": [
+            "assert first and second and (first + second == versions)",
+            "assert not set(first) & set(second)",
+            "assert abs(len(first) - len(second)) <= 1",
+            "assert coverage.partition_versions(versions, 'all') == versions",
+            "assert result['covered'] == len(versions) and result['versions'] == list(versions)"
+          ],
+          "test_native_upgrade_union_rejects_incomplete_wrong_run_or_private_reports": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_native_upgrade_partition_rejects_invalid_selection": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_native_upgrade_hosted_wiring_preserves_bounds_actions_and_exact_union": [
+            "assert job['strategy'] == {'fail-fast': False, 'matrix': {'partition': ['first', 'second']}}",
+            "assert job['timeout-minutes'] == 30 and 'continue-on-error' not in job",
+            "assert any(('-UpgradePartition ${{ matrix.partition }}' in step.get('run', '') for step in steps))",
+            "assert upload['if'] == 'always()' and upload['with']['if-no-files-found'] == 'error'",
+            "assert upload['with']['path'] == '${{ runner.temp }}/angmoo-supported-upgrade-${{ matrix.partition }}.json'",
+            "assert aggregate['if'] == 'always()' and aggregate['timeout-minutes'] == 5",
+            "assert 'windows-installer-supported-upgrade' in aggregate['needs']",
+            "assert any(('windows_installer_upgrade_coverage.py' in step.get('run', '') and '--run-attempt \"$GITHUB_RUN_ATTEMPT\"' in step['run'] for step in aggregate['steps']))",
+            "assert '--select-partition $UpgradePartition' in source",
+            "assert 'windows_installer_idempotent_marker_changed' in source",
+            "assert source.index('windows_installer_hosted_runner_only') < source.index('foreach ($required')",
+            "assert source.index('Assert-SyntheticFixtureArchive $Archive') < source.index('Remove-IsolatedFixture', source.index('Assert-SyntheticFixtureArchive $Archive'))",
+            "assert f'if ($selectedVersions -contains {version})' in source",
+            "assert f'Restore-IsolatedFixture $SupportedV{version}FixtureArchive' in source",
+            "assert f'$supportedContract.source_data_version -ne {version}' in source",
+            "assert f'$completedVersions.Add({version})' in source"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_windows_installer_upgrade_coverage.py": {}
+      }
     }
   ]
 }
