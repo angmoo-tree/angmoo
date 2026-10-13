@@ -3246,7 +3246,7 @@
     },
     {
       "path": "backend/tests/memory/test_search_diagnostics.py",
-      "sha256": "d11e245f35b159eaa48de2fce973c126d5af558593c3da67287831c6c53e42e9"
+      "sha256": "1320eed1f3959d8374ecb0a0bb99e07792b4d5d8711c122e3ab3e10c31a2f734"
     },
     {
       "path": "backend/tests/memory/test_search_worker_transport_cancel.py",
