@@ -2698,11 +2698,11 @@
     },
     {
       "path": "backend/security/public_route_security_inventory.json",
-      "sha256": "acd654005ab66b83c58c9afba91c1e257147e5931bfd99edb0b1f4ab2a12d38c"
+      "sha256": "ce1ae38fb7920b2d659f5f0ea3dec7f691fa4798f6326560713bc7c3382cb3c9"
     },
     {
       "path": "backend/security/route_security_inventory.json",
-      "sha256": "5decf1dbe4d16b8cfa944c17035503c20ba0f970cc497b2cdeb8fc214fbcc152"
+      "sha256": "c90207154732ec978a185ce477fbf3b16a9a540c002faad1b6cc8b0a150280fb"
     },
     {
       "path": "backend/tests/chat/test_activity_situation_receipt.py",

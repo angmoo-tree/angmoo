@@ -337,3 +337,16 @@ limits are unchanged. No retry-until-pass or relaxed assertion is introduced.
 The corrected worker module passed21 cases on Windows and21 on isolated Linux;
 the same three existing Vec1-dependent cases were skipped locally. Hosted CI
 builds the pinned extension and is the separate native execution Gate.
+
+The `4dd96051` hosted preflight completed dependency installation, native Vec1
+build, schema materialization, full baseline collection and current/frozen
+inventories, then exposed missing route-security metadata. Eleven newer OpenAPI
+operations and one schema-hidden legacy World-media route were absent from the
+explicit current inventory. Existing entries, endpoint ownership and access
+classes are preserved; the twelve additions are classified from their actual
+authentication and resource authorization. The World-media routes permit only
+the already authorized visibility/member reads, protected resource operations
+remain owner-only, and pure workflow analysis requires an authenticated session.
+The full route/auth/object-ID and mutation-surface security assertions remain;
+their exact current mutation count is149 with all four added POST/PATCH/DELETE
+operations explicitly required. No runtime authentication or API scope changes.
