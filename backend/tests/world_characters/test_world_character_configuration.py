@@ -272,8 +272,8 @@ def test_t56_dashboard_batch_queries_do_not_grow_per_character(engine):
     from app.domains.worlds.models import WorldMembership
     from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     statements = []
-    def count_query(*_args):
-        statements.append(1)
+    def count_query(_connection, _cursor, statement, *_args):
+        statements.append(statement)
     event.listen(engine, "before_cursor_execute", count_query)
     with Session(engine) as db:
         owner = fixture_owner(db)
@@ -302,7 +302,10 @@ def test_t56_dashboard_batch_queries_do_not_grow_per_character(engine):
         expanded = management_service(db).dashboard(world_id="config-world-a", user=owner)
         assert len(expanded.items) == len(initial.items) + 7
         assert len(statements) == first_count
-        assert first_count <= 22
+        assert first_count <= 23
+        # Three fixed admission fences (World/profile/basic configuration) are
+        # independent of character count, as the equality above proves.
+        assert sum("FROM world_deletion_requests" in statement for statement in statements) == 3
     event.remove(engine, "before_cursor_execute", count_query)
 
 

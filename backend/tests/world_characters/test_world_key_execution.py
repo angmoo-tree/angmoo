@@ -84,14 +84,17 @@ def test_world_status_read_has_actual_typed_state_and_no_writes(world_session):
 
 def test_comfy_partner_write_only_and_client_cannot_invent_connection(world_session):
     db = world_session
-    row = world_credentials.save(db, **SCOPE, purpose="image", data=WorldCredentialWrite(expected_revision=0,
-        provider="comfyui", model="workflow", thinking_level=None, api_key="server-only", partner_api_key="partner-only"))
-    assert row.has_key and row.has_partner_key and "server-only" not in row.model_dump_json() and "partner-only" not in row.model_dump_json()
+    with pytest.raises(CredentialResolutionError, match="comfy_server_key_not_supported"):
+        world_credentials.save(db, **SCOPE, purpose="image", data=WorldCredentialWrite(expected_revision=0, expected_key_revision=0,
+            provider="comfyui", model="workflow", thinking_level=None, api_key="server-only", partner_api_key="partner-only"))
+    row = world_credentials.save(db, **SCOPE, purpose="image", data=WorldCredentialWrite(expected_revision=0, expected_key_revision=0,
+        provider="comfyui", model="workflow", thinking_level=None, partner_api_key="partner-only"))
+    assert not row.has_key and row.has_partner_key and "server-only" not in row.model_dump_json() and "partner-only" not in row.model_dump_json()
     primary, partner = world_credentials.resolve_image_keys(db, **SCOPE)
-    assert primary.reveal() == "server-only" and partner == "partner-only"
+    assert primary is None and partner == "partner-only"
     with pytest.raises(ImagePreparationError, match="connection_unverified"):
         validate_settings({"profiles": {"comfyui:workflow": {"options": {}, "connection": {"ready": True}}}})
-    world_credentials.save(db, **SCOPE, purpose="image", data=WorldCredentialWrite(expected_revision=1,
+    world_credentials.save(db, **SCOPE, purpose="image", data=WorldCredentialWrite(expected_revision=1, expected_key_revision=1,
         provider="comfyui", model="workflow", thinking_level=None, clear_partner_key=True))
     primary, partner = world_credentials.resolve_image_keys(db, **SCOPE)
-    assert primary.reveal() == "server-only" and partner is None
+    assert primary is None and partner is None

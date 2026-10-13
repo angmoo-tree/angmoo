@@ -1,6 +1,6 @@
 {
-  "edge_count": 6540,
-  "external_import_count": 4447,
+  "edge_count": 6541,
+  "external_import_count": 4448,
   "module_count": 1518,
   "modules": [
     {
@@ -18977,8 +18977,10 @@
       "external_imports": [
         "__future__",
         "collections.abc",
+        "contextlib",
         "datetime",
         "sqlalchemy",
+        "sqlalchemy.exc",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -18993,6 +18995,7 @@
         "app.domains.relationships.service.projection_state",
         "app.domains.relationships.service.sqlite_projection_state",
         "app.domains.worlds.service.projection_sources",
+        "app.exceptions",
         "app.runtime.graph_projection.sqlalchemy_commands"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",
@@ -19006,7 +19009,6 @@
         "dataclasses",
         "datetime",
         "logging",
-        "sqlalchemy.exc",
         "threading",
         "time",
         "typing"

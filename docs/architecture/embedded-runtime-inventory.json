@@ -19,7 +19,7 @@
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "c6495e8e040316eee61b7b5d363d0613a81f911c86f1a25266a17af9ceff5d61"
+      "sha256": "fa2c3aa010982334dc290332193c7a1e97fbd086e877ac65815e774a0d0d5d0c"
     },
     {
       "path": "frontend/next.config.ts",
@@ -35,7 +35,7 @@
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
-      "sha256": "ab11bad31193b80b6829db0e0cc02fd53c635aaf8c8efa010a4b3af15564427e"
+      "sha256": "4a0b95aaf0ad9c2b242fa02a70ed984dd9932dcf8dcfe259c5497fa7ac1a93bd"
     }
   ],
   "dependencies": {
@@ -274,7 +274,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/worker.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "ab11bad31193b80b6829db0e0cc02fd53c635aaf8c8efa010a4b3af15564427e",
+      "source_sha256": "4a0b95aaf0ad9c2b242fa02a70ed984dd9932dcf8dcfe259c5497fa7ac1a93bd",
       "transition_pr": "ER4 PR J"
     },
     {

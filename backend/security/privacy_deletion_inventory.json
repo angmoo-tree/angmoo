@@ -79,8 +79,10 @@
       "memory_situation_receipts",
       "memory_situation_recheck_attempts",
       "memory_situation_requests",
+      "memory_situation_result_bindings",
       "memory_situation_runs",
       "memory_situation_settings",
+      "memory_situation_source_bindings",
       "memory_situation_sources",
       "memory_situation_transitions",
       "memory_source_deliveries",
@@ -135,6 +137,7 @@
       "world_credentials",
       "world_image_attempts",
       "world_image_policies",
+      "world_image_provider_credentials",
       "world_memberships"
     ],
     "scrub": [
@@ -173,7 +176,9 @@
       "auth_google_signup_grants",
       "auth_login_throttle_buckets",
       "community_mutation_quota_buckets",
-      "lore_parser_leases"
+      "lore_parser_leases",
+      "world_deletion_cleanup_items",
+      "world_deletion_requests"
     ],
     "retain_local_installation": [
       "image_generation_policy",
@@ -258,8 +263,10 @@
       "memory_situation_receipts",
       "memory_situation_recheck_attempts",
       "memory_situation_requests",
+      "memory_situation_result_bindings",
       "memory_situation_runs",
       "memory_situation_settings",
+      "memory_situation_source_bindings",
       "memory_situation_sources",
       "memory_situation_transitions",
       "memory_source_deliveries",
@@ -310,7 +317,8 @@
       "world_credential_revisions",
       "world_credentials",
       "world_image_attempts",
-      "world_image_policies"
+      "world_image_policies",
+      "world_image_provider_credentials"
     ],
     "scrub": [
       "characters"
@@ -353,6 +361,8 @@
       "social_recommendation_topics",
       "users",
       "world_daypart_profiles",
+      "world_deletion_cleanup_items",
+      "world_deletion_requests",
       "world_glossary_terms",
       "world_memberships",
       "world_package_exports",

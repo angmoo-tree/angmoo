@@ -121,7 +121,7 @@ def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path
     path.write_text(json.dumps(payload), encoding="utf-8")
     def git(args, **kwargs):
         if args[1] == "log":
-            return b"historical\n"
+            return ("d" * 40 + "\n").encode()
         if args[1] == "show":
             return json.dumps(payload).encode()
         if args[1] == "merge-base":
@@ -143,11 +143,13 @@ def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path
 
 @pytest.mark.parametrize("injected", [False, True])
 def test_historical_manifests_are_rechecked_without_retaining_their_bytes(tmp_path, monkeypatch, injected):
-    payload = {"schema_version": 1, "records": []}
+    record = {"id": "immutable-history", "implementation_commit": "c" * 40,
+        "reason": "reviewed", "review": "fixture", "source_blobs": {"backend/example.py": "a" * 40}}
+    payload = {"schema_version": 1, "records": [record]}
     path = tmp_path / changes.MANIFEST
     path.parent.mkdir()
     path.write_text(json.dumps(payload), encoding="utf-8")
-    calls, history = [], {"records": []}
+    calls, history = [], deepcopy(payload)
 
     def git(args, **kwargs):
         calls.append(tuple(args))
@@ -155,17 +157,28 @@ def test_historical_manifests_are_rechecked_without_retaining_their_bytes(tmp_pa
             return ("a" * 40).encode()
         if args[1] == "log":
             return ("b" * 40 + "\n").encode()
+        if args[1] == "merge-base":
+            return b""
         assert args[1] == "show"
         return json.dumps(history).encode()
 
     monkeypatch.setattr(changes.subprocess, "check_output", git)
     reader = (lambda *args, root: git(["git", *args], cwd=root)) if injected else None
-    assert changes.load(tmp_path, reader=reader) == []
-    assert changes.load(tmp_path, reader=reader) == []
-    assert sum(args[1] == "show" for args in calls) == 2
-    history["records"] = [{"id": "unexpected historical record"}]
+    assert changes.load(tmp_path, reader=reader) == payload["records"]
+    assert changes.load(tmp_path, reader=reader) == payload["records"]
+    assert sum(args[1] == "show" for args in calls) == (2 if injected else 1)
+    # Immutable Git objects may reuse compressed bytes, while the candidate
+    # prefix is reread and compared on every call. Injected readers stay fresh.
+    altered = deepcopy(payload)
+    altered["records"][0]["reason"] = "unreviewed candidate rewrite"
+    path.write_text(json.dumps(altered), encoding="utf-8")
     with pytest.raises(ValueError, match="append-only"):
         changes.load(tmp_path, reader=reader)
+    if injected:
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        history["records"] = [{"id": "unexpected historical record"}]
+        with pytest.raises(ValueError, match="append-only"):
+            changes.load(tmp_path, reader=reader)
 
 
 def test_git_object_cache_rereads_head_and_candidate_manifest(tmp_path, monkeypatch):

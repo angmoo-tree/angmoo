@@ -120,4 +120,5 @@ def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip().endswith(",".join(f"v{version}" for version in range(1, 32)))
+    from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+    assert result.stdout.strip().endswith(",".join(f"v{version}" for version in range(1, SQLITE_SCHEMA_VERSION)))

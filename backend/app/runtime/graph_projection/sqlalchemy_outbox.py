@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any
 
 from sqlalchemy import Engine
+from sqlalchemy.exc import TimeoutError as PoolCheckoutTimeout
 from sqlalchemy.orm import Session
 
 from app.domains.worlds.service.projection_sources import list_projection_world_ids
@@ -16,18 +18,29 @@ from app.domains.relationships.constants import LEASE_TTL_SECONDS
 from app.domains.relationships.service import sqlite_projection_state
 from app.domains.relationships.policies.events import _aware_utc
 from app.domains.relationships.service import projection_state as graph_projection_crud
-from app.domains.relationships.contracts.outbox import (OutboxFinalizeStatus, ProjectionWorkItem)
+from app.domains.relationships.contracts.outbox import (OutboxCapacityError, OutboxFinalizeStatus, ProjectionWorkItem)
 from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
 from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,
 )
+from app.exceptions import SqliteTaskQueueFull
 from app.runtime.graph_projection.sqlalchemy_commands import (
     build_projection_command,
 )
 
 
 SessionFactory = Callable[[], Session]
+
+
+@contextmanager
+def _projection_session(session_factory: SessionFactory):
+    """Translate adapter-specific checkout pressure to the outbox port."""
+    try:
+        with session_factory() as db:
+            yield db
+    except PoolCheckoutTimeout as exc:
+        raise OutboxCapacityError("canonical_checkout_timeout") from exc
 
 
 class SqlAlchemyProjectionReplaySource:
@@ -67,7 +80,7 @@ class SqlAlchemyProjectionOutbox:
         now: datetime,
         batch_size: int,
     ) -> tuple[ProjectionWorkItem, ...]:
-        with self._session_factory() as db:
+        with _projection_session(self._session_factory) as db:
             ids = graph_projection_crud.claim_batch(
                 db,
                 worker_id=worker_id,
@@ -83,7 +96,7 @@ class SqlAlchemyProjectionOutbox:
             return items
 
     def load_command(self, *, outbox_id: str) -> ProjectionCommand:
-        with self._session_factory() as db:
+        with _projection_session(self._session_factory) as db:
             return build_projection_command(db, outbox_id=outbox_id)
 
     def finalize_success(
@@ -93,7 +106,7 @@ class SqlAlchemyProjectionOutbox:
         worker_id: str,
         now: datetime,
     ) -> OutboxFinalizeStatus:
-        with self._session_factory() as db:
+        with _projection_session(self._session_factory) as db:
             succeeded = graph_projection_crud.finalize_success(
                 db,
                 outbox_id=outbox_id,
@@ -113,7 +126,7 @@ class SqlAlchemyProjectionOutbox:
         terminal: bool,
         cancelled: bool = False,
     ) -> OutboxFinalizeStatus:
-        with self._session_factory() as db:
+        with _projection_session(self._session_factory) as db:
             status = graph_projection_crud.finalize_failure(
                 db,
                 outbox_id=outbox_id,
@@ -149,7 +162,7 @@ class SqliteProjectionOutbox:
         )
 
     def load_command(self, *, outbox_id: str) -> ProjectionCommand:
-        with Session(self._engine) as db:
+        with _projection_session(lambda: Session(self._engine)) as db:
             return build_projection_command(db, outbox_id=outbox_id)
 
     def finalize_success(
@@ -180,11 +193,14 @@ class SqliteProjectionOutbox:
         )
 
     def _write(self, operation: Callable[[Any], Any]) -> Any:
-        return run_sqlite_immediate(
-            self._engine,
-            operation,
-            retry_policy=self._retry_policy,
-        )
+        try:
+            return run_sqlite_immediate(
+                self._engine,
+                operation,
+                retry_policy=self._retry_policy,
+            )
+        except (PoolCheckoutTimeout, SqliteTaskQueueFull) as exc:
+            raise OutboxCapacityError("canonical_write_capacity") from exc
 
 
 __all__ = [

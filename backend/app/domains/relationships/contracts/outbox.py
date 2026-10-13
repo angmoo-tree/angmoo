@@ -18,6 +18,10 @@ OutboxFinalizeStatus = Literal[
 ]
 
 
+class OutboxCapacityError(RuntimeError):
+    """Temporary canonical resource pressure; leases remain retryable."""
+
+
 @dataclass(frozen=True)
 class ProjectionWorkItem:
     id: str
@@ -56,7 +60,7 @@ class OutboxPort(Protocol):
     ) -> OutboxFinalizeStatus: ...
 
 
-__all__ = ["OutboxFinalizeStatus", "OutboxPort", "ProjectionWorkItem"]
+__all__ = ["OutboxCapacityError", "OutboxFinalizeStatus", "OutboxPort", "ProjectionWorkItem"]
 
 
 @dataclass(frozen=True)

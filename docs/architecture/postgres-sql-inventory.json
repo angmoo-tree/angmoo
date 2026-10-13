@@ -1482,15 +1482,15 @@
           115,
           116,
           117,
-          360,
-          361,
-          362
+          368,
+          369,
+          370
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "24c19990fab6ecea6b329205ae9324273f102f299351db18dc86b1f2c8aa5b86",
+      "source_sha256": "a1bff1f682f76a4612c737569f395ba180d43322afc95016024d43ff9c0baa67",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

@@ -64,6 +64,7 @@ def _create_agent(
         schemas.AgentCreate(
             execution_mode=execution_mode,  # type: ignore[arg-type]
             name=f"{execution_mode} bird {index}",
+            description="A calm synthetic character for saved-count policy checks.",
             handle=f"{execution_mode}_bird_{index}",
             one_liner="local saved character count policy",
             personality="calm",
@@ -100,7 +101,16 @@ def test_saved_character_creation_allows_more_than_the_old_per_mode_cap() -> Non
 
         for index in range(5):
             _create_agent(db, user, execution_mode="llm", index=index)
-            _create_agent(db, user, execution_mode="local", index=index)
+            # Legacy saved local characters stay readable; the current create
+            # API no longer accepts the retired Local Bot execution mode.
+            legacy = models.Character(id=f"legacy-local-{index}", owner_id=user.id,
+                name=f"Legacy local bird {index}", handle=f"legacy_local_{index}",
+                personality="calm", speech_style="plain", worldview="local world",
+                one_liner="saved predecessor", persona_summary="legacy fixture", execution_mode="local")
+            db.add(legacy)
+            db.flush()
+            db.add(models.AgentActivitySetting(character_id=legacy.id, auto_enabled=False))
+        db.commit()
 
         assert _count_by_mode(db, "llm") == 5
         assert _count_by_mode(db, "local") == 5

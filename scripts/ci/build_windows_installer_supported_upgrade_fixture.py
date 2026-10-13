@@ -82,7 +82,9 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -649,7 +651,8 @@ def _seed_supported_predecessor(
                 # its historical manifest; production upgrades stay forward-only.
                 from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES, build_sqlite_v31_metadata
                 from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES as WORLD_ACTIVITY_TABLES
-                sql_connection.exec_driver_sql('ALTER TABLE "post_image_generation_jobs" DROP COLUMN "provider_diagnostic_json"')
+                if source_version < 33:
+                    sql_connection.exec_driver_sql('ALTER TABLE "post_image_generation_jobs" DROP COLUMN "provider_diagnostic_json"')
                 if source_version < 32:
                     sql_connection.exec_driver_sql('DROP TABLE "memory_situation_recheck_attempts"')
                 if source_version < 31:

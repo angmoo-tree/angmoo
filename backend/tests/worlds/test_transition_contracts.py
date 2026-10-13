@@ -165,7 +165,12 @@ def test_split_router_preserves_all_fourteen_world_and_resident_endpoints() -> N
     resident = {(route.path, method) for route in resident_router.routes for method in route.methods}
     creator_routes = {(route.path, method) for route in creator_router.routes for method in route.methods}
     assert len(resident) == 4
-    assert len(creator_routes) == 13
+    assert len(creator_routes) == 14
+    assert ('/worlds/{world_id}/media/{filename}', 'GET') in creator_routes
+    from app.domains.worlds.router_deletion import router as deletion_router
+    deletion_routes = {(route.path, method) for route in deletion_router.routes for method in route.methods}
+    assert ('/worlds/{world_id}', 'DELETE') in deletion_routes
+    assert deletion_routes.isdisjoint(creator_routes | resident)
     assert {('/worlds/default-space/ensure', 'POST'), ('/worlds/{world_id}/icon', 'POST'), ('/worlds/{world_id}/icon', 'DELETE')} <= creator_routes
     assert resident.isdisjoint(creator_routes)
     for routers in (main.PUBLIC_ROUTERS, public.PUBLIC_ROUTERS):

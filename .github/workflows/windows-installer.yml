@@ -132,6 +132,14 @@ jobs:
           $supportedV26 = Join-Path $root 'supported-v26'
           $supportedV27 = Join-Path $root 'supported-v27'
           $supportedV28 = Join-Path $root 'supported-v28'
+          $supportedV29 = Join-Path $root 'supported-v29'
+          $supportedV30 = Join-Path $root 'supported-v30'
+          $supportedV31 = Join-Path $root 'supported-v31'
+          $supportedV32 = Join-Path $root 'supported-v32'
+          $supportedV33 = Join-Path $root 'supported-v33'
+          $supportedV34 = Join-Path $root 'supported-v34'
+          $supportedV35 = Join-Path $root 'supported-v35'
+          $supportedV36 = Join-Path $root 'supported-v36'
           $conflict = Join-Path $root 'conflicting-v2'
           backend\.venv\Scripts\python.exe `
             scripts\ci\check_windows_installer_supported_upgrade_matrix.py
@@ -305,6 +313,54 @@ jobs:
             --source-version 28
           backend\.venv\Scripts\python.exe `
             scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV29 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 29
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV30 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 30
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV31 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 31
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV32 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 32
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV33 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 33
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV34 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 34
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV35 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 35
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
+            --output-root $supportedV36 `
+            --host $hostExecutable `
+            --sidecar $sidecar `
+            --source-version 36
+          backend\.venv\Scripts\python.exe `
+            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
             --output-root $conflict `
             --host $hostExecutable `
             --sidecar $sidecar `
@@ -394,6 +450,30 @@ jobs:
           Compress-Archive `
             -Path "$supportedV28\*" `
             -DestinationPath (Join-Path $root 'supported-v28.zip')
+          Compress-Archive `
+            -Path "$supportedV29\*" `
+            -DestinationPath (Join-Path $root 'supported-v29.zip')
+          Compress-Archive `
+            -Path "$supportedV30\*" `
+            -DestinationPath (Join-Path $root 'supported-v30.zip')
+          Compress-Archive `
+            -Path "$supportedV31\*" `
+            -DestinationPath (Join-Path $root 'supported-v31.zip')
+          Compress-Archive `
+            -Path "$supportedV32\*" `
+            -DestinationPath (Join-Path $root 'supported-v32.zip')
+          Compress-Archive `
+            -Path "$supportedV33\*" `
+            -DestinationPath (Join-Path $root 'supported-v33.zip')
+          Compress-Archive `
+            -Path "$supportedV34\*" `
+            -DestinationPath (Join-Path $root 'supported-v34.zip')
+          Compress-Archive `
+            -Path "$supportedV35\*" `
+            -DestinationPath (Join-Path $root 'supported-v35.zip')
+          Compress-Archive `
+            -Path "$supportedV36\*" `
+            -DestinationPath (Join-Path $root 'supported-v36.zip')
           Compress-Archive `
             -Path "$conflict\*" `
             -DestinationPath (Join-Path $root 'conflicting-v2.zip')
@@ -497,6 +577,14 @@ jobs:
             .codex-temp/windows-installer-supported-upgrade/supported-v26.zip
             .codex-temp/windows-installer-supported-upgrade/supported-v27.zip
             .codex-temp/windows-installer-supported-upgrade/supported-v28.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v29.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v30.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v31.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v32.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v33.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v34.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v35.zip
+            .codex-temp/windows-installer-supported-upgrade/supported-v36.zip
             .codex-temp/windows-installer-supported-upgrade/conflicting-v2.zip
       - name: Attest Windows installers
         if: github.event_name != 'pull_request'
@@ -587,7 +675,23 @@ jobs:
             Select-Object -First 1
           $supportedV28 = Get-ChildItem $root -Filter 'supported-v28.zip' -Recurse |
             Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $conflict) {
+          $supportedV29 = Get-ChildItem $root -Filter 'supported-v29.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV30 = Get-ChildItem $root -Filter 'supported-v30.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV31 = Get-ChildItem $root -Filter 'supported-v31.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV32 = Get-ChildItem $root -Filter 'supported-v32.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV33 = Get-ChildItem $root -Filter 'supported-v33.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV34 = Get-ChildItem $root -Filter 'supported-v34.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV35 = Get-ChildItem $root -Filter 'supported-v35.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV36 = Get-ChildItem $root -Filter 'supported-v36.zip' -Recurse |
+            Select-Object -First 1
+          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $supportedV29 -or -not $supportedV30 -or -not $supportedV31 -or -not $supportedV32 -or -not $supportedV33 -or -not $supportedV34 -or -not $supportedV35 -or -not $supportedV36 -or -not $conflict) {
             throw 'Windows installer supported-upgrade inputs are missing'
           }
           $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
@@ -623,6 +727,14 @@ jobs:
             -SupportedV26FixtureArchive $supportedV26.FullName `
             -SupportedV27FixtureArchive $supportedV27.FullName `
             -SupportedV28FixtureArchive $supportedV28.FullName `
+            -SupportedV29FixtureArchive $supportedV29.FullName `
+            -SupportedV30FixtureArchive $supportedV30.FullName `
+            -SupportedV31FixtureArchive $supportedV31.FullName `
+            -SupportedV32FixtureArchive $supportedV32.FullName `
+            -SupportedV33FixtureArchive $supportedV33.FullName `
+            -SupportedV34FixtureArchive $supportedV34.FullName `
+            -SupportedV35FixtureArchive $supportedV35.FullName `
+            -SupportedV36FixtureArchive $supportedV36.FullName `
             -ConflictFixtureArchive $conflict.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
@@ -708,7 +820,23 @@ jobs:
             Select-Object -First 1
           $supportedV28 = Get-ChildItem $root -Filter 'supported-v28.zip' -Recurse |
             Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $conflict) {
+          $supportedV29 = Get-ChildItem $root -Filter 'supported-v29.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV30 = Get-ChildItem $root -Filter 'supported-v30.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV31 = Get-ChildItem $root -Filter 'supported-v31.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV32 = Get-ChildItem $root -Filter 'supported-v32.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV33 = Get-ChildItem $root -Filter 'supported-v33.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV34 = Get-ChildItem $root -Filter 'supported-v34.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV35 = Get-ChildItem $root -Filter 'supported-v35.zip' -Recurse |
+            Select-Object -First 1
+          $supportedV36 = Get-ChildItem $root -Filter 'supported-v36.zip' -Recurse |
+            Select-Object -First 1
+          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $supportedV29 -or -not $supportedV30 -or -not $supportedV31 -or -not $supportedV32 -or -not $supportedV33 -or -not $supportedV34 -or -not $supportedV35 -or -not $supportedV36 -or -not $conflict) {
             throw 'Windows installer failure-recovery inputs are missing'
           }
           $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
@@ -745,6 +873,14 @@ jobs:
             -SupportedV26FixtureArchive $supportedV26.FullName `
             -SupportedV27FixtureArchive $supportedV27.FullName `
             -SupportedV28FixtureArchive $supportedV28.FullName `
+            -SupportedV29FixtureArchive $supportedV29.FullName `
+            -SupportedV30FixtureArchive $supportedV30.FullName `
+            -SupportedV31FixtureArchive $supportedV31.FullName `
+            -SupportedV32FixtureArchive $supportedV32.FullName `
+            -SupportedV33FixtureArchive $supportedV33.FullName `
+            -SupportedV34FixtureArchive $supportedV34.FullName `
+            -SupportedV35FixtureArchive $supportedV35.FullName `
+            -SupportedV36FixtureArchive $supportedV36.FullName `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
             -RunSentinel $sentinel `

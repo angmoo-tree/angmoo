@@ -407,3 +407,43 @@ a healthy graph and current SQLite target, and reject an incorrect secret and
 different target ciphertext even if it decrypts to the same synthetic value.
 No executable or service was launched. The corrected-head real Windows NSIS
 matrix remains a required hosted Gate before review/merge.
+
+The exact `b1139f1a` hosted backend corpus completed all6350 cases:6261 passed,
+66 existing skips and23 failures. All four downloaded reports share source,
+checkout tree, Python and lock identities, and their unique union covers6350.
+The original aggregate correctly rejects these failing reports. Frontend,
+Windows Core/Host/advisory, migration, governance, local smoke, CodeQL and the
+then-current v1-v28 native installer matrix passed. This is not whole-CI success.
+
+The follow-up repair translates SQLAlchemy checkout pressure and SQLite queue
+capacity into the Relationships outbox port at the concrete adapter. The worker
+retains its lease/finalize rules and bounded backoff without importing SQLAlchemy
+exceptions. Eight actual adapter/operation faults preserve their cause chains,
+and a different error remains a different error. Current generated import and
+runtime inventories classify actual owners rather than allowing a boundary bypass.
+
+Synthetic startup fixtures now adopt both character ownership and the matching
+World membership. Comfy tests require Partner-only secrets, reject a retired
+server key, and retain write-only/revision/unverified-connection checks. Dashboard
+queries remain equal for one and eight characters with three fixed erasure fences;
+the additional guarded World-media endpoint and separate deletion router are
+explicitly asserted. Current Studio, creation and support screen composition,
+first-registration OFF, auth/runtime post loading and main-landmark ownership
+replace stale text/topology expectations while retaining scope and access checks.
+The new autonomy section marker is semantic only, with no visible copy or layout.
+
+Every readable v1-v36 predecessor is now explicitly wired through fixture creation,
+archive validation and the real hosted NSIS upgrade runner at unchanged time limits.
+The synthetic schema retains v33 diagnostics at v33 and later, while old frozen
+manifests and production forward migrations remain unchanged. New v33-v36 file-only
+authenticated upgrades preserve original DB/secret/media and reject target drift.
+
+Focused failed-node and new port/upgrade regressions passed43 cases. The broader
+144-case related-file run completed143 passed/1 failed: the sole remaining issue
+was a literal-only historical inventory reader rejecting a dynamic fixture-version
+assignment. The supported versions are now an explicit36-version tuple, checked
+against the actual readable registry, rather than changing that historical reader.
+The subsequent P8-L-D inventory/matrix checks and four-case module rerun passed.
+Frontend lint/type/ownership/design and backend import/
+runtime contract checks passed. Final committed preservation/privacy checks,
+expanded native matrix, full new-head CI and human review remain separate Gates.

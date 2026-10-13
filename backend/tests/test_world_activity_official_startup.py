@@ -4,10 +4,13 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from app.runtime.contributor_backend import create_contributor_runtime_app
 from app.runtime.persistence.sqlite_schema import sqlite_schema_contract_digest
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.domains.identity.dependencies import get_current_user
 from app.domains.identity.models import InstallationIdentity
 from app.domains.characters.models import Character
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.worlds.models import WorldMembership
 from app.domains.identity.models_world_credentials import WorldCredential
 from app.domains.media.models_world_policy import WorldImagePolicy
 from chat.test_p8_l_d_world_chat_api import _seed, FRONTEND_HEADERS
@@ -24,11 +27,15 @@ def test_official_factory_cold_start_read_only_settings_health_and_restart(tmp_p
         owner, _, _ = _seed(engine, principal, existing_identity=True)
         with factory() as db:
             db.get(Character, "responding-character").owner_id = owner.id
+            # Adopt this synthetic responder and its registration together.
+            # Basic settings requires the membership to belong to its owner.
+            db.get(WorldCharacter, "wc-responding").membership_id = db.scalar(select(WorldMembership.id).where(
+                WorldMembership.world_id == "world-a", WorldMembership.user_id == owner.id))
             db.commit()
         app.dependency_overrides[get_current_user] = lambda: owner
         prefix = "/api/v1/worlds/world-a/world-characters/wc-responding"
         with engine.connect() as connection:
-            assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(32).schema_digest
+            assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(SQLITE_SCHEMA_VERSION).schema_digest
         with factory() as db:
             before = (db.scalar(select(func.count()).select_from(WorldCredential)),
                 [(p.world_character_id, p.revision, p.generation_enabled, p.vision_enabled) for p in db.scalars(select(WorldImagePolicy))])

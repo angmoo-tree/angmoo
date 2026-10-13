@@ -43,7 +43,10 @@ def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
     device_contract = _read("features/device-home/utils/device-home-presentation.ts")
 
     assert 'getLocalWorldSurface("creator_studio"' in dashboard
-    assert '"live" | "draft" | "private" | "archived"' in dashboard
+    assert '"live" | "draft" | "archived"' in dashboard
+    grouping = dashboard.split("function groupFor(", 1)[1].split("function statusLabel(", 1)[0]
+    assert "world.visibility" not in grouping
+    assert '!world.launchable || world.status !== "published" || world.readiness_status !== "publish_ready"' in grouping
     assert "studioWorldRoute(world.world_id)" in dashboard
     assert "worldAppRoute(world.world_id)" in dashboard
     assert 'label: "Creator Studio"' in device_contract
@@ -97,7 +100,7 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
 
     assert "StudioWorldCharacterList" in creator
     assert "이 World의 캐릭터" in surface
-    assert "활동 준비·상태 보기" in surface
+    assert 'uiText("활동 설정")' in surface
     assert "/autonomy-setup`" in surface
     assert 'import Link from "next/link"' in surface
     assert "useRuntimeRouter" in surface
@@ -120,9 +123,12 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     assert 'router.push(returnRoute)' in create_client
     assert "completeAgentDraft(saved.id, { revision: saved.revision })" in create_client
     assert "if (created)" in create_client
-    assert "자율활동 OFF로 등록" in create_client
+    assert "등록은 이 공간에 자율활동 OFF로 진행" in create_client
+    assert "ActivitySettings worldId={created.registration_scope.world_id}" in create_client
+    creation = _read("composition/screens/agent-creation-screen.tsx")
+    assert "WorldCharacterBasicSettings" in creation and "showActivation={false}" in creation
     assert "findExistingWorldCharacter(target, copyId)" in create_client
-    assert "<AgentCreateClient />" in browser_create_page
+    assert "<AgentCreationScreen />" in browser_create_page
 
 
 def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
@@ -149,7 +155,8 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
         assert forbidden not in combined
 
     assert '<legend className="sr-only">{uiText("만드는 방법")}</legend>' in create_client
-    assert "['external', '외부 실행기 연결용 캐릭터']" in create_client
+    assert "['direct', '새 캐릭터 직접 만들기']" in create_client
+    assert "외부 실행기 방식은 현재 새로 등록할 수 없어요." in create_client
     assert "['card', '실리태번 캐릭터 카드 가져오기']" in create_client
     assert 'type="radio" name="creation-method" value={value}' in create_client
     assert "counts=" not in create_client
@@ -202,12 +209,14 @@ def test_local_character_delete_copy_keeps_exact_character_scope() -> None:
 
 def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:
     setup = _read("composition/screens/world-character-autonomy-setup-screen.tsx")
+    setup += _read("composition/screens/world-character-basic-settings.tsx")
     contract = _read("features/social/api/feed-status.ts")
 
-    assert 'data-feed-runtime-state={feedStatus.runtime_state}' in setup
-    assert 'data-feed-lane-state="routine-only"' in setup
-    assert "P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다." in setup
-    assert "Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다." in setup
+    assert "WorldCharacterBasicSettings" in setup
+    assert "getStudioWorldCharacters(worldId, { signal })" in setup
+    assert 'scopeKey: `${worldId}:${characterId}`' in setup
+    assert "<BasicActivitySettingsCard" in setup and 'purpose="sns"' in setup
+    assert "<WorldImageGenerationCard" in setup
     assert "현재는 기존 최신 피드 호환 모드입니다." not in setup
     for runtime_state in (
         "routine_only_legacy_feed",

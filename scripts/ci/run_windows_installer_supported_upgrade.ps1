@@ -59,6 +59,22 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV28FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV29FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV30FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV31FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV32FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV33FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV34FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV35FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV36FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -135,6 +151,14 @@ foreach ($required in @(
     $SupportedV26FixtureArchive,
     $SupportedV27FixtureArchive,
     $SupportedV28FixtureArchive,
+    $SupportedV29FixtureArchive,
+    $SupportedV30FixtureArchive,
+    $SupportedV31FixtureArchive,
+    $SupportedV32FixtureArchive,
+    $SupportedV33FixtureArchive,
+    $SupportedV34FixtureArchive,
+    $SupportedV35FixtureArchive,
+    $SupportedV36FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -568,6 +592,78 @@ try {
             ([int]$supportedContract.ladybug_source_data_version)
 
         $supportedManifest = Restore-IsolatedFixture $SupportedV28FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV29FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV30FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV31FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV32FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV33FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV34FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV35FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+        $supportedManifest = Restore-IsolatedFixture $SupportedV36FixtureArchive
         $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
             ConvertFrom-Json
         Invoke-Installer 0

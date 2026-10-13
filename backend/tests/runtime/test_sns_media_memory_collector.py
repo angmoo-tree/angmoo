@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import os
 import shutil
+import sys
 import pytest
 
 ROOT=Path(__file__).resolve().parents[3]
@@ -47,7 +48,8 @@ def test_parameterized_probe_has_real_reply_parent_media_and_no_bodies(tmp_path,
     assert (probe.instant(result['tail_ends_utc'])-probe.instant(result['started_utc'])).total_seconds()==270*60
     if PWSH.is_file():
         run=subprocess.run([str(PWSH),'-NoProfile','-File',str(ROOT/'scripts/diagnostics/Invoke-SnsMediaMemoryObservation.ps1'),
-            '-DataRoot',str(root),'-SessionId',manifest['session_id'],'-OutputRoot',str(tmp_path/'smoke'),'-ReadOnlySmoke'],capture_output=True,text=True,timeout=60)
+            '-DataRoot',str(root),'-SessionId',manifest['session_id'],'-OutputRoot',str(tmp_path/'smoke'),
+            '-PythonExe',sys.executable,'-ReadOnlySmoke'],capture_output=True,text=True,timeout=60)
         assert run.returncode==0,run.stderr
         assert json.loads((tmp_path/'smoke/collector-health.json').read_text(encoding='utf-8-sig'))['state']=='SMOKE_COMPLETE'
 

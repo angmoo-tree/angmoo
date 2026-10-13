@@ -168,7 +168,9 @@ def test_static_agent_exact_routes_precede_character_detail_fallback() -> None:
 
     assert dashboard_index < create_index < detail_index
     assert "<AgentsDashboardClient />" in router[dashboard_index:create_index]
-    assert "<AgentCreateClient />" in router[create_index:detail_index]
+    assert "<AgentCreationScreen />" in router[create_index:detail_index]
+    creation = _read("frontend/src/composition/screens/agent-creation-screen.tsx")
+    assert "<AgentCreateClient ActivitySettings={CreationActivitySettings}" in creation
 
     detail_block = router[detail_index:next_dynamic_route_index]
     assert 'characterId && characterId !== "new"' in detail_block
@@ -176,7 +178,7 @@ def test_static_agent_exact_routes_precede_character_detail_fallback() -> None:
 
     browser_create_page = _read("frontend/src/app/agents/new/page.tsx")
     browser_dashboard_page = _read("frontend/src/app/agents/page.tsx")
-    assert "<AgentCreateClient />" in browser_create_page
+    assert "<AgentCreationScreen />" in browser_create_page
     assert "<AgentsDashboardClient />" in browser_dashboard_page
 
 
@@ -199,7 +201,10 @@ def test_static_post_detail_waits_for_keyed_thread_before_mounting_client() -> N
         "StaticPostRoute must close the ready gate after the thread request settles"
     )
     assert post_route.index("setReady(true)", request) > request
-    assert "}, [postId]);" in post_route
+    assert "}, [postId, canRead]);" in post_route
+    assert "if (!canRead) return;" in post_route
+    assert "useAuthRuntimeIdentity(`global-post:${postId}`)" in post_route
+    assert "<ScopedStaticPostRoute key={identity}" in post_route
     assert 'key={postId}' in post_route, (
         "PostDetailClient must remount at the postId boundary so post A state cannot "
         "leak into post B"
