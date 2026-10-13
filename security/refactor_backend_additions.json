@@ -36942,6 +36942,620 @@
       "test_suppressions": {
         "tests/test_security_secret_scan.py": {}
       }
+    },
+    {
+      "commit": "b19eca0196f92f7d48bf258df5ea3c466a1767c8",
+      "feature_id": "AR-FIRST-PR-CI-REPAIR",
+      "reason": "Exact current error/scope guards and cross-platform media syntax; all new regressions are additive",
+      "tracked_files": {
+        "backend/tests/test_quickstart_smoke_errors.py": "d2f82dc84c9e0a6dc37b756ed7e3b8ebfe6a919d"
+      },
+      "test_nodes": [
+        "tests/media/test_media_storage_boundaries.py::test_private_media_accepts_world_scoped_managed_file",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[/drafts/image.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[drafts/../outside.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[drafts//image.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[drafts/C:outside.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[drafts/sub/../../outside.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_cross_platform_path_syntax_before_io[drafts\\\\outside.webp]",
+        "tests/media/test_media_storage_boundaries.py::test_private_media_rejects_symlink_at_expected_directory",
+        "tests/test_quickstart_smoke_errors.py::test_explicit_conflict_expectation_keeps_other_http_failures_fatal[401]",
+        "tests/test_quickstart_smoke_errors.py::test_explicit_conflict_expectation_keeps_other_http_failures_fatal[403]",
+        "tests/test_quickstart_smoke_errors.py::test_explicit_conflict_expectation_keeps_other_http_failures_fatal[422]",
+        "tests/test_quickstart_smoke_errors.py::test_explicit_conflict_expectation_keeps_other_http_failures_fatal[500]",
+        "tests/test_quickstart_smoke_errors.py::test_specific_denial_is_returned_for_the_callers_exact_status_check",
+        "tests/test_t2_secret_allowlist.py::test_pr365_noncredential_allowlists_never_hide_other_values_paths_or_rules"
+      ],
+      "test_assertions": {
+        "tests/historical_schema_fixture.py": {
+          "rebuild_frozen_schema": [
+            "assert connection.dialect.name == 'sqlite'",
+            "assert set(inspect(connection).get_table_names()) == set(metadata.tables) | {'angmoo_schema_version'}",
+            "assert connection.exec_driver_sql(\"SELECT name FROM sqlite_master WHERE type='trigger'\").all() == []",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert connection.exec_driver_sql(f'SELECT COUNT(*) FROM {quoted}').scalar_one() == len(values)"
+          ],
+          "populate_frozen_schema": [
+            "assert target.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert target.exec_driver_sql(f'SELECT COUNT(*) FROM {quoted}').scalar_one() == len(rows)"
+          ]
+        },
+        "tests/image_integration/test_comfy_security_saves_tls.py": {
+          "test_character_unsafe_save_rolls_back_revision_credentials_and_keeps_off_cleanup": [
+            "pytest.raises(ImagePreparationError, match='https_required')",
+            "assert media.read_generation(db, owner, CHARACTER) == saved",
+            "assert not media.read_generation(db, owner, CHARACTER)['has_partner_api_key']",
+            "pytest.raises(ImagePreparationError, match='revision_conflict')"
+          ],
+          "test_world_selected_key_and_settings_reject_unsafe_and_allow_off_history": [
+            "pytest.raises(ImagePreparationError, match='https_required')",
+            "assert db.get(WorldImagePolicy, 'config-role-a').revision == revision",
+            "assert world_credentials.find(db, owner_id=owner.id, world_id='config-world-a', world_character_id='config-role-a', purpose='image') is None",
+            "pytest.raises(ImagePreparationError, match='https_required')",
+            "assert db.get(WorldImagePolicy, 'config-role-a').revision == revision",
+            "assert not db.get(WorldImagePolicy, 'config-role-a').generation_enabled"
+          ],
+          "test_selecting_an_old_unsafe_character_profile_is_activation_but_key_withdrawal_is_safe": [
+            "pytest.raises(ImagePreparationError, match='https_required')",
+            "pytest.raises(ImagePreparationError, match='https_required')",
+            "assert not media.read_generation(db, owner, CHARACTER)['has_partner_api_key']"
+          ],
+          "test_comfy_reference_from_another_owned_character_is_rejected_without_attachment": [
+            "pytest.raises(InvalidProfileMediaError)",
+            "assert media.read_generation(db, owner, CHARACTER) == before",
+            "assert media.assets.owned(db, owner_id=OWNER, asset_id=asset_id).state == 'draft'"
+          ],
+          "tls_server": [],
+          "test_tls_untrusted_certificate_and_wrong_hostname_never_send_body": [
+            "assert calls == []",
+            "pytest.raises(ImageSubmissionError, match='transport_error')",
+            "pytest.raises(ImageSubmissionError, match='transport_error')"
+          ],
+          "test_injected_follow_redirects_client_is_still_not_followed": [
+            "assert seen == ['https://trusted.test/prompt']",
+            "assert response.status_code == 307"
+          ]
+        },
+        "tests/media/test_media_storage_boundaries.py": {
+          "_png_bytes": [],
+          "test_character_upload_limit_does_not_replace_post_encoded_size_contract": [
+            "pytest.raises(InvalidProfileMediaError, match='Image file is too large')",
+            "assert path.is_file()",
+            "assert result['byte_size'] == path.stat().st_size",
+            "assert result['byte_size'] <= 2048",
+            "assert (result['width'], result['height']) == (8, 5)"
+          ],
+          "test_quarantine_partial_move_failure_restores_preceding_file": [
+            "pytest.raises(files.PrivateMediaCleanupError, match='private_media_quarantine_failed')",
+            "assert first.read_bytes() == b'first'",
+            "assert second.read_bytes() == b'second'",
+            "assert not any((tmp_path / '.media-deletion-quarantine').rglob('*.webp'))"
+          ],
+          "test_compatibility_exports_use_owner_implementations_and_same_error_classes": [
+            "assert export_matches('app.services.profile_media', 'save_profile_media', character_media.save_profile_media)",
+            "assert export_matches('app.services.profile_media', 'save_generated_post_image_bytes', post_media.save_generated_post_image_bytes)",
+            "assert export_matches('app.services.profile_media', 'encode_profile_media_webp', images.encode_profile_media_webp)",
+            "assert export_matches('app.services.profile_media', 'quarantine_private_media', files.quarantine_private_media)",
+            "assert export_matches('app.services.profile_media', 'PrivateMediaCleanupError', files.PrivateMediaCleanupError)",
+            "assert export_matches('app.services.profile_media', 'InvalidProfileMediaError', InvalidProfileMediaError)"
+          ],
+          "test_private_media_rejects_cross_platform_path_syntax_before_io": [
+            "pytest.raises(InvalidProfileMediaError, match='Invalid private media path')"
+          ],
+          "test_private_media_accepts_world_scoped_managed_file": [
+            "assert resolved == path.resolve()",
+            "assert content_type == 'image/webp'"
+          ],
+          "test_private_media_rejects_symlink_at_expected_directory": [
+            "pytest.raises(InvalidProfileMediaError, match='symlinks')"
+          ]
+        },
+        "tests/memory/test_hybrid_episode_inventory.py": {
+          "generator": [],
+          "test_current_inventory_preserves_predecessor_and_runtime_contract": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == SQLITE_SCHEMA_VERSION",
+            "assert value['schema']['schema_digest'] == manifest.schema_digest",
+            "assert value['schema']['canonical_table_count'] == manifest.canonical_table_count",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ],
+          "test_successor_rejects_changed_predecessor": [
+            "pytest.raises(ValueError, match='predecessor drift')"
+          ],
+          "test_successor_rejects_stale_live_source_inventory": [
+            "pytest.raises(ValueError, match='inventory drift')"
+          ]
+        },
+        "tests/persistence/test_model_registration.py": {
+          "run_cold": [
+            "assert result.returncode == 0, result.stderr"
+          ],
+          "test_base_import_does_not_load_domain_models_database_or_runtime": [
+            "assert result == ''"
+          ],
+          "test_registration_is_idempotent_and_keeps_102_canonical_classes": [
+            "assert result == ''"
+          ],
+          "test_canonical_database_opens_without_importing_an_app": [
+            "assert result == ''"
+          ],
+          "test_default_engine_cache_and_request_session_cleanup": [
+            "assert database.get_default_engine() is engine",
+            "assert database.get_default_engine() is engine",
+            "assert database.get_default_session_factory() is Session",
+            "assert calls == [('engine', database.settings.database_url), 'factory']",
+            "assert isinstance(next(request), Session)",
+            "assert calls[-1] == 'close'",
+            "assert value is engine"
+          ],
+          "test_sqlite_connection_pragmas_and_explicit_session_rollback": [
+            "assert actual == {'foreign_keys': 1, 'busy_timeout': 5000, 'journal_mode': 'wal', 'synchronous': 2, 'wal_autocheckpoint': 1000}",
+            "assert session.autoflush is False",
+            "assert observer.execute(text('SELECT count(*) FROM rollback_probe')).scalar_one() == 0"
+          ]
+        },
+        "tests/test_embedded_data_migration.py": {
+          "_sha256": [],
+          "test_generation_name_limit_preserves_target_version_and_disambiguator": [
+            "assert len(target) == 64",
+            "assert target.endswith('-schema-v9')",
+            "assert target != MAX_LENGTH_V8_GENERATION",
+            "assert len(collision) == 64",
+            "assert collision.endswith('-schema-v9-deadbeef')",
+            "assert collision not in {MAX_LENGTH_V8_GENERATION, target}"
+          ],
+          "_seed_v1": [],
+          "_seed_v2_roleless": [
+            "assert sqlite_schema_contract_digest(connection) == manifest.schema_digest"
+          ],
+          "test_legacy_marker_survives_forward_sqlite_generation_upgrade": [
+            "assert imported.status == 'migrated'",
+            "assert imported.generation == legacy_generation",
+            "assert imported.schema_version == 1",
+            "assert imported.canonical_table_count == 83",
+            "assert upgraded.canonical.source_version == 1",
+            "assert upgraded.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert upgraded.canonical.migrated is True",
+            "assert upgraded.canonical.generation != legacy_generation",
+            "assert completed.status == 'already_migrated'",
+            "assert completed.generation == legacy_generation",
+            "assert completed.schema_version == 1",
+            "assert completed.canonical_table_count == 83"
+          ],
+          "test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved": [
+            "assert first.canonical.source_version == 1",
+            "assert first.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert first.canonical.migrated is True",
+            "assert first.canonical.generation != GENERATION",
+            "assert source.is_file()",
+            "assert _sha256(source) == source_sha",
+            "assert _sha256(root / 'secrets' / 'app-secret') == secret_sha",
+            "assert _sha256(root / 'media' / 'world-a' / 'banner.txt') == media_sha",
+            "assert first.graph.rebuilt is False",
+            "assert first.graph.degraded is False",
+            "assert first.graph.database_root == (root / 'graph' / 'ladybug').resolve()",
+            "assert version == SQLITE_SCHEMA_VERSION",
+            "assert owner == 'Existing Owner'",
+            "assert set(WORLD_PACKAGE_REGISTRY_TABLES) <= tables",
+            "assert previous['generation'] == GENERATION",
+            "assert previous['data_version'] == 1",
+            "assert second.canonical.migrated is False",
+            "assert second.canonical.database_path == first.canonical.database_path",
+            "assert (root / 'canonical' / 'current-generation.json').read_bytes() == current_before",
+            "assert second.graph.rebuilt is False",
+            "assert (root / 'graph' / 'current-generation.json').read_bytes() == graph_current_before"
+          ],
+          "test_max_length_v8_generation_upgrades_without_reusing_source_directory": [
+            "assert result.canonical.source_version == 8",
+            "assert result.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert result.canonical.migrated is True",
+            "assert result.canonical.generation != MAX_LENGTH_V8_GENERATION",
+            "assert len(result.canonical.generation) <= 64",
+            "assert result.canonical.generation.endswith(f'-schema-v{SQLITE_SCHEMA_VERSION}')",
+            "assert source.is_file()",
+            "assert _sha256(source) == source_sha",
+            "assert current['generation'] == result.canonical.generation",
+            "assert current['data_version'] == SQLITE_SCHEMA_VERSION",
+            "assert previous['generation'] == MAX_LENGTH_V8_GENERATION",
+            "assert previous['data_version'] == 8"
+          ],
+          "test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta": [
+            "assert first.canonical.source_version == 2",
+            "assert first.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert first.canonical.migrated is True",
+            "assert first.canonical.generation != V2_GENERATION",
+            "assert _sha256(source) == source_sha",
+            "assert _sha256(root / 'secrets' / 'app-secret') == secret_sha",
+            "assert doctor.schema_version == SQLITE_SCHEMA_VERSION",
+            "assert previous['generation'] == V2_GENERATION",
+            "assert previous['data_version'] == 2",
+            "assert second.canonical.migrated is False",
+            "assert second.canonical.database_path == first.canonical.database_path",
+            "assert (root / 'canonical' / 'current-generation.json').read_bytes() == marker_before",
+            "assert len(reserved_roles) == 1",
+            "assert reserved_roles[0].name == '역할 없음'",
+            "assert autonomous['autonomous-v2-a'].role_key == 'no_specific_role'",
+            "assert autonomous['autonomous-v2-a'].version == 5",
+            "assert autonomous['autonomous-v2-b'].role_key == 'no_specific_role'",
+            "assert autonomous['autonomous-v2-b'].version == 8",
+            "assert owner_controlled is not None",
+            "assert owner_controlled.role_key is None",
+            "assert owner_controlled.version == 2",
+            "assert custom_role is not None",
+            "assert custom_role.role_key == 'harbor_guide'",
+            "assert custom_role.version == 1",
+            "assert credential is not None",
+            "assert credential.encrypted_api_key == original_envelope",
+            "assert credential.key_fingerprint == 'fixture-fingerprint'"
+          ],
+          "test_supported_v2_without_roleless_rows_adds_no_reserved_role": [
+            "assert reserved == []",
+            "assert [(row.role_key, row.version) for row in autonomous] == [('harbor_guide', 4), ('harbor_guide', 7)]"
+          ],
+          "test_supported_v2_reuses_existing_canonical_reserved_role": [
+            "assert len(reserved) == 1",
+            "assert reserved[0].id == 'canonical-reserved-role-v2'",
+            "assert reserved[0].version == 3"
+          ],
+          "test_supported_v2_creates_one_reserved_role_per_affected_world": [
+            "assert [row.world_id for row in reserved] == ['world-v2', 'world-v2-second']",
+            "assert second is not None",
+            "assert second.role_key == 'no_specific_role'",
+            "assert second.version == 10"
+          ],
+          "test_supported_v2_reserved_role_conflict_fails_closed": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_reserved_role_conflict')",
+            "assert _sha256(source) == source_sha",
+            "assert not (root / 'canonical' / 'current-generation.json').exists()",
+            "assert not list((root / 'canonical' / 'generations').glob('.*.tmp-*'))"
+          ],
+          "test_failed_sqlite_step_keeps_v1_active_and_removes_staging": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='step_failed')",
+            "assert _sha256(source) == source_sha",
+            "assert not (root / 'canonical' / 'current-generation.json').exists()",
+            "assert not list((root / 'canonical' / 'generations').glob('.*.tmp-*'))"
+          ],
+          "test_each_consecutive_step_rejects_undeclared_identity_changes": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_identity_changed')",
+            "assert _sha256(source) == source_sha",
+            "assert not (root / 'canonical' / 'current-generation.json').exists()",
+            "assert not list((root / 'canonical' / 'generations').glob('.*.tmp-*'))"
+          ],
+          "test_newer_sqlite_generation_fails_closed_without_replacement": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='newer_than_runtime')",
+            "assert source_sha != newer_sha",
+            "assert _sha256(source) == newer_sha",
+            "assert not (root / 'canonical' / 'current-generation.json').exists()",
+            "assert not list((root / 'canonical' / 'generations').glob('.*.tmp-*'))"
+          ],
+          "test_graph_version_change_replays_to_staging_and_preserves_previous": [
+            "assert result.graph.rebuilt is True",
+            "assert result.graph.database_root != root / 'graph' / 'ladybug'",
+            "assert _sha256(previous_graph) == previous_sha",
+            "assert (result.graph.database_root / 'relationships.lbdb').exists()",
+            "assert current['relative_path'].startswith('generations/ladybug-v3')",
+            "assert previous['relative_path'] == 'ladybug'",
+            "assert previous['data_version'] == 0"
+          ],
+          "test_graph_rebuild_failure_degrades_without_replacing_previous": [
+            "assert result.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert result.graph.degraded is True",
+            "assert result.graph.error_code == 'ladybug_rebuild_injected'",
+            "assert _sha256(previous_graph) == previous_sha",
+            "assert not (root / 'graph' / 'current-generation.json').exists()"
+          ],
+          "test_graph_rebuild_replays_direction_evidence_and_world_scope": [
+            "assert rebuilt.graph.rebuilt is True",
+            "assert rebuilt.graph.degraded is False",
+            "assert _sha256(previous_graph) == previous_sha",
+            "assert len(direct) == 1",
+            "assert len(reverse) == 1",
+            "assert reverse[0].relationship_state_id == observation_relationship_id",
+            "assert [row.event_id for row in evidence] == [event_id]",
+            "assert [row.event_id for row in reverse_evidence] == [event_id]",
+            "assert cross_world == []"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 37",
+            "assert fixture['target_table_count'] == 174",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        },
+        "tests/test_quickstart_smoke_errors.py": {
+          "smoke_module": [],
+          "test_explicit_conflict_expectation_keeps_other_http_failures_fatal": [
+            "pytest.raises(module.SmokeError, match=f'returned {actual}')"
+          ],
+          "test_specific_denial_is_returned_for_the_callers_exact_status_check": [
+            "assert module._request('http://127.0.0.1', '/api/v1/agents/fixture/local-key', method='POST', payload={}, expected_error_status=409) == (409, {'detail': 'legacy_local_only'})"
+          ]
+        },
+        "tests/test_t2_secret_allowlist.py": {
+          "test_pr365_noncredential_allowlists_never_hide_other_values_paths_or_rules": [
+            "assert len(entries) == 8",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'secret'",
+            "assert len(entry['targetRules']) == 1",
+            "assert pattern.startswith('(^|/)') and pattern.endswith('$')",
+            "assert not re.search(pattern, 'security/other-credentials.json')",
+            "assert not re.search(pattern, 'backend/production-credentials.env')",
+            "assert pattern.startswith('^') and pattern.endswith('$')",
+            "assert not re.fullmatch(pattern, 'unreviewed-secret-value')",
+            "assert not re.fullmatch(pattern, 'sk-123456789012345678901234567890')",
+            "assert not re.fullmatch(pattern, 'f' * 64)"
+          ],
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_gitleaks_card_credential_form_exception_requires_exact_source_and_line": [
+            "assert value == 'b8f8669e84cf60c7920a877d76d60460e19b71c0'",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND' and entry['regexTarget'] == 'line'",
+            "assert len(entry['regexes']) == 1 and len(entry['paths']) == 2",
+            "assert re.fullmatch(entry['regexes'][0], line)",
+            "assert not any((re.search(pattern, 'security/other-credentials.json') for pattern in entry['paths']))",
+            "assert not re.fullmatch(entry['regexes'][0], changed)",
+            "assert any((re.search(pattern, path) for pattern in entry['paths']))"
+          ],
+          "test_additive_exception_matches_existing_assertion_and_is_exact": [
+            "assert scanner_spec is not None and scanner_spec.loader is not None",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert list(scanner.scan_text(entry['path'], entry['value'], allowlist=allowlist)) == []",
+            "assert {f.rule for f in scanner.scan_text(entry['path'], entry['value'] + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {f.rule for f in scanner.scan_text('security/another-additions.json', entry['value'], allowlist=allowlist)} == {'google-api-key'}",
+            "assert checker.validate(fixture)"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ],
+          "_checkpoint_gitleaks_fingerprints": [
+            "assert len(entries) == 1",
+            "assert all((re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', value) for _, value in pairs))"
+          ],
+          "test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints": [
+            "assert set(entry) == {'targetRules', 'description', 'condition', 'regexTarget', 'paths', 'regexes'}",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'line'",
+            "assert entry['paths'] == ['(^|/)security/refactor_backend_checkpoint\\\\.json$']",
+            "assert len(entry['regexes']) == len(set(entry['regexes'])) == 55",
+            "assert set(entry['regexes']) <= reviewed.keys()"
+          ],
+          "test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules": [
+            "assert not allowed(checker.CHECKPOINT_PATH, f'''\"api_key\": \"{fixture['value']}\"''')",
+            "assert allowed(checker.CHECKPOINT_PATH, line)",
+            "assert allowed('/snapshot/' + checker.CHECKPOINT_PATH, line)",
+            "assert not allowed('security/another-checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH + '.bak', line)",
+            "assert not allowed('security/not_refactor_backend_checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"{key}\": \"{changed}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"api_key\": \"{value}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line + ' \"api_key\": \"another-value\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line, 'openai-api-key')"
+          ]
+        },
+        "tests/world_packages/test_ui_contract.py": {
+          "_frontend": [],
+          "_desktop": [],
+          "test_world_package_import_is_available_from_home_studio_and_static_router": [
+            "assert 'availability: \"available\"' in home_entry",
+            "assert 'availability: \"available\"' in import_entry",
+            "assert 'href={PRODUCT_ROUTES.studioImport}' in dashboard",
+            "assert 'uiText(\"World 패키지 가져오기\")' in dashboard",
+            "assert 'pathname === \"/studio/import\"' in static_router",
+            "assert 'StudioImportRouteClient' in static_router",
+            "assert 'StudioImportRouteClient' in import_page"
+          ],
+          "test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation": [
+            "assert 'type=\"file\"' in source",
+            "assert 'WORLD_PACKAGE_EXTENSION' in source",
+            "assert 'prepared.preview.content_digest' in source",
+            "assert 'commitWorldPackageImport' in source",
+            "assert 'discardWorldPackageImport' in source",
+            "assert 'href={PRODUCT_ROUTES.deviceHome}' in source",
+            "assert 'uiText(\"기기 홈에서 보기\")' in source",
+            "assert 'studioWorldRoute(result.imported_world_id)' in source",
+            "assert 'value === \"checksum_verified_unsigned\"' in source",
+            "assert '파일 내용 확인 완료 · 제작자 미확인' in source",
+            "assert '이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다' in source",
+            "assert 'return;' in source.split('이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다', 1)[1]"
+          ],
+          "test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as": [
+            "assert 'WorldPackageExportPanel' in creator",
+            "assert 'previewWorldPackageExport' in panel",
+            "assert 'triggerBrowserWorldPackageDownload' in panel",
+            "assert 'selectNativeWorldPackageDestination' in panel",
+            "assert 'acknowledgeNativeWorldPackageDelivery' in panel",
+            "assert '취소했습니다. 파일과 성공 이력은 생성되지 않았습니다' in panel",
+            "assert 'destinationToken' in native",
+            "assert 'destinationPath' not in native",
+            "assert 'atomic_write' in host",
+            "assert 'world_package_destination' in host",
+            "assert 'fs:' not in capability",
+            "assert 'dialog:' not in capability",
+            "assert 'pendingCleanup' in panel",
+            "assert 'retryCleanup' in panel",
+            "assert '실패 작업 정리 후 다시 시도' in panel"
+          ]
+        },
+        "tests/worlds/test_creator_routes.py": {
+          "_app": [
+            "assert principal['user'] is not None"
+          ],
+          "_request": [],
+          "_user": [],
+          "_payload": [],
+          "test_creator_route_lifecycle_and_stable_conflict": [
+            "assert created.status_code == 201",
+            "assert created.json()['readiness']['ready_for_publish'] is True",
+            "assert published.status_code == 200",
+            "assert published.json()['world']['status'] == 'published'",
+            "assert replayed_publish.status_code == 200",
+            "assert replayed_publish.json()['world']['row_version'] == published.json()['world']['row_version']",
+            "assert stale.status_code == 409",
+            "assert stale.json() == {'detail': 'row_version_conflict'}",
+            "assert db.query(models.Post).count() == 0",
+            "assert db.query(models.AgentRun).count() == 0",
+            "assert db.get(RecommendationCatalog, world_id) is not None",
+            "assert db.query(RecommendationPreparation).count() == 0",
+            "assert db.query(RecommendationTopic).count() == 0"
+          ],
+          "test_reserved_no_role_is_system_owned_and_survives_user_definition_sync": [
+            "assert created.status_code == 201",
+            "assert omitted.status_code == 200, omitted.text",
+            "assert managed.status_code == 422",
+            "assert managed.json() == {'detail': 'world_definition_incomplete'}",
+            "assert reserved.status == 'enabled'"
+          ],
+          "test_world_banner_round_trip_stays_inside_worlds_domain_storage": [
+            "assert uploaded.status_code == 200",
+            "assert media_url.startswith(f\"/media/worlds/{world['id']}/banner-\")",
+            "assert media_path.is_file()",
+            "assert media_path.read_bytes().startswith(b'RIFF')",
+            "assert removed.status_code == 200",
+            "assert removed.json()['world']['banner_media_id'] is None",
+            "assert not media_path.exists()"
+          ],
+          "test_private_world_is_hidden_and_member_cannot_mutate": [
+            "assert hidden.status_code == 404",
+            "assert forbidden.status_code == 403",
+            "assert forbidden.json() == {'detail': 'creator_role_required'}"
+          ],
+          "test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes": [
+            "assert invalid.status_code == 422",
+            "assert 'useUiText(\"worlds\")' in client",
+            "assert 'PRODUCT_ROUTES.studioNewWorld' in client",
+            "assert 'studioWorldRoute(worldId)' in client",
+            "assert 'activity-templates' not in client",
+            "assert '^\\\\/worlds\\\\/new$' in navigation",
+            "assert 'creator\\\\/$' not in navigation"
+          ]
+        },
+        "tests/worlds/test_world_media_reads.py": {
+          "pixels": [],
+          "stack": [],
+          "upload": [
+            "assert response.status_code == 200"
+          ],
+          "api_url": [],
+          "test_upload_returned_url_and_authenticated_api_deliver_same_pixels": [
+            "assert response.status_code == 200",
+            "assert response.content == stored.read_bytes()",
+            "assert response.headers['content-type'] == 'image/webp'",
+            "assert response.headers['cache-control'] == 'private, no-store'",
+            "assert response.headers['x-content-type-options'] == 'nosniff'",
+            "assert Image.open(BytesIO(response.content)).size == size",
+            "assert row.row_version == version and getattr(row, f'{kind}_media_id') == url"
+          ],
+          "test_image_read_follows_existing_world_visibility_and_membership": [
+            "assert _request(app, 'GET', url).status_code == expected",
+            "assert _request(app, 'GET', api_url(url)).status_code == expected"
+          ],
+          "test_same_url_rechecks_private_transition_and_revoked_membership": [
+            "assert _request(app, 'GET', url).status_code == 200",
+            "assert _request(app, 'GET', url).status_code == 404",
+            "assert _request(app, 'GET', url).status_code == 200",
+            "assert _request(app, 'GET', api_url(url)).status_code == 404"
+          ],
+          "test_old_current_link_or_arbitrary_file_never_grants_access": [
+            "assert old != fresh",
+            "assert _request(app, 'GET', old).status_code == 404",
+            "assert _request(app, 'GET', f\"/media/worlds/{world['id']}/{arbitrary.name}\").status_code == 404",
+            "assert _request(app, 'GET', fresh.replace(world['id'], 'other-world')).status_code == 404",
+            "assert removed.status_code == 200",
+            "assert _request(app, 'GET', api_url(fresh)).status_code == 404"
+          ],
+          "test_existing_file_reference_requires_no_migration_or_reupload": [
+            "assert _request(app, 'GET', reference).content == legacy.read_bytes()",
+            "assert _request(app, 'GET', reference).status_code == 404",
+            "assert db.get(models.World, world['id']).row_version == version"
+          ],
+          "test_public_mount_still_excludes_private_directories_and_traversal": [
+            "assert _request(app, 'GET', f'/media/{directory}/fixture.webp').status_code == 404",
+            "assert _request(app, 'GET', f\"/api/v1/worlds/{world['id']}/media/{name}\").status_code == 404"
+          ],
+          "test_symlink_current_reference_never_escapes_world_directory": [
+            "assert _request(app, 'GET', url).status_code == 404"
+          ],
+          "test_real_app_factory_registers_both_guarded_media_paths": [
+            "assert response.status_code == 404 and response.json() == {'detail': 'world_not_found'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/historical_schema_fixture.py": {},
+        "tests/image_integration/test_comfy_security_saves_tls.py": {},
+        "tests/media/test_media_storage_boundaries.py": {},
+        "tests/memory/test_hybrid_episode_inventory.py": {},
+        "tests/persistence/test_model_registration.py": {},
+        "tests/test_embedded_data_migration.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {},
+        "tests/test_quickstart_smoke_errors.py": {},
+        "tests/test_t2_secret_allowlist.py": {},
+        "tests/world_packages/test_ui_contract.py": {},
+        "tests/worlds/test_creator_routes.py": {},
+        "tests/worlds/test_world_media_reads.py": {
+          "test_symlink_current_reference_never_escapes_world_directory": [
+            "pytest.skip(f'platform does not permit symlink fixture: {exc.__class__.__name__}')"
+          ]
+        }
+      }
     }
   ]
 }
