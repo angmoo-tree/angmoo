@@ -75,8 +75,10 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus(tm
         shutil.copyfile(ROOT / "scripts/ci" / name, scripts / name)
     (backend / "uv.lock").write_text("synthetic locked fixture\n", encoding="utf-8")
     (backend / "app/__init__.py").write_text("VALUE = 17\n", encoding="utf-8")
-    (backend / "tests/test_corpus.py").write_text("from app import VALUE\n\n" + "\n\n".join(
-        f"def test_case_{index}():\n    assert VALUE == 17 and {index} >= 0" for index in range(80)), encoding="utf-8")
+    (backend / "tests/test_corpus.py").write_text(
+        "from app import VALUE\nimport pytest\n\n@pytest.fixture\n"
+        "def changed_directory(monkeypatch, tmp_path):\n    monkeypatch.chdir(tmp_path)\n\n" + "\n\n".join(
+        f"def test_case_{index}(changed_directory):\n    assert VALUE == 17 and {index} >= 0" for index in range(80)), encoding="utf-8")
     for command in (["init", "--quiet"], ["config", "user.name", "Synthetic fixture"],
                     ["config", "user.email", "fixture@example.test"], ["add", "."],
                     ["-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "synthetic CLI fixture"]):

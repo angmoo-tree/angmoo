@@ -34,7 +34,7 @@ def main() -> int:
     identity = {"source_sha": args.source_sha, "checkout_sha": git("rev-parse", "HEAD"),
         "checkout_tree": git("rev-parse", "HEAD^{tree}"), "python": platform.python_version(),
         "lock_sha256": hashlib.sha256((ROOT / "backend/uv.lock").read_bytes()).hexdigest()}
-    output = Path(".ci")
+    output = ROOT / "backend/.ci"
     output.mkdir(exist_ok=True)
     journal = output / "backend-shard-events.jsonl"
     journal.write_text("", encoding="utf-8")
@@ -43,7 +43,7 @@ def main() -> int:
     # Selection is exclusively the deterministic partition of the whole `tests`
     # collection. No -k/-m/ignore/maxfail or caller-supplied pytest flags exist.
     code = int(pytest.main(["-vv", "--tb=short", "tests", "--durations=25",
-        "--junitxml=.ci/backend-junit.xml"], plugins=[coverage]))
+        f"--junitxml={output / 'backend-junit.xml'}"], plugins=[coverage]))
     report = output / "backend-shard-report.json"
     pending = report.with_suffix(".tmp")
     pending.write_text(json.dumps(coverage.report(identity, code), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

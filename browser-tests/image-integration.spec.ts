@@ -187,8 +187,13 @@ test("new Comfy reference preference can be switched off before the first connec
   await panel.getByRole("button",{name:"참조 없는 텍스트 경로 입력",exact:true}).click();
   await panel.getByLabel("불러온 API workflow JSON",{exact:true}).fill(JSON.stringify({"9":{class_type:"TextImage",inputs:{text:"%prompt%"}}}));
   await expect(panel.getByText("JSON 분석 완료",{exact:true})).toBeVisible();
-  await reference.uncheck();await panel.getByRole("button",{name:"연결·입력 확인 및 저장",exact:true}).click();
+  await expect(reference).toBeEnabled();await expect(reference).toBeChecked();
+  await reference.uncheck();await expect(reference).not.toBeChecked();
+  await panel.getByLabel("외형 (선택)",{exact:true}).fill("Unsent current appearance");
+  await panel.getByLabel("스타일 (선택)",{exact:true}).fill("Unsent current style");
+  await panel.getByRole("button",{name:"연결·입력 확인 및 저장",exact:true}).click();
   await expect.poll(()=>audit.writes.length).toBe(1);expect(audit.writes[0].reference_enabled).toBe(false);
+  expect(audit.writes[0].appearance).toBe("Unsent current appearance");expect(audit.writes[0].style).toBe("Unsent current style");
 });
 
 test("Comfy legacy settings retain direct CLIP and single-output contract until explicit conversion",async({page},info)=>{

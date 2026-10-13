@@ -363,3 +363,27 @@ test creates an isolated Git/backend/app fixture, clears inherited PYTHONPATH an
 runs all four original scripts against80 importing cases, then verifies exact
 complete coverage. Product imports, test selection and failure handling are
 unchanged; collection failure remains a failing result.
+
+The same hosted head exposed a Comfy browser-test synchronization defect: the
+analysis-complete status can precede the parent's reference-support update. The
+test's uncheck operation could see a temporarily disabled, unchecked control and
+return without an actual OFF selection, leaving the preference uninitialized.
+The regression now requires the reference control to be enabled and checked
+before unchecking, and asserts the saved OFF preference and unsaved appearance
+and style. The existing product state and scoped late-result guards are retained.
+No layout, translation, raw color, permission or provider-call changes.
+The real CLI's first actual-corpus partition then reached495 passed/4 existing
+skips before a fixture changed process cwd and exposed a relative progress-journal
+path. CI report/JUnit/journal paths are now absolute under the verified backend
+directory. The real CLI fixture changes cwd in every test and still requires
+all four partitions' setup/call/teardown results and exact coverage, so this operational failure cannot
+be hidden by a synthetic test that never changes directories.
+
+The combined CLI/policy/report regressions passed47 cases. The unchanged product
+frontend passed all20 repeated Next/static reference-OFF and late-profile cases,
+then all56 related image-integration cases with the exact committed synthetic
+PNG/JPEG/WebP fixtures. The first supplementary local image environment omitted
+those three files and finished44 passed/12 failed with ENOENT; that environment
+failure is retained separately, and no product patch or weakened assertion was
+used to remove it. Final corrected-head hosted CI and human platform review are
+still separate pending Gates.
