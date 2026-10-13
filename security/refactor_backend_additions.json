@@ -39651,6 +39651,846 @@
       "test_suppressions": {
         "tests/test_p8_l_d_installer_upgrade_contract.py": {}
       }
+    },
+    {
+      "commit": "6482483a0995321fc5525d8e5db3df349c8e6df4",
+      "feature_id": "AR-B113-CI-PORT-AND-INSTALLER-COVERAGE",
+      "reason": "Actual concrete checkout capacity translation with other failures preserved, and every readable v1-v36 predecessor plus scoped authenticated newer upgrades",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapter_does_not_disguise_other_failures_as_capacity",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[claim-sqlalchemy]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[claim-sqlite]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[finalize_failure-sqlalchemy]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[finalize_failure-sqlite]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[finalize_success-sqlalchemy]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[finalize_success-sqlite]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[load_command-sqlalchemy]",
+        "tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port[load_command-sqlite]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift[33]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift[34]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift[35]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift[36]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[32]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[33]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[34]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[35]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[36]"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_graph_projection_worker.py": {
+          "RecordingStore::__init__": [],
+          "RecordingStore::apply": [],
+          "_session_factory": [],
+          "test_pending_row_is_claimed_once_and_succeeds": [
+            "assert first.succeeded == 1",
+            "assert second.claimed == 0",
+            "assert len(store.commands) == 1",
+            "assert row is not None",
+            "assert row.status == 'succeeded'",
+            "assert row.attempt_count == 1"
+          ],
+          "test_transient_failure_retries_without_losing_row": [
+            "assert result.retried == 1",
+            "assert result.graph_degraded is True",
+            "assert recovery.succeeded == 1",
+            "assert recovery.graph_degraded is False",
+            "assert row is not None",
+            "assert row.status == 'pending'",
+            "assert row.next_attempt_at is not None",
+            "assert row.last_error_class == 'ladybug_unavailable'"
+          ],
+          "test_poison_payload_is_dead_without_store_call": [
+            "assert result.dead == 1",
+            "assert store.commands == []",
+            "assert row is not None",
+            "assert row is not None",
+            "assert row.status == 'dead'",
+            "assert row.last_error_class == 'signature_mismatch'"
+          ],
+          "BlockingStore::__init__": [],
+          "BlockingStore::apply": [
+            "assert self.release_event.wait(timeout=timeout_seconds)"
+          ],
+          "test_shutdown_drains_inflight_and_returns_unstarted_claims_to_pending": [
+            "assert store.started_event.wait(timeout=2.0)",
+            "assert not thread.is_alive()",
+            "assert result.claimed == 4",
+            "assert result.succeeded == 1",
+            "assert result.retried == 3",
+            "assert sum((row.status == 'succeeded' for row in rows)) == 1",
+            "assert len(pending) == 3",
+            "assert all((row.last_error_class == 'shutdown_interrupted' for row in pending))",
+            "assert all((row.lease_owner is None for row in pending))",
+            "assert all((row.lease_expires_at is None for row in pending))"
+          ],
+          "test_idle_connectivity_failure_marks_projector_degraded_without_exiting": [
+            "assert states == ['degraded']"
+          ],
+          "test_pool_exhaustion_recovers_in_same_loop_and_projects_once": [
+            "assert states == ['degraded', 'ready']",
+            "assert len(store.commands) == 1",
+            "assert row.status == 'succeeded' and row.attempt_count == 1"
+          ],
+          "test_repeated_checkout_timeouts_back_off_and_never_report_ready": [
+            "assert states == ['degraded'] * 6",
+            "assert delays == [2, 4, 8, 16, 30, 30]"
+          ],
+          "test_outbox_adapters_translate_checkout_pressure_to_the_port": [
+            "pytest.raises(OutboxCapacityError, match=reason)",
+            "assert isinstance(caught.value.__cause__, SqliteTaskQueueFull)",
+            "assert caught.value.__cause__.__cause__ is failure",
+            "assert caught.value.__cause__ is failure"
+          ],
+          "test_outbox_adapter_does_not_disguise_other_failures_as_capacity": [
+            "pytest.raises(ValueError, match='different failure')"
+          ]
+        },
+        "tests/runtime/test_sns_media_memory_collector.py": {
+          "fixture": [],
+          "test_parameterized_probe_has_real_reply_parent_media_and_no_bodies": [
+            "assert len(result['posts']) == int(nonempty)",
+            "assert 'private-body' not in json.dumps(result)",
+            "assert (probe.instant(result['tail_ends_utc']) - probe.instant(result['started_utc'])).total_seconds() == 270 * 60",
+            "assert result['posts'][0]['parent_exists']",
+            "assert result['posts'][0]['image_jobs'][0]['status'] == 'completed'",
+            "assert run.returncode == 0, run.stderr",
+            "assert json.loads((tmp_path / 'smoke/collector-health.json').read_text(encoding='utf-8-sig'))['state'] == 'SMOKE_COMPLETE'"
+          ],
+          "test_wrong_parent_column_fails_even_with_empty_posts": [
+            "pytest.raises(ValueError, match='schema_incompatible')"
+          ],
+          "test_offset_strings_represent_one_instant": [
+            "assert probe.instant(stamp) == datetime(2026, 10, 10, 0, 28, 13, 863635, tzinfo=UTC)"
+          ],
+          "test_ambiguous_datetime_is_rejected": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_real_powershell_policy_preserves_strings_degrades_after_three_and_finalizes": [
+            "assert run.returncode == 0, run.stderr"
+          ],
+          "test_actual_collector_exports_after_final_probe_error_and_terminates": [
+            "assert run.returncode == (0 if export_success else 2), run.stderr",
+            "assert health['state'] == ('PARTIAL' if export_success else 'ERROR')",
+            "assert health['final_probe_error'] == 'collector_probe_failed'",
+            "assert health['export_success'] is export_success",
+            "assert health['last_status_success'] and health['last_flush_success']",
+            "assert bool(health['last_export_success']) is export_success",
+            "assert bool(health['last_copy_success']) is export_success",
+            "assert (tmp_path / 'result/export/attempt.txt').is_file()"
+          ]
+        },
+        "tests/test_l2_5_creator_studio_shell_contract.py": {
+          "_read": [],
+          "test_creator_studio_canonical_routes_use_public_feature_shell": [
+            "assert 'activeSection=\"worlds\"' in dashboard_page",
+            "assert 'activeSection=\"new-world\"' in new_page",
+            "assert 'WorldCreatorClient' in new_page",
+            "assert 'WorldCreatorClient' in edit_page",
+            "assert 'StudioImportRouteClient' in import_page",
+            "assert 'from \"@/composition/shells/creator-studio-frame\"' in source",
+            "assert 'from \"@/features/creator-studio/public\"' in source"
+          ],
+          "test_creator_studio_reads_owner_surface_and_groups_blocked_worlds": [
+            "assert 'getLocalWorldSurface(\"creator_studio\"' in dashboard",
+            "assert '\"live\" | \"draft\" | \"archived\"' in dashboard",
+            "assert 'world.visibility' not in grouping",
+            "assert '!world.launchable || world.status !== \"published\" || world.readiness_status !== \"publish_ready\"' in grouping",
+            "assert 'studioWorldRoute(world.world_id)' in dashboard",
+            "assert 'worldAppRoute(world.world_id)' in dashboard",
+            "assert 'label: \"Creator Studio\"' in device_contract",
+            "assert 'availability: \"available\"' in studio_entry"
+          ],
+          "test_legacy_creator_routes_redirect_to_canonical_studio_routes": [
+            "assert 'await searchParams' in legacy_new",
+            "assert 'await Promise.all([' in legacy_edit",
+            "assert 'params,' in legacy_edit",
+            "assert 'searchParams,' in legacy_edit",
+            "assert 'PRODUCT_ROUTES.studioNewWorld' in legacy_new",
+            "assert 'studioWorldRoute(worldId)' in legacy_edit",
+            "assert 'router.replace(studioWorldRoute(saved.world.id))' in creator",
+            "assert '\"/worlds/new\"' not in creator",
+            "assert '`/worlds/${worldId}/creator`' not in creator",
+            "assert 'productRouteWithSearchParams' in source",
+            "assert 'searchParams: Promise' in source"
+          ],
+          "test_studio_shell_is_wide_and_preserves_small_viewport_accessibility": [
+            "assert 'grid-template-columns: minmax(210px, 260px) minmax(0, 1fr)' in shell_css",
+            "assert '@media (max-width: 799px)' in shell_css",
+            "assert 'grid-template-columns: 1fr' in shell_css",
+            "assert 'width: min(100%, 1180px)' in dashboard_css",
+            "assert 'href={PRODUCT_ROUTES.deviceHome}' in frame"
+          ],
+          "test_studio_world_character_surface_owns_fixture_lifecycle_orchestration": [
+            "assert 'StudioWorldCharacterList' in creator",
+            "assert '이 World의 캐릭터' in surface",
+            "assert 'uiText(\"활동 설정\")' in surface",
+            "assert '/autonomy-setup`' in surface",
+            "assert 'import Link from \"next/link\"' in surface",
+            "assert 'useRuntimeRouter' in surface",
+            "assert '새 캐릭터 만들기' in surface",
+            "assert 'const createHref = `/agents/new?worldId=${encodeURIComponent(worldId)}&returnTo=${encodeURIComponent(returnTo)}`;' in surface",
+            "assert '기존 캐릭터 설정 복사' in surface",
+            "assert '이 World에서 제거' in surface",
+            "assert '생성·삭제는 P10-L에서 제공합니다.' not in surface",
+            "assert '?surface=studio' in client",
+            "assert '/character-candidates' in client",
+            "assert '/leave`' in client",
+            "assert 'method: \"POST\"' not in surface",
+            "assert 'method: \"DELETE\"' not in surface",
+            "assert 'useRuntimeSearchParams' in create_client",
+            "assert 'query.get(\"worldId\")' in create_client",
+            "assert 'query.get(\"returnTo\") === studioWorldRoute(target)' in create_client",
+            "assert 'router.push(returnRoute)' in create_client",
+            "assert 'completeAgentDraft(saved.id, { revision: saved.revision })' in create_client",
+            "assert 'if (created)' in create_client",
+            "assert '등록은 이 공간에 자율활동 OFF로 진행' in create_client",
+            "assert 'ActivitySettings worldId={created.registration_scope.world_id}' in create_client",
+            "assert 'WorldCharacterBasicSettings' in creation and 'showActivation={false}' in creation",
+            "assert 'findExistingWorldCharacter(target, copyId)' in create_client",
+            "assert '<AgentCreationScreen />' in browser_create_page"
+          ],
+          "test_local_character_creation_ui_has_no_hosted_saved_count_gate": [
+            "assert not (FRONTEND_ROOT / 'components/agents-dashboard-client.tsx').exists()",
+            "assert '<legend className=\"sr-only\">{uiText(\"만드는 방법\")}</legend>' in create_client",
+            "assert \"['direct', '새 캐릭터 직접 만들기']\" in create_client",
+            "assert '외부 실행기 방식은 현재 새로 등록할 수 없어요.' in create_client",
+            "assert \"['card', '실리태번 캐릭터 카드 가져오기']\" in create_client",
+            "assert 'type=\"radio\" name=\"creation-method\" value={value}' in create_client",
+            "assert 'counts=' not in create_client",
+            "assert 'summarizeCharacterAutonomy(items)' in dashboard",
+            "assert 'uiText(\"전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}\"' in dashboard",
+            "assert 'enabled: summary.enabled' in dashboard",
+            "assert 'router.push(\"/agents/new\")' in dashboard",
+            "assert 'export { AgentsDashboardClient } from \"@/features/characters/public\";' in dashboard_compatibility",
+            "assert forbidden not in combined"
+          ],
+          "test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract": [
+            "assert 'candidate.character.id === nextItem.character.id' in dashboard",
+            "assert 'nextItem.settings.auto_enabled' not in dashboard",
+            "assert 'item.activity_summary.next_activity_at' in dashboard",
+            "assert 'item.assigned_slot?.next_tick_at' not in dashboard",
+            "assert 'item.activity_summary.timezone' in dashboard",
+            "assert '휴식 ·' in dashboard",
+            "assert '쉬는 중 ·' in detail",
+            "assert 'apiInstantTimestamp' in detail",
+            "assert 'from \"@/utils/profile-presentation\"' in social_summary",
+            "assert 'API_TIMEZONE_OFFSET_PATTERN' in presentation",
+            "assert '`${value}Z`' in presentation",
+            "assert 'timeZone,' in presentation",
+            "assert 'hourCycle: \"h23\"' in presentation",
+            "assert 'from \"@/shared/ui/public\"' in social_summary",
+            "assert exported in shared_public"
+          ],
+          "test_local_character_delete_copy_keeps_exact_character_scope": [
+            "assert '이 Character 하나에 연결된 private 프로필 미디어' in detail",
+            "assert '현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다.' in detail",
+            "assert 'owner 전체 삭제나 한 World에서' in detail",
+            "assert '작성자는' in detail and '삭제한 앵무' in detail",
+            "assert 'privacy@angmoo.com' not in detail"
+          ],
+          "test_world_character_setup_distinguishes_routine_and_feed_lane_states": [
+            "assert 'WorldCharacterBasicSettings' in setup",
+            "assert 'getStudioWorldCharacters(worldId, { signal })' in setup",
+            "assert 'scopeKey: `${worldId}:${characterId}`' in setup",
+            "assert '<BasicActivitySettingsCard' in setup and 'purpose=\"sns\"' in setup",
+            "assert '<WorldImageGenerationCard' in setup",
+            "assert '현재는 기존 최신 피드 호환 모드입니다.' not in setup",
+            "assert runtime_state in contract"
+          ]
+        },
+        "tests/test_l2_5_world_app_shell_contract.py": {
+          "_read": [],
+          "test_world_app_routes_compose_only_the_public_feature_entry": [
+            "assert 'sectionId=\"home\"' in root_page",
+            "assert 'from \"@/composition/shells/world-app-navigation\"' in section_page",
+            "assert 'from \"@/composition/screens/world-app-screen\"' in section_page",
+            "assert 'from \"@/composition/screens/world-app\"' in route_client",
+            "assert 'worldAppSectionFromSegment' in section_page",
+            "assert 'notFound()' in section_page",
+            "assert 'from \"@/features/world-app/public\"' in section_page",
+            "assert 'from \"@/features/world-app/public\"' in route_client"
+          ],
+          "test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities": [
+            "assert 'encodeURIComponent(worldId)' in _read('lib/navigation/product-routes.ts')",
+            "assert contract.count('availability: \"unavailable\"') == 0",
+            "assert 'id: \"feed\"' in contract",
+            "assert 'id: \"relationships\"' in contract",
+            "assert 'availability: \"available\"' in contract",
+            "assert 'worldAppSectionRoute(worldId, section)' in world_app",
+            "assert 'relationshipGraphRoute(relationshipCharacterId, worldId)' in world_app",
+            "assert '<WorldRelationshipsScreen characterId={relationshipCharacterId ?? ownerActor?.character_id ?? null} worldId={worldId}' in world_app",
+            "assert '다른 World로 자동 이동하지 않습니다' in world_app",
+            "assert 'WorldSocialFeed' in world_app",
+            "assert 'from \"@/features/social/components/world-social-feed\"' in world_app",
+            "assert 'WorldCharacterDirectory' in world_app",
+            "assert 'WorldCharacterManagementScreen' in world_app",
+            "assert 'from \"@/features/characters/components/world-character-directory\"' in world_app",
+            "assert 'from \"@/composition/screens/world-character-management-screen\"' in world_app",
+            "assert '/api/backend/worlds/mine/${encodeURIComponent(worldId)}' in client",
+            "assert 'from \"@/features/characters/public\"' in world_app",
+            "assert 'from \"@/features/social/public\"' in world_app",
+            "assert f'segment: \"{segment}\"' in contract"
+          ],
+          "test_legacy_posts_route_remains_the_global_feed": [
+            "assert '<FeedPage />' in posts_page",
+            "assert 'disabled={!world.launchable}' in device_home",
+            "assert 'href={world.launchable ? worldAppRoute(world.world_id) : undefined}' in device_home"
+          ]
+        },
+        "tests/test_l3_er5_next_static_export_contract.py": {
+          "_read": [],
+          "test_next_and_static_home_share_one_screen_and_request_owner": [
+            "assert 'import { DeviceHomeScreen as DeviceHomeRouteClient } from \"@/composition/screens/device-home-screen\";' in page",
+            "assert '<DeviceHomeRouteClient />' in page",
+            "assert not (ROOT / 'frontend/src/app/device-home-route-client.tsx').exists()",
+            "assert f'export {{ DeviceHomeScreen as DeviceHomeRouteClient }} from \"{shared_screen}\";' in next_entry",
+            "assert f'import {{ DeviceHomeScreen }} from \"{shared_screen}\";' in static_router",
+            "assert 'if (pathname === \"/\") return <DeviceHomeScreen />;' in static_router",
+            "assert 'getProductRuntimeState' in screen",
+            "assert 'getLocalWorldSurface' not in screen",
+            "assert 'getLocalWorldSurface' in home",
+            "assert 'getProductRuntimeState' not in home",
+            "assert 'DeviceHomeScreen' not in public_entry"
+          ],
+          "test_static_profile_reuses_product_source_and_has_no_server_hooks": [
+            "assert 'output: \"export\"' in config",
+            "assert 'headers()' not in config",
+            "assert 'redirects()' not in config",
+            "assert 'rewrites()' not in config",
+            "assert 'WorldRelationshipsScreen' in _read('frontend/src/composition/screens/world-app.tsx')",
+            "assert 'RelationshipGraphClient' in _read('frontend/src/composition/screens/world-relationships-screen.tsx')",
+            "assert marker in router"
+          ],
+          "test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths": [
+            "assert 'new Set([\"127.0.0.1\", \"localhost\", \"[::1]\"])' in runtime",
+            "assert 'parsed.protocol !== \"http:\"' in runtime",
+            "assert 'input.startsWith(\"/api/backend\")' in runtime",
+            "assert '`${runtime.apiBaseUrl}/api/v1' in runtime",
+            "assert 'input.startsWith(\"/media/\")' in runtime",
+            "assert 'runtime.launchToken && isSidecarRequest' in runtime",
+            "assert 'headers.set(\"X-Angmoo-Launcher-Token\"' in runtime",
+            "assert 'installDesktopRuntimeConfig' in runtime",
+            "assert 'DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT' in runtime",
+            "assert 'window.dispatchEvent' in runtime",
+            "assert 'DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT' in auth_provider",
+            "assert 'window.addEventListener(\\n      DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT' in auth_provider"
+          ],
+          "test_static_product_waits_for_packaged_runtime_and_exposes_only_retry": [
+            "assert 'DesktopRuntimeGate' in router",
+            "assert 'phase: \"starting\" | \"ready\" | \"crashed\" | \"stopped\"' in desktop",
+            "assert 'invoke<AngmooDesktopRuntimeStatus>(\"desktop_runtime_status\")' in desktop",
+            "assert 'invoke(\"retry_desktop_runtime\")' in desktop",
+            "assert '로컬 엔진과 저장된 World를 준비하고 있습니다.' in gate",
+            "assert '로컬 엔진 다시 시작' in gate",
+            "assert 'desktop_runtime_unreachable' in gate",
+            "assert 'useUiText(\"shell\")' in gate",
+            "assert forbidden not in gate"
+          ],
+          "test_static_media_uses_authenticated_fetch_and_blob_urls": [
+            "assert 'runtimeFetch(resolvedSource' in media_hook",
+            "assert 'cache: \"no-store\"' in media_hook",
+            "assert 'URL.createObjectURL(blob)' in media_hook",
+            "assert 'URL.revokeObjectURL' in media_hook",
+            "assert 'useRuntimeMediaUrl' in _read(relative)"
+          ],
+          "test_static_route_matrix_and_dynamic_fallback_are_explicit": [
+            "assert 'join(productOutput, \"index.html\")' in build",
+            "assert 'join(productOutput, \"404.html\")' in build",
+            "assert route_marker in router"
+          ],
+          "test_static_agent_exact_routes_precede_character_detail_fallback": [
+            "assert dashboard_index < create_index < detail_index",
+            "assert '<AgentsDashboardClient />' in router[dashboard_index:create_index]",
+            "assert '<AgentCreationScreen />' in router[create_index:detail_index]",
+            "assert '<AgentCreateClient ActivitySettings={CreationActivitySettings}' in creation",
+            "assert 'characterId && characterId !== \"new\"' in detail_block",
+            "assert '<AgentDetailClient characterId={characterId} />' in detail_block",
+            "assert '<AgentCreationScreen />' in browser_create_page",
+            "assert '<AgentsDashboardClient />' in browser_dashboard_page"
+          ],
+          "test_static_post_detail_waits_for_keyed_thread_before_mounting_client": [
+            "assert 'return <StaticPostRoute key={postId} postId={postId} />' in router, 'The static route dispatcher must synchronously remount the loader at the postId boundary'",
+            "assert 'const [ready, setReady] = useState(false)' in post_route, 'StaticPostRoute must own an explicit ready gate instead of mounting PostDetailClient with null async initial props'",
+            "assert 'setReady(true)' in post_route, 'StaticPostRoute must close the ready gate after the thread request settles'",
+            "assert post_route.index('setReady(true)', request) > request",
+            "assert '}, [postId, canRead]);' in post_route",
+            "assert 'if (!canRead) return;' in post_route",
+            "assert 'useAuthRuntimeIdentity(`global-post:${postId}`)' in post_route",
+            "assert '<ScopedStaticPostRoute key={identity}' in post_route",
+            "assert 'key={postId}' in post_route, 'PostDetailClient must remount at the postId boundary so post A state cannot leak into post B'",
+            "assert ready_gate < detail_mount, 'StaticPostRoute must render its loading gate before mounting PostDetailClient'"
+          ],
+          "test_next_post_detail_keeps_server_prefetch_initial_prop_handoff": [
+            "assert 'export default async function PostDetailPage' in page",
+            "assert fetch in page",
+            "assert '`/api/v1/posts/${postId}/thread`' in page",
+            "assert page.index(fetch) < page.index(detail)",
+            "assert initial_prop in page"
+          ],
+          "test_static_profile_disables_pwa_and_leaves_outputs_untracked": [
+            "assert 'isStaticFrontendProfile()' in lifecycle",
+            "assert 'unregisterAngmooServiceWorker()' in lifecycle",
+            "assert '\"sw.js\"' not in build",
+            "assert 'out/' in ignore",
+            "assert 'frontend/static-shell/out/' in ignore"
+          ],
+          "test_package_exposes_static_build_without_changing_default_build": [
+            "assert package['scripts']['build'] == 'next build'",
+            "assert package['scripts']['build:static'] == 'node ./scripts/build-static.mjs'"
+          ],
+          "test_static_output_exists_when_explicitly_requested": [
+            "assert (FRONTEND / 'out' / '404.html').read_bytes() == (FRONTEND / 'out' / 'index.html').read_bytes()",
+            "assert not (FRONTEND / 'out' / 'sw.js').exists()"
+          ]
+        },
+        "tests/test_l4_5_ui_c_landmark_contract.py": {
+          "_read": [],
+          "test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes": [
+            "assert '<main' in device_shell",
+            "assert 'data-main-landmark-owner=\"device-shell\"' in device_shell",
+            "assert '<main' not in app_shell",
+            "assert '<main' not in source",
+            "assert content_marker in source",
+            "assert f'@/features/support/components/{slug}-content' in source",
+            "assert f'<{component}' in source",
+            "assert '<AngmooApiContent' in source"
+          ],
+          "test_wide_product_shells_own_their_main_landmark": [
+            "assert '<main' in relationship_frame",
+            "assert 'data-main-landmark-owner=\"relationship-graph\"' in relationship_frame",
+            "assert '<main' not in relationship_client",
+            "assert 'data-product-content=\"relationship-graph\"' in relationship_client",
+            "assert '<main' in creator_shell",
+            "assert 'data-main-landmark-owner=\"creator-studio\"' in creator_shell",
+            "assert '<main' not in creator_client",
+            "assert 'data-product-content=\"creator-studio-world\"' in creator_client"
+          ]
+        },
+        "tests/test_local_character_creation_policy.py": {
+          "_create_tables": [],
+          "_add_user": [],
+          "_create_agent": [],
+          "_count_by_mode": [],
+          "test_saved_character_creation_allows_more_than_the_old_per_mode_cap": [
+            "assert _count_by_mode(db, 'llm') == 5",
+            "assert _count_by_mode(db, 'local') == 5",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0",
+            "assert db.scalar(select(func.count(models.AgentRun.id))) == 0",
+            "assert len(activity_settings) == 10",
+            "assert all((setting.auto_enabled is False for setting in activity_settings))"
+          ],
+          "test_llm_draft_create_and_complete_work_beyond_the_old_cap": [
+            "assert completed.character.handle == 'llm_bird_3'",
+            "assert _count_by_mode(db, 'llm') == 4",
+            "assert db.get(models.AgentCreationDraft, draft.id).status == 'completed'"
+          ],
+          "test_public_runtime_source_has_no_hosted_saved_count_quota_contract": [
+            "assert 'AgentAutonomyCapacityError' in sources['backend/app/runtime/characters/management.py']",
+            "assert 'settings.server_llm_autonomy_max_active_agents' in sources['backend/app/runtime/characters/management.py']",
+            "assert forbidden not in combined"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 37",
+            "assert fixture['target_table_count'] == 174",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift": [
+            "assert decrypt_local_secret(credential[4], scope=scope, app_secret=app_secret) == 'synthetic-supported-fixture-key'",
+            "pytest.raises(ValueError)",
+            "assert upgraded.canonical.source_version == source_version",
+            "assert upgraded.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert not upgraded.graph.degraded",
+            "assert [hashlib.sha256(path.read_bytes()).hexdigest() for path in (source, secret, media)] == originals",
+            "assert changed != credential[4]",
+            "pytest.raises(SystemExit, match='supported_upgrade_credential_changed')",
+            "assert settings.model_dump() == original_settings"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        },
+        "tests/test_p8_l_d_world_chat_inventory.py": {
+          "_json": [],
+          "_sha256": [],
+          "test_p8_l_d_generated_inventory_is_current": [
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_p8_l_d_chains_frozen_a_and_b_without_rewriting_history": [
+            "assert _sha256('security/p8_l_a_inventory.json') == A_INVENTORY_SHA256",
+            "assert _sha256('security/p8_l_b_chat_domain_inventory.json') == B_INVENTORY_SHA256",
+            "assert inventory['owner_stage'] == 'P8-L-D'",
+            "assert inventory['predecessor']['sha256'] == B_INVENTORY_SHA256",
+            "assert inventory['historical_chain'] == {'current_tree_owner': 'P8-L-D', 'p8_l_a_sha256': A_INVENTORY_SHA256, 'p8_l_b_sha256': B_INVENTORY_SHA256, 'predecessor_mode': 'frozen_digest'}",
+            "assert result.returncode == 1",
+            "assert 'P8-L-B inventory is frozen' in result.stderr",
+            "assert _sha256('security/p8_l_b_chat_domain_inventory.json') == B_INVENTORY_SHA256"
+          ],
+          "test_p8_l_d_freezes_world_chat_v4_migration_and_transport_contract": [
+            "assert inventory['migration'] == {'alembic_down_revision': '20260825_0083', 'alembic_revision': '20260831_0084', 'embedded_sqlite': {'canonical_table_count': 87, 'schema_digest': '520b6dfafdae9fc26b11a40ff147eef4596122cde3a40559a2cd4fc1a3ea875c', 'schema_version': 4, 'source_migration_count': 83, 'source_revision': '20260831_0084'}, 'migration_registry_step': 'v3_to_v4_world_scoped_chat', 'mutable_identity_tables': ['message_threads']}",
+            "assert inventory['message_thread']['backfill_outcomes'] == ['resolved', 'ambiguous', 'quarantined']",
+            "assert inventory['message_thread']['legacy_columns_preserved'] is True",
+            "assert inventory['message_thread']['lossless_messages_required'] is True",
+            "assert inventory['transport']['route_operations'] == ['GET /worlds/{world_id}/chat/threads', 'GET /worlds/{world_id}/chat/threads/{thread_id}', 'POST /worlds/{world_id}/chat/threads']"
+          ],
+          "test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix": [
+            "assert inventory['installer_upgrade'] == {'hosted_workflow_archive': 'supported-v3.zip', 'idempotent_target_reinstall_verified': True, 'message_survival_verified': True, 'required_predecessor': 3, 'supported_predecessor_present': True, 'synthetic_fixture_has_resolved_and_ambiguous_threads': True}",
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip().endswith(','.join((f'v{version}' for version in range(1, SQLITE_SCHEMA_VERSION))))"
+          ]
+        },
+        "tests/test_post_refactor_contract_changes.py": {
+          "test_only_named_contract_changes_apply_and_original_snapshot_is_immutable": [
+            "assert original['full']['schemas']['Persona'] == 'old'",
+            "assert expected['full']['schemas'] == {'Persona': 'new', 'Other': 'untouched'}",
+            "assert drifted != expected",
+            "pytest.raises(ValueError, match='preimage')"
+          ],
+          "test_named_definition_delta_cannot_approve_a_different_owner_or_body": [
+            "assert changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, drift, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/other.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'other', old, new, records=records)"
+          ],
+          "test_ast_evidence_normalizes_empty_fields_but_never_executes_calls": [
+            "assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)",
+            "assert changes.assertions('test.py::test_version', before, after, [record]) == after",
+            "pytest.raises(ValueError, match='constructor')",
+            "assert changes.normalize_ast_dump(fragment) == ast.dump(ast.parse(fragment))"
+          ],
+          "test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage": [
+            "assert changes.contracts(original, [record]) == {'orm_tables': {'profiles': 'new', 'secrets': 'untouched'}}",
+            "assert original['orm_tables']['profiles'] == 'old'",
+            "pytest.raises(ValueError, match='ORM preimage')"
+          ],
+          "test_orm_and_duplicate_changes_cannot_be_excused": [
+            "pytest.raises(ValueError, match='ORM')",
+            "pytest.raises(ValueError, match='duplicate')"
+          ],
+          "test_assertion_change_requires_exact_before_after_and_keeps_other_nodes": [
+            "assert changes.assertions('test.py::test_change', before, after, [record]) == after",
+            "assert changes.assertions('test.py::test_other', before, after, [record]) == before",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_assertion_chain_checks_every_transition_and_exact_final_state": [
+            "assert changes.assertions('test.py::test_change', Counter(['v9', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v10', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', final, final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v9']), final, records) == final",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_manifest_requires_committed_provenance_and_append_only_history": [
+            "assert changes.load(tmp_path) == [record]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(ValueError, match='provenance')",
+            "assert args[1] == 'rev-parse'"
+          ],
+          "test_historical_manifests_are_rechecked_without_retaining_their_bytes": [
+            "assert changes.load(tmp_path, reader=reader) == payload['records']",
+            "assert changes.load(tmp_path, reader=reader) == payload['records']",
+            "assert sum((args[1] == 'show' for args in calls)) == (2 if injected else 1)",
+            "pytest.raises(ValueError, match='append-only')",
+            "assert args[1] == 'show'",
+            "pytest.raises(ValueError, match='append-only')"
+          ],
+          "test_git_object_cache_rereads_head_and_candidate_manifest": [
+            "assert changes.load(tmp_path) == changes.load(tmp_path) == [record]",
+            "assert sum((args[1:] == ('rev-parse', 'HEAD') for args in calls)) == 2",
+            "assert sum((args[1:] == ('rev-parse', commit + ':backend/a.py') for args in calls)) == 1",
+            "pytest.raises(ValueError, match='provenance')",
+            "pytest.raises(changes.subprocess.CalledProcessError)",
+            "assert state['head'] in args",
+            "assert args[-1] == state['head']"
+          ],
+          "test_removed_binding_requires_exact_parent_and_committed_and_current_absence": [
+            "assert args[1] == 'show'",
+            "pytest.raises(ValueError, match='removed binding')",
+            "assert changes.removed_bindings(changes.load(tmp_path)) == {(source, 'LIMIT')}"
+          ]
+        },
+        "tests/test_world_activity_official_startup.py": {
+          "test_official_factory_cold_start_read_only_settings_health_and_restart": [
+            "assert client.get('/health').status_code == 200",
+            "assert client.get('/health').status_code == 200",
+            "assert restored.state.runtime_config.data_paths.root == root.resolve()",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(SQLITE_SCHEMA_VERSION).schema_digest",
+            "assert response.status_code == 200, (suffix, response.text)",
+            "assert 'synthetic' not in response.text",
+            "assert after == before and (not db.new) and (not db.dirty)",
+            "assert (p.generation_limit, p.vision_limit) == (20, 10)",
+            "assert (p.generation_limit, p.vision_limit) == (20, 10)"
+          ]
+        },
+        "tests/world_characters/test_world_character_configuration.py": {
+          "engine": [],
+          "_client": [],
+          "test_t49_t53_dashboard_partition_user_first_read_only_and_no_private_values": [
+            "assert dashboard.summary.model_dump() == {'total': 2, 'enabled': 0, 'disabled': 1, 'users': 1}",
+            "assert dashboard.items[0].profile.control_mode == 'owner_controlled'",
+            "assert dashboard.items[0].settings is None and dashboard.items[0].recent_activity is None",
+            "assert dashboard.items[1].profile.world_id == 'config-world-a'",
+            "assert 'Original persona' not in dashboard.model_dump_json()",
+            "assert 'encrypted' not in dashboard.model_dump_json() and 'fixture-owner' not in dashboard.model_dump_json()",
+            "assert before == [(row.id, row.version, row.autonomous_enabled) for row in db.scalars(select(WorldCharacter))]",
+            "assert origin_before == [(row.id, row.digest, row.payload) for row in db.scalars(select(CharacterImportSnapshot))]",
+            "assert not db.new and (not db.dirty)"
+          ],
+          "test_t89_t90_world_settings_profile_and_explicit_removals_never_write_source_or_other_world": [
+            "assert a.profile.display_name == \"A's Bram\" and a.profile.intro == '' and (a.profile.avatar_url is None)",
+            "assert a.settings.personality == 'World A persona' and a.settings.activity_interval_minutes == 45",
+            "assert a.settings.image_model == image_model and a.settings.image_style == 'soft' and (b.settings.image_model is None)",
+            "assert b.profile.display_name == 'Bram' and b.settings.personality == 'Original persona' and (b.revision == 1)",
+            "assert (source.name, source.personality, source.one_liner, source.handle) == original",
+            "assert origin.digest == digest and origin.payload['settings']['personality'] == 'Original persona'",
+            "assert a.profile.intro == '' and a.profile.avatar_url is None",
+            "assert b.profile.display_name == 'Bram' and b.settings.personality == 'Original persona'"
+          ],
+          "test_t95_route_auth_origin_scope_fields_and_revision_fail_without_writes": [
+            "assert client.get(prefix + '/settings').status_code == 200",
+            "assert client.patch(prefix + '/settings', json={'expected_revision': 1, 'settings': {'personality': 'No origin'}}).status_code == 403",
+            "assert client.patch(prefix + '/profile', headers=headers, json={'expected_revision': 1, 'avatar_url': 'https://example.test/not-owned.png'}).status_code == 422",
+            "assert client.patch(prefix.replace('config-role-a', 'config-role-b') + '/profile', headers=headers, json={'expected_revision': 1, 'intro': 'cross'}).status_code == 404",
+            "assert client.patch(prefix + '/profile', headers=headers, json={'expected_revision': 77, 'intro': 'conflict'}).json() == {'detail': 'world_character_revision_conflict'}",
+            "assert client.patch(prefix + '/settings', headers=headers, json=payload).status_code == 422",
+            "assert db.get(WorldCharacter, 'config-role-a').version == 1",
+            "assert effective_configuration(db, world_character_id='config-role-a').profile.intro == 'Original intro'"
+          ],
+          "test_t89_world_handle_uses_canonical_policy_without_rewriting_unchanged_user_handle": [
+            "assert effective_configuration(db, world_character_id=user_role.id).profile.handle == original_handle",
+            "assert db.get(Character, user_role.character_id).handle == source_handle",
+            "assert effective_configuration(db, world_character_id='config-role-a').profile.handle == 'bram_new'",
+            "pytest.raises(WorldManagementError, match='world_profile_handle_conflict')",
+            "assert effective_configuration(db, world_character_id='config-role-a').revision == 2",
+            "assert db.get(Character, 'config-actor-a').handle == 'bram_a'",
+            "pytest.raises(WorldManagementError, match='world_profile_handle_invalid')"
+          ],
+          "test_t96_two_sessions_same_revision_exactly_one_success_and_one_conflict": [
+            "assert sorted(values, key=str) == [2, 'world_character_revision_conflict']",
+            "assert db.get(WorldCharacter, 'config-role-a').version == 2",
+            "assert effective_configuration(db, world_character_id='config-role-b').revision == 1"
+          ],
+          "test_t97_owner_world_profile_alias_writes_world_only_and_name_binding": [
+            "assert updated.profile.display_name == 'World User' and updated.profile.handle == 'world_user'",
+            "assert (character.name, character.handle, character.one_liner) == before",
+            "assert names.user_display_name == 'World User'"
+          ],
+          "test_t103_t105_independent_ids_default_off_saved_onoff_never_write_global_flags": [
+            "assert origins[0] == origins[1]",
+            "assert all((db.get(WorldCharacter, f'config-role-{suffix}').autonomous_enabled for suffix in ('a', 'b')))",
+            "assert not db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled",
+            "assert all((not db.get(AgentActivitySetting, f'config-actor-{suffix}').auto_enabled for suffix in ('a', 'b')))",
+            "assert not role.autonomous_enabled",
+            "assert db.get(CharacterWorldBinding, role.character_id).world_id == role.world_id",
+            "assert db.get(CharacterActiveWorld, role.character_id).world_character_id == role.id"
+          ],
+          "test_t91_snapshot_immutable_and_payload_contains_configuration_only": [
+            "assert snapshot.kind == 'creation' and snapshot.contract_version == 1",
+            "assert set(snapshot.payload) == {'profile', 'settings'}",
+            "assert not any((word in json.dumps(snapshot.payload).lower() for word in ('credential', 'encrypted', 'memory', 'lease', 'auto_enabled', 'world_id')))",
+            "pytest.raises(ValueError, match='snapshot_immutable')"
+          ],
+          "test_t93_explicit_entry_initializes_existing_basis_once_and_get_never_backfills": [
+            "pytest.raises(WorldManagementError, match='world_configuration_missing')",
+            "assert db.get(WorldCharacterConfiguration, role.id) is None",
+            "assert stored.snapshot_id == basis_id",
+            "assert stored.profile['display_name'] == 'Bram' and role.version == 1",
+            "assert stored.profile['intro'] == 'World-local edit'",
+            "assert role.version == 2 and role.autonomous_enabled",
+            "pytest.raises(WorldCharacterSetupValidationError, match='world_character_not_ready')"
+          ],
+          "test_t53_recent_activity_requires_current_world_evidence_and_orders_by_time": [
+            "assert item.recent_activity.action_type == 'post'",
+            "assert item.recent_activity.post_id == 'recent-a' and item.recent_activity.title == 'World a post'",
+            "assert datetime.fromisoformat(item.recent_activity.occurred_at) == datetime(2026, 10, 5, 12, 0, tzinfo=UTC)"
+          ],
+          "test_t56_dashboard_batch_queries_do_not_grow_per_character": [
+            "assert len(expanded.items) == len(initial.items) + 7",
+            "assert len(statements) == first_count",
+            "assert first_count <= 23",
+            "assert sum(('FROM world_deletion_requests' in statement for statement in statements)) == 3"
+          ],
+          "test_t49_t52_dashboard_filters_participation_and_counts_zero_and_multiple_users": [
+            "assert zero.summary.model_dump() == {'total': 2, 'enabled': 1, 'disabled': 1, 'users': 0}",
+            "assert {item.profile.world_character_id for item in zero.items} == {a.id, extra_ids[0]}",
+            "assert zero.items[0].profile.world_character_id == a.id",
+            "assert zero.items[1].profile.control_mode == 'autonomous'",
+            "assert zero.items[1].profile.display_name == '사용자'",
+            "assert multiple.summary.model_dump() == {'total': 3, 'enabled': 1, 'disabled': 0, 'users': 2}",
+            "assert all((item.profile.control_mode == 'owner_controlled' for item in multiple.items[:2]))",
+            "assert multiple.items[-1].profile.world_character_id == a.id",
+            "assert 'Private' not in multiple.model_dump_json()",
+            "assert service.dashboard(world_id=b.world_id, user=owner).summary.enabled == 1",
+            "assert not db.dirty and (not db.new)",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_and_readiness": [
+            "assert state('capacity_wait').next_activity_at is None",
+            "assert state('waiting').next_activity_at is not None",
+            "assert state('not_ready').status.reason == 'credential_required'",
+            "assert item.status.state == expected",
+            "assert item.autonomous_enabled and dashboard.summary.enabled == 1",
+            "assert db.get(AgentActivitySetting, role.character_id).auto_enabled is False",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled is False",
+            "assert not db.new and (not db.dirty)"
+          ]
+        },
+        "tests/world_characters/test_world_key_execution.py": {
+          "test_frozen_purpose_binding_cannot_borrow_chat_key_or_latest_rotation": [
+            "pytest.raises(CredentialResolutionError, match='required')",
+            "assert 'synthetic-direct-key' not in json.dumps(frozen)",
+            "assert resolve(db, frozen, owner_id=SCOPE['owner_id'], world_id=SCOPE['world_id'], actor_id=SCOPE['world_character_id'], purpose='sns').reveal() == 'synthetic-direct-key'",
+            "pytest.raises(CredentialResolutionError)",
+            "assert world_credentials.resolve(db, **SCOPE, purpose='chat').reveal() == 'synthetic-direct-key'"
+          ],
+          "test_vision_sns_chat_combined_cap_rotation_does_not_reset_usage": [
+            "assert (policy.generation_limit, policy.vision_limit) == (20, 10)",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='vision', now=now, timezone='Asia/Seoul') == 10",
+            "pytest.raises(ImagePreparationError, match='daily_limit_reached')",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='image', now=now, timezone='Asia/Seoul') == 0",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='vision', now=now + timedelta(days=1), timezone='Asia/Seoul') == 0",
+            "assert adapter.read(db, SCOPE['owner_id'], SimpleNamespace(scope_kind='world', scope_id=SCOPE['world_id']), SCOPE['world_character_id']).model == 'gemini-3.1-flash-lite'",
+            "pytest.raises(ImagePreparationError, match='scope_unavailable')",
+            "assert world_policy.reserve(db, **args).id == world_policy.reserve(db, **args).id"
+          ],
+          "test_world_status_read_has_actual_typed_state_and_no_writes": [
+            "assert value.contract_version == 'world-character-status-v1' and value.state.state == 'off'",
+            "assert value.persona['worldview'] == 'Original world'",
+            "assert set(value.summary['allowed_actions']) <= {'post', 'reply', 'like'}",
+            "assert value.summary['posts'] == value.summary['replies'] == value.summary['likes'] == 0",
+            "assert statements == []"
+          ],
+          "test_comfy_partner_write_only_and_client_cannot_invent_connection": [
+            "pytest.raises(CredentialResolutionError, match='comfy_server_key_not_supported')",
+            "assert not row.has_key and row.has_partner_key and ('server-only' not in row.model_dump_json()) and ('partner-only' not in row.model_dump_json())",
+            "assert primary is None and partner == 'partner-only'",
+            "pytest.raises(ImagePreparationError, match='connection_unverified')",
+            "assert primary is None and partner is None"
+          ]
+        },
+        "tests/worlds/test_transition_contracts.py": {
+          "world_session": [],
+          "test_frozen_migration_imports_resolve_to_identical_models_and_functions": [
+            "assert old_models.World is models.World is registered_models.World",
+            "assert old_models.WorldMembership is models.WorldMembership",
+            "assert old_models.WorldRole is models.WorldRole",
+            "assert old_models.World.metadata is Base.metadata",
+            "assert Base.metadata.tables['worlds'] is models.World.__table__",
+            "assert old_definition.refresh_world_contract is definition.refresh_world_contract",
+            "assert old_roles.ensure_no_specific_role is reserved_roles.ensure_no_specific_role",
+            "assert old_roles.ReservedWorldRoleConflictError is service.ReservedWorldRoleConflictError",
+            "assert old_contracts.is_canonical_no_specific_role is contracts.is_canonical_no_specific_role",
+            "assert not hasattr(service, 'World')",
+            "assert not hasattr(service, 'WorldMembership')"
+          ],
+          "test_banner_commit_failure_removes_new_file_and_preserves_previous_banner": [
+            "pytest.raises(RuntimeError, match='injected database commit failure')",
+            "assert list(previous_file.parent.iterdir()) == [previous_file]",
+            "assert previous_file.read_bytes() == b'previous verified image'",
+            "assert world.banner_media_id == previous_url",
+            "assert world.banner_alt_text == 'previous banner'",
+            "assert world.row_version == original_version"
+          ],
+          "test_timezone_update_and_rescheduling_share_one_transaction": [
+            "assert callbacks == []",
+            "pytest.raises(RuntimeError, match='injected definition commit failure')",
+            "assert commits == []",
+            "assert world.timezone == original_timezone",
+            "assert world.row_version == original_version",
+            "assert world.banner_alt_text == ''",
+            "assert commits == [db]",
+            "assert updated.world.timezone == 'America/New_York'",
+            "assert updated.world.runtime_timezone == 'UTC'",
+            "assert world.row_version == original_version + 1",
+            "assert db.get(models.World, world_id).banner_alt_text == ''"
+          ],
+          "test_seed_flushes_without_owning_the_callers_commit": [
+            "assert commits == []",
+            "assert seeded.membership.world_id == identifier",
+            "assert db.get(models.World, identifier) is seeded.world",
+            "assert db.get(models.World, identifier) is None",
+            "assert db.scalar(select(models.WorldMembership).where(models.WorldMembership.world_id == identifier)) is None"
+          ],
+          "test_split_router_preserves_all_fourteen_world_and_resident_endpoints": [
+            "assert len(resident) == 4",
+            "assert len(creator_routes) == 14",
+            "assert ('/worlds/{world_id}/media/{filename}', 'GET') in creator_routes",
+            "assert ('/worlds/{world_id}', 'DELETE') in deletion_routes",
+            "assert deletion_routes.isdisjoint(creator_routes | resident)",
+            "assert {('/worlds/default-space/ensure', 'POST'), ('/worlds/{world_id}/icon', 'POST'), ('/worlds/{world_id}/icon', 'DELETE')} <= creator_routes",
+            "assert resident.isdisjoint(creator_routes)",
+            "assert routers.count(resident_router) == 1",
+            "assert routers.count(creator_router) == 1",
+            "assert routers.index(creator_router) == routers.index(resident_router) + 1"
+          ],
+          "test_resident_leave_still_translates_errors_from_the_world_service": [
+            "assert response.status_code == 404",
+            "assert response.json() == {'detail': 'world_not_found'}",
+            "assert invoked[0]['world_id'] == world_id",
+            "assert invoked[0]['current_user_id'] == owner_id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_graph_projection_worker.py": {},
+        "tests/runtime/test_sns_media_memory_collector.py": {
+          "test_real_powershell_policy_preserves_strings_degrades_after_three_and_finalizes": [
+            "pytest.mark.skipif(not PWSH.is_file(), reason='PowerShell host-only policy check')"
+          ],
+          "test_actual_collector_exports_after_final_probe_error_and_terminates": [
+            "pytest.mark.skipif(not PWSH.is_file(), reason='PowerShell host-only collector lifecycle')"
+          ]
+        },
+        "tests/test_l2_5_creator_studio_shell_contract.py": {},
+        "tests/test_l2_5_world_app_shell_contract.py": {},
+        "tests/test_l3_er5_next_static_export_contract.py": {},
+        "tests/test_l4_5_ui_c_landmark_contract.py": {},
+        "tests/test_local_character_creation_policy.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {},
+        "tests/test_p8_l_d_world_chat_inventory.py": {},
+        "tests/test_post_refactor_contract_changes.py": {},
+        "tests/test_world_activity_official_startup.py": {},
+        "tests/world_characters/test_world_character_configuration.py": {},
+        "tests/world_characters/test_world_key_execution.py": {},
+        "tests/worlds/test_transition_contracts.py": {}
+      }
     }
   ]
 }
