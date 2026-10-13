@@ -68,7 +68,8 @@ FROM base AS vec1-build
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev
 COPY scripts/build_vec1.py /tmp/build_vec1.py
-RUN python /tmp/build_vec1.py --output /opt/angmoo-vec1
+RUN --mount=type=cache,target=/var/cache/angmoo-vec1,sharing=locked \
+    python /tmp/build_vec1.py --output /opt/angmoo-vec1 --source-cache-dir /var/cache/angmoo-vec1
 
 FROM base AS source
 COPY --chown=angmoo:angmoo backend/app ./app

@@ -56,7 +56,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
 $vec1ResourceRoot = Join-Path $WorkRoot "vec1-resources"
-& $Python (Join-Path $repoRoot "scripts\build_vec1.py") --output $vec1ResourceRoot
+& $Python (Join-Path $repoRoot "scripts\build_vec1.py") --output $vec1ResourceRoot --source-cache-dir (Join-Path $WorkRoot "vec1-source-cache")
 if ($LASTEXITCODE -ne 0) { throw "Pinned Vec1 resource build failed" }
 $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
 
