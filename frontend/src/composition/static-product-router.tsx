@@ -1,6 +1,8 @@
 "use client";
 import { requestFailureMessage } from "@/lib/http/error-presentation";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { useAuth } from "@/hooks/use-auth";
 
 
 import Link from "next/link";
@@ -322,12 +324,19 @@ function staticWorldSection(segment: string | undefined): WorldAppSectionId | nu
 }
 
 function StaticFeedRoute() {
+  const identity = useAuthRuntimeIdentity("global-feed");
+  const { status } = useAuth();
+  return <ScopedStaticFeedRoute key={identity} canRead={status !== "checking"} />;
+}
+
+function ScopedStaticFeedRoute({ canRead }: { canRead: boolean }) {
   const uiText = useUiText("shell");
   const [feed, setFeed] = useState<FeedPage>(EMPTY_FEED);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!canRead) return;
     let active = true;
     listSocialFeed({ limit: 10 })
       .then((result) => {
@@ -344,7 +353,7 @@ function StaticFeedRoute() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [canRead]);
 
   if (!ready) {
     return (
@@ -363,12 +372,19 @@ function StaticFeedRoute() {
 }
 
 function StaticPostRoute({ postId }: { postId: string }) {
+  const identity = useAuthRuntimeIdentity(`global-post:${postId}`);
+  const { status } = useAuth();
+  return <ScopedStaticPostRoute key={identity} postId={postId} canRead={status !== "checking"} />;
+}
+
+function ScopedStaticPostRoute({ postId, canRead }: { postId: string; canRead: boolean }) {
   const uiText = useUiText("shell");
   const [thread, setThread] = useState<PostThreadRead | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!canRead) return;
     let active = true;
     getSocialPostThread(postId)
       .then((result) => {
@@ -385,7 +401,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
     return () => {
       active = false;
     };
-  }, [postId]);
+  }, [postId, canRead]);
 
   if (!ready) {
     return (

@@ -1,8 +1,9 @@
 # Release readiness integration evidence — 2026-10-13
 
 This report distinguishes committed source, focused local regressions, hosted CI,
-platform review, deployment and real-provider quality. This is the pre-publication
-preparation snapshot at 2026-10-13 08:09 KST. Pending items are not PASS; exact final
+platform review, deployment and real-provider quality. The initial preparation
+snapshot below is historical; subsequent corrected-head evidence is recorded in
+the later section. Pending items are not PASS; exact final
 head/base and completed CI outcomes are recorded in the PR and workspace execution
 ledger rather than inferred from this earlier snapshot.
 
@@ -201,3 +202,62 @@ registration, credentials and package tests43 passed. The isolated provider-free
 contributor smoke persisted the reply/state and verified LLM Local Bot denial.
 Hosted final-head checks, native human review, Ready, merge and merge-SHA main CI
 remain pending. Fixed source does not update the user's running Docker or installer.
+
+## Corrected source after the 7bcc22bb CI attempt
+
+At `7bcc22bb`, required architecture, migration, DCO, license, local core/autonomy/
+full-graph, Windows Tauri/host and CodeQL checks completed successfully. Frontend
+failed at a retired card-creation selector, OSS scanning found four newly committed
+public blob identifiers, and the packaged installer candidate failed to announce
+its endpoint. The backend suite was still running when these repairs were prepared.
+The source of each failed check is retained; downstream skipped installer matrices
+are not successful executions.
+
+The sidecar startup imports World's reviewed erasure inventory. Its eleven
+domain-owned JSON files were absent from the PyInstaller data inputs. The builder
+now reads the authoritative owner tuple without importing/starting the app,
+validates each JSON's path/owner/version, and includes only those exact resources
+at their real runtime paths in both OneFile and OneDir builds. Missing or invalid
+policies fail packaging. A file-only frozen-layout test first reproduces the missing
+resource and then loads the unchanged rules from every owned destination. Native
+packaged execution still awaits the corrected Windows CI. The sanitized Defender
+report is uploaded even if a later packaging step fails; raw logs/keys/DB are excluded.
+
+Four public blob identifiers are allowed only by their exact existing path/rule/
+field/value, with actual Git source/ancestry and changed-value/path negative tests.
+No file, AST line, history range or unrelated credential is exempted. The reviewed
+7bcc22bb tree/history scans found no leaks, including all 1147 ancestor commits;
+the final corrected head is scanned again before publication.
+
+Current schema tests now expect the actually shipped head, 174 registered tables,
+and v37/0114. Old migration manifests and predecessor schemas remain immutable.
+Card, Comfy/image, daily setup and static navigation tests use the existing current
+controls and contracts. Provider-free request, exact payload, conflict, retry,
+late-result and OFF-by-default assertions remain.
+
+An actual static Feed/Post cold-start defect was also corrected: requests wait for
+initial authentication to settle, then remount on user/session/runtime scope changes.
+Late results from an old runtime are rejected. This avoids both the original
+aborted-load blank state and automatic duplicate fetches that could hide a manual
+retry. The production preview now uses Next's actual repository-root traced
+`standalone/frontend/server.js`, preserving its existing Windows launcher behavior.
+
+| Focused corrected-source evidence | Observed result |
+| --- | --- |
+| Current schema/layout/observation expectations | 21 passed; frozen predecessors retained. |
+| Sidecar resource, supply-chain and native shell contracts | 21 passed; four resource cases included. File-only synthetic layout, no installed runtime launch. |
+| Native Windows managed-key file regressions | 7 passed. |
+| Exact public blob provenance and secret-scan negatives | 3 passed. |
+| Synthetic PNG/JSON card through the actual Next proxy | 2 passed. |
+| Shared image flows in Next and static | 56 passed; no external provider or GPU. |
+| Current World-scoped daily setup in Next/static | 2 plus 2 passed; explicit activation only, failed writes retain OFF. |
+| Static direct routes, authorization/media and current lifecycle/relationships | 78 passed. |
+| Memory scope and retained native shutdown regressions | 2 passed. |
+| Canonical Ubuntu Next/static visual comparisons | 36 passed without snapshot updates. Existing eleven images and 25px/0.1 tolerance retained; eight additional versioned captures represent intended product changes. Creation of those captures is recorded separately. |
+| Frontend architecture/design | Passed: 14 features, 1157 raw colors in 35 files, 18 surfaces, 61 screenshot mappings, historical-plus-current 19 images. |
+
+The [versioned visual report](release-readiness-visual-deltas-20261013.md) links the
+current captures to the pre-existing implementation decisions. All actual source,
+assertion, browser and new-file transitions are appended after the real repair
+commit, retaining the original provenance prefix. These local results do not replace
+required corrected-head hosted CI, final human platform review or merge-SHA main CI.

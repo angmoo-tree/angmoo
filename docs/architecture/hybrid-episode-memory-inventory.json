@@ -3034,7 +3034,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "8725490afafe08a1074d88ce0ac2a121945e2fc32e751f467e6d4ce2f8ca021a"
+      "sha256": "0f4f786d241e96b8069dc3c32ab27165348b141d34a25da480e56d16c188be5e"
     },
     {
       "path": "backend/tests/memory/test_embedding_keyword_preservation.py",
@@ -3314,7 +3314,7 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "7ff4d5d344312dd62b7b50a64853fedc85769518c43e4c662fd895d5d8d538e8"
+      "sha256": "659552f37ab923c17360087446df226af84ffee4bce33b0b74873295c5e49d13"
     },
     {
       "path": "backend/tests/migrations/test_canonical_retention.py",
@@ -3346,7 +3346,7 @@
     },
     {
       "path": "backend/tests/migrations/test_observation_outbox_v20.py",
-      "sha256": "583c486d9d653d9174667ef4fc6a9f518c74653ae021a3bae819ae04c3fad0ab"
+      "sha256": "edd6b40d106beb822cf31a83627e70d6039f078044f1b19417e19f4f966ebcc9"
     },
     {
       "path": "backend/tests/migrations/test_populated_memory_upgrade.py",

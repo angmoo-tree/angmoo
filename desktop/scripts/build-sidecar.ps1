@@ -38,6 +38,11 @@ $loggingConfigData = "$loggingConfig;."
 $novelResources = "$(Join-Path $backendRoot 'app\integrations\novelai_resources');app/integrations/novelai_resources"
 $imageCatalogData = "$(Join-Path $backendRoot 'app\integrations\image_catalog.json');app/integrations"
 $comfySampleData = "$(Join-Path $backendRoot 'app\domains\media\samples');app/domains/media/samples"
+# Runtime imports cannot collect adjacent non-Python deletion policies. Read the
+# authoritative owner tuple without importing or starting the application.
+$worldErasureJson = & $Python (Join-Path $PSScriptRoot 'sidecar-world-erasure-resources.py') --backend-root $backendRoot
+if ($LASTEXITCODE -ne 0) { throw "World erasure runtime resource inventory failed" }
+$worldErasureArguments = @($worldErasureJson | ConvertFrom-Json)
 $distRoot = Join-Path $WorkRoot "dist"
 $buildRoot = Join-Path $WorkRoot "build"
 $specRoot = Join-Path $WorkRoot "spec"
@@ -72,6 +77,7 @@ $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
     --add-data $imageCatalogData `
     --add-data $comfySampleData `
     --add-data $vec1ResourceData `
+    @worldErasureArguments `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `
     --exclude-module psycopg_binary `

@@ -317,7 +317,7 @@
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
-        "sha256": "537d2e250d994de513bf3d73b2f3495db36ba5935663489322a5bf92984bbb46"
+        "sha256": "a9b80427fa7f1ab618b7fce4a9c80cd5b48e3e0a8090aa4de20cd997885a0c10"
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
@@ -329,7 +329,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "de4366b2077efac7b3da08669c32b0c28d5cd415faf29d88f699512250849f60"
+        "sha256": "0272106c9ab857c159e72be510dcab534595e92fda5a0ebfbedff9ede390c5fd"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1343,7 +1343,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "fa1b70d4804a33809617d6633e42df0c9fd39862ca685b8e1b465274987f9ac1"
+        "sha256": "9251713c057e075a91cde28335aa3707dfa33e0a7805ff39048eafde2792a725"
       },
       {
         "path": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
@@ -1473,6 +1473,14 @@
       "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
       "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
       "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-empty-1440x900.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-populated-1440x900.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-centered-1440x1000.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-phone-360x800.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-runtime-offline-390x844.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-degraded-1440x900.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-ready-1440x900.png",
+      "browser-tests/snapshots/ui-f/release-readiness-20261013/world-feed-composer-phone-436x880.png",
       "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png"
     ],
     "manifest": {
@@ -1515,7 +1523,7 @@
       "production_preview_script": {
         "path": "frontend/scripts/serve-production.mjs",
         "present": true,
-        "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2"
+        "sha256": "c814ee4da60d6babcbdc2197902a152b7b546914c815c065f2bca497ee1ac210"
       },
       "projects": [
         "next-production",
@@ -1596,6 +1604,46 @@
           "sha256": "37e34cc44a5454f8653eb9061d2b014c79ff4ca7539df6c6081c0f7b34a16a35"
         },
         {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-empty-1440x900.png",
+          "present": true,
+          "sha256": "1ab49a6cd7780dcbc98782393b32e212671f49511a0cfd9d20a3f08ff5c1d1d2"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-populated-1440x900.png",
+          "present": true,
+          "sha256": "4e24e55fab89eb7b94687ca5cc8462655c60493a6c3a1569ee909305facea081"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-centered-1440x1000.png",
+          "present": true,
+          "sha256": "4d35b47b0dc5e0785c4e1962e9248bac3ef5aebe1ea4a9850d3b5697a3918ad3"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-phone-360x800.png",
+          "present": true,
+          "sha256": "e5d663b6df7e14e8c7ea71a45468ebd9b17a1e7958b755093dc9d47f71dfc662"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-runtime-offline-390x844.png",
+          "present": true,
+          "sha256": "3ac010db1c8e24a11dee41cc9162e621d819ed321a67b6a2d39c89df1d4a9a6d"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-degraded-1440x900.png",
+          "present": true,
+          "sha256": "8ac3eb5af5c73d45452d10abe11f9e372bacd3b51a536cf9297357cc6a4ac085"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-ready-1440x900.png",
+          "present": true,
+          "sha256": "df4d20c160892ba76c9569600dd54c0ffd01f8d935dd0faf0ff5601e0977a055"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/release-readiness-20261013/world-feed-composer-phone-436x880.png",
+          "present": true,
+          "sha256": "b01a9f4092f057e31c32289670c984d1f1ec0a38d77a9d51913153a590d5f68e"
+        },
+        {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
           "sha256": "8283ba408f849079b9bdc38e9e9e051d4ac01b5de27e4a4c3336e6bfe24049df"
@@ -1605,7 +1653,7 @@
         {
           "path": "browser-tests/product-surfaces.visual.spec.ts",
           "present": true,
-          "sha256": "537d2e250d994de513bf3d73b2f3495db36ba5935663489322a5bf92984bbb46"
+          "sha256": "a9b80427fa7f1ab618b7fce4a9c80cd5b48e3e0a8090aa4de20cd997885a0c10"
         },
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",

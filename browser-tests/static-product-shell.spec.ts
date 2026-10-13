@@ -1,5 +1,5 @@
 import { personalizedActivityTests } from "./personalized-activity-fixture";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { cardMetadataTests } from "./card-metadata-fixture";
@@ -1048,6 +1048,31 @@ test("static feed paginates on the Device scroll owner and keeps hosted-only rou
   expect(feedRequests.some((request) => request.includes("cursor=page-two"))).toBe(true);
 });
 
+test("static feed rebinds its read lifetime on runtime changes and rejects a late old response", async ({page}) => {
+  let phase: "initial" | "old" | "current" = "initial";
+  let oldRequested = false, oldCompleted = false;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route("http://127.0.0.1:8080/api/v1/**", async route => {
+    if (new URL(route.request().url()).pathname !== "/api/v1/feed") return route.fallback();
+    const snapshot = phase;
+    if (snapshot === "old") { oldRequested = true; await gate; }
+    await route.fulfill({json:{items:[staticProfilePost(`post-${snapshot}`, snapshot === "initial" ? "Initial feed scope" : snapshot === "old" ? "Late old feed scope" : "Current feed scope")],next_cursor:null}});
+    if (snapshot === "old") oldCompleted = true;
+  });
+  try {
+    await page.goto("/posts");await expect(page.getByText("Initial feed scope",{exact:true})).toBeVisible();
+    phase = "old";await page.evaluate(()=>window.dispatchEvent(new Event("angmoo:desktop-runtime-config-changed")));
+    await expect.poll(()=>oldRequested).toBe(true);
+    phase = "current";await page.evaluate(()=>window.dispatchEvent(new Event("angmoo:desktop-runtime-config-changed")));
+    await expect(page.getByText("Current feed scope",{exact:true})).toBeVisible();
+    release();await expect.poll(()=>oldCompleted).toBe(true);
+    await expect(page.getByText("Late old feed scope",{exact:true})).toHaveCount(0);
+    await expect(page.getByText("Current feed scope",{exact:true})).toBeVisible();
+    await expect(page.getByText("게시글을 불러오지 못했어요.",{exact:false})).toHaveCount(0);
+  } finally { release(); }
+});
+
 test("UI-D0 static global post detail waits for a delayed thread before mounting its body", async ({
   page,
 }) => {
@@ -1537,11 +1562,12 @@ test("static local creation stays available beyond the former hosted count cap",
   await expect(page.getByText("3/3")).toHaveCount(0);
 
   const llmMode = page.getByRole("radio", { name: "새 캐릭터 직접 만들기" });
-  const localMode = page.getByRole("radio", { name: "외부 실행기 연결용 캐릭터" });
+  const cardMode = page.getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기" });
   await expect(llmMode).toBeEnabled();
-  await expect(localMode).toBeEnabled();
-  await localMode.check();
-  await expect(localMode).toBeChecked();
+  await expect(cardMode).toBeEnabled();
+  await expect(page.getByRole("radio", { name: "외부 실행기 연결용 캐릭터" })).toHaveCount(0);
+  await llmMode.check();
+  await expect(llmMode).toBeChecked();
   await expect(page.getByRole("button", { name: "저장하고 다음" })).toBeEnabled();
   expect(pageErrors).toEqual([]);
 });
@@ -1912,13 +1938,13 @@ test("returned Studio preselects the created Character and clears the query afte
   });
 
   await page.goto(studioRoute);
-  await expect(page.getByText("캐릭터 생성은 완료되었습니다.")).toBeVisible();
+  await expect(page.getByText("캐릭터를 만들었어요. 역할을 선택해 이 World에 연결해주세요.", {exact:true})).toBeVisible();
   await expect(page.getByLabel("내 캐릭터")).toHaveValue("char-new-1");
   await page.getByLabel("World 역할").first().selectOption("student");
   await page.getByRole("button", { name: "이 World에 연결" }).click();
 
   await expect(
-    page.getByText("현재 World에 연결했습니다. 활동 설정에서 키와 정책을 저장해주세요."),
+    page.getByText("이 World에 연결했어요. 활동 설정에서 API 키와 활동 조건을 저장해주세요.", {exact:true}),
   ).toBeVisible();
   expect(entryRequestCount).toBe(1);
   expect(entryBody).toMatchObject({
@@ -2076,7 +2102,7 @@ test("Studio World-local leave stops autonomy, refreshes version, and preserves 
   await expect(page.getByRole("dialog", { name: "이 World에서 제거" })).toBeVisible();
   await expect(
     page.getByText(
-      "이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다.",
+      "이 World의 새 자율활동은 멈추고, 이미 작성한 글과 확인된 경험·관계 근거는 남아요. 캐릭터 자체와 다른 World의 참여는 유지돼요.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -2091,7 +2117,7 @@ test("Studio World-local leave stops autonomy, refreshes version, and preserves 
 
   await expect(
     page.getByText(
-      "이 World에서 제거했습니다. 캐릭터 자체와 기존 활동·사건·관계 근거는 보존됩니다.",
+      "이 World에서 제거했어요. 캐릭터 자체와 기존 활동·경험·관계 근거는 남아요.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -3488,6 +3514,41 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
   await expect(page.getByText("Nested child reply body", { exact: true })).toBeVisible();
 });
 
+async function installStaticRelationshipScope(page: Page, graph = false): Promise<void> {
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    const worldId = "world-static-probe";
+    if (pathname === `/api/v1/worlds/mine/${worldId}`) {
+      await route.fulfill({json: staticUiDWorld(worldId)});
+      return;
+    }
+    if (pathname === `/api/v1/worlds/${worldId}/owner-character`) {
+      await route.fulfill({json: {
+        ...staticUiDOwnerActor(worldId),
+        world_character_id: "wc-static-owner",
+        character_id: "character-static-owner",
+      }});
+      return;
+    }
+    if (pathname.endsWith("/relationship-review")) {
+      await route.fulfill({json: {mode: "interpreted", activated_at: "2026-09-22T00:00:00Z",
+        configuration: {status: "scheduled", manual_available: true, local_time: "02:00", timezone: "Asia/Seoul"},
+        jobs: [], states: [], excluded_counts: {}}});
+      return;
+    }
+    if (graph && pathname.endsWith("/relationship-graph")) {
+      expect(new URL(route.request().url()).searchParams.get("provider")).toBe("ladybug");
+      await route.fulfill({json: {world_id: worldId, center_world_character_id: "wc-static-owner",
+        nodes: [{world_character_id: "wc-static-owner", character_id: "character-static-owner",
+          display_name: "Static Owner Parrot", is_center: true}], edges: [], evidence: [],
+        meta: {template: "neighborhood", source: "ladybug", graph_status: "healthy", truncated: false,
+          projection_lag_seconds: 0, revalidated_node_count: 1, revalidated_edge_count: 0, fallback_reason: null}}});
+      return;
+    }
+    await route.fallback();
+  });
+}
+
 test("static installed relationship route ignores provider overrides and requests Ladybug", async ({
   page,
 }) => {
@@ -3529,14 +3590,16 @@ test("static installed relationship route ignores provider overrides and request
     await route.fallback();
   });
 
+  await installStaticRelationshipScope(page);
   await page.goto(
     "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=neo4j",
   );
-  await page.getByText("관계 데이터 정보", { exact: true }).click();
-  await expect(page.getByText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")).toBeVisible();
+  await expect(page.getByRole("heading", {name: "이 World의 관계", exact: true})).toBeVisible();
   await expect(page.getByText("관계망 최신 상태")).toBeVisible();
-  await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();
-  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(0);
+  await expect(page.locator('[data-product-content="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('[data-product-shell="relationship-graph"]')).toHaveCount(0);
+  await expect(page.getByRole("navigation", {name: "World 앱 기능"}).getByRole("link")).toHaveCount(5);
+  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(1);
   expect(requestedProviders).toEqual(["ladybug"]);
 });
 
@@ -3616,6 +3679,7 @@ test("installed relationship graph distinguishes outage, replay, and recovery", 
 
   const graphRoute =
     "/characters/character-static-owner/worlds/world-static-probe/relationship-graph";
+  await installStaticRelationshipScope(page);
   await page.goto(graphRoute);
   await expect(page.locator('[data-relationship-graph-state="degraded"]')).toBeVisible();
   await expect(page.locator('[data-relationship-graph-state="empty"]')).toHaveCount(0);
@@ -3638,7 +3702,7 @@ test("installed relationship graph distinguishes outage, replay, and recovery", 
   }
 });
 
-test("installed wide-window bootstrap restores the exact relationship route", async ({
+test("installed Phone bootstrap restores the exact embedded relationship route", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -3701,16 +3765,17 @@ test("installed wide-window bootstrap restores the exact relationship route", as
   const relationshipRoute =
     "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=ladybug";
   const bootstrap = new URLSearchParams({
-    __angmoo_window_kind: "relationship-graph",
+    __angmoo_window_kind: "phone",
     __angmoo_window_route: relationshipRoute,
   });
+  await installStaticRelationshipScope(page);
   await page.goto(`/?${bootstrap.toString()}`);
 
   await expect(page.locator("body")).toHaveAttribute(
     "data-angmoo-desktop-window",
-    "relationship-graph",
+    "phone",
   );
-  await expect(page.getByRole("heading", { name: "World 관계망" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "이 World의 관계", exact: true })).toBeVisible();
   await expect(page.getByText("관계망 최신 상태")).toBeVisible();
   await expect(page.getByText("LOCAL DEVICE")).toHaveCount(0);
   await expect(page).toHaveURL(new RegExp(`${relationshipRoute.replace("?", "\\?")}$`));
@@ -3757,7 +3822,7 @@ for (const bootstrapKind of ["phone", "main"] as const) {
   });
 }
 
-test("installed wide window keeps its route while runtime auth becomes ready", async ({
+test("installed Phone keeps its relationship route while runtime auth becomes ready", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -3823,12 +3888,13 @@ test("installed wide window keeps its route while runtime auth becomes ready", a
   const relationshipRoute =
     "/characters/character-static-owner/worlds/world-static-probe/relationship-graph?provider=ladybug";
   const bootstrap = new URLSearchParams({
-    __angmoo_window_kind: "relationship-graph",
+    __angmoo_window_kind: "phone",
     __angmoo_window_route: relationshipRoute,
   });
+  await installStaticRelationshipScope(page);
   await page.goto(`/?${bootstrap.toString()}`);
 
-  await expect(page.getByRole("heading", { name: "World 관계망" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "이 World의 관계", exact: true })).toBeVisible();
   await expect(page.getByText("관계망 최신 상태")).toBeVisible();
   await expect(page.getByRole("heading", { name: "제품 창 경로를 열지 못했습니다." })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "이 장치의 owner 준비" })).toHaveCount(0);
@@ -4098,7 +4164,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
   }).__ANGMOO_DESKTOP_INVOCATIONS__.some(({ command }) => command === "minimize_product_window"))).toBe(false);
 });
 
-test("Tauri Phone opens the owner relationship graph in a wide product window", async ({
+test("Tauri Phone embeds the owner relationship graph without opening a product window", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -4192,25 +4258,16 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
     await route.fallback();
   });
 
+  await installStaticRelationshipScope(page, true);
   await page.goto("/worlds/world-static-probe/relationships");
-  await page.getByRole("link", { name: "내 조종 캐릭터 관계망 열기" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
-      }),
-    )
-    .toContainEqual({
-      command: "open_product_window",
-      args: {
-        kind: "relationship-graph",
-        route:
-          "/characters/character-static-owner/worlds/world-static-probe/relationship-graph",
-      },
-    });
+  await expect(page.getByRole("heading", {name: "이 World의 관계", exact: true})).toBeVisible();
+  await expect(page.getByText("관계망 최신 상태")).toBeVisible();
+  await expect(page.locator('[data-product-content="relationship-graph"]')).toBeVisible();
+  await expect(page.getByRole("navigation", {name: "World 앱 기능"}).getByRole("link")).toHaveCount(5);
+  const invocations = await page.evaluate(() => (window as unknown as {
+    __ANGMOO_DESKTOP_INVOCATIONS__: Array<{command: string}>;
+  }).__ANGMOO_DESKTOP_INVOCATIONS__);
+  expect(invocations.filter(value => value.command === "open_product_window")).toEqual([]);
   await expect(page).toHaveURL(/\/worlds\/world-static-probe\/relationships$/);
 });
 

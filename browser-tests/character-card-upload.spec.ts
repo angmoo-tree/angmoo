@@ -142,7 +142,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
 
       await page.goto(base + "/agents/new");
       await expect(page.getByLabel("만드는 방법", { exact: true })).toBeVisible();
-      await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+      await page.getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기", exact: true }).check();
       const uploaded = page.waitForResponse((response) =>
         /^\/api\/backend\/agents\/drafts\/[^/]+\/card$/.test(new URL(response.url()).pathname)
         && response.request().method() === "POST");
@@ -178,12 +178,12 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         await expect(page.getByText("현재 편집 내용을 이 카드의 설정으로 교체할까요?", { exact: true })).toBeVisible();
         await page.getByRole("button", { name: "취소", exact: true }).click();
         await expect(page.getByRole("button", { name: "교체하기", exact: true })).toHaveCount(0);
-        await page.getByLabel("만드는 방법", { exact: true }).selectOption("direct");
+        await page.getByRole("radio", { name: "새 캐릭터 직접 만들기", exact: true }).check();
         await expect(notice).toHaveCount(0);
         await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
         await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue(result.draft.name + " edited");
         await page.getByRole("button", { name: "이전", exact: true }).click();
-        await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+        await page.getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기", exact: true }).check();
         await expect(notice).toBeVisible();
         await page.getByRole("button", { name: "나중에 하기", exact: true }).click();
         await page.goto(base + "/agents/new");
@@ -238,7 +238,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
         const registration = page.waitForResponse((item) => item.request().method() === "POST"
           && new URL(item.url()).pathname.endsWith(`/agents/drafts/${result.draft.id}/complete`));
-        await page.getByRole("button", { name: "자율활동 OFF로 등록", exact: true }).click();
+        await page.getByRole("button", { name: "등록", exact: true }).click();
         completed = await registration;
         await expect(page.getByRole("heading", { name: `${result.draft.name} 등록 완료`, exact: true })).toBeVisible();
       } else {
@@ -282,7 +282,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(macroSource);
 
         await page.goto(base + `/agents/new?worldId=${encodeURIComponent(world.id)}`);
-        await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+        await page.getByRole("radio", { name: "실리태번 캐릭터 카드 가져오기", exact: true }).check();
         const worldUpload = page.waitForResponse((response) => response.request().method() === "POST"
           && /^\/api\/backend\/agents\/drafts\/[^/]+\/card$/.test(new URL(response.url()).pathname));
         await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles(filePath);

@@ -50,6 +50,7 @@ async function fixtures(page:Page, staticShell:boolean, initial:{comfy?:Record<s
     if(path==="/auth/me")return json(route,{id:"local-owner",email:null,display_name:"Local Owner",profile_setup_completed:true,ui_language:initial.language??"ko",ui_preference_revision:1,feed_content_filter:"all",is_admin:true});
     if(path==="/auth/local/environment")return json(route,VISUAL_ENVIRONMENT);
     if(path===`/agents/${character}`)return json(route,continuityAgentDetail(character));
+    if(path.startsWith(`/agents/${character}/generation-provider-key/`))return json(route,{provider:path.split("/").at(-1),has_key:false,fingerprint:null,key_revision:0});
     if(path.endsWith("/lore-sources"))return json(route,{items:[]});
     if(path==="/media/catalog")return json(route,{models,quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
     if(path.includes("/generation-settings")){
@@ -62,7 +63,7 @@ async function fixtures(page:Page, staticShell:boolean, initial:{comfy?:Record<s
       if(request.method()!=="GET"){const body=request.postDataJSON();writes.push(body);recognition={...recognition,...body,revision:recognition.revision+1,has_api_key:Boolean(body.api_key)};}return json(route,recognition);
     }
     if(path==="/media/usage-settings")return json(route,{revision:1,daily_limit:10,quota_day:"2026-09-30",generation_reserved_or_used:2,interpretation_reserved_or_used:1,interpretation_daily_limit:4});
-    if(path.startsWith("/media/comfy-samples/")){const kind=path.split("/").at(-1);return json(route,JSON.parse(readFileSync(`../backend/app/domains/media/samples/comfy-${kind}.json`,"utf8")));}
+    if(path.startsWith("/media/comfy-samples/")){const kind=path.split("/").at(-1),api=new URL(request.url()).searchParams.get("format")==="api_json";return json(route,JSON.parse(readFileSync(`../backend/app/domains/media/samples/comfy-${api?"api-":""}${kind}.json`,"utf8")));}
     if(path==="/media/comfy-workflows/analyze"){
       try {const body=request.postDataJSON();return json(route,viewAnalysis(body.source_json,body.input_mode));}
       catch {return json(route,{detail:"comfy_json_invalid"},422);}
@@ -111,14 +112,23 @@ for(const viewport of [{width:360,height:800},{width:390,height:844},{width:436,
   });
 }
 
-test("Comfy samples provide editable bindings and a separate text path without generation",async({page},info)=>{
+test("Comfy samples provide editable API JSON and a separate text path without generation",async({page},info)=>{
   const audit=await fixtures(page,info.project.name==="static");await page.goto(`/agents/${character}?tab=settings`);
   const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});await panel.getByRole("combobox",{name:"이미지 서비스"}).selectOption("comfyui");
-  await panel.getByRole("button",{name:"참조 예시",exact:true}).click();await panel.getByText("고급 입력 연결",{exact:true}).click();await expect(panel.getByRole("combobox",{name:"positive · 입력 노드"})).toHaveValue("2");
-  await panel.getByRole("button",{name:"참조 없는 텍스트 경로 입력"}).click();await panel.getByRole("button",{name:"텍스트 예시",exact:true}).click();if(!await panel.getByRole("combobox",{name:"positive · 입력 노드"}).isVisible())await panel.getByText("고급 입력 연결",{exact:true}).click();await expect(panel.getByRole("combobox",{name:"positive · 입력 노드"})).toHaveValue("2");
-  await expect(panel.getByRole("combobox",{name:"reference · 입력 노드"})).toHaveValue("");
+  const referenceGraph=JSON.parse(readFileSync("../backend/app/domains/media/samples/comfy-api-reference.json","utf8"));
+  const textGraph=JSON.parse(readFileSync("../backend/app/domains/media/samples/comfy-api-text.json","utf8"));
+  const raw=panel.getByLabel("불러온 API workflow JSON",{exact:true});
+  await panel.getByRole("button",{name:"참조 이미지 예시 사용",exact:true}).click();
+  await expect.poll(async()=>JSON.parse(await raw.inputValue()||"null")).toEqual(referenceGraph);
+  await expect(panel.getByText("JSON 분석 완료",{exact:true})).toBeVisible();
+  await expect(panel.getByRole("checkbox",{name:"참조 이미지 사용",exact:true})).toBeChecked();
+  await panel.getByRole("button",{name:"참조 없는 텍스트 경로 입력"}).click();await panel.getByRole("button",{name:"텍스트 예시 사용",exact:true}).click();
+  await expect.poll(async()=>JSON.parse(await raw.inputValue()||"null")).toEqual(textGraph);
+  await expect(panel.getByText("JSON 분석 완료",{exact:true})).toBeVisible();
   await panel.getByRole("button",{name:"연결·입력 확인 및 저장"}).click();await expect.poll(()=>audit.writes.length).toBe(1);
-  const written=audit.writes[0].options as Record<string,unknown>;expect(written.workflow).toBeTruthy();expect(written.text_workflow).toBeTruthy();expect(audit.writes[0].auto_enabled).toBe(false);
+  const written=audit.writes[0].options as {workflow:{prompt:unknown;input_mode:string};text_workflow:{prompt:unknown;input_mode:string}};
+  expect(written.workflow.prompt).toEqual(referenceGraph);expect(written.text_workflow.prompt).toEqual(textGraph);
+  expect(written.workflow.input_mode).toBe("placeholders");expect(written.text_workflow.input_mode).toBe("placeholders");expect(audit.writes[0].auto_enabled).toBe(false);
 });
 
 const placeholderGraph = {"9":{class_type:"CustomNotInstalled",inputs:{text:"%prompt%",negative:"%negative_prompt%",nested:{"a/b":["%seed%","%clip_skip%"]},model:"%model%",prefix:"image_%seed%",untouched:"%unknown%"},_meta:{title:"%prompt%"}}};
@@ -274,7 +284,7 @@ test("chat preview stays selected when recognition is unavailable until explicit
   const send=page.getByRole("button",{name:"메시지 보내기"});await expect(send).toBeDisabled();
   await page.getByLabel("첨부 이미지 선택").setInputFiles(syntheticFile);
   await expect(page.getByRole("img",{name:"선택한 첨부 이미지 미리보기"})).toBeVisible();
-  await expect(page.getByRole("alert").filter({hasText:"이미지를 인식할 수 없습니다"})).toBeVisible();
+  await expect(page.getByRole("alert").filter({hasText:"이미지를 인식할 수 없어요. 이미지 인식 설정을 확인하거나 사진을 제거해주세요."})).toBeVisible();
   await expect(send).toBeDisabled();await page.getByPlaceholder("메시지를 입력하세요").fill("이 텍스트를 유지");await expect(send).toBeDisabled();
   expect(audit.writes).toHaveLength(1);expect(audit.writes[0].scope_kind).toBe("thread");expect(audit.writes[0].scope_id).toBe("thread-image");
   await page.getByRole("button",{name:"사진 제거"}).click();await expect(send).toBeEnabled();await expect(page.getByPlaceholder("메시지를 입력하세요")).toHaveValue("이 텍스트를 유지");

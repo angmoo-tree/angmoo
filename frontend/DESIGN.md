@@ -14,6 +14,17 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-13 릴리스 준비 visual 증거 정렬 (LOCAL)
+
+기존 UI-B/UI-F의 canonical PNG 11장은 원본 그대로 보존한다. 이미 구현된
+기기 홈·Feed·World 사용 상태·삭제·embedded 관계 화면의 의도한 변화는
+`browser-tests/snapshots/ui-f/release-readiness-20261013/`의 추가 8장으로 기록한다.
+Next production과 static export는 동일한 새 expected PNG와 기존 25px/0.1
+오차 정책을 사용한다. 기존 61개 screenshot mapping·raw-color 한도는 유지한다.
+생성 inventory에는 역사적 11장과 새 8장 모두를 기록한다. 이미지 생성 자체는
+비교 PASS가 아니며, 자동 비교·최종 platform 리뷰·설치본 USER CHECK를 분리한다.
+근거: [의도한 변화와 검증 범위](../docs/verification/release-readiness-visual-deltas-20261013.md).
+
 ## 2026-10-11 World 이미지 업로드·Feed/Chat 작성 안내 (LOCAL)
 
 기기 홈 아이콘 미리보기 아래의 `아이콘 업로드 / Upload icon`, World 배너 우상단의
