@@ -324,3 +324,16 @@ both fresh and production-upgraded World-author paths and worker deadline cleanu
 These tests used a recorded dirty-source overlay over `35c5f340`; they are focused
 precommit evidence. A broader related-file run and final committed-source gates
 are tracked separately, and no in-progress run is counted as successful.
+
+The broader 353-case overlay run completed with333 passed/6 existing skips,
+9 failed/5 setup errors. Eight failures and five setup errors were the already
+corrected duplicate-marker/old-Social-fixture cases above. The remaining timeout
+case actually expired at `child_bootstrap`, before its intended `nn_query` fault.
+The backend correctly reported the last observed stage. That synthetic test now
+allows30 seconds for cold spawn/import and blocks its child for60 seconds, so the
+same real deadline, last-stage, metadata, forced cleanup and no-late-success
+assertions can test the intended stage. Product budgets and the 75-minute CI job
+limits are unchanged. No retry-until-pass or relaxed assertion is introduced.
+The corrected worker module passed21 cases on Windows and21 on isolated Linux;
+the same three existing Vec1-dependent cases were skipped locally. Hosted CI
+builds the pinned extension and is the separate native execution Gate.
