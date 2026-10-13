@@ -37686,6 +37686,348 @@
         "tests/test_oss_architecture_boundaries.py": {},
         "tests/test_t2_secret_allowlist.py": {}
       }
+    },
+    {
+      "commit": "adcf9845c5589020b696c30262e3f02fd57b13a6",
+      "feature_id": "AR-CURRENT-RUNTIME-AND-VISUAL-CI",
+      "reason": "Mandatory runtime resources and their fail-closed tests; additional synthetic versioned PNGs preserve the historical visual oracle",
+      "tracked_files": {
+        "backend/tests/runtime/test_sidecar_world_erasure_resources.py": "4dac1fa09f67f421201d4194a73e5f8289c8e1d1",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-empty-1440x900.png": "cf81434ce970cbfe2836c0d722efbe77a27e597a",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/creator-studio-populated-1440x900.png": "a24b2c1983a501a298132fb2ff64a7aa0de06fec",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-centered-1440x1000.png": "316e154350481c6c543ef4c82b81c5c31c1d0cc3",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-phone-360x800.png": "5fec10f9c74cb0a8027acc6a147901d5e8fd8447",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/device-home-runtime-offline-390x844.png": "a51a42d49ee6c8501068b3b95e561ab5fce5382f",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-degraded-1440x900.png": "04d582d7693306461041c1b3ced0dbb01f6291bb",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-ready-1440x900.png": "02c59b7c7aa1cc357017725a70c86599e17cd456",
+        "browser-tests/snapshots/ui-f/release-readiness-20261013/world-feed-composer-phone-436x880.png": "7fadec3264af22b17de65496d05de4b9d5d4daa8",
+        "desktop/scripts/sidecar-world-erasure-resources.py": "a4962b375eff62c1c698ba104d19984ac1d0f4ba",
+        "docs/verification/release-readiness-visual-deltas-20261013.md": "fb5013ad268e5512cc6e8475744730dd07ab38db"
+      },
+      "test_nodes": [
+        "tests/runtime/test_sidecar_world_erasure_resources.py::test_both_sidecar_layouts_receive_every_runtime_owner_at_its_exact_bundle_path",
+        "tests/runtime/test_sidecar_world_erasure_resources.py::test_missing_or_unreviewed_policy_cannot_silently_disappear_from_the_package[missing]",
+        "tests/runtime/test_sidecar_world_erasure_resources.py::test_missing_or_unreviewed_policy_cannot_silently_disappear_from_the_package[wrong_owner]",
+        "tests/runtime/test_sidecar_world_erasure_resources.py::test_missing_or_unreviewed_policy_cannot_silently_disappear_from_the_package[wrong_version]"
+      ],
+      "test_assertions": {
+        "tests/memory/test_daypart_runtime_bindings.py": {
+          "engine": [],
+          "test_note_author_uses_attached_profile_without_committing": [
+            "assert f'- seen_person: {expected}' in note",
+            "assert db.is_modified(author)",
+            "assert daypart_observations._daypart_observation_author(db, 'missing', 'unknown', profile_references=unavailable_references) == 'unknown'",
+            "assert daypart_observations._daypart_observation_author(db, None, None, profile_references=unavailable_references) is None",
+            "assert getattr(author, field).startswith('Original')",
+            "assert getattr(observer.get(model, identity), field).startswith('Original')"
+          ],
+          "test_provided_observations_commit_inbox_before_same_session_author_read": [
+            "assert calls == ['character-post']",
+            "assert current is db",
+            "assert [row.event_type for row in rows] == ['observation_inbox', 'observation_feed']",
+            "assert rows[1].payload == {'source_item_id': 'post:character-post', 'seen_person': 'Original character (@daypart)'}",
+            "assert [row.event_type for row in observer.scalars(select(AgentDaypartMemoryEvent))] == ['observation_inbox']"
+          ],
+          "test_cold_resident_imports_use_actual_owners_and_explicit_registration": [
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == ''"
+          ]
+        },
+        "tests/migrations/test_alembic_layout.py": {
+          "test_historical_revision_blobs_and_graph_remain_unchanged": [
+            "assert len(historical) == 88",
+            "assert {key: actual_graph[key] for key in expected_graph} == expected_graph",
+            "assert actual_graph['20260909_0090'] == '20260904_0089'",
+            "assert actual_graph['20260910_0091'] == '20260909_0090'",
+            "assert actual_graph['20260914_0092'] == '20260910_0091'",
+            "assert actual_graph['20260916_0093'] == '20260914_0092'",
+            "assert actual_graph['20260917_0094'] == '20260916_0093'",
+            "assert actual_graph['20260918_0095'] == '20260917_0094'",
+            "assert actual_graph['20260918_0096'] == '20260918_0095'",
+            "assert actual_graph['20260923_0097'] == '20260918_0096'",
+            "assert actual_graph['20260924_0098'] == '20260923_0097'",
+            "assert actual_graph['20260927_0099'] == '20260924_0098'",
+            "assert actual_graph['20260927_0100'] == '20260927_0099'",
+            "assert actual_graph['20260928_0101'] == '20260927_0100'",
+            "assert actual_graph['20260929_0102'] == '20260928_0101'",
+            "assert actual_graph['20260929_0103'] == '20260929_0102'",
+            "assert actual_graph['20260930_0104'] == '20260929_0103'",
+            "assert actual_graph['20261003_0105'] == '20260930_0104'",
+            "assert actual_graph['20261005_0106'] == '20261003_0105'",
+            "assert actual_graph['20261006_0107'] == '20261005_0106'",
+            "assert actual_graph['20261008_0108'] == '20261006_0107'",
+            "assert len(actual_graph) == 113",
+            "assert actual_graph['20261008_0109'] == '20261008_0108'",
+            "assert actual_graph['20261009_0110'] == '20261008_0109'",
+            "assert actual_graph['20261009_0111'] == '20261009_0110'",
+            "assert actual_graph['20261010_0112'] == '20261009_0111'",
+            "assert actual_graph['20261010_0113'] == '20261010_0112'",
+            "assert actual_graph['20261012_0114'] == '20261010_0113'",
+            "assert script.get_heads() == ['20261012_0114']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ],
+          "test_alembic_heads_from_outside_backend": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20261012_0114 (head)'"
+          ],
+          "test_alembic_env_registers_canonical_metadata_on_real_memory_connection": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result_data == {'registered_tables': expected_count + 72, 'revision_bodies_run': 0}",
+            "assert not list(tmp_path.rglob('*.sqlite3'))"
+          ],
+          "test_historical_inventory_record_keeps_old_path_and_digest": [
+            "assert spec is not None and spec.loader is not None",
+            "assert record == {'path': old_path, 'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()}"
+          ]
+        },
+        "tests/migrations/test_observation_outbox_v20.py": {
+          "_seed_v19": [
+            "assert sqlite_schema_contract_digest(connection) == manifest.schema_digest",
+            "assert row is not None",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest"
+          ],
+          "_outbox_row": [],
+          "test_frozen_v19_still_rejects_second_observation_event_key": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_v19_to_v20_backfills_only_verified_relationship_id": [
+            "assert old['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert before.observation_count == before.backfill_count == 1",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert new == {**old, 'relationship_state_id': state_id}",
+            "assert connection.exec_driver_sql('SELECT COUNT(*) FROM graph_projection_outbox').scalar_one() == 2"
+          ],
+          "test_invalid_legacy_observation_stops_before_rebuild": [
+            "pytest.raises(SqliteMigrationDeltaError, match='observation_outbox_legacy_hash_invalid')",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None"
+          ],
+          "test_coordinator_rejects_invalid_legacy_before_promotion": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='observation_outbox_legacy_hash_invalid')",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('SELECT schema_version FROM angmoo_schema_version').scalar_one() == 19"
+          ],
+          "test_coordinator_preserves_source_generation_and_promotes_v20": [
+            "assert result.migrated is True",
+            "assert result.source_version == 19 and result.target_version == 37",
+            "assert result.database_path != database",
+            "assert _outbox_row(old, row_id)['relationship_state_id'] is None",
+            "assert _outbox_row(new, row_id)['relationship_state_id'] == state_id",
+            "assert new.exec_driver_sql('SELECT schema_version, source_revision FROM angmoo_schema_version').one() == (37, '20261012_0114')"
+          ],
+          "test_failed_staging_upgrade_leaves_v19_active_and_is_retryable": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_step_failed')",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('SELECT schema_version FROM angmoo_schema_version').scalar_one() == 19",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id"
+          ],
+          "test_alembic_sqlite_revision_uses_frozen_upgrade": [
+            "assert spec is not None and spec.loader is not None",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id"
+          ],
+          "test_alembic_offline_revision_refuses_unverified_sql": [
+            "assert spec is not None and spec.loader is not None",
+            "pytest.raises(RuntimeError, match='observation_outbox_online_migration_required')"
+          ],
+          "test_alembic_online_sqlite_env_prepares_foreign_keys": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert connection.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one() == '20261012_0114'",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= indexes"
+          ]
+        },
+        "tests/runtime/test_sidecar_world_erasure_resources.py": {
+          "builder": [],
+          "test_both_sidecar_layouts_receive_every_runtime_owner_at_its_exact_bundle_path": [
+            "assert arguments[::2] == ['--add-data'] * len(inventory.OWNERS)",
+            "assert len(arguments) == 2 * len(inventory.OWNERS)",
+            "pytest.raises(FileNotFoundError)",
+            "assert inventory.ErasureInventory(metadata).rules == rules",
+            "assert '@worldErasureArguments' in script",
+            "assert script.index('@worldErasureArguments') > script.index('-m PyInstaller')",
+            "assert Path(source) == BACKEND / f'app/domains/{owner}/repository/world_erasure.json'",
+            "assert target == f'app/domains/{owner}/repository'",
+            "assert destination.read_bytes() == Path(source).read_bytes()"
+          ],
+          "test_missing_or_unreviewed_policy_cannot_silently_disappear_from_the_package": [
+            "pytest.raises(FileNotFoundError if mutation == 'missing' else ValueError)"
+          ]
+        },
+        "tests/test_l3_er5_tauri_product_shell_contract.py": {
+          "_read": [],
+          "test_tauri_product_shell_is_pinned_and_keeps_sidecar_out_of_js_shell_scope": [
+            "assert 'tauri = { version = \"=2.11.5\"' in cargo",
+            "assert 'tauri-build = { version = \"=2.6.3\"' in cargo",
+            "assert package['devDependencies']['@tauri-apps/cli'] == '2.11.4'",
+            "assert capability['permissions'] == ['core:default']",
+            "assert 'shell:' not in serialized",
+            "assert 'tauri-plugin-shell = \"=2.3.5\"' in cargo",
+            "assert 'tauri-plugin-single-instance = \"=2.4.3\"' in cargo",
+            "assert 'features = [\"macos-private-api\"]' in cargo",
+            "assert config['bundle']['externalBin'] == ['binaries/angmoo-sidecar']",
+            "assert config['app']['macOSPrivateApi'] is True"
+          ],
+          "test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract": [
+            "assert 'PyInstaller 6.16.0' in build",
+            "assert 'System.Security.Cryptography.SHA256' in build",
+            "assert 'sqlite_versions/manifests' in normalized_build",
+            "assert 'ladybug_versions/manifests' in normalized_build",
+            "assert '--add-data $sqliteManifestData' in build",
+            "assert '--add-data $ladybugManifestData' in build",
+            "assert 'listener.bind((\"127.0.0.1\", 0))' in sidecar",
+            "assert '\"sidecar.owner.json\"' in sidecar",
+            "assert '\"sidecar.endpoint.json\"' in sidecar",
+            "assert 'launch_token' not in sidecar.split('publish_endpoint', 1)[1].split('def release', 1)[0]",
+            "assert 'hmac.compare_digest' in middleware",
+            "assert 'width: \"min(24rem, calc(100vw - 4rem))\"' in runtime_gate",
+            "assert 'wordBreak: \"keep-all\"' in runtime_gate",
+            "assert 'sidecar_terminated' not in runtime",
+            "assert marker in runtime or marker in host",
+            "assert forbidden not in runtime"
+          ],
+          "test_phone_window_has_no_browser_chrome_and_applies_scaling_policy": [
+            "assert config['app']['windows'] == []",
+            "assert config['app']['withGlobalTauri'] is True",
+            "assert 'mod phone_resize' not in host",
+            "assert 'PHONE_ASPECT_RATIO' not in policy",
+            "assert not (ROOT / 'desktop/src-tauri/src/phone_resize.rs').exists()",
+            "assert 'start_product_window_resize' not in host",
+            "assert marker in windows",
+            "assert marker in policy"
+          ],
+          "test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag": [
+            "assert 'data-angmoo-runtime-profile=\"tauri-static\"' in layout",
+            "assert 'ProductViewport' in layout",
+            "assert 'DesktopNavigationToolbar' in viewport",
+            "assert 'data-device-scroll-owner=\"true\"' in frame",
+            "assert 'data-device-titlebar-inset=\"true\"' not in frame",
+            "assert 'max-width: var(--product-body-max-width)' in frame_css",
+            "assert 'height: 100%' in frame_css",
+            "assert 'border-radius' not in frame_css",
+            "assert 'border:' not in frame_css",
+            "assert 'pointerdown' not in bridge",
+            "assert 'start_product_window_drag' not in bridge",
+            "assert 'installDesktopHistory' in bridge",
+            "assert 'data-desktop-navigation=\"true\"' in toolbar",
+            "assert 'event.nativeEvent.isComposing' in toolbar",
+            "assert 'on_navigation' in windows",
+            "assert 'on_new_window' in windows",
+            "assert 'NewWindowResponse::Deny' in windows",
+            "assert 'validate_external_product_link' in windows",
+            "assert capabilities['permissions'] == ['core:default']"
+          ],
+          "test_wide_windows_use_explicit_route_boundaries_and_single_labels": [
+            "assert 'invoke(\"open_product_window\"' in desktop_runtime",
+            "assert 'navigateDesktopProductRoute' in bridge",
+            "assert 'targetKind === state.kind' in desktop_runtime",
+            "assert 'relationshipGraphRoute(relationshipCharacterId, worldId)' in world_app",
+            "assert '<WorldRelationshipsScreen characterId={relationshipCharacterId ?? ownerActor?.character_id ?? null} worldId={worldId}' in world_app",
+            "assert 'export function relationshipGraphRoute' in product_routes",
+            "assert marker in windows"
+          ],
+          "test_phone_product_window_allowlist_matches_local_route_capabilities": [
+            "assert '[\"settings\"] | [\"login\"] | [\"posts\"] | [\"agents\"]' in windows",
+            "assert '[\"worlds\", world_id, \"posts\", post_id]' in windows",
+            "assert 'fn safe_world_id' in windows",
+            "assert 'decoded != \"new\" && safe_decoded_segment(&decoded)' in windows",
+            "assert 'fn decode_route_segment' in windows"
+          ],
+          "test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner": [
+            "assert 'isStaticLocalProductRouteSupported' in capability",
+            "assert 'data-product-route-unavailable=\"true\"' in product_link",
+            "assert 'aria-disabled=\"true\"' in product_link",
+            "assert 'role=\"link\"' in product_link",
+            "assert 'event.stopPropagation()' in product_link",
+            "assert 'local-product-link.module.css' in product_link",
+            "assert 'SocialPostRow' in feed",
+            "assert 'LocalProductLink' in social_post_row",
+            "assert 'const canStartMessage = !isLocalAgent && !isStaticFrontendProfile()' in agent",
+            "assert 'getRuntimeConfig()?.apiBaseUrl ?? window.location.origin' in agent",
+            "assert 'resolveScrollEventTarget' in feed",
+            "assert 'resolveScrollEventTarget' in agent",
+            "assert 'resolveScrollEventTarget' in pull_to_refresh",
+            "assert 'export function isScrollNearBottom' in scroll_viewport",
+            "assert 'const [ready, setReady] = useState(false)' in static_router"
+          ],
+          "test_programmatic_navigation_respects_product_window_boundaries": [
+            "assert 'export async function navigateDesktopProductRoute' in desktop_runtime",
+            "assert 'const targetKind = desktopWindowKindForRoute(normalized)' in desktop_runtime",
+            "assert 'if (targetKind === state.kind)' in desktop_runtime",
+            "assert 'await openDesktopProductWindow(targetKind, normalized)' in desktop_runtime",
+            "assert 'desktopWindowKindForRoute(normalized) !== state.kind' in desktop_runtime",
+            "assert 'if (isTauriDesktopRuntime())' in runtime_navigation",
+            "assert 'navigateDesktopProductRoute(href, replace)' in runtime_navigation",
+            "assert 'window.location' not in tauri_branch"
+          ],
+          "test_static_and_next_profiles_share_the_same_window_bridge": [
+            "assert '<DesktopWindowBridge />' in next_layout",
+            "assert '<DesktopWindowBridge />' in static_layout",
+            "assert 'currentDesktopRoute' in router",
+            "assert 'subscribeDesktopRoute' in router",
+            "assert 'return `${route.pathname}\\\\n${route.search}`;' in router",
+            "assert 'const route = `${location.pathname}${location.search}`;' in router",
+            "assert config['build']['devUrl'] == 'http://127.0.0.1:3000'",
+            "assert config['build']['frontendDist'] == '../../frontend/out'"
+          ],
+          "test_memory_read_surface_replaces_the_inactive_explorer_placeholder": [
+            "assert 'id: \"memory\"' in contract",
+            "assert 'label: \"Memory\"' in contract",
+            "assert 'href: \"/memory\"' in contract",
+            "assert 'availability: \"available\"' in contract",
+            "assert 'id: \"memory-explorer\"' not in contract"
+          ],
+          "test_desktop_build_outputs_never_enter_docker_build_context": [
+            "assert ignored_output in dockerignore"
+          ]
+        },
+        "tests/test_release_gitleaks_provenance.py": {
+          "groups": [],
+          "allowed": [],
+          "test_release_provenance_review_keeps_rule_path_and_full_line_conditions": [
+            "assert len(reviewed) == 1",
+            "assert reviewed[0]['targetRules'] == ['generic-api-key']",
+            "assert reviewed[0]['condition'] == 'AND'",
+            "assert reviewed[0]['regexTarget'] == 'line'",
+            "assert reviewed[0]['paths'] == ['(^|/)security/refactor_backend_additions\\\\.json$', '(^|/)security/post_refactor_contract_changes\\\\.json$']",
+            "assert len(reviewed[0]['regexes']) == len({(row[1], row[2]) for row in EVIDENCE})",
+            "assert all((pattern.startswith('^\\\\s*') and pattern.endswith('$') for pattern in reviewed[0]['regexes']))"
+          ],
+          "test_reviewed_public_source_blobs_match_actual_committed_objects_and_ancestry": [
+            "assert actual == blob",
+            "assert allowed(manifest, line)"
+          ],
+          "test_release_provenance_exceptions_reject_changed_value_key_path_or_extra_data": [
+            "assert len(vectors) == 1",
+            "assert group['targetRules'] == ['generic-api-key']",
+            "assert group['condition'] == 'AND' and group['regexTarget'] == 'line'",
+            "assert group['paths'] == ['(^|/)backend/tests/test_release_gitleaks_provenance\\\\.py$']",
+            "assert len(group['regexes']) == len(EVIDENCE)",
+            "assert all((pattern.startswith('^\\\\s*') and pattern.endswith('$') for pattern in group['regexes']))",
+            "assert not any((re.search(pattern, 'backend/app/config.py') for pattern in group['paths']))",
+            "assert not allowed('backend/app/config.py', line)",
+            "assert not allowed(manifest + '.backup', line)",
+            "assert not allowed(manifest, line.replace(blob, '0' * 40))",
+            "assert not allowed(manifest, line.replace(source, 'api_key'))",
+            "assert not allowed(manifest, line + ' \"api_key\": \"unrelated-value\"')",
+            "assert any((re.search(pattern, line) for pattern in group['regexes']))",
+            "assert not any((re.search(pattern, line.replace(row[2], '0' * 40)) for pattern in group['regexes']))",
+            "assert not any((re.search(pattern, line + ' api_key=\"unrelated-value\"') for pattern in group['regexes']))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_daypart_runtime_bindings.py": {},
+        "tests/migrations/test_alembic_layout.py": {},
+        "tests/migrations/test_observation_outbox_v20.py": {},
+        "tests/runtime/test_sidecar_world_erasure_resources.py": {},
+        "tests/test_l3_er5_tauri_product_shell_contract.py": {},
+        "tests/test_release_gitleaks_provenance.py": {}
+      }
     }
   ]
 }
