@@ -19,6 +19,16 @@ def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
 
 
+def test_actions_event_key_is_not_a_yaml_boolean(tmp_path):
+    path = REPO_ROOT / ".github/workflows/windows-installer.yml"
+    text = path.read_text(encoding="utf-8")
+    parsed = checker.yaml.load(text, Loader=checker._UniqueKeyLoader)
+    assert "on" in parsed and True not in parsed
+    broken = tmp_path / "windows-installer.yml"
+    broken.write_text(text.replace("'on':", "true:", 1), encoding="utf-8")
+    assert any("event key" in error for error in checker.check_workflow(broken)[0])
+
+
 def test_core_reports_reject_database_or_directory_uploads() -> None:
     path = REPO_ROOT / ".github/workflows/ci.yml"
     text = path.read_text(encoding="utf-8")
@@ -26,7 +36,7 @@ def test_core_reports_reject_database_or_directory_uploads() -> None:
     assert checker.check_report_uploads(document, "ci.yml", text) == []
     for unsafe_path in ("browser-tests/.ci/canonical.sqlite3", "browser-tests/.ci/"):
         changed = copy.deepcopy(document)
-        uploads = [step for step in changed["jobs"]["frontend"]["steps"]
+        uploads = [step for step in changed["jobs"]["frontend-work"]["steps"]
                    if str(step.get("uses", "")).startswith("actions/upload-artifact@")]
         assert len(uploads) == 1
         uploads[0]["with"]["path"] += "\n" + unsafe_path

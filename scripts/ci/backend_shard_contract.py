@@ -6,9 +6,12 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from impact import digest as selection_digest, select_nodes
 
 SHARD_COUNT = 4
-SCHEMA = "backend-test-shard.v1"
+SCHEMA = "backend-test-shard.v2"
 
 
 def shard_for(node: str) -> int:
@@ -37,7 +40,7 @@ def node_result(phases: dict[str, str]) -> str:
 
 
 class ExecutionCoverage:
-    def __init__(self, index: int, journal: Path):
+    def __init__(self, index: int, journal: Path, selection: dict | None = None):
         if type(index) is not int or not 0 <= index < SHARD_COUNT:
             raise ValueError("invalid_backend_shard_index")
         self.index = index
@@ -46,6 +49,8 @@ class ExecutionCoverage:
         self.selected: list[str] = []
         self.phases: dict[str, dict[str, str]] = defaultdict(dict)
         self.collection_completed = False
+        self.selection = selection or {"backend": "full", "test_paths": []}
+        self.suite_nodes: list[str] = []
 
     def pytest_collection_modifyitems(self, config, items):
         import pytest
@@ -53,10 +58,11 @@ class ExecutionCoverage:
         self.all_nodes = [item.nodeid for item in items]
         if not self.all_nodes or len(self.all_nodes) != len(set(self.all_nodes)):
             raise pytest.UsageError("backend_collection_empty_or_duplicate")
+        self.suite_nodes = select_nodes(self.all_nodes, self.selection)
         selected, deselected = [], []
         for item in items:
-            (selected if shard_for(item.nodeid) == self.index else deselected).append(item)
-        if not selected:
+            (selected if item.nodeid in self.suite_nodes and shard_for(item.nodeid) == self.index else deselected).append(item)
+        if not selected and self.selection["backend"] == "full":
             raise pytest.UsageError("backend_shard_empty")
         self.selected = [item.nodeid for item in selected]
         config.hook.pytest_deselected(items=deselected)
@@ -78,13 +84,17 @@ class ExecutionCoverage:
         return {"schema": SCHEMA, "identity": identity, "index": self.index,
             "count": SHARD_COUNT, "collection_completed": self.collection_completed,
             "all_nodes": self.all_nodes, "collection_sha256": collection_digest(self.all_nodes),
+            "suite_nodes": self.suite_nodes, "suite_sha256": collection_digest(self.suite_nodes),
+            "selection_sha256": selection_digest(self.selection),
             "selected_nodes": self.selected, "exit_code": exit_code,
             "results": {node: {"phases": self.phases[node], "outcome": node_result(self.phases[node])}
                         for node in self.selected}}
 
 
-def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str) -> dict:
-    if any(re.fullmatch(r"[0-9a-f]{40}", value) is None for value in (source_sha, checkout_sha)):
+def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str, checkout_tree: str,
+                   selection: dict | None = None, run_id: str = "0", run_attempt: str = "1") -> dict:
+    selection = selection or {"backend": "full", "test_paths": []}
+    if any(re.fullmatch(r"[0-9a-f]{40}", value) is None for value in (source_sha, checkout_sha, checkout_tree)):
         raise ValueError("backend_coverage_commit_invalid")
     if len(reports) != SHARD_COUNT:
         raise ValueError("backend_shard_reports_missing")
@@ -96,6 +106,7 @@ def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str) -
     if len(reference) != len(set(reference)):
         raise ValueError("backend_collection_duplicate")
     digest = collection_digest(reference)
+    suite = select_nodes(reference, selection)
     identities = []
     executed: list[str] = []
     totals = {"passed": 0, "skipped": 0}
@@ -107,18 +118,24 @@ def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str) -
             raise ValueError("backend_shard_not_completed_successfully")
         identity = report.get("identity", {})
         if (not isinstance(identity, dict) or set(identity) != {
-                "source_sha", "checkout_sha", "checkout_tree", "python", "lock_sha256"}
+                "source_sha", "checkout_sha", "checkout_tree", "python", "lock_sha256", "run_id", "run_attempt"}
                 or re.fullmatch(r"[0-9a-f]{40}", identity.get("checkout_tree", "")) is None
                 or re.fullmatch(r"[0-9a-f]{64}", identity.get("lock_sha256", "")) is None
                 or re.fullmatch(r"\d+\.\d+\.\d+", identity.get("python", "")) is None):
             raise ValueError("backend_shard_runtime_identity_invalid")
-        if identity.get("source_sha") != source_sha or identity.get("checkout_sha") != checkout_sha:
+        if (identity.get("source_sha") != source_sha or identity.get("checkout_sha") != checkout_sha
+                or identity.get("checkout_tree") != checkout_tree):
             raise ValueError("backend_shard_source_mismatch")
+        if identity.get("run_id") != run_id or identity.get("run_attempt") != run_attempt:
+            raise ValueError("backend_shard_run_mismatch")
         identities.append(identity)
         if (report.get("all_nodes") != reference or report.get("collection_sha256") != digest):
             raise ValueError("backend_shard_collection_mismatch")
-        expected = [node for node in reference if shard_for(node) == index]
-        if not expected or report.get("selected_nodes") != expected:
+        if (report.get("suite_nodes") != suite or report.get("suite_sha256") != collection_digest(suite)
+                or report.get("selection_sha256") != selection_digest(selection)):
+            raise ValueError("backend_shard_suite_mismatch")
+        expected = [node for node in suite if shard_for(node) == index]
+        if (not expected and selection["backend"] == "full") or report.get("selected_nodes") != expected:
             raise ValueError("backend_shard_selection_mismatch")
         results = report.get("results")
         if not isinstance(results, dict) or set(results) != set(expected):
@@ -132,8 +149,10 @@ def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str) -
         executed.extend(expected)
     if any(identity != identities[0] for identity in identities[1:]):
         raise ValueError("backend_shard_runtime_identity_mismatch")
-    if len(executed) != len(set(executed)) or set(executed) != set(reference):
+    if not executed or len(executed) != len(set(executed)) or set(executed) != set(suite):
         raise ValueError("backend_shard_union_incomplete")
-    return {"schema": "backend-test-coverage.v1", "source_sha": source_sha,
-        "checkout_sha": checkout_sha, "collection_sha256": digest,
-        "collected": len(reference), "covered": len(executed), "shards": SHARD_COUNT, **totals}
+    return {"schema": "backend-test-coverage.v2", "source_sha": source_sha,
+        "checkout_sha": checkout_sha, "checkout_tree": checkout_tree, "collection_sha256": digest,
+        "profile": selection["backend"], "suite_sha256": collection_digest(suite),
+        "run_id": run_id, "run_attempt": run_attempt,
+        "collected": len(reference), "selected": len(suite), "covered": len(executed), "shards": SHARD_COUNT, **totals}

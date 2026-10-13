@@ -112,10 +112,19 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
 
     installer_workflow = yaml.safe_load(windows_installer)
     jobs = installer_workflow["jobs"]
+    verification = next(
+        step for step in jobs["release-candidate"]["steps"]
+        if step.get("name") == "Verify ER6 migration, restore, and installer contracts"
+    )["run"]
+    # A pytest failure must stop this multi-command PowerShell step before
+    # a later successful checker can replace its process exit code.
+    assert verification.index("$ErrorActionPreference = 'Stop'") < verification.index("-m pytest")
+    assert verification.index("$PSNativeCommandUseErrorActionPreference = $true") < verification.index("-m pytest")
     for job_id in (
         "release-candidate",
         "windows-installer-supported-upgrade",
         "windows-installer-failure-recovery",
+        "windows-installer-representative-upgrade",
     ):
         checkout = next(
             step
@@ -127,16 +136,37 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
 
     assert "$env:GITHUB_SHA" not in windows_installer
     assert "angmoo-windows-installer-${{ github.sha }}" not in windows_installer
-    assert windows_installer.count("angmoo-windows-installer-${{ env.SOURCE_SHA }}") == 4
+    candidate_name = "angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}"
+    publisher = next(
+        step for step in jobs["release-candidate"]["steps"]
+        if step.get("name") == "Upload release-candidate evidence"
+    )
+    assert publisher["with"]["name"] == candidate_name
+    candidate_consumers = (
+        "installed-runtime-smoke",
+        "windows-installer-supported-upgrade",
+        "windows-installer-failure-recovery",
+        "windows-installer-representative-upgrade",
+    )
+    for job_id in candidate_consumers:
+        downloads = [
+            step for step in jobs[job_id]["steps"]
+            if str(step.get("uses", "")).startswith("actions/download-artifact@")
+            and str(step.get("with", {}).get("name", "")).startswith("angmoo-windows-installer-")
+        ]
+        assert len(downloads) == 1
+        assert downloads[0]["with"]["name"] == candidate_name
     assert "--commit $env:SOURCE_SHA" in windows_installer
     assert "$payloadIdentity.build_commit -ne $env:SOURCE_SHA" in windows_installer
     assert "-Mode Upgrade" in windows_installer
     assert "-Mode Recovery" in windows_installer
     assert jobs["windows-installer"]["needs"] == [
+        "impact",
         "release-candidate",
         "installed-runtime-smoke",
         "windows-installer-supported-upgrade",
         "windows-installer-failure-recovery",
+        "windows-installer-representative-upgrade",
     ]
 
     guard_index = installer_fixture.index("windows_installer_hosted_runner_only")
@@ -151,4 +181,10 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
     assert "RUNNER_ENVIRONMENT -cne 'github-hosted'" in installer_fixture
     assert "windows_installer_hosted_sentinel_invalid" in installer_fixture
     assert "windows_installer_supported_upgrade_fixture_not_synthetic" in installer_fixture
-    assert windows_installer.count("-RunSentinel $sentinel") == 2
+    for job_id in candidate_consumers[1:]:
+        native_steps = [
+            step for step in jobs[job_id]["steps"]
+            if "run_windows_installer_supported_upgrade.ps1" in str(step.get("run", ""))
+        ]
+        assert len(native_steps) == 1
+        assert "-RunSentinel $sentinel" in native_steps[0]["run"]

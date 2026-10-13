@@ -10,22 +10,47 @@ from time import monotonic
 import pytest
 
 
-def test_worker_deadline_keeps_last_native_stage_and_does_not_return_late_success():
-    observation, token = recording()
-    workers = FaultWorkers("slow")
-    try:
-        with pytest.raises(TimeoutError):
-            # This fault targets nn_query, not cold spawn/import. Leave enough
-            # startup budget to reach that stage; the child cannot finish in it.
-            asyncio.run(workers.search(None, deadline=monotonic()+30))
-        terminal = observation.search_trace.payload()["terminals"][0]
-        assert terminal["terminal_state"] == "deadline"
-        assert terminal["failure"]["failure_code"] == "deadline_exceeded"
-        assert terminal["last_observed_stage"] == "nn_query"
-        assert terminal["eligible_vector_count"] == 7
-        assert terminal["joined"] and not workers.active_processes
-    finally:
-        current.reset(token)
+@pytest.mark.parametrize("retain_progress", [True, False])
+def test_worker_deadline_keeps_last_native_stage_and_does_not_return_late_success(retain_progress):
+    async def run():
+        observation, token = recording()
+        ready = multiprocessing.get_context("spawn").Event()
+        workers = FaultWorkers("slow")
+        workers._child_target = deadline_child
+        workers._arguments = (ready, retain_progress)
+        task = asyncio.create_task(workers.search(None, deadline=monotonic()+30))
+        try:
+            # Arrival is independent of the best-effort diagnostic channel.
+            # The retained case acknowledges publication before awaiting the
+            # real deadline; the lost case proves that missing progress is not
+            # misreported as an observed NN stage.
+            async with asyncio.timeout(20):
+                while not ready.is_set():
+                    if task.done():
+                        pytest.fail("deadline fixture exited before reaching NN")
+                    await asyncio.sleep(0.005)
+            with pytest.raises(TimeoutError):
+                await task
+            payload = observation.search_trace.payload()
+            terminal = payload["terminals"][0]
+            assert terminal["terminal_state"] == "deadline"
+            assert terminal["failure"]["failure_code"] == "deadline_exceeded"
+            if retain_progress:
+                assert terminal["last_observed_stage"] == "nn_query"
+                assert terminal["eligible_vector_count"] == 7
+            else:
+                assert terminal["last_observed_stage"] in {None, "child_bootstrap"}
+                assert not any(row["stage"] == "nn_query" for row in payload["stages"])
+            assert terminal["result_received"] is False
+            assert terminal["terminate_sent"] and terminal["joined"]
+            assert payload["coverage"] == "partial"
+            assert not workers.active_processes
+        finally:
+            if not task.done():
+                task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+            current.reset(token)
+    asyncio.run(run())
 
 
 def test_completed_progress_is_not_replaced_by_stale_terminal_snapshot():
@@ -137,6 +162,23 @@ def cancellation_child(pipe, stage_ready, drop_first_progress, query, deadline):
     finally:
         if held:
             trace.progress.lock.release()
+        pipe.close()
+
+
+def deadline_child(pipe, stage_ready, retain_progress, query, deadline):
+    if retain_progress:
+        # Reuse the cancellation fixture's publication acknowledgement; only
+        # the parent termination stimulus differs (deadline versus cancel).
+        return cancellation_child(pipe, stage_ready, True, query, deadline)
+    trace = current_worker.get()
+    trace.metadata["eligible_vector_count"] = 7
+    trace.progress.lock.acquire()
+    try:
+        with phase("nn_query"):
+            trace.progress.lock.release()
+            stage_ready.set()
+            time.sleep(60)
+    finally:
         pipe.close()
 
 

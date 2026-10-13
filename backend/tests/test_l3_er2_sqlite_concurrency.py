@@ -230,10 +230,14 @@ def test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed(
     barrier = Barrier(10)
 
     def acquire(owner_id: str) -> tuple[str, int] | None:
-        barrier.wait()
+        barrier.wait(timeout=10)
         try:
             snapshot = repository.acquire(owner_id=owner_id, ttl_seconds=30)
         except SchedulerLeaseHeldError:
+            return None
+        except SqliteBusyRetryExhausted as error:
+            assert error.reason_code == "sqlite_busy_retry_exhausted"
+            assert error.sqlite_errorcode & 0xFF == sqlite3.SQLITE_BUSY
             return None
         return owner_id, snapshot.fencing_epoch
 
@@ -244,6 +248,12 @@ def test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed(
     assert len(winners) == 1
     winner_id, winner_epoch = winners[0]
     assert winner_epoch == 1
+    # After contention, every other claimant must observe the real owner;
+    # a bounded busy response must never grant a second lease.
+    for owner_id in (f"scheduler-{index}" for index in range(10)):
+        if owner_id != winner_id:
+            with pytest.raises(SchedulerLeaseHeldError):
+                repository.acquire(owner_id=owner_id, ttl_seconds=30)
 
     clock.advance(seconds=31)
     reclaimed = repository.acquire(owner_id="scheduler-recovered", ttl_seconds=30)
@@ -305,25 +315,57 @@ def test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick(
     database.close()
 
 
+@pytest.mark.parametrize("hold_writer", [False, True])
 def test_ten_same_manual_requests_commit_one_public_write(
     tmp_path: Path,
+    hold_writer: bool,
 ) -> None:
     database = _database(tmp_path)
     _seed_world_and_outbox(database)
     barrier = Barrier(10)
 
-    def write_once(_index: int) -> bool:
-        barrier.wait()
-        return _create_manual_post_once(database)
+    def write_once(_index: int) -> bool | None:
+        barrier.wait(timeout=10)
+        try:
+            return _create_manual_post_once(database)
+        except SqliteBusyRetryExhausted as error:
+            # Bounded writer admission explicitly permits a busy response.
+            # Host scheduling cannot guarantee ten admissions within 250 ms.
+            assert error.reason_code == "sqlite_busy_retry_exhausted"
+            assert error.sqlite_errorcode & 0xFF == sqlite3.SQLITE_BUSY
+            return None
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        created = list(executor.map(write_once, range(10)))
+    holder = database.engine.connect() if hold_writer else None
+    try:
+        if holder is not None:
+            holder.exec_driver_sql("BEGIN IMMEDIATE")
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            created = list(executor.map(write_once, range(10)))
 
-    assert created.count(True) == 1
-    with Session(database.engine) as session:
-        assert session.scalar(select(func.count(models.Post.id))) == 1
-        assert session.scalar(select(func.count(models.OwnerManualSocialWrite.id))) == 1
-    database.close()
+        expected_initial = 0 if hold_writer else 1
+        assert created.count(True) == expected_initial
+        if hold_writer:
+            assert created == [None] * 10
+        with Session(database.engine) as session:
+            assert session.scalar(select(func.count(models.Post.id))) == expected_initial
+            assert session.scalar(select(func.count(models.OwnerManualSocialWrite.id))) == expected_initial
+        if holder is not None:
+            holder.rollback()
+            holder.close()
+            holder = None
+
+        # Explicit client redelivery after contention, including redelivery of
+        # successes. No retry loop or extended product deadline hides failure.
+        replayed = [_create_manual_post_once(database) for _ in range(10)]
+        assert replayed.count(True) == 1 - expected_initial
+        with Session(database.engine) as session:
+            assert session.scalar(select(func.count(models.Post.id))) == 1
+            assert session.scalar(select(func.count(models.OwnerManualSocialWrite.id))) == 1
+    finally:
+        if holder is not None:
+            holder.rollback()
+            holder.close()
+        database.close()
 
 
 def test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed(
@@ -334,16 +376,21 @@ def test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed(
     outbox = SqliteProjectionOutbox(database.engine)
     barrier = Barrier(10)
 
-    def claim(worker_id: str) -> tuple[str, ...]:
-        barrier.wait()
-        return tuple(
-            item.id
-            for item in outbox.claim(
-                worker_id=worker_id,
-                now=NOW,
-                batch_size=1,
+    def claim(worker_id: str) -> tuple[str, ...] | None:
+        barrier.wait(timeout=10)
+        try:
+            return tuple(
+                item.id
+                for item in outbox.claim(
+                    worker_id=worker_id,
+                    now=NOW,
+                    batch_size=1,
+                )
             )
-        )
+        except SqliteBusyRetryExhausted as error:
+            assert error.reason_code == "sqlite_busy_retry_exhausted"
+            assert error.sqlite_errorcode & 0xFF == sqlite3.SQLITE_BUSY
+            return None
 
     workers = [f"projector-{index}" for index in range(10)]
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -352,6 +399,9 @@ def test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed(
     owners = [workers[index] for index, result in enumerate(claims) if result]
     assert len(owners) == 1
     first_owner = owners[0]
+    for worker_id in workers:
+        if worker_id != first_owner:
+            assert not outbox.claim(worker_id=worker_id, now=NOW, batch_size=1)
     with Session(database.engine) as session:
         row = session.get(models.GraphProjectionOutbox, "outbox-concurrency")
         assert row is not None

@@ -10,7 +10,7 @@ from test_t2_ci_policy import checker
 def report(job):
     return {
         "name": "Preserve test reports",
-        "if": "always()",
+        "if": "success() && needs.impact.outputs.backend == 'true'" if job == "backend" else "always()",
         "uses": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
         "with": {
             "name": checker.CORE_TEST_REPORT_NAMES[job],
@@ -26,7 +26,7 @@ def errors(step, *, job="backend", workflow="ci.yml"):
     return checker.check_report_uploads(document, workflow, yaml.safe_dump(document))
 
 
-@pytest.mark.parametrize("job", ["backend", "frontend", "backend-preflight", "backend-tests"])
+@pytest.mark.parametrize("job", ["backend", "frontend-work", "backend-preflight", "backend-tests"])
 def test_exact_synthetic_test_report_files_are_allowed(job):
     assert errors(report(job), job=job) == []
 
@@ -49,10 +49,10 @@ def test_artifact_paths_cannot_expand_or_become_dynamic(path):
     "artifacts/image-integration/browser/**/stdout.txt",
 ])
 def test_image_failure_reports_reject_extra_files_and_directories(path):
-    step = report("frontend")
-    assert errors(step, job="frontend") == []
+    step = report("frontend-work")
+    assert errors(step, job="frontend-work") == []
     step["with"]["path"] += "\n" + path
-    assert errors(step, job="frontend") == [
+    assert errors(step, job="frontend-work") == [
         "raw artifact upload is limited to the installer or exact Core test reports"
     ]
 

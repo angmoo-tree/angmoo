@@ -1,5 +1,14 @@
 # Angmoo Frontend Architecture
 
+## CI scope and completed migration evidence (2026-10-14)
+
+Current architecture and DESIGN rules remain authoritative. Completed migration
+source snapshots remain audit evidence rather than a requirement to preserve old
+source text in routine CI. Current boundary, design, translation, type and browser
+checks protect the supported Next and static paths. Those paths are distinct
+product consumers, so similar fixtures alone do not justify deleting either path's
+coverage. See [CI validation](../docs/operations/ci-validation.md).
+
 ## World and own-profile image transport (2026-10-12 LOCAL)
 
 Worlds API owns exact four-field serialization for own-profile uploads. Shared
