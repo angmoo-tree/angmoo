@@ -292,7 +292,7 @@
     "configs": [
       {
         "path": "browser-tests/playwright.config.ts",
-        "sha256": "52729cdb066f1c28b7f0cf6fc90883a762f41bc5cd0798345d4bfadf32544a27"
+        "sha256": "4053d2cced31a9f95959ecf5d5847697cedb1c471ba96b8640d6d7b828df7133"
       },
       {
         "path": "browser-tests/playwright.static.config.ts",
@@ -300,7 +300,7 @@
       },
       {
         "path": "browser-tests/playwright.ui-e-local-settings.config.ts",
-        "sha256": "134308f052dd016993275a5791dc3151507f8e4fb357527a40c70de1bdbce689"
+        "sha256": "3873484963a6594164c15791115801298f27b092f868cfef6b798b89255124a7"
       },
       {
         "path": "browser-tests/playwright.visual.config.ts",

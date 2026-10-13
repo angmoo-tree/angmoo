@@ -4,6 +4,7 @@ const port = Number(process.env.ANGMOO_E2E_PORT ?? "3100");
 const baseURL = process.env.ANGMOO_E2E_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 export default defineConfig({
+  metadata: { nextRuntime: process.env.CI ? "production" : "development" },
   testDir: ".",
   testMatch: "product-shell.spec.ts",
   fullyParallel: false,
@@ -23,7 +24,9 @@ export default defineConfig({
   webServer: process.env.ANGMOO_E2E_BASE_URL
     ? undefined
     : {
-        command: `pnpm --dir ../frontend ${process.env.CI ? "start" : "dev"} --hostname 127.0.0.1 --port ${port}`,
+        command: process.env.CI
+          ? `node ../frontend/scripts/serve-production.mjs --port ${port}`
+          : `pnpm --dir ../frontend dev --hostname 127.0.0.1 --port ${port}`,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         url: baseURL,

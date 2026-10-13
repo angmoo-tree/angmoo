@@ -7,6 +7,7 @@ export default defineConfig({
   timeout: 60_000, expect: { timeout: 15_000 }, reporter: "list",
   use: { ...devices["Desktop Chrome"], baseURL: `http://127.0.0.1:${port}`, trace: "retain-on-failure" },
   webServer: { command: staticShell ? `node ../frontend/scripts/serve-static.mjs --port ${port}`
-    : `pnpm --dir ../frontend ${process.env.CI ? "start" : "dev"} --hostname 127.0.0.1 --port ${port}`,
+    : process.env.CI ? `node ../frontend/scripts/serve-production.mjs --port ${port}`
+      : `pnpm --dir ../frontend dev --hostname 127.0.0.1 --port ${port}`,
     url: `http://127.0.0.1:${port}`, reuseExistingServer: false, timeout: 120_000 },
 });
