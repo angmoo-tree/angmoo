@@ -91,10 +91,10 @@ class ExecutionCoverage:
                         for node in self.selected}}
 
 
-def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str,
+def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str, checkout_tree: str,
                    selection: dict | None = None, run_id: str = "0", run_attempt: str = "1") -> dict:
     selection = selection or {"backend": "full", "test_paths": []}
-    if any(re.fullmatch(r"[0-9a-f]{40}", value) is None for value in (source_sha, checkout_sha)):
+    if any(re.fullmatch(r"[0-9a-f]{40}", value) is None for value in (source_sha, checkout_sha, checkout_tree)):
         raise ValueError("backend_coverage_commit_invalid")
     if len(reports) != SHARD_COUNT:
         raise ValueError("backend_shard_reports_missing")
@@ -123,7 +123,8 @@ def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str,
                 or re.fullmatch(r"[0-9a-f]{64}", identity.get("lock_sha256", "")) is None
                 or re.fullmatch(r"\d+\.\d+\.\d+", identity.get("python", "")) is None):
             raise ValueError("backend_shard_runtime_identity_invalid")
-        if identity.get("source_sha") != source_sha or identity.get("checkout_sha") != checkout_sha:
+        if (identity.get("source_sha") != source_sha or identity.get("checkout_sha") != checkout_sha
+                or identity.get("checkout_tree") != checkout_tree):
             raise ValueError("backend_shard_source_mismatch")
         if identity.get("run_id") != run_id or identity.get("run_attempt") != run_attempt:
             raise ValueError("backend_shard_run_mismatch")
@@ -151,7 +152,7 @@ def verify_reports(reports: list[dict], *, source_sha: str, checkout_sha: str,
     if not executed or len(executed) != len(set(executed)) or set(executed) != set(suite):
         raise ValueError("backend_shard_union_incomplete")
     return {"schema": "backend-test-coverage.v2", "source_sha": source_sha,
-        "checkout_sha": checkout_sha, "collection_sha256": digest,
+        "checkout_sha": checkout_sha, "checkout_tree": checkout_tree, "collection_sha256": digest,
         "profile": selection["backend"], "suite_sha256": collection_digest(suite),
         "run_id": run_id, "run_attempt": run_attempt,
         "collected": len(reference), "selected": len(suite), "covered": len(executed), "shards": SHARD_COUNT, **totals}

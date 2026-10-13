@@ -23,7 +23,7 @@ def main() -> int:
         raise ValueError("backend_shard_report_path_invalid")
     plan = read_plan(args.impact_plan)
     result = verify_reports([json.loads(path.read_text(encoding="utf-8")) for path in paths],
-        source_sha=args.source_sha, checkout_sha=args.checkout_sha, selection=plan["effective"],
+        source_sha=args.source_sha, checkout_sha=args.checkout_sha, checkout_tree=plan["checkout_tree"], selection=plan["effective"],
         run_id=os.environ.get("GITHUB_RUN_ID", "0"), run_attempt=os.environ.get("GITHUB_RUN_ATTEMPT", "1"))
     print(json.dumps(result, sort_keys=True))
     (root / "backend-shard-coverage.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")

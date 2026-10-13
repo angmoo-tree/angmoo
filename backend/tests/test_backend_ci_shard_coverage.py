@@ -57,7 +57,7 @@ def completed_partitions(tmp_path_factory):
 
 def test_four_real_pytest_sessions_cover_each_original_case_exactly_once(completed_partitions):
     result = contract.verify_reports(completed_partitions,
-        source_sha=IDENTITY["source_sha"], checkout_sha=IDENTITY["checkout_sha"])
+        source_sha=IDENTITY["source_sha"], checkout_sha=IDENTITY["checkout_sha"], checkout_tree=IDENTITY["checkout_tree"])
     assert result["collected"] == result["covered"] == result["passed"] == 80
     assert result["skipped"] == 0
     assert result["shards"] == 4
@@ -87,6 +87,7 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_selected_corpus
                     ["-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "synthetic CLI fixture"]):
         subprocess.run(["git", *command], cwd=root, check=True, capture_output=True)
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], cwd=root, text=True).strip()
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
     env.pop("PYTEST_ADDOPTS", None)
@@ -113,7 +114,7 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_selected_corpus
         assert result.returncode == 0, result.stdout + result.stderr
         reports.append(json.loads((backend / ".ci/backend-shard-report.json").read_text()))
     if profile == "full":
-        coverage = contract.verify_reports(reports, source_sha=sha, checkout_sha=sha)
+        coverage = contract.verify_reports(reports, source_sha=sha, checkout_sha=sha, checkout_tree=tree)
         assert coverage["collected"] == coverage["covered"] == coverage["passed"] == 80
         assert coverage["skipped"] == 0
     else:
@@ -126,7 +127,7 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_selected_corpus
 
 
 @pytest.mark.parametrize("mutation", ["missing_shard", "duplicate_shard", "wrong_source",
-    "changed_collection", "missing_result", "unexecuted", "teardown_failure", "wrong_selection", "wrong_attempt", "missing_suite"])
+    "changed_collection", "missing_result", "unexecuted", "teardown_failure", "wrong_selection", "wrong_attempt", "missing_suite", "all_wrong_tree"])
 def test_missing_failed_or_unexecuted_coverage_cannot_become_aggregate_success(completed_partitions, mutation):
     reports = deepcopy(completed_partitions)
     node = reports[0]["selected_nodes"][0]
@@ -140,8 +141,11 @@ def test_missing_failed_or_unexecuted_coverage_cannot_become_aggregate_success(c
     elif mutation == "wrong_selection": reports[0]["selected_nodes"].append(reports[1]["selected_nodes"][0])
     elif mutation == "wrong_attempt": reports[0]["identity"]["run_attempt"] = "2"
     elif mutation == "missing_suite": reports[0]["suite_nodes"].pop()
+    elif mutation == "all_wrong_tree":
+        for report in reports:
+            report["identity"]["checkout_tree"] = "9" * 40
     with pytest.raises(ValueError):
-        contract.verify_reports(reports, source_sha=IDENTITY["source_sha"], checkout_sha=IDENTITY["checkout_sha"])
+        contract.verify_reports(reports, source_sha=IDENTITY["source_sha"], checkout_sha=IDENTITY["checkout_sha"], checkout_tree=IDENTITY["checkout_tree"])
 
 
 def test_real_fixture_teardown_failure_is_failed_even_when_the_call_passes(tmp_path):

@@ -37,4 +37,6 @@ PR/main success and release-candidate validation are separate states. Select a f
 
 For classifier uncertainty, widen to full. For cache corruption, quarantine only the named CI cache entry and retrieve the original fixed source. Never disable hashes, remove required checks or use an administrator merge override to obtain green status. Retry transient infrastructure errors; repair deterministic failures first.
 
+Coverage reports belong to one source/tree and one run attempt. A retry of backend shards therefore needs a fresh complete four-partition proof: rerun the affected Core workflow as a unit, not one failed partition mixed with three earlier successes. Independent successful Local Smoke or Windows Installer workflows do not need to be restarted. The same rule applies to the installer's selected predecessor report set. Diagnose the failed step first; a retry is not a substitute for fixing a reproducible test or workflow error.
+
 Track local implementation, focused local checks, hosted checks, human review, main checks, candidate checks and user checks independently. Compare wall/queue/retry time and artifact bytes by profile, not a blended average. Execution evidence and the I00–I55/R00–R08 ledger are recorded in `artifacts/ci-modernization-20261014/`; this guide describes contracts, not an assertion that all those stages have passed.
