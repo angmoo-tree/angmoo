@@ -54,7 +54,7 @@ jobs:
         repository: ${{ env.SOURCE_REPOSITORY }}
         ref: ${{ env.SOURCE_SHA }}
     - id: select
-      name: Classify actual changed paths (full observer)
+      name: Classify actual changed paths
       run: python scripts/ci/impact.py
 
   local-core-smoke-work:

@@ -50,7 +50,7 @@ jobs:
         persist-credentials: false
         fetch-depth: 0
     - id: select
-      name: Classify actual changed paths (full observer)
+      name: Classify actual changed paths
       run: python scripts/ci/impact.py
 
   backend-preflight:

@@ -209,7 +209,7 @@ def read_plan(path: Path) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path(".ci/impact.json"))
-    parser.add_argument("--mode", choices=("observe", "active"), default="observe")
+    parser.add_argument("--mode", choices=("observe", "active"), default="active")
     parser.add_argument("--profile", choices=("auto", "full"), default="auto")
     args = parser.parse_args()
     event_path = os.environ.get("GITHUB_EVENT_PATH")
