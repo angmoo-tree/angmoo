@@ -39534,6 +39534,56 @@
         "tests/test_ci_report_artifacts.py": {},
         "tests/world_configuration_fixture_support.py": {}
       }
+    },
+    {
+      "commit": "b747ef561c5a2ccb752a395532a0cc0feb7c8cfd",
+      "feature_id": "AR-BACKEND-CLI-BOOTSTRAP",
+      "reason": "Actual file-entrypoint import/collection and exact four-way execution coverage regression without inherited PYTHONPATH",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_backend_ci_shard_coverage.py::test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus"
+      ],
+      "test_assertions": {
+        "tests/test_backend_ci_shard_coverage.py": {
+          "actual_partition": [],
+          "completed_partitions": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert {event['node'] for event in events} == set(report['selected_nodes'])",
+            "assert len(events) == 3 * len(report['selected_nodes'])"
+          ],
+          "test_four_real_pytest_sessions_cover_each_original_case_exactly_once": [
+            "assert result['collected'] == result['covered'] == result['passed'] == 80",
+            "assert result['skipped'] == 0",
+            "assert result['shards'] == 4",
+            "assert all((report['selected_nodes'] for report in completed_partitions))"
+          ],
+          "test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus": [
+            "assert coverage['collected'] == coverage['covered'] == coverage['passed'] == 80",
+            "assert coverage['skipped'] == 0",
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_missing_failed_or_unexecuted_coverage_cannot_become_aggregate_success": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_real_fixture_teardown_failure_is_failed_even_when_the_call_passes": [
+            "assert result.returncode == 1",
+            "assert report['results']['test_corpus.py::test_call']['phases']['call'] == 'passed'",
+            "assert report['results']['test_corpus.py::test_call']['outcome'] == 'failed'"
+          ],
+          "test_real_fixture_setup_skip_is_recorded_without_inventing_a_call": [
+            "assert result.returncode == 0",
+            "assert 'call' not in value['phases']",
+            "assert value['outcome'] == 'skipped'"
+          ],
+          "test_ci_policy_rejects_incomplete_partition_wiring": [
+            "assert ci_policy.check_backend_partitions(jobs) == []",
+            "assert ci_policy.check_backend_partitions(jobs)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_backend_ci_shard_coverage.py": {}
+      }
     }
   ]
 }
