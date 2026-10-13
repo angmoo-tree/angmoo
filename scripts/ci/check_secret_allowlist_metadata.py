@@ -22,12 +22,13 @@ REQUIRED_FIELDS = {
     "review_due",
     "removal_condition",
 }
-EXPECTED_COUNT = 30
+EXPECTED_COUNT = 31
 PR365_CANARY_SHA256 = "aca32a5f456daa79bae5dfc7d0110a3bd19f8a9172bffe6f4d7d5365cad9d79c"
 PR365_CANARY_PATHS = frozenset({
     "backend/tests/test_t2_secret_allowlist.py",
     "security/refactor_backend_additions.json",
     "security/post_refactor_contract_changes.json",
+    "backend/security/secret_scan_allowlist.json",
 })
 PR365_CANARY_EVIDENCE = {
     "evidence_commit": "b19eca0196f92f7d48bf258df5ea3c466a1767c8",
@@ -144,7 +145,7 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
     if additions_entries != 1:
         errors.append("allowlist must contain exactly one reviewed additive fixture tuple")
     if canary_paths != PR365_CANARY_PATHS:
-        errors.append("allowlist must retain exactly the three reviewed PR365 canary paths")
+        errors.append("allowlist must retain exactly the four reviewed PR365 canary paths")
     return errors
 
 
