@@ -112,6 +112,34 @@ def recording():
     return observation, current.set(observation)
 
 
+def cancellation_child(pipe, stage_ready, drop_first_progress, query, deadline):
+    """Hold a real child at NN after its diagnostic packet is safely retained."""
+    trace = current_worker.get()
+    trace.metadata["eligible_vector_count"] = 7
+    held = False
+    try:
+        if drop_first_progress:
+            trace.progress.lock.acquire()
+            held = True
+        with phase("nn_query"):
+            if held:
+                trace.progress.lock.release()
+                held = False
+            # Progress is deliberately lossy in production. This fault fixture
+            # requires a retained NN packet before it tests caller cancellation.
+            row = trace.stages["nn_query"].model_dump(mode="json")
+            while not trace.progress.write(row, trace.metadata):
+                if monotonic() >= deadline:
+                    raise TimeoutError("cancellation_fixture_progress_deadline")
+                time.sleep(0.005)
+            stage_ready.set()
+            time.sleep(60)
+    finally:
+        if held:
+            trace.progress.lock.release()
+        pipe.close()
+
+
 @pytest.mark.parametrize("case,expected", [
     ("busy", "sqlite_busy"), ("locked", "sqlite_locked"), ("load", "extension_load_failed"),
     ("mapping", "mapping_missing"), ("eof", "result_eof"), ("protocol", "result_decode_failed"),
@@ -173,33 +201,42 @@ def test_slot_timeout_and_spawn_failure_are_distinct(monkeypatch):
 
 
 def test_cancel_preserves_last_stage_count_and_cleans_process():
-    observation, token = recording()
-    workers = FaultWorkers("slow")
-    try:
-        async def run():
-            task = asyncio.create_task(workers.search(None, deadline=monotonic()+12))
-            for _ in range(1600):
-                if any(s.stage == "nn_query" for s in collector().stages.values()):
-                    break
-                await asyncio.sleep(.005)
-            else:
-                task.cancel()
-                await asyncio.gather(task, return_exceptions=True)
-                pytest.fail("child never reached NN")
-            task.cancel()
-            with pytest.raises(asyncio.CancelledError):
-                await task
-        asyncio.run(run())
-        terminal = observation.search_trace.payload()["terminals"][0]
-        assert terminal["terminal_state"] == "cancelled"
-        assert terminal["last_observed_stage"] == "nn_query"
-        assert terminal["nn_query_started"] is True
-        assert terminal["eligible_vector_count"] == 7
-        assert terminal["joined"] and terminal["terminate_sent"]
-        assert observation.search_trace.payload()["coverage"] == "partial"
-        assert not workers.active_processes
-    finally:
-        current.reset(token)
+    for drop_first_progress in (False, True):
+        observation, token = recording()
+        stage_ready = multiprocessing.get_context("spawn").Event()
+        workers = FaultWorkers("slow")
+        workers._child_target = cancellation_child
+        workers._arguments = (stage_ready, drop_first_progress)
+        try:
+            async def run():
+                # Cancellation is injected after the child acknowledges NN;
+                # cold spawn and optional diagnostic loss are not the fault.
+                task = asyncio.create_task(workers.search(None, deadline=monotonic()+60))
+                try:
+                    async with asyncio.timeout(30):
+                        while not stage_ready.is_set():
+                            if task.done():
+                                await task
+                                pytest.fail("worker completed before cancellation point")
+                            await asyncio.sleep(.005)
+                    task.cancel()
+                    with pytest.raises(asyncio.CancelledError):
+                        await task
+                finally:
+                    if not task.done():
+                        task.cancel()
+                    await asyncio.gather(task, return_exceptions=True)
+            asyncio.run(run())
+            terminal = observation.search_trace.payload()["terminals"][0]
+            assert terminal["terminal_state"] == "cancelled"
+            assert terminal["last_observed_stage"] == "nn_query"
+            assert terminal["nn_query_started"] is True
+            assert terminal["eligible_vector_count"] == 7
+            assert terminal["joined"] and terminal["terminate_sent"]
+            assert observation.search_trace.payload()["coverage"] == "partial"
+            assert not workers.active_processes
+        finally:
+            current.reset(token)
 
 
 def test_shared_progress_is_bounded_and_never_waits_on_abandoned_lock():
