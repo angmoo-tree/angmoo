@@ -313,7 +313,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "2e8c24dcd3badf095b23c093556ae05dcef1099ec305ef84b34ef6d1edd7e7f6"
+        "sha256": "ff98d32b7519a136a089f4852beab40d37b54d583deb5e054ca289f6583875e5"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -321,7 +321,7 @@
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
-        "sha256": "f1f1fe4a325a69bb013b9e55d6a4b85defc0cfbdca858e5e2b031973335e7d11"
+        "sha256": "ae141bd6cf61c1b57ada53a23c415d50d132ee36d2d377568059470612c218e5"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -1252,7 +1252,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "6943503511fc792ee4b5ea279370eeff1bdbcb356b8747903997322464b150c3",
+    "next_static_inventory_sha256": "5e0d0a11f7605ab4e6a23909c7a559c8f858404235dd93193d3ec0b2493a142a",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,

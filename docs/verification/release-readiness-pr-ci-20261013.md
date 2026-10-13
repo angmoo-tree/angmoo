@@ -148,3 +148,56 @@ media. Schema changes use shipped versioned migrations; deployment and data
 rollback are independent of this Git integration. Platform-shell approval and
 post-merge CI receipts are recorded in the workspace execution plan rather than
 rewriting `main` to add a completion claim.
+
+## PR365 first-head CI corrections (2026-10-13)
+
+Attempt1 at source `0e625143` failed on stale current inventories, historical
+fixture construction, retired Local-mode onboarding and former UI expectations.
+Its DCO/license/full-graph/Windows advisory and Core Tauri Windows tests/build
+passed; installer child gates were skipped after their prerequisite fixture
+build failed. A failed/skipped check is not a merge PASS.
+
+Historical v1-v8 direct metadata builders now omit only later v34/v36/v37 tables,
+while all frozen manifests and released DDL remain unchanged. Synthetic v2 seeds
+copy explicit predecessor columns with row-count/FK/digest checks, and installer
+fixtures strip newer fences/tables before constructing each supported predecessor.
+The cold registry explicitly includes Worlds' two deletion models; real-app media
+factory tests bind middleware's actual SQL session factory to the same disposable
+database as their API overrides, without disabling the gate.
+
+The current quickstart creates keyless LLM registrations and proves that they
+cannot mint retained legacy Local Bot credentials. Legacy Local Bot positive
+domain tests remain. Explicit expected-status handling accepts only the selected
+409 and unrelated 401/403/422/500 responses still fail the smoke.
+
+Frontend tests exercise the current usage-state groups, compact directory,
+World-embedded graph scope, pending-memory recovery, separate relationship
+settings and topic states. Retired Feed diagnostic panels remain absent; scope,
+authorization, late-result, idempotency, readable layout and no-provider checks
+remain. No canonical PNG, visual tolerance, raw-color policy or UI wording changed.
+The current design report retains 1157 colors / 35 files / 18 surfaces / 61 calls.
+
+The synthetic real proxy uses explicit fixed-host HTTP request options. Managed
+private files reject cross-platform traversal/drive syntax before filesystem IO
+and also reject a symlink at the expected root directory. The TLS fixture sets an
+explicit TLS1.2 minimum while preserving bad-certificate/hostname/redirect tests.
+
+Pinned Gitleaks8.30.1 initially reported114 matches. Each was a public Git/schema
+fingerprint, protocol/code fragment or explicit synthetic fixture identifier.
+Added exceptions bind exact rule AND closed path AND exact matched secret value;
+other secrets on the same large JSON AST line are still detected. The corrected
+tracked-tree scan found0 leaks; full ancestor scanning is a separate final check.
+CodeQL alerts19/20 were reviewed and dismissed as false positives: SHA256/HMAC in
+the retained dev-v1 encryption/MAC protocol are not password storage, contributor
+app keys use token_urlsafe(48), current envelope writes use HKDF/AESGCM and user
+passwords use salted PBKDF2. Existing ciphertext compatibility and tamper/scope
+rejection tests remain. Other alerts await the corrected source scan.
+
+Local evidence: 39 initial scoped backend regressions; all31 readable installer
+predecessors plus the additional installer contract passed; 11 initially failing
+browser cases passed in related reruns; current media/app factory, precise HTTP
+failure handling and retained Local Bot tests9 passed; focused current security,
+registration, credentials and package tests43 passed. The isolated provider-free
+contributor smoke persisted the reply/state and verified LLM Local Bot denial.
+Hosted final-head checks, native human review, Ready, merge and merge-SHA main CI
+remain pending. Fixed source does not update the user's running Docker or installer.

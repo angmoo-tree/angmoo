@@ -42,10 +42,12 @@ from app.models import Base
 from app.runtime.persistence.model_registration import register_models
 import app.database as database
 from sqlalchemy.orm import configure_mappers
+from app.runtime.persistence.sqlite_schema import EXPECTED_CANONICAL_TABLE_COUNT
 metadata = register_models()
 configure_mappers()
 original = {mapper.class_.__tablename__: mapper.class_ for mapper in Base.registry.mappers}
-assert len(original) == len(metadata.tables) == 169
+assert len(original) == len(metadata.tables) == EXPECTED_CANONICAL_TABLE_COUNT == 174
+assert {'world_deletion_requests', 'world_deletion_cleanup_items'} <= set(original)
 from app.domains.memory.models.activity_situation import SITUATION_TABLES
 assert set(SITUATION_TABLES) <= set(original)
 assert {'local_environments', 'environment_timezone_changes'} <= set(original)
@@ -75,8 +77,8 @@ try:
     engine = database.engine
     second = database.open()
     assert database.engine is engine
-    assert first.schema_version == second.schema_version == 32
-    assert first.canonical_table_count == second.canonical_table_count == 169
+    assert first.schema_version == second.schema_version == 37
+    assert first.canonical_table_count == second.canonical_table_count == 174
     assert first.schema_digest_matches and second.schema_digest_matches
     assert first.foreign_keys and first.synchronous == 'FULL'
     assert 'app.main' not in sys.modules and 'app.public_main' not in sys.modules

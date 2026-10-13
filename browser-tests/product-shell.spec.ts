@@ -663,8 +663,8 @@ test("Creator Studio is a wide owner workspace and preserves private and draft W
   await expect(page).toHaveURL(/\/studio$/);
   await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "내 World" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "실행 중인 World" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "비공개", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "사용 가능한 World" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "비공개", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "작성 중", exact: true })).toBeVisible();
   await expect(page.getByText("비공개 작업실", { exact: true })).toBeVisible();
   await expect(page.getByText("초안 마을", { exact: true })).toBeVisible();
@@ -1490,8 +1490,8 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await expect(page.getByText("기억을 켰어요.", { exact: false })).toBeVisible();
   await verifyMemoryBatchControls(page);
   handleMemoryBatch.capacityReached();
-  await expect(page.getByText("저장된 기억 100,000 / 100,000개")).toBeVisible({ timeout: 10000 });
-  await expect(page.getByText("표시 중인 정리 작업에서 저장 1개 · 남은 경험 1개")).toBeVisible();
+  await expect(page.getByText("일부 경험을 저장하지 못했어요. 저장된 기억은 유지됩니다.")).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("[data-memory-processing]").getByText("저장 대기 1개")).toBeVisible();
   await expect(page.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
@@ -1730,24 +1730,10 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/worlds/${worldId}/characters`);
-  const directoryIcon = page.locator("[data-world-character-directory-icon]");
-  const directoryIconOffset = await directoryIcon.evaluate((tile) => {
-    const icon = tile.querySelector("svg");
-    if (!icon) return null;
-    const tileRect = tile.getBoundingClientRect();
-    const iconRect = icon.getBoundingClientRect();
-    return {
-      x: Math.abs(
-        iconRect.left + iconRect.width / 2 - (tileRect.left + tileRect.width / 2),
-      ),
-      y: Math.abs(
-        iconRect.top + iconRect.height / 2 - (tileRect.top + tileRect.height / 2),
-      ),
-    };
-  });
-  expect(directoryIconOffset).not.toBeNull();
-  expect(directoryIconOffset?.x).toBeLessThanOrEqual(1);
-  expect(directoryIconOffset?.y).toBeLessThanOrEqual(1);
+  // The World directory uses the shared compact header. Its former standalone
+  // decorative tile was retired; keep the actual directory and World scope gate.
+  await expect(page.getByRole("heading", { name: "이 World의 캐릭터", exact: true })).toBeVisible();
+  await expect(page.locator('main[data-product-surface="world-app"]')).toHaveAttribute("data-world-id", worldId);
 
   await page.goto(`/worlds/${worldId}/feed`);
   await expect(page.getByText("P8-L-E author entry", { exact: true })).toBeVisible();
@@ -1767,7 +1753,7 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     profile.getByRole("paragraph").filter({ hasText: "@ui_d_autonomous" }),
   ).toBeVisible();
   await expect(profile.getByText("같은 World에서 활동하는 자율 앵무입니다.")).toBeVisible();
-  await page.getByRole("button", { name: "World 캐릭터 목록으로 돌아가기" }).click();
+  await page.getByRole("link", { name: "피드", exact: true }).click();
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   await authorLinks.first().click();
   await expect(profile).toBeVisible();

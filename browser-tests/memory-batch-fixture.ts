@@ -5,6 +5,11 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     provider: "google", model: "gemini-embedding-2", credential_id: null as string | null,
     profile: "fixture-profile", version: 0, ready: false, reason_code: "memory_embedding_disabled" as string | null,
     runtime_status: "ready", available_credentials: [], preparation_state: "needs_preparation", preparation_revision: 0 };
+  let blocked = false;
+  const processing = () => ({ scope: embedding.scope, version: 1, memory_enabled: enabled(),
+    daily_enabled: false, local_time: "23:51", timezone: "Asia/Seoul", shutdown_apply_enabled: true,
+    next_due_at: null, last_applied_at: null, pending_count: blocked ? 1 : 32, blocked_count: 0,
+    applied_count: 0, status: blocked ? "partial_error" : "idle", result: null });
   const keys = {
     consolidation: {provider:"google",model:"gemini-3.1-flash-lite",thinking_level:"high",has_key:false,fingerprint:null as string|null,revision:0,configuration_revision:0},
     embedding: {provider:"google",model:"gemini-embedding-2",thinking_level:null as string|null,has_key:false,fingerprint:null as string|null,revision:0,configuration_revision:0},
@@ -28,6 +33,13 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
   const handle = async (route: Route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    if (path.endsWith("/memory/processing-settings")) {
+      await route.fulfill({ json: processing() }); return true;
+    }
+    if (path.endsWith("/memory/unsaved-experiences")) {
+      await route.fulfill({ json: { scope: embedding.scope, items: [], next_cursor: null,
+        blocked_count: 0, scope_busy: false, can_recheck: false } }); return true;
+    }
     if (/\/credentials\/(consolidation|embedding)$/.test(path)) {
       const purpose = path.split("/").at(-1) as keyof typeof keys;
       if (request.method() === "PUT") {
@@ -51,10 +63,10 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
       accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
       saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null, workflow_version: 1, followup: "relationships",
-      flow_state: manualPolls < 4 ? "memory_running" : manualPolls < 6 ? "relationship_running" : "completed",
-      relationship: { state: manualPolls < 6 ? "running" : "completed", request_id: "manual-receipt",
+      flow_state: manualPolls < 4 ? "relationship_running" : "completed",
+      relationship: { state: manualPolls < 4 ? "running" : "completed", request_id: "manual-receipt",
         target_count: manualPolls < 4 ? null : 1, memory_count: manualPolls < 4 ? null : 2,
-        completed_count: manualPolls < 6 ? 0 : 1, kept_count: manualPolls < 6 ? 0 : 1, changed_count: 0, last_code: null, completed_at: null } });
+        completed_count: manualPolls < 4 ? 0 : 1, kept_count: manualPolls < 4 ? 0 : 1, changed_count: 0, last_code: null, completed_at: null } });
     if (path.endsWith("/memory/batch-progress")) {
       if (manualKey) manualPolls++;
       await route.fulfill({ json: { scope: saved.scope, capability: { relationships: true, reason: null }, progress: manualKey ? manualProgress() : null } });
@@ -107,6 +119,7 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     return true;
   };
   return Object.assign(handle, { capacityReached() {
+    blocked = true;
     saved = { ...saved, status: "capacity_blocked", stored_count: 100000,
       capacity_blocked: true, can_run: false, retryable: false, pending_count: 1,
       run_saved_count: 1, run_pending_count: 1, last_code: "memory_capacity_reached" };
@@ -114,7 +127,7 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
 }
 
 export async function verifyMemoryBatchControls(page: Page) {
-  const embedding = page.getByRole("region", { name: "기억 의미 검색", exact: true });
+  const embedding = page.getByRole("region", { name: "임베딩 모델 API 키", exact: true });
   await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
   await embedding.getByLabel("의미 검색 사용", { exact: true }).check();
   await expect(embedding.getByRole("button", { name: "의미 검색 설정 저장" })).toBeDisabled();
@@ -133,10 +146,10 @@ export async function verifyMemoryBatchControls(page: Page) {
   await embedding.getByRole("button", { name: "의미 검색 설정 저장" }).click();
   await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
   await expect(embedding.getByText("API key 저장됨",{exact:false})).toBeVisible();
-  const region = page.getByRole("region", { name: "기억·관계 정리", exact:true });
-  await expect(region.getByText("AI 기억 정리 사용 안 함", { exact: false })).toBeVisible();
-  await region.getByLabel("AI 선별·정리 사용", { exact: true }).check();
-  await expect(region.getByRole("button", { name: "정리 설정 저장" })).toBeDisabled();
+  const region = page.getByRole("region", { name: "관계 정리", exact:true });
+  await expect(region.getByText("저장된 기억을 바탕으로 캐릭터별 관계를 정리해요.", { exact: false })).toBeVisible();
+  await region.getByLabel("AI 관계 정리 사용", { exact: true }).check();
+  await expect(region.getByRole("button", { name: "관계 설정 저장" })).toBeDisabled();
   await expect(region.getByRole("combobox").locator('option:not([value=""])')).toHaveText([
     "Gemini 3.5 Flash-Lite (high)", "Gemini 3.5 Flash-Lite (medium)",
     "Gemini 3.1 Flash-Lite (high)", "Gemini 3.1 Flash-Lite (medium)",
@@ -145,32 +158,28 @@ export async function verifyMemoryBatchControls(page: Page) {
   await region.getByLabel("새 API key",{exact:true}).fill("own-synthetic-consolidation-key");
   await region.getByRole("button",{name:"키·모델 저장",exact:true}).click();
   await expect(region.getByLabel("새 API key",{exact:true})).toHaveValue("");
-  await region.getByLabel("선택한 모델로 경험의 발췌가 전송되고 API 비용이 발생할 수 있음에 동의합니다.").check();
-  await region.getByLabel("매일 정해진 시각에 정리").check();
+  await region.getByLabel("관계 정리를 위해 저장된 기억이 선택한 모델로 전송되며 API 비용이 발생할 수 있음에 동의합니다.").check();
+  await region.getByLabel("매일 정해진 시각에 관계 정리").check();
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
-  await region.getByRole("button", { name: "정리 설정 저장" }).click();
-  await expect(region.getByText("기억 정리 설정을 저장했어요. 저장만으로 AI를 호출하지 않습니다.")).toBeVisible();
+  await region.getByRole("button", { name: "관계 설정 저장" }).click();
+  await expect(region.getByText("관계 정리 설정을 저장했어요.")).toBeVisible();
   await expect(region.getByLabel("예약 시각 · Asia/Seoul")).toHaveValue("23:15");
   await expect(region.getByRole("combobox")).toHaveValue("google:gemini-3.1-flash-lite:medium");
-  await expect(region.getByText("예약 또는 종료를 기다리고 있어요", { exact: false })).toBeVisible();
-  await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toBeVisible();
-  await region.getByRole("button", { name: "실패한 정리 다시 시도" }).click();
-  await expect(region.getByText("다시 정리하도록 요청했어요.")).toBeVisible();
-  await expect(region.getByText("정리를 마쳤어요.", { exact: false })).toBeVisible();
-  await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toHaveCount(0);
+  // Relationship settings no longer expose the retired Memory batch failure
+  // control. Exercise the retained explicit, dirty-guarded relationship run below.
   await expect(region.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:16");
-  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeDisabled();
+  await expect(region.getByRole("button", { name: "지금 관계 정리", exact: true })).toBeDisabled();
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
-  const manualButton = region.getByRole("button", { name: "지금 기억·관계 정리", exact: true });
+  const manualButton = region.getByRole("button", { name: "지금 관계 정리", exact: true });
   await manualButton.focus();
   await expect(manualButton).toBeFocused();
   await manualButton.press("Enter");
-  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeDisabled();
-  await expect(region.getByText("기억 정리 중", { exact: true })).toBeVisible();
-  await expect(region.getByText("기억 정리 완료 · 관계 정리 중 · 새 기억 2개", { exact: true })).toBeVisible();
-  await expect(region.getByText("기억·관계 정리 완료 · 새 기억 2개", { exact: true })).toBeVisible();
-  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeEnabled();
+  await expect(region.getByRole("button", { name: "지금 관계 정리", exact: true })).toBeDisabled();
+  await expect(region.getByText("관계 정리 중", { exact: true })).toBeVisible();
+  await expect(region.getByText("관계 정리 완료", { exact: true })).toBeVisible();
+  await expect(region.getByText("관계 1 / 1개 검토 완료 · 유지 1개 · 갱신 판단 0개", { exact: true })).toBeVisible();
+  await expect(region.getByRole("button", { name: "지금 관계 정리", exact: true })).toBeEnabled();
   await page.evaluate(() => { document.documentElement.style.zoom = "2"; });
   await expect(manualButton).toBeVisible();
   expect(await region.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);

@@ -30,6 +30,7 @@ def _request(
     token: str | None = None,
     cookie: str | None = None,
     origin: str | None = None,
+    expected_error_status: int | None = None,
 ) -> tuple[int, object]:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     headers = {"Accept": "application/json"}
@@ -53,6 +54,8 @@ def _request(
             return response.status, json.loads(body) if body else None
     except HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
+        if exc.code == expected_error_status:
+            return exc.code, json.loads(body) if body else None
         raise SmokeError(f"{method} {path} returned {exc.code}: {body[:240]}") from exc
 
 
@@ -220,7 +223,7 @@ def run_smoke(
         "/api/v1/agents/drafts",
         method="POST",
         token=token,
-        payload={"execution_mode": "local"},
+        payload={"execution_mode": "llm"},
     )
     _expect(status, 201, "local character draft create")
     if draft.get("key_fingerprint") is not None or not draft.get("target_world_id"):
@@ -318,15 +321,15 @@ def run_smoke(
         method="POST",
         token=token,
         payload={},
+        expected_error_status=409,
     )
-    _expect(status, 201, "Local Bot token issue")
-    local_token = str(local_key["token"])
-    status, bot_me = _request(
-        backend_url, "/api/v1/bot/me", token=local_token
-    )
-    _expect(status, 200, "Local Bot me")
-    if bot_me.get("character", {}).get("id") != character_id:
-        raise SmokeError("Local Bot token resolved the wrong character")
+    # New registrations are keyless LLM characters. Retained Local Bot keys
+    # belong only to legacy local characters, exercised by their domain tests.
+    # The current onboarding smoke must prove it cannot mint such a key.
+    _expect(status, 409, "Local Bot key denied for LLM registration")
+    if (not isinstance(local_key, dict) or "token" in local_key
+            or local_key.get("detail") != "로컬 모드 앵무에서만 local key를 사용할 수 있습니다."):
+        raise SmokeError("LLM registration unexpectedly received a Local Bot token")
 
     frontend_checks: dict[str, int] = {}
     if frontend_url:
@@ -349,6 +352,7 @@ def run_smoke(
         "reply_persisted": True,
         "state_persisted": True,
         "local_bot_contract": True,
+        "local_bot_denied_for_llm": True,
         "frontend": frontend_checks,
         "completed_at_epoch": int(time.time()),
     }

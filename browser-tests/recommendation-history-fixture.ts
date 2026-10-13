@@ -52,93 +52,61 @@ export function recommendationHistoryTests(staticMode: boolean, bootstrap: (page
     return { state, methods };
   }
 
-  test("recommendation history uses completed rounds and refresh is read-only", async ({ page }, testInfo) => {
+  test("character topics remain scoped and refresh without retired Feed history", async ({ page }, testInfo) => {
     const { state, methods } = await setup(page);
-    const panel = page.getByLabel("최근 전달된 Feed", { exact: true });
-    await expect(panel.getByText("아직 전달된 글이 없습니다.", { exact: true })).toBeVisible();
+    const panel = page.getByRole("region", { name: "캐릭터 관심 주제", exact: true });
+    await expect(panel.getByText("등록된 주제가 없습니다.", { exact: true })).toBeVisible();
+    state.body = { ...base, topics: [{ id: "topic-one", name: "실제 준비된 축구 주제", scope: "world" }],
+      recent_deliveries: history() };
+    await panel.getByRole("button", { name: "상태 새로고침", exact: true }).click();
+    await expect(panel.getByText("실제 준비된 축구 주제", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("최근 전달된 Feed", { exact: true })).toHaveCount(0);
     await expect(page.getByText("과거 관찰은 표시 금지")).toHaveCount(0);
-    state.body = { ...base, recent_deliveries: history() };
-    await page.getByRole("button", { name: "상태 새로고침", exact: true }).click();
-    await expect(panel.getByText("최신글 · 댓글 작성 완료", { exact: true })).toBeVisible();
-    await expect(panel.getByText("관심사 · 댓글 선택 · 실행 결과 확인 불가", { exact: true })).toBeVisible();
-    await expect(panel.getByText("탐색 · 읽고 지나감", { exact: true })).toBeVisible();
-    await expect(panel.getByText("관계 · 댓글 처리 실패", { exact: true })).toBeVisible();
-    await expect(panel.getByText("출처 기록 없음 · 전달됨 · 반응 결과 확인 불가", { exact: true })).toBeVisible();
-    await expect(panel.locator("details")).toHaveCount(2);
-    await expect(panel.locator("details").nth(1)).not.toHaveAttribute("open", "");
-    const summary = panel.locator("summary").nth(1);
-    await summary.focus(); await page.keyboard.press("Enter");
-    await expect(panel.getByText("현재 표시할 수 있는 글이 없습니다.")).toBeVisible();
+    await expect(page.getByText("실제 전달된 축구 글", { exact: true })).toHaveCount(0);
     await page.setViewportSize({ width: 360, height: 800 });
-    await panel.scrollIntoViewIfNeeded();
-    expect(await summary.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
-    expect(await panel.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
-    // Element screenshots scroll behind the existing sticky Agent header. Capture
-    // the real viewport after placing the history heading below that header.
-    await panel.evaluate(node => {
-      const owner = node.closest<HTMLElement>('[data-device-scroll-owner="true"]');
-      const header = node.closest("section.min-h-screen")?.querySelector(".sticky");
-      if (owner && header) owner.scrollTop -= header.getBoundingClientRect().bottom + 8 - node.getBoundingClientRect().top;
-    });
-    await page.screenshot({ path: testInfo.outputPath("recommendation-history-mobile.png") });
+    expect(await panel.evaluate(node => node.scrollWidth <= node.clientWidth + 1)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath("recommendation-topics-mobile.png") });
     expect(methods.length).toBeGreaterThanOrEqual(2);
     expect(methods.every(method => method === "GET")).toBe(true);
   });
 
-  test("feed readiness separates old results and refresh remains read-only", async ({ page }, testInfo) => {
+  test("topic readiness stays distinct from historical Feed execution results", async ({ page }, testInfo) => {
     const { state, methods } = await setup(page);
-    const refresh = page.getByRole("button", { name: "상태 새로고침", exact: true });
-    state.body = { ...base, recent_deliveries: [], feed_status: {
-      readiness: { state: "ready", reason_code: null, persona_changed: true, checked_at: "2026-09-22T00:00:00Z" },
-      last_attempt: { run_id: "test", occurred_at: "2026-09-21T00:00:00Z", result: "world_community_profile_stale",
-        reason_code: null, candidate_count: null, delivered_count: 0, delivery_state: null },
-    } };
-    await refresh.click();
-    const panel = page.getByRole("region", { name: "Feed 실행 상태", exact: true });
-    await expect(panel.getByText("현재 준비 상태 · Feed 실행 준비됨")).toBeVisible();
-    await expect(panel.getByText(/기존 승인 프로필·일과로 활동을 계속/)).toBeVisible();
-    await expect(panel.getByText(/이전 준비 검사에서 차단됨/)).toBeVisible();
-    await expect(panel.getByText("후보 미확인 · 전달 0개")).toBeVisible();
-    state.body = { ...base, recent_deliveries: [], feed_status: {
-      readiness: { state: "blocked", reason_code: "approved_setup_invalid", persona_changed: false, checked_at: "2026-09-22T00:00:00Z" },
-      last_attempt: { run_id: "test", occurred_at: "2026-09-21T00:00:00Z", result: "planner_failed",
-        reason_code: null, candidate_count: 2, delivered_count: null, delivery_state: "uncertain" },
-    } };
-    await refresh.focus(); await page.keyboard.press("Enter");
-    await expect(panel.getByText(/현재 준비 상태 · Feed 준비 확인 필요/)).toBeVisible();
-    await expect(panel.getByText(/전달 완료 여부가 불확실/)).toBeVisible();
-    await page.setViewportSize({ width: 360, height: 800 });
-    await page.locator("body").evaluate(node => { node.style.zoom = "2"; });
-    await panel.scrollIntoViewIfNeeded();
-    expect(await panel.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
-    await page.screenshot({ path: testInfo.outputPath("feed-status-mobile-200pct.png") });
+    const panel = page.getByRole("region", { name: "캐릭터 관심 주제", exact: true });
+    const refresh = panel.getByRole("button", { name: "상태 새로고침", exact: true });
+    for (const [value, label] of [["pending", "주제 준비 전"], ["running", "주제 만드는 중"],
+      ["failed", "주제 생성 실패 · 이전 결과 유지"], ["stale", "설정 변경됨 · 기존 주제 사용 중"]]) {
+      state.body = { ...base, state: value, recent_deliveries: history() };
+      await refresh.click();
+      await expect(panel.getByText(label, { exact: true })).toBeVisible();
+      await expect(page.getByRole("region", { name: "Feed 실행 상태", exact: true })).toHaveCount(0);
+    }
     expect(methods.every(method => method === "GET")).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath("topic-readiness.png") });
   });
 
-  test("recommendation history handles failed old and late responses without legacy fallback", async ({ page }) => {
+  test("topic refresh rejects failed and late responses without legacy Feed fallback", async ({ page }) => {
     const { state, methods } = await setup(page);
-    const panel = page.getByLabel("최근 전달된 Feed", { exact: true });
-    const refresh = page.getByRole("button", { name: "상태 새로고침", exact: true });
-    await expect(panel.getByText("아직 전달된 글이 없습니다.", { exact: true })).toBeVisible();
-    state.status = 503;
+    const panel = page.getByRole("region", { name: "캐릭터 관심 주제", exact: true });
+    const refresh = panel.getByRole("button", { name: "상태 새로고침", exact: true });
+    state.status = 502;
     await refresh.click();
     await expect(panel.getByRole("alert")).toBeVisible();
-    await expect(panel.getByText("아직 전달된 글이 없습니다.", { exact: true })).toHaveCount(0);
     state.status = 200; state.body = base;
     await refresh.click();
-    await expect(panel.getByText(/앱과 서버 버전을 확인/)).toBeVisible();
-    await expect(page.getByText("과거 관찰은 표시 금지")).toHaveCount(0);
+    await expect(panel.getByText("주제 준비됨", { exact: true })).toBeVisible();
     let release!: () => void;
     state.defer = new Promise<void>(resolve => { release = resolve; });
     const before = state.reads;
     await refresh.click();
     await expect.poll(() => state.reads).toBeGreaterThan(before);
-    await expect(panel.getByText("전달 이력 확인 중")).toBeVisible();
-    state.defer = undefined; state.body = { ...base, recent_deliveries: history() };
+    state.defer = undefined;
+    state.body = { ...base, topics: [{ id: "latest-topic", name: "최신 주제만 표시", scope: "world" }] };
     await refresh.click();
-    await expect(panel.getByText("실제 전달된 축구 글", { exact: true })).toBeVisible();
+    await expect(panel.getByText("최신 주제만 표시", { exact: true })).toBeVisible();
     release();
-    await expect(panel.getByText("실제 전달된 축구 글", { exact: true })).toBeVisible();
+    await expect(panel.getByText("최신 주제만 표시", { exact: true })).toBeVisible();
+    await expect(page.getByText("과거 관찰은 표시 금지")).toHaveCount(0);
     expect(methods.every(method => method === "GET")).toBe(true);
   });
 }

@@ -613,6 +613,25 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                # This synthetic predecessor must not carry newer write fences
+                # or additive vault/binding tables. Shipped manifests/forward
+                # migrations and actual installed data are never modified here.
+                if source_version < 37:
+                    for (name,) in sql_connection.exec_driver_sql(
+                        "SELECT name FROM sqlite_master WHERE type='trigger' "
+                        "AND name LIKE 'world_erasure_%'"
+                    ).all():
+                        quoted = '"' + name.replace('"', '""') + '"'
+                        sql_connection.exec_driver_sql(f"DROP TRIGGER {quoted}")
+                for version, tables in (
+                    (37, ("world_deletion_cleanup_items", "world_deletion_requests")),
+                    (36, ("memory_situation_result_bindings",)),
+                    (35, ("memory_situation_source_bindings",)),
+                    (34, ("world_image_provider_credentials",)),
+                ):
+                    if source_version < version:
+                        for name in tables:
+                            sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
                 from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )

@@ -17,7 +17,7 @@ from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.worlds import router as world_routes
 from app.config import settings
-from app.models import Base
+from app.runtime.persistence.model_registration import register_models
 from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )
@@ -34,7 +34,7 @@ def _app():
     def _foreign_keys(dbapi_connection, _connection_record) -> None:
         dbapi_connection.execute("PRAGMA foreign_keys=ON")
 
-    Base.metadata.create_all(engine)
+    register_models().create_all(engine)
     app = FastAPI()
     from app.runtime.social.composition import configure_social_runtime
     configure_social_runtime(app)

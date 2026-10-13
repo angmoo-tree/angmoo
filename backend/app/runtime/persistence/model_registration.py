@@ -59,5 +59,6 @@ def register_models() -> MetaData:
     import app.domains.world_characters.activity_models  # noqa: F401
     import app.domains.world_packages.models  # noqa: F401 - explicit ORM registration
     import app.domains.worlds.models  # noqa: F401 - explicit ORM registration
+    import app.domains.worlds.models_deletion  # noqa: F401 - durable erasure lifecycle
 
     return Base.metadata

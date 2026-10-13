@@ -6,7 +6,7 @@ createServer((request,response)=>{
   const media=request.url.startsWith("/media/");
   const port=api||media?3420:3415;
   const path=api?request.url.replace(/^\/api\/backend\//,"/api/v1/"):request.url;
-  const forwarded=proxyRequest(`http://127.0.0.1:${port}${path}`,{method:request.method,headers:request.headers},result=>{
+  const forwarded=proxyRequest({hostname:"127.0.0.1",port,path,method:request.method,headers:request.headers},result=>{
     response.writeHead(result.statusCode,result.headers);result.pipe(response);
   });
   forwarded.on("error",()=>{response.writeHead(503,{"Content-Type":"application/json"});response.end('{"detail":"isolated_fixture_unavailable"}');});

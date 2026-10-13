@@ -71,3 +71,39 @@ def test_compatibility_exports_use_owner_implementations_and_same_error_classes(
     assert export_matches('app.services.profile_media', 'quarantine_private_media', files.quarantine_private_media)
     assert export_matches('app.services.profile_media', 'PrivateMediaCleanupError', files.PrivateMediaCleanupError)
     assert export_matches('app.services.profile_media', 'InvalidProfileMediaError', InvalidProfileMediaError)
+
+
+@pytest.mark.parametrize("relative", [
+    "drafts/../outside.webp", "drafts/sub/../../outside.webp",
+    "drafts\\outside.webp", "drafts/C:outside.webp", "drafts//image.webp",
+    "/drafts/image.webp",
+])
+def test_private_media_rejects_cross_platform_path_syntax_before_io(tmp_path, monkeypatch, relative):
+    monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
+    def unexpected_io(_path):
+        pytest.fail("Rejected path syntax must never reach filesystem traversal")
+    monkeypatch.setattr(Path, "is_symlink", unexpected_io)
+    with pytest.raises(InvalidProfileMediaError, match="Invalid private media path"):
+        files.resolve_private_media_file(f"{settings.media_url_path}/{relative}", expected_directory="drafts")
+
+
+def test_private_media_accepts_world_scoped_managed_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
+    path = tmp_path / "worlds" / "world-1" / "icon-1.webp"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(b"managed-fixture")
+    resolved, content_type = files.resolve_private_media_file(
+        f"{settings.media_url_path}/worlds/world-1/icon-1.webp", expected_directory="worlds/world-1")
+    assert resolved == path.resolve()
+    assert content_type == "image/webp"
+
+
+def test_private_media_rejects_symlink_at_expected_directory(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
+    path = tmp_path / "drafts" / "image.webp"
+    path.parent.mkdir()
+    path.write_bytes(b"managed-fixture")
+    original = Path.is_symlink
+    monkeypatch.setattr(Path, "is_symlink", lambda value: value == path.parent or original(value))
+    with pytest.raises(InvalidProfileMediaError, match="symlinks"):
+        files.resolve_private_media_file(f"{settings.media_url_path}/drafts/image.webp", expected_directory="drafts")

@@ -151,8 +151,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 32
-    assert fixture["target_table_count"] == 169
+    assert fixture["target_data_version"] == 37
+    assert fixture["target_table_count"] == 174
     if source_version == 8:
         assert fixture["generation"] == (
             "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"

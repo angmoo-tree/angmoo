@@ -13,6 +13,26 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_pr365_noncredential_allowlists_never_hide_other_values_paths_or_rules():
+    config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    entries = [item for item in config["allowlists"]
+               if item["description"].startswith("Reviewed PR365 exact noncredential values")]
+    assert len(entries) == 8
+    for entry in entries:
+        assert entry["condition"] == "AND"
+        assert entry["regexTarget"] == "secret"
+        assert len(entry["targetRules"]) == 1
+        for pattern in entry["paths"]:
+            assert pattern.startswith("(^|/)") and pattern.endswith("$")
+            assert not re.search(pattern, "security/other-credentials.json")
+            assert not re.search(pattern, "backend/production-credentials.env")
+        for pattern in entry["regexes"]:
+            assert pattern.startswith("^") and pattern.endswith("$")
+            assert not re.fullmatch(pattern, "unreviewed-secret-value")
+            assert not re.fullmatch(pattern, "sk-123456789012345678901234567890")
+            assert not re.fullmatch(pattern, "f" * 64)
 CHECKER_PATH = REPO_ROOT / "scripts/ci/check_secret_allowlist_metadata.py"
 SPEC = importlib.util.spec_from_file_location("angmoo_t2_allowlist", CHECKER_PATH)
 assert SPEC is not None and SPEC.loader is not None

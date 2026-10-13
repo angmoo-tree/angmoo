@@ -1,6 +1,6 @@
 {
   "edge_count": 6540,
-  "external_import_count": 4446,
+  "external_import_count": 4447,
   "module_count": 1518,
   "modules": [
     {
@@ -16622,6 +16622,7 @@
       "external_imports": [
         "dataclasses",
         "pathlib",
+        "re",
         "shutil",
         "typing",
         "uuid"

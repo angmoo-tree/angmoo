@@ -322,6 +322,14 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    # These direct-copy builders predate v34/v36/v37. Their released table
+    # inventories must not acquire additive current-model registrations.
+    for name in (
+        "world_image_provider_credentials", "memory_situation_result_bindings",
+        "world_deletion_cleanup_items", "world_deletion_requests",
+    ):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
     _remove_comfy_diagnostics(metadata)
     _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:

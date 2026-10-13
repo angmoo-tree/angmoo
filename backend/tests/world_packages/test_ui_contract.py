@@ -25,7 +25,8 @@ def test_world_package_import_is_available_from_home_studio_and_static_router() 
     import_entry = studio.split('id: "import"', 1)[1].split("},", 1)[0]
     assert 'availability: "available"' in home_entry
     assert 'availability: "available"' in import_entry
-    assert "Package 가져오기" in dashboard
+    assert 'href={PRODUCT_ROUTES.studioImport}' in dashboard
+    assert 'uiText("World 패키지 가져오기")' in dashboard
     assert 'pathname === "/studio/import"' in static_router
     assert "StudioImportRouteClient" in static_router
     assert "StudioImportRouteClient" in import_page
@@ -40,9 +41,11 @@ def test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation() -
     assert "prepared.preview.content_digest" in source
     assert "commitWorldPackageImport" in source
     assert "discardWorldPackageImport" in source
-    assert "Device Home에서 보기" in source
+    assert 'href={PRODUCT_ROUTES.deviceHome}' in source
+    assert 'uiText("기기 홈에서 보기")' in source
     assert "studioWorldRoute(result.imported_world_id)" in source
-    assert "서명 없음" in source
+    assert 'value === "checksum_verified_unsigned"' in source
+    assert "파일 내용 확인 완료 · 제작자 미확인" in source
     assert "이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다" in source
     assert "return;" in source.split("이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다", 1)[1]
 

@@ -163,9 +163,13 @@ def test_symlink_current_reference_never_escapes_world_directory(stack):
 
 
 @pytest.mark.parametrize("profile", ["full", "public"])
-def test_real_app_factory_registers_both_guarded_media_paths(stack, profile):
+def test_real_app_factory_registers_both_guarded_media_paths(stack, profile, monkeypatch):
     from app import main
-    app, _, _, _, *_ = stack
+    from app.runtime import world_deletion_composition
+    app, engine, _, _, *_ = stack
+    # Middleware reads use a captured session factory, independently of FastAPI
+    # route overrides. Bind its real SQL reads to this same disposable stack.
+    monkeypatch.setattr(world_deletion_composition, "SessionLocal", lambda: Session(engine))
     actual = main.create_app(profile=profile, prepare_media_directories=False)
     actual.dependency_overrides.update(app.dependency_overrides)
     for path in ("/media/worlds/missing-world/image.webp", "/api/v1/worlds/missing-world/media/image.webp"):

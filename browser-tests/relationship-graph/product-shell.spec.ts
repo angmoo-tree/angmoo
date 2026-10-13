@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { uiDWorld } from "../continuity-next-fixture";
 
 type GraphPhase =
   | "ready"
@@ -105,6 +106,11 @@ export async function installGraphFixture(
       await json(route, OWNER);
       return;
     }
+    if (url.pathname.endsWith("/worlds/mine/world-ui-e-graph")) {
+      await json(route, { schema_version: "local-world-app-v1", surface: "world_app",
+        world: uiDWorld("world-ui-e-graph") });
+      return;
+    }
     if (url.pathname.endsWith("/relationship-review")) {
       await json(route, {mode:"interpreted",activated_at:"2026-09-22T00:00:00Z",
         configuration:{status:"scheduled",local_time:"02:00",timezone:"Asia/Seoul"},
@@ -137,8 +143,8 @@ test("UI-E Relationship Graph keeps ready, empty, degraded, and unavailable dist
     "/characters/character-ui-e-center/worlds/world-ui-e-graph/relationship-graph";
   await page.goto(route);
 
-  await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();
-  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(0);
+  await expect(page.locator('[data-product-content="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('main[data-product-surface="world-app"]')).toHaveAttribute("data-world-id", "world-ui-e-graph");
   await expect(page.locator('[data-relationship-graph-state="ready"]')).toBeVisible();
   await expect(page.getByText("LadybugDB 검증 결과", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "방향 관계 지도" })).toBeVisible();
