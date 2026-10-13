@@ -21,4 +21,8 @@ Frontend Next/static/shell checks, synthetic providers and installation fixtures
 
 ## Completion boundary
 
+During hosted execution of `8c68292d`, Local Smoke's ten-request SQLite test encountered the existing 250 ms bounded busy response at `BEGIN IMMEDIATE`. A local run reproduced the same admission-contract issue in its outbox companion. The fixture now verifies permitted busy responses separately from successful claims, preserves the single-write/owner invariant, and checks explicit duplicate redelivery after contention. A held-writer case proves no partial write on refusal. Production concurrency policy is unchanged. Full success still requires rerunning the affected final source.
+
+The baseline event journals quantify 117 retired replay/count nodes across the four partitions: 598.42, 724.26, 672.87 and 837.70 worker-seconds respectively (2,833.25 summed worker-seconds). These run in parallel; the sum is not elapsed-time savings. This supports removing completed historical obligations instead of increasing the partition count.
+
 At this commit, final hosted full execution, human platform review of the narrow setup-uv PR, normal merges, post-merge checks and fixed-main candidate verification remain pending. Local focused tests and observer selection are not substitutes. The live run ledger and raw local evidence are under `artifacts/ci-modernization-20261014/`; final measured timings and remote results will be appended after completion. No release is published and no developer installation or user data is modified.
