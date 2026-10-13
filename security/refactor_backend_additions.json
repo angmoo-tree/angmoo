@@ -37556,6 +37556,136 @@
           ]
         }
       }
+    },
+    {
+      "commit": "c10ee037a1b13851d54b52e38be1a8fac4d28607",
+      "feature_id": "AR-CONTAINER-VAULT-SCAN",
+      "reason": "Exact current error/scope guards and cross-platform media syntax; all new regressions are additive",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_pr365_scanner_canary_is_exact_in_value_path_rule_and_source_evidence"
+      ],
+      "test_assertions": {
+        "tests/test_oss_architecture_boundaries.py": {
+          "_imports": [],
+          "test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports": [
+            "assert not {name for name in imports if 'openclaw' in name.lower()}",
+            "assert not {name for name in imports if name == 'google' or name.startswith('google.')}"
+          ],
+          "test_public_runtime_modules_do_not_import_private_openclaw_modules": [
+            "assert violations == {}"
+          ],
+          "test_public_runtime_modules_do_not_import_subprocess_launchers": [
+            "assert violations == {}"
+          ],
+          "test_crud_modules_do_not_import_services": [
+            "assert violations == {}"
+          ],
+          "test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth": [
+            "assert violations == {}"
+          ],
+          "test_secret_decryption_is_confined_to_credential_resolver": [
+            "assert violations == []"
+          ],
+          "test_plaintext_credential_reveal_calls_are_explicitly_allowlisted": [
+            "assert observed == allowed"
+          ],
+          "test_public_read_schemas_do_not_expose_secret_storage_fields": [
+            "assert violations == {}"
+          ]
+        },
+        "tests/test_t2_secret_allowlist.py": {
+          "test_pr365_noncredential_allowlists_never_hide_other_values_paths_or_rules": [
+            "assert len(entries) == 8",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'secret'",
+            "assert len(entry['targetRules']) == 1",
+            "assert pattern.startswith('(^|/)') and pattern.endswith('$')",
+            "assert not re.search(pattern, 'security/other-credentials.json')",
+            "assert not re.search(pattern, 'backend/production-credentials.env')",
+            "assert pattern.startswith('^') and pattern.endswith('$')",
+            "assert not re.fullmatch(pattern, 'unreviewed-secret-value')",
+            "assert not re.fullmatch(pattern, 'sk-123456789012345678901234567890')",
+            "assert not re.fullmatch(pattern, 'f' * 64)"
+          ],
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_pr365_scanner_canary_is_exact_in_value_path_rule_and_source_evidence": [
+            "assert {f.rule for f in scanner.scan_text('backend/real_credentials.py', value, allowlist=allowlist)} == {'openai-api-key'}",
+            "assert list(scanner.scan_text(path, value, allowlist=allowlist)) == []",
+            "assert {f.rule for f in scanner.scan_text(path, value + '1', allowlist=allowlist)} == {'openai-api-key'}",
+            "assert checker.validate(path)"
+          ],
+          "test_gitleaks_card_credential_form_exception_requires_exact_source_and_line": [
+            "assert value == 'b8f8669e84cf60c7920a877d76d60460e19b71c0'",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND' and entry['regexTarget'] == 'line'",
+            "assert len(entry['regexes']) == 1 and len(entry['paths']) == 2",
+            "assert re.fullmatch(entry['regexes'][0], line)",
+            "assert not any((re.search(pattern, 'security/other-credentials.json') for pattern in entry['paths']))",
+            "assert not re.fullmatch(entry['regexes'][0], changed)",
+            "assert any((re.search(pattern, path) for pattern in entry['paths']))"
+          ],
+          "test_additive_exception_matches_existing_assertion_and_is_exact": [
+            "assert scanner_spec is not None and scanner_spec.loader is not None",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert list(scanner.scan_text(entry['path'], entry['value'], allowlist=allowlist)) == []",
+            "assert {f.rule for f in scanner.scan_text(entry['path'], entry['value'] + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {f.rule for f in scanner.scan_text('security/another-additions.json', entry['value'], allowlist=allowlist)} == {'google-api-key'}",
+            "assert checker.validate(fixture)"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ],
+          "_checkpoint_gitleaks_fingerprints": [
+            "assert len(entries) == 1",
+            "assert all((re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', value) for _, value in pairs))"
+          ],
+          "test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints": [
+            "assert set(entry) == {'targetRules', 'description', 'condition', 'regexTarget', 'paths', 'regexes'}",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'line'",
+            "assert entry['paths'] == ['(^|/)security/refactor_backend_checkpoint\\\\.json$']",
+            "assert len(entry['regexes']) == len(set(entry['regexes'])) == 55",
+            "assert set(entry['regexes']) <= reviewed.keys()"
+          ],
+          "test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules": [
+            "assert not allowed(checker.CHECKPOINT_PATH, f'''\"api_key\": \"{fixture['value']}\"''')",
+            "assert allowed(checker.CHECKPOINT_PATH, line)",
+            "assert allowed('/snapshot/' + checker.CHECKPOINT_PATH, line)",
+            "assert not allowed('security/another-checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH + '.bak', line)",
+            "assert not allowed('security/not_refactor_backend_checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"{key}\": \"{changed}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"api_key\": \"{value}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line + ' \"api_key\": \"another-value\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line, 'openai-api-key')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_oss_architecture_boundaries.py": {},
+        "tests/test_t2_secret_allowlist.py": {}
+      }
     }
   ]
 }
