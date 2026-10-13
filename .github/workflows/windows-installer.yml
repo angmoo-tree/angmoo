@@ -1,25 +1,58 @@
 name: Windows Installer
-
-on:
+true:
   push:
     branches:
       - main
-  pull_request:
+  pull_request: null
   workflow_dispatch:
-
+    inputs:
+      profile:
+        description: Validation scope / 검증 범위 (full for release candidates)
+        type: choice
+        options:
+          - full
+          - auto
+        default: full
+        required: true
+  schedule:
+    - cron: 23 3 * * 1
 permissions:
   contents: read
-
 concurrency:
-  group: windows-installer-${{ github.workflow }}-${{ github.ref }}
+  group: windows-installer-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
-
 env:
-  PYTHONUTF8: "1"
+  PYTHONUTF8: '1'
   SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-
 jobs:
+  impact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      plan: ${{ steps.select.outputs.plan }}
+      backend_profile: ${{ steps.select.outputs.backend_profile }}
+      windows: ${{ steps.select.outputs.windows }}
+      backend: ${{ steps.select.outputs.backend }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      local_core_smoke: ${{ steps.select.outputs.local_core_smoke }}
+      local_autonomy_smoke: ${{ steps.select.outputs.local_autonomy_smoke }}
+      local_full_graph: ${{ steps.select.outputs.local_full_graph }}
+      embedded_data_migration: ${{ steps.select.outputs.embedded_data_migration }}
+      tauri_windows: ${{ steps.select.outputs.tauri_windows }}
+      windows_installer: ${{ steps.select.outputs.windows_installer }}
+      windows_native: ${{ steps.select.outputs.windows_native }}
+      tauri_windows_host_dev: ${{ steps.select.outputs.tauri_windows_host_dev }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
+      - id: select
+        name: Classify actual changed paths (full observer)
+        run: python scripts/ci/impact.py
   release-candidate:
     name: windows-installer-build
     runs-on: windows-latest
@@ -29,21 +62,21 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: "22"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+          node-version: '22'
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
         with:
-          version: "11.22.0"
+          version: 11.22.0
           run_install: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7
         with:
-          version: "0.12.5"
+          version: 0.12.5
           enable-cache: false
       - name: Install locked release-candidate dependencies
         shell: pwsh
@@ -101,388 +134,19 @@ jobs:
       - name: Build supported predecessor update fixtures
         shell: pwsh
         run: |
-          $root = '.codex-temp\windows-installer-supported-upgrade'
-          $hostExecutable = 'desktop\src-tauri\target\release\angmoo-desktop.exe'
-          $sidecar = 'desktop\src-tauri\binaries\angmoo-sidecar-x86_64-pc-windows-msvc.exe'
-          $supportedV1 = Join-Path $root 'supported-v1'
-          $supportedV2 = Join-Path $root 'supported-v2'
-          $supportedV3 = Join-Path $root 'supported-v3'
-          $supportedV4 = Join-Path $root 'supported-v4'
-          $supportedV5 = Join-Path $root 'supported-v5'
-          $supportedV6 = Join-Path $root 'supported-v6'
-          $supportedV7 = Join-Path $root 'supported-v7'
-          $supportedV8 = Join-Path $root 'supported-v8'
-          $supportedV9 = Join-Path $root 'supported-v9'
-          $supportedV10 = Join-Path $root 'supported-v10'
-          $supportedV11 = Join-Path $root 'supported-v11'
-          $supportedV12 = Join-Path $root 'supported-v12'
-          $supportedV13 = Join-Path $root 'supported-v13'
-          $supportedV14 = Join-Path $root 'supported-v14'
-          $supportedV15 = Join-Path $root 'supported-v15'
-          $supportedV16 = Join-Path $root 'supported-v16'
-          $supportedV17 = Join-Path $root 'supported-v17'
-          $supportedV18 = Join-Path $root 'supported-v18'
-          $supportedV19 = Join-Path $root 'supported-v19'
-          $supportedV20 = Join-Path $root 'supported-v20'
-          $supportedV21 = Join-Path $root 'supported-v21'
-          $supportedV22 = Join-Path $root 'supported-v22'
-          $supportedV23 = Join-Path $root 'supported-v23'
-          $supportedV24 = Join-Path $root 'supported-v24'
-          $supportedV25 = Join-Path $root 'supported-v25'
-          $supportedV26 = Join-Path $root 'supported-v26'
-          $supportedV27 = Join-Path $root 'supported-v27'
-          $supportedV28 = Join-Path $root 'supported-v28'
-          $supportedV29 = Join-Path $root 'supported-v29'
-          $supportedV30 = Join-Path $root 'supported-v30'
-          $supportedV31 = Join-Path $root 'supported-v31'
-          $supportedV32 = Join-Path $root 'supported-v32'
-          $supportedV33 = Join-Path $root 'supported-v33'
-          $supportedV34 = Join-Path $root 'supported-v34'
-          $supportedV35 = Join-Path $root 'supported-v35'
-          $supportedV36 = Join-Path $root 'supported-v36'
-          $conflict = Join-Path $root 'conflicting-v2'
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\check_windows_installer_supported_upgrade_matrix.py
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV1 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 1
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV2 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 2
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV3 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 3
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV4 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 4
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV5 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 5
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV6 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 6
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV7 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 7
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV8 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 8
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV9 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 9
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV10 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 10
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV11 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 11
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV12 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 12
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV13 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 13
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV14 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 14
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV15 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 15
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV16 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 16
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV17 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 17
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV18 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 18
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV19 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 19
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV20 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 20
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV21 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 21
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV22 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 22
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV23 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 23
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV24 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 24
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV25 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 25
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV26 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 26
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV27 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 27
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV28 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 28
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV29 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 29
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV30 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 30
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV31 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 31
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV32 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 32
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV33 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 33
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV34 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 34
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV35 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 35
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $supportedV36 `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 36
-          backend\.venv\Scripts\python.exe `
-            scripts\ci\build_windows_installer_supported_upgrade_fixture.py `
-            --output-root $conflict `
-            --host $hostExecutable `
-            --sidecar $sidecar `
-            --source-version 2 `
-            --conflict
-          Compress-Archive `
-            -Path "$supportedV1\*" `
-            -DestinationPath (Join-Path $root 'supported-v1.zip')
-          Compress-Archive `
-            -Path "$supportedV2\*" `
-            -DestinationPath (Join-Path $root 'supported-v2.zip')
-          Compress-Archive `
-            -Path "$supportedV3\*" `
-            -DestinationPath (Join-Path $root 'supported-v3.zip')
-          Compress-Archive `
-            -Path "$supportedV4\*" `
-            -DestinationPath (Join-Path $root 'supported-v4.zip')
-          Compress-Archive `
-            -Path "$supportedV5\*" `
-            -DestinationPath (Join-Path $root 'supported-v5.zip')
-          Compress-Archive `
-            -Path "$supportedV6\*" `
-            -DestinationPath (Join-Path $root 'supported-v6.zip')
-          Compress-Archive `
-            -Path "$supportedV7\*" `
-            -DestinationPath (Join-Path $root 'supported-v7.zip')
-          Compress-Archive `
-            -Path "$supportedV8\*" `
-            -DestinationPath (Join-Path $root 'supported-v8.zip')
-          Compress-Archive `
-            -Path "$supportedV9\*" `
-            -DestinationPath (Join-Path $root 'supported-v9.zip')
-          Compress-Archive `
-            -Path "$supportedV10\*" `
-            -DestinationPath (Join-Path $root 'supported-v10.zip')
-          Compress-Archive `
-            -Path "$supportedV11\*" `
-            -DestinationPath (Join-Path $root 'supported-v11.zip')
-          Compress-Archive `
-            -Path "$supportedV12\*" `
-            -DestinationPath (Join-Path $root 'supported-v12.zip')
-          Compress-Archive `
-            -Path "$supportedV13\*" `
-            -DestinationPath (Join-Path $root 'supported-v13.zip')
-          Compress-Archive `
-            -Path "$supportedV14\*" `
-            -DestinationPath (Join-Path $root 'supported-v14.zip')
-          Compress-Archive `
-            -Path "$supportedV15\*" `
-            -DestinationPath (Join-Path $root 'supported-v15.zip')
-          Compress-Archive `
-            -Path "$supportedV16\*" `
-            -DestinationPath (Join-Path $root 'supported-v16.zip')
-          Compress-Archive `
-            -Path "$supportedV17\*" `
-            -DestinationPath (Join-Path $root 'supported-v17.zip')
-          Compress-Archive `
-            -Path "$supportedV18\*" `
-            -DestinationPath (Join-Path $root 'supported-v18.zip')
-          Compress-Archive `
-            -Path "$supportedV19\*" `
-            -DestinationPath (Join-Path $root 'supported-v19.zip')
-          Compress-Archive `
-            -Path "$supportedV20\*" `
-            -DestinationPath (Join-Path $root 'supported-v20.zip')
-          Compress-Archive `
-            -Path "$supportedV21\*" `
-            -DestinationPath (Join-Path $root 'supported-v21.zip')
-          Compress-Archive `
-            -Path "$supportedV22\*" `
-            -DestinationPath (Join-Path $root 'supported-v22.zip')
-          Compress-Archive `
-            -Path "$supportedV23\*" `
-            -DestinationPath (Join-Path $root 'supported-v23.zip')
-          Compress-Archive `
-            -Path "$supportedV24\*" `
-            -DestinationPath (Join-Path $root 'supported-v24.zip')
-          Compress-Archive `
-            -Path "$supportedV25\*" `
-            -DestinationPath (Join-Path $root 'supported-v25.zip')
-          Compress-Archive `
-            -Path "$supportedV26\*" `
-            -DestinationPath (Join-Path $root 'supported-v26.zip')
-          Compress-Archive `
-            -Path "$supportedV27\*" `
-            -DestinationPath (Join-Path $root 'supported-v27.zip')
-          Compress-Archive `
-            -Path "$supportedV28\*" `
-            -DestinationPath (Join-Path $root 'supported-v28.zip')
-          Compress-Archive `
-            -Path "$supportedV29\*" `
-            -DestinationPath (Join-Path $root 'supported-v29.zip')
-          Compress-Archive `
-            -Path "$supportedV30\*" `
-            -DestinationPath (Join-Path $root 'supported-v30.zip')
-          Compress-Archive `
-            -Path "$supportedV31\*" `
-            -DestinationPath (Join-Path $root 'supported-v31.zip')
-          Compress-Archive `
-            -Path "$supportedV32\*" `
-            -DestinationPath (Join-Path $root 'supported-v32.zip')
-          Compress-Archive `
-            -Path "$supportedV33\*" `
-            -DestinationPath (Join-Path $root 'supported-v33.zip')
-          Compress-Archive `
-            -Path "$supportedV34\*" `
-            -DestinationPath (Join-Path $root 'supported-v34.zip')
-          Compress-Archive `
-            -Path "$supportedV35\*" `
-            -DestinationPath (Join-Path $root 'supported-v35.zip')
-          Compress-Archive `
-            -Path "$supportedV36\*" `
-            -DestinationPath (Join-Path $root 'supported-v36.zip')
-          Compress-Archive `
-            -Path "$conflict\*" `
-            -DestinationPath (Join-Path $root 'conflicting-v2.zip')
+          backend\.venv\Scripts\python.exe scripts\ci\check_windows_installer_supported_upgrade_matrix.py
+          backend\.venv\Scripts\python.exe scripts\ci\build_installer_fixtures.py `
+            --output-root .codex-temp\windows-installer-fixtures `
+            --host desktop\src-tauri\target\release\angmoo-desktop.exe `
+            --sidecar desktop\src-tauri\binaries\angmoo-sidecar-x86_64-pc-windows-msvc.exe `
+            --profile ${{ needs.impact.outputs.windows }}
       - name: Build Defender trigger matrix binaries
         shell: pwsh
         run: |
           $env:CARGO_TARGET_DIR = (Resolve-Path 'desktop\src-tauri\target').Path
           cargo build --manifest-path desktop\security\defender-matrix\Cargo.toml `
             --release --locked --bins
+        if: needs.impact.outputs.windows == 'full'
       - name: Run pre-install Defender trigger matrix
         shell: pwsh
         run: |
@@ -499,9 +163,10 @@ jobs:
             -Installer $installer.FullName `
             -OutputRoot '.codex-temp\er6-defender-trigger-matrix' `
             -FailOnDetection
+        if: needs.impact.outputs.windows == 'full'
       - name: Preserve sanitized pre-install Defender diagnostics
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always() && needs.impact.outputs.windows == 'full'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: angmoo-defender-preinstall-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
@@ -533,9 +198,9 @@ jobs:
             --version 0.4.0-1 `
             --commit $env:SOURCE_SHA
       - name: Upload release-candidate evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 14
           path: |
@@ -547,369 +212,190 @@ jobs:
             .codex-temp/er6-release-metadata/THIRD_PARTY_NOTICES.md
             .codex-temp/er6-release-metadata/LICENSE
             .codex-temp/er6-supply-chain-audit.json
-            .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
-            .codex-temp/er6-localappdata-lifecycle/er6-localappdata-lifecycle.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v1.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v2.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v3.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v4.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v5.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v6.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v7.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v8.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v9.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v10.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v11.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v12.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v13.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v14.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v15.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v16.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v17.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v18.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v19.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v20.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v21.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v22.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v23.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v24.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v25.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v26.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v27.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v28.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v29.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v30.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v31.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v32.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v33.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v34.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v35.zip
-            .codex-temp/windows-installer-supported-upgrade/supported-v36.zip
-            .codex-temp/windows-installer-supported-upgrade/conflicting-v2.zip
       - name: Attest Windows installers
         if: github.event_name != 'pull_request'
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             desktop/src-tauri/target/release/bundle/nsis/*.exe
             desktop/src-tauri/target/release/bundle/msi/*.msi
-
+      - name: Preserve installer-legacy-fixture
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-legacy-fixture-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: .codex-temp/er6-localappdata-lifecycle/er6-localappdata-lifecycle.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve installer-fixtures-payload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: |
+            .codex-temp/windows-installer-fixtures/payload/*.zip
+            .codex-temp/windows-installer-fixtures/payload/bundle.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve installer-fixtures-first
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-fixtures-first-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: |
+            .codex-temp/windows-installer-fixtures/first/*.zip
+            .codex-temp/windows-installer-fixtures/first/bundle.json
+          if-no-files-found: error
+          retention-days: 14
+        if: needs.impact.outputs.windows == 'full'
+      - name: Preserve installer-fixtures-second
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-fixtures-second-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: |
+            .codex-temp/windows-installer-fixtures/second/*.zip
+            .codex-temp/windows-installer-fixtures/second/bundle.json
+          if-no-files-found: error
+          retention-days: 14
+        if: needs.impact.outputs.windows == 'full'
+      - name: Preserve installer-fixtures-recovery
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-fixtures-recovery-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: |
+            .codex-temp/windows-installer-fixtures/recovery/*.zip
+            .codex-temp/windows-installer-fixtures/recovery/bundle.json
+          if-no-files-found: error
+          retention-days: 14
+        if: needs.impact.outputs.windows == 'full'
+      - name: Preserve installer-fixtures-representative
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: installer-fixtures-representative-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: |
+            .codex-temp/windows-installer-fixtures/representative/*.zip
+            .codex-temp/windows-installer-fixtures/representative/bundle.json
+          if-no-files-found: error
+          retention-days: 14
+        if: needs.impact.outputs.windows == 'installer-smoke'
+    needs:
+      - impact
+    if: needs.impact.outputs.windows_installer == 'true'
   windows-installer-supported-upgrade:
     name: windows-installer-supported-upgrade (${{ matrix.partition }})
-    needs: release-candidate
+    needs:
+      - impact
+      - release-candidate
     runs-on: windows-latest
-    # v1-v28 each runs real NSIS, followed by the idempotent re-install check.
-    # Twenty minutes ended after v24 passed but before that final check.
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        partition: [first, second]
+        partition:
+          - first
+          - second
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/payload
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-${{ matrix.partition }}-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/fixtures/${{ matrix.partition }}
       - name: Run real NSIS supported-predecessor direct update
         shell: pwsh
         run: |
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
-          $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse |
-            Select-Object -First 1
-          $supportedV1 = Get-ChildItem $root -Filter 'supported-v1.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV2 = Get-ChildItem $root -Filter 'supported-v2.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV3 = Get-ChildItem $root -Filter 'supported-v3.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV4 = Get-ChildItem $root -Filter 'supported-v4.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV5 = Get-ChildItem $root -Filter 'supported-v5.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV6 = Get-ChildItem $root -Filter 'supported-v6.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV7 = Get-ChildItem $root -Filter 'supported-v7.zip' -Recurse |
-            Select-Object -First 1
-          $conflict = Get-ChildItem $root -Filter 'conflicting-v2.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV8 = Get-ChildItem $root -Filter 'supported-v8.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV9 = Get-ChildItem $root -Filter 'supported-v9.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV10 = Get-ChildItem $root -Filter 'supported-v10.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV11 = Get-ChildItem $root -Filter 'supported-v11.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV12 = Get-ChildItem $root -Filter 'supported-v12.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV13 = Get-ChildItem $root -Filter 'supported-v13.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV14 = Get-ChildItem $root -Filter 'supported-v14.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV15 = Get-ChildItem $root -Filter 'supported-v15.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV16 = Get-ChildItem $root -Filter 'supported-v16.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV17 = Get-ChildItem $root -Filter 'supported-v17.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV18 = Get-ChildItem $root -Filter 'supported-v18.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV19 = Get-ChildItem $root -Filter 'supported-v19.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV20 = Get-ChildItem $root -Filter 'supported-v20.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV21 = Get-ChildItem $root -Filter 'supported-v21.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV22 = Get-ChildItem $root -Filter 'supported-v22.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV23 = Get-ChildItem $root -Filter 'supported-v23.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV24 = Get-ChildItem $root -Filter 'supported-v24.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV25 = Get-ChildItem $root -Filter 'supported-v25.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV26 = Get-ChildItem $root -Filter 'supported-v26.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV27 = Get-ChildItem $root -Filter 'supported-v27.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV28 = Get-ChildItem $root -Filter 'supported-v28.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV29 = Get-ChildItem $root -Filter 'supported-v29.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV30 = Get-ChildItem $root -Filter 'supported-v30.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV31 = Get-ChildItem $root -Filter 'supported-v31.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV32 = Get-ChildItem $root -Filter 'supported-v32.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV33 = Get-ChildItem $root -Filter 'supported-v33.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV34 = Get-ChildItem $root -Filter 'supported-v34.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV35 = Get-ChildItem $root -Filter 'supported-v35.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV36 = Get-ChildItem $root -Filter 'supported-v36.zip' -Recurse |
-            Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $supportedV29 -or -not $supportedV30 -or -not $supportedV31 -or -not $supportedV32 -or -not $supportedV33 -or -not $supportedV34 -or -not $supportedV35 -or -not $supportedV36 -or -not $conflict) {
-            throw 'Windows installer supported-upgrade inputs are missing'
-          }
-          $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
-          "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)" |
-            Set-Content -LiteralPath $sentinel -Encoding ascii -NoNewline
+          $installer = @(Get-ChildItem $root -Filter '*setup*.exe' -Recurse)
+          if ($installer.Count -ne 1) { throw 'installer_candidate_must_be_unique' }
+          $sentinel = Join-Path $env:RUNNER_TEMP 'angmoo-installer-fixture.sentinel'
+          [System.IO.File]::WriteAllText($sentinel, "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)")
           .\scripts\ci\run_windows_installer_supported_upgrade.ps1 `
-            -Installer $installer.FullName `
-            -SupportedV1FixtureArchive $supportedV1.FullName `
-            -SupportedV2FixtureArchive $supportedV2.FullName `
-            -SupportedV3FixtureArchive $supportedV3.FullName `
-            -SupportedV4FixtureArchive $supportedV4.FullName `
-            -SupportedV5FixtureArchive $supportedV5.FullName `
-            -SupportedV6FixtureArchive $supportedV6.FullName `
-            -SupportedV7FixtureArchive $supportedV7.FullName `
-            -SupportedV8FixtureArchive $supportedV8.FullName `
-            -SupportedV9FixtureArchive $supportedV9.FullName `
-            -SupportedV10FixtureArchive $supportedV10.FullName `
-            -SupportedV11FixtureArchive $supportedV11.FullName `
-            -SupportedV12FixtureArchive $supportedV12.FullName `
-            -SupportedV13FixtureArchive $supportedV13.FullName `
-            -SupportedV14FixtureArchive $supportedV14.FullName `
-            -SupportedV15FixtureArchive $supportedV15.FullName `
-            -SupportedV16FixtureArchive $supportedV16.FullName `
-            -SupportedV17FixtureArchive $supportedV17.FullName `
-            -SupportedV18FixtureArchive $supportedV18.FullName `
-            -SupportedV19FixtureArchive $supportedV19.FullName `
-            -SupportedV20FixtureArchive $supportedV20.FullName `
-            -SupportedV21FixtureArchive $supportedV21.FullName `
-            -SupportedV22FixtureArchive $supportedV22.FullName `
-            -SupportedV23FixtureArchive $supportedV23.FullName `
-            -SupportedV24FixtureArchive $supportedV24.FullName `
-            -SupportedV25FixtureArchive $supportedV25.FullName `
-            -SupportedV26FixtureArchive $supportedV26.FullName `
-            -SupportedV27FixtureArchive $supportedV27.FullName `
-            -SupportedV28FixtureArchive $supportedV28.FullName `
-            -SupportedV29FixtureArchive $supportedV29.FullName `
-            -SupportedV30FixtureArchive $supportedV30.FullName `
-            -SupportedV31FixtureArchive $supportedV31.FullName `
-            -SupportedV32FixtureArchive $supportedV32.FullName `
-            -SupportedV33FixtureArchive $supportedV33.FullName `
-            -SupportedV34FixtureArchive $supportedV34.FullName `
-            -SupportedV35FixtureArchive $supportedV35.FullName `
-            -SupportedV36FixtureArchive $supportedV36.FullName `
-            -ConflictFixtureArchive $conflict.FullName `
+            -Installer $installer[0].FullName `
+            -FixtureRoot (Join-Path $root 'fixtures/${{ matrix.partition }}') `
+            -PayloadArchive (Join-Path $root 'payload/predecessor-payload.zip') `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
             -RunSentinel $sentinel `
             -UpgradePartition ${{ matrix.partition }} `
             -Mode Upgrade
-
       - name: Upload exact native upgrade coverage
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-${{ matrix.partition }}
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/angmoo-supported-upgrade-${{ matrix.partition }}.json
-
+    if: needs.impact.outputs.windows == 'full'
   windows-installer-failure-recovery:
     name: windows-installer-failure-recovery
-    needs: release-candidate
+    needs:
+      - impact
+      - release-candidate
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/payload
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-recovery-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/fixtures/recovery
       - name: Run real NSIS migration-failure rollback
         shell: pwsh
         run: |
           $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
-          $installer = Get-ChildItem $root -Filter '*setup*.exe' -Recurse |
-            Select-Object -First 1
-          $supportedV1 = Get-ChildItem $root -Filter 'supported-v1.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV2 = Get-ChildItem $root -Filter 'supported-v2.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV3 = Get-ChildItem $root -Filter 'supported-v3.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV4 = Get-ChildItem $root -Filter 'supported-v4.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV5 = Get-ChildItem $root -Filter 'supported-v5.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV6 = Get-ChildItem $root -Filter 'supported-v6.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV7 = Get-ChildItem $root -Filter 'supported-v7.zip' -Recurse |
-            Select-Object -First 1
-          $conflict = Get-ChildItem $root -Filter 'conflicting-v2.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV8 = Get-ChildItem $root -Filter 'supported-v8.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV9 = Get-ChildItem $root -Filter 'supported-v9.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV10 = Get-ChildItem $root -Filter 'supported-v10.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV11 = Get-ChildItem $root -Filter 'supported-v11.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV12 = Get-ChildItem $root -Filter 'supported-v12.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV13 = Get-ChildItem $root -Filter 'supported-v13.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV14 = Get-ChildItem $root -Filter 'supported-v14.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV15 = Get-ChildItem $root -Filter 'supported-v15.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV16 = Get-ChildItem $root -Filter 'supported-v16.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV17 = Get-ChildItem $root -Filter 'supported-v17.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV18 = Get-ChildItem $root -Filter 'supported-v18.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV19 = Get-ChildItem $root -Filter 'supported-v19.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV20 = Get-ChildItem $root -Filter 'supported-v20.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV21 = Get-ChildItem $root -Filter 'supported-v21.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV22 = Get-ChildItem $root -Filter 'supported-v22.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV23 = Get-ChildItem $root -Filter 'supported-v23.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV24 = Get-ChildItem $root -Filter 'supported-v24.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV25 = Get-ChildItem $root -Filter 'supported-v25.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV26 = Get-ChildItem $root -Filter 'supported-v26.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV27 = Get-ChildItem $root -Filter 'supported-v27.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV28 = Get-ChildItem $root -Filter 'supported-v28.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV29 = Get-ChildItem $root -Filter 'supported-v29.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV30 = Get-ChildItem $root -Filter 'supported-v30.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV31 = Get-ChildItem $root -Filter 'supported-v31.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV32 = Get-ChildItem $root -Filter 'supported-v32.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV33 = Get-ChildItem $root -Filter 'supported-v33.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV34 = Get-ChildItem $root -Filter 'supported-v34.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV35 = Get-ChildItem $root -Filter 'supported-v35.zip' -Recurse |
-            Select-Object -First 1
-          $supportedV36 = Get-ChildItem $root -Filter 'supported-v36.zip' -Recurse |
-            Select-Object -First 1
-          if (-not $installer -or -not $supportedV1 -or -not $supportedV2 -or -not $supportedV3 -or -not $supportedV4 -or -not $supportedV5 -or -not $supportedV6 -or -not $supportedV7 -or -not $supportedV8 -or -not $supportedV9 -or -not $supportedV10 -or -not $supportedV11 -or -not $supportedV12 -or -not $supportedV13 -or -not $supportedV14 -or -not $supportedV15 -or -not $supportedV16 -or -not $supportedV17 -or -not $supportedV18 -or -not $supportedV19 -or -not $supportedV20 -or -not $supportedV21 -or -not $supportedV22 -or -not $supportedV23 -or -not $supportedV24 -or -not $supportedV25 -or -not $supportedV26 -or -not $supportedV27 -or -not $supportedV28 -or -not $supportedV29 -or -not $supportedV30 -or -not $supportedV31 -or -not $supportedV32 -or -not $supportedV33 -or -not $supportedV34 -or -not $supportedV35 -or -not $supportedV36 -or -not $conflict) {
-            throw 'Windows installer failure-recovery inputs are missing'
-          }
-          $sentinel = Join-Path $env:RUNNER_TEMP "angmoo-installer-fixture-$($env:GITHUB_RUN_ID)-$($env:SOURCE_SHA)"
-          "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)" |
-            Set-Content -LiteralPath $sentinel -Encoding ascii -NoNewline
+          $installer = @(Get-ChildItem $root -Filter '*setup*.exe' -Recurse)
+          if ($installer.Count -ne 1) { throw 'installer_candidate_must_be_unique' }
+          $sentinel = Join-Path $env:RUNNER_TEMP 'angmoo-installer-fixture.sentinel'
+          [System.IO.File]::WriteAllText($sentinel, "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)")
           .\scripts\ci\run_windows_installer_supported_upgrade.ps1 `
-            -Installer $installer.FullName `
-            -SupportedV1FixtureArchive $supportedV1.FullName `
-            -SupportedV2FixtureArchive $supportedV2.FullName `
-            -SupportedV3FixtureArchive $supportedV3.FullName `
-            -SupportedV4FixtureArchive $supportedV4.FullName `
-            -SupportedV5FixtureArchive $supportedV5.FullName `
-            -SupportedV6FixtureArchive $supportedV6.FullName `
-            -SupportedV7FixtureArchive $supportedV7.FullName `
-            -SupportedV8FixtureArchive $supportedV8.FullName `
-            -SupportedV9FixtureArchive $supportedV9.FullName `
-            -SupportedV10FixtureArchive $supportedV10.FullName `
-            -SupportedV11FixtureArchive $supportedV11.FullName `
-            -SupportedV12FixtureArchive $supportedV12.FullName `
-            -SupportedV13FixtureArchive $supportedV13.FullName `
-            -SupportedV14FixtureArchive $supportedV14.FullName `
-            -SupportedV15FixtureArchive $supportedV15.FullName `
-            -SupportedV16FixtureArchive $supportedV16.FullName `
-            -SupportedV17FixtureArchive $supportedV17.FullName `
-            -SupportedV18FixtureArchive $supportedV18.FullName `
-            -SupportedV19FixtureArchive $supportedV19.FullName `
-            -SupportedV20FixtureArchive $supportedV20.FullName `
-            -SupportedV21FixtureArchive $supportedV21.FullName `
-            -SupportedV22FixtureArchive $supportedV22.FullName `
-            -SupportedV23FixtureArchive $supportedV23.FullName `
-            -ConflictFixtureArchive $conflict.FullName `
-            -SupportedV24FixtureArchive $supportedV24.FullName `
-            -SupportedV25FixtureArchive $supportedV25.FullName `
-            -SupportedV26FixtureArchive $supportedV26.FullName `
-            -SupportedV27FixtureArchive $supportedV27.FullName `
-            -SupportedV28FixtureArchive $supportedV28.FullName `
-            -SupportedV29FixtureArchive $supportedV29.FullName `
-            -SupportedV30FixtureArchive $supportedV30.FullName `
-            -SupportedV31FixtureArchive $supportedV31.FullName `
-            -SupportedV32FixtureArchive $supportedV32.FullName `
-            -SupportedV33FixtureArchive $supportedV33.FullName `
-            -SupportedV34FixtureArchive $supportedV34.FullName `
-            -SupportedV35FixtureArchive $supportedV35.FullName `
-            -SupportedV36FixtureArchive $supportedV36.FullName `
+            -Installer $installer[0].FullName `
+            -FixtureRoot (Join-Path $root 'fixtures/recovery') `
+            -PayloadArchive (Join-Path $root 'payload/predecessor-payload.zip') `
             -Python (Get-Command python).Source `
             -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
             -RunSentinel $sentinel `
+            -UpgradePartition all `
             -Mode Recovery
-
+    if: needs.impact.outputs.windows == 'full'
   installed-runtime-smoke:
     name: windows-installer-clean-install
-    needs: release-candidate
+    needs:
+      - impact
+      - release-candidate
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-legacy-fixture-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/legacy
       - name: Verify installer digests
         shell: pwsh
         run: |
@@ -1604,55 +1090,99 @@ jobs:
             Set-Content -LiteralPath (Join-Path $evidence 'threat-detections.json') -Encoding utf8
       - name: Upload hosted Defender evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: angmoo-windows-defender-evidence-${{ env.SOURCE_SHA }}
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/angmoo-defender-evidence
-
+    if: needs.impact.outputs.windows_installer == 'true'
   windows-installer:
-    name: windows-installer
     if: always()
     needs:
+      - impact
       - release-candidate
       - installed-runtime-smoke
       - windows-installer-supported-upgrade
       - windows-installer-failure-recovery
+      - windows-installer-representative-upgrade
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+      SUPPORTED_UPGRADE_RESULT: ${{ needs.windows-installer-supported-upgrade.result }}
+      FAILURE_RECOVERY_RESULT: ${{ needs.windows-installer-failure-recovery.result }}
     steps:
-      - name: Require every Windows installer Gate
-        shell: bash
-        env:
-          BUILD_RESULT: ${{ needs.release-candidate.result }}
-          CLEAN_INSTALL_RESULT: ${{ needs.installed-runtime-smoke.result }}
-          SUPPORTED_UPGRADE_RESULT: ${{ needs.windows-installer-supported-upgrade.result }}
-          FAILURE_RECOVERY_RESULT: ${{ needs.windows-installer-failure-recovery.result }}
-        run: |
-          set -euo pipefail
-          for result in \
-            "$BUILD_RESULT" \
-            "$CLEAN_INSTALL_RESULT" \
-            "$SUPPORTED_UPGRADE_RESULT" \
-            "$FAILURE_RECOVERY_RESULT"; do
-            test "$result" = "success"
-          done
-          echo "windows_installer_required_matrix_pass"
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - name: Require every selected Windows installer Gate
+        run: |-
+          python scripts/ci/gate.py --gate windows-installer
+          echo windows_installer_required_matrix_pass
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        if: needs.impact.outputs.windows_installer == 'true'
         with:
           pattern: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-*
           merge-multiple: true
           path: .ci/windows-upgrade-reports
-      - name: Require exact native predecessor union
-        run: >-
-          python scripts/ci/windows_installer_upgrade_coverage.py
-          --directory .ci/windows-upgrade-reports
-          --source-sha "$SOURCE_SHA"
-          --run-id "$GITHUB_RUN_ID"
-          --run-attempt "$GITHUB_RUN_ATTEMPT"
+      - name: Require exact selected native predecessor union
+        if: needs.impact.outputs.windows_installer == 'true'
+        run: python scripts/ci/windows_installer_upgrade_coverage.py --directory .ci/windows-upgrade-reports --source-sha "$SOURCE_SHA"
+          --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" --profile "${{ needs.impact.outputs.windows }}"
+  windows-installer-representative-upgrade:
+    name: windows-installer-representative-upgrade
+    needs:
+      - impact
+      - release-candidate
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/payload
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: installer-fixtures-representative-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-installer/fixtures/representative
+      - name: Run real NSIS supported-predecessor direct update
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'angmoo-installer'
+          $installer = @(Get-ChildItem $root -Filter '*setup*.exe' -Recurse)
+          if ($installer.Count -ne 1) { throw 'installer_candidate_must_be_unique' }
+          $sentinel = Join-Path $env:RUNNER_TEMP 'angmoo-installer-fixture.sentinel'
+          [System.IO.File]::WriteAllText($sentinel, "angmoo-installer-fixture:$($env:GITHUB_RUN_ID):$($env:SOURCE_SHA)")
+          .\scripts\ci\run_windows_installer_supported_upgrade.ps1 `
+            -Installer $installer[0].FullName `
+            -FixtureRoot (Join-Path $root 'fixtures/representative') `
+            -PayloadArchive (Join-Path $root 'payload/predecessor-payload.zip') `
+            -Python (Get-Command python).Source `
+            -Verifier scripts\ci\verify_windows_installer_supported_upgrade_fixture.py `
+            -RunSentinel $sentinel `
+            -UpgradePartition representative `
+            -Mode Upgrade
+      - name: Upload exact native upgrade coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-representative
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ runner.temp }}/angmoo-supported-upgrade-representative.json
+    if: needs.impact.outputs.windows == 'installer-smoke'

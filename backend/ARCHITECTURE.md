@@ -1,5 +1,16 @@
 # Angmoo Backend Architecture
 
+## Current CI protection after completed refactors (2026-10-14)
+
+Current import boundaries, ownership, authorization, persistence and runtime behavior
+are the executable architecture contract. Completed refactor evidence remains historical
+documentation; routine CI no longer requires retired forwarding bodies, exact historical
+AST copies or frozen M3/M4 test names. Their current behavior remains covered by the
+runtime composition, ASGI, Chat ownership/lifecycle and architecture-boundary tests.
+CI full runs collect the complete current corpus. Scoped runs record and verify the
+current collection, dependency selection and exact executed union; unknown impact
+expands validation. See [CI validation](../docs/operations/ci-validation.md).
+
 ## World image reads and own-profile media contracts (2026-10-12 LOCAL)
 
 Worlds owns current icon/banner pixel reads in `service/media.py`. Both the

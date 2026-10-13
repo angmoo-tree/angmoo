@@ -6,12 +6,21 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "Validation scope / 검증 범위 (full for release candidates)"
+        type: choice
+        options: [full, auto]
+        default: full
+        required: true
+  schedule:
+    - cron: "23 3 * * 1"
 
 permissions:
   contents: read
 
 concurrency:
-  group: local-smoke-${{ github.workflow }}-${{ github.ref }}
+  group: local-smoke-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -20,7 +29,37 @@ env:
   SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
 jobs:
-  local-core-smoke:
+  impact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      plan: ${{ steps.select.outputs.plan }}
+      backend_profile: ${{ steps.select.outputs.backend_profile }}
+      windows: ${{ steps.select.outputs.windows }}
+      backend: ${{ steps.select.outputs.backend }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      local_core_smoke: ${{ steps.select.outputs.local_core_smoke }}
+      local_autonomy_smoke: ${{ steps.select.outputs.local_autonomy_smoke }}
+      local_full_graph: ${{ steps.select.outputs.local_full_graph }}
+      embedded_data_migration: ${{ steps.select.outputs.embedded_data_migration }}
+      tauri_windows: ${{ steps.select.outputs.tauri_windows }}
+      windows_installer: ${{ steps.select.outputs.windows_installer }}
+      windows_native: ${{ steps.select.outputs.windows_native }}
+      tauri_windows_host_dev: ${{ steps.select.outputs.tauri_windows_host_dev }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+        repository: ${{ env.SOURCE_REPOSITORY }}
+        ref: ${{ env.SOURCE_SHA }}
+    - id: select
+      name: Classify actual changed paths (full observer)
+      run: python scripts/ci/impact.py
+
+  local-core-smoke-work:
+    needs: [impact]
+    if: needs.impact.outputs.local_core_smoke == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -110,7 +149,29 @@ jobs:
               bash scripts/ci/run_container_gate.sh
           )
 
-  local-autonomy-smoke:
+  local-core-smoke:
+    if: always()
+    needs:
+    - impact
+    - local-core-smoke-work
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+        repository: ${{ env.SOURCE_REPOSITORY }}
+        ref: ${{ env.SOURCE_SHA }}
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate local-core-smoke
+
+  local-autonomy-smoke-work:
+    needs: [impact]
+    if: needs.impact.outputs.local_autonomy_smoke == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -167,7 +228,29 @@ jobs:
             tests/relationships/test_social_event_runtime.py \
             tests/relationships/test_activity_proposals.py
 
-  local-full-graph:
+  local-autonomy-smoke:
+    if: always()
+    needs:
+    - impact
+    - local-autonomy-smoke-work
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+        repository: ${{ env.SOURCE_REPOSITORY }}
+        ref: ${{ env.SOURCE_SHA }}
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate local-autonomy-smoke
+
+  local-full-graph-work:
+    needs: [impact]
+    if: needs.impact.outputs.local_full_graph == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
@@ -205,3 +288,22 @@ jobs:
             tests/relationships/test_graph_projection_worker.py \
             tests/relationships/test_relationship_graph_api.py \
             tests/relationships/test_relationship_graph_repository.py
+  local-full-graph:
+    if: always()
+    needs:
+    - impact
+    - local-full-graph-work
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+        repository: ${{ env.SOURCE_REPOSITORY }}
+        ref: ${{ env.SOURCE_SHA }}
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate local-full-graph

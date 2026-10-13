@@ -24,7 +24,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  impact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      plan: ${{ steps.select.outputs.plan }}
+      backend_profile: ${{ steps.select.outputs.backend_profile }}
+      windows: ${{ steps.select.outputs.windows }}
+      backend: ${{ steps.select.outputs.backend }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      local_core_smoke: ${{ steps.select.outputs.local_core_smoke }}
+      local_autonomy_smoke: ${{ steps.select.outputs.local_autonomy_smoke }}
+      local_full_graph: ${{ steps.select.outputs.local_full_graph }}
+      embedded_data_migration: ${{ steps.select.outputs.embedded_data_migration }}
+      tauri_windows: ${{ steps.select.outputs.tauri_windows }}
+      windows_installer: ${{ steps.select.outputs.windows_installer }}
+      windows_native: ${{ steps.select.outputs.windows_native }}
+      tauri_windows_host_dev: ${{ steps.select.outputs.tauri_windows_host_dev }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - id: select
+      name: Classify actual changed paths (full observer)
+      run: python scripts/ci/impact.py
+
   windows-native:
+    needs: [impact]
+    if: needs.impact.outputs.windows_native == 'true'
     runs-on: windows-latest
     timeout-minutes: 50
     steps:

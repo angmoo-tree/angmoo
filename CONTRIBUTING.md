@@ -23,6 +23,12 @@ reference in the pull request.
 
 ## Local development and checks
 
+CI selects validation from the actual changed paths and records the selection with
+its commit and run identity. Unknown or shared build inputs expand validation.
+Manual and weekly full runs cover the current complete test corpus and supported
+Windows upgrades; a main check pass is separate from release-candidate validation.
+See [CI validation and failure recovery](docs/operations/ci-validation.md).
+
 The official contributor baseline requires Git and Docker Compose 2.22.0 or
 newer. It is a reproducible Linux Docker environment with exactly two services:
 Next.js development frontend and FastAPI `CONTRIBUTOR_EMBEDDED` backend. Start

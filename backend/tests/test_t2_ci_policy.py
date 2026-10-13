@@ -26,7 +26,7 @@ def test_core_reports_reject_database_or_directory_uploads() -> None:
     assert checker.check_report_uploads(document, "ci.yml", text) == []
     for unsafe_path in ("browser-tests/.ci/canonical.sqlite3", "browser-tests/.ci/"):
         changed = copy.deepcopy(document)
-        uploads = [step for step in changed["jobs"]["frontend"]["steps"]
+        uploads = [step for step in changed["jobs"]["frontend-work"]["steps"]
                    if str(step.get("uses", "")).startswith("actions/upload-artifact@")]
         assert len(uploads) == 1
         uploads[0]["with"]["path"] += "\n" + unsafe_path

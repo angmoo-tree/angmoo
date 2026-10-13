@@ -16,7 +16,7 @@ spec = importlib.util.spec_from_file_location("backend_shard_proof", ROOT / "scr
 contract = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contract)
 IDENTITY = {"source_sha": "1" * 40, "checkout_sha": "2" * 40, "checkout_tree": "3" * 40,
-            "python": "3.13.15", "lock_sha256": "4" * 64}
+            "python": "3.13.15", "lock_sha256": "4" * 64, "run_id": "0", "run_attempt": "1"}
 
 
 def actual_partition(tmp_path, index, source):
@@ -64,14 +64,15 @@ def test_four_real_pytest_sessions_cover_each_original_case_exactly_once(complet
     assert all(report["selected_nodes"] for report in completed_partitions)
 
 
-def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus(tmp_path):
+@pytest.mark.parametrize("profile", ["full", "scoped"])
+def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_selected_corpus(tmp_path, profile):
     root = tmp_path / "actual-cli-repository"
     scripts = root / "scripts/ci"
     backend = root / "backend"
     scripts.mkdir(parents=True)
     (backend / "app").mkdir(parents=True)
     (backend / "tests").mkdir()
-    for name in ("run_backend_shard.py", "backend_shard_contract.py"):
+    for name in ("run_backend_shard.py", "backend_shard_contract.py", "impact.py"):
         shutil.copyfile(ROOT / "scripts/ci" / name, scripts / name)
     (backend / "uv.lock").write_text("synthetic locked fixture\n", encoding="utf-8")
     (backend / "app/__init__.py").write_text("VALUE = 17\n", encoding="utf-8")
@@ -79,6 +80,8 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus(tm
         "from app import VALUE\nimport pytest\n\n@pytest.fixture\n"
         "def changed_directory(monkeypatch, tmp_path):\n    monkeypatch.chdir(tmp_path)\n\n" + "\n\n".join(
         f"def test_case_{index}(changed_directory):\n    assert VALUE == 17 and {index} >= 0" for index in range(80)), encoding="utf-8")
+    if profile == "scoped":
+        (backend / "tests/test_selected.py").write_text("def test_selected():\n    assert True\n", encoding="utf-8")
     for command in (["init", "--quiet"], ["config", "user.name", "Synthetic fixture"],
                     ["config", "user.email", "fixture@example.test"], ["add", "."],
                     ["-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "synthetic CLI fixture"]):
@@ -87,21 +90,43 @@ def test_actual_cli_bootstrap_imports_backend_app_and_covers_the_whole_corpus(tm
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
     env.pop("PYTEST_ADDOPTS", None)
+    for name in list(env):
+        if name.startswith("GITHUB_"):
+            del env[name]
     env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    arguments = []
+    if profile == "scoped":
+        result = subprocess.run([sys.executable, str(scripts / "impact.py"), "--mode", "active"],
+            cwd=root, env=env, capture_output=True, text=True, check=True)
+        plan_file = root / ".ci/impact.json"
+        plan = json.loads(plan_file.read_text())
+        from impact import classify, digest
+        plan["effective"] = classify(["backend/tests/test_selected.py"])
+        plan["selection_sha256"] = digest(plan["effective"])
+        plan_file.write_text(json.dumps(plan), encoding="utf-8")
+        arguments = ["--impact-plan", str(plan_file)]
     reports = []
     for index in range(contract.SHARD_COUNT):
         result = subprocess.run([sys.executable, str(scripts / "run_backend_shard.py"),
-            "--index", str(index), "--source-sha", sha], cwd=backend, env=env,
+            "--index", str(index), "--source-sha", sha, *arguments], cwd=backend, env=env,
             capture_output=True, text=True, timeout=40)
         assert result.returncode == 0, result.stdout + result.stderr
         reports.append(json.loads((backend / ".ci/backend-shard-report.json").read_text()))
-    coverage = contract.verify_reports(reports, source_sha=sha, checkout_sha=sha)
-    assert coverage["collected"] == coverage["covered"] == coverage["passed"] == 80
-    assert coverage["skipped"] == 0
+    if profile == "full":
+        coverage = contract.verify_reports(reports, source_sha=sha, checkout_sha=sha)
+        assert coverage["collected"] == coverage["covered"] == coverage["passed"] == 80
+        assert coverage["skipped"] == 0
+    else:
+        assert all(len(report["all_nodes"]) == 81 for report in reports)
+        assert all(report["suite_nodes"] == ["tests/test_selected.py::test_selected"] for report in reports)
+        assert sum(not report["selected_nodes"] for report in reports) == 3
+        executed = [node for report in reports for node in report["selected_nodes"]]
+        assert executed == ["tests/test_selected.py::test_selected"]
+        assert all(report["exit_code"] == 0 for report in reports)
 
 
 @pytest.mark.parametrize("mutation", ["missing_shard", "duplicate_shard", "wrong_source",
-    "changed_collection", "missing_result", "unexecuted", "teardown_failure", "wrong_selection"])
+    "changed_collection", "missing_result", "unexecuted", "teardown_failure", "wrong_selection", "wrong_attempt", "missing_suite"])
 def test_missing_failed_or_unexecuted_coverage_cannot_become_aggregate_success(completed_partitions, mutation):
     reports = deepcopy(completed_partitions)
     node = reports[0]["selected_nodes"][0]
@@ -113,6 +138,8 @@ def test_missing_failed_or_unexecuted_coverage_cannot_become_aggregate_success(c
     elif mutation == "unexecuted": reports[0]["results"][node]["phases"].pop("call")
     elif mutation == "teardown_failure": reports[0]["results"][node]["phases"]["teardown"] = "failed"
     elif mutation == "wrong_selection": reports[0]["selected_nodes"].append(reports[1]["selected_nodes"][0])
+    elif mutation == "wrong_attempt": reports[0]["identity"]["run_attempt"] = "2"
+    elif mutation == "missing_suite": reports[0]["suite_nodes"].pop()
     with pytest.raises(ValueError):
         contract.verify_reports(reports, source_sha=IDENTITY["source_sha"], checkout_sha=IDENTITY["checkout_sha"])
 
@@ -137,7 +164,7 @@ def test_real_fixture_setup_skip_is_recorded_without_inventing_a_call(tmp_path):
 
 
 @pytest.mark.parametrize("damage", ["missing_dependency", "missing_partition", "fail_fast",
-    "filtering", "missing_baseline", "aggregate_without_coverage"])
+    "filtering", "missing_selection", "aggregate_without_coverage"])
 def test_ci_policy_rejects_incomplete_partition_wiring(damage):
     document = ci_policy.yaml.load((ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"), Loader=ci_policy._UniqueKeyLoader)
     jobs = document["jobs"]
@@ -148,8 +175,8 @@ def test_ci_policy_rejects_incomplete_partition_wiring(damage):
     elif damage == "filtering":
         step = next(step for step in jobs["backend-tests"]["steps"] if "run_backend_shard.py" in str(step.get("run")))
         step["run"] += " --ignore tests/migrations"
-    elif damage == "missing_baseline":
-        jobs["backend-preflight"]["steps"] = [step for step in jobs["backend-preflight"]["steps"] if "check_test_node_baseline.py" not in str(step.get("run"))]
+    elif damage == "missing_selection":
+        jobs["backend-preflight"]["steps"] = [step for step in jobs["backend-preflight"]["steps"] if "check_ci_selection.py" not in str(step.get("run"))]
     else:
         step = next(step for step in jobs["backend"]["steps"] if "check_backend_shards.py" in str(step.get("run")))
         step["run"] = "echo success"

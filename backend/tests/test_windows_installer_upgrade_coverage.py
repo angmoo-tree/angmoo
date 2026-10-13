@@ -73,11 +73,20 @@ def test_native_upgrade_hosted_wiring_preserves_bounds_actions_and_exact_union()
         and '--run-attempt "$GITHUB_RUN_ATTEMPT"' in step["run"] for step in aggregate["steps"])
     source = (ROOT / "scripts/ci/run_windows_installer_supported_upgrade.ps1").read_text(encoding="utf-8")
     assert "--select-partition $UpgradePartition" in source
-    for version in coverage.readable_predecessors():
-        assert f"if ($selectedVersions -contains {version})" in source
-        assert f"Restore-IsolatedFixture $SupportedV{version}FixtureArchive" in source
-        assert f"$supportedContract.source_data_version -ne {version}" in source
-        assert f"$completedVersions.Add({version})" in source
+    assert "foreach ($version in $selectedVersions)" in source
+    assert "Restore-IsolatedFixture $archive" in source
+    assert "$supportedContract.source_data_version -ne [int]$version" in source
+    assert "$completedVersions.Add([int]$version)" in source
     assert "windows_installer_idempotent_marker_changed" in source
     assert source.index("windows_installer_hosted_runner_only") < source.index("foreach ($required")
     assert source.index("Assert-SyntheticFixtureArchive $Archive") < source.index("Remove-IsolatedFixture", source.index("Assert-SyntheticFixtureArchive $Archive"))
+
+
+def test_representative_smoke_cannot_claim_full_predecessor_coverage():
+    versions = coverage.readable_predecessors()
+    receipt = reports()[0]
+    receipt.update(partition="representative", versions=list(coverage.partition_versions(versions, "representative")))
+    value = coverage.verify_reports([receipt], versions=versions, source_sha="a" * 40, run_id="123", run_attempt="1", profile="installer-smoke")
+    assert value["profile"] == "installer-smoke" and value["covered"] == 2
+    with pytest.raises(ValueError, match="partitions_missing"):
+        coverage.verify_reports([receipt], versions=versions, source_sha="a" * 40, run_id="123", run_attempt="1")

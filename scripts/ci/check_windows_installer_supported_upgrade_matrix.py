@@ -48,16 +48,13 @@ def main() -> int:
                and '--run-attempt "$GITHUB_RUN_ATTEMPT"' in step["run"]
                for step in jobs["windows-installer"]["steps"]):
         raise SystemExit("windows_installer_native_union_missing")
-    for version in readable_predecessors:
-        if (
-            f"--source-version {version}" not in workflow
-            or f"supported-v{version}.zip" not in workflow
-            or f"-SupportedV{version}FixtureArchive" not in workflow
-            or f"Restore-IsolatedFixture $SupportedV{version}FixtureArchive" not in runner
-            or f"if ($selectedVersions -contains {version})" not in runner
-            or f"$completedVersions.Add({version})" not in runner
-        ):
-            raise SystemExit(f"windows_installer_hosted_predecessor_missing:v{version}")
+    for token in ("--select-partition $UpgradePartition", "foreach ($version in $selectedVersions)",
+                  "Restore-IsolatedFixture $archive", "$supportedContract.source_data_version -ne [int]$version",
+                  "$completedVersions.Add([int]$version)", "windows_installer_partition_coverage_incomplete"):
+        if token not in runner:
+            raise SystemExit("windows_installer_dynamic_predecessor_execution_missing")
+    if "build_installer_fixtures.py" not in workflow:
+        raise SystemExit("windows_installer_fixture_generation_missing")
     print(
         "windows_installer_supported_upgrade_matrix_contract_pass:"
         + ",".join(f"v{version}" for version in readable_predecessors)

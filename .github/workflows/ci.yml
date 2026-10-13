@@ -6,23 +6,61 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "Validation scope / 검증 범위 (full for release candidates)"
+        type: choice
+        options: [full, auto]
+        default: full
+        required: true
+  schedule:
+    - cron: "23 3 * * 1"
 
 permissions:
   contents: read
 
 concurrency:
-  group: core-ci-${{ github.workflow }}-${{ github.ref }}
+  group: core-ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   PYTHONUTF8: "1"
 
 jobs:
+  impact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      plan: ${{ steps.select.outputs.plan }}
+      backend_profile: ${{ steps.select.outputs.backend_profile }}
+      windows: ${{ steps.select.outputs.windows }}
+      backend: ${{ steps.select.outputs.backend }}
+      frontend: ${{ steps.select.outputs.frontend }}
+      local_core_smoke: ${{ steps.select.outputs.local_core_smoke }}
+      local_autonomy_smoke: ${{ steps.select.outputs.local_autonomy_smoke }}
+      local_full_graph: ${{ steps.select.outputs.local_full_graph }}
+      embedded_data_migration: ${{ steps.select.outputs.embedded_data_migration }}
+      tauri_windows: ${{ steps.select.outputs.tauri_windows }}
+      windows_installer: ${{ steps.select.outputs.windows_installer }}
+      windows_native: ${{ steps.select.outputs.windows_native }}
+      tauri_windows_host_dev: ${{ steps.select.outputs.tauri_windows_host_dev }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - id: select
+      name: Classify actual changed paths (full observer)
+      run: python scripts/ci/impact.py
+
   backend-preflight:
+    needs: [impact]
+    if: needs.impact.outputs.backend == 'true'
     runs-on: ubuntu-latest
     # Keep baseline, model, inventory and route/license gates before every partition.
     timeout-minutes: 75
     env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
       APP_ENV: test
       APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
       DATABASE_URL: sqlite+pysqlite:///./.ci/angmoo.sqlite3
@@ -50,7 +88,7 @@ jobs:
         working-directory: backend
       - name: Build pinned Vec1 for native hybrid regression
         run: |
-          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1"
+          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1" --source-cache-dir "$RUNNER_TEMP/angmoo-vec1-sources"
           echo "ANGMOO_TEST_VEC1_EXTENSION=$RUNNER_TEMP/angmoo-test-vec1/vec1.so" >> "$GITHUB_ENV"
       - name: Record backend test checkout identity
         env:
@@ -85,9 +123,8 @@ jobs:
             --diagnostics > ./.ci/contributor-status.json
           python -c "import json; p=json.load(open('./.ci/contributor-status.json', encoding='utf-8')); assert p['runtime_profile']=='CONTRIBUTOR_EMBEDDED' and p['persistence_provider']=='sqlite' and p['graph_provider']=='ladybug'"
         working-directory: backend
-      - name: Preserve approved test nodes
-        run: uv run python ../scripts/check_test_node_baseline.py --profile public
-        working-directory: backend
+      - name: Verify current checkout selection
+        run: python scripts/ci/check_ci_selection.py
       - name: Verify L4 P5-P7 parity and ownership inventory
         run: uv run python ../scripts/ci/generate_l4_pr_a_inventory.py --check
         working-directory: backend
@@ -109,8 +146,19 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
+      - name: Share verified pinned sources with partitions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: vec1-sources-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/angmoo-vec1-sources/sha256-8571bb4f77f9547d11ad11e2f72e0de7d3b2ab44e7930151998bce9377ed4b86.source-v1
+            ${{ runner.temp }}/angmoo-vec1-sources/sha256-bf3733d7c71b3ab0f6fd8a9ea0052ad87fa037d94333e14ce09878ba3492c3b0.source-v1
+          if-no-files-found: error
+          retention-days: 3
+
   backend-tests:
-    needs: backend-preflight
+    needs: [impact, backend-preflight]
+    if: needs.impact.outputs.backend == 'true'
     runs-on: ubuntu-latest
     # At 7bcc22bb the serial suite timed out at 75%, including many completed
     # failures and costly actual-Git preservation negatives. Keep every node
@@ -121,6 +169,7 @@ jobs:
       matrix:
         shard: [0, 1, 2, 3]
     env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
       APP_ENV: test
       APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}-${{ matrix.shard }}
       DATABASE_URL: sqlite+pysqlite:///./.ci/angmoo.sqlite3
@@ -147,15 +196,21 @@ jobs:
       - name: Install locked backend dependencies
         run: uv sync --frozen
         working-directory: backend
+      - name: Verify current checkout selection
+        run: python scripts/ci/check_ci_selection.py
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: vec1-sources-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/angmoo-vec1-sources
       - name: Build pinned Vec1 for native hybrid regression
         run: |
-          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1"
+          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1" --source-cache-dir "$RUNNER_TEMP/angmoo-vec1-sources"
           echo "ANGMOO_TEST_VEC1_EXTENSION=$RUNNER_TEMP/angmoo-test-vec1/vec1.so" >> "$GITHUB_ENV"
       - name: Run complete backend corpus partition with durable progress
         env:
           TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         working-directory: backend
-        run: uv run python ../scripts/ci/run_backend_shard.py --index "${{ matrix.shard }}" --source-sha "$TEST_SOURCE_SHA"
+        run: uv run python ../scripts/ci/run_backend_shard.py --index "${{ matrix.shard }}" --source-sha "$TEST_SOURCE_SHA" --impact-plan ../.ci/impact.json
       - name: Preserve every partition result and interruption progress
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -171,38 +226,92 @@ jobs:
 
   backend:
     if: always()
-    needs: [backend-preflight, backend-tests]
+    needs:
+    - impact
+    - backend-preflight
+    - backend-tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate backend
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      if: needs.impact.outputs.backend == 'true'
+      with:
+        pattern: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-*
+        path: .ci/backend-shard-reports
+    - name: Verify selected suite and exact partition union
+      if: needs.impact.outputs.backend == 'true'
+      env:
+        TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      run: python scripts/ci/check_backend_shards.py --directory .ci/backend-shard-reports --source-sha "$TEST_SOURCE_SHA" --checkout-sha "$GITHUB_SHA" --impact-plan .ci/impact.json
+    - name: Preserve verified aggregate coverage
+      if: success() && needs.impact.outputs.backend == 'true'
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: backend-coverage-${{ github.sha }}-${{ github.run_attempt }}
+        path: .ci/backend-shard-reports/backend-shard-coverage.json
+        include-hidden-files: true
+        if-no-files-found: error
+
+  tauri-windows:
+    needs: [impact]
+    if: needs.impact.outputs.tauri_windows == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          pattern: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-*
-          path: .ci/backend-shard-reports
-      - name: Require all gates and exact complete backend coverage
-        env:
-          PREFLIGHT_RESULT: ${{ needs.backend-preflight.result }}
-          TESTS_RESULT: ${{ needs.backend-tests.result }}
-          TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          node-version: "22"
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: "11.22.0"
+          run_install: false
+      - name: Install locked frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Install pinned Tauri CLI
+        run: npm ci --ignore-scripts
+        working-directory: desktop
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.10.8"
+          enable-cache: false
+      - name: Install pinned product sidecar build environment
+        shell: pwsh
+        working-directory: backend
         run: |
-          set -euo pipefail
-          test "$PREFLIGHT_RESULT" = success
-          test "$TESTS_RESULT" = success
-          python scripts/ci/check_backend_shards.py --directory .ci/backend-shard-reports --source-sha "$TEST_SOURCE_SHA" --checkout-sha "$GITHUB_SHA"
-      - name: Preserve verified aggregate coverage
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: backend-coverage-${{ github.sha }}-${{ github.run_attempt }}
-          path: .ci/backend-shard-reports/backend-shard-coverage.json
-          include-hidden-files: true
-          if-no-files-found: error
+          uv python install 3.13.12
+          uv sync --frozen --python 3.13.12
+          uv pip install --python .venv\Scripts\python.exe PyInstaller==6.16.0
+      - name: Package and attest the product sidecar
+        run: npm run build:sidecar
+        working-directory: desktop
+      - name: Verify pinned Rust product-window contracts
+        shell: pwsh
+        working-directory: desktop/src-tauri
+        run: |
+          rustup component add rustfmt clippy
+          cargo fmt --all -- --check
+          cargo test --locked
+          cargo clippy --locked --all-targets -- -D warnings
+      - name: Link Windows Tauri static product shell
+        run: npm run build:shell
+        working-directory: desktop
 
-  frontend:
+  frontend-work:
+    needs: [impact]
+    if: needs.impact.outputs.frontend == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -436,53 +545,27 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
-  tauri-windows:
-    runs-on: windows-latest
-    timeout-minutes: 35
+  frontend:
+    if: always()
+    needs:
+    - impact
+    - frontend-work
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "22"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-        with:
-          version: "11.22.0"
-          run_install: false
-      - name: Install locked frontend dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: frontend
-      - name: Install pinned Tauri CLI
-        run: npm ci --ignore-scripts
-        working-directory: desktop
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          version: "0.10.8"
-          enable-cache: false
-      - name: Install pinned product sidecar build environment
-        shell: pwsh
-        working-directory: backend
-        run: |
-          uv python install 3.13.12
-          uv sync --frozen --python 3.13.12
-          uv pip install --python .venv\Scripts\python.exe PyInstaller==6.16.0
-      - name: Package and attest the product sidecar
-        run: npm run build:sidecar
-        working-directory: desktop
-      - name: Verify pinned Rust product-window contracts
-        shell: pwsh
-        working-directory: desktop/src-tauri
-        run: |
-          rustup component add rustfmt clippy
-          cargo fmt --all -- --check
-          cargo test --locked
-          cargo clippy --locked --all-targets -- -D warnings
-      - name: Link Windows Tauri static product shell
-        run: npm run build:shell
-        working-directory: desktop
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate frontend
 
-  embedded-data-migration:
+  embedded-data-migration-work:
+    needs: [impact]
+    if: needs.impact.outputs.embedded_data_migration == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -515,3 +598,20 @@ jobs:
           tests/test_l3_er6_localappdata_migration.py
           tests/test_l3_er7_runtime_composition.py
         working-directory: backend
+  embedded-data-migration:
+    if: always()
+    needs:
+    - impact
+    - embedded-data-migration-work
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI_IMPACT_PLAN: ${{ needs.impact.outputs.plan }}
+      CI_NEEDS: ${{ toJSON(needs) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Verify required results or explicit N/A
+      run: python scripts/ci/gate.py --gate embedded-data-migration
