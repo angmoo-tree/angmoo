@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import {connection} from "next/server";
 import { ProductViewport } from "@/composition/shells/product-viewport";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/composition/providers/auth-provider";
@@ -49,11 +50,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await connection();
   return (
     <html lang="en">
       <body className="antialiased">

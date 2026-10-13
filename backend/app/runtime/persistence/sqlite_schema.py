@@ -6,17 +6,21 @@ import hashlib
 import json
 import re
 
-from sqlalchemy import Connection, MetaData, UniqueConstraint, text
+from sqlalchemy import Connection, MetaData, UniqueConstraint, text, event
 
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 29
-SOURCE_ALEMBIC_REVISION = "20261005_0106"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 105
-EXPECTED_CANONICAL_TABLE_COUNT = 153
+SQLITE_SCHEMA_VERSION = 37
+SOURCE_ALEMBIC_REVISION = "20261012_0114"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 113
+EXPECTED_CANONICAL_TABLE_COUNT = 174
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
+SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
+SITUATION_V32_TABLES = ("memory_situation_recheck_attempts",)
+SITUATION_V35_TABLES = ("memory_situation_source_bindings",)
+SITUATION_V36_TABLES = ("memory_situation_result_bindings",)
 
 ACTIVITY_V19_TABLES = (
     "world_character_activity_states", "world_character_state_receipts",
@@ -102,6 +106,8 @@ def build_sqlite_baseline_metadata() -> MetaData:
     """
 
     metadata = MetaData()
+    from app.runtime.persistence.model_registration import install_canonical_write_fences
+    event.listen(metadata, "after_create", install_canonical_write_fences)
     for table_name in sorted(Base.metadata.tables):
         Base.metadata.tables[table_name].to_metadata(metadata)
     for table in metadata.tables.values():
@@ -141,7 +147,7 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES + SITUATION_V36_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -171,7 +177,7 @@ def build_sqlite_v3_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -201,7 +207,7 @@ def build_sqlite_v5_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -230,7 +236,7 @@ def build_sqlite_v6_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
             table_name == "message_threads"
@@ -254,7 +260,7 @@ def build_sqlite_v7_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
             table_name in SUBJECTIVE_CONTEXT_V8_TABLES
@@ -275,7 +281,7 @@ def build_sqlite_v8_metadata() -> MetaData:
     """Immutable pre-batch settings/admission schema."""
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
-        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES:
+        if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if table_name not in MEMORY_BATCH_V9_TABLES:
             Base.metadata.tables[table_name].to_metadata(metadata)
@@ -316,6 +322,16 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    # These direct-copy builders predate v34/v36/v37. Their released table
+    # inventories must not acquire additive current-model registrations.
+    for name in (
+        "world_image_provider_credentials", "memory_situation_result_bindings",
+        "world_deletion_cleanup_items", "world_deletion_requests",
+    ):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    _remove_comfy_diagnostics(metadata)
+    _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -728,11 +744,95 @@ def build_sqlite_v26_metadata() -> MetaData:
 
 def build_sqlite_v27_metadata() -> MetaData:
     """The frozen pre-World-configuration schema; previous manifests stay fixed."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v29_metadata()
     for name in WORLD_CONFIGURATION_V28_TABLES:
         metadata.remove(metadata.tables[name])
     _remove_world_admission_columns(metadata)
     return metadata
+
+
+def build_sqlite_v29_metadata() -> MetaData:
+    """Frozen v29 shape, including the attested final v28 admission columns."""
+    metadata = build_sqlite_v30_metadata()
+    _remove_world_activity_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v30_metadata() -> MetaData:
+    """Frozen shape before durable activity situation admission."""
+    from app.domains.memory.models.activity_situation import SITUATION_TABLES
+    metadata = build_sqlite_v32_metadata()
+    for name in SITUATION_TABLES:
+        metadata.remove(metadata.tables[name])
+    return metadata
+
+
+def build_sqlite_v33_metadata() -> MetaData:
+    metadata = build_sqlite_v34_metadata()
+    metadata.remove(metadata.tables["world_image_provider_credentials"])
+    return metadata
+
+
+def build_sqlite_v34_metadata() -> MetaData:
+    metadata = build_sqlite_v35_metadata()
+    metadata.remove(metadata.tables["memory_situation_source_bindings"])
+    return metadata
+
+
+def build_sqlite_v35_metadata() -> MetaData:
+    metadata = build_sqlite_v36_metadata()
+    metadata.remove(metadata.tables["memory_situation_result_bindings"])
+    return metadata
+
+
+def build_sqlite_v36_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["world_deletion_cleanup_items"])
+    metadata.remove(metadata.tables["world_deletion_requests"])
+    return metadata
+
+
+def build_sqlite_v32_metadata() -> MetaData:
+    metadata = build_sqlite_v33_metadata()
+    _remove_comfy_diagnostics(metadata)
+    return metadata
+
+
+def _remove_comfy_diagnostics(metadata):
+    table = metadata.tables.get("post_image_generation_jobs")
+    if table is not None and "provider_diagnostic_json" in table.c:
+        table._columns.remove(table.c.provider_diagnostic_json)
+
+
+def build_sqlite_v31_metadata() -> MetaData:
+    """Frozen shape before receipt recovery; preserve v31 manifest semantics."""
+    from sqlalchemy import CheckConstraint
+    metadata = build_sqlite_v32_metadata()
+    metadata.remove(metadata.tables["memory_situation_recheck_attempts"])
+    run = metadata.tables["memory_situation_runs"]
+    run.constraints.remove(next(value for value in run.constraints if value.name == "ck_situation_run_work_kind"))
+    run._columns.remove(run.c.work_kind)
+    receipt = metadata.tables["memory_situation_receipts"]
+    for value in tuple(receipt.constraints):
+        if value.name in {"ck_situation_receipt_version", "ck_situation_receipt_manifest", "ck_situation_receipt_state"}:
+            receipt.constraints.remove(value)
+    receipt.append_constraint(CheckConstraint("state IN ('pending','claimed','applied','blocked','skipped','error')", name="ck_situation_receipt_state"))
+    for name in ("state_version", "discarded_at", "discard_request_key"):
+        receipt._columns.remove(receipt.c[name])
+    receipt.c.manifest_id.nullable = False
+    return metadata
+
+
+def _remove_world_activity_schema(metadata):
+    for name in ("world_credential_revisions", "world_credentials", "world_image_policies", "world_image_attempts",
+                 "memory_subject_profiles", "memory_index_preparations", "memory_episode_restrictions"):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    table = metadata.tables.get("memory_batch_runs")
+    if table is not None:
+        for column in ("credential_id", "credential_revision"):
+            if column in table.c:
+                table._columns.remove(table.c[column])
 
 
 def _remove_world_admission_columns(metadata):

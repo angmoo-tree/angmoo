@@ -39,6 +39,10 @@ from app.domains.runtime.exceptions import SchedulerLeaseLostError
 from app.domains.runtime.contracts.lease import SchedulerTickResult
 
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
+from app.runtime.persistence.sqlite_scheduler_lease import SqliteSchedulerLeaseRepository
+from app.runtime.resident.lease_executor import SchedulerLeaseExecutor, lease_call
+from app.exceptions import SqliteBusyRetryExhausted, SqliteTaskQueueFull
+from datetime import UTC, datetime
 
 from app.runtime.persistence.scheduler_fence import scheduler_fence
 
@@ -51,7 +55,7 @@ logger = logging.getLogger(__name__)
 SchedulerStateListener = Callable[[str], None]
 
 class SchedulerShutdownDrainTimeout(RuntimeError):
-    pass
+    pending_tasks: tuple[asyncio.Task, ...] = ()
 
 class SchedulerProcessLockHeld(RuntimeError):
     pass
@@ -125,8 +129,11 @@ def _coordinator(
             "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS must be shorter than "
             "RESIDENT_TICK_LEASE_TTL_SECONDS"
         )
+    with resolved_session_factory() as session:
+        engine = session.get_bind()
+    repository = SqliteSchedulerLeaseRepository(engine) if engine.dialect.name == "sqlite" else SqlAlchemySchedulerLeaseRepository(resolved_session_factory)
     return SchedulerLeaseCoordinator(
-        SqlAlchemySchedulerLeaseRepository(resolved_session_factory),
+        repository,
         ttl_seconds=config.RESIDENT_TICK_LEASE_TTL_SECONDS,
         interval_seconds=config.resident_tick_interval_seconds,
     )
@@ -177,60 +184,49 @@ async def _run_fenced_tick_with_heartbeat(
     async def heartbeat() -> None:
         while True:
             await sleep(config.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS)
-            coordinator.heartbeat(owner_id=owner_id, fencing_epoch=fencing_epoch)
+            snapshot = await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
+            _record_proof(config, snapshot)
 
     tick_task = asyncio.create_task(run_tick())
     heartbeat_task = asyncio.create_task(heartbeat())
-    stop_task = (
-        asyncio.create_task(stop_event.wait()) if stop_event is not None else None
-    )
-    watched = {tick_task, heartbeat_task}
-    if stop_task is not None:
-        watched.add(stop_task)
-    done, _ = await asyncio.wait(
-        watched,
-        return_when=asyncio.FIRST_COMPLETED,
-    )
-    if heartbeat_task in done:
-        error = heartbeat_task.exception()
-        tick_task.cancel()
-        await asyncio.gather(tick_task, return_exceptions=True)
-        if error is not None:
-            raise error
-        raise SchedulerLeaseLostError("scheduler heartbeat stopped unexpectedly")
-    if stop_task is not None and stop_task in done and tick_task not in done:
-        timeout = (
-            config.resident_tick_shutdown_drain_seconds
-            if drain_timeout_seconds is None
-            else max(0.1, drain_timeout_seconds)
-        )
-        done, _ = await asyncio.wait(
-            {tick_task, heartbeat_task},
-            timeout=timeout,
-            return_when=asyncio.FIRST_COMPLETED,
-        )
+    stop_task = asyncio.create_task(stop_event.wait()) if stop_event is not None else None
+    tasks = {tick_task, heartbeat_task, *([stop_task] if stop_task else [])}
+    timeout = config.resident_tick_shutdown_drain_seconds if drain_timeout_seconds is None else max(0.1, drain_timeout_seconds)
+    primary_error: BaseException | None = None
+    try:
+        done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
         if heartbeat_task in done:
             error = heartbeat_task.exception()
-            tick_task.cancel()
-            await asyncio.gather(tick_task, return_exceptions=True)
             if error is not None:
                 raise error
-            raise SchedulerLeaseLostError("scheduler heartbeat stopped unexpectedly")
-        if tick_task not in done:
-            tick_task.cancel()
-            await asyncio.gather(tick_task, return_exceptions=True)
-            raise SchedulerShutdownDrainTimeout(
-                "resident scheduler tick exceeded shutdown drain timeout"
-            )
-    heartbeat_task.cancel()
-    if stop_task is not None:
-        stop_task.cancel()
-    await asyncio.gather(
-        heartbeat_task,
-        *([stop_task] if stop_task is not None else []),
-        return_exceptions=True,
-    )
-    return tick_task.result()
+            raise SchedulerLeaseLostError("scheduler_heartbeat_stopped")
+        if stop_task is not None and stop_task in done and tick_task not in done:
+            done, _ = await asyncio.wait({tick_task, heartbeat_task}, timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
+            if heartbeat_task in done:
+                error = heartbeat_task.exception()
+                if error is not None:
+                    raise error
+            if tick_task not in done:
+                raise SchedulerShutdownDrainTimeout("scheduler_tick_drain_timeout")
+        return tick_task.result()
+    except BaseException as exc:
+        primary_error = exc
+        raise
+    finally:
+        for task in tasks:
+            if not task.done(): task.cancel()
+        _, pending = await asyncio.wait(tasks, timeout=timeout)
+        for task in tasks - pending:
+            if not task.cancelled(): task.exception()
+        if pending:
+            if primary_error is not None:
+                # Preserve the original lease/tick failure while preventing a
+                # replacement runner until its real child work has settled.
+                primary_error.pending_tasks = tuple(pending)
+                raise primary_error
+            error = SchedulerShutdownDrainTimeout("scheduler_children_not_settled")
+            error.pending_tasks = tuple(pending)
+            raise error
 
 async def _sleep_until_next_tick_with_heartbeat(
     *,
@@ -257,18 +253,16 @@ async def _sleep_until_next_tick_with_heartbeat(
         else:
             sleep_task = asyncio.create_task(sleep(wait_seconds))
             stop_task = asyncio.create_task(stop_event.wait())
-            done, _ = await asyncio.wait(
-                {sleep_task, stop_task},
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-            if stop_task in done:
-                sleep_task.cancel()
-                await asyncio.gather(sleep_task, return_exceptions=True)
-                return False
-            stop_task.cancel()
-            await asyncio.gather(stop_task, return_exceptions=True)
-            await sleep_task
-        coordinator.heartbeat(owner_id=owner_id, fencing_epoch=fencing_epoch)
+            try:
+                done, _ = await asyncio.wait({sleep_task, stop_task}, return_when=asyncio.FIRST_COMPLETED)
+                if stop_task in done:
+                    return False
+                await sleep_task
+            finally:
+                sleep_task.cancel(); stop_task.cancel()
+                await asyncio.gather(sleep_task, stop_task, return_exceptions=True)
+        snapshot = await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
+        _record_proof(config, snapshot)
     return True
 
 async def run_resident_tick_scheduler(
@@ -287,135 +281,138 @@ async def run_resident_tick_scheduler(
     session_factory: Callable[[], Any] | None = None,
 ) -> None:
     resolved_session_factory = session_factory or SessionLocal
-    lease_coordinator = coordinator or _coordinator(
-        config,
-        resolved_session_factory,
-    )
-    run_tick = tick_runner or (
-        lambda: _tick_once(config, resolved_session_factory)
-    )
+    lease_coordinator = SchedulerLeaseExecutor(lambda: coordinator or _coordinator(config, resolved_session_factory))
+    run_tick = tick_runner or (lambda: _tick_once(config, resolved_session_factory))
     lease_owner_id = owner_id or f"scheduler-{uuid4()}"
-    lock = process_lock or SchedulerProcessLock(
-        config.RESIDENT_TICK_PROCESS_LOCK_PATH
-    )
+    lock = process_lock or SchedulerProcessLock(config.RESIDENT_TICK_PROCESS_LOCK_PATH)
     readiness = Path(ready_path or config.RESIDENT_TICK_READY_PATH)
     stop = stop_event or asyncio.Event()
     lease = None
+    primary_error: BaseException | None = None
+    recovering = True
+    backoff = 1.0
+    drain_timeout = config.resident_tick_shutdown_drain_seconds if drain_timeout_seconds is None else max(0.1, drain_timeout_seconds)
 
-    with lock:
+    def observe(state: str) -> None:
+        if state != "ready":
+            _clear_proof(config); readiness.unlink(missing_ok=True)
+        if state_listener is not None: state_listener(state)
+
+    async def pause() -> None:
+        nonlocal backoff
         try:
-            lease = lease_coordinator.acquire(owner_id=lease_owner_id)
-            readiness.parent.mkdir(parents=True, exist_ok=True)
-            readiness.write_text(
-                "state=ready\n"
-                f"owner={lease_owner_id}\nepoch={lease.fencing_epoch}\n",
-                encoding="utf-8",
-            )
-            logger.info(
-                "resident scheduler lease acquired owner=%s epoch=%s",
-                lease_owner_id,
-                lease.fencing_epoch,
-            )
-            if state_listener is not None:
-                state_listener("ready")
+            await asyncio.wait_for(stop.wait(), timeout=backoff)
+        except TimeoutError:
+            pass
+        backoff = min(10.0, backoff * 2)
+
+    try:
+        with lock:
             while not stop.is_set():
-                permit = lease_coordinator.begin_tick(
-                    owner_id=lease_owner_id,
-                    fencing_epoch=lease.fencing_epoch,
-                )
-                if permit.should_run:
-                    try:
-                        result = await _run_fenced_tick_with_heartbeat(
-                            coordinator=lease_coordinator,
-                            owner_id=lease_owner_id,
-                            fencing_epoch=lease.fencing_epoch,
-                            tick_runner=run_tick,
-                            sleep=sleep,
-                            stop_event=stop,
-                            drain_timeout_seconds=drain_timeout_seconds,
-                            config=config,
-                        )
-                    except asyncio.CancelledError:
-                        raise
-                    except SchedulerLeaseLostError:
-                        raise
-                    except SchedulerShutdownDrainTimeout as exc:
-                        logger.warning("resident scheduler bounded drain timed out")
-                        lease_coordinator.finish_tick(
-                            owner_id=lease_owner_id,
-                            fencing_epoch=lease.fencing_epoch,
-                            result=SchedulerTickResult.FAILED,
-                            error_code=type(exc).__name__,
-                        )
-                        break
-                    except Exception as exc:
-                        logger.exception("resident scheduler tick failed")
-                        lease_coordinator.finish_tick(
-                            owner_id=lease_owner_id,
-                            fencing_epoch=lease.fencing_epoch,
-                            result=SchedulerTickResult.FAILED,
-                            error_code=type(exc).__name__,
-                        )
-                    else:
-                        lease_coordinator.finish_tick(
-                            owner_id=lease_owner_id,
-                            fencing_epoch=lease.fencing_epoch,
-                            result=(
-                                SchedulerTickResult.SUCCESS
-                                if result.started_count
-                                else SchedulerTickResult.NO_ACTION
-                            ),
-                        )
-                else:
-                    lease_coordinator.heartbeat(
-                        owner_id=lease_owner_id,
-                        fencing_epoch=lease.fencing_epoch,
-                    )
-                if stop.is_set():
-                    break
-                completed_wait = await _sleep_until_next_tick_with_heartbeat(
-                    coordinator=lease_coordinator,
-                    owner_id=lease_owner_id,
-                    fencing_epoch=lease.fencing_epoch,
-                    duration_seconds=config.resident_tick_interval_seconds,
-                    sleep=sleep,
-                    monotonic_clock=monotonic_clock,
-                    stop_event=stop,
-                    config=config,
-                )
-                if not completed_wait:
-                    break
-        except SchedulerLeaseHeldError:
-            if state_listener is not None:
-                state_listener("duplicate")
-            logger.error("resident scheduler duplicate rejected")
-            raise
-        except SchedulerLeaseLostError:
-            if state_listener is not None:
-                state_listener("failed")
-            logger.exception("resident scheduler lease lost")
-            raise
-        finally:
-            if lease is not None and stop.is_set() and readiness.exists():
-                if state_listener is not None:
-                    state_listener("draining")
-                readiness.write_text(
-                    "state=draining\n"
-                    f"owner={lease_owner_id}\nepoch={lease.fencing_epoch}\n",
-                    encoding="utf-8",
-                )
-            readiness.unlink(missing_ok=True)
-            if lease is not None:
                 try:
-                    lease_coordinator.release(
-                        owner_id=lease_owner_id,
-                        fencing_epoch=lease.fencing_epoch,
-                    )
-                except SchedulerLeaseLostError:
-                    logger.warning(
-                        "resident scheduler lease already transferred owner=%s epoch=%s",
-                        lease_owner_id,
-                        lease.fencing_epoch,
-                    )
-            if state_listener is not None:
-                state_listener("stopped")
+                    if lease is None:
+                        lease = await lease_coordinator.call("acquire", owner_id=lease_owner_id)
+                    if stop.is_set(): break
+                    if recovering:
+                        # A snapshot alone is not readiness: verify a live heartbeat
+                        # before resuming, or acquire a new epoch after expiry.
+                        lease = await lease_coordinator.call("heartbeat", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch)
+                        if stop.is_set(): break
+                        _record_proof(config, lease)
+                        readiness.parent.mkdir(parents=True, exist_ok=True)
+                        readiness.write_text(f"state=ready\nowner={lease_owner_id}\nepoch={lease.fencing_epoch}\n", encoding="utf-8")
+                        observe("ready"); recovering = False; backoff = 1.0
+                    permit = await lease_coordinator.call("begin_tick", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch)
+                    if stop.is_set(): break
+                    if permit.should_run:
+                        result_kind, tick_error = SchedulerTickResult.NO_ACTION, None
+                        try:
+                            result = await _run_fenced_tick_with_heartbeat(coordinator=lease_coordinator, owner_id=lease_owner_id,
+                                fencing_epoch=lease.fencing_epoch, tick_runner=run_tick, sleep=sleep, stop_event=stop,
+                                drain_timeout_seconds=drain_timeout_seconds, config=config)
+                            result_kind = SchedulerTickResult.SUCCESS if result.started_count else SchedulerTickResult.NO_ACTION
+                        except SchedulerShutdownDrainTimeout as exc:
+                            if exc.pending_tasks:
+                                raise
+                            logger.warning("scheduler_tick_failed code=%s", type(exc).__name__)
+                            result_kind, tick_error = SchedulerTickResult.FAILED, type(exc).__name__
+                        except (asyncio.CancelledError, SchedulerLeaseLostError, SqliteBusyRetryExhausted, SqliteTaskQueueFull):
+                            raise
+                        except Exception as exc:
+                            # Even a non-lease primary failure may leave a child
+                            # that did not honor cancellation. Do not finish the
+                            # window or start another tick while it is alive.
+                            if getattr(exc, "pending_tasks", ()):
+                                raise
+                            logger.warning("scheduler_tick_failed code=%s", type(exc).__name__)
+                            result_kind, tick_error = SchedulerTickResult.FAILED, type(exc).__name__
+                        # A failed finish never causes this completed tick to rerun:
+                        # begin_tick's committed logical window is retained.
+                        lease = await lease_coordinator.call("finish_tick", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch,
+                            result=result_kind, error_code=tick_error)
+                    if stop.is_set(): break
+                    if not await _sleep_until_next_tick_with_heartbeat(coordinator=lease_coordinator, owner_id=lease_owner_id,
+                        fencing_epoch=lease.fencing_epoch, duration_seconds=config.resident_tick_interval_seconds, sleep=sleep,
+                        monotonic_clock=monotonic_clock, stop_event=stop, config=config): break
+                except (SqliteBusyRetryExhausted, SqliteTaskQueueFull) as exc:
+                    if getattr(exc, "pending_tasks", ()):
+                        raise
+                    observe("degraded"); recovering = True
+                    logger.warning("scheduler_recovery code=%s owner=%s epoch=%s backoff_seconds=%s",
+                        type(exc).__name__, lease_owner_id, lease.fencing_epoch if lease else None, backoff)
+                    if not await lease_coordinator.drain(drain_timeout):
+                        raise SchedulerShutdownDrainTimeout("scheduler_lease_work_not_settled") from exc
+                    if not stop.is_set(): await pause()
+                except (SchedulerLeaseLostError, SchedulerLeaseHeldError) as exc:
+                    if getattr(exc, "pending_tasks", ()):
+                        raise
+                    observe("degraded"); recovering = True; lease = None
+                    logger.warning("scheduler_recovery code=%s owner=%s backoff_seconds=%s", type(exc).__name__, lease_owner_id, backoff)
+                    if not await lease_coordinator.drain(drain_timeout):
+                        raise SchedulerShutdownDrainTimeout("scheduler_lease_work_not_settled") from exc
+                    if not stop.is_set(): await pause()
+    except BaseException as exc:
+        primary_error = exc
+        observe("draining" if isinstance(exc, asyncio.CancelledError) else "failed")
+        raise
+    finally:
+        _clear_proof(config); readiness.unlink(missing_ok=True)
+        settled = await lease_coordinator.drain(drain_timeout)
+        children = getattr(primary_error, "pending_tasks", ())
+        if children:
+            _, unfinished = await asyncio.wait(children, timeout=drain_timeout)
+            for child in children:
+                child.add_done_callback(lambda done: None if done.cancelled() else done.exception())
+            settled = settled and not unfinished
+        cleanup_error = None
+        if settled and lease is not None:
+            try:
+                await lease_coordinator.call("release", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch)
+            except SchedulerLeaseLostError:
+                logger.warning("scheduler_cleanup code=lease_transferred owner=%s epoch=%s", lease_owner_id, lease.fencing_epoch)
+            except BaseException as exc:
+                cleanup_error = exc
+                logger.warning("scheduler_cleanup_failed code=%s primary_code=%s owner=%s epoch=%s",
+                    type(exc).__name__, type(primary_error).__name__ if primary_error else None, lease_owner_id, lease.fencing_epoch)
+        lease_coordinator.close()
+        if not settled and primary_error is None:
+            observe("failed")
+            raise SchedulerShutdownDrainTimeout("scheduler_lease_work_not_settled")
+        if cleanup_error is not None and primary_error is None:
+            observe("failed")
+            raise cleanup_error
+        if primary_error is None: observe("stopped")
+
+
+# Content-free proof consumed by health; expires even when an event loop stalls.
+_scheduler_proofs: dict[str, Any] = {}
+
+def _record_proof(config: Settings, lease: Any) -> None:
+    _scheduler_proofs[config.RESIDENT_TICK_READY_PATH] = lease
+
+def _clear_proof(config: Settings) -> None:
+    _scheduler_proofs.pop(config.RESIDENT_TICK_READY_PATH, None)
+
+def scheduler_is_ready(config: Settings) -> bool:
+    proof = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH)
+    return proof is not None and proof.lease_expires_at is not None and proof.lease_expires_at > datetime.now(UTC)

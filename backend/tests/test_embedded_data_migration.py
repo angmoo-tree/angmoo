@@ -11,6 +11,7 @@ from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
+from app.core import security
 from app.runtime.social.observations import observe_source
 from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
@@ -54,6 +55,7 @@ from app.runtime.persistence.sqlite_schema import (
     build_sqlite_v1_metadata,
     build_sqlite_v8_metadata,
     create_schema_version_table,
+    sqlite_schema_contract_digest,
     sqlite_schema_digest,
 )
 from p7_graph_support import seed_projection_fixture
@@ -152,7 +154,8 @@ def _seed_v2_roleless(
 
     secret = root / "secrets" / "app-secret"
     secret.parent.mkdir(parents=True)
-    secret.write_text("supported-v2-secret\n", encoding="utf-8")
+    app_secret = "supported-v2-secret"
+    secret.write_text(app_secret + "\n", encoding="utf-8")
     database = SqliteCanonicalDatabase(
         StaticRuntimeDataPath(root),
         settings=SqliteCanonicalSettings(generation=V2_GENERATION),
@@ -314,7 +317,16 @@ def _seed_v2_roleless(
                     model="fixture-model",
                     auth_profile_id="fixture-profile",
                     label="Existing credential",
-                    encrypted_api_key="fixture-ciphertext",
+                    encrypted_api_key=security.encrypt_local_secret(
+                        "synthetic-v2-api-key",
+                        scope=security.SecretScope(
+                            owner_id=owner.id,
+                            character_id=characters[0].id,
+                            provider="google",
+                            purpose="agent",
+                        ),
+                        app_secret=app_secret,
+                    ),
                     key_fingerprint="fixture-fingerprint",
                     enabled=True,
                 ),
@@ -382,93 +394,14 @@ def _seed_v2_roleless(
             connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             connection.commit()
             with connection.begin():
-                from app.domains.memory.models.batch import (
-                    MEMORY_BATCH_TABLES,
-                )
-                from app.models import Base
+                from historical_schema_fixture import rebuild_frozen_schema
+                from app.runtime.persistence.sqlite_schema import build_sqlite_v3_metadata
 
-                from app.runtime.persistence.sqlite_schema import ACTIVITY_V19_TABLES, EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES, RECOMMENDATION_V15_TABLES, build_sqlite_v14_metadata
-                from sqlalchemy.schema import CreateTable, CreateIndex
-                from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
-                from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata, build_sqlite_v22_metadata
-                from image_schema_fixture_support import freeze_pre_image_schema
-                freeze_pre_image_schema(connection)
-                # This fixture reconstructs the frozen v2 schema from current
-                # metadata. World configuration is additive in v28 and must
-                # not appear in the historical predecessor under test.
-                from app.runtime.persistence.sqlite_schema import WORLD_CONFIGURATION_V28_TABLES
-                for name in WORLD_CONFIGURATION_V28_TABLES:
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                connection.exec_driver_sql('ALTER TABLE agent_slots DROP COLUMN admission_metadata')
-                connection.exec_driver_sql('ALTER TABLE agent_runs DROP COLUMN input_snapshot')
-                Base.metadata.tables["activity_preparation_jobs"].drop(connection, checkfirst=True)
-                for name in reversed(CREATOR_V21_TABLES):
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                # Reconstruct the predecessor before applying its older deltas.
-                # Do not let current creator columns or nullable credentials leak into v2.
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
-                for name in ("daily_activity_plans", "daily_activity_plan_items", "worlds", "agent_creation_drafts"):
-                    predecessor = build_sqlite_v22_metadata() if name.startswith("daily_activity_plan") else build_sqlite_v20_metadata()
-                    historical = predecessor.tables[name]
-                    old = name + "_creator_fixture"
-                    connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
-                    connection.execute(CreateTable(historical))
-                    cols = ", ".join(c.name for c in historical.columns)
-                    connection.exec_driver_sql(f"INSERT INTO {name} ({cols}) SELECT {cols} FROM {old}")
-                    connection.exec_driver_sql(f"DROP TABLE {old}")
-                    for index in historical.indexes:
-                        connection.execute(CreateIndex(index))
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
-                # v22 adds this column to the still-surviving Character table.
-                # A reconstructed v2 predecessor must not retain it.
-                connection.exec_driver_sql('ALTER TABLE characters DROP COLUMN character_background')
-                # v24 adds an explicit beat state version. This populated
-                # predecessor must retain the exact supported v2 schema.
-                connection.exec_driver_sql('ALTER TABLE activity_beats DROP COLUMN state_schema_version')
-                for name in reversed(ACTIVITY_V19_TABLES):
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
-                for name in ("relationship_states", "graph_projection_outbox"):
-                    historical = build_sqlite_v16_metadata().tables[name]
-                    old = name + "_current_fixture"
-                    connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
-                    connection.execute(CreateTable(historical))
-                    cols = ", ".join(c.name for c in historical.columns)
-                    connection.exec_driver_sql(f"INSERT INTO {name} ({cols}) SELECT {cols} FROM {old}")
-                    connection.exec_driver_sql(f"DROP TABLE {old}")
-                    for index in historical.indexes:
-                        connection.execute(CreateIndex(index))
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
-                # This fixture intentionally reconstructs v2 from the current baseline.
-                historical_wc = build_sqlite_v14_metadata().tables["world_characters"]
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
-                connection.exec_driver_sql("ALTER TABLE world_characters RENAME TO world_characters_current_fixture")
-                connection.execute(CreateTable(historical_wc))
-                columns = ", ".join(column.name for column in historical_wc.columns)
-                connection.exec_driver_sql(f"INSERT INTO world_characters ({columns}) SELECT {columns} FROM world_characters_current_fixture")
-                connection.exec_driver_sql("DROP TABLE world_characters_current_fixture")
-                for index in historical_wc.indexes:
-                    connection.execute(CreateIndex(index))
-                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
-                connection.exec_driver_sql("DROP INDEX ix_posts_world_author_created")
-                for name in reversed(RECOMMENDATION_V15_TABLES + CONSOLIDATION_V14_TABLES + EPISODE_V13_TABLES + ("memory_vector_eligibility", "memory_embedding_settings")):
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                Base.metadata.tables["chat_retrieval_diagnostics"].drop(connection, checkfirst=True)
-                for name in reversed(MEMORY_BATCH_TABLES):
-                    Base.metadata.tables[name].drop(connection, checkfirst=True)
-                # Remove only the new v10 columns from surviving historical tables.
-                from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
-                for table, columns in ADDED_COLUMNS.items():
-                    if table in MEMORY_BATCH_TABLES or table == "chat_response_requests":
-                        continue
-                    for column in columns:
-                        connection.exec_driver_sql(f'ALTER TABLE "{table}" DROP COLUMN "{column}"')
-                drop_subjective_context_schema(connection)
-                drop_response_request_schema(connection)
-                drop_memory_schema_v1(connection)
-                rebuild_message_threads_v3(connection, create_legacy_unique_index=False)
+                # v2 and v3 share the same frozen DDL; only the roleless rows
+                # differ. Copy declared columns into that schema rather than
+                # repeatedly subtracting every newer ORM column and trigger.
+                rebuild_frozen_schema(connection, build_sqlite_v3_metadata())
+                assert sqlite_schema_contract_digest(connection) == manifest.schema_digest
                 connection.exec_driver_sql(
                     f"UPDATE {SCHEMA_VERSION_TABLE} "
                     "SET schema_version = ?, source_revision = ?, "
@@ -673,6 +606,10 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
     source = _seed_v2_roleless(root)
     source_sha = _sha256(source)
     secret_sha = _sha256(root / "secrets" / "app-secret")
+    with sqlite3.connect(source) as connection:
+        original_envelope = connection.execute(
+            "SELECT encrypted_api_key FROM llm_credentials WHERE id='credential-v2'"
+        ).fetchone()[0]
 
     first = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
@@ -728,7 +665,7 @@ def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(
         assert custom_role.version == 1
         credential = session.get(models.LlmCredential, "credential-v2")
         assert credential is not None
-        assert credential.encrypted_api_key == "fixture-ciphertext"
+        assert credential.encrypted_api_key == original_envelope
         assert credential.key_fingerprint == "fixture-fingerprint"
     database.close()
 

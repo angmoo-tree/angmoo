@@ -47,5 +47,6 @@
   "The state changed. Refresh and try again.": "상태가 변경되었습니다. 새로고침 후 다시 시도해주세요.",
   "Please check the submitted values.": "입력한 값을 확인해주세요.",
   "The usage limit was reached. Please try again later.": "사용 한도에 도달했습니다. 잠시 후 다시 시도해주세요.",
-  "The request could not be completed. Please try again.": "요청을 완료할 수 없습니다. 다시 시도해주세요."
+  "The request could not be completed. Please try again.": "요청을 완료할 수 없습니다. 다시 시도해주세요.",
+  "홈 제목에는 로컬 Quicksand 글꼴을 사용해요. HEIF 사진 변환에는 기기에 포함된 libheif를 사용하며 외부 변환 서비스로 사진을 보내지 않아요.": "홈 제목에는 로컬 Quicksand 글꼴을 사용해요. HEIF 사진 변환에는 기기에 포함된 libheif를 사용하며 외부 변환 서비스로 사진을 보내지 않아요."
 }

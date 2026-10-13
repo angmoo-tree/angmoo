@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
+import { AgentCreationScreen } from "@/composition/screens/agent-creation-screen";
 import { AppShell } from "@/composition/shells/app-shell";
 import { NO_INDEX_ROBOTS } from "@/config/seo";
 
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function NewAgentPage() {
   return (
-    <AppShell>
-      <AgentCreateClient />
+    <AppShell navigation="none">
+      <AgentCreationScreen />
     </AppShell>
   );
 }

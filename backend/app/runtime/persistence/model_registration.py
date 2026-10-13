@@ -1,21 +1,37 @@
 """Register the actual domain ORM classes without creating an engine or app."""
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, event, inspect
 from app.models import Base
+
+
+def install_canonical_write_fences(target, connection, **kwargs):
+    if connection.dialect.name == "sqlite" and "world_deletion_requests" in inspect(connection).get_table_names():
+        from app.runtime.world_deletion.fences import install_fences
+        install_fences(connection)
 
 
 def register_models() -> MetaData:
     """Load each owner once through Python imports and return the one metadata."""
     import app.domains.character_lore.models  # noqa: F401 - explicit ORM registration
+    import app.domains.worlds.models_deletion  # noqa: F401
+    if not event.contains(Base.metadata, "after_create", install_canonical_write_fences):
+        event.listen(Base.metadata, "after_create", install_canonical_write_fences)
     import app.domains.characters.models  # noqa: F401 - explicit ORM registration
     import app.domains.characters.models_import  # noqa: F401
     import app.domains.chat.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models_media  # noqa: F401
+    import app.domains.identity.models_world_credentials  # noqa: F401
+    import app.domains.identity.models_world_image_credentials  # noqa: F401
     import app.domains.identity.models_environment  # noqa: F401
     import app.domains.media.models  # noqa: F401
+    import app.domains.media.models_world_policy  # noqa: F401
     import app.domains.local_bot.models  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.consolidation_request  # noqa: F401
     import app.domains.memory.models.batch  # noqa: F401 - explicit ORM registration
+    import app.domains.memory.models.activity_configuration  # noqa: F401
+    import app.domains.memory.models.activity_situation  # noqa: F401
+    import app.domains.memory.models.situation_source_binding  # noqa: F401
+    import app.domains.memory.models.situation_result_binding  # noqa: F401
     import app.domains.memory.models.embedding  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.daypart  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.items  # noqa: F401 - explicit ORM registration
@@ -43,5 +59,6 @@ def register_models() -> MetaData:
     import app.domains.world_characters.activity_models  # noqa: F401
     import app.domains.world_packages.models  # noqa: F401 - explicit ORM registration
     import app.domains.worlds.models  # noqa: F401 - explicit ORM registration
+    import app.domains.worlds.models_deletion  # noqa: F401 - durable erasure lifecycle
 
     return Base.metadata

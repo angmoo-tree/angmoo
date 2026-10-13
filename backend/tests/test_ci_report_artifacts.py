@@ -8,13 +8,12 @@ from test_t2_ci_policy import checker
 
 
 def report(job):
-    prefix = "backend" if job == "backend" else "browser"
     return {
         "name": "Preserve test reports",
         "if": "always()",
         "uses": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
         "with": {
-            "name": prefix + "-tests-${{ github.sha }}-${{ github.run_attempt }}",
+            "name": checker.CORE_TEST_REPORT_NAMES[job],
             "path": "\n".join(checker.CORE_TEST_REPORT_PATHS[job]),
             "include-hidden-files": True,
             "if-no-files-found": "error",
@@ -27,7 +26,7 @@ def errors(step, *, job="backend", workflow="ci.yml"):
     return checker.check_report_uploads(document, workflow, yaml.safe_dump(document))
 
 
-@pytest.mark.parametrize("job", ["backend", "frontend"])
+@pytest.mark.parametrize("job", ["backend", "frontend", "backend-preflight", "backend-tests"])
 def test_exact_synthetic_test_report_files_are_allowed(job):
     assert errors(report(job), job=job) == []
 

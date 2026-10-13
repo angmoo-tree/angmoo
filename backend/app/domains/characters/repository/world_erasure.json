@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "owner": "characters",
+  "tables": {
+    "agent_creation_drafts": {
+      "world_column": "target_world_id"
+    },
+    "agent_image_generation_settings": {
+      "joins": [
+        {
+          "columns": [
+            "card_asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "reference_asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "character_draft_import_origins": {
+      "joins": [
+        {
+          "columns": [
+            "draft_id"
+          ],
+          "target_table": "agent_creation_drafts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "character_registration_receipts": {
+      "joins": [
+        {
+          "columns": [
+            "draft_id"
+          ],
+          "target_table": "agent_creation_drafts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "profile_image_candidates": {
+      "joins": [
+        {
+          "columns": [
+            "draft_id"
+          ],
+          "target_table": "agent_creation_drafts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  }
+}

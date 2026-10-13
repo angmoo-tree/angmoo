@@ -9,6 +9,7 @@ from app.domains.chat.contracts import RetrievalRoute, ResponseRequestState, Gen
 from app.domains.chat.exceptions import MessageValidationError
 from app.domains.chat.models import MessageMessage, MessageAttachment, ChatResponseRequest
 from app.domains.chat.schemas import WorldChatMessageCreate
+from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.models import InterpretationSetting
 from app.domains.media.generation_contracts import ImagePreparationError
 from image_integration.chat_support import synthetic_chat
@@ -89,7 +90,7 @@ def test_off_without_cache_rejects_image_admission_and_preserves_draft(tmp_path)
     chat = synthetic_chat(tmp_path, FakeInterpreter())
     try:
         identity = upload(chat)
-        chat.db.get(InterpretationSetting, chat.owner.id).enabled = False
+        chat.db.get(WorldImagePolicy, "p-responding").vision_enabled = False
         chat.db.commit()
         with pytest.raises(MessageValidationError, match="disabled"):
             chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,
@@ -200,7 +201,7 @@ def test_valid_cache_allows_off_admission_and_actual_workflow_without_second_ana
     try:
         asset = upload(chat)
         asyncio.run(chat.media.interpretation.interpret(chat.db, chat.owner.id, asset))
-        chat.db.get(InterpretationSetting, chat.owner.id).enabled = False
+        chat.db.get(WorldImagePolicy, "p-responding").vision_enabled = False
         chat.db.commit()
         assert chat.media.interpretation.preflight(chat.db, chat.owner.id, asset)["reason"] == "cached"
         accepted = chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,

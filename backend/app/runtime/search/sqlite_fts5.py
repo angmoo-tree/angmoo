@@ -100,6 +100,18 @@ class SqliteFts5SearchIndex:
             self._delete_document(connection, document_id)
             self._refresh_state(connection)
 
+    def erase_world(self, world_id: str, *, limit: int = 100) -> bool:
+        """Physically remove one bounded page, including original FTS text."""
+        self._require_open()
+        if not 1 <= limit <= 100:
+            raise ValueError("search_erasure_page_limit")
+        with self._write_transaction() as connection:
+            identifiers = connection.execute("SELECT document_id FROM search_documents WHERE world_id=? ORDER BY document_id LIMIT ?", (world_id, limit)).fetchall()
+            for (identifier,) in identifiers:
+                self._delete_document(connection, identifier)
+            self._refresh_state(connection)
+            return connection.execute("SELECT 1 FROM search_documents WHERE world_id=? LIMIT 1", (world_id,)).fetchone() is None
+
     def search(
         self,
         *,

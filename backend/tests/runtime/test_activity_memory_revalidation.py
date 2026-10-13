@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import json
 
 import pytest
@@ -11,6 +11,71 @@ from app.runtime.autonomous_activity import recall
 from app.runtime.autonomous_activity.recall import bounded_records
 from memory.test_episode_hybrid_reader import fixture
 from memory.test_p8_l_g_memory_write_lifecycle import memory_session
+
+
+def _hydrated_sns_validation(db, monkeypatch, *, author_id="verified-author"):
+    reader, request, candidate, details = fixture(db)
+    read_sources = details.read_sources
+    monkeypatch.setattr(details, "read_sources", lambda **kwargs: {
+        key: replace(value, author_id=author_id) for key, value in read_sources(**kwargs).items()
+    })
+    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
+    memory = {**bounded_records(hydration.records),
+        "ranked_memory_ids": [row.memory_item_id for row in hydration.records]}
+    assert memory["packets"][0]["units"][0]["sources"]
+    assert all("author_id" not in source for packet in memory["packets"]
+        for unit in packet["units"] for source in unit["sources"])
+    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
+    snapshot = json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))
+    args = dict(owner_id=request.scope.owner_id, world_id=request.scope.world_id,
+        actor_id=request.scope.subject_world_character_id, memories={"target": memory},
+        validations={"target": snapshot})
+    return details, memory, args
+
+
+@pytest.mark.parametrize("author_id", (None, "verified-author"))
+@pytest.mark.parametrize("with_snapshot", (False, True))
+def test_unchanged_hydrated_sns_sources_pass_with_private_author_metadata(
+    memory_session, monkeypatch, author_id, with_snapshot,
+):
+    _details, _memory, args = _hydrated_sns_validation(memory_session, monkeypatch, author_id=author_id)
+    if not with_snapshot:
+        args.pop("validations")
+    revalidation.assert_memories_current(memory_session, **args)
+
+
+@pytest.mark.parametrize("change", ("text", "digest", "blocked", "missing"))
+def test_sns_snapshot_still_rejects_changed_or_inaccessible_originals(memory_session, monkeypatch, change):
+    details, _memory, args = _hydrated_sns_validation(memory_session, monkeypatch)
+    revalidation.assert_memories_current(memory_session, **args)
+    if change == "text":
+        read_sources = details.read_sources
+        monkeypatch.setattr(details, "read_sources", lambda **kwargs: {
+            key: replace(value, text="변경") for key, value in read_sources(**kwargs).items()
+        })
+    elif change == "digest":
+        details.values = {key: replace(value, source_digest="f" * 64) for key, value in details.values.items()}
+    elif change == "blocked":
+        details.values = {key: replace(value, blocked=True) for key, value in details.values.items()}
+    else:
+        details.values = {}
+    with pytest.raises(ValueError, match="activity_memory_(source_changed|changed|followup_changed)"):
+        revalidation.assert_memories_current(memory_session, **args)
+
+
+@pytest.mark.parametrize("field,value", (
+    ("reference", "forged-source"), ("role", "untrusted-role"),
+    ("text", "변경"), ("status", "missing"), ("start_offset", 1),
+    ("end_offset", 1), ("author_id", "injected-private-identity"),
+))
+def test_sns_snapshot_rejects_altered_delivery_fields_and_extra_private_metadata(
+    memory_session, monkeypatch, field, value,
+):
+    _details, memory, args = _hydrated_sns_validation(memory_session, monkeypatch)
+    revalidation.assert_memories_current(memory_session, **args)
+    memory["packets"][0]["units"][0]["sources"][0][field] = value
+    with pytest.raises(ValueError, match="activity_memory_source_changed"):
+        revalidation.assert_memories_current(memory_session, **args)
 
 
 def test_existing_bounded_followups_are_not_concurrent_changes_but_new_edges_are(memory_session, monkeypatch):

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <AppShell>
+    <AppShell navigation="none">
       <SettingsClient />
     </AppShell>
   );

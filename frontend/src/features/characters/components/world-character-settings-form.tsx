@@ -1,100 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { SettingsCard } from "@/components/ui/settings-card";
+import { Sparkles, Settings2 } from "lucide-react";
+import { WorldCredentialCard } from "./world-credential-card";
+import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
-import { ActiveHoursControl, ACTIVE_HOURS_LIMIT_MESSAGE, isValidActiveHours } from "./activity-hours-control";
+import { isValidActiveHours } from "./activity-hours-control";
 import { PersonaField } from "./persona-field";
 import { PERSONA_LIMITS, normalizePersonaText, personaLengthError } from "../utils/persona-limits";
 import type { WorldCharacterSettingsRead, WorldCharacterSettingsValues } from "../types/world-character-management";
 import styles from "./world-character-management.module.css";
+import { ActivityPolicyFields, POLICY_FIELDS } from "./activity-policy-fields";
 
 const PERSONA_FIELDS = [
+  { key: "worldview", label: "캐릭터 설명" },
   { key: "personality", label: "성격" }, { key: "speech_style", label: "말투" },
-  { key: "worldview", label: "세계관" }, { key: "character_background", label: "캐릭터 배경" },
+  { key: "character_background", label: "캐릭터 배경" },
   { key: "topic_preferences", label: "관심 주제" }, { key: "safety_rules", label: "안전 규칙" },
 ] as const;
-const POLICY_FIELDS = [
-  { key: "activity_interval_minutes", label: "활동 간격 (분)", min: 30, max: 1440 },
-  { key: "max_posts_per_day", label: "하루 게시글 한도", min: 0, max: 1000 },
-  { key: "max_comments_per_day", label: "하루 답글 한도", min: 0, max: 1000 },
-] as const;
-const MODEL_FIELDS = [
-  { key: "generation_model", label: "활동 모델", options: "supported_generation_models" },
-  { key: "image_model", label: "이미지 모델", options: "supported_image_models" },
-] as const;
-const OPTIONAL_FIELDS = [
-  { key: "image_style", label: "이미지 스타일" }, { key: "appearance_prompt", label: "외형 설명" },
-] as const;
-
-export function WorldCharacterSettingsForm({ initial, pending, onSave }: {
+function SettingsEditor({ initial, pending, onSave, kind }: {
+  kind: "persona" | "activity";
   initial: WorldCharacterSettingsRead; pending: boolean;
   onSave: (revision: number, values: Partial<WorldCharacterSettingsValues>) => Promise<WorldCharacterSettingsRead | null>;
 }) {
   const uiText = useUiText("characters");
   const [baseline, setBaseline] = useState(initial.settings);
   const [draft, setDraft] = useState(initial.settings);
-  const [revision, setRevision] = useState(initial.revision);
+  const [conflict, setConflict] = useState(false);
   const [saved, setSaved] = useState(false);
-  const dirty = JSON.stringify(draft) !== JSON.stringify(baseline);
+  const keys: (keyof WorldCharacterSettingsValues)[] = kind === "persona" ? PERSONA_FIELDS.map(f => f.key) : [...POLICY_FIELDS.map(f => f.key), "active_hours_start", "active_hours_end", "allow_post", "allow_reply", "allow_like"];
+  const dirty = keys.some(key => draft[key] !== baseline[key]);
   useProductLeaveGuard(dirty || pending);
   const personaInvalid = PERSONA_FIELDS.some(field => personaLengthError(draft[field.key], PERSONA_LIMITS[field.key]));
   const hoursInvalid = !isValidActiveHours(draft.active_hours_start, draft.active_hours_end);
   const numbersInvalid = POLICY_FIELDS.some(field => !Number.isInteger(draft[field.key]) || draft[field.key] < field.min || draft[field.key] > field.max);
-  const modelsInvalid = MODEL_FIELDS.some(field => draft[field.key] !== baseline[field.key] && draft[field.key]
-    && !initial[field.options].some(option => option.enabled && option.value === draft[field.key]));
+  const reconcileRead = useEffectEvent((next: WorldCharacterSettingsValues) => {
+    setDraft(Object.fromEntries(Object.entries(next).map(([key, value]) => [key,
+      draft[key as keyof WorldCharacterSettingsValues] === baseline[key as keyof WorldCharacterSettingsValues] ? value : draft[key as keyof WorldCharacterSettingsValues]])) as WorldCharacterSettingsValues);
+    setBaseline(Object.fromEntries(Object.entries(next).map(([key, value]) => [key,
+      draft[key as keyof WorldCharacterSettingsValues] === baseline[key as keyof WorldCharacterSettingsValues] ? value : baseline[key as keyof WorldCharacterSettingsValues]])) as WorldCharacterSettingsValues);
+  });
+  useEffect(() => {
+    let current = true;
+    queueMicrotask(() => {
+      if (!current) return;
+      reconcileRead(initial.settings);
+    });
+    return () => { current = false; };
+  }, [initial.settings]);
 
   function change<K extends keyof WorldCharacterSettingsValues>(key: K, value: WorldCharacterSettingsValues[K]) {
-    setDraft(current => ({ ...current, [key]: value })); setSaved(false);
+    setDraft(current => ({ ...current, [key]: value })); setSaved(false); setConflict(false);
   }
 
-  return <form className={styles.settingsForm} data-world-character-settings-form onSubmit={async event => {
+  return <SettingsCard elevated data-world-character-settings-card={kind} title={uiText(kind === "persona" ? "캐릭터 페르소나 설정" : "활동 설정")} description={uiText(kind === "persona" ? "캐릭터 설명과 성격·말투를 설정해요." : "활동 시간, 허용 행동, 작성 상한을 설정해요.")} icon={kind === "persona" ? <Sparkles size={20} /> : <Settings2 size={20} />}><form className={styles.settingsForm} data-world-character-settings-editor onSubmit={async event => {
     event.preventDefault();
-    if (pending || personaInvalid || hoursInvalid || numbersInvalid || modelsInvalid || !dirty) return;
+    if (pending || (kind === "persona" ? personaInvalid : hoursInvalid || numbersInvalid) || !dirty) return;
+    const edited = keys.filter(key => draft[key] !== baseline[key]);
+    if (edited.some(key => initial.settings[key] !== baseline[key] && initial.settings[key] !== draft[key])) { setSaved(false); setConflict(true); return; }
     const normalized = { ...draft };
     for (const field of PERSONA_FIELDS) normalized[field.key] = normalizePersonaText(normalized[field.key]);
-    const values = Object.fromEntries(Object.entries(normalized).filter(([key, value]) => value !== baseline[key as keyof WorldCharacterSettingsValues]));
-    const result = await onSave(revision, values);
-    if (result) { setBaseline(result.settings); setDraft(result.settings); setRevision(result.revision); setSaved(true); }
+    const values = Object.fromEntries(Object.entries(normalized).filter(([key]) => edited.includes(key as keyof WorldCharacterSettingsValues)));
+    const result = await onSave(initial.revision, values);
+    if (result) { setBaseline(result.settings); setDraft(result.settings); setSaved(true); setConflict(false); }
   }}>
     <p className={styles.scopeNotice}>{uiText("이 World에서만 적용되는 설정이에요.")}</p>
-    <fieldset disabled={pending} className={styles.fieldset}>
-      <legend>{uiText("캐릭터 설정")}</legend>
+    {kind === "persona" ? <fieldset disabled={pending} className={styles.fieldset}>
       {PERSONA_FIELDS.map(field => <PersonaField key={field.key} name={field.key} label={uiText(field.label)} value={draft[field.key]}
         limit={PERSONA_LIMITS[field.key]} onChange={value => change(field.key, value)} disabled={pending} />)}
-    </fieldset>
-    <fieldset disabled={pending} className={styles.fieldset}>
-      <legend>{uiText("활동 정책")}</legend>
-      <ActiveHoursControl start={draft.active_hours_start} end={draft.active_hours_end} onChange={(start, end) => {
-        setDraft(current => ({ ...current, active_hours_start: start, active_hours_end: end })); setSaved(false);
-      }} />
-      {hoursInvalid ? <p role="alert" className={styles.error}>{uiText(ACTIVE_HOURS_LIMIT_MESSAGE)}</p> : null}
-      <div className={styles.policyFields}>{POLICY_FIELDS.map(field => <Field key={field.key} label={uiText(field.label)}>{props => <Input {...props} name={field.key}
-        type="number" min={field.min} max={field.max} step={1} required value={Number.isFinite(draft[field.key]) ? draft[field.key] : ""}
-        onChange={event => change(field.key, event.target.value === "" ? Number.NaN : Number(event.target.value))} />}</Field>)}</div>
-    </fieldset>
-    {[...MODEL_FIELDS, ...OPTIONAL_FIELDS].some(field => field.key in initial.settings) ? <fieldset disabled={pending} className={styles.fieldset}>
-      <legend>{uiText("모델과 이미지 설정")}</legend>
-      <p className={styles.scopeNotice}>{uiText("설치된 모델과 저장된 자격증명을 사용해요. 이 화면에서는 API 키를 변경하지 않아요.")}</p>
-      {MODEL_FIELDS.filter(field => field.key in initial.settings).map(field => {
-        const value = draft[field.key] ?? "";
-        const options = initial[field.options];
-        return <Field key={field.key} label={uiText(field.label)}>{props => <Select {...props} name={field.key} value={value}
-          onChange={event => change(field.key, event.target.value || null)}>
-          <option value="">{uiText("기본 설정 사용")}</option>
-          {value && !options.some(option => option.value === value) ? <option value={value} disabled>{uiText("현재 저장된 모델: {{value0}}", { value0: value })}</option> : null}
-          {options.map(option => <option key={option.value} value={option.value} disabled={!option.enabled}>{option.label}{!option.enabled ? ` (${uiText("사용할 수 없음")})` : ""}</option>)}
-        </Select>}</Field>;
-      })}
-      {OPTIONAL_FIELDS.filter(field => field.key in initial.settings).map(field => <Field key={field.key} label={uiText(field.label)}>{props => <Input {...props}
-        name={field.key} maxLength={10000} value={draft[field.key] ?? ""} onChange={event => change(field.key, event.target.value || null)} />}</Field>)}
     </fieldset> : null}
+    {kind === "activity" ? <ActivityPolicyFields value={draft} disabled={pending} onChange={changes => { setDraft(current => ({ ...current, ...changes })); setSaved(false); }} /> : null}
     {saved ? <p role="status">{uiText("이 World의 설정을 저장했어요.")}</p> : null}
-    {initial.revision > revision ? <div className={styles.formActions}><p className={styles.scopeNotice}>{uiText("저장된 설정에 새 버전이 있어요. 초안을 유지한 채 최신 버전을 기준으로 저장할 수 있어요.")}</p>
-      <Button variant="secondary" disabled={pending} onClick={() => { setRevision(initial.revision); setBaseline(initial.settings); }}>{uiText("최신 버전을 저장 기준으로 사용")}</Button></div> : null}
+    {conflict ? <div role="alert"><p>{uiText("같은 항목이 다른 곳에서 변경되었어요. 입력을 보존했으니 최신 값과 확인해주세요.")}</p>
+      <dl>{keys.filter(key => draft[key] !== baseline[key] && initial.settings[key] !== baseline[key]).map(key => <div key={key}><dt>{uiText(PERSONA_FIELDS.find(f => f.key === key)?.label ?? POLICY_FIELDS.find(f => f.key === key)?.label ?? (key === "active_hours_start" ? "활동 시작" : key === "active_hours_end" ? "활동 마감" : key === "allow_post" ? "게시글 작성" : key === "allow_reply" ? "답글 작성" : "좋아요"))}</dt><dd className="whitespace-pre-wrap break-words">{String(initial.settings[key])}</dd></div>)}</dl>
+      <Button variant="secondary" onClick={() => { setBaseline(initial.settings); setConflict(false); }}>{uiText("최신 값을 확인했어요. 내 입력 유지")}</Button></div> : null}
     <div className={styles.formActions}><Button variant="secondary" disabled={pending || !dirty} onClick={() => { setDraft(baseline); setSaved(false); }}>{uiText("변경 취소")}</Button>
-      <Button type="submit" loading={pending} disabled={!dirty || personaInvalid || hoursInvalid || numbersInvalid || modelsInvalid} loadingLabel={uiText("저장 중...")}>{uiText("설정 저장")}</Button></div>
-  </form>;
+      <Button type="submit" loading={pending} disabled={!dirty || (kind === "persona" ? personaInvalid : hoursInvalid || numbersInvalid)} loadingLabel={uiText("저장 중...")}>{uiText("설정 저장")}</Button></div>
+  </form></SettingsCard>;
+}
+
+export function WorldCharacterSettingsForm(props: {
+  initial: WorldCharacterSettingsRead; pending: boolean;
+  onSave: (revision: number, values: Partial<WorldCharacterSettingsValues>) => Promise<WorldCharacterSettingsRead | null>;
+  imageCard?: ReactNode; visionControls?: ReactNode; interestCard?: ReactNode; modeCard?: ReactNode; dayCard?: ReactNode; deleteCard?: ReactNode;
+}) {
+ const { initial } = props;
+ return <div className={styles.settingsForm} data-world-character-settings-form>
+  <SettingsEditor {...props} kind="persona" />
+  <SettingsEditor {...props} kind="activity" />
+  <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="sns" />
+  {props.imageCard}
+  <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="chat" />
+  <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="vision">{props.visionControls}</WorldCredentialCard>
+  {props.interestCard}{props.modeCard}{props.dayCard}{props.deleteCard}
+ </div>;
 }

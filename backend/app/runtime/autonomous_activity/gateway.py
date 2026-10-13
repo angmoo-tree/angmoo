@@ -33,7 +33,10 @@ def _bind_activity_run(ctx, actor):
     ).order_by(ActivityGraphRun.started_at).limit(1))
     if row is None:
         from app.runtime.autonomous_activity.configuration import configuration_for_activity
-        row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id, configuration=configuration_for_activity(ctx, actor))
+        from functools import partial
+        from app.domains.memory.service.situation_policy import capture
+        row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id, configuration=configuration_for_activity(ctx, actor),
+            memory_policy=partial(capture, policy=settings.MEMORY_GENERATION_POLICY))
     ctx.db.commit()
     return row
 

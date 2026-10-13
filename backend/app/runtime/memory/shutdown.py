@@ -12,10 +12,11 @@ from app.domains.memory.models.items import MemoryMaintenanceJob
 
 
 class MemoryShutdownCoordinator:
-    def __init__(self, memory, *, budget_seconds=30, quiesce=None):
+    def __init__(self, memory, *, budget_seconds=30, quiesce=None, search=None):
         self.memory = memory
         self.budget_seconds = budget_seconds
         self.quiesce = quiesce
+        self.search = search
         self.phase = "RUNNING"
         self.deferred = False
         self.started_at = None
@@ -74,7 +75,7 @@ class MemoryShutdownCoordinator:
                     self.quiesce(), min(5, max(0, deadline - time.monotonic() - 5))
                 )
             self.phase = "PREPARING"
-            self.memory.prepare(shutdown=True)
+            await self._prepare_memory()
             self.phase = "CONSOLIDATING"
             for _ in range(8):
                 remaining = (
@@ -91,10 +92,25 @@ class MemoryShutdownCoordinator:
             else:
                 # The bounded drain is not a claim that all work completed.
                 self.deferred = True
+            situations = getattr(self.memory, "situations", None)
+            if self.search is not None and situations is not None and not self.deferred:
+                ready = await self._bounded(self.search.wait(situations),
+                    max(0, deadline - time.monotonic() - 1))
+                self.deferred = not ready
         except (Exception, asyncio.CancelledError):
             self.deferred = True
         finally:
             self.phase = "FINALIZING"
+            if self.search is not None:
+                self.search.fence()
+            situations = getattr(self.memory, "situations", None)
+            if situations is not None:
+                try:
+                    fence = getattr(self.memory, "fence_async", None)
+                    fenced = await fence() if fence is not None else situations.fence()
+                    self.deferred = fenced or self.deferred
+                except Exception:
+                    self.deferred = True
             # Fence even providers which ignore cancellation. Their old lease
             # can never commit after the host abandons the attempt.
             try:
@@ -124,10 +140,17 @@ class MemoryShutdownCoordinator:
                 self.deferred = True
             try:
                 # This records pending cutoffs even on immediate exit. No AI.
-                self.memory.prepare(shutdown=True)
+                await self._prepare_memory()
             except Exception:
                 self.deferred = True
             self.phase = "EXIT_READY"
+
+    async def _prepare_memory(self):
+        prepare = getattr(self.memory, "prepare_async", None)
+        if prepare is not None:
+            await prepare(shutdown=True)
+        else:
+            self.memory.prepare(shutdown=True)
 
 
 def _consume(task):

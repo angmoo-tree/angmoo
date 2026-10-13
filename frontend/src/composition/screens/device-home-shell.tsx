@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { DeviceShell } from "@/components/layout/device-shell";
-import { LocalDeviceNavigation } from "@/composition/shells/local-device-navigation";
 
 import styles from "./device-home-shell.module.css";
 
@@ -19,7 +18,6 @@ export function DeviceHomeShell({
   const header = (
     <header className={styles.header}>
       <div>
-        <div className={styles.eyebrow}>Local Device</div>
         <h1 className={styles.title}>{title}</h1>
       </div>
       {status}
@@ -30,7 +28,6 @@ export function DeviceHomeShell({
     <DeviceShell
       ariaLabel={`${title} Device Home`}
       header={header}
-      navigation={<LocalDeviceNavigation />}
       surface="device-home"
     >
       <div className={styles.content}>

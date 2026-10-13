@@ -50,7 +50,15 @@ export function patchMyProfile(worldId: string, data: { version: number; display
 }
 
 export function uploadMyProfileMedia(worldId: string, data: { version: number; media_type: "avatar" | "banner"; content_type: string; data_base64: string }) {
-  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/media"), { method: "POST", body: data });
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/media"), {
+    method: "POST",
+    body: {
+      version: data.version,
+      media_type: data.media_type,
+      content_type: data.content_type,
+      data_base64: data.data_base64,
+    },
+  });
 }
 
 export class WorldApiError extends Error {
@@ -86,7 +94,7 @@ export function requestValidationFields(detail: unknown) {
   );
 }
 
-async function apiRequest<T>(path: string, options: RequestOptions = {}) {
+export async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const { body, headers, ...rest } = options;
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
@@ -138,12 +146,21 @@ export function createWorld(data: WorldDraftCreate) {
   });
 }
 
-export function getWorldCreatorContext(worldId: string) {
-  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"));
+export function getWorldCreatorContext(worldId: string, signal?: AbortSignal) {
+  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/creator-context"), { signal });
 }
 
-export function getWorld(worldId: string) {
-  return apiRequest<WorldRead>(worldPath(worldId));
+export async function getWorld(worldId: string, options: { signal?: AbortSignal } = {}) {
+  const world = await apiRequest<WorldRead>(worldPath(worldId), options);
+  const textFields = ["name", "tagline", "setting_description", "daily_life_description", "additional_generation_guidance", "banner_alt_text"] as const;
+  if (!world || world.id !== worldId || textFields.some(field => typeof world[field] !== "string") ||
+    ![world.genre_tags, world.tone_tags].every(tags => Array.isArray(tags) && tags.every(tag => typeof tag === "string")) ||
+    !Array.isArray(world.places) || world.places.some(place => !place || typeof place.name !== "string" || typeof place.description !== "string") ||
+    !Array.isArray(world.roles) || world.roles.some(role => !role || typeof role.name !== "string" || typeof role.description !== "string" || !Array.isArray(role.responsibilities) || role.responsibilities.some(value => typeof value !== "string")) ||
+    !(world.banner_media_id === null || typeof world.banner_media_id === "string")) {
+    throw new WorldApiError("world_read_schema_mismatch", 502, null);
+  }
+  return world;
 }
 
 export function updateWorld(worldId: string, data: WorldUpdate) {
@@ -182,17 +199,20 @@ export function uploadWorldBanner(
     alt_text: string;
   },
   mediaType: "banner" | "icon" = "banner",
+  signal?: AbortSignal,
 ) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "POST",
     body: data,
+    signal,
   });
 }
 
-export function removeWorldBanner(worldId: string, rowVersion: number, mediaType: "banner" | "icon" = "banner") {
+export function removeWorldBanner(worldId: string, rowVersion: number, mediaType: "banner" | "icon" = "banner", signal?: AbortSignal) {
   return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "DELETE",
     body: { row_version: rowVersion },
+    signal,
   });
 }
 

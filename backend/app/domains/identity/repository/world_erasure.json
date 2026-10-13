@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "owner": "identity",
+  "tables": {
+    "world_credential_revisions": {
+      "joins": [
+        {
+          "columns": [
+            "credential_id"
+          ],
+          "target_table": "world_credentials",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_credentials": {
+      "world_column": "world_id"
+    },
+    "world_image_provider_credentials": {
+      "world_column": "world_id"
+    }
+  }
+}

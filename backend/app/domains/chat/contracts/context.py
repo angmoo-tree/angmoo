@@ -58,6 +58,9 @@ class ChatCredential(Protocol):
 
 
 class ChatScopeQueries(Protocol):
+    def world_chat_profile(
+        self, db: Session, *, owner_id: str, world_id: str, actor_id: str
+    ) -> tuple[str, str | None]: ...
     def owner_controlled_world_characters(
         self, db: Session, owner_id: str, world_id: str, *, lock_scope: bool = False
     ) -> list[ChatWorldCharacter]: ...

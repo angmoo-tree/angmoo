@@ -79,8 +79,9 @@ def test_new_llm_registration_schema_requires_description_not_personality():
     value = schemas.AgentCreate(name="Bird", api_key="fixture", worldview="서점 주인")
     assert value.personality == ""
     assert value.character_background == ""
-    # The existing local executor's no-description admission is distinct.
-    assert schemas.AgentCreate(name="Bird", execution_mode="local").worldview == ""
+    # Existing Local rows remain readable; new Local registration is retired.
+    with pytest.raises(ValueError, match="execution_mode"):
+        schemas.AgentCreate(name="Bird", execution_mode="local")
 
 
 def test_description_only_draft_registers_keyless_off_and_preserves_background(tmp_path):

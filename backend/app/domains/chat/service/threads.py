@@ -249,10 +249,9 @@ class ThreadService:
                 outcome="reused", thread=thread_read
             )
         try:
-            preference = self.settings_service.ensure_user_preference(
-                db, user, commit_if_created=False
-            )
-            selected_model = data.selected_model or preference.default_model
+            default_model, default_thinking = self.scope_queries.world_chat_profile(db,
+                owner_id=user.id, world_id=world_id, actor_id=responding.id)
+            selected_model = data.selected_model or default_model
             self.settings_service._ensure_supported_model(selected_model)
             thread = models.MessageThread(
                 id=f"msg-thread-{uuid4().hex[:12]}",
@@ -263,7 +262,7 @@ class ThreadService:
                 responding_world_character_id=responding.id,
                 world_scope_status="resolved",
                 selected_model=selected_model,
-                selected_thinking_level=(data.selected_thinking_level or "high") if data.selected_model else preference.default_thinking_level,
+                selected_thinking_level=(data.selected_thinking_level or "high") if data.selected_model else default_thinking,
                 model_binding_mode=MessageModelBindingMode.THREAD_OVERRIDE.value
                 if data.selected_model is not None
                 else MessageModelBindingMode.DEFAULT.value,
@@ -388,15 +387,11 @@ class ThreadService:
                 "World Chat 모델 binding이 올바르지 않습니다."
             ) from exc
         if binding is MessageModelBindingMode.DEFAULT:
-            preference = self.settings_service.ensure_user_preference(
-                db, user, commit_if_created=False
-            )
-            configuration = configuration_for_actor(db, character_id=thread.character_id, world_id=thread.world_id)
-            selected_model = configuration.settings.generation_model if configuration is not None else None
-            selected_model = selected_model or preference.default_model
+            selected_model, thinking = self.scope_queries.world_chat_profile(db,
+                owner_id=user.id, world_id=thread.world_id, actor_id=thread.responding_world_character_id)
             self.settings_service._ensure_supported_model(selected_model)
             thread.selected_model = selected_model
-            thread.selected_thinking_level = preference.default_thinking_level
+            thread.selected_thinking_level = thinking
         else:
             self.settings_service._ensure_supported_model(thread.selected_model)
         db.flush()

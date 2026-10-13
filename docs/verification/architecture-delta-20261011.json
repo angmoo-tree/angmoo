@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "3e306c18b50e06b4794f2e5a954e54c5def7ab41",
+  "baseline_modules": 1496,
+  "current_modules": 1501,
+  "baseline_violations": [
+    "[cross_domain_deep_import] app.domains.chat.contracts.evidence_reads -> app.domains.memory.contracts.activity_situation; allowed_fix=import app.domains.memory.public; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[cross_domain_deep_import] app.domains.chat.relationship_evidence_policy -> app.domains.relationships.policies.social_context_validation; allowed_fix=import app.domains.relationships.public; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[module_cycle] app.domains.identity.service.world_credentials | app.domains.identity.service.world_image_credentials; allowed_fix=break the cycle through a public API or port; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[module_cycle] app.domains.memory.contracts.activity_situation | app.domains.memory.contracts.situation_source_binding; allowed_fix=break the cycle through a public API or port; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[refactor_cross_domain_role] app.domains.chat.contracts.evidence_reads -> app.domains.memory.contracts.activity_situation",
+    "[refactor_cross_domain_role] app.domains.chat.relationship_evidence_policy -> app.domains.relationships.policies.social_context_validation"
+  ],
+  "current_violations": [
+    "[cross_domain_deep_import] app.domains.chat.contracts.evidence_reads -> app.domains.memory.contracts.activity_situation; allowed_fix=import app.domains.memory.public; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[cross_domain_deep_import] app.domains.chat.relationship_evidence_policy -> app.domains.relationships.policies.social_context_validation; allowed_fix=import app.domains.relationships.public; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[module_cycle] app.domains.identity.service.world_credentials | app.domains.identity.service.world_image_credentials; allowed_fix=break the cycle through a public API or port; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[module_cycle] app.domains.memory.contracts.activity_situation | app.domains.memory.contracts.situation_source_binding; allowed_fix=break the cycle through a public API or port; legacy_exception=no; owner_stage=none; docs=docs/architecture/backend-domains.md",
+    "[refactor_cross_domain_role] app.domains.chat.contracts.evidence_reads -> app.domains.memory.contracts.activity_situation",
+    "[refactor_cross_domain_role] app.domains.chat.relationship_evidence_policy -> app.domains.relationships.policies.social_context_validation"
+  ],
+  "added_violations": []
+}

@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowLeft, Play, Power, PowerOff, RefreshCw } from "lucide-react";
+import { Play, Power, PowerOff } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
-import { Button, IconButton } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
 import { useUiText } from "@/hooks/use-ui-text";
 import { setWorldCharacterAutonomy } from "../api/world-character-dashboard-client";
@@ -14,12 +14,15 @@ import { CharacterManagementIdentity, CharacterManagementTabs } from "./characte
 import { ProfileError, ProfileStatus, WorldCharacterManagementItem, worldCharacterOperationError } from "./world-character-directory";
 import { WorldCharacterProfileEditor } from "./world-character-profile-editor";
 import { WorldCharacterSettingsForm } from "./world-character-settings-form";
+import { WorldCharacterStatusCards } from "./world-character-status-cards";
 import styles from "./world-character-management.module.css";
 
-export function WorldCharacterManagement({ worldId, worldCharacterId, activeView, onViewChange, onBack, renderProfile }: {
+export function WorldCharacterManagement({ worldId, worldCharacterId, activeView, onViewChange, renderProfile, renderSettings, renderStatus }: {
   worldId: string; worldCharacterId: string; activeView: WorldCharacterManagementView;
   onViewChange: (view: WorldCharacterManagementView) => void; onBack: () => void;
   renderProfile: (input: { read: WorldCharacterManagementRead; onEditProfile?: () => void }) => ReactNode;
+  renderStatus?: (input: { read: WorldCharacterManagementRead; active: boolean; onSettings: () => void }) => ReactNode;
+  renderSettings?: (read: WorldCharacterManagementRead) => Pick<React.ComponentProps<typeof WorldCharacterSettingsForm>, "imageCard" | "visionControls" | "interestCard" | "modeCard" | "dayCard" | "deleteCard">;
 }) {
   const uiText = useUiText("characters");
   const controller = useWorldCharacterManagement(worldId, worldCharacterId);
@@ -71,14 +74,12 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
   }
 
   return <section className={styles.management} data-world-character-management data-world-id={worldId} data-world-character-id={worldCharacterId}>
-    <header className={styles.header}>
+    <div className={styles.stickyHeader}><header className={styles.header}>
       <div className={styles.headerIdentity}>
-        <IconButton label={uiText("World 캐릭터 목록으로 돌아가기")} onClick={onBack}><ArrowLeft aria-hidden="true" size={20} /></IconButton>
         <CharacterManagementIdentity name={profile.display_name} handle={profile.handle} role={uiText(isUser ? "사용자" : "캐릭터")}
           badge={uiText(isUser ? "사용자" : "이 World의 캐릭터")} />
       </div>
       <div className={styles.headerActions}>
-        <IconButton label={uiText("관리 상태 새로고침")} title={uiText("관리 상태 새로고침")} disabled={busy} onClick={refresh}><RefreshCw aria-hidden="true" size={20} /></IconButton>
         {!isUser && read.can_manage ? <>
           <Button variant={item.autonomous_enabled ? "strong" : "primary"} loading={pending.has("autonomy")} disabled={busy || !toggleAllowed}
             title={!toggleAllowed ? uiText(worldCharacterRestrictionMessage(capabilities.reason)) : undefined} onClick={() => void toggle()}>
@@ -90,21 +91,21 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
       </div>
     </header>
     <CharacterManagementTabs activeView={activeView} onViewChange={onViewChange} label={uiText("World 캐릭터 관리 탭")} panelId={panelId} />
+    </div>
     {error ? <InlineError className={styles.feedback}><p>{uiText(worldCharacterOperationError(error))}</p><Button variant="secondary" onClick={refresh}>{uiText("최신 상태 확인")}</Button></InlineError> : null}
     {message ? <p className={styles.readonly} role="status">{uiText(message)}</p> : null}
     {(visited.has("profile") || activeView === "profile") ? <div className={styles.pane} hidden={activeView !== "profile"} role="tabpanel" id={panelId("profile")} aria-labelledby={`${panelId("profile")}-tab`}>
       {renderProfile({ read, onEditProfile: edit })}
     </div> : null}
-    {(visited.has("status") || activeView === "status") ? <div className={styles.pane} hidden={activeView !== "status"} role="tabpanel" id={panelId("status")} aria-labelledby={`${panelId("status")}-tab`}>
-      <p className={styles.readonly}>{uiText("이 World에서만 적용되는 활동 상태예요.")}</p>
-      <WorldCharacterManagementItem item={item} />
+    {(visited.has("status") || activeView === "status") ? <div className={`${styles.pane} ${styles.statusPane}`} hidden={activeView !== "status"} role="tabpanel" id={panelId("status")} aria-labelledby={`${panelId("status")}-tab`}>
+      {read.can_manage && !isUser ? <WorldCharacterStatusCards worldId={worldId} actorId={worldCharacterId} profile={profile} revision={item.revision} active={activeView === "status"} summaryCards={renderStatus?.({ read, active: activeView === "status", onSettings: () => onViewChange("settings") })} /> : <WorldCharacterManagementItem item={item} />}
       {!read.can_manage ? <p className={styles.readonly}>{uiText("이 World 캐릭터의 관리 권한이 없어요.")}</p> : null}
     </div> : null}
     {(visited.has("settings") || activeView === "settings") ? <div className={styles.pane} hidden={activeView !== "settings"} role="tabpanel" id={panelId("settings")} aria-labelledby={`${panelId("settings")}-tab`}>
       {!read.can_manage ? <p className={styles.readonly}>{uiText("이 World 캐릭터의 관리 권한이 없어요.")}</p>
         : isUser ? <div className={styles.readonly}><p>{uiText("직접 작성하는 사용자 프로필이에요. 자율활동을 사용하지 않아요.")}</p>{edit ? <Button variant="secondary" onClick={edit}>{uiText("내 프로필 편집")}</Button> : null}</div>
         : !capabilities.can_edit_settings ? <p className={styles.readonly}>{uiText(worldCharacterRestrictionMessage(capabilities.reason))}</p>
-        : settings ? <WorldCharacterSettingsForm initial={settings} pending={busy}
+        : settings ? <WorldCharacterSettingsForm initial={settings} pending={busy} {...renderSettings?.(read)}
           onSave={(revision, values) => mutate("settings-save", signal => updateWorldCharacterSettings(worldId, worldCharacterId, revision, values, { signal }), acceptSettings)} />
         : settingsError ? <InlineError className={styles.feedback}><p>{uiText(worldCharacterOperationError(settingsError))}</p><Button variant="secondary" onClick={() => void loadSettings()}>{uiText("다시 시도")}</Button></InlineError>
         : <ProfileStatus title={uiText("World 설정을 불러오는 중")} />}

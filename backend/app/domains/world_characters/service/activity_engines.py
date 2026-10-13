@@ -60,7 +60,7 @@ def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: 
     db.flush()
 
 
-def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str, configuration=None) -> ActivityGraphRun:
+def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str, configuration=None, memory_policy=None) -> ActivityGraphRun:
     """Existing runs keep their engine even if policy changes during execution."""
     from app.domains.identity.service.environment import lock_environment_admission
     lock_environment_admission(db, actor.owner_user_id)
@@ -88,11 +88,14 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str, configurat
         binding = replace(binding, actor_display_name=configuration.profile.display_name)
     from app.domains.identity.service.environment import snapshot
     environment = snapshot(db, binding.owner_id)
+    situation_policy = memory_policy(db, owner_id=binding.owner_id, world_id=actor.world_id,
+        actor_id=actor.id, environment=environment) if memory_policy else None
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
         world_character_id=actor.id, engine=engine,
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
         status="running", stage="LoadContext", started_at=datetime.now(UTC),
         result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version,
+            "_situation_policy": situation_policy,
             "name_binding": binding.to_dict(), "environment_snapshot": environment.to_dict(),
             **({"_world_configuration": configuration.request_snapshot()} if configuration is not None else {})})
     if engine == "personalized_graph_v2":

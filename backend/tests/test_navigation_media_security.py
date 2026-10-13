@@ -55,7 +55,10 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     assert "ALLOWED_RETURN_PATHS" in navigation
     assert "ALLOWED_LOGIN_RETURN_PATHS" in navigation
     assert "safeLoginReturnTo" in navigation
-    assert "safeSettingsReturnTo(params.get" in settings
+    # Settings no longer consumes a return URL. The login redirect remains
+    # allowlisted; settings must not introduce an unchecked query redirect.
+    assert "useSearchParams" not in settings and "params.get(" not in settings
+    assert 'router.replace("/login")' in settings
     assert "safeLoginReturnTo" in login_page
     assert 'returnTo={returnTo}' in login_page
     assert 'returnTo ?? "/agents"' in login_client

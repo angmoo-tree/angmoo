@@ -23,6 +23,14 @@ def output():
         for part in ("dawn", "morning", "afternoon", "evening")])
 
 
+def update_world_settings(db, ready, **changes):
+    from app.runtime.world_characters.management import management_service
+    from app.domains.world_characters.schemas.management import WorldCharacterSettingsPatch
+    return management_service(db).patch_settings(world_id=ready.world_character.world_id,
+        world_character_id=ready.world_character.id, user=ready.user,
+        data=WorldCharacterSettingsPatch(expected_revision=ready.world_character.version, settings=changes))
+
+
 def test_plan_rejects_duplicate_dayparts_and_empty_or_duplicate_topics():
     data = output().model_dump()
     data["items"][0]["daypart"] = "morning"
@@ -84,11 +92,13 @@ def test_durable_budget_and_failed_job_do_not_reset_on_reclaim():
 
 
 @pytest.fixture
-def preparation_scope(monkeypatch):
+def preparation_scope(monkeypatch, deny_external_network):
     from app.config import settings
     monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", True)
     from app.runtime import daily_preparation as runtime
-    from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
+    from app.domains.identity.service import world_credentials
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.models import InstallationIdentity
     from app.domains.worlds.models import WorldRole
     from app.domains.social.service.recommendation_topics import mark_new_subject
     register_models()
@@ -96,12 +106,16 @@ def preparation_scope(monkeypatch):
     with Session(engine, expire_on_commit=False) as db:
         world, ready, _ = _seed(db)
         world.owner_user_id = ready.user.id
+        ready.membership.role = "owner"
+        db.add(InstallationIdentity(singleton_key="local-installation", installation_id="preparation-test",
+            owner_user_id=ready.user.id, bootstrap_state="claimed", local_label="test", claimed_at=datetime.now(UTC)))
         db.add(WorldRole(id="role", world_id=world.id, role_key="student", name="학생"))
         mark_new_subject(db, world_id=world.id, world_character_id=ready.world_character.id)
+        world_credentials.save(db, owner_id=ready.user.id, world_id=world.id,
+            world_character_id=ready.world_character.id, purpose="sns",
+            data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite",
+                thinking_level="high", api_key="synthetic-preparation-sns-key"))
         db.commit()
-        material = CredentialMaterial("credential-a", "google", "gemini-3.1-flash-lite", "fake",
-            CredentialPurpose.WORLD_CHARACTER_SETUP_LLM, "unused")
-        monkeypatch.setattr(runtime.CredentialResolver, "resolve_llm_credential", lambda *a, **k: material)
         yield db, world, ready, runtime
     engine.dispose()
 
@@ -176,8 +190,7 @@ def test_late_persona_change_discards_both_outputs(preparation_scope):
     db, world, ready, runtime = preparation_scope
     async def generate(**kwargs):
         kwargs["reserve"]()
-        ready.character.worldview = "수정한 캐릭터 설명"
-        db.commit()
+        update_world_settings(db, ready, worldview="수정한 캐릭터 설명")
         return InitialPreparationOutput(daily_plan=output(), recommendation_topics=[dict(name="독서", scope="common")]), SimpleNamespace(calls=[])
     result = asyncio.run(runtime.ensure_preparation(db, character_id=ready.character.id, world_id=world.id,
         user=ready.user, request_id="source-changed", generator=generate))
@@ -274,6 +287,7 @@ def enable_automatic(db, ready, start="22:00", end="03:00"):
     db.add(AgentActivitySetting(character_id=ready.character.id, auto_enabled=True,
         active_hours_start=start, active_hours_end=end))
     db.commit()
+    update_world_settings(db, ready, active_hours_start=start, active_hours_end=end)
 
 
 def test_automatic_midnight_same_date_reuse_and_hours(preparation_scope):

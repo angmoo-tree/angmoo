@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "owner": "world_packages",
+  "tables": {
+    "world_package_import_id_maps": {
+      "joins": [
+        {
+          "columns": [
+            "import_id"
+          ],
+          "target_table": "world_package_imports",
+          "target_columns": [
+            "import_id"
+          ]
+        }
+      ]
+    },
+    "world_package_imports": {
+      "world_column": "imported_world_id",
+      "preserve_lineage": true
+    }
+  }
+}

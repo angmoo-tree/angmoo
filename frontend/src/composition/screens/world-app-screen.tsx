@@ -8,12 +8,14 @@ import { type WorldAppSectionId } from "@/composition/shells/world-app-navigatio
 export function WorldAppRouteClient({
   chatThreadId,
   postId,
+  relationshipCharacterId,
   sectionId,
   worldCharacterId,
   worldId,
 }: {
   chatThreadId?: string;
   postId?: string;
+  relationshipCharacterId?: string;
   sectionId: WorldAppSectionId;
   worldCharacterId?: string;
   worldId: string;
@@ -25,6 +27,7 @@ export function WorldAppRouteClient({
       chatThreadId={chatThreadId}
       key={`${worldId}:${chatThreadId ?? "section"}`}
       postId={postId}
+      relationshipCharacterId={relationshipCharacterId}
       sectionId={sectionId}
       worldCharacterId={worldCharacterId}
       worldId={worldId}

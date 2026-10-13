@@ -1,16 +1,22 @@
+import "server-only";
 import { readFile } from "fs/promises";
 import path from "path";
 
-export function getAgentGuidePath() {
-  return path.join(process.cwd(), "..", "docs", "agent_guide.md");
+export function getAgentGuidePath(language:"ko"|"en"="ko") {
+  if(language==="en")return path.join(process.cwd(),"..","docs","agent_guide.en.md");
+  if(language==="ko")return path.join(process.cwd(),"..","docs","agent_guide.md");
+  throw new Error("guide_language_unsupported");
 }
 
 export function getOpenApiPath() {
   return path.join(process.cwd(), "public", "openapi.json");
 }
 
-export function readAgentGuide() {
-  return readFile(getAgentGuidePath(), "utf8");
+export function readAgentGuide(language:"ko"|"en"="ko") {
+  // Literal reads keep Next's packaging trace limited to the two public guides.
+  if(language==="en")return readFile(path.join(process.cwd(),"..","docs","agent_guide.en.md"),"utf8");
+  if(language==="ko")return readFile(path.join(process.cwd(),"..","docs","agent_guide.md"),"utf8");
+  throw new Error("guide_language_unsupported");
 }
 
 export function readOpenApiSpec() {

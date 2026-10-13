@@ -2,6 +2,7 @@
 
 from types import SimpleNamespace
 from app.runtime.persistence.model_registration import register_models
+from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeletionCleanupItem
 from app.domains.operations.models import AdminAuditLog
 from app.domains.characters.models import AgentCreationDraft
 from app.domains.routines.models.resident import AgentActivityLog
@@ -109,6 +110,8 @@ from app.domains.world_packages.models import WorldPackageSource
 register_models()
 
 models = SimpleNamespace(
+    WorldDeletionRequest=WorldDeletionRequest,
+    WorldDeletionCleanupItem=WorldDeletionCleanupItem,
     AdminAuditLog=AdminAuditLog,
     AgentCreationDraft=AgentCreationDraft,
     AgentActivityLog=AgentActivityLog,

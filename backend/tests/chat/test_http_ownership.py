@@ -76,6 +76,13 @@ def test_request_injected_service_receives_the_original_session_and_user():
 
 
 def test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import StaticPool
+    from app.domains.worlds.models_deletion import WorldDeletionRequest
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    WorldDeletionRequest.__table__.create(engine)
+    sessions = sessionmaker(engine)
     session = object()
     user = SimpleNamespace(id="owner")
     memory = object()
@@ -107,7 +114,7 @@ def test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_contex
         stream_world_response=stream,
     )
     app.state.runtime_composition = SimpleNamespace(
-        memory_recall_service=memory, settings=config
+        memory_recall_service=memory, settings=config, session_factory=sessions
     )
     app.include_router(world_chat_response.router, prefix="/api/v1")
     app.dependency_overrides[get_db] = lambda: session
@@ -142,6 +149,7 @@ def test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_contex
             {"memory_recall_service": memory, "runtime_settings": config},
         ),
     ]
+    engine.dispose()
 
 
 def test_missing_service_configuration_does_not_construct_an_implicit_fallback():

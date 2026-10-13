@@ -21,7 +21,7 @@ class LangGraphResidentContext:
     agent_id: str
     session_key: str
     character: Character
-    credential: LlmCredential
+    credential: LlmCredential | None
     state: CharacterState | None
     activity_policy: agent_activity_policy.ActivityPolicy
     selected_post_id: str | None
@@ -50,7 +50,10 @@ class LangGraphResidentContext:
         from app.runtime.world_configuration.effective_values import configuration_for_input
         configuration = configuration_for_input(self.input_snapshot, character_id=self.character.id)
         model = ((self.input_snapshot or {}).get("_generation_model") or
-            (configuration.settings.generation_model if configuration else None) or self.credential.model)
+            (configuration.settings.generation_model if configuration else None) or
+            (self.credential.model if self.credential else ""))
+        if not model:
+            raise ValueError("world_credential_binding_missing")
         object.__setattr__(self, "generation_model", model)
         object.__setattr__(self, "generation_thinking_level", (self.input_snapshot or {}).get("_generation_thinking_level") or
             getattr(self.credential, "thinking_level", "high") or "high")

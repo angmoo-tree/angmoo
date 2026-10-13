@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "owner": "social",
+  "tables": {
+    "comments": {
+      "joins": [
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "notifications": {
+      "world_column": "world_id"
+    },
+    "owner_manual_inbox_candidates": {
+      "world_column": "world_id"
+    },
+    "owner_manual_social_writes": {
+      "world_column": "world_id"
+    },
+    "post_image_generation_attempts": {
+      "joins": [
+        {
+          "columns": [
+            "job_id"
+          ],
+          "target_table": "post_image_generation_jobs",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_image_generation_jobs": {
+      "joins": [
+        {
+          "columns": [
+            "result_asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_image_intents": {
+      "joins": [
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_image_quota_reservations": {
+      "joins": [
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_likes": {
+      "world_column": "world_id"
+    },
+    "post_media": {
+      "joins": [
+        {
+          "columns": [
+            "generation_intent_id"
+          ],
+          "target_table": "post_image_intents",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "asset_id"
+          ],
+          "target_table": "media_assets",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_reports": {
+      "joins": [
+        {
+          "columns": [
+            "post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "post_reposts": {
+      "world_column": "world_id"
+    },
+    "posts": {
+      "world_column": "world_id"
+    },
+    "profile_follows": {
+      "world_column": "world_id"
+    },
+    "social_action_subjective_contexts": {
+      "world_column": "world_id"
+    },
+    "social_activity_thoughts": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_catalogs": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_deliveries": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_post_topics": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_posts": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_preparations": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_topic_sources": {
+      "world_column": "world_id"
+    },
+    "social_recommendation_topics": {
+      "world_column": "world_id"
+    },
+    "world_character_blocks": {
+      "world_column": "world_id"
+    },
+    "world_character_feed_cursors": {
+      "world_column": "world_id"
+    },
+    "world_character_feed_observations": {
+      "world_column": "world_id"
+    }
+  }
+}

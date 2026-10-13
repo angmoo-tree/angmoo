@@ -2,6 +2,8 @@
   "schema_version": 1,
   "description": "Reviewed old-to-new paths. The source/test baseline is never regenerated after a move.",
   "files": {
+    "backend/app/runtime/world_deletion/ports.py": "backend/app/runtime/world_deletion/canonical_erasure.py",
+    "backend/app/runtime/world_deletion/composition.py": "backend/app/runtime/world_deletion_composition.py",
     "backend/app/domains/device_home/api/routes.py": "backend/app/domains/device_home/router.py",
     "backend/app/domains/device_home/api/device_home_schemas.py": "backend/app/domains/device_home/schemas.py",
     "backend/app/domains/device_home/application/list_local_world_apps.py": "backend/app/domains/device_home/service.py",
@@ -2107,7 +2109,11 @@
     "tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected",
     "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/gif-GIF89a]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[unsupported-gif]",
     "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/jpeg-\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x18\\x00\\x00\\x00\\x10\\x08\\x02\\x00\\x00\\x00\\x83F(\\xc2\\x00\\x00\\x00#IDATx\\x9ccd`\\xf8\\xcf@\\r\\xc0D\\x15S\\x18F\\r\"\\x06\\x8c\\x066a0\\x1aF\\x84\\xc1\\xe0\\x0b#\\x00\\xd6?\\x01\\x1f\\xdc\\x1c\\xcd\\xeb\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[mismatched-png-as-jpeg]",
-    "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/png-fake]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[invalid-png-bytes]"
+    "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/png-fake]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[invalid-png-bytes]",
+    "tests/test_l3_er4_single_backend_runtime.py::test_scheduler_reacquires_after_runtime_lease_loss": "tests/test_l3_er4_single_backend_runtime.py::test_supervisor_does_not_start_a_second_recovery_owner",
+    "tests/image_integration/test_comfy_partner.py::test_partner_body_uses_account_key_and_headers_use_server_key_once": "tests/image_integration/test_comfy_partner.py::test_partner_body_uses_account_key_without_server_headers",
+    "tests/chat/test_activity_situation_receipt.py::test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven": "tests/chat/test_activity_situation_receipt.py::test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven[\\uc751.-False]",
+    "tests/runtime/test_world_deletion_worker.py::test_native_graph_erasure_is_bounded_durable_and_fences_late_commands": "tests/runtime/test_world_deletion_worker.py::test_native_graph_erasure_is_bounded_durable_and_fences_late_commands[event]"
   },
   "details": {
     "AR-B1": {
@@ -136837,7 +136843,9 @@
     "backend/tests/test_langgraph_resident_engine.py::test_direct_llm_rate_limiter_waits_instead_of_failing": "backend/tests/integrations/test_direct_llm.py::test_direct_llm_rate_limiter_waits_instead_of_failing",
     "backend/tests/test_langgraph_resident_engine.py::test_writing_composition_stream_params_omit_sampling_parameters": "backend/tests/routines/test_writing_parameters.py::test_writing_composition_stream_params_omit_sampling_parameters",
     "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback",
-    "backend/tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "backend/tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected"
+    "backend/tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "backend/tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected",
+    "backend/tests/test_l3_er4_single_backend_runtime.py::test_scheduler_reacquires_after_runtime_lease_loss": "backend/tests/test_l3_er4_single_backend_runtime.py::test_supervisor_does_not_start_a_second_recovery_owner",
+    "backend/tests/image_integration/test_comfy_partner.py::test_partner_body_uses_account_key_and_headers_use_server_key_once": "backend/tests/image_integration/test_comfy_partner.py::test_partner_body_uses_account_key_without_server_headers"
   },
   "retired_model_facades": {
     "app.models.auth": "app.domains.identity.models",

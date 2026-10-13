@@ -1,7 +1,7 @@
 """Capture only on final creation/migration; reads and copies never recapture."""
 from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot, CharacterDraftImportOrigin
 from app.domains.characters.service.import_configuration import ImportConfiguration, import_digest
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 
 
 def get_import_snapshot(db, character_id):
@@ -36,7 +36,7 @@ def attach_copy_origin(db, *, draft_id, character_id):
     return db.get(CharacterImportSnapshot, link.snapshot_id)
 
 
-def retained_import_media_urls(db, *, excluding_character_id):
+def retained_import_media_urls(db, *, excluding_character_id, candidate_paths=None):
     """Keep origin files while a surviving identity or copy draft uses the basis."""
     from app.domains.characters.models import Character, AgentCreationDraft
     surviving = select(CharacterImportOrigin.snapshot_id).join(Character,
@@ -44,8 +44,18 @@ def retained_import_media_urls(db, *, excluding_character_id):
         Character.id != excluding_character_id)
     preparing = select(CharacterDraftImportOrigin.snapshot_id).join(AgentCreationDraft,
         AgentCreationDraft.id == CharacterDraftImportOrigin.draft_id).where(AgentCreationDraft.status.in_(("editing", "registering")))
-    rows = db.scalars(select(CharacterImportSnapshot).where(
-        CharacterImportSnapshot.id.in_(surviving.union(preparing))))
+    query = select(CharacterImportSnapshot).where(CharacterImportSnapshot.id.in_(surviving.union(preparing)))
+    if candidate_paths is not None:
+        if not candidate_paths:
+            return set()
+        predicates = []
+        for path in candidate_paths:
+            escaped = path.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            for kind in ("avatar", "banner"):
+                predicates.append(func.json_extract(CharacterImportSnapshot.payload, f"$.profile.{kind}_url").like(
+                    "%/media/" + escaped + "%", escape="\\"))
+        query = query.where(or_(*predicates))
+    rows = db.scalars(query)
     result = set()
     for row in rows:
         if row.digest != import_digest(row.payload):

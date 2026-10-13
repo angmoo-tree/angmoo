@@ -14,6 +14,7 @@ _FIELDS = {"entity_ref": "entities.ref", "relationship_from": "relationship.from
 @dataclass
 class _Attempt:
     phase: str
+    named: bool = False
     call: int = 1
     entity_index: int = 0
     received: dict = field(default_factory=dict)
@@ -23,8 +24,8 @@ _active = ContextVar("chat_reference_observation", default=None)
 
 
 @contextmanager
-def reference_attempt(phase):
-    token = _active.set(_Attempt(phase) if current.get() is not None else None)
+def reference_attempt(phase, *, named=False):
+    token = _active.set(_Attempt(phase, named=named) if current.get() is not None else None)
     try:
         yield
     finally:
@@ -102,20 +103,36 @@ def reference_failure(field_name, value, *, rule, reason, related=None, declared
 
 
 @safe_observation
+def name_failure(field_path, *, reason, index=None):
+    """Only closed paths and indices; name values never enter failure traces."""
+    state = _active.get()
+    if state is None or field_path not in {"entities", "entities.mention", "entities.role", "relationship", "relationship.from_name", "relationship.to_name"}:
+        return
+    basic = {"status": "rejected", "field_path": field_path, "failure_reason": reason,
+        "applied_rule": "named_person_contract.v2", "call": state.call}
+    if index is not None:
+        basic["entity_index"] = index
+    emit("reference_failure", axis="supervisor", phase=state.phase, basic=basic,
+        **basic, input_stage="model_name_wire")
+
+
+@safe_observation
 def reference_inputs(arguments, stage):
     state = _active.get()
     if state is None or not current.get().detailed or type(arguments) is not dict:
         return
     row = {"call": state.call, "input_stage": stage}
+    named_wire = state.named and stage == "received_arguments"
     entities = arguments.get("entities")
     if type(entities) is list:
         row["entity_count"] = len(entities)
         for i, entity in enumerate(entities[:4], 1):
             if type(entity) is dict:
-                row[f"entity_{i}_ref"] = alias("ref", entity.get("ref"))
+                if not named_wire:
+                    row[f"entity_{i}_ref"] = alias("ref", entity.get("ref"))
                 row[f"entity_{i}_role"] = closed(entity.get("role"), _ROLES)
     relation = arguments.get("relationship")
-    if type(relation) is dict:
+    if type(relation) is dict and not named_wire:
         row.update(from_ref=_ref(relation.get("from")), to_ref=_ref(relation.get("to")))
     emit("reference_inputs", axis="supervisor", phase=state.phase, **row)
 
@@ -125,7 +142,7 @@ def resolved_references(intent, resolutions, *, phase, subject, bindings=(), dir
     if not current.get().detailed:
         return
     row = {"input_stage": "resolved_binding" if direction is not None else "entity_resolution",
-           "applied_rule": "unique_safe_binding.v1", "entity_count": len(intent.entities)}
+           "applied_rule": "complete_unique_binding.v2" if any(r.named for r in resolutions) else "unique_safe_binding.v1", "entity_count": len(intent.entities)}
     by_ref = {item.ref: item for item in resolutions}
     bound = {item.ref: item.world_character_id for item in bindings}
     def identity(value):

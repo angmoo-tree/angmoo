@@ -382,6 +382,12 @@ class MemoryWriteLifecycleService:
             item_id=old_item_id,
         )
         current_evidence: list[CanonicalMemoryEvidence] = []
+        situation_reader = getattr(self._repository, "situation_correction_evidence", None)
+        situation_evidence = situation_reader(scope=scope, item_id=old_item_id,
+            reader=self._source_reader, now=corrected_at) if situation_reader else None
+        if situation_evidence is not None:
+            current_evidence.extend(situation_evidence)
+            rows = ()
         for row in rows:
             evidence = self._source_reader.read_evidence(
                 scope=scope,
@@ -399,7 +405,7 @@ class MemoryWriteLifecycleService:
             if validate_source_digest(evidence.source_digest) != row.source_digest:
                 raise MemoryConflictError("memory_source_digest_conflict")
             current_evidence.append(evidence)
-        if not current_evidence:
+        if not current_evidence and situation_evidence is None:
             raise MemoryConflictError("memory_correction_evidence_missing")
 
         _, replacement, created = self._repository.correct_item_summary(

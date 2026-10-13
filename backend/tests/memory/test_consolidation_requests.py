@@ -52,7 +52,7 @@ def test_manual_receipt_replay_coalescing_and_late_material(memory_session):
     db.commit()
     factory = create_session_factory(db.bind)
     provider = Provider()
-    runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider)
+    runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
     install_memory_delivery(factory)
     try:
         with factory() as writer:
@@ -92,7 +92,7 @@ def test_empty_request_restarts_without_provider_or_schedule_change(memory_sessi
     db.commit()
     row, _, _ = start(db, repo, scope, setting)
     provider = Provider()
-    runtime = MemoryBatchRuntime(create_session_factory(db.bind), lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider)
+    runtime = MemoryBatchRuntime(create_session_factory(db.bind), lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
     assert asyncio.run(runtime.tick()) == "memory_batch_queue_empty"
     db.expire_all()
     assert progress(db, db.get(MemoryConsolidationRequest, row.id))["state"] == "no_work"
@@ -123,7 +123,7 @@ def test_schedule_off_preserves_manual_interest_only(memory_session, prepared, m
     factory = create_session_factory(db.bind)
     provider = Provider()
     runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1",
-        episode_provider_factory=lambda *args: provider)
+        episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
     install_memory_delivery(factory)
     try:
         with factory() as writer:
@@ -197,14 +197,14 @@ def test_provider_barrier_preserves_concurrency_one_and_observable_phase(memory_
                     self.phase_observer("applying")
                     return await super().select(bundle, timeout=timeout)
             provider = Barrier()
-            runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider)
+            runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
             running = asyncio.create_task(runtime.tick())
             await asyncio.wait_for(started.wait(), 5)
             with factory() as observer:
                 snapshot = progress(observer, observer.get(MemoryConsolidationRequest, row.id))
                 assert snapshot["state"] == "ai_running"
             active[0] = True
-            other = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider)
+            other = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1", episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
             assert await other.tick() == "memory_foreground_deferred"
             assert provider.calls == 0
             release.set()

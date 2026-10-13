@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import get_current_user, get_optional_current_user
@@ -12,6 +13,25 @@ from app.domains.worlds import schemas, service as world_service
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
+legacy_media_router = APIRouter(prefix="/media/worlds", tags=["worlds"])
+
+
+@legacy_media_router.get("/{world_id}/{filename}", include_in_schema=False)
+@router.get("/{world_id}/media/{filename}", response_class=FileResponse)
+def read_world_media(
+    world_id: str, filename: str,
+    db: Session = Depends(get_db), user=Depends(get_optional_current_user),
+) -> FileResponse:
+    from app.domains.worlds.service.media import read_world_media as read
+    try:
+        path, content_type = read(db, world_id=world_id, filename=filename, user=user)
+        return FileResponse(path, media_type=content_type, headers={
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        })
+    except world_service.WorldServiceError as exc:
+        _raise_world_error(exc)
+        raise AssertionError("unreachable")
 
 
 @router.post("/default-space/ensure", response_model=schemas.WorldRead)
@@ -38,7 +58,7 @@ def create_world(
     topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCreatorContextRead:
     try:
-        return world_service.create_world(db, user=user, data=data, on_created=topics.mark_new_subject)
+        return world_service.create_world(db, user=user, data=data, on_created=topics.initialize_world)
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)
         raise AssertionError("unreachable")
@@ -133,7 +153,6 @@ async def publish_world(
             user=user,
             data=data,
         )
-        await topics.prepare_initial_world(db, world_id=world_id, owner_id=user.id)
         return result
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)

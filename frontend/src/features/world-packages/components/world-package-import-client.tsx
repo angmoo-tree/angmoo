@@ -110,16 +110,16 @@ export function WorldPackageImportClient({
   }
 
   if (authStatus === "checking") {
-    return <ImportNotice><Loader2 className="size-5 animate-spin" /> {uiText("local owner를 확인하는 중입니다.")}</ImportNotice>;
+    return <ImportNotice><Loader2 className="size-5 animate-spin" /> {uiText("사용자 연결을 확인하고 있어요.")}</ImportNotice>;
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">WORLD PACKAGE V1</p>
-        <h1 className="mt-3 text-3xl font-black text-[#101828]">{uiText("World Package 가져오기")}</h1>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">{uiText("World 가져오기")}</p>
+        <h1 className="mt-3 text-3xl font-black text-[#101828]">{uiText("World 패키지 가져오기")}</h1>
         <p className="mt-4 max-w-3xl font-semibold leading-7 text-[#667085]">
-          {uiText("원본 파일은 bounded staging에서만 검증합니다. 미리보기 승인 전에는 World나 Device Home을 변경하지 않으며, 외부 코드·provider·네트워크를 실행하지 않습니다.")}</p>
+          {uiText("World 파일을 선택하고, 가져올 내용을 먼저 확인해요. ‘World 가져오기’를 누르기 전에는 기존 World가 바뀌지 않아요.")}</p>
       </header>
 
       {!result ? (
@@ -127,7 +127,7 @@ export function WorldPackageImportClient({
           <label className="flex cursor-pointer flex-col items-center rounded-[24px] border-2 border-dashed border-[#d0d5dd] bg-[#f9fafb] px-6 py-10 text-center hover:border-[#ff9b9b]">
             {pending === "stage" ? <Loader2 className="size-9 animate-spin text-[#ff6b6b]" /> : <FileArchive className="size-9 text-[#ff6b6b]" />}
             <strong className="mt-4 text-lg text-[#101828]">{uiText(".angmoo-world 파일 선택")}</strong>
-            <span className="mt-2 text-sm font-semibold text-[#667085]">{uiText("파일 경로를 직접 입력하지 않습니다.")}</span>
+            <span className="mt-2 text-sm font-semibold text-[#667085]">{uiText("저장한 .angmoo-world 파일을 선택해주세요.")}</span>
             <input
               ref={inputRef}
               accept={`${WORLD_PACKAGE_EXTENSION},${WORLD_PACKAGE_MEDIA_TYPE}`}
@@ -154,6 +154,7 @@ export function WorldPackageImportClient({
       ) : null}
 
       {result ? <ImportSuccess result={result} /> : null}
+      {pending === "stage" ? <p role="status">{uiText("가져올 내용을 확인하는 중이에요.")}</p> : null}
       {error ? <InlineError>{formatWorldPackageFailure(error, "import", uiText, formatNumber)}</InlineError> : null}
     </div>
   );
@@ -177,7 +178,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
     <Card as="section" elevated>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">VALIDATED PREVIEW</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">{uiText("가져올 내용")}</p>
           <h2 className="mt-2 text-2xl font-black text-[#101828]">{preview.world_name}</h2>
           <p className="mt-2 text-sm font-semibold text-[#667085]">{preview.world_tagline}</p>
         </div>
@@ -189,8 +190,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
       <dl className="mt-6 grid gap-4 rounded-[22px] bg-[#f7f8fa] p-5 sm:grid-cols-2 lg:grid-cols-4">
         <Value label={uiText("자율 캐릭터")} value={uiText("{{value0}}명", {value0: preview.character_names.length})} />
         <Value label={uiText("장소·역할")} value={`${preview.place_count} · ${preview.role_count}`} />
-        <Value label={uiText("관리 자산")} value={uiText("{{value0}}개 · {{value1}}", {value0: preview.asset_count, value1: formatBytes(preview.asset_bytes)})} />
-        <Value label={uiText("예정 slug")} value={preview.collision_plan.planned_world_slug} />
+        <Value label={uiText("포함된 이미지·미디어")} value={uiText("{{value0}}개 · {{value1}}", {value0: preview.asset_count, value1: formatBytes(preview.asset_bytes)})} />
       </dl>
 
       {preview.character_settings?.length ? (
@@ -218,7 +218,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
           {preview.license.source_url ? <a className="mt-3 block break-all text-sm font-bold text-state-running underline" href={preview.license.source_url} rel="noreferrer" target="_blank">{uiText("원본 안내 열기")}</a> : null}
         </div>
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
-          <h3 className="font-black text-[#101828]">{uiText("충돌 계획")}</h3>
+          <h3 className="font-black text-[#101828]">{uiText("같은 이름·이미 가져온 World 확인")}</h3>
           <p className="mt-3 text-sm font-bold text-[#475467]">{uiText(duplicateLabel(preview.collision_plan.duplicate_state))}</p>
           <ul className="mt-3 space-y-2 text-sm text-[#667085]">{preview.collision_plan.characters.map((character) => <li key={character.source_ref}>{character.display_name} → @{character.planned_handle}</li>)}</ul>
         </div>
@@ -226,8 +226,8 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
 
       {alreadyImported ? (
         <label className="mt-5 block rounded-[20px] border border-[#fdb022] bg-[#fffaeb] p-4 text-sm font-bold text-[#7a2e0e]">
-          {uiText("이미 가져온 같은 content입니다. 원본을 덮어쓰지 않고 독립 복사본으로만 가져올 수 있습니다.")}<Select className="mt-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
-            <option value="independent_copy">{uiText("독립 복사본으로 가져오기")}</option>
+          {uiText("이미 가져온 World예요. 기존 World를 덮어쓰지 않고 별도의 복사본으로 가져올 수 있어요.")}<Select className="mt-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
+            <option value="independent_copy">{uiText("별도 복사본으로 가져오기")}</option>
             <option value="reject">{uiText("가져오지 않기")}</option>
           </Select>
         </label>
@@ -238,14 +238,14 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
 
       <label className="mt-6 flex items-start gap-3 rounded-[20px] bg-[#f7f8fa] p-4 text-sm font-semibold leading-6 text-[#475467]">
         <input className="mt-1 size-4" checked={approved} disabled={blocked} onChange={(event) => onApproval(event.target.checked)} type="checkbox" />
-        <span>{uiText("위 라이선스·제외 항목·충돌 계획과 digest")}<code className="break-all text-xs">{preview.content_digest}</code>{uiText("를 확인하고 이 미리보기 그대로 가져옵니다.")}</span>
+        <span>{uiText("가져올 내용과 라이선스, 제외되는 정보, 같은 World의 처리 방식을 확인했어요. 표시된 내용으로 가져올게요.")}</span>
       </label>
 
       <div className="mt-6 flex flex-wrap gap-3">
         <Button variant="strong" loading={pending === "commit"} loadingLabel={uiText("World 가져오는 중")} disabled={!approved || blocked || pending !== null || duplicateStrategy === "reject" && alreadyImported} onClick={onCommit}>
           <ShieldCheck className="size-4" /> {uiText("World 가져오기")}</Button>
-        <Button variant="secondary" loading={pending === "discard"} loadingLabel={uiText("미리보기 폐기 중")} disabled={pending !== null} onClick={onDiscard}>
-          <RotateCcw className="size-4" /> {uiText("미리보기 폐기")}</Button>
+        <Button variant="secondary" loading={pending === "discard"} loadingLabel={uiText("취소 중…")} disabled={pending !== null} onClick={onDiscard}>
+          <RotateCcw className="size-4" /> {uiText("가져오기 취소")}</Button>
       </div>
     </Card>
   );
@@ -256,11 +256,11 @@ function ImportSuccess({ result }: { result: WorldPackageImportResult }) {
   return (
     <section className="rounded-[28px] border border-[#abefc6] bg-[#ecfdf3] p-8 text-center">
       <CheckCircle2 className="mx-auto size-11 text-[#039855]" />
-      <h2 className="mt-4 text-2xl font-black text-[#05603a]">{uiText("World를 안전하게 가져왔습니다")}</h2>
-      <p className="mt-3 text-sm font-semibold text-[#027a48]">{uiText("Device Home 등록과 새 World seed commit이 하나의 transaction으로 완료됐습니다.")}</p>
+      <h2 className="mt-4 text-2xl font-black text-[#05603a]">{uiText("World를 가져왔어요.")}</h2>
+      <p className="mt-3 text-sm font-semibold text-[#027a48]">{uiText("기기 홈에서 World를 찾거나 Studio에서 설정을 편집할 수 있어요.")}</p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Link className={primaryButtonClass} href={PRODUCT_ROUTES.deviceHome}>{uiText("Device Home에서 보기")}</Link>
-        <Link className={secondaryButtonClass} href={studioWorldRoute(result.imported_world_id)}>{uiText("새 World 열기")}</Link>
+        <Link className={primaryButtonClass} href={PRODUCT_ROUTES.deviceHome}>{uiText("기기 홈에서 보기")}</Link>
+        <Link className={secondaryButtonClass} href={studioWorldRoute(result.imported_world_id)}>{uiText("Studio에서 편집")}</Link>
       </div>
     </section>
   );
@@ -275,7 +275,8 @@ function Value({ label, value }: { label: string; value: string }) {
 }
 
 function IssueList({ title, items, tone }: { title: string; items: string[]; tone: "warning" | "error" }) {
-  return <div className={`mt-5 rounded-[20px] p-5 ${tone === "error" ? "bg-[#fff1f0] text-[#b42318]" : "bg-[#fffaeb] text-[#7a2e0e]"}`}><h3 className="flex items-center gap-2 font-black"><AlertTriangle className="size-4" />{title}</h3><ul className="mt-3 list-disc space-y-1 pl-5 text-sm font-semibold">{items.map((item) => <li key={item}>{item}</li>)}</ul></div>;
+  const uiText = useUiText("world-packages");
+  return <div className={`mt-5 rounded-[20px] p-5 ${tone === "error" ? "bg-[#fff1f0] text-[#b42318]" : "bg-[#fffaeb] text-[#7a2e0e]"}`}><h3 className="flex items-center gap-2 font-black"><AlertTriangle className="size-4" />{title}</h3><ul className="mt-3 list-disc space-y-1 pl-5 text-sm font-semibold">{items.map((item) => <li key={item}>{uiText(packageIssueLabel(item))}</li>)}</ul></div>;
 }
 
 function formatBytes(value: number) {
@@ -283,14 +284,26 @@ function formatBytes(value: number) {
 }
 
 function trustLabel(value: string) {
-  return value === "locally_exported" ? "이 설치에서 내보냄" : "checksum 검증 · 서명 없음";
+  if (value === "locally_exported") return "여기서 내보낸 파일";
+  if (value === "checksum_verified_unsigned") return "파일 내용 확인 완료 · 제작자 미확인";
+  return "파일 확인 필요";
 }
 
 function duplicateLabel(value: string) {
-  if (value === "already_imported") return "이미 가져온 동일 content";
-  if (value === "independent_fork") return "독립 복사본";
-  return "새 Package";
+  if (value === "already_imported") return "이미 가져온 World";
+  if (value === "independent_fork") return "별도 복사본";
+  return "새 World 파일";
 }
 
 const primaryButtonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-sm font-extrabold text-white hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-50";
 const secondaryButtonClass = "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#d0d5dd] bg-white px-5 text-sm font-extrabold text-[#344054] hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-50";
+
+function packageIssueLabel(code: string): string {
+  return ({
+    author_signature_not_available: "이 파일만으로는 제작자를 확인할 수 없어요. 라이선스와 출처를 확인해주세요.",
+    already_imported: "이미 가져온 World예요. 기존 World를 유지하고 별도 복사본으로 가져올 수 있어요.",
+    independent_fork_no_merge: "기존 World와 합치지 않고 별도의 World로 가져와요.",
+    custom_license_review_required: "별도로 작성된 라이선스예요. 포함된 이용 조건을 확인해주세요.",
+    local_only_license: "이 라이선스의 사용·공유 범위를 확인해주세요.",
+  } as Record<string, string>)[code] ?? "파일에 확인이 필요한 정보가 있어요. 라이선스와 내용을 확인해주세요.";
+}

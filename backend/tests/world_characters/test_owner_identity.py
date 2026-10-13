@@ -479,6 +479,11 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         role = db.get(models.WorldCharacter, "wc-autonomous-a")
         initialize_created_world_character(db, character=autonomous, world_character=role)
         role.autonomous_enabled = True
+        from app.domains.identity.service import world_credentials
+        from app.domains.identity.schemas import WorldCredentialWrite
+        world_credentials.save(db, owner_id=owner.id, world_id=role.world_id, world_character_id=role.id,
+            purpose="sns", data=WorldCredentialWrite(expected_revision=0, provider="google",
+                model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-own-scheduler-key"))
         db.add_all(
             [
                 models.AgentSlot(

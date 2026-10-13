@@ -5,6 +5,7 @@ from app.domains.memory.contracts.episode import (
     MAX_EPISODE_CHARACTERS, MAX_EPISODES_PER_BUNDLE,
 )
 from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
 
 
 def episode_response_schema() -> dict:
@@ -41,7 +42,8 @@ def parse_episode_selection(payload: object, bundle: EpisodeBundle) -> EpisodeSe
     if payload["bundle_ref"] != bundle.bundle_ref or type(payload["needs_split"]) is not bool:
         raise MemoryValidationError("episode_output_invalid")
     rows = payload["episodes"]
-    if not isinstance(rows, list) or len(rows) > MAX_EPISODES_PER_BUNDLE:
+    modern = bundle.policy_version == ACTIVITY_POLICY_VERSION
+    if not isinstance(rows, list) or len(rows) > (32 if modern else MAX_EPISODES_PER_BUNDLE):
         raise MemoryValidationError("episode_output_invalid")
     new_refs = {f"S{i}" for i in range(1, len(bundle.new_units) + 1)}
     skipped = _refs(payload["skipped_new_refs"], new_refs)
@@ -59,7 +61,7 @@ def parse_episode_selection(payload: object, bundle: EpisodeBundle) -> EpisodeSe
         if not isinstance(row, dict) or set(row) != {"summary", "source_refs", "follows_episode_refs"}:
             raise MemoryValidationError("episode_output_invalid")
         summary = row["summary"]
-        if not isinstance(summary, str) or not 1 <= len(summary.strip()) <= MAX_EPISODE_CHARACTERS:
+        if not isinstance(summary, str) or not 1 <= len(summary.strip()) <= (1000 if modern else MAX_EPISODE_CHARACTERS):
             raise MemoryValidationError("episode_summary_invalid")
         refs = _refs(row["source_refs"], allowed)
         if not (set(refs) & new_refs):

@@ -1,15 +1,18 @@
 import { cpSync, existsSync, rmSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
 const frontendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const standaloneRoot = join(frontendRoot, ".next", "standalone");
-const server = join(standaloneRoot, "server.js");
+// next.config traces from the repository root, so Next retains the frontend
+// directory inside standalone rather than placing its server at the root.
+const tracedFrontendRoot = join(standaloneRoot, basename(frontendRoot));
+const server = join(tracedFrontendRoot, "server.js");
 const sourceStatic = join(frontendRoot, ".next", "static");
-const targetStatic = join(standaloneRoot, ".next", "static");
+const targetStatic = join(tracedFrontendRoot, ".next", "static");
 const sourcePublic = join(frontendRoot, "public");
-const targetPublic = join(standaloneRoot, "public");
+const targetPublic = join(tracedFrontendRoot, "public");
 const portIndex = process.argv.indexOf("--port");
 const port = Number(portIndex >= 0 ? process.argv[portIndex + 1] : "3300");
 

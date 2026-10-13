@@ -21,6 +21,12 @@ from app.runtime.relationships.manual_review_worker import advance_manual_reques
 from test_relationship_daily_review import Provider, References
 
 
+@pytest.fixture(autouse=True)
+def legacy_memory_generation(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "activity32")
+
+
 def setup(db):
     scope, setting, *_ = _stack(db)
     repo = memory_batch_repository(db)

@@ -53,7 +53,7 @@ def test_character_writes_reach_runtime_in_same_session_after_original_commits(t
             assert character.promotion_usage_allowed is True
             return character
         callbacks = _workflows(validate_initial_activity=validate, after_create=created)
-        character = management.create_agent(db, owner, schemas.AgentCreate(name="Owner Bird", execution_mode="local", promotion_usage_allowed=True), workflows=callbacks)
+        character = management.create_agent(db, owner, schemas.AgentCreate(api_key="fixture", worldview="A synthetic character for current registration tests", name="Owner Bird", execution_mode="llm", promotion_usage_allowed=True), workflows=callbacks)
         calls.clear()
         def profile_changed(current, actual_owner, actual_character, media_changed):
             assert current is db and actual_owner is owner and actual_character is character

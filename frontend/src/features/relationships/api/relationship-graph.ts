@@ -69,9 +69,9 @@ export async function getRelationshipGraph(
 }
 
 
-export async function getRelationshipReview(characterId: string, worldId: string): Promise<RelationshipReviewRead> {
+export async function getRelationshipReview(characterId: string, worldId: string, signal?: AbortSignal): Promise<RelationshipReviewRead> {
   const response = await runtimeFetch(`/api/backend/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-review`, {
-    cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" },
+    cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" }, signal,
   });
   if (!response.ok) throw new RelationshipGraphApiError("relationship_review_unavailable", response.status);
   return response.json();

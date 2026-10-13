@@ -1,0 +1,23 @@
+.root { min-width: 0; }
+.banner { position: relative; width: 100%; height: clamp(160px, 27vw, 280px); background: var(--color-surface-muted); }
+.banner img { object-fit: cover; }
+.content { padding: 28px 20px 36px; }
+.eyebrow { margin: 0 0 12px; color: var(--color-brand-accent); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.title { margin: 0; color: var(--color-text-strong); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.tags { display: flex; min-width: 0; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.tag { min-width: 0; max-width: 100%; border-radius: var(--radius-pill); background: var(--color-surface-muted); color: var(--color-text-default); font-size: 0.78rem; line-height: 1.5; padding: 5px 12px; overflow-wrap: anywhere; }
+.tagline { margin: 16px 0 0; color: var(--color-text-secondary); font-size: 1rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.about { margin-top: 28px; }
+.about h2 { margin: 0 0 16px; color: var(--color-text-strong); font-size: 1.3rem; font-weight: 800; }
+.prose { margin: 0; color: var(--color-text-default); font-size: 0.95rem; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+.collapsed { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.details { display: grid; gap: 28px; margin-top: 24px; }
+.details h3 { margin: 0 0 12px; color: var(--color-text-strong); font-size: 1.3rem; font-weight: 800; }
+.details h3.dailyHeading { font-size: 1rem; font-weight: 700; }
+.definitionList { display: grid; gap: 20px; margin: 0; padding: 0; list-style: none; }
+.definitionList h4 { margin: 0 0 5px; color: var(--color-text-strong); font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+.responsibilities { margin: 8px 0 0; padding-left: 20px; color: var(--color-text-default); font-size: 0.95rem; line-height: 1.85; overflow-wrap: anywhere; }
+.expand { min-height: 44px; margin-top: 12px; padding-left: 0; padding-right: 12px; color: var(--color-text-secondary); font-weight: 500; }
+.feedback { margin-top: 24px; }
+.myProfile { margin-top: 28px; }
+@media (min-width: 640px) { .content { padding: 32px; } }

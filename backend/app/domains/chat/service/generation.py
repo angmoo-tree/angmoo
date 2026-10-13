@@ -1,6 +1,7 @@
 """Durable generation admission, replay, status and terminal failure rules."""
 
 from __future__ import annotations
+from app.contracts.name_binding import NameBindingError
 from app.contracts.environment import EnvironmentSnapshot
 from app.domains.identity.service.environment import lock_environment_admission, snapshot
 import asyncio
@@ -58,6 +59,10 @@ from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.worlds.service.character_entry import get_character_entry_world
 from app.domains.world_characters.contracts.configuration import configuration_from_request
 from app.domains.world_characters.service.configuration import configuration_for_actor
+from app.domains.chat.contracts.supervisor_selection import (
+    NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, read_selection_protocol,
+)
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
 RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
@@ -73,11 +78,13 @@ class GenerationService:
         settings_service: MessageSettingsService,
         workflows: GenerationWorkflows,
         images=None,
+        memory_policy=None,
     ) -> None:
         self.thread_service = thread_service
         self.settings_service = settings_service
         self.workflows = workflows
         self.images = images
+        self.memory_policy = memory_policy
 
     def accept_world_message(
         self,
@@ -220,10 +227,16 @@ class GenerationService:
         if later_user_message is not None:
             raise MessageValidationError("latest_retryable_response_required")
         prior_metadata = json.loads(prior.node_state_json)
+        prior_protocol = read_selection_protocol(prior_metadata)
+        self._validate_request_names(db, user, thread, SqlAlchemyResponseLifecycleRepository(db).get_request(prior.request_id))
         # Retry the admitted input, including historical namespaces. Current
         # World edits must not replace a saved name or introduce a new snapshot.
-        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding")
+        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy")
             if key in prior_metadata}
+        if settings.CHAT_RECALL_MODE == "social_hybrid" and "chat_identity_context.v1" in prior_metadata:
+            retry_metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
+        elif prior_protocol is not None:
+            retry_metadata[SELECTION_PROTOCOL_KEY] = prior_protocol
         if "_world_configuration" in prior_metadata:
             self._request_configuration(thread, prior_metadata)
             retry_metadata["_world_configuration"] = prior_metadata["_world_configuration"]
@@ -321,6 +334,16 @@ class GenerationService:
             actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id),
             "_environment": snapshot(db, user.id).to_dict()}
         metadata["_world_configuration"] = configuration.request_snapshot()
+        from app.contracts.name_binding import read_name_binding
+        from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext, IDENTITY_KEY
+        metadata[IDENTITY_KEY] = ChatIdentityContext.from_binding(read_name_binding(metadata), thread.id).to_dict()
+        metadata["_world_credential"] = self.workflows.capture_credential(db, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
+        metadata["_situation_policy"] = self.memory_policy(db, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id,
+            environment=EnvironmentSnapshot.from_dict(metadata["_environment"])) if self.memory_policy else None
+        if settings.CHAT_RECALL_MODE == "social_hybrid":
+            metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -531,8 +554,20 @@ class GenerationService:
                 yield event
             return
         try:
+            self._validate_request_names(db, user, thread, record)
             configuration = self._request_configuration(thread, record.node_state)
-        except MessageValidationError:
+            protocol = read_selection_protocol(record.node_state)
+            if protocol is not None and runtime_settings.CHAT_RECALL_MODE != "social_hybrid":
+                raise RetrievalContractError("selection_protocol_mode_mismatch")
+            if protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and "chat_identity_context.v1" not in record.node_state:
+                raise RetrievalContractError("selection_protocol_identity_required")
+        except RetrievalContractError:
+            async for event in self._fail_before_workflow(db, record,
+                failure_class="selection_protocol_invalid", retryable=False,
+                reason=ResponseTerminalReason.CONTRACT_INVALID):
+                yield event
+            return
+        except (MessageValidationError, NameBindingError):
             async for event in self._fail_before_workflow(db, record,
                 failure_class="world_configuration_snapshot_invalid", retryable=False,
                 reason=ResponseTerminalReason.CONTRACT_INVALID):
@@ -549,9 +584,8 @@ class GenerationService:
                 yield event
             return
         try:
-            _credential, base_material = (
-                self.settings_service.resolve_message_credential_material(db, user)
-            )
+            base_material = self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
+                world_id=thread.world_id, actor_id=thread.responding_world_character_id)
         except MessageCredentialRequiredError:
             async for event in self._fail_before_workflow(
                 db,
@@ -611,9 +645,15 @@ class GenerationService:
             world_id=world_id,
         )
         character_labels = execution.character_labels
+        from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
+        identity = ChatIdentityContext.read(record.node_state)
+        if identity is not None:
+            identity.assert_scope(user.id, world_id, thread.id, thread.requester_world_character_id,
+                thread.responding_world_character_id)
+            character_labels.update(identity.names)
         workflow = execution.workflow
         router_context, response_context = _recent_context(
-            db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id
+            db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id, identity=identity
         )
         environment = EnvironmentSnapshot.from_dict(record.node_state.get("_environment"))
         today_sns_snapshot = None
@@ -628,6 +668,7 @@ class GenerationService:
                     subject_world_character_id=thread.responding_world_character_id,
                     timezone=environment.timezone,
                     character_labels=character_labels,
+                    label_reader=lambda ids: self.workflows.character_names(db, world_id, ids),
                     now=datetime.now(UTC),
                 )
             except Exception as exc:
@@ -659,23 +700,32 @@ class GenerationService:
             graph_projection_enabled=runtime_settings.graph_projection_enabled,
             name_binding_validator=lambda: self._validate_request_input(db, user, thread, record, message.id, image_evidence),
             image_evidence=image_evidence,
+            chat_identity=identity,
+            identity_labels=lambda ids: self.workflows.character_names(db, world_id, ids),
         )
         async for event in workflow.run(command):
             yield event
 
     def _validate_request_names(self, db, user, thread, record):
+        from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
+        identity = ChatIdentityContext.read(record.node_state)
+        if identity is not None:
+            identity.assert_scope(user.id, thread.world_id, thread.id, thread.requester_world_character_id,
+                thread.responding_world_character_id)
         self.workflows.assert_names_current(db, record.node_state, owner_id=user.id,
             world_id=thread.world_id, actor_id=thread.responding_world_character_id)
 
     def _validate_request_input(self, db, user, thread, record, message_id, evidence):
         self._mutation_thread(db, user, thread.world_id, thread.id)
+        self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
         self._validate_request_names(db, user, thread, record)
         if self.images:
             self.images.assert_current(db, user.id, thread.id, message_id, evidence)
 
 
 def _recent_context(
-    db: Session, thread_id: str, *, exclude_message_id: int, images=None, owner_id=None
+    db: Session, thread_id: str, *, exclude_message_id: int, images=None, owner_id=None, identity=None
 ) -> tuple[
     tuple[RetrievalRouterContextMessage, ...],
     tuple[CharacterResponseContextMessage, ...],
@@ -689,23 +739,28 @@ def _recent_context(
     selected: list[models.MessageMessage] = []
     contents = {}
     chars = 0
+    thread = db.get(models.MessageThread, thread_id)
     for row in reversed(rows):
         content = images.previous_context(db, owner_id, thread_id, row) if images else row.content
-        if not content.strip() or chars + len(content) > RESPONSE_CONTEXT_CHAR_LIMIT:
+        author = thread.requester_world_character_id if row.role == "user" else thread.responding_world_character_id
+        prefix = len(identity.names.get(author, "")) + 2 if identity is not None else 0
+        if not content.strip() or chars + len(content) + prefix > RESPONSE_CONTEXT_CHAR_LIMIT:
             continue
         selected.append(row)
         contents[row.id] = content
-        chars += len(content)
+        chars += len(content) + prefix
     selected.reverse()
     router = tuple(
         (
-            RetrievalRouterContextMessage(role=row.role, content=contents[row.id])
+            RetrievalRouterContextMessage(role=row.role, content=contents[row.id],
+                author_id=thread.requester_world_character_id if row.role == "user" else thread.responding_world_character_id)
             for row in selected
         )
     )
     response = tuple(
         (
-            CharacterResponseContextMessage(role=row.role, content=contents[row.id])
+            CharacterResponseContextMessage(role=row.role, content=contents[row.id], source_id=str(row.id),
+                author_id=thread.requester_world_character_id if row.role == "user" else thread.responding_world_character_id)
             for row in selected
         )
     )

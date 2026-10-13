@@ -26,6 +26,9 @@ def scope():
         db.add(world)
         db.flush()
         _, character, wc = _add_world_character(db, world=world, suffix="actor")
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        initialize_created_world_character(db, character=character, world_character=wc)
+        db.commit()
         yield db, world, character, wc
     engine.dispose()
 
@@ -68,6 +71,7 @@ def test_world_and_other_character_union_reuse_and_retirement(scope):
 def test_no_backfill_no_new_topic_and_edit_drops_signature(scope):
     db, world, character, wc = scope
     football = replace_source_topics(db, world_id=world.id, world_character_id=None, topics=[("축구", "common")])[0]
+    replace_source_topics(db, world_id=world.id, world_character_id=wc.id, topics=[("축구", "common")])
     old = post(db, world, character, wc, "old")
     assert match_post(db, old, final_signature="축구") == []
     assert db.get(RecommendationPost, old.id) is None

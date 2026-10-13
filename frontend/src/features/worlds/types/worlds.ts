@@ -64,6 +64,8 @@ export type WorldDefinition = {
 };
 
 export type WorldRead = WorldDefinition & {
+  can_delete?: boolean;
+  is_default_space?: boolean;
   runtime_timezone?: string;
   icon_media_id?: string | null;
   id: string;

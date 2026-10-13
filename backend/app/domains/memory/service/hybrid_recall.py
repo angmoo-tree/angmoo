@@ -45,7 +45,8 @@ class HybridRecallService:
                  canonical: HybridCanonicalReader):
         self._fts = fts
         self._vector = vector
-        self._canonical = canonical
+        from app.domains.memory.contracts.hybrid_recall import SyncCanonicalAdapter
+        self._canonical = canonical if hasattr(canonical, "revalidate_async") else SyncCanonicalAdapter(canonical)
 
     async def execute(self, request: HybridRecallRequest, *, deadline: float) -> HybridRecallResult:
         started = monotonic()
@@ -76,7 +77,7 @@ class HybridRecallService:
         if not any(r.receipt.status in available for r in (fts, vector)):
             raise RuntimeError("hybrid_all_axes_unavailable")
         fused = reciprocal_rank_fusion(fts.candidates, vector.candidates)
-        records = self._canonical.revalidate(request, fused)
+        records = await self._canonical.revalidate_async(request, fused, deadline=deadline)
         if monotonic() >= deadline:
             raise TimeoutError("hybrid_recall_deadline")
         # Canonical validation preserves fusion order; memory IDs deduplicate only
@@ -93,7 +94,7 @@ class HybridRecallService:
                 lineage("select", "merged", reason="memory_identity", identities=record_identity(record))
             if len(selected) >= request.result_limit:
                 break
-        hydration = self._canonical.hydrate(request, tuple(selected))
+        hydration = await self._canonical.hydrate_async(request, tuple(selected), deadline=deadline)
         hydrated, sources = hydration.records, hydration.sources
         if monotonic() >= deadline:
             raise TimeoutError("hybrid_recall_deadline")

@@ -1,0 +1,13 @@
+services:
+  scheduler-proof:
+    image: angmoo-creator-lock-test:20261010
+    entrypoint: ["python", "-m", "scripts.verify_scheduler_lock_recovery"]
+    ports: ["127.0.0.1:3382:8080"]
+    tmpfs: ["/tmp:uid=10001,gid=10001,mode=1777"]
+    environment:
+      ANGMOO_API_PROFILE: full
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 3

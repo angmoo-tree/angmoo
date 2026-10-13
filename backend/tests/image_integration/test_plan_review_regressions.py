@@ -1,5 +1,6 @@
 """Plan regressions: synthetic DB/files and no real network or credentials."""
 import asyncio
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,6 +18,7 @@ from app.domains.social.models.image_intents import ImageGenerationAttempt, Imag
 from app.domains.media.generation_contracts import ImageSubmissionError
 from app.domains.media.setting_schemas import GenerationSettingsWrite
 from app.domains.identity.models import User
+from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.models import InterpretationSetting, InterpretationAttempt
 from app.domains.chat.schemas import WorldChatMessageCreate
 from app.integrations.comfy_images import ComfyImageClient
@@ -62,7 +64,7 @@ def test_known_failed_comfy_job_retry_can_submit_a_new_attempt(tmp_path):
     job_id = admit(sessions, media)
     original = provider.generate
 
-    async def execution_failed(request, key, reference, *, on_submit, on_receipt, receipt=None):
+    async def execution_failed(request, key, reference, *, on_submit, on_receipt, receipt=None, on_diagnostic=None):
         await on_submit()
         provider.calls += 1
         await on_receipt("failed-comfy-receipt")
@@ -104,7 +106,7 @@ def test_text_workflow_applies_its_supported_negative_prompt(tmp_path):
         if url.endswith("/object_info"):
             return httpx.Response(200, json=object_info())
         if url.endswith("/prompt"):
-            calls.append(kwargs["json"]["prompt"])
+            calls.append(json.loads(kwargs["content"])["prompt"])
             return httpx.Response(200, json={"prompt_id":"text-receipt"})
         if "/history/" in url:
             return httpx.Response(200, json={"text-receipt":{"outputs":{"7":{"images":[{"filename":"result.png","type":"output"}]}}}})
@@ -122,7 +124,7 @@ def test_chat_acceptance_reserves_analysis_budget_before_returning(tmp_path):
     chat = synthetic_chat(tmp_path, FakeInterpreter())
     try:
         asset_id = upload(chat)
-        chat.db.get(InterpretationSetting, chat.owner.id).daily_limit = 1
+        chat.db.get(WorldImagePolicy, "p-responding").vision_limit = 1
         chat.db.commit()
         chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,
             WorldChatMessageCreate(content="", attachment_asset_id=asset_id, idempotency_key="review-admission-0001"))

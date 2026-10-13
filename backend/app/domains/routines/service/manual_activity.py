@@ -33,7 +33,8 @@ def _slot_is_assigned_resident(slot: models.AgentSlot) -> bool:
     return (
         slot.assigned_user_id is not None
         and slot.assigned_character_id is not None
-        and slot.assigned_credential_id is not None
+        and (slot.assigned_credential_id is not None or slot.next_tick_at is not None
+             or bool((slot.admission_metadata or {}).get("_world_credential")))
     )
 
 
@@ -130,8 +131,9 @@ async def run_agent_now(
     available_at = _manual_run_available_at(db, user.id)
     if available_at is not None and available_at > datetime.now(UTC):
         raise RunNowCooldownError(available_at)
-    credential = workflows.get_credential(db, character.id)
-    if credential is None:
+    admitted = workflows.capture_activity_input(db, character_id=character.id) if workflows.capture_activity_input else None
+    credential = None if admitted else workflows.get_credential(db, character.id)
+    if credential is None and not admitted:
         raise workflows.credential_required_error("Agent credential is required before running")
     run_message = (
         "This is a user-clicked run-once test. Read the community, "
@@ -165,7 +167,7 @@ async def run_agent_now(
             db,
             user_id=user.id,
             character_id=character.id,
-            credential_id=credential.id,
+            credential_id=credential.id if credential else None,
             heartbeat_interval_seconds=heartbeat_interval_seconds,
             timeout_seconds=timeout_seconds,
         )
@@ -185,7 +187,7 @@ async def run_agent_now(
             target_slot=temporary_slot,
             now=datetime.now(UTC),
         )
-        if workflows.sync_enabled():
+        if credential is not None and workflows.sync_enabled():
             auth_profile_attempted = True
             workflows.bind_profile(
                 schemas.AgentSlotRead.model_validate(temporary_slot),
@@ -199,7 +201,7 @@ async def run_agent_now(
             agent_id=temporary_slot.agent_id,
             user_id=user.id,
             character_id=character.id,
-            credential_id=credential.id,
+            credential_id=credential.id if credential else None,
             timeout_seconds=timeout_seconds,
             message=run_message,
             require_public_action=True,
@@ -227,7 +229,7 @@ async def run_agent_now(
                 agent_id=temporary_slot.agent_id,
                 user_id=user.id,
                 character_id=character.id,
-                credential_id=credential.id,
+                credential_id=credential.id if credential else None,
             )
         except Exception as exc:
             if cleanup_error is None:

@@ -73,29 +73,39 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryBatchRuntime:
-    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, episode_prior_search=None, idle_work=None) -> None:
+    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, activity_provider_factory=None, episode_prior_search=None, idle_work=None, data_root=None) -> None:
         # Preserve safe success/attempt measurements without enabling verbose
         # SDK logging or changing application-wide log levels.
         logging.getLogger("app.domains.memory.service.batch_selection").setLevel(logging.INFO)
         logging.getLogger("app.domains.memory.service.episode_selection").setLevel(logging.INFO)
         logging.getLogger("app.runtime.memory.episode_batch").setLevel(logging.INFO)
         self.session_factory, self.provider_factory = session_factory, provider_factory
-        if generation_policy not in {"legacy", "episode_v1"}:
+        if generation_policy not in {"legacy", "episode_v1", "activity32", "activity_situation"}:
             raise ValueError("memory_generation_policy_invalid")
         self.generation_policy = generation_policy
+        from app.runtime.memory.situation_runtime import SituationRuntime
+        self.situations = SituationRuntime(session_factory, data_root=data_root) if generation_policy == "activity_situation" else None
         self.episode_provider_factory = episode_provider_factory
+        self.activity_provider_factory = activity_provider_factory
         self.episode_prior_search = episode_prior_search
         self.idle_work = idle_work
         self.preparation = build_preparation_dependencies(generation_policy=generation_policy)
         self.stop_event = asyncio.Event()
         self.lock = asyncio.Lock()
         self.task = None
+        from app.runtime.memory.canonical_work import MemoryCanonicalWork
+        self._canonical = MemoryCanonicalWork() if self.situations is not None else None
+        self._brief_cursor = ""
 
     async def start(self) -> None:
         if self.task is not None and not self.task.done():
             return
-        install_memory_delivery(self.session_factory)
+        if self.situations is None:
+            install_memory_delivery(self.session_factory)
         self.stop_event.clear()
+        if self._canonical is not None and self._canonical.closed:
+            from app.runtime.memory.canonical_work import MemoryCanonicalWork
+            self._canonical = MemoryCanonicalWork()
         self.task = asyncio.create_task(self._loop(), name="memory-batch-worker")
 
     async def _loop(self) -> None:
@@ -110,6 +120,9 @@ class MemoryBatchRuntime:
                 pass
 
     def prepare(self, *, shutdown: bool = False) -> None:
+        if self.situations is not None:
+            self.situations.prepare(shutdown=shutdown)
+            return
         with self.session_factory() as db:
             now = datetime.now(UTC)
             reconcile_sources(db, now=now, dependencies=self.preparation)
@@ -124,7 +137,13 @@ class MemoryBatchRuntime:
     async def tick(self, *, shutdown: bool = False, timeout: float = MEMORY_PROVIDER_TIMEOUT_SECONDS) -> str:
         async with self.lock:
             from app.runtime.memory.foreground_priority import chat_is_active
-            if not shutdown and self.generation_policy == "episode_v1":
+            if self.situations is not None:
+                result = await self._canonical.call(self._situation_tick, shutdown=shutdown)
+                closing = shutdown or self.situations.quit_identity is not None
+                if result == "memory_batch_queue_empty" and self.idle_work is not None and not closing:
+                    return await self.idle_work()
+                return result
+            if not shutdown and self.generation_policy in {"episode_v1", "activity32"}:
                 with self.session_factory() as db:
                     if chat_is_active(db, now=datetime.now(UTC)):
                         from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
@@ -142,14 +161,15 @@ class MemoryBatchRuntime:
                     if self.idle_work is not None and not shutdown:
                         return await self.idle_work()
                     return "memory_batch_queue_empty"
-                if batch.policy_version == "episode-selection.v1":
-                    if self.episode_provider_factory is None:
+                if batch.policy_version in {"episode-selection.v1", "episode-activity-batch32.v1"}:
+                    factory = self.activity_provider_factory if batch.credential_id is not None else self.episode_provider_factory
+                    if factory is None:
                         repository.fail(batch, code="episode_provider_unconfigured", now=datetime.now(UTC))
                         repository.commit()
                         return "episode_provider_unconfigured"
                     from app.runtime.memory.episode_batch import run_episode_batch
                     return await run_episode_batch(repository, batch,
-                        provider_factory=self.episode_provider_factory, timeout=timeout,
+                        provider_factory=factory, timeout=timeout,
                         foreground_active=None if shutdown else chat_is_active, prior_search=self.episode_prior_search)
                 reader = SqlAlchemyMemorySourceEvidenceReader(db)
                 service = MemoryBatchSelectionService(
@@ -165,6 +185,35 @@ class MemoryBatchRuntime:
                 )
             return result
 
+    def _situation_tick(self, *, shutdown):
+        from app.runtime.memory.foreground_priority import chat_is_active
+        closing = shutdown or self.situations.quit_identity is not None
+        if not closing:
+            with self.session_factory() as db:
+                if chat_is_active(db, now=datetime.now(UTC)):
+                    return "memory_foreground_deferred"
+        self.situations.prepare(shutdown=closing)
+        result = self.situations.tick()
+        if not closing:
+            from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
+            with self.session_factory() as db:
+                # One scope per transaction; the cursor includes invalid/dirty
+                # scopes so a poisoned brief cannot starve other characters.
+                self._brief_cursor = rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
+                    settings_type=MemorySituationProcessingSetting, limit=1, after=self._brief_cursor)
+        return result
+
+    async def prepare_async(self, *, shutdown=False):
+        if self._canonical is not None:
+            await self._canonical.call(self.prepare, shutdown=shutdown)
+        else:
+            self.prepare(shutdown=shutdown)
+
+    async def fence_async(self):
+        if self.situations is not None:
+            return await self._canonical.call(self.situations.fence)
+        return False
+
     async def pause(self) -> None:
         self.stop_event.set()
         if self.task is not None:
@@ -174,7 +223,11 @@ class MemoryBatchRuntime:
             except asyncio.CancelledError:
                 pass
             self.task = None
+        if self._canonical is not None:
+            await self._canonical.drain()
 
     async def stop(self) -> None:
         await self.pause()
+        if self._canonical is not None:
+            self._canonical.close()
         uninstall_memory_delivery(self.session_factory)

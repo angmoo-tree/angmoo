@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "owner": "world_characters",
+  "tables": {
+    "activity_engine_policies": {
+      "world_column": "world_id"
+    },
+    "activity_graph_runs": {
+      "world_column": "world_id"
+    },
+    "character_active_worlds": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id",
+            "character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id",
+            "character_id"
+          ]
+        }
+      ]
+    },
+    "character_world_bindings": {
+      "world_column": "world_id"
+    },
+    "world_activity_candidates": {
+      "joins": [
+        {
+          "columns": [
+            "repertoire_id"
+          ],
+          "target_table": "world_activity_repertoires",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_activity_repertoires": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_character_activity_states": {
+      "world_column": "world_id"
+    },
+    "world_character_configurations": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_character_setup_attempts": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "world_character_state_receipts": {
+      "world_column": "world_id"
+    },
+    "world_characters": {
+      "world_column": "world_id"
+    },
+    "world_community_profiles": {
+      "joins": [
+        {
+          "columns": [
+            "world_character_id"
+          ],
+          "target_table": "world_characters",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  }
+}

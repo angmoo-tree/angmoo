@@ -79,7 +79,7 @@ def claim_due_resident_slots(
         models.AgentSlot.status.in_(DUE_SLOT_STATUSES),
         models.AgentSlot.assigned_user_id.is_not(None),
         models.AgentSlot.assigned_character_id.is_not(None),
-        models.AgentSlot.assigned_credential_id.is_not(None),
+
         models.AgentSlot.next_tick_at <= now,
         models.AgentSlot.timezone_revision == environment_revision,
     ]

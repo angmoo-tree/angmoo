@@ -4,7 +4,7 @@ These are bounded entry lookups/writes. They never export ORM classes, commit,
 refresh unrelated rows, or replace the caller's WC error/status decisions.
 """
 from datetime import UTC, datetime
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.worlds import models
@@ -12,7 +12,21 @@ from app.domains.worlds.service.definition import refresh_world_contract
 
 
 def get_character_entry_world(db: Session, world_id: str):
+    from app.domains.worlds.service.deletion import is_deleting
+    if is_deleting(db, world_id):
+        return None
     return db.get(models.World, world_id)
+
+
+def lock_character_entry_world_write(db: Session, world_id: str) -> bool:
+    """Serialize an already-authorized profile write with World deletion.
+
+    Keep the caller's Session/error policy. No commit, data projection, version
+    increment or authority is added by acquiring this existing World row lock.
+    """
+    result = db.execute(update(models.World).where(models.World.id == world_id)
+        .values(row_version=models.World.row_version))
+    return result.rowcount == 1
 
 
 def get_character_entry_membership(db: Session, membership_id: str):

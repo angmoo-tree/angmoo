@@ -10,6 +10,22 @@ from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReader
 from app.domains.memory.contracts.inspector import MemoryItemDetail
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
+from app.domains.chat.contracts.relationship_evidence import RelationshipCurrentRead
+
+
+class RetainedRelationshipManifest(Protocol):
+    """Only frozen delivery fields consumed by Chat's historical validator.
+
+    Runtime retains Memory's concrete admission/authorization implementation.
+    """
+    @property
+    def version(self) -> int: ...
+    @property
+    def call_identity(self) -> str: ...
+    @property
+    def payload_digest(self) -> str: ...
+    @property
+    def sources(self) -> tuple[object, ...]: ...
 
 
 class RelationshipEvidenceState(Protocol):
@@ -20,6 +36,8 @@ class RelationshipEvidenceState(Protocol):
 
 
 class ChatEvidenceReads(Protocol):
+    def relationships_current(self, db: Session, scope: MemoryScope, locators: tuple[dict, ...]) -> dict[str, RelationshipCurrentRead]: ...
+    def legacy_relationship_manifest(self, db: Session, scope: MemoryScope, request) -> RetainedRelationshipManifest | None: ...
     def memory_episode_receipt(self, db: Session, scope: MemoryScope, *, item_id: str, text: str) -> tuple[str, dict] | None: ...
     def social_relationship_current(self, db: Session, scope: MemoryScope, locator: dict) -> bool: ...
     def source_reader(self, db: Session) -> MemorySourceEvidenceReaderPort: ...

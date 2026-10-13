@@ -18,7 +18,7 @@ from routines.test_activity_persistence import _file_engine
 def test_character_lock_uses_caller_session_after_slot_pool_write(tmp_path, commit):
     engine = _file_engine(tmp_path)
     with Session(engine, expire_on_commit=False) as db:
-        fixture = _seed(db)
+        fixture = _seed(db, with_owned_sns=True)
         character_id = fixture.character.id
         original_name = fixture.character.name
         fixture.character.name = "pending during slot assignment"

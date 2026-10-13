@@ -235,6 +235,16 @@ def test_ladybug_outage_keeps_sqlite_outbox_pending() -> None:
     assert result.graph_degraded is True
 
 
+@pytest.mark.parametrize("world_id", [None, ""], ids=["missing", "empty"])
+def test_current_snapshot_requires_world_scope_without_writing_graph(tmp_path, world_id):
+    command = replace(_relationship(), event=None, world_id=world_id)
+    with LadybugRelationshipProjection(database_root=_root(tmp_path)) as projection:
+        with pytest.raises(LadybugProjectionError) as exc_info:
+            projection.apply(command)
+        assert exc_info.value.error_class == "world_missing"
+        assert all(not values for values in projection.world_digest("world-arcana").values())
+
+
 def test_current_snapshot_without_social_event_preserves_text_and_rejects_same_version_conflict(tmp_path):
     command = replace(_relationship(version=5), event=None, world_id="world-arcana", last_event_id=None,
         last_event_at=None, relationship_label="함께 성장하는 동료", perception="어려운 때 도와주는 상대다.", view_version=2)

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from PIL import Image
 from sqlalchemy import select
+from app.core.sqlite_concurrency import SqliteAsyncTaskQueue
 
 from app.domains.characters.models import Character, CharacterCardSource, AgentImageGenerationSetting
 from app.domains.chat.models import MessageThread
@@ -18,7 +19,7 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.models_media import MediaCredential
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service import media_credentials
-from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, select_comfy_workflow, MODEL_CATALOG
+from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, MODEL_CATALOG
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.service.assets import AssetService, prepare_asset_image
 from app.domains.media.models import MediaAsset
@@ -26,7 +27,9 @@ from app.domains.media.service.interpretation import InterpretationService
 from app.domains.routines.service.tick_schedule import APP_TIMEZONE
 from app.domains.social.service.image_intent_generation import GenerationWorker, admit, source_revision
 from app.domains.worlds.models import World
+from app.domains.world_characters.models import WorldCharacter
 from app.integrations.comfy_images import ComfyImageClient
+from app.domains.media.service.comfy_workflows import required_roles, freeze_comfy_request, restore_generation_request, select_comfy_workflow
 from app.integrations.image_api import ImageApiClient
 from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options
 from app.integrations.llm.image_interpretation import GeminiImageInterpreter
@@ -39,6 +42,17 @@ def quota_day(at):
 
 
 def authorize_scope(db, owner_id, kind, scope_id):
+    from app.domains.worlds.service.deletion import is_deleting
+    if kind in {"world", "thread", "world_character"}:
+        world_id = scope_id if kind == "world" else None
+        if kind == "thread":
+            bound = db.get(MessageThread, scope_id)
+            world_id = bound.world_id if bound else None
+        elif kind == "world_character":
+            bound = db.get(WorldCharacter, scope_id)
+            world_id = bound.world_id if bound else None
+        if world_id and is_deleting(db, world_id):
+            raise InvalidProfileMediaError("world_deleting")
     if kind == "character":
         character = db.get(Character, scope_id)
         valid = character is not None and character.owner_id == owner_id and character.deleted_at is None
@@ -50,6 +64,11 @@ def authorize_scope(db, owner_id, kind, scope_id):
         valid = thread is not None and thread.requester_id == owner_id and thread.deleted_at is None and thread.world_scope_status == "resolved"
         if valid:
             authorize_scope(db, owner_id, "world", thread.world_id)
+    elif kind == "world_character":
+        actor = db.get(WorldCharacter, scope_id)
+        valid = actor is not None and actor.status == "active"
+        if valid:
+            authorize_scope(db, owner_id, "world", actor.world_id)
     else:
         valid = False
     if not valid:
@@ -74,14 +93,22 @@ class MediaRuntime:
         root = settings.media_root_path / "private-image-assets"
         self.assets = assets or AssetService(root, authorize_scope)
         self.clients = clients or {"novelai": NovelImageClient(), "nanogpt": ImageApiClient("nanogpt"), "openrouter": ImageApiClient("openrouter")}
-        self.interpretation = InterpretationService(sessions, self.assets, interpreter or GeminiImageInterpreter(), quota_day=quota_day)
-        self.worker = GenerationWorker(sessions, self.assets, self, spool=root / "received-results")
+        from app.runtime.media.world_vision import WorldVisionPolicies
+        self.interpretation = InterpretationService(sessions, self.assets, interpreter or GeminiImageInterpreter(), quota_day=quota_day, policies=WorldVisionPolicies())
+        self._canonical_work = SqliteAsyncTaskQueue(capacity=4, closed_code="media_canonical_worker_closed")
+        self.worker = GenerationWorker(sessions, self.assets, self, spool=root / "received-results",
+            local_work=self._canonical_work.call)
         self._maintenance_task = None
 
     def read_generation(self, db, user, character_id):
         authorize_scope(db, user.id, "character", character_id)
         from app.domains.characters.service.generation_settings import read_settings
         return self._generation_view(db, user, character_id, read_settings(db, user, character_id, limits=self.limits))
+
+    def read_generation_provider_key(self, db, user, character_id, provider):
+        authorize_scope(db, user.id, "character", character_id)
+        from app.domains.characters.service.generation_settings import read_provider_key
+        return read_provider_key(db, user, character_id, provider)
 
     def write_generation(self, db, user, character_id, data, *, validated_connection=None):
         authorize_scope(db, user.id, "character", character_id)
@@ -126,7 +153,7 @@ class MediaRuntime:
         if saved["provider"] == "comfyui":
             try:
                 workflow = select_comfy_workflow(ComfyOptions.model_validate(options), has_reference=has_reference)
-                path = "reference" if has_reference and "reference" in workflow.bindings else "text"
+                path = "reference" if has_reference and "reference" in required_roles(workflow) else "text"
             except (ImagePreparationError, ValueError):
                 path = "unavailable"
                 reason = "comfy_reference_or_text_path_required"
@@ -183,19 +210,27 @@ class MediaRuntime:
         if self._maintenance_task is not None:
             return
         binding.register(self)
+        await self._canonical_work.call(self._startup_maintenance)
+        await self.worker.start()
+        self._maintenance_task = asyncio.create_task(self._maintain())
+
+    def _startup_maintenance(self):
+        self.cleanup_deleted_assets()
         with self.sessions() as db:
             self.assets.expire_drafts(db, datetime.now(timezone.utc))
         self.interpretation.recover_elapsed()
-        await self.worker.start()
-        self._maintenance_task = asyncio.create_task(self._maintain())
+
+    def _maintenance(self):
+        with self.sessions() as db:
+            self.assets.expire_drafts(db, datetime.now(timezone.utc))
+        self.interpretation.recover_elapsed()
+        self.cleanup_deleted_assets()
 
     async def _maintain(self):
         while True:
             await asyncio.sleep(60)
             try:
-                with self.sessions() as db:
-                    self.assets.expire_drafts(db, datetime.now(timezone.utc))
-                self.interpretation.recover_elapsed()
+                await self._canonical_work.call(self._maintenance)
             except Exception as exc:
                 logging.getLogger(__name__).warning("image_maintenance_failed type=%s", type(exc).__name__)
 
@@ -208,8 +243,14 @@ class MediaRuntime:
             except asyncio.CancelledError:
                 pass
         await self.worker.stop()
+        await self._canonical_work.drain()
         await self.interpretation.close()
+        self._canonical_work.close()
         binding.unregister(self)
+
+    def cleanup_deleted_assets(self):
+        from app.runtime.media.erasure import cleanup
+        return cleanup(self)
 
     def _reference(self, db, owner_id, character, setting, preferred, *, materialize=True, prefer_profile=False):
         # Forced OFF does not even inspect card/profile files.
@@ -249,21 +290,25 @@ class MediaRuntime:
                 source="profile", materialize=materialize)
         return EffectiveReference(True, reason="source_missing")
 
-    def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize):
+    def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize, actor_id=None):
         prepared = prepare_asset_image(mime, content, max_bytes=10 * 1024 * 1024)
         pixels = prepared.content
         digest = hashlib.sha256(pixels).hexdigest()
-        row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == "character",
-            MediaAsset.scope_id == character_id, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
+        kind, scope = ("world_character", actor_id) if actor_id else ("character", character_id)
+        row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == kind,
+            MediaAsset.scope_id == scope, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
         if row:
             self.assets.read(db, owner_id=owner_id, asset_id=row.id, digest=digest)
         elif materialize:
-            row = self.assets.upload(db, owner_id=owner_id, scope_kind="character", scope_id=character_id,
+            row = self.assets.upload(db, owner_id=owner_id, scope_kind=kind, scope_id=scope,
                 content_type=prepared.info.content_type, content=pixels, draft=False)
         return EffectiveReference(True, source, row.id if row else None, digest, revision=row.revision if row else None)
 
     def prepare_intent(self, db, owner_id, character_id, scene, scene_error, *, configuration=None):
         from app.domains.media.generation_contracts import compose_positive
+        if configuration is not None:
+            from app.runtime.media.world_generation import prepare_intent
+            return prepare_intent(self, db, owner_id, character_id, scene, scene_error, configuration)
         row = db.get(AgentImageGenerationSetting, character_id)
         if row is None or not row.generation_auto_enabled:
             return None
@@ -324,8 +369,8 @@ class MediaRuntime:
                 if partner and partner.revision != profile.get("partner_credential_revision"):
                     raise ImagePreparationError("comfy_partner_key_changed")
                 workflow = select_comfy_workflow(comfy, has_reference=bool(reference.asset_id))
-                negative = row.negative_prompt if "negative" in workflow.bindings else None
-                options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
+                negative = row.negative_prompt if "negative" in required_roles(workflow) else None
+                options = comfy.model_dump(exclude_none=True)
             else:
                 negative = row.negative_prompt if provider == "novelai" else None
             if provider == "novelai":
@@ -339,7 +384,7 @@ class MediaRuntime:
                 world_id=configuration.world_id if configuration else None,
                 world_character_id=configuration.world_character_id if configuration else None,
                 world_configuration_revision=configuration.revision if configuration else None)
-            return request, credential, row.generation_revision, row.generation_daily_limit, None
+            return freeze_comfy_request(request), credential, row.generation_revision, row.generation_daily_limit, None
         except Exception as exc:
             code = str(exc) if isinstance(exc, ImagePreparationError) else "reference_preparation_failed"
             return None, credential, row.generation_revision, row.generation_daily_limit, code
@@ -354,7 +399,7 @@ class MediaRuntime:
         return admit(db, post=post, owner_id=owner_id, character_id=character_id,
             scene=draft._image_prompt, scene_error=draft._image_error,
             prepare=partial(self.prepare_intent, configuration=configuration),
-            quota_day=accounting_period(db, owner_id, "day").key)
+            quota_day=accounting_period(db, owner_id, "day").key, reserve=self.reserve_attempt)
 
     def authorize_job(self, db, job):
         from app.domains.social.models.posts import Post
@@ -388,11 +433,19 @@ class MediaRuntime:
         authorize_scope(db, job.user_id, "world", post.world_id)
         if post.author_character_id != job.character_id:
             raise ImagePreparationError("generation_post_author_changed")
+        value = json.loads(intent.request_json)
+        request = restore_generation_request(value)
+        if request.credential_binding:
+            from app.runtime.media.world_generation import prepare_execution
+            key, partner, reference = prepare_execution(self, db, job, intent, request)
+            return PreparedExecution(request, key, reference, job.provider_receipt, partner)
+        if request.world_character_id:
+            raise ImagePreparationError("generation_binding_unproven")
         row = db.get(AgentImageGenerationSetting, job.character_id)
         if row is None or not row.generation_auto_enabled or row.generation_revision != intent.settings_revision:
             raise ImagePreparationError("generation_settings_changed")
         value = json.loads(intent.request_json)
-        request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        request = restore_generation_request(value)
         if request.world_configuration_revision is not None and (
                 request.world_id != post.world_id or request.world_character_id != post.author_world_character_id
                 or type(request.world_configuration_revision) is not int or request.world_configuration_revision < 1):
@@ -422,12 +475,24 @@ class MediaRuntime:
                 revision=request.partner_credential_revision).reveal()
         return PreparedExecution(request, material.reveal() if material else None, reference, job.provider_receipt, partner_key)
 
-    async def submit(self, execution, *, on_receipt, on_submit=None):
+    def reserve_attempt(self, db, **values):
+        from app.runtime.media.world_generation import reserve_attempt
+        return reserve_attempt(self, db, **values)
+
+    def transition_attempt(self, db, attempt_id, status):
+        from sqlalchemy import update
+        from app.domains.media.models_world_policy import WorldImageAttempt
+        state = {"reserved": "reserved", "submitted": "submitted", "outcome_unknown": "unknown",
+            "result_received": "completed", "succeeded": "completed", "failed": "failed", "released": "released"}[status]
+        db.execute(update(WorldImageAttempt).where(WorldImageAttempt.purpose == "image",
+            WorldImageAttempt.request_key == attempt_id).values(state=state))
+
+    async def submit(self, execution, *, on_receipt, on_submit=None, on_diagnostic=None):
         request = execution.request
         if request.provider == "comfyui":
             client = self.clients.get("comfyui") or ComfyImageClient(request.options["base_url"])
             return await client.generate(request, execution.key, execution.reference, on_receipt=on_receipt,
-                receipt=execution.receipt, on_submit=on_submit,
+                receipt=execution.receipt, on_submit=on_submit, on_diagnostic=on_diagnostic,
                 **({"partner_key": execution.partner_key} if request.options.get("partner_auth") else {}))
         client = self.clients[request.provider]
         if request.provider in {"nanogpt", "openrouter"}:
@@ -442,7 +507,7 @@ class MediaRuntime:
         credential = media_credentials.find_credential(db, owner_id=user.id, character_id=character_id,
             provider=data.provider, purpose=CredentialPurpose.USER_IMAGE)
         key = data.api_key.get_secret_value() if data.api_key else None
-        if key is None and credential and not data.clear_api_key:
+        if key is None and credential and data.provider != "comfyui" and not data.clear_api_key:
             key = media_credentials.resolve_credential(credential, owner_id=user.id, character_id=character_id,
                 provider=data.provider, purpose=CredentialPurpose.USER_IMAGE).reveal()
         if data.provider == "comfyui" and data.options.get("partner_auth"):
@@ -454,14 +519,26 @@ class MediaRuntime:
                     character_id=character_id, provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE).reveal()
             if not partner_key:
                 raise ImagePreparationError("comfy_partner_key_required")
+        if data.provider == "comfyui":
+            from types import SimpleNamespace
+            options = ComfyOptions.model_validate(data.options)
+            row = db.get(AgentImageGenerationSetting, character_id)
+            profiles = json.loads(row.generation_profiles_json) if row else {}
+            from app.domains.characters.service.generation_settings import profile_key
+            previous = profiles.get(profile_key(data.provider, data.model, data.options), {})
+            initialized = bool(previous and previous.get("reference_initialized", True))
+            preferred = data.reference_enabled if data.reference_enabled is not None else (
+                bool(previous.get("reference_enabled")) if initialized
+                else "reference" in required_roles(options.workflow))
+            reference = self._reference(db, user.id, db.get(Character, character_id),
+                SimpleNamespace(reference_asset_id=data.reference_asset_id),
+                preferred, materialize=False)
+            has_reference = bool(reference.asset_id) or reference.source != "none"
         # Read-only connection checks end the read transaction before awaiting the network.
         db.rollback()
         if data.provider == "comfyui":
-            options = ComfyOptions.model_validate(data.options)
-            info = await ComfyImageClient(options.base_url).validate(options, key=key)
-            return {"ready": True, "reference_supported": bool(options.workflow and "reference" in options.workflow.bindings),
-                "object_info": {node["class_type"]: info[node["class_type"]] for workflow in (options.workflow,options.text_workflow) if workflow for node in workflow.prompt.values()},
-                "checked_at": datetime.now(timezone.utc).isoformat()}
+            checked = await ComfyImageClient(options.base_url).validate(options, key=key, has_reference=has_reference)
+            return {**checked, "checked_at": datetime.now(timezone.utc).isoformat()}
         if not key:
             raise ImagePreparationError("generation_key_required")
         if data.provider == "novelai":
@@ -486,7 +563,14 @@ class MediaRuntime:
             "checked_at": datetime.now(timezone.utc).isoformat()}
 
 
-def image_output_enabled(db, character_id):
+def image_output_enabled(db, character_id, *, input_snapshot=None):
+    configuration = (input_snapshot or {}).get("_world_configuration")
+    if configuration:
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        from app.domains.media.models_world_policy import WorldImagePolicy
+        saved = configuration_for_input(input_snapshot, character_id=character_id)
+        row = db.get(WorldImagePolicy, saved.world_character_id)
+        return bool(row and row.generation_enabled)
     row = db.get(AgentImageGenerationSetting, character_id)
     return bool(row and row.generation_auto_enabled)
 

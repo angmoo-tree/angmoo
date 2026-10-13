@@ -7,4 +7,9 @@ from app.runtime.memory import source_queries
 
 
 def source_evidence_reader(session):
-    return SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries)
+    from app.runtime.memory.situation_sources import SituationSources
+    reader = SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries,
+        situation_validator=lambda manifest, source, **values:
+            situations.validate(manifest, source, **values))
+    situations = SituationSources(session, reader=reader)
+    return reader

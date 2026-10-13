@@ -316,7 +316,8 @@ class EvidenceBundleAssembler:
                 kind=EvidenceKind.EPISODE_MEMORY if record.metadata.get("episode_packet") == "v1" else EvidenceKind.CANONICAL_SOURCE,
                 text=record.text if record.metadata.get("episode_packet") == "v1" else EvidenceBundleAssembler._bounded_text(record.text),
                 occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
-                locator=_record_locator(record)) for record in result.recall.records if record.text.strip())
+                locator=_record_locator(record), author_identities=_record_authors(record))
+                for record in result.recall.records if record.text.strip())
             if collector() is not None:
                 for record, item in zip((r for r in result.recall.records if r.text.strip()), items):
                     lineage("evidence", "linked", identities={**record_identity(record), **evidence_identities(item)})
@@ -343,6 +344,7 @@ class EvidenceBundleAssembler:
                         occurred_at=EvidenceBundleAssembler._aware(record.occurred_at),
                         axes=(RetrievalAxis.CANONICAL,),
                         locator=_record_locator(record),
+                        author_identities=_record_authors(record),
                     )
                 )
         return tuple(items)
@@ -385,6 +387,10 @@ class EvidenceBundleAssembler:
                         ),
                         kind=EvidenceKind.GRAPH_RELATIONSHIP,
                         text=text,
+                        relationship_projection={"familiarity": relationship.familiarity,
+                            "affinity": relationship.affinity, "trust": relationship.trust,
+                            "tension": relationship.tension, "interactions": relationship.interaction_count,
+                            "relationship_label": None, "perception": None},
                         occurred_at=EvidenceBundleAssembler._aware(
                             relationship.updated_at or relationship.last_event_at
                         ),
@@ -393,6 +399,8 @@ class EvidenceBundleAssembler:
                             kind=EvidenceLocatorKind.GRAPH_RELATIONSHIP,
                             source_id=relationship.relationship_state_id,
                             source_revision=str(relationship.relationship_version),
+                            relationship_facts_digest=relationship.delivery_facts_digest(),
+                            relationship_view_version=relationship.view_version,
                             actor_world_character_id=(
                                 relationship.actor_world_character_id
                             ),
@@ -491,7 +499,12 @@ class EvidenceBundleAssembler:
     ) -> tuple[EvidenceItem, ...]:
         deduplicated: dict[tuple[str, str], EvidenceItem] = {}
         for item in candidates:
-            key = (item.kind.value, item.opaque_reference if preserve_rank_order else item.normalized_text.casefold())
+            identity = item.opaque_reference if preserve_rank_order else item.normalized_text.casefold()
+            if item.kind is EvidenceKind.GRAPH_RELATIONSHIP and item.locator is not None:
+                # Equal names and metrics do not make two different people one
+                # relationship. The canonical identity remains private.
+                identity = f"{item.locator.source_id}:{item.locator.source_revision}:{identity}"
+            key = (item.kind.value, identity)
             existing = deduplicated.get(key)
             if collector() is not None:
                 ids = evidence_identities(item)
@@ -519,6 +532,8 @@ class EvidenceBundleAssembler:
                 occurred_at=occurred_at,
                 axes=axes,
                 locator=existing.locator or item.locator,
+                author_identities=tuple(dict.fromkeys((*existing.author_identities, *item.author_identities))),
+                relationship_projection=existing.relationship_projection,
             )
         ordered = list(deduplicated.values()) if preserve_rank_order else sorted(
             deduplicated.values(),
@@ -612,6 +627,13 @@ class EvidenceBundleAssembler:
         source_id = entry.source_id
         return EvidenceItem(
             opaque_reference=entry.opaque_reference,
+            author_identities=tuple((role, identifier) for role, identifier in
+                (("actor", entry.actor_id), ("counterpart", entry.counterpart_id)) if identifier)
+                + tuple((field, identifier) for field, identifier in entry.source_authors
+                    if field in {"title", "body", "parent_title", "parent_body", "root_title", "root_body"} and getattr(entry, field)
+                    and {"title": "제목: ", "body": "내용: ", "parent_title": "직접 연결된 이전 글 제목: ",
+                         "parent_body": "직접 연결된 이전 글: ", "root_title": "대화 시작 글 제목: ",
+                         "root_body": "대화 시작 글 일부: "}[field] + getattr(entry, field) in text),
             kind=EvidenceKind.TODAY_SNS_ACTIVITY,
             text=text,
             occurred_at=EvidenceBundleAssembler._aware(entry.occurred_at),
@@ -672,3 +694,17 @@ def _record_locator(record) -> EvidenceLocator | None:
             source_revision=record.metadata.get("item_version"),
         )
     return None
+
+
+def _record_authors(record):
+    import json
+    raw = record.metadata.get("source_authors")
+    if raw is not None:
+        values = json.loads(raw)
+        if not isinstance(values, list) or len(values) > 100 or any(
+                not isinstance(pair, list) or len(pair) != 2 or
+                any(not isinstance(v, str) or not v for v in pair) for pair in values):
+            raise ValueError("chat_source_author_invalid")
+        return tuple(tuple(pair) for pair in values)
+    identifier = record.metadata.get("source_author")
+    return (("source", identifier),) if identifier else ()

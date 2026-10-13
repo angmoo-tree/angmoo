@@ -68,7 +68,7 @@ export function decodeSettings(payload: unknown, worldId: string, worldCharacter
   }
   const editableKeys = ["personality", "speech_style", "worldview", "character_background", "topic_preferences", "safety_rules",
     "active_hours_start", "active_hours_end", "activity_interval_minutes", "max_posts_per_day", "max_comments_per_day",
-    "generation_model", "image_model", "image_style", "appearance_prompt"];
+    "generation_model", "image_model", "image_style", "appearance_prompt", "allow_post", "allow_reply", "allow_like"];
   const editableSettings = Object.fromEntries(editableKeys.filter(key => key in settings).map(key => [key, settings[key]]));
   return { ...payload, settings: editableSettings, capabilities: decodeWorldCharacterCapabilities(payload.capabilities) } as WorldCharacterSettingsRead;
 }

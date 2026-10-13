@@ -157,7 +157,7 @@
   font-size: 1.18rem;
 }
 
-.worldCard p {
+.worldCardHeader > div > p {
   margin: 8px 0 0;
   color: var(--color-text-secondary);
   font-size: 0.82rem;

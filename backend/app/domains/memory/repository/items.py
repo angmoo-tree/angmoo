@@ -353,6 +353,10 @@ class SqlAlchemyMemoryRepository:
         self._session.refresh(new_item)
         return self._to_candidate(candidate), self._to_item(new_item)
 
+    def situation_correction_evidence(self, *, scope, item_id, reader, now):
+        from app.domains.memory.repository.situation_reads import correction_evidence
+        return correction_evidence(self._session, reader, scope, self._require_item(scope, item_id), now)
+
     def correct_item_summary(
         self,
         *,
@@ -386,7 +390,8 @@ class SqlAlchemyMemoryRepository:
             ):
                 raise MemoryConflictError("memory_correction_replay_conflict")
             return self._to_item(old), self._to_item(existing), False
-        if not evidences:
+        from app.domains.memory.repository.situation_reads import situation_origin, copy_correction_origin
+        if not evidences and situation_origin(self._session, self._require_item(setting.scope, old_item_id)) is None:
             raise MemoryConflictError("memory_correction_evidence_missing")
 
         old = self._require_item(setting.scope, old_item_id, for_update=True)
@@ -419,6 +424,7 @@ class SqlAlchemyMemoryRepository:
             )
             self._session.add(replacement)
             self._session.flush()
+            copy_correction_origin(self._session, old, replacement)
             from app.domains.memory.models.embedding import MemoryVectorEligibility
             if self._session.get(MemoryVectorEligibility, old.id) is not None:
                 from app.domains.memory.repository.vector_eligibility import register_content
@@ -935,6 +941,9 @@ class SqlAlchemyMemoryRepository:
         row.version += 1
 
     def _invalidate_hot_briefs(self, setting_id: str, *, now: datetime) -> None:
+        from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
+        self._session.execute(update(MemorySituationProcessingSetting).where(
+            MemorySituationProcessingSetting.scope_setting_id == setting_id).values(brief_dirty=True))
         self._session.execute(
             update(MemoryHotBrief)
             .where(

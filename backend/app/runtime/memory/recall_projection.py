@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from contextlib import contextmanager
 import logging
 import json
-from threading import Event, RLock, Thread
+from threading import Event, Lock, RLock, Thread
+from time import monotonic
 from app.core.atomic_json import write_json
 
 from sqlalchemy import event, select
@@ -25,6 +27,8 @@ logger = logging.getLogger(__name__)
 _PENDING_ITEM_IDS = "angmoo_memory_recall_pending_item_ids"
 _PENDING_SETTING_IDS = "angmoo_memory_recall_pending_setting_ids"
 _PENDING_FULL_SYNC = "angmoo_memory_recall_pending_full_sync"
+_PAGE_SIZE = 32
+_QUEUE_LIMIT = 100
 
 
 class MemoryRecallProjectionState(StrEnum):
@@ -50,11 +54,38 @@ class EmbeddedMemoryRecallProjection:
         self._source = SqlAlchemyMemoryRecallDocumentSource(session_factory, episode_only=episode_only)
         self._listening = False
         self._rebuild_lock = RLock()
+        # Commit listeners never take the worker's I/O lock. Only bounded IDs
+        # cross threads; Sessions and source validation stay in the worker.
+        self._pending_lock = Lock()
+        self._pending_items = set()
+        self._pending_settings = set()
+        self._full_sync = False
+        self._wake = Event()
+        self._working = Event()
         self._stopping = Event()
         self._thread = None
         self._writer = None
+        self._retry_after = 0.0
+        self._retry_delay = 1.0
         self._cursor_path = index.database_path.with_name("rebuild-progress.json")
         self.state = MemoryRecallProjectionState.STOPPED
+
+    @property
+    def is_caught_up(self):
+        """Shutdown must include queued commits, not just a promoted generation."""
+        with self._pending_lock:
+            return (self.state is MemoryRecallProjectionState.READY
+                and not self._working.is_set() and not self._pending_items
+                and not self._pending_settings and not self._full_sync)
+
+    @contextmanager
+    def _work(self):
+        with self._rebuild_lock:
+            self._working.set()
+            try:
+                yield
+            finally:
+                self._working.clear()
 
     def start(self, *, background: bool = True) -> None:
         self._stopping.clear()
@@ -73,9 +104,7 @@ class EmbeddedMemoryRecallProjection:
                 self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
             write_json(self._cursor_path, self._progress)
             self._listen()
-            for _ in range(3):
-                self.advance_rebuild(max_pages=3)
-            if background and self.state is MemoryRecallProjectionState.REBUILDING:
+            if background:
                 self._thread = Thread(target=self._rebuild_loop, name="memory-fts-rebuild", daemon=True)
                 self._thread.start()
         except Exception:
@@ -83,33 +112,106 @@ class EmbeddedMemoryRecallProjection:
             self.state = MemoryRecallProjectionState.DEGRADED
 
     def _rebuild_loop(self):
-        while not self._stopping.is_set() and self.state is MemoryRecallProjectionState.REBUILDING:
+        while not self._stopping.is_set():
+            self._wake.clear()
             self.advance_rebuild(max_pages=1)
-            self._stopping.wait(0.01)
+            if self.state is MemoryRecallProjectionState.REBUILDING:
+                self._stopping.wait(0.01)
+            elif self.state is MemoryRecallProjectionState.DEGRADED:
+                # A transient checkout/index failure must not wait forever for
+                # another commit. Persistent failures retry at most every 30s.
+                self._stopping.wait(max(0.01, self._retry_after - monotonic()))
+            else:
+                self._wake.wait()
 
     def request_rebuild(self):
         """Large committed changes schedule bounded work, not a request-time scan."""
+        self._enqueue(full_sync=True)
+
+    def erase_memory_items(self, identifiers):
+        """Serialize erasure with source reads, delayed writes and promotion."""
+        with self._work():
+            self.index.erase_memory_items(identifiers)
+            if self._writer is not None:
+                self._writer.erase_memory_items(identifiers)
+            # Retained disposable images are part of managed projection cleanup.
+            for path in (self.index.rollback_path, self.index.staging_path):
+                if not path.exists():
+                    continue
+                image = object.__new__(type(self.index))
+                image.settings, image.database_path = self.index.settings, path
+                image.staging_path, image.rollback_path = path.with_suffix(".unused-stage"), path.with_suffix(".unused-rollback")
+                image._lock, image._opened = RLock(), False
+                image.open()
+                try:
+                    image.erase_memory_items(identifiers)
+                finally:
+                    image.close()
+
+    def _begin_rebuild(self):
         with self._rebuild_lock:
             if self._writer is None:
                 self._writer = self.index.rebuild_writer()
             self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
             write_json(self._cursor_path, self._progress)
             self.state = MemoryRecallProjectionState.REBUILDING
-            if self._thread is None or not self._thread.is_alive():
-                self._thread = Thread(target=self._rebuild_loop, name="memory-fts-rebuild", daemon=True)
-                self._thread.start()
+
+    def _enqueue(self, item_ids=(), setting_ids=(), *, full_sync=False):
+        with self._pending_lock:
+            if self._stopping.is_set():
+                return  # Startup reconciliation recovers commits at shutdown.
+            self._pending_items.update(item_ids)
+            self._pending_settings.update(setting_ids)
+            self._full_sync = self._full_sync or full_sync or (
+                len(self._pending_items) + len(self._pending_settings) > _QUEUE_LIMIT)
+            if self._full_sync:
+                self._pending_items.clear()
+                self._pending_settings.clear()
+        self._wake.set()
+
+    def _apply_pending(self):
+        with self._pending_lock:
+            item_ids, setting_ids, full_sync = self._pending_items, self._pending_settings, self._full_sync
+            self._pending_items, self._pending_settings, self._full_sync = set(), set(), False
+        if not item_ids and not setting_ids and not full_sync:
+            return
+        try:
+            for identifier in setting_ids:
+                item_ids.update(self._source.item_ids_for_scope_setting(identifier, limit=_QUEUE_LIMIT + 1))
+                if len(item_ids) > _QUEUE_LIMIT:
+                    full_sync = True
+                    break
+            if full_sync:
+                self._begin_rebuild()
+                return
+            documents = self._source.documents_for_item_ids(item_ids)
+            target = self._writer if self._writer is not None else self.index
+            target.replace_memory_items({identifier: documents.get(identifier, ()) for identifier in sorted(item_ids)})
+        except Exception:
+            # Retain recovery intent after derived-index failure. A subsequent
+            # wakeup retries a full rebuild; restart also reconciles canonical SQL.
+            with self._pending_lock:
+                self._full_sync = True
+            raise
 
     def advance_rebuild(self, *, max_pages=1):
         if not 1 <= max_pages <= 3:
             raise ValueError("memory_recall_rebuild_page_budget_invalid")
         try:
-            with self._rebuild_lock:
+            with self._work():
+                if self.state is MemoryRecallProjectionState.DEGRADED:
+                    if monotonic() < self._retry_after:
+                        return
+                    self.state = MemoryRecallProjectionState.REBUILDING
                 for _ in range(max_pages):
+                    if self._stopping.is_set():
+                        return
+                    self._apply_pending()
                     if self._stopping.is_set() or self.state is not MemoryRecallProjectionState.REBUILDING:
                         return
                     phase, cursor = self._progress["phase"], self._progress["cursor"]
-                    ids = (self._writer.memory_item_id_page(after=cursor, limit=100) if phase == "orphans"
-                        else self._source.item_id_page(after=cursor, limit=100))
+                    ids = (self._writer.memory_item_id_page(after=cursor, limit=_PAGE_SIZE) if phase == "orphans"
+                        else self._source.item_id_page(after=cursor, limit=_PAGE_SIZE))
                     if ids:
                         documents = self._source.documents_for_item_ids(ids)
                         self._writer.replace_memory_items({identifier: documents.get(identifier, ()) for identifier in ids})
@@ -123,16 +225,22 @@ class EmbeddedMemoryRecallProjection:
                         self._writer = None
                         self._cursor_path.unlink(missing_ok=True)
                         self.state = MemoryRecallProjectionState.READY
+                        self._retry_delay = 1.0
                         return
                     write_json(self._cursor_path, self._progress)
+                    self._retry_delay = 1.0
         except Exception:
             logger.exception("memory_recall_projection_page_failed")
             self.state = MemoryRecallProjectionState.DEGRADED
+            self._retry_after = monotonic() + self._retry_delay
+            self._retry_delay = min(self._retry_delay * 2, 30.0)
 
     def stop(self) -> None:
         self._stopping.set()
+        self._wake.set()
         if self._thread is not None:
-            self._thread.join(timeout=2)
+            # Finish the owned page before closing its index or canonical engine.
+            self._thread.join()
         with self._rebuild_lock:
             self._unlisten()
             if self._writer is not None:
@@ -180,6 +288,9 @@ class EmbeddedMemoryRecallProjection:
         if (
             getattr(orm_execute_state, "is_update", False)
             and getattr(table, "name", None) == MemoryScopeSettingModel.__tablename__
+            # Receipt admission serializes writers with id=id. That lock is
+            # not a settings mutation and must not rebuild historical memory.
+            and not orm_execute_state.execution_options.get("memory_scope_lock_only", False)
         ):
             query = select(MemoryScopeSettingModel.id)
             if statement.whereclause is not None:
@@ -210,28 +321,7 @@ class EmbeddedMemoryRecallProjection:
         full_sync = bool(session.info.pop(_PENDING_FULL_SYNC, False))
         if not item_ids and not setting_ids and not full_sync:
             return
-        try:
-            for identifier in setting_ids:
-                item_ids.update(self._source.item_ids_for_scope_setting(identifier, limit=101))
-                if len(item_ids) > 100:
-                    break
-            if full_sync or len(item_ids) > 100:
-                self.request_rebuild()
-                return
-
-            with self._rebuild_lock:
-                documents = self._source.documents_for_item_ids(item_ids)
-                target = self._writer if self._writer is not None else self.index
-                target.replace_memory_items({item_id: documents.get(item_id, ()) for item_id in sorted(item_ids)})
-            # One transactional mutation already recomputed the full digest.
-            # Full doctor remains available at startup and explicit diagnosis.
-            if self._writer is None:
-                self.state = MemoryRecallProjectionState.READY
-        except Exception:
-            # This listener executes after canonical commit. Projection failure
-            # cannot roll back the already successful Memory transaction.
-            logger.exception("memory_recall_projection_commit_sync_failed")
-            self.state = MemoryRecallProjectionState.DEGRADED
+        self._enqueue(item_ids, setting_ids, full_sync=full_sync)
 
     @staticmethod
     def _after_rollback(session: Session) -> None:

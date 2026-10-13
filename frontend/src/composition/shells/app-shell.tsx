@@ -13,7 +13,7 @@ import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
  * product navigation are assembled here; DeviceShell renders the supplied
  * slots and retains the established chrome, safe-area and scroll ownership.
  */
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, navigation = "local" }: { children: ReactNode; navigation?: "local" | "none" }) {
   const pathname = usePathname();
   const router = useRouter();
   const { status, user } = useAuth();
@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <DeviceShell
       ariaLabel="Angmoo Local Phone"
-      navigation={<LocalDeviceNavigation />}
+      navigation={navigation === "local" ? <LocalDeviceNavigation /> : undefined}
       surface="local-phone"
     >
       {children}

@@ -93,6 +93,10 @@ def execute(lane, state):
                     workflows.executions.mark_public_action_execution_finished(db, row, status="succeeded", result=result)
                     workflows.record_activity_thought(db, execution=row, event=applied.event,
                         source_post_id=str(result["post_id"]) if draft else None, thought=thought, captured_at=datetime.now(UTC))
+                    from app.runtime.autonomous_activity.situation_memory import participant
+                    admission = participant(lane, state, raw["target_id"])
+                    if admission is not None:
+                        admission(db, row, {**result, "social_event_id": applied.event.id}, applied.event.occurred_at)
                 return row, "succeeded"
             from app.core.sqlite_concurrency import run_sqlite_session_immediate
             if db.in_transaction():

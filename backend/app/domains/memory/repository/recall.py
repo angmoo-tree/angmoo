@@ -71,12 +71,14 @@ class SqlAlchemyMemoryRecallDocumentSource:
     def documents_for_item_ids(
         self,
         item_ids: Iterable[str],
+        *, session: Session | None = None,
     ) -> dict[str, tuple[MemoryRecallDocument, ...]]:
         ids = tuple(dict.fromkeys(str(value) for value in item_ids if value))
         if not ids:
             return {}
         now = _as_utc(self._now_factory())
-        with self._factory() as session:
+        from contextlib import nullcontext
+        with (nullcontext(session) if session is not None else self._factory()) as session:
             items = list(
                 session.scalars(
                     select(MemoryItem)
@@ -95,6 +97,8 @@ class SqlAlchemyMemoryRecallDocumentSource:
             ):
                 evidence_by_item.setdefault(evidence.memory_item_id, []).append(evidence)
             reader = self._source_reader_factory(session)
+            from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+            validation = MemoryAccessValidation(session, now)
             result: dict[str, tuple[MemoryRecallDocument, ...]] = {}
             for item in items:
                 result[item.id] = self._documents_for_item(
@@ -104,6 +108,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     evidences=evidence_by_item.get(item.id, []),
                     now=now,
                     episode_only=self._episode_only,
+                    validation=validation,
                 )
             return result
 
@@ -156,17 +161,24 @@ class SqlAlchemyMemoryRecallDocumentSource:
         evidences: list[MemoryItemEvidence],
         now: datetime,
         episode_only: bool = False,
+        validation=None,
     ) -> tuple[MemoryRecallDocument, ...]:
         scope = _item_scope(item)
         setting = _scope_setting(session, scope)
         if setting is None or not setting.enabled or not _item_retrievable(item, now):
             return ()
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        if not currently_accessible(session, reader, scope, item, now, validation=validation):
+            return ()
+        from app.domains.memory.repository.situation_reads import representation
+        item_representation = representation(session, item, validation=validation)
+        summary_only = episode_only or item_representation == "activity_situation_v1"
         current: list[tuple[MemoryItemEvidence, CanonicalMemoryEvidence]] = []
-        for row in (() if episode_only else evidences):
-            canonical = _current_evidence(reader, scope, item, row)
+        for row in (() if summary_only else evidences):
+            canonical = _current_evidence(reader, scope, item, row, session=session, now=now)
             if canonical is not None:
                 current.append((row, canonical))
-        if not current and not episode_only:
+        if not current and not summary_only:
             return ()
 
         occurred_at = _as_utc(max((value.source_created_at for _row, value in current), default=item.valid_from))
@@ -188,11 +200,11 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     "memory_kind": item.memory_kind,
                     "item_version": str(item.version),
                     "evidence_ids": evidence_ids,
-                    **({"representation": "episode_v1"} if episode_only else {}),
+                    **({"representation": item_representation} if summary_only else {}),
                 },
             )
         ]
-        if episode_only:
+        if summary_only:
             return tuple(documents)
         for row, canonical in current:
             documents.append(
@@ -272,7 +284,7 @@ class SqlAlchemyCanonicalRecallRepository:
                 for evidence, item in rows:
                     if not _item_retrievable(item, _as_utc(now)):
                         continue
-                    canonical = _current_evidence(reader, scope, item, evidence)
+                    canonical = _current_evidence(reader, scope, item, evidence, session=session, now=now)
                     if canonical is not None:
                         result.append(_canonical_source_record(reference=reference, item=item,
                             evidence=evidence, canonical=canonical))
@@ -311,6 +323,22 @@ class SqlAlchemyCanonicalRecallRepository:
                 ):
                     excluded["item_missing_scope_or_lifecycle"] += 1
                     continue
+                from app.domains.memory.repository.situation_reads import situation_origin, situation_accessible
+                info = situation_origin(session, item)
+                if info is not None:
+                    if (candidate.kind is not RecallDocumentKind.MEMORY_ITEM
+                        or candidate.document_id != f"memory-item:{item.id}" or candidate.canonical_source_id != item.id
+                        or candidate.counterpart_world_character_id != item.counterpart_world_character_id
+                        or candidate.thread_id != item.thread_id or candidate.metadata.get("item_version") != str(item.version)
+                        or not situation_accessible(session, reader, scope, item, info, now, ancestors=frozenset())):
+                        excluded["situation_identity_or_privacy_invalid"] += 1
+                        continue
+                    records.append(CanonicalRecallRecord(candidate.document_id, RecallDocumentKind.MEMORY_ITEM,
+                        item.id, item.summary, _as_utc(item.valid_from), memory_item_id=item.id,
+                        counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
+                        metadata={"item_version": str(item.version), "memory_kind": item.memory_kind, "representation": "activity_situation_v1"}))
+                    seen.add(candidate.document_id)
+                    continue
                 statement = select(MemoryItemEvidence).where(
                     MemoryItemEvidence.memory_item_id == item.id).order_by(MemoryItemEvidence.id)
                 if evidence_limit is not None:
@@ -320,7 +348,7 @@ class SqlAlchemyCanonicalRecallRepository:
                     (row, canonical)
                     for row in evidences
                     if (
-                        canonical := _current_evidence(reader, scope, item, row)
+                        canonical := _current_evidence(reader, scope, item, row, session=session, now=now)
                     )
                     is not None
                 ]
@@ -393,7 +421,7 @@ class SqlAlchemyCanonicalRecallRepository:
                     query.source_references,
                 ):
                     continue
-                canonical = _current_evidence(reader, query.scope, item, evidence)
+                canonical = _current_evidence(reader, query.scope, item, evidence, session=session, now=now)
                 if canonical is None or not _in_time_range(
                     canonical.source_created_at,
                     query,

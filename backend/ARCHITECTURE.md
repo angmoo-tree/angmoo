@@ -1,5 +1,389 @@
 # Angmoo Backend Architecture
 
+## World image reads and own-profile media contracts (2026-10-12 LOCAL)
+
+Worlds owns current icon/banner pixel reads in `service/media.py`. Both the
+retained `/media/worlds/{world_id}/{filename}` and API
+`/api/v1/worlds/{world_id}/media/{filename}` paths reuse this service and the
+existing World read policy. Active membership grants the existing private/draft
+read; anonymous access is only published public/unlisted. Current persisted image
+reference, bounded filename, World directory and symlink checks precede FileResponse.
+Main composes the compatibility router; common public media mounts do not expose
+the World directory or private asset/draft/candidate directories. Reads use
+private/no-store responses and preserve existing files, URLs, package IO and schema.
+
+Own-profile upload keeps its strict four-field schema, owner and version guards.
+Worlds frontend serializes only those fields from the shared Characters crop
+payload. The identity response projection includes its existing handle/banner
+fields so saved values survive upload and reload; no new stored field is added.
+Evidence: [focused image recovery](../docs/verification/world-image-recovery-20261012.md).
+
+## Chat advisory interpretation and fresh canonical reads (2026-10-11 LOCAL)
+
+New `social_hybrid` Chat admissions freeze the server-owned
+`_selection_protocol=selection-args.hybrid.v3`. The three native functions keep
+their core execution contracts; an optional `entities` list supplies person names
+and nullable roles only. There is no relationship-pair or model-created ref field.
+Chat owns bounded pure normalization (scan 32, deliver 4, name 160), immutable
+`person-hints.v1` and request/identity/core/evidence binding in `hybrid-admission.v3`.
+Invalid hints are omitted or partly retained without repair or response failure.
+Core search text, scope, ranking, permissions and actual source proof still fail
+when invalid. Hints do not rewrite queries or filter the authorized memory set.
+
+Only frozen requester/responder names (and actually supplied handles) can confirm
+a hint, without additional person lookup SQL. Other names remain `not_checked`.
+CRG reads usable names/roles/status alongside the complete original question,
+verified participants and authorized evidence. It preserves actual fact/direction,
+uncertainty and persona rules and can interpret the question when hints are absent.
+Common role and speaker/quotation definitions are reused; English instructions do
+not change situation descriptions' admitted `memory_search_locale`. One final
+payload still feeds both situation and relationship delivery captures.
+
+Historical v1/v2 schemas, names/endpoint validators and hashes remain supported.
+Pending/idempotent requests retain their admitted protocol. An explicit retry with
+retained identity creates a new v3 attempt preserving question, model, environment,
+settings, identity and situation policy; history without identity keeps its old
+contract. Damaged markers/identity fail before provider work. Both v3 Supervisor
+and CRG awaits checkpoint caller read transactions; leases and final fences remain.
+
+Memory owns `MemoryAccessValidation` and batched Memory rows/bindings/unique prior
+nodes, scoped to one read Session and one timestamp. Runtime owns foreign current
+Post/Reply/Chat/routine/image facts through injected read ports. Cycles are checked
+before completed-node memoization; each receipt/manifest/ordinal/range is validated.
+Candidate, hydration and final provider/application guards each open fresh contexts.
+Owner detail and Chat inspection share exact situation entry resolution, including
+nullable evidence and corrections. A damaged situation origin cannot become legacy
+Feed authorization. Memory OFF permits owner inspection, without source ACL bypass.
+Original links are only canonical World POST/REPLY routes.
+
+Production hybrid recall uses a separate Runtime canonical worker (one worker,
+capacity eight). Queue wait, axes, validation and hydration share one absolute
+deadline; SNS includes its semaphore wait in the existing 15 seconds. Sessions
+open inside the worker, SQLite progress/busy limits are restored in finally,
+cancelled running futures remain owned, and shutdown drains before engine dispose.
+Only immutable results and bounded diagnostics cross back to the parent. SQL,
+completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
+when not observed. No request collector or Session crosses the thread boundary.
+
+Evidence: [integrated implementation and scoped verification](../docs/verification/chat-memory-world-integrated-20261011.md).
+
+## Runtime contention recovery and Media SQL ownership (2026-10-11 LOCAL)
+
+Runtime Media owns a bounded, single-worker `SqliteAsyncTaskQueue`, using the same
+cancellation/drain contract as `MemoryCanonicalWork`. Image job discovery, leased
+preparation, submission/receipt/diagnostic transitions, result persistence and
+maintenance open and close their own Sessions inside that worker. Provider I/O
+stays asynchronous. Request Sessions and ORM entities never cross this boundary;
+ownership/settings rechecks, quotas, result spooling and lease-token fences remain.
+Shutdown stops producers and drains running local work before unregistering Media.
+
+The graph projector retains its registered loop after canonical checkout timeouts
+and reports degraded until a real successful batch/probe. Backoff is bounded at
+30 seconds with the normal runtime polling interval. Memory FTS page failures retry
+without requiring a new commit, retaining 32-item pages and the existing
+build/validate/orphan/promotion fence. Persistent failures remain degraded.
+Unsaved-experience pages share `MemoryAccessValidation` only within one synchronous
+request, Session and timestamp; every later read revalidates current source/access.
+Pool capacity, readiness/health criteria and authorization policies are unchanged.
+
+Evidence: [implementation, tradeoffs and local Docker checks](../docs/verification/docker-runtime-limited-features-20261011.md).
+
+## Chat participant presentation and historical relationship evidence (2026-10-11 LOCAL)
+
+Chat admission derives `chat_identity_context.v1` from the existing NameBinding v1,
+freezes the actual World requester/responding identities for the request, and rejects
+damaged or mismatched namespaces before provider work. Runtime batches only selected
+effective World names. Neutral episode/Today values carry private, verified source
+authors from the original Post or Thread role; shared SNS packet serialization and
+legacy source hashes exclude those identities. Integrations adds only Chat presentation
+names and selected opaque participant links, preserving raw source text and provider
+message/schema contracts. One final payload feeds serialization and both delivery captures.
+
+Memory owns the explicit `episode-packet.v1` delivered-source projection. Packet
+serialization and SNS snapshot currentness comparison share that same projection;
+private canonical author metadata never becomes model input or an accidental
+source-change signal. Current scope/access, source digest/status, delivered text,
+role/range, thought and follow-up checks remain; unexpected delivery fields fail
+the exact comparison. This requires no stored-data rewrite or provider call.
+Evidence: [SNS currentness regression and scoped Docker checks](../docs/verification/sns-memory-source-currentness-20261011.md).
+
+Chat finalize binds `relationship-evidence-delivery.v2` to request, scope, generation,
+slot, attempt and actual JSON/user-prompt digests in the existing canonical UoW. It is
+independent of Memory enablement or receipt processing. Committed evidence reads validate
+the retained proof and current canonical authorization through Runtime, on the caller's
+Session, without graph projection or writes. A normal later version/view change displays
+verified frozen facts as changed; lower versions, damaged facts or lost access do not.
+Only retained, bound legacy delivery material can recover a historical graph excerpt.
+The public v1 DTO adds safe projections/change status and separates original retrieval
+limitations from current read limitations; private proofs and IDs are not exposed.
+
+Evidence: [implementation and scoped checks](../docs/verification/chat-identity-evidence-preview-20261011.md).
+
+## Memory validation and runtime responsiveness (2026-10-10 LOCAL)
+
+Memory keeps current scope, participants, blocks, private-thread access, delivered
+proof, source digests, prior versions and cycle checks. `MemoryAccessValidation`
+belongs to one synchronous read operation with one Session and timestamp; it
+memoizes shared lineage and canonical facts only inside that operation. It must
+never be retained on a reader, Session, runtime or index, or reused across writes,
+provider waits or later requests. Final canonical hydration and post-provider
+application still perform fresh validation.
+
+Runtime owns the execution boundary. The FTS after-commit listener only enqueues
+bounded identifiers and never waits for a projection lock, opens a new Session or
+revalidates history on the HTTP/scheduler loop. One owned worker reconciles current
+SQLite rows, drains committed edits, and rebuilds in 32-item pages with the existing
+build/validate/orphan/promotion fence. Overflow requests a bounded rebuild;
+restart reconciliation recovers an interrupted in-memory queue. Canonical recall
+still rejects stale or forbidden candidates while derived work catches up.
+Whole-library FTS rebuilds keep the existing `MemoryRecallPreparing` fence until
+validation and promotion finish.
+
+The situation consumer and vector source lookup use a single-worker bounded
+`MemoryCanonicalWork` queue per runtime. Sessions open and close inside the worker;
+only immutable documents/results cross the boundary. Cancellation keeps running
+futures owned and shutdown drains them before disposing the canonical engine.
+Situation application retains its cutoff, admission, source and lease checks in
+16-receipt transactions. Dirty briefs advance one scope per transaction with a
+cursor that also advances past invalid scopes. Quit preparation/fencing uses the
+same serialized worker and search drain includes queued FTS commits. Provider I/O
+and the vector's final canonical write fence keep their existing contracts. The
+scheduler lease TTL, heartbeat checks and Compose health contract are unchanged.
+[Implementation, tradeoffs and local Docker validation](../docs/verification/docker-backend-memory-startup-20261010.md)
+
+## SNS stored-text comparison and immutable result recovery (2026-10-10)
+
+Social owns the strict `social-visible-text.v1` expected-output projection and
+reuses its existing title/body sanitizers once. Runtime compares the selected
+final draft in that representation with the independently stored Post in the
+caller-owned Session. Actions, targets, effects and substantive content remain
+separate guards; Chat text does not use this Social projection.
+
+Memory separates restored immutable admission material from trusted validation
+context. Only an explicit, lease-fenced v4 blocked recheck can approve an
+append-only result binding after exact original planned/final hashes, source,
+scope and access checks. Runtime supplies a bounded read-only checkpoint basis
+through a typed port. Receipt, manifest and prior v2/v3 rules remain immutable;
+v3 parent bindings continue to work. Successful proofs and memories share the
+existing outer UoW, failed checks roll back tentative proofs, and reads restore
+the saved proof without checkpoint I/O. The proof retains its original run ID
+when mutable processing history is pruned. Current source/access guards remain.
+
+SQLite v36 / Alembic 20261010_0113 adds the empty result-binding table after
+v35/0112, preserving frozen prior metadata and staged upgrade failure behavior.
+The auxiliary `situation-observation.v1` capability uses the existing opt-in,
+bounded SNS recorder; Memory's pure parser owns structural interpretation.
+Physical/JSON/stage attempts and final Writer selection are explicit. Committed
+receipt diagnostics follow the existing outer commit and never own a commit.
+Auxiliary export completeness is independent of core schema3 completeness and
+AI quality. External PowerShell/Python collectors stay outside app workers,
+read canonical data without mutation and terminate after bounded finalization.
+[Implementation and scoped validation](../docs/verification/sns-result-normalization-observation-20261010.md)
+
+## Basic activity settings, SNS parent evidence and World topic retirement (2026-10-10)
+
+WorldCharacters owns the strict `world-activity-settings-v1` projection and its
+eight policy fields. Basic and detailed saves share configuration normalization,
+configuration CAS and the caller's Session. Runtime composes a saved-facts
+activation decision for GET, dashboard and actual ON admission: published World,
+eligible actor, saved policy and SNS purpose/model/key, readiness and maintenance.
+An owned pending/inactive/active autonomous actor with an active membership may
+save basic settings and SNS/image credentials before publication. This exception
+does not grant Chat, vision, graph, general profile or autonomous execution access.
+OFF does not cancel an already admitted activity. Image options, provider vault
+revisions, blank-key preservation and explicit connection checks remain owned by
+Identity/Media. Character registration returns the durable `registration_scope`
+for the atomically registered OFF actor, including idempotent completion replies.
+
+Social's TodayActivityRecord carries `parent_post_id` alongside the delivered
+parent body/title, independently of source/target/root IDs. Both producers reuse
+the parent they already loaded. The final bounded provider payload must retain
+the pair; inconsistent input is rejected before provider submission even when
+Memory is OFF. Runtime captures the actual parent fragment with its payload hash.
+
+Memory owns the typed parent-binding contract, exact pure policy, append-only
+`memory_situation_source_bindings` repository and validation revision v3. The
+Runtime adapter reads canonical Social rows in the same Session through the
+optional typed resolver. Memory imports no Social persistence model. Original
+manifest, admission, call, scope, result and description integrity is checked
+before loading a binding. Historical correction requires the exact parent-body
+path, an unchanged same-record child and its frozen direct-parent relationship,
+the full original parent-body SHA256, delivery ranges/payload and current access.
+No search, similarity, guessed IDs or source mutation is used. The fixed proof
+view serves application, details/correction, recall/hydration, prior memory and
+HotBrief access checks; later child/parent edits, reparenting or access revocation
+still prevent return. A receipt savepoint rolls back tentative bindings on failed
+validation; successful bindings, Memory/evidence, incremental eligibility and
+receipt share the outer UoW. A shared manifest retains its proof until its final
+dependent is removed. Older unfinished v2 runs retain v2 rules; unknown revisions
+stop, and only a new explicit request can use v3. GET/startup/migration never
+recheck blocked receipts. Existing individual/bulk recheck and discard are reused.
+
+Embedded SQLite v35 and Alembic 20261010_0112 add the empty binding table after
+v34/0111. Historical metadata builders/manifests are frozen. Copy/stage/validate/
+promote remains the upgrade boundary; failure preserves the original DB, key and
+selection marker. New accepted memories use existing incremental FTS/vector
+registration and do not prepare the whole historical corpus.
+
+World-level recommendation topic generation is retired after authorization with
+`410 world_recommendation_topics_retired` for GET/key PUT/regenerate POST.
+World create/publication/restart and late results cannot dispatch/apply it.
+Catalog and relationship initialization remain independent. The matching
+dictionary consists of valid character sources (including OFF/inactive actors),
+retains common/World-scoped shared IDs, and excludes World-only/deleted/left
+sources. Actor preparation, maximum six post links, cache invalidation, historic
+PostTopic/epochs and delivery DTOs remain intact. No dependency was added.
+
+## Image provider vault and supported creation methods (2026-10-09)
+
+Identity owns `WorldImageProviderCredential`, keyed by owner, World, actor,
+provider and credential purpose, with encrypted material, key revision and
+tombstone. The existing WorldCredential remains the current executable
+provider/model selection and preserves admitted execution revisions. Selecting
+another provider reuses its active vault key without reading plaintext into a
+DTO. Same-provider model changes reuse the key; explicit deletion tombstones
+the vault and revokes that provider's execution copies. Other providers and
+Comfy Partner remain independent. Current, provider-key and image-policy CAS
+checks participate in the runtime's existing Session/UoW and rollback together.
+Runtime composes authorization, policy invalidation and privacy deletion; domain
+services do not import another domain's internal service or open nested Sessions.
+
+ComfyUI accepts no server authentication key. Its separate Partner key is the
+account credential used only in Comfy extra_data. Runtime resolution and the
+HTTP integration reject retired server material before submission; external
+service secrets cannot become Comfy server headers. Embedded SQLite v34 and
+Alembic 20261009_0111 authenticate prior material before mutation, seed the
+provider vault without reviving deletion, and retire Comfy server secrets from
+current/history and legacy USER_IMAGE. Partner/other-provider material remains
+protected. Previous manifests and migrations are frozen. Failed authentication
+does not promote a staging DB or alter the source DB/selection marker.
+
+Characters separates supported new creation inputs from legacy read types.
+New local/external creation and new external draft registration are rejected
+before side effects. Completed receipt reads remain idempotent. An owned,
+unexpired editing external draft may be explicitly reselected as direct under
+target/revision checks, preserving fields and temporary media in one transaction.
+V1 adoption does not silently reselect; old credentials are not copied.
+
+Memory admission, validation, apply, scheduling, shutdown, FTS5 and Vec1 behavior
+is unchanged by the frontend saved-embedding controller. Related isolated and
+mock evidence is recorded in [2026-10-09 verification](../docs/verification/world-ui-settings-improvements-20261009.md).
+
+## Situation delivery validation and owner recovery (2026-10-08)
+
+Memory owns `SituationValidationContext`, delivery/relationship policies, receipt
+restoration, the common apply operation and owner recovery endpoints. Runtime
+adapters read foreign canonical sources through injected ports and participate
+in the existing Chat/SNS transaction. They never fabricate Feed observations.
+`MemoryItemEvidence.observation_id` remains the actual Feed foreign key; an Inbox
+fragment proved by a restored receipt uses the separate `situation_delivered`
+origin and leaves that foreign key empty.
+
+The v2 delivery manifest binds the actual final payload digest, JSON pointer,
+fragment ranges, source identity and scope to the successful execution result.
+Restoration verifies the stored manifest hash, receipt's original admission hash,
+call/target/lane/epoch and committed effects before constructing trusted context.
+Raw manifests, client flags and unsigned observation booleans cannot grant access.
+Relationship background evidence carries the approved prepared version, view
+version and facts digest. Normal later version increments preserve that history;
+current World ownership, participants, blocks, thread access and source integrity
+are still mandatory. V1 serialization and hashes remain unchanged; insufficient
+historical relationship proof fails closed.
+
+Apply, correction lineage, canonical/hybrid recall, prior memories, HotBrief,
+relationship review and source hydration share the restored proof and current
+access checks. Hydration reads only allowed delivered ranges. Summary-only FTS and
+vector preparation remain derived work after canonical commit, without library
+backfill or provider calls inside save/recheck/discard transactions.
+
+`pending_apply` and explicit `blocked_recheck` use the same bounded, lease-fenced
+consumer. Individual recovery freezes one receipt and state version; whole-scope
+recovery freezes a cutoff and processes at most 100 rows per page. Operation,
+validation revision, scope, target and version bind idempotent requests, including
+legacy save-key reuse. Recheck attempts record decisions atomically with item,
+source, cursor and receipt updates; previous completed runs are immutable.
+Operational `run_state=error` is distinct from a completed run with rejected rows.
+
+Owner discard accepts only unapplied blocked receipts with a matching state
+version, including Memory OFF/closed epochs. A live scope lease prevents races;
+queued/deferred/error rechecks may record an atomic discarded/skipped attempt.
+Discarded receipts are terminal and excluded from replay, counts and consumers.
+Only their description, result detail and unshared manifest are removed; original
+activities, other memories and shared manifests remain. Identity, content digest,
+sequence, state version and discard time retain the minimal termination record.
+
+SQLite v32 / Alembic 0109 is a forward delta from v31 / 0108. Frozen historical
+migrations are unchanged. Embedded upgrade rebuilds affected tables only in an
+unpublished staging database, preserving legacy rows, foreign keys, credentials
+and receipt sequence high-water marks. Failure leaves the selected database and
+marker unchanged. [Implementation and validation](<../docs/verification/10-08 Chat·SNS 상황기억 관찰 검증과 차단 기록 복구 구현 결과.md>)
+separates local regression, isolated Docker, real AI and installed/user checks.
+
+## Activity situation admission and deferred application (2026-10-08)
+
+Memory owns `activity_situation` policy, immutable delivery manifests, receipts,
+processing settings, accepted cutoffs, application runs and canonical metadata.
+Chat and WorldCharacters consume neutral values from `contracts/activity_situation.py`;
+Runtime injects policy capture and same-Session participation at their existing
+admission/finalization boundaries. A receipt commits with the successful assistant
+message, SNS target effects or Routine post. Invalid auxiliary descriptions do not
+invalidate a valid base answer; a database admission failure rolls the activity back.
+
+The final provider payload owns delivery proof after selection, truncation and
+name binding. Source adapters revalidate the entire delivered scope and current
+permissions, including prior memories and image interpretations. No original body
+is copied into a replacement evidence store. Source deletion and changed/private
+sources have distinct policies. Unknown policies fail closed.
+
+Daily, explicit manual and authenticated host-quit requests use one Memory
+application consumer. Each request freezes an immutable cutoff; bounded pages
+atomically write MemoryItem, evidence, situation metadata and applied identity.
+Ordinary activity, reads, settings saves and Memory ON do not trigger a flush or
+whole-library indexing. FTS and Vec1 are derived from each committed summary.
+Provider I/O occurs outside canonical write transactions. Shutdown observes only
+accepted search work within its deadline and fences late projection results.
+
+Relationship preparation, refresh and apply wait for their own scope's accepted
+canonical work, then use the old/new memory union. Other scopes remain eligible;
+neither vector readiness nor unrequested pending activities block relationship work.
+Explicit D03 maintenance retires only its inventoried legacy queue and fences
+re-admission. Ordinary forward migration preserves historical work and memories.
+SQLite v31 and Alembic 0108 share the registered ORM; historical migrations remain
+immutable. [Implementation and validation](../docs/operations/10-08-activity-situation-implementation.md)
+records automated, synthetic-load and unperformed real-provider/native checks separately.
+
+## Runtime diagnostic migration target (2026-10-07)
+
+Runtime diagnostics composition reads the frozen manifest for the shipped
+`SQLITE_SCHEMA_VERSION` and injects its `source_revision` into the Runtime
+status service. Runtime domain policy compares the persisted revision with
+that explicit target; it does not maintain a second release-version constant
+or import persistence and migration implementations.
+
+An actual old, unknown, or missing DB revision still reports
+`migration_not_current`. Regression checks compare the manifest, SQLite
+baseline lineage, Alembic head, and a real canonical DB independently, and
+exercise a future packaged manifest without changing domain policy. This
+diagnostic correction changes neither stored schema markers nor the startup
+migration and component failure checks.
+
+## Embedded migration credentials (2026-10-07)
+
+Before upgrading canonical SQLite, the common embedded coordinator binds
+`secrets/app-secret` from its resolved data root through a separate settings
+value and injects that reader into Identity's `MigrationSecretInterpreter`.
+The interpreter reads and caches the key when credential authentication is
+actually needed; transitions without credentials do not require a key read.
+Migration authentication and Comfy credential rebinding use the shared local
+envelope implementation with that explicit key. They do not modify process
+settings, select a default key, or contact KMS or an AI provider.
+
+This applies to both embedded startup entrypoints. Existing local-v2 and legacy
+dev-v1 reads keep their envelope contracts, including local-v2 scope validation.
+Authentication failure still aborts the unpublished staging generation and
+preserves the selected original database, secret and media. Runtime configuration
+and worker startup remain after a successful canonical upgrade.
+
 ## World configuration and permanent import origins (2026-10-05)
 
 Characters owns immutable import snapshots and proven origin references. Final
@@ -574,3 +958,132 @@ SNS 관계 현재성은 AI에 제공한 순서를 유지하는 입력 해시와 
 판단 전용 응답/제안의 의미는 `domains/routines/contracts/reply_writing.py`와 `domains/social/contracts/proposal_plan.py`에 두고 실제 본문·서버 task·일정/공개 제안 결합은 canonical owner에서 검증한다. 모델용 view의 필드 축소는 원천 Candidate·revision·Chat/Memory 입력을 삭제하는 절차가 아니다. 신규 wire 정책과 Routine 출력 정책은 별도 metadata로 생성 시 고정하며 이전 V2/2의 정책 부재는 기존 계약으로 읽는다.
 
 미완료 current/V1의 퇴역은 `runtime/autonomous_activity/retirement.py`가 도메인 `routines/service/legacy_claims.py`와 조립한다. 실제 claim·불확실 효과는 actor별로 보류하고, 지원 정산 이후에만 abandoned/aborted로 종료한다. 성공·역사·원장·기존 보존 정책은 유지한다. current 설정은 승인·하루 준비·scope/revision 확인 후 조건부 전환하며 구 실행을 SDK로 재개하지 않는다. startup은 그 앱의 composition session factory를 사용한다. 상세 계약과 검증 범위는 [실행·검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)에 있다.
+
+## ComfyUI 입력·출력 연동 (2026-10-09)
+
+`domains/media/generation_contracts.py`와 `service/comfy_workflows.py`가 legacy/v2 옵션, typed 자리표시자 위치, 유한 값·JSON 상한, 선택 경로와 실행 snapshot을 소유한다. 문자열 전체가 14개 지원 토큰과 같은 `node.inputs` 위치만 바꾸며 링크·metadata·고정 값은 보존한다. API graph의 class/input type·연결 가능성·custom node·모델 설치 조건은 `integrations/comfy_images.py`의 `/prompt` 요청에서 ComfyUI가 최종 검사한다. `/system_stats`는 연결 확인, `/object_info`는 선택적인 입력 후보 조회이며 후보 실패가 준비 완료를 막지 않는다. Partner 인증은 명시적 옵션과 별도 목적 credential을 사용한다.
+
+다른 업무가 소비하는 지원 경로는 실제 역할 파일인 `service/comfy_workflows.py`(순수 입력 준비·선택·복원), `schemas.py`(제한된 분석·진단 DTO), `service/http_workflows.py`(framework decoding 전 raw HTTP JSON 검사)다. import 정책에 이 세 경로만 명시하며 예외나 facade를 추가하지 않는다. DTO 파일은 워크플로 알고리즘을 역참조하지 않고, 선택 함수는 `service/comfy_workflows.py`에서 DTO를 소비하므로 순환 의존이 없다.
+
+Character와 World runtime은 실제 장면·negative·참조 scope를 조립하고, 접수 전에 seed -1을 한 번 추첨하고 양수 CLIP skip을 한 번 변환한다. 경로·graph digest·입력/출력 정책·실제 값은 기존 intent `request_json`에 고정한다. PNG Base64는 제출 시 픽셀에서 한 번 만들고 저장하지 않는다. 이전 receipt는 history만 조회하며, 이전 미제출 작업만 lease 안에서 snapshot을 보완한다. 참조 없는 텍스트 대체 경로는 제출 전에 선택한다.
+
+자동 출력은 JavaScript Object.values 키 순서의 첫 images 배열 첫 항목을 선택한다. explicit v2도 지정 노드 첫 항목이며 legacy는 기존 단일 출력 규칙을 보존한다. 잘못된 첫 결과를 두 번째 이미지로 대체하지 않는다. 제출 오류는 receipt 유무와 HTTP 상태로 알려진 실패/미확정 상태를 구분하며, history 실행 오류·완료 후 이미지 없음은 종료 상태다.
+
+`schemas.py`와 `integrations/comfy_diagnostics.py`는 whitelist·민감값 가림·20항목/16 KiB 진단을 담당한다. Social worker가 동일 lease의 receipt와 nullable 진단을 짧은 transaction으로 저장하고 spool 복구 시 재사용한다. Alembic 0110 및 embedded SQLite v33은 새 진단 컬럼만 추가하며 v32 이하 manifest를 바꾸지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)은 모의 원본 재사용, 실제 무모델 ComfyUI 통신, 미측정 AI/설치 환경을 구분한다.
+
+## SQLite scheduler와 사진 요청 경계 (2026-10-10 LOCAL)
+
+실제 주입 Session의 engine dialect가 sqlite면 기존 SqliteSchedulerLeaseRepository를 사용한다.
+다른 dialect의 ORM port는 보존한다. lease의 acquire/heartbeat/begin/finish/release는 짧은
+BEGIN IMMEDIATE와 owner/epoch/expiry 조건부 갱신을 유지하며 만료된 같은 owner도 새 epoch를
+받는다. DB 작업은 Session/connection을 worker 안에서 만들고 bounded executor(worker1,
+capacity4, queued deadline1초)로 event loop와 분리한다. 실제 Future 종료를 추적하며 await
+취소만으로 drain 완료를 판정하지 않는다.
+
+BUSY code의 하위8bit만 재시도한다. LOCKED/IOERR/FULL/불명 오류를 일반 재시도하지 않는다.
+최대4회/총250ms/개별 busy timeout50ms, rollback 뒤 새 transaction에서 현재 값을 읽고
+원래 timeout을 복원한다. canonical connection pool checkout도 50ms로 제한한다. 이 값은
+풀 포화 시 빨리 실패하는 비용을 감수하고 lease 작업의 무제한 대기를 막는 선택이며 기존
+일반 SQLite busy_timeout 5000ms를 전역으로 바꾸지 않는다.
+
+재시도 소진 뒤 한 runner가 DEGRADED로 신규 tick을 멈추고 작업을 drain한다. 자기 유효
+owner/epoch는 실제 heartbeat 후 재개하며 만료는 새 generation, 다른 유효 owner는 대기한다.
+1/2/4/8/10초 backoff는 stop으로 중단한다. supervisor의 별도 재시작 loop는 제거하여 recovery
+소유자를 하나로 둔다. 완료 tick의 begin 장부를 보존해 finish 실패 뒤 효과를 재생하지 않는다.
+보조 task가 실제로 끝나지 않으면 FAILED와 최초 오류를 유지하고 새 tick/runner를 만들지 않는다.
+release 실패는 최초 오류와 별도로 기록하고 stale owner는 expiry/fence로 차단한다.
+
+health는 scheduler READY 표시에 더해 유효 owner/epoch/expiry의 실제 heartbeat proof를 확인한다.
+DEGRADED/FAILED/만료는503, 복구 확인 뒤200이다. projector 기존 정책은 유지한다. 진단은
+단계·안전한 code·시도/queue/transaction 시간·owner/epoch만 기록하며 SQL/본문/키를 출력하지 않는다.
+원래 incident의 잠금 소유 작업은 미확정이며 Chat이 원인이라고 추정하지 않는다.
+
+사진은 기존 Media 서버 재검증/UoW를 보존하고 정확한 POST media/assets 요청만14MiB로 맞춘다.
+World 네 POST는 기존8,262,144 bytes, 파일5MiB를 유지한다. 프런트 로컬 HEIF 변환은 서버의
+원본 HEIF 수용이나 인식/생성 정책 변경이 아니다. schema/migration/과거manifest를 바꾸지 않는다.
+[동시성 계약](../docs/architecture/l3-er2-sqlite-concurrency.md),
+[사진 계약](../docs/operations/local-photo-codec.md),
+[검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.
+
+## World 영속 삭제와 이미지 출처 설명 (2026-10-12)
+
+Worlds의 `contracts_deletion`/`models_deletion`/`service/deletion`은 canonical owner membership,
+소유자 ID, 기본 SNS binding, 저장명·row_version·명시 consent·idempotency를 확인한다. 삭제 의도와
+admission 차단은 같은 UoW이며 receipt는 membership 정리 후에도 immutable owner만 읽는다.
+명령 키와 확인 내용은 digest로 저장한다. 기본 SNS 이름·소개·태그·이미지는 계속 편집할 수 있다.
+
+각 도메인의 `repository/world_erasure.json`은 검토한 정리 범위를 동결한다. Runtime은 이를
+canonical SQL에 연결하고, 부모 정리 전 exact PK/file/index/checkpoint ID를 journal에 기록한다.
+실행 중 공개 효과 정산 후 최대100개 단위로 정리한다. lease epoch CAS와 SQLite INSERT/UPDATE
+fence는 오래된 reader/provider의 새 효과를 거절하며 FK/source 검증을 끄지 않는다. 운영 lease의
+정산과 새 lease 획득을 구분한다. 타 World의 같은 Character·slot은 중지하지 않는다.
+
+불변 `CharacterImportSnapshot`/origin·identity·owner·초기 이미지는 World별 현재 설정/기록과
+별도로 보존한다. 마지막 World 등록이 사라지면 Characters 소유 함수가 원본으로 표시 캐시를
+복구한다. 선택·복사·명시적 등록은 기존 ownership/eligibility 경로를 사용하며 가짜 home/actor,
+현재 설정 재캡처·자동 등록·자율활동 ON·기억 이관을 만들지 않는다.
+
+worker는 autonomy OFF에도 lifespan에서 실행하고 failed/retry_wait에 같은 cursor/fence를 남긴다.
+timeout은 공개 효과의 정산 증명이 아니다. FTS/Vec1/graph와 SDK checkpoint의 정확한 제거를
+확인하기 전 완료하지 않는다. 퇴역 SNS FTS도 기존 파일만 정리하며 검색 lane을 재활성화하지
+않는다. Checkpoint SDK의 delete_thread와 content-free thread fence로 늦은 저장을 차단한다.
+파일의 resolved root·symlink/junction·공유/최초 원본 참조를 검사하며 전체 root를 삭제하지 않는다.
+공식 SQLite v37/Alembic `20261012_0114`는 빈 작업 테이블과 쓰기 fence를 추가한다. v36 source
+manifest와 기존 사용자 자료는 migration에서 재작성하지 않는다. native graph schema는 유지한다.
+
+현재 첨부 이미지가 있을 때 Supervisor/CRG 시스템 지침에 공통 영어 설명을 한 번 조합한다.
+`untrusted_current_image_observation`와 frozen evidence의 kind `current_image_analysis`를 실제
+현재 사용자 메시지에 연결하고, 발신을 촬영/피사체 신원의 증명으로 취급하지 않는다. 이전 이미지,
+payload/hash/delivery·Vision·언어/사실/페르소나·호출 수 정책은 유지한다.
+
+[통합 구현·검증 원장](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.
+
+## ComfyUI 전송과 관리 키 보호 (2026-10-12, LOCAL)
+
+Media의 순수 Partner 주소 정책을 Character/World 저장·새 실행 freeze·integration의 마지막 송신에
+조립한다. ON은 검증된 HTTPS 또는 정확한 loopback만 허용하고, localhost HTTP 새 송신만 127.0.0.1로
+일시 고정한다. 저장 주소·base path·port는 유지한다. OFF의 keyless HTTP와 소유/폐기/lease 조건을
+충족한 receipt history/view는 신규 키 전송과 분리한다. 일반 서버 Authorization은 부활시키지 않는다.
+HTTP는 TLS 검증과 redirect/downgrade 금지를 유지한다. 보안 규칙을 역사 DTO 읽기 전체에 넣지 않는다.
+
+예시 config의 구 응답/파일은 유지하고 format=api_json만 순수 graph를 추가한다. sample/raw analyze는
+credential/runtime/외부 통신 없이 수행한다. 보존한 binding/output 검사는 기존 workflow validator를
+통해 수행한다. renderer/seed/CLIP/metadata 제거 Base64/output/receipt snapshot 의미는 유지한다.
+
+`core/secret_file_access.py`는 중립적인 관리 파일 접근 helper다. Windows API는 지연 로딩하고,
+현재 계정의 실제 read-open과 DACL/최종 물리 경로를 검사한다. 부족한 관리 key/필요 디렉터리만 보호한다.
+최초/임시 파일은 첫 쓰기 전에 보호하고 완성된 파일만 overwrite 없는 atomic link로 게시한다.
+부모 디렉터리 handle을 유지해 rename/reparse 교체를 막는다. 복잡한 ACL이나 미확인은 원본을 남기고
+안전한 오류로 종료한다. 소유권 변경·DPAPI 전환·키 교체·전체 AppData ACL 변경은 하지 않는다.
+helper는 contributor/sidecar 시작과 관리 키 migration에만 조립하며 활동마다 검사하지 않는다.
+원래 키·암호문 AAD·명시 migration secret source는 유지한다.
+
+패키징 metadata는 관리 key/temp·환경 파일·SQLite/private backup sentinel을 거절한다.
+실제 설치의 key ACL은 읽기 전용 조사이며 소스/fixture PASS와 설치 반영은 별개다.
+[검증·미측정 경계](../docs/verification/comfy-security-20261012.md)를 참조한다.
+
+## Release readiness ownership corrections (2026-10-13, LOCAL)
+
+`identity/service/world_credential_state.py` owns the common credential row reads,
+revision preservation and sealed Comfy payload interpretation. General and image
+credential services depend on it in one direction while retaining the caller's
+Session, authorization, purpose, version and AAD checks.
+
+Relationships exposes `service/social_context_evidence.py` as a supported pure
+projection/validation operation for already authorized immutable social context.
+Chat does not import Relationships' private policy. Its historical evidence read
+port describes only the retained manifest values it consumes; Runtime supplies
+the concrete Memory manifest and keeps proof/World checks. Memory's situation
+binding value and policy constant live with its activity contracts; the binding
+policy module depends on those values without a reverse type dependency.
+
+Worlds owns `service/character_entry.py::lock_character_entry_world_write`, which
+serializes an already authorized profile write with deletion admission in the
+same transaction. It neither grants access nor increments the World version.
+`runtime/world_deletion/canonical_erasure.py` is the concrete canonical erasure
+adapter. The protocol stays in the World contracts. Application-level assembly
+lives in `runtime/world_deletion_composition.py` above low-level persistence and
+fence helpers. Cold migration fence installation can reflect existing SQL
+descriptors; explicit domain erasure rules still determine scope and an
+incomplete descriptor set fails. It does not register models through a reverse
+dependency or infer deletion policy from newly discovered foreign keys.

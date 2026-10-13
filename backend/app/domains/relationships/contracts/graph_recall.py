@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from hashlib import sha256
+import json
 from enum import StrEnum
 
 
@@ -99,6 +101,11 @@ class GraphRecallRelationship:
     last_event_id: str | None = None
     last_event_at: datetime | None = None
     updated_at: datetime | None = None
+
+    def delivery_facts_digest(self):
+        """Digest prepared facts, without reading a newer canonical state."""
+        return sha256(json.dumps(asdict(self), sort_keys=True, ensure_ascii=False,
+            separators=(",", ":"), default=str, allow_nan=False).encode()).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)

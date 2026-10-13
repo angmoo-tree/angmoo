@@ -4,7 +4,7 @@ from io import BytesIO
 from types import SimpleNamespace
 import pytest
 from PIL import Image
-from sqlalchemy import create_engine, select, func
+from sqlalchemy import create_engine, select, func, delete
 from sqlalchemy.orm import sessionmaker
 from app.runtime.persistence.model_registration import register_models
 from app.domains.media.service.assets import AssetService
@@ -145,6 +145,31 @@ def test_scope_isolation_and_owner_quota(image_db,tmp_path):
             assert service.cached(db,"owner",identities[1]) is None
             assert service.preflight(db,"owner",identities[1])["reason"] == "interpretation_daily_limit_reached"
     asyncio.run(scenario());assert fake.calls == 1
+
+
+def test_deleted_job_during_provider_call_cannot_recreate_received_file(image_db, tmp_path, deny_external_network):
+    class HeldInterpreter:
+        calls = 0
+        async def analyze(self, **kwargs):
+            self.calls += 1
+            # Simulate the independent committed deletion while the adapter
+            # is waiting. No raw analysis is permitted to reach a new spool.
+            with image_db() as eraser:
+                eraser.execute(delete(InterpretationAttempt))
+                eraser.execute(delete(ImageInterpretation))
+                eraser.commit()
+            return parse_analysis({"description": "must not survive deletion"}), {}
+    fake = HeldInterpreter()
+    _, service, (identity,) = prepared(image_db, tmp_path, fake)
+    async def scenario():
+        with image_db() as db:
+            with pytest.raises(Exception, match="interpretation_source_or_key_changed"):
+                await service.interpret(db, "owner", identity)
+    asyncio.run(scenario())
+    assert fake.calls == 1
+    assert not service.spool.exists() or not tuple(service.spool.iterdir())
+    with image_db() as db:
+        assert db.scalar(select(func.count()).select_from(ImageInterpretation)) == 0
 
 
 def test_received_analysis_recovers_db_failure_without_second_api(image_db,tmp_path,monkeypatch):

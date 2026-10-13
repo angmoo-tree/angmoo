@@ -1,4 +1,5 @@
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
 export type ActivityDaypart = "dawn" | "morning" | "afternoon" | "evening";
 export type ActivityRuntimeMode = "legacy_resident_v1" | "routine_resident_v1";
@@ -184,6 +185,7 @@ export class DailyActivityPlanApiError extends Error {
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}) {
+  const scope = captureAuthRequestScope();
   const { body, headers, ...rest } = options;
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
@@ -197,6 +199,7 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}) {
     },
   });
   const text = await response.text();
+  if (options.signal?.aborted || !isCurrentAuthRequestScope(scope)) throw new DOMException("Request scope changed", "AbortError");
   let payload: unknown = null;
   try {
     payload = text ? JSON.parse(text) : null;
@@ -223,9 +226,9 @@ function planPath(characterId: string, worldId: string, suffix = "") {
   return `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/activity-plan${suffix}`;
 }
 
-export async function getDailyActivityPlan(characterId: string, worldId: string) {
+export async function getDailyActivityPlan(characterId: string, worldId: string, signal?: AbortSignal) {
   try {
-    return await apiRequest<DailyActivityPlanRead>(planPath(characterId, worldId));
+    return await apiRequest<DailyActivityPlanRead>(planPath(characterId, worldId), { signal });
   } catch (error) {
     if (error instanceof DailyActivityPlanApiError && error.status === 404) {
       return null;

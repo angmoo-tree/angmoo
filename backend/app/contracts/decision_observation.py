@@ -22,7 +22,7 @@ _TEXT_FIELDS = frozenset({"status", "check", "validation_code", "normalized_code
     "dimension_state", "polarity_state", "from_ref", "to_ref", "from_resolution", "to_resolution",
     "dimension", "polarity", "perspective", "aggregation_kind", "aggregation_target",
     "intent", "time_scope_state", "coordination_state", "execution_state", "ranking",
-    "expected_values_supplied", "changed_fields", "shape_check", "from_is_subject", "to_is_subject", "wire_stage", "entities_stage", "relationship_stage", "meaning_stage", "coordination_stage", "agreement_stage"})
+    "expected_values_supplied", "changed_fields", "shape_check", "schema_protocol", "from_is_subject", "to_is_subject", "wire_stage", "entities_stage", "relationship_stage", "meaning_stage", "coordination_stage", "agreement_stage"})
 _NUMBER_FIELDS = frozenset({"step", "call", "tool_count", "response_chars", "entity_count", "extra_keys",
     "missing_keys", "max_output_tokens", "timeout_seconds", "input_tokens", "output_tokens", "thought_tokens",
     "total_tokens", "physical_attempts", "logical_calls", "limit", "max_hops", "depth", "plan_steps",
@@ -30,7 +30,8 @@ _NUMBER_FIELDS = frozenset({"step", "call", "tool_count", "response_chars", "ent
 _CODE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_.-]{0,95}$")
 _REF_TEXT = frozenset({"value_type", "features_complete", "first_lower", "has_uppercase", "has_underscore", "has_space", "has_non_ascii", "has_other", "ref_alias"})
 _TEXT_FIELDS |= _REF_TEXT | frozenset("received_" + k for k in _REF_TEXT) | frozenset({"input_stage", "failure_reason", "same_endpoint", "normalization_changed"})
-_NUMBER_FIELDS |= frozenset({"entity_index", "value_length", "received_value_length"})
+_NUMBER_FIELDS |= frozenset({"entity_index", "value_length", "received_value_length", "hints_reviewed", "hints_delivered", "hints_excluded"})
+_TEXT_FIELDS |= frozenset({"hint_state"})
 
 
 def closed(value, allowed, *, absent="not_reported"):

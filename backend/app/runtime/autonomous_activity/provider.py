@@ -103,7 +103,8 @@ class ActivityProvider:
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
                    before_provider_request: Callable[[int], Awaitable[None]] | None = None,
                    before_admitted_request: Callable[[], None] | None = None,
-                   on_input_receipt: Callable[[dict], None] | None = None):
+                   on_input_receipt: Callable[[dict], None] | None = None,
+                   on_json_object=None, on_json_validated=None):
         from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
         system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
         # Remove optional whole units before rejecting an oversized required
@@ -140,6 +141,16 @@ class ActivityProvider:
             raise ValueError("activity_input_budget_exceeded")
         from hashlib import sha256
         def record_input(actual_user):
+            from app.domains.social.contracts.today_activity import validate_today_activity_payload
+            final_payload, _ = json.JSONDecoder().raw_decode(actual_user)
+            validate_today_activity_payload(final_payload)
+            if getattr(self, "situation_output_active", False):
+                from app.runtime.autonomous_activity.situation_memory import freeze_social_input
+                # JSON recovery feedback follows the original JSON value. The
+                # manifest's payload digest includes those actual transmitted bytes.
+                final_payload, _ = json.JSONDecoder().raw_decode(actual_user)
+                self.situation_manifest = freeze_social_input(self.context, self.situation_snapshot,
+                    node=node, payload=final_payload, transmitted=actual_user, state=self.situation_state)
             memories = context.get("memories") if isinstance(context, dict) else None
             memory_refs = [packet.get("ref") for item in (memories or {}).values()
                 if isinstance(item, dict) for packet in item.get("packets", [])]
@@ -150,6 +161,7 @@ class ActivityProvider:
             if getattr(self.tracker, "observer", None) is None:
                 return
             self.tracker._notify("input_manifest", {
+                "situation_expected": getattr(self, "situation_output_active", False),
                 "node": node, "lane": lane, "input_chars": len(system) + len(actual_user),
                 "schema_sha256": sha256(json.dumps(schema, sort_keys=True, default=str).encode()).hexdigest(),
                 "prompt_sha256": sha256(system.encode()).hexdigest(),
@@ -204,10 +216,13 @@ class ActivityProvider:
             nonlocal dispatched
             # The final guard and physical-call allowance are checked by the
             # transport before this synchronous submission boundary.
-            if delivery is not None:
+            if delivery is not None and not dispatched:
                 delivery.dispatched()
             dispatched = True
             record_input(request.user_prompt)
+            db = getattr(self.context, "db", None)
+            if db is not None and db.in_transaction():
+                db.commit()
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,
@@ -221,9 +236,10 @@ class ActivityProvider:
                 retry_input_char_limit=64000 if json_retry_policy is not None and not token_budget else None,
                 sdk_attempts=1,
                 before_json_retry=before_json_retry,
-                before_provider_request=guard_request if before_provider_request is not None else None,
+                before_provider_request=guard_request,
                 request_preparer=prepare_request if token_budget else None,
-                on_request_submission=submitted_request if token_budget else None,
+                on_request_submission=submitted_request,
+                on_json_object=on_json_object, on_json_validated=on_json_validated,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None and dispatched:

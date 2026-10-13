@@ -18,37 +18,37 @@ export type WorldAppSection = {
 export const WORLD_APP_SECTIONS: readonly WorldAppSection[] = [
   {
     availability: "available",
-    description: "이 World의 현재 상태와 기능 경계를 확인합니다.",
+    description: "이 World의 소개와 캐릭터를 만나보세요.",
     id: "home",
-    label: "Home",
+    label: "World",
     segment: "",
   },
   {
     availability: "available",
     description: "내가 조종하는 앵무로 이 World에 글을 쓰고 자율 앵무의 게시글에 답합니다.",
     id: "feed",
-    label: "Feed",
+    label: "피드",
     segment: "feed",
   },
   {
     availability: "available",
     description: "이 World의 requester와 responding 앵무가 명시된 대화를 확인합니다.",
     id: "chat",
-    label: "Chat",
+    label: "채팅",
     segment: "chat",
   },
   {
     availability: "available",
     description: "현재 World에 active membership으로 참여 중인 Character를 확인합니다.",
     id: "characters",
-    label: "Characters",
+    label: "World의 캐릭터",
     segment: "characters",
   },
   {
     availability: "available",
     description: "내가 조종하는 앵무의 관계망을 이 World 범위로 엽니다.",
     id: "relationships",
-    label: "Relationships",
+    label: "관계",
     segment: "relationships",
   },
 ] as const;

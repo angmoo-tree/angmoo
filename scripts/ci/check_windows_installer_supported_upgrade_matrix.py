@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import yaml
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -35,12 +36,26 @@ def main() -> int:
         )
     workflow = (REPOSITORY_ROOT / ".github/workflows/windows-installer.yml").read_text(encoding="utf-8")
     runner = (REPOSITORY_ROOT / "scripts/ci/run_windows_installer_supported_upgrade.ps1").read_text(encoding="utf-8")
+    jobs = yaml.safe_load(workflow)["jobs"]
+    upgrade = jobs["windows-installer-supported-upgrade"]
+    if (upgrade.get("strategy") != {"fail-fast": False, "matrix": {"partition": ["first", "second"]}}
+            or upgrade.get("timeout-minutes") != 30 or "continue-on-error" in upgrade):
+        raise SystemExit("windows_installer_native_partitions_invalid")
+    if not any("-UpgradePartition ${{ matrix.partition }}" in step.get("run", "")
+               for step in upgrade["steps"]):
+        raise SystemExit("windows_installer_native_partition_not_executed")
+    if not any("windows_installer_upgrade_coverage.py" in step.get("run", "")
+               and '--run-attempt "$GITHUB_RUN_ATTEMPT"' in step["run"]
+               for step in jobs["windows-installer"]["steps"]):
+        raise SystemExit("windows_installer_native_union_missing")
     for version in readable_predecessors:
         if (
             f"--source-version {version}" not in workflow
             or f"supported-v{version}.zip" not in workflow
             or f"-SupportedV{version}FixtureArchive" not in workflow
             or f"Restore-IsolatedFixture $SupportedV{version}FixtureArchive" not in runner
+            or f"if ($selectedVersions -contains {version})" not in runner
+            or f"$completedVersions.Add({version})" not in runner
         ):
             raise SystemExit(f"windows_installer_hosted_predecessor_missing:v{version}")
     print(

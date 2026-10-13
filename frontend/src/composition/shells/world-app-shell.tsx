@@ -2,6 +2,7 @@
 
 import { useUiText } from "@/hooks/use-ui-text";
 import type { ReactNode } from "react";
+import { Globe } from "lucide-react";
 
 import { DeviceShell } from "@/components/layout/device-shell";
 
@@ -26,10 +27,10 @@ export function WorldAppShell({
 }: WorldAppShellProps) {
   const uiText = useUiText("shell");
   const header = (
-    <header className={styles.header}>
+    <header className={styles.header} data-world-introduction-header>
       <div className={styles.identity}>
-        <div className={styles.eyebrow}>World App</div>
-        <h1 className={styles.title}>{worldName}</h1>
+        <Globe size={20} aria-hidden="true" />
+        <span className={styles.title}>World</span>
       </div>
       {status}
     </header>

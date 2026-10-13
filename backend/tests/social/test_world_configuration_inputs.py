@@ -1,5 +1,6 @@
 """World static inputs reach SNS and durable Media; all Providers are injected."""
 import asyncio
+import hashlib
 import json
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -8,13 +9,17 @@ from types import SimpleNamespace
 
 import pytest
 from PIL import Image
-from sqlalchemy import select
+from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session, sessionmaker
+from pydantic import SecretStr
 
 from app.config import settings
 from app.domains.characters.models import Character, AgentImageGenerationSetting
 from app.domains.characters.service.world_image_profiles import available_world_image_models, select_world_image_profile
 from app.domains.identity.models import LlmCredential
+from app.domains.identity.schemas import WorldCredentialWrite
+from app.domains.identity.service import world_credentials
+from app.domains.media.models_world_policy import WorldImagePolicy
 from app.domains.media.generation_contracts import ImageResult, ImagePreparationError
 from app.domains.routines.contracts.activity_policy import ActivityPolicy
 from app.domains.routines.models import AgentRun, AgentActivitySetting
@@ -44,13 +49,36 @@ pytestmark = pytest.mark.usefixtures("deny_external_network")
 @pytest.fixture(params=("creation", "legacy_transition"))
 def database(tmp_path, request):
     legacy = request.param == "legacy_transition"
-    engine = seed_configuration_fixture(tmp_path / "social-input.sqlite", legacy=legacy)
+    root = tmp_path / "isolated-runtime"
+    source = root / "canonical/generations/v27-fixture/angmoo.sqlite3" if legacy else tmp_path / "social-input.sqlite"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    engine = seed_configuration_fixture(source, legacy=legacy)
     if legacy:
-        from app.runtime.migrations.sqlite_versions import world_configuration_v28
+        from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeCoordinator
+        from app.runtime.migrations.generation import EmbeddedGenerationController
+        from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+        from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+        from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION, sqlite_schema_contract_digest, sqlite_schema_digest
+        manifest = load_sqlite_manifest(27)
         with engine.begin() as connection:
-            before = world_configuration_v28.capture_delta(connection)
-            world_configuration_v28.upgrade(connection)
-            world_configuration_v28.verify_delta(connection, before)
+            assert sqlite_schema_contract_digest(connection) == manifest.schema_digest
+            connection.exec_driver_sql("INSERT INTO angmoo_schema_version VALUES(1,?,?,?,?,?)",
+                (27, manifest.source_revision, manifest.source_migration_count,
+                 sqlite_schema_digest(connection), datetime.now(UTC).isoformat()))
+        engine.dispose()
+        original_sha = hashlib.sha256(source.read_bytes()).hexdigest()
+        controller = EmbeddedGenerationController(root / "canonical", artifact_relative_path="angmoo.sqlite3")
+        controller.promote("generations/v27-fixture", manifest_sha256=manifest.manifest_sha256, data_version=27)
+        # Use the product's copy-on-write staging path; never disable live FK
+        # enforcement or weaken the table-rebuild migration's safety guard.
+        result = SqliteCanonicalUpgradeCoordinator(StaticRuntimeDataPath(root), fallback_generation="v27-fixture").upgrade()
+        assert result.source_version == 27 and result.target_version == SQLITE_SCHEMA_VERSION
+        assert result.database_path != source and hashlib.sha256(source.read_bytes()).hexdigest() == original_sha
+        engine = create_engine(f"sqlite:///{result.database_path}", connect_args={"check_same_thread": False, "timeout": 10})
+        event.listen(engine, "connect", lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"))
+        with engine.connect() as connection:
+            assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
+            assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
     yield engine
     engine.dispose()
 
@@ -66,6 +94,20 @@ def world_values(db, suffix, *, name=None, image=False):
     if image:
         model = install_configuration_image_fixture(db, actor.character_id)
         stored.settings = {**stored.settings, "image_model": model}
+        world_credentials.save(db, owner_id="fixture-owner", world_id=actor.world_id,
+            world_character_id=actor.id, purpose="image", data=WorldCredentialWrite(
+                provider="comfyui", model="workflow", thinking_level=None, expected_revision=0,
+                expected_key_revision=0))
+        common = db.get(AgentImageGenerationSetting, actor.character_id)
+        profile = json.loads(common.generation_profiles_json)["comfyui:fixture-workflow:"]
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_enabled, policy.generation_limit = True, 4
+        policy.generation_settings = {"style": f"World {suffix} watercolor", "appearance": f"World {suffix} red coat",
+            "negative": "blur", "profiles": {"comfyui:workflow": {"options": profile["options"], "connection": profile["connection"]}}}
+    world_credentials.save(db, owner_id="fixture-owner", world_id=actor.world_id,
+        world_character_id=actor.id, purpose="sns", data=WorldCredentialWrite(provider="google",
+            model=stored.settings["generation_model"], thinking_level="high",
+            api_key=SecretStr("synthetic-world-input-key"), expected_revision=0))
     actor.version += 1
     actor.autonomous_enabled = True
     db.commit()
@@ -73,6 +115,7 @@ def world_values(db, suffix, *, name=None, image=False):
 
 
 def context(db, actor, configuration, *, run_id=None, manual=False):
+    from app.runtime.world_credential_binding import capture
     cid = actor.character_id
     character = db.get(Character, cid)
     credential = db.get(LlmCredential, f"config-credential-{cid[-1]}")
@@ -82,7 +125,9 @@ def context(db, actor, configuration, *, run_id=None, manual=False):
         character=character, credential=credential, state=None,
         activity_policy=ActivityPolicy(True, ("post", "reply", "like"), {}, now, "synthetic ready"),
         selected_post_id=None, run_started_at=now,
-        input_snapshot={"_world_configuration": configuration.request_snapshot()})
+        input_snapshot={"_world_configuration": configuration.request_snapshot(),
+            "_world_credential": capture(db, owner_id="fixture-owner", world_id=actor.world_id,
+                actor_id=actor.id, purpose="sns")})
 
 
 def test_actual_selector_planner_writer_transport_uses_each_accepted_world(database, monkeypatch):
@@ -96,7 +141,6 @@ def test_actual_selector_planner_writer_transport_uses_each_accepted_world(datab
         return kwargs["validator"](value)
 
     monkeypatch.setattr(transport, "generate_json", fake_generate)
-    monkeypatch.setattr(transport, "_api_key", lambda _: "synthetic-only")
     with Session(database, expire_on_commit=False) as db:
         for suffix in ("a", "b"):
             actor, configuration = world_values(db, suffix)
@@ -252,7 +296,7 @@ class FakeImages:
     def __init__(self):
         self.requests = []
 
-    async def generate(self, request, key, reference, *, on_receipt=None, receipt=None, on_submit=None):
+    async def generate(self, request, key, reference, *, on_receipt=None, receipt=None, on_submit=None, on_diagnostic=None):
         assert key is None and reference is None
         if receipt is None:
             if on_submit:
@@ -298,7 +342,7 @@ def test_actual_image_admission_and_worker_retain_frozen_world_values(database, 
     asyncio.run(media.worker.process(job_id))
     asyncio.run(media.worker.process(job_id))
     assert len(fake.requests) == 1
-    assert fake.requests[0].model == "fixture-workflow"
+    assert fake.requests[0].model == "workflow"
     assert fake.requests[0].positive == "World a watercolor, World a red coat, reading at a desk"
     assert (fake.requests[0].world_id, fake.requests[0].world_character_id, fake.requests[0].world_configuration_revision) == (
         "config-world-a", "config-role-a", configuration.revision)
@@ -306,6 +350,42 @@ def test_actual_image_admission_and_worker_retain_frozen_world_values(database, 
         assert db.get(PostImageGenerationJob, job_id).status == "succeeded"
         assert db.scalar(select(PostMedia).where(PostMedia.post_id == "world-a-image-post")).source_kind == "generated"
         assert db.get(WorldCharacter, "config-role-b").autonomous_enabled is False
+
+
+def test_world_placeholder_admission_freezes_actual_values_once(database, tmp_path, monkeypatch):
+    from app.domains.media.service import comfy_workflows
+    draws = []
+    monkeypatch.setattr(comfy_workflows.secrets, "randbits", lambda bits: draws.append(bits) or 731)
+    sessions = sessionmaker(database, expire_on_commit=False)
+    fake = FakeImages()
+    media = MediaRuntime(sessions, SimpleNamespace(media_root_path=tmp_path / "media"), clients={"comfyui": fake})
+    with sessions() as db:
+        actor, configuration = world_values(db, "a", image=True)
+        media.limits.write(db, 4, expected_revision=0)
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_settings = {**policy.generation_settings, "profiles": {"comfyui:workflow": {
+            "options": {"options_schema_version": 2, "values": {"seed": -1, "clip_skip": 2},
+                "workflow": {"input_mode": "placeholders", "prompt": {"8": {"class_type": "Custom", "inputs": {
+                    "text": "%prompt%", "negative": "%negative_prompt%", "seed": "%seed%", "clip": "%clip_skip%"}}}}},
+            "connection": {"ready": True}}}}
+        db.flush()
+        post = Post(id="world-v2-image-post", world_id=actor.world_id, author_world_character_id=actor.id,
+            author_character_id=actor.character_id, author_name=configuration.profile.display_name, title="A post", body="A body")
+        db.add(post); db.flush()
+        intent = media.admit_post(db, post=post, owner_id="fixture-owner", character_id=actor.character_id,
+            draft=SimpleNamespace(_image_prompt="reading at a desk", _image_error=None),
+            input_snapshot={"_world_configuration": configuration.request_snapshot()})
+        db.commit()
+        assert intent.state == "queued"
+        snapshot = json.loads(intent.request_json)["comfy_execution"]
+        assert snapshot["prepared_values"] == {"positive": "World a watercolor, World a red coat, reading at a desk",
+            "negative": "blur", "seed": 731, "clip_skip": -2}
+        assert snapshot["clip_skip_display"] == 2 and snapshot["input_mode"] == "placeholders"
+        job_id = db.scalar(select(PostImageGenerationJob.id).where(PostImageGenerationJob.intent_id == intent.id))
+    asyncio.run(media.worker.process(job_id))
+    asyncio.run(media.worker.process(job_id))
+    assert draws == [32] and len(fake.requests) == 1
+    assert fake.requests[0].comfy_execution.prepared_values == snapshot["prepared_values"]
 
 
 def test_image_validation_options_and_prepare_use_same_supported_profile(database, tmp_path):
@@ -317,7 +397,7 @@ def test_image_validation_options_and_prepare_use_same_supported_profile(databas
         options = references.image_model_options(db, character_id=actor.character_id)
         assert options == [{"value": "comfyui:fixture-workflow", "label": "comfyui · fixture-workflow", "enabled": True, "reason": None}]
         request, _, _, _, error = media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)
-        assert error is None and request.model == "fixture-workflow"
+        assert error is None and request.model == "workflow"
         setting = db.get(AgentImageGenerationSetting, actor.character_id)
         profile = json.loads(setting.generation_profiles_json)["comfyui:fixture-workflow:"]
         setting.generation_profiles_json = json.dumps({"comfyui:custom:workflow:": profile})
@@ -332,7 +412,14 @@ def test_image_validation_options_and_prepare_use_same_supported_profile(databas
         assert available_world_image_models(setting)[0]["enabled"] is False
         with pytest.raises(ImagePreparationError, match="connection_unverified"):
             select_world_image_profile(setting, "klein")
-        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] == "world_image_model_connection_unverified"
+        # The common profile cannot alter an actor-owned connection. Only the
+        # actual World policy going unavailable must block its next image.
+        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] is None
+        policy = db.get(WorldImagePolicy, actor.id)
+        policy.generation_settings = {**policy.generation_settings,
+            "profiles": {"comfyui:workflow": {"connection": {"ready": False}}}}
+        db.commit()
+        assert media.prepare_intent(db, "fixture-owner", actor.character_id, "scene", None, configuration=configuration)[-1] == "generation_connection_unverified"
         assert not db.dirty
 
 

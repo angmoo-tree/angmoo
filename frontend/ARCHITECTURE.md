@@ -1,5 +1,181 @@
 # Angmoo Frontend Architecture
 
+## World and own-profile image transport (2026-10-12 LOCAL)
+
+Worlds API owns exact four-field serialization for own-profile uploads. Shared
+Characters crop payloads retain filename for their existing consumers. The common
+runtime media transport maps retained `/media/worlds/...` references to the guarded
+World image API via the Next proxy or static sidecar. Safe media validation keeps
+the original relative reference until the hook performs the scoped authenticated
+fetch and creates a blob. Auth/runtime changes invalidate fetched blobs; late
+responses and unmount revoke them. Other public media, private assets and default
+images retain their existing transport. The same features serve Next/static;
+no layout, visible copy, dependencies or canonical visual assets change.
+Evidence: [focused image recovery](../docs/verification/world-image-recovery-20261012.md).
+
+## World image editing and scoped search diagnostics (2026-10-11 LOCAL)
+
+`features/worlds` owns same-page icon/banner editing in Creator Studio. Explicit
+semantic Buttons open the corresponding file input synchronously and reuse the
+common `ImageCropDialog`/conversion functions. The common dialog exposes an optional
+recovery-action slot, without importing Worlds or Characters. Profile upload remains
+owned by Characters. Existing World upload/remove APIs, creator access and row-version
+checks remain; image success updates image/version state without resetting unsaved
+World definition fields. A conflict retains the crop and requires explicit refresh
+and apply. Scope epochs/abort guards and bitmap cleanup reject late results.
+
+Next and the static shell use the same feature. Existing World editing stays on its
+URL; a new World's first draft save retains its normal navigation. Home preview then
+World preview stays in one column. Social owns the body placeholder; Media removes
+only its fixed original-size paragraph and retains preparation/recognition/error UI.
+All changed visible strings have ko/en counterparts. Chat owns typed, optional
+canonical-read diagnostics, export field allowlists and unknown values for old or
+unfinished reads. No raw worker/connection/private source data is added to export.
+
+Evidence: [local integrated verification](../docs/verification/chat-memory-world-integrated-20261011.md).
+
+### Historical Chat evidence and Studio preview layout (2026-10-11 LOCAL)
+
+Memory owns the strict additive world-chat-evidence.v1 decoder, safe frozen relationship
+projection, three comparison states, and separate retrieval/current/legacy notices.
+WorldChatEvidenceInspector retains its World/thread/request/open key, abort cleanup and
+shared Dialog scroll/focus behavior; presentation text stays in both Memory ko/en catalogs.
+This LOCAL surface reuses the same feature component in Next and StaticProductRouter.
+WorldCreator's image-preview container remains one column at every width, with the home
+icon before the full-width World preview. The existing outer Studio form/aside grid and
+crop/upload/draft guards remain unchanged. WorldBanner receives the original canonical
+asset URL and owns its authenticated display resolution; an already-resolved blob is
+not passed through its canonical URL validator again.
+
+Evidence: [implementation and scoped checks](../docs/verification/chat-identity-evidence-preview-20261011.md).
+
+### Device Home and optional basic activity composition (2026-10-10)
+
+DeviceHome owns its icon grid and World list without the local four-link footer
+or its reserved space. Other local surfaces and the five World tabs retain their
+navigation, scroll ownership and safe-area. Existing runtime navigation owns
+direct-entry fallback and native window routing; no delayed redirect was added.
+Relationships' embedded header uses the Chat/Characters geometry (20px inset,
+12px gap, 48px icon); its graph/depth/evidence remain feature-owned.
+
+Characters owns ActivityPolicyFields shared by basic and detailed settings,
+the strict basic API decoder and BasicActivitySettingsCard. A scoped editor
+identity includes auth/runtime/World/actor; identity changes unmount drafts and
+abort requests. Same-scope refresh reconciles only unedited fields; an explicit
+save re-reads current values and preserves conflicting input until acknowledgement.
+Policy, SNS credential and image settings save independently. Composition joins
+the three feature cards in WorldCharacterBasicSettings and passes that assembly
+through AgentCreateClient's ReactNode render slot. Features do not import another
+feature or Composition. The sixth optional creation step uses the server's
+durable registration_scope, recovers a lost completion response and reloads the
+same receipt without duplicate registration. Done/Skip do not implicitly save or
+enable activity; aggregate dirty/busy guards protect navigation. The existing
+autonomy-setup URL reads the owned Studio list for unpublished actor scopes.
+Studio's link is Activity settings. Published detailed settings reuse the same
+policy/credential/image APIs. SNS save refreshes eligibility from saved facts.
+
+Registration success is distinct from activity-scope recovery. A missing or
+mismatched registration_scope retains the completed receipt and sixth step,
+offers an explicit receipt review, and permits Done/Skip without mounting cards
+for an unverified scope. The neutral use-auth-runtime-identity hook keys creation,
+credential and image-policy component lifetimes by auth session and runtime;
+identity changes discard unsaved inputs, including the Media-owned Partner key,
+and cancel scoped effects. Callers retain their DTO and authorization checks.
+The additional exception and isolation coverage is recorded in the
+[2026-10-10 review](../docs/verification/home-activity-memory-topics-review-20261010.md).
+
+World status composes the stored current_state into the neutral status card:
+state, mood/intensity, full original note and confirmed_at precede name/intro and
+recent/next activity. Only the World identity handle badge is absent; Device
+identity remains unchanged. The active scoped read aborts on auth/runtime/scope
+changes, retains same-scope last-good data on errors, and makes no AI calls,
+writes or polling. Activity-engine settings retain effective source, inheritance,
+explicit V2, CAS and transition notices without state/run presentation.
+
+Plan rows start independently collapsed. Plan/topic summaries have 44px labelled
+chevrons with independent aria-controls/expanded and no settings navigation.
+Topics expand from six to all without a +N or textual collapse control. The
+character-only recommendation panel retains state/model/tags/regenerate/refresh;
+Feed diagnostic/history DOM and World key selection are absent. Studio no longer
+assembles World/character/owner topic tools. Existing delivery/feed DTOs remain
+available for their other consumers. All changed product copy has ko/en entries.
+
+### World summaries, embedded relationships and saved embedding settings (2026-10-09)
+
+Characters owns the four-row daily-plan presentation and scoped read-only plan
+summary; Social owns the six-topic summary and the shared expandable topic list.
+Composition passes these through the Status ReactNode slot, preserving the order
+identity, recent activity, plan, topics, persona and activity summary. Features do
+not import another feature's implementation. `hooks/use-active-scoped-read` owns
+only neutral active/visibility, abort, auth/runtime identity and refresh lifetime;
+the calling feature validates scope, plan versions and the server World timezone.
+Settings retains the existing generation and credential controls; the 2026-10-10
+contract above removes Feed-detail presentation while preserving its API DTOs.
+
+The World Relationships section and the explicit Character/World graph URL use
+one `WorldApp` composition and Phone shell in both Next and StaticProductRouter.
+The default center comes from that World's existing owner profile; an explicit
+Character remains the center without owner fallback or profile creation.
+Relationships owns the unchanged directional graph, depth, evidence and review
+presentation. The old dedicated window enum is retained for launch metadata
+compatibility; current navigation classifies the graph URL as Phone.
+
+Media decides whether generic service-secret fields exist. The neutral common
+CredentialFields accepts selected-provider metadata, revision-aware transports
+and an optional saved metadata source; it never chooses a business provider.
+World image settings and legacy generation settings retain write-only inputs,
+clear unsaved keys on provider changes, preserve them for same-provider model
+changes and reject stale auth/runtime/provider responses. ComfyUI has no generic
+server-key DOM. The separate Partner account-key field remains Media-owned.
+
+Memory owns one saved embedding controller, shared by storage guidance and the
+embedding editor. Saved configuration/key readiness is separate from dirty
+inputs, read failures and preparation state. Memory renders storage, embedding,
+then relationship review. Only explicit save/prepare controls issue mutations;
+no embedding shortcut or scroll/focus navigation is added. Korean/English copy,
+scope cancellation and the existing shared mutation lock remain mandatory.
+
+Implementation and scoped evidence: [2026-10-09 verification](../docs/verification/world-ui-settings-improvements-20261009.md).
+
+### Scoped unsaved experience recovery (2026-10-08)
+
+Memory owns the bounded unsaved-experience client/DTO and recovery controls inside
+the existing memory-processing card. Composition retains the shared mutation
+lock; recheck/save/settings/discard cannot overlap through separate UI controllers.
+The server supplies safe descriptions, reason enums and action capabilities.
+Provider credentials, source bodies, manifests, internal run IDs and proof flags
+are not presented or accepted from the UI.
+
+The list exposes a whole-scope recheck next to the unresolved count, individual
+recheck/discard below each experience, bounded cursor pagination and an internal
+scroll region. Scope changes remount the controller, abort requests and reject
+late responses. Ambiguous failures retry the exact operation/target/body/key;
+request-key reads must resolve that request. Completed partial results display
+saved/rejected/skipped counts, while operational worker errors retain a resumable
+request instead of a completion notice.
+
+Discard uses the common Dialog/Button, safe default focus, focus trapping/return
+and an irreversible confirmation. Current counts and list/focus update after the
+canonical response. Memory OFF blocks recheck while owner discard remains subject
+to the server capability. Korean and English catalogs share keys/placeholders;
+saved experience text is not translated. Next and static shell use the same
+feature implementation and are verified separately.
+
+### World introduction (2026-10-07)
+
+Worlds owns `components/world-introduction.tsx`, the existing World detail read,
+scope/schema validation, banner interpretation and expandable definition display.
+Characters owns `components/world-character-preview.tsx`, canonical public-profile
+reads and the compact autonomous-character preview. Composition supplies character
+and owner-profile ReactNode slots without cross-feature implementation imports.
+Existing media URL validation/runtime authentication and ProfileAvatar fallbacks
+remain in the common media/display owners. The bundled default banner is a static
+LOCAL SVG asset and does not create a media record or invoke generation.
+
+World App retains the `home` section ID and URL while displaying World. World,
+auth identity and runtime changes remount the scoped screen; cancelled or stale
+reads cannot apply to the replacement scope or initiate profile creation.
+
 ### World management and confirmed reactions (2026-10-05)
 
 Characters owns the scoped dashboard/management clients, DTO validation, shared
@@ -556,3 +732,75 @@ ko/en은 기존 namespace와 안정된 hook을 사용하고 locale 변경은 dra
 일반 Next 내부 링크의 작성 중 이탈 확인은 composition의 `BrowserNavigationGuard`가 기존 등록된 leave guard를 호출해 처리한다. Native와 static 탐색의 소유자는 그대로 유지하며, 수정 키·초안·첨부·사업 정책을 공통 탐색 계층으로 옮기지 않는다. locale 변경은 같은 route와 actor의 component 수명을 유지한다.
 
 `features/characters`의 personalized activity API/type/panel이 현재 지원 engine 쓰기와 역사 engine 읽기를 구분한다. 신규 입력은 V2 또는 상속 null이고 과거 current·abandoned 및 backend 전환 상태는 그대로 표시한다. 전환 readiness·owner·World·scope/revision·claim 정산은 Backend가 소유한다. UI의 안내 문구나 선택만으로 활동 ON·승인·예약을 변경하지 않는다. Next와 static 모두 같은 소유 컴포넌트를 사용한다. [검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)과 [LOCAL 디자인 근거](../docs/architecture/frontend-design-reference.md)의 최신 기록을 함께 읽는다.
+
+## 공통 ComfyUI 편집 화면 (2026-10-09)
+
+`features/media/components/comfy-editor.tsx`가 Character 생성 설정과 World 이미지 설정이 공통 사용하는 JSON 가져오기/편집·위치 안내·필요 값·후보·고급 출력 UI를 소유한다. `api/media-client.ts`의 인증된 분석 endpoint를 사용하며 입력 원문은 화면의 draft로 남기고, 분석된 graph만 부모 설정 draft로 전달한다. invalid 원문은 지우지 않고 저장을 막는다. 파일/예시 교체와 textarea edit/paste는 같은 Backend raw decoder를 사용하지만, 교체는 선택 경로의 binding/output을 초기화하고 편집은 유효한 기존 설정을 보존한다. 중복 JSON 키와 보존한 연결·출력의 검사는 Backend 책임이다.
+
+Character/model 및 World/actor/profile 별 component key와 AbortSignal로 늦은 분석 결과를 격리한다. legacy는 조회 시 전환하지 않으며 명시적 전환만 v2 node_value 모드로 바꾼다. UI는 필요한 role만 보여주고 object_info 후보가 없으면 자유 입력을 제공한다. `/system_stats` 연결·앱 입력 준비·후보 조회 상태를 구분하며 서버의 실행 가능성 검사를 UI에서 재현하지 않는다. Next와 static은 동일 editor/status/error/types를 사용한다. 상세 진단은 plain text로 렌더링하며 성공한 작업의 warning도 확인할 수 있다.
+
+조립·소유권·credential transport는 기존 위치를 유지한다. JSON과 API 키를 localStorage에 보관하거나 다른 캐릭터 키를 가져오지 않는다. [구현·검증 기록](../docs/verification/comfy-workflow-reuse-20261009.md)을 참조한다.
+
+## Creator Studio 표시·공용 사진 준비 (2026-10-10 LOCAL)
+
+Studio 목록은 Creator Studio, World 편집/신규·저장된 공개 준비 결과와 draft 미리보기는 Worlds,
+가져오기/내보내기 승인은 World Packages가 소유한다. 앱 안내만 ko/en으로 바꾸며 사용자 본문,
+고급 JSON, digest 승인, CAS/revision·권한 계약은 원래 feature에 남긴다.
+
+AppIconVisual·SectionHeading·ImageCropDialog와 utils/image-crop.ts는 표시·canvas 계산만 소유하는
+중립 컴포넌트다. WorldBanner는 Worlds 내부에서 소개/편집 미리보기가 공유한다. 선택/자르기
+취소는 저장하지 않고 적용 때만 기존 version-aware API를 호출한다. 생성 마지막 단계는
+기존 Characters controller를 composition slot으로 받아 명시 ON 후 이동한다. 다른 설정의
+ON/OFF·독립 저장은 보존한다. feature 직접 import나 새 facade를 만들지 않는다.
+
+AppShell navigation="none"은 /settings와 /agents/new의 Next/static 조립에만 적용한다.
+Home Quicksand wordmark는 로컬 번들과 원문 고지를 제공하며 일반 UI 글꼴은 보존한다.
+Media의 bounded Worker는 게시글/Chat 사진만 처리한다. 원본 20MiB·최종 10MiB/4096px·요청
+14MiB, 30초/6회/동시1개와 조기 픽셀 제한을 공통 적용한다. auth/runtime/World/thread 변경과
+취소/unmount 때 Worker·HTTP·late response를 정리한다. Social 공개/Chat 전송과 실제 asset
+preflight/인식 책임은 기존 소유자에 남긴다. World/프로필 5MiB와 네 POST 8,262,144 bytes는
+별도 계약이다. [자산·코덱 계약](../docs/operations/local-photo-codec.md)과
+[검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 따른다.
+
+TypeScript는 제품 소스와 생성된 Next route 타입을 검사한다. 정적 산출물인 `out`과
+`static-shell/out`은 입력 소스가 아니므로 제외한다. 사진 Worker 원본의 타입 검사는 유지한다.
+
+## Chat·World 삭제 수명 (2026-10-12 LOCAL)
+
+Chat은 기존 TypingPresence 하나로 이미지 인식부터 응답 대기까지 표시한다. 같은 generationScope의
+재연결은 보이는 표시를 유지하며 새 request/attempt에 이전 상태를 전달하지 않는다. 종료 event 없이
+닫힌 stream은 실제 status로 복구하며 completed를 합성하지 않는다. 정상 실패/text-only/retry와
+NDJSON·identity 검증은 유지한다. 실제 World 삭제 오류만 처리 중 표시·scope를 종료한다.
+
+Worlds가 삭제 DTO/API/Dialog/controller/progress와 read-only 삭제 watch를 소유한다. Composition이
+Studio·World 편집·선택적 기존 package export를 render slot으로 조립한다. Memory는 순수 scope
+검사 callback을 Composition에서 받아 다른 feature를 직접 import하지 않는다. server-confirmed
+삭제가 확인되면 열린 scope를 종료하지만 통신 실패를 삭제로 취급하거나 다른 World로 이동하지 않는다.
+auth/runtime identity로 controller를 재생성하고 타 World의 입력·blob·원본 선택 경로는 유지한다.
+
+Dialog는 저장명/version·이름 입력·영구 consent를 사용하며 dirty 설정을 저장하지 않는다. 접수 전
+취소는 요청0과 trigger focus 복귀를 보장한다. 응답 유실은 동일 command/key로 확인하고 202는
+완료가 아니다. owner status/active list로 복원하고 실패 retry는 동일 작업을 사용한다. 작업 단계의
+가짜 퍼센트나 완료를 표시하지 않는다. 모든 추가/변경 사용자 문구는 같은 ko/en catalog에 둔다.
+
+## ComfyUI 교체·배포 CSP·Guide 언어 경계 (2026-10-12, LOCAL)
+
+Media의 파일/예시 교체와 편집은 같은 서버 분석 API를 사용하고, `utils/comfy-editor-draft.ts`는
+교체 후 작은 설정 전환과 직렬화만 담당한다. graph parser/실행 검사를 복제하지 않는다.
+교체는 선택 경로를 placeholders/auto output으로 바꾸며, legacy의 다른 경로와 global CLIP 의미를
+보존한다. edit는 binding/output을 서버에서 다시 확인한다. 읽기 시작·분석·같은 파일 재선택은
+revision/AbortSignal과 path·Character/World·auth/runtime 수명에 묶고, locale은 draft를 재설정하지 않는다.
+예시 다운로드는 draft/저장/키 읽기/외부 생성과 분리된 인증된 read다.
+
+Next 16의 `src/proxy.ts`는 서버 전용 framework adapter다. 공통 CSP helper만 import할 수 있고
+feature/composition을 import하지 않는다. `lib/security/csp.ts`는 `server-only`로 보호한다.
+요청마다 새 nonce를 만들고 client CSP/x-nonce를 덮어써 request와 enforcing response에 전달한다.
+Root layout은 connection()으로 동적 HTML을 유지하고 nonce HTML은 private,no-store다.
+정적 셸은 이 서버 root/Proxy/helper를 import하지 않으며 Tauri의 별도 CSP를 유지한다.
+
+Support는 server-only 문서 loader/server component와 locale client view를 분리한다.
+Guide의 ko/en은 고정 literal 파일 읽기이며 frontend tracing/Docker/static 복사에도 둘 다 포함한다.
+`/agent_guide.md` 기본 KO와 lang=ko|en 계약을 유지한다. 정적 셸의 `/angmoo-api` 미지원 계약은 유지한다.
+영어 Guide도 기존 외부 bot의 한국어 공개 출력, auth/route/payload 의미를 바꾸지 않는다.
+
+[LOCAL 검증·실행 원장](../docs/verification/comfy-security-20261012.md)을 참조한다.

@@ -14,14 +14,16 @@
     "test:world-package-proxy": "node ./scripts/test-world-package-proxy.mjs",
     "test:character-card-proxy": "node ./scripts/test-character-card-proxy.mjs",
     "test:ui-catalog": "node ./scripts/check-ui-catalog.mjs",
+    "test:next-root-glob": "node ./scripts/test-next-root-glob.mjs",
     "test:user-environment": "node ./scripts/test-user-environment.mjs",
     "test:ui-error-contracts": "node ./scripts/test-ui-error-contracts.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "i18next": "26.4.2",
+    "libheif-js": "1.23.5",
     "lucide-react": "^1.29.0",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-i18next": "17.0.15"
@@ -32,7 +34,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

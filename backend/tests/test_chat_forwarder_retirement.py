@@ -21,6 +21,11 @@ def signed_reader():
     cache = {}
 
     def read(*args, root):
+        # The production bounded cache returns exact immutable ledger bytes.
+        # Every validation still parses and compares history against the fresh
+        # candidate; no assertion, source or current-owner check is skipped.
+        if len(args) == 2 and args[0] == "show" and args[1].endswith(":security/post_refactor_contract_changes.json"):
+            return proof._product_change_module().committed_history_bytes(REPO, args[1])
         if args not in cache:
             cache[args] = subprocess.check_output(["git", *args], cwd=REPO)
         return cache[args]

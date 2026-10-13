@@ -72,6 +72,7 @@ class AutonomyWorkflows(Generic[DetailT]):
     bind_profile: ProfileBind
     release_profile: ProfileRelease
     reload_secrets: Callable[[], None]
+    prepare_activation_detail: Callable[[Session, str], None]
     build_detail: Callable[[Session, ActivityCharacter], DetailT]
     character_not_found_error: type[Exception]
     credential_required_error: type[Exception]

@@ -78,3 +78,17 @@ test("missing trace is not fabricated for old requests or lost detail", () => {
   assert.equal(output.search_trace, null);
   assert.equal(output.detail_availability, "not_retained");
 });
+
+test("canonical receipt retains unknown counts and never exports worker internals", () => {
+  const data = sample();
+  data.search_trace = { version: "search-diagnostic-trace.v1", coverage: "complete", stages: [], lineage: [], terminals: [],
+    stage_events_dropped: 0, lineage_edges_dropped: 0, aliases_dropped: 0,
+    canonical_reads: [{ stage: "revalidate", status: "deadline", wait_ms: null, elapsed_ms: null, sql_count: null,
+      unique_nodes: null, memo_hits: null, cleaned: null, connection: "must-not-export" }] };
+  const output = diagnosticExport(data, "world", "thread", "failed-request");
+  assert.equal(output.search_trace.canonical_reads[0].sql_count, null);
+  assert.equal(output.search_trace.canonical_reads[0].cleaned, null);
+  assert.ok(!JSON.stringify(output).includes("must-not-export"));
+  delete data.search_trace.canonical_reads;
+  assert.ok(!("canonical_reads" in diagnosticExport(data, "world", "thread", "failed-request").search_trace));
+});

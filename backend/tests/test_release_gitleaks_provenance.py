@@ -20,6 +20,11 @@ EVIDENCE = (
     ('security/post_refactor_contract_changes.json', 'frontend/src/lib/http/api-request.ts', '2a70207309b02ccb2c24e41b2138468cbd0c6066', '77aa85f75e3f8ae6157d0aa41ac07a3018cc058c'),
     ('security/refactor_backend_additions.json', 'browser-tests/playwright.world-character-api.config.ts', 'ac228d6d97249b6b5262bf8d22601a9d10c4e114', '8551ea27c5b521504b9c22e22646b9637f5af758'),
     ('security/refactor_backend_additions.json', 'browser-tests/world-character-configuration-api.spec.ts', '51b0aec04167bfb00e085a262d09da2e5975c54b', '8551ea27c5b521504b9c22e22646b9637f5af758'),
+    ('security/post_refactor_contract_changes.json', 'backend/tests/test_t2_secret_allowlist.py', '05f9d788ddaa1d35b6cf6647668121fc1eba1881', 'b19eca0196f92f7d48bf258df5ea3c466a1767c8'),
+    ('security/post_refactor_contract_changes.json', 'backend/security/secret_scan_allowlist.json', 'cdfa774f0fa21b50ab29e7ed9ae345f79a737729', 'c10ee037a1b13851d54b52e38be1a8fac4d28607'),
+    ('security/post_refactor_contract_changes.json', 'backend/tests/test_t2_secret_allowlist.py', 'fd6be4d63213ad086e7096d9a7c2f4d23cba13fc', 'c10ee037a1b13851d54b52e38be1a8fac4d28607'),
+    ('security/post_refactor_contract_changes.json', 'backend/security/secret_scan_allowlist.json', '238944f9a08254cb18035aab4d58d9ae18900ee9', '20332573326b98ec66fc57f6d3b728ec4156b9b1'),
+    ('security/post_refactor_contract_changes.json', 'backend/tests/world_characters/test_world_key_execution.py', '6266e382e8a87f9f534bd048e935adc9427340f5', '6482483a0995321fc5525d8e5db3df349c8e6df4'),
 )
 
 def groups():

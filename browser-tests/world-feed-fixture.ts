@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { uiDManualFeed, uiDManualPost, uiDOwnerActor, uiDWorld } from "./continuity-next-fixture";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
+import type { WorldCharacterManagementRead } from "../frontend/src/features/characters/types/world-character-management";
 
 export const FEED_WORLD = "world-feed-alpha";
 export const OTHER_FEED_WORLD = "world-feed-beta";
@@ -56,12 +57,26 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
   const assets = new Map<string, { bytes: Buffer; mime: string }>();
   const saved = new Map<string, ReturnType<typeof uiDManualPost>>();
   let assetNumber = 0;
+  let ownerProfileRevision = 1;
   const owner = (world: string) => ({
     ...uiDOwnerActor(world), world_character_id: ownerId(world), character_id: `character-${ownerId(world)}`,
     profile: { ...uiDOwnerActor(world).profile, display_name: world === FEED_WORLD ? state.displayName : "Other World User",
       handle: world === FEED_WORLD ? state.handle : "other_user", avatar_url: state.avatar ? "/api/v1/media/assets/owner-avatar/content" : null },
   });
   const readFeed = (world: string) => ({ ...uiDManualFeed(state.posts.map(post => ({ ...post, world_id: world })), world), owner_world_character_id: ownerId(world) });
+  const ownerManagement = (world: string): WorldCharacterManagementRead => {
+    const actor = owner(world);
+    return { contract_version: "world-character-management-v1", world_id: world, world_character_id: actor.world_character_id,
+      character_id: actor.character_id, can_manage: true, item: {
+        profile: { ...actor.profile, schema_version: "world-character-profile-v1", world_id: world,
+          world_character_id: actor.world_character_id, character_id: actor.character_id, control_mode: "owner_controlled",
+          status: "active", profile_capability: "available", role_name: null, banner_url: null },
+        revision: ownerProfileRevision, autonomous_enabled: false, status: { state: "off", reason: null },
+        settings: null, next_activity_at: null, recent_activity: null,
+        capabilities: { can_activate: false, can_deactivate: false, can_run_now: false,
+          can_edit_profile: true, can_edit_settings: false, can_view_graph: true, reason: null },
+      } };
+  };
   const reply = (route: Route, body: unknown, status = 200) => route.fulfill({ status, json: body });
   const handler = async (route: Route) => {
     const request = route.request(), url = new URL(request.url());
@@ -120,6 +135,18 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
     if (socialProfile) return reply(route, { schema_version: "world-character-social-profile-v1", world_id: socialProfile[1],
       world_character_id: socialProfile[2], character_id: `character-${socialProfile[2]}`, tab: url.searchParams.get("tab"),
       counts: { post_count: 0, reply_count: 0, liked_post_count: 0, received_like_count: 0 }, items: [], next_cursor: null });
+    const management = path.match(/^\/worlds\/([^/]+)\/world-characters\/([^/]+)\/(management|profile)$/);
+    if (management && management[2] === ownerId(management[1])) {
+      if (management[3] === "management" && method === "GET") return reply(route, ownerManagement(management[1]));
+      if (management[3] === "profile" && method === "PATCH") {
+        const values = request.postDataJSON();
+        if (values.expected_revision !== ownerProfileRevision) return reply(route, { detail: "world_character_revision_conflict" }, 409);
+        if (typeof values.display_name === "string") state.displayName = values.display_name;
+        if (typeof values.handle === "string") state.handle = values.handle;
+        ownerProfileRevision += 1;
+        return reply(route, ownerManagement(management[1]));
+      }
+    }
     const profile = path.match(/^\/worlds\/([^/]+)\/world-characters\/([^/]+)$/);
     if (profile) return reply(route, { schema_version: "world-character-profile-v1", world_id: profile[1], world_character_id: profile[2],
       character_id: `character-${profile[2]}`, display_name: owner(profile[1]).profile.display_name, handle: owner(profile[1]).profile.handle,

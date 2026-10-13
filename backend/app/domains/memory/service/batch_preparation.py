@@ -87,9 +87,8 @@ def enqueue_scope(
             or 0
         )
     # Filter assigned entries before the cap; failed heads cannot starve tails.
-    rows = (
-        session.scalars(
-            select(MemoryCandidate)
+    statement = (
+            select(MemoryCandidate, MemorySourceDelivery.sequence)
             .join(
                 MemorySourceDelivery,
                 MemorySourceDelivery.candidate_id == MemoryCandidate.id,
@@ -107,16 +106,26 @@ def enqueue_scope(
             )
             .order_by(MemorySourceDelivery.sequence)
             .limit(128)
-        )
-        .unique()
-        .all()
     )
+    rows, seen, after = [], set(), 0
+    while True:
+        page = session.execute(statement.where(MemorySourceDelivery.sequence > after)).all()
+        if not page:
+            break
+        for candidate, sequence in page:
+            after = sequence
+            if candidate.id not in seen:
+                seen.add(candidate.id)
+                rows.append(candidate)
+        if dependencies.generation_policy != "activity32" or len(page) < 128:
+            break
     scope = MemoryScope(
         setting.owner_id, setting.world_id, setting.subject_world_character_id
     )
     reader = dependencies.source_reader(session)
     groups = defaultdict(list)
-    episode = dependencies.generation_policy == "episode_v1"
+    modern = dependencies.generation_policy == "activity32"
+    episode = dependencies.generation_policy in {"episode_v1", "activity32"}
     epochs = dict(session.execute(select(MemorySourceDelivery.candidate_id, MemorySourceDelivery.epoch_id).where(
         MemorySourceDelivery.candidate_id.in_([row.id for row in rows]))).all()) if episode else {}
     for candidate in rows:
@@ -135,12 +144,12 @@ def enqueue_scope(
             )
         )
         thread = None if evidence is None else evidence.thread_id
-        groups[(thread, epochs.get(candidate.id)) if episode else thread].append(
+        groups[epochs.get(candidate.id) if modern else (thread, epochs.get(candidate.id)) if episode else thread].append(
             (candidate.id, size)
         )
     jobs = 0
     for key, group in groups.items():
-        maximum = (50 if key[0] is not None else 20) if episode else MAX_SELECTION_CANDIDATES
+        maximum = 960 if modern else (50 if key[0] is not None else 20) if episode else MAX_SELECTION_CANDIDATES
         chunks, chunk, size = [], [], 0
         for candidate_id, candidate_size in group:
             if chunk and (
@@ -162,7 +171,7 @@ def enqueue_scope(
                     trigger=trigger,
                     **({"request_id": request_id} if request_id else {}),
                     now=now,
-                    **({"generation_policy": "episode_v1"} if episode else {}),
+                    **({"generation_policy": dependencies.generation_policy} if episode else {}),
                 )
                 is not None
             )
@@ -170,21 +179,24 @@ def enqueue_scope(
 
 
 
-def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None) -> None:
+def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None,
+                   settings_type=MemoryBatchSetting, limit=16, after="") -> str:
     repository = dependencies.consolidation_repository(session)
     reader = source_reader or dependencies.source_reader(session)
     memory = dependencies.memory_repository(session)
     configs = session.scalars(
-        select(MemoryBatchSetting)
+        select(settings_type)
         .join(
             MemoryScopeSettingModel,
-            MemoryScopeSettingModel.id == MemoryBatchSetting.scope_setting_id,
+            MemoryScopeSettingModel.id == settings_type.scope_setting_id,
         )
         .where(
-            MemoryBatchSetting.brief_dirty.is_(True),
+            settings_type.brief_dirty.is_(True),
             MemoryScopeSettingModel.enabled.is_(True),
+            settings_type.scope_setting_id > after,
         )
-        .limit(16)
+        .order_by(settings_type.scope_setting_id)
+        .limit(limit)
     ).all()
     for config in configs:
         snapshot = repository.get_scope_setting_by_id(config.scope_setting_id)
@@ -195,6 +207,10 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
         items = repository.hot_brief_source_items(setting=snapshot, now=now, limit=24)
         valid = True
         for item in items:
+            situation_evidence = memory.situation_correction_evidence(
+                scope=snapshot.scope, item_id=item.id, reader=reader, now=now)
+            if situation_evidence is not None:
+                continue
             evidence_rows = memory.list_item_evidence(
                 scope=snapshot.scope, item_id=item.id
             )
@@ -232,3 +248,4 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
             )
         config.brief_dirty = False
     session.commit()
+    return configs[-1].scope_setting_id if configs else ""

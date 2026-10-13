@@ -34,6 +34,10 @@ def _active_profile_statement(world_id: str):
 
 
 class SqlAlchemyWorldCharacterQueries:
+    def role_names(self, db, world_id):
+        from app.domains.worlds.models import WorldRole
+        return dict(db.execute(select(WorldRole.role_key, WorldRole.name).where(WorldRole.world_id == world_id)).all())
+
     def public_profile_rows(self, db, world_id):
         return db.execute(_active_profile_statement(world_id)).all()
 
@@ -41,6 +45,17 @@ class SqlAlchemyWorldCharacterQueries:
         return db.execute(
             _active_profile_statement(world_id).where(WorldCharacter.id == world_character_id)
         ).one_or_none()
+
+    def basic_settings_row(self, db, world_id, world_character_id):
+        return db.execute(select(WorldCharacter, Character).join(Character,
+            Character.id == WorldCharacter.character_id).join(WorldMembership,
+            (WorldMembership.id == WorldCharacter.membership_id)
+            & (WorldMembership.world_id == WorldCharacter.world_id)
+            & (WorldMembership.user_id == Character.owner_id)).where(
+            WorldCharacter.id == world_character_id, WorldCharacter.world_id == world_id,
+            WorldCharacter.status.in_(("pending", "inactive", "active")),
+            WorldMembership.status == "active", Character.deleted_at.is_(None),
+            Character.moderation_status == "active")).one_or_none()
 
     def effective_profiles(self, db, *, world_id, world_character_ids):
         from app.domains.world_characters.service.configuration import batch_effective_profiles

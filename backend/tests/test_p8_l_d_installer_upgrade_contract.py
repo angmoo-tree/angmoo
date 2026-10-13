@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", tuple(range(1, 29)))
+@pytest.mark.parametrize("source_version", tuple(range(1, 37)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -151,13 +151,65 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 29
-    assert fixture["target_table_count"] == 153
+    assert fixture["target_data_version"] == 37
+    assert fixture["target_table_count"] == 174
     if source_version == 8:
         assert fixture["generation"] == (
             "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"
         )
         assert len(fixture["generation"]) == 64
+
+
+@pytest.mark.parametrize("source_version", (1, 29, 32, 33, 34, 35, 36))
+def test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift(
+    tmp_path: Path, monkeypatch, deny_external_network, source_version: int,
+) -> None:
+    import hashlib
+    from pydantic import SecretStr
+    from app.config import settings
+    from app.core.security import SecretScope, decrypt_local_secret, encrypt_local_secret
+    from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
+    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+    from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+
+    monkeypatch.setattr(settings, "APP_SECRET_FILE", str(tmp_path / "unrelated-missing-secret"))
+    monkeypatch.setattr(settings, "APP_SECRET", SecretStr("unrelated-process-secret"))
+    monkeypatch.setattr(settings, "CREDENTIAL_ENCRYPTION_PROVIDER", "oci_kms")
+    original_settings = settings.model_dump()
+    builder = _script_module(f"authenticated_fixture_v{source_version}",
+        "scripts/ci/build_windows_installer_supported_upgrade_fixture.py")
+    verifier = _script_module(f"authenticated_verifier_v{source_version}",
+        "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py")
+    host, sidecar = tmp_path / "host.exe", tmp_path / "sidecar.exe"
+    host.write_bytes(b"synthetic host; never executed")
+    sidecar.write_bytes(b"synthetic sidecar; never executed")
+    root = tmp_path / "fixture"
+    builder.build_fixture(root, host=host, sidecar=sidecar, source_version=source_version, conflict=False)
+    fixture = json.loads((root / "fixture-manifest.json").read_text(encoding="utf-8"))
+    source = root / "canonical/generations" / fixture["generation"] / "angmoo.sqlite3"
+    secret, media = root / "secrets/app-secret", root / fixture["media_relative_path"]
+    originals = [hashlib.sha256(path.read_bytes()).hexdigest() for path in (source, secret, media)]
+    with sqlite3.connect(source.as_uri() + "?mode=ro", uri=True) as connection:
+        credential = connection.execute("SELECT owner_id,character_id,provider,purpose,encrypted_api_key "
+            "FROM llm_credentials WHERE id='credential-supported-v2'").fetchone()
+    scope = SecretScope(owner_id=credential[0], character_id=credential[1], provider=credential[2], purpose=credential[3])
+    app_secret = secret.read_text(encoding="utf-8").strip()
+    assert decrypt_local_secret(credential[4], scope=scope, app_secret=app_secret) == "synthetic-supported-fixture-key"
+    with pytest.raises(ValueError):
+        decrypt_local_secret(credential[4], scope=scope, app_secret="incorrect-owned-secret")
+    upgraded = EmbeddedDataUpgradeCoordinator(StaticRuntimeDataPath(root), fallback_generation="er6-preview-v1").upgrade()
+    assert upgraded.canonical.source_version == source_version
+    assert upgraded.canonical.target_version == SQLITE_SCHEMA_VERSION
+    assert not upgraded.graph.degraded
+    assert [hashlib.sha256(path.read_bytes()).hexdigest() for path in (source, secret, media)] == originals
+    verifier._verify_database(root, fixture)
+    changed = encrypt_local_secret("synthetic-supported-fixture-key", scope=scope, app_secret=app_secret)
+    assert changed != credential[4]
+    with sqlite3.connect(upgraded.canonical.database_path) as connection:
+        connection.execute("UPDATE llm_credentials SET encrypted_api_key=? WHERE id='credential-supported-v2'", (changed,))
+    with pytest.raises(SystemExit, match="supported_upgrade_credential_changed"):
+        verifier._verify_database(root, fixture)
+    assert settings.model_dump() == original_settings
 
 
 def test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill(

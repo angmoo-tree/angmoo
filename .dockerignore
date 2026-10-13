@@ -18,6 +18,9 @@
 **/node_modules/**
 **/.next
 **/.next/**
+# NEXT_DIST_DIR integration builds are generated outputs, not source inputs.
+**/.next-*
+**/.next-*/**
 **/out
 **/out/**
 **/target

@@ -137,39 +137,29 @@ def test_duplicate_scheduler_rejects_second_single_backend_owner() -> None:
     assert scheduler.reason_code is RuntimeDiagnosticCode.SCHEDULER_DUPLICATE_ACTIVE
 
 
-def test_scheduler_reacquires_after_runtime_lease_loss() -> None:
+def test_supervisor_does_not_start_a_second_recovery_owner() -> None:
     registry = ComponentObservationRegistry()
     attempts = 0
-    recovered = asyncio.Event()
 
     async def scheduler(stop, listener) -> None:
         nonlocal attempts
         attempts += 1
         listener("ready")
-        if attempts == 1:
-            raise SchedulerLeaseLostError("simulated-sleep-gap")
-        recovered.set()
-        await stop.wait()
+        await asyncio.sleep(0.02)
+        raise SchedulerLeaseLostError("runner-actually-exited")
 
     def projector(stop, listener) -> None:
         listener("ready")
-        assert stop.wait(timeout=2)
+        stop.wait(timeout=2)
 
     async def scenario() -> None:
-        manager = SingleBackendRuntimeComponents(
-            scheduler_runner=scheduler,
-            projector_runner=projector,
-            registry=registry,
-            startup_timeout_seconds=1,
-            shutdown_timeout_seconds=2,
-            scheduler_restart_delay_seconds=0.01,
-        )
+        manager = SingleBackendRuntimeComponents(scheduler_runner=scheduler,
+            projector_runner=projector, registry=registry,
+            startup_timeout_seconds=1, shutdown_timeout_seconds=2)
         await manager.start()
-        await asyncio.wait_for(recovered.wait(), timeout=1)
-        assert attempts == 2
-        assert {item.name: item.state for item in registry.snapshot()}[
-            "scheduler"
-        ] is RuntimeComponentState.READY
+        await asyncio.sleep(0.1)
+        assert attempts == 1
+        assert {item.name: item.state for item in registry.snapshot()}["scheduler"] is RuntimeComponentState.FAILED
         await manager.stop()
 
     asyncio.run(scenario())

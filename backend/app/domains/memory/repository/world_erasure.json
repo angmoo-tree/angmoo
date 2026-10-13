@@ -1,0 +1,602 @@
+{
+  "version": 1,
+  "owner": "memory",
+  "tables": {
+    "agent_daypart_memory_events": {
+      "joins": [
+        {
+          "columns": [
+            "run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "notification_id"
+          ],
+          "target_table": "notifications",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "source_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_activation_epochs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_batch_runs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_batch_settings": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_candidates": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_consolidation_jobs": {
+      "joins": [
+        {
+          "columns": [
+            "job_id"
+          ],
+          "target_table": "memory_batch_runs",
+          "target_columns": [
+            "job_id"
+          ]
+        }
+      ]
+    },
+    "memory_consolidation_requests": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_embedding_settings": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_bundles": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_info": {
+      "joins": [
+        {
+          "columns": [
+            "bundle_id"
+          ],
+          "target_table": "memory_episode_bundles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_links": {
+      "joins": [
+        {
+          "columns": [
+            "following_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "prior_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_processed_units": {
+      "joins": [
+        {
+          "columns": [
+            "bundle_id"
+          ],
+          "target_table": "memory_episode_bundles",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_restrictions": {
+      "joins": [
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_unit_evidence": {
+      "joins": [
+        {
+          "columns": [
+            "unit_id"
+          ],
+          "target_table": "memory_episode_units",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_episode_units": {
+      "joins": [
+        {
+          "columns": [
+            "social_thought_id"
+          ],
+          "target_table": "social_activity_thoughts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_hot_brief_items": {
+      "joins": [
+        {
+          "columns": [
+            "brief_id"
+          ],
+          "target_table": "memory_hot_briefs",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_hot_briefs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_index_preparations": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_item_evidence": {
+      "joins": [
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_items": {
+      "world_column": "world_id"
+    },
+    "memory_maintenance_jobs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_scope_settings": {
+      "world_column": "world_id"
+    },
+    "memory_selection_decisions": {
+      "joins": [
+        {
+          "columns": [
+            "item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "candidate_id"
+          ],
+          "target_table": "memory_candidates",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "job_id"
+          ],
+          "target_table": "memory_batch_runs",
+          "target_columns": [
+            "job_id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_info": {
+      "joins": [
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_manifests": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_receipts": {
+      "joins": [
+        {
+          "columns": [
+            "applied_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "manifest_id"
+          ],
+          "target_table": "memory_situation_manifests",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_recheck_attempts": {
+      "joins": [
+        {
+          "columns": [
+            "applied_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "receipt_sequence"
+          ],
+          "target_table": "memory_situation_receipts",
+          "target_columns": [
+            "sequence"
+          ]
+        }
+      ]
+    },
+    "memory_situation_requests": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_result_bindings": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "receipt_sequence"
+          ],
+          "target_table": "memory_situation_receipts",
+          "target_columns": [
+            "sequence"
+          ]
+        }
+      ]
+    },
+    "memory_situation_runs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_settings": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_source_bindings": {
+      "joins": [
+        {
+          "columns": [
+            "manifest_id"
+          ],
+          "target_table": "memory_situation_manifests",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_sources": {
+      "joins": [
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_situation_transitions": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_source_deliveries": {
+      "joins": [
+        {
+          "columns": [
+            "batch_job_id"
+          ],
+          "target_table": "memory_maintenance_jobs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "candidate_id"
+          ],
+          "target_table": "memory_candidates",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "epoch_id"
+          ],
+          "target_table": "memory_activation_epochs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_subject_profiles": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_vector_eligibility": {
+      "joins": [
+        {
+          "columns": [
+            "memory_item_id"
+          ],
+          "target_table": "memory_items",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  }
+}

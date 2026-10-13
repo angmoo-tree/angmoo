@@ -10,7 +10,7 @@ from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePacke
 from app.domains.memory.repository.episode_candidates import SqlAlchemyEpisodeCandidates
 from app.domains.memory.policies.episode_provider_view import episode_provider_view
 from app.domains.memory.policies.episode_provider_view import episode_provider_reference
-from app.domains.memory.policies.episode_packets import bounded_episode_packets
+from app.domains.memory.policies.episode_packets import bounded_episode_packets, episode_source_payload
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 
@@ -20,7 +20,7 @@ def _rows(value):
     return tuple(tuple(row) for row in value)
 
 
-def _assert_snapshot_current(db, *, scope, result, snapshot, now):
+def _assert_snapshot_current(db, *, scope, result, snapshot, now, validation=None):
     if (not isinstance(snapshot, dict) or snapshot.get("schema_version") != 1
             or snapshot.get("policy_version") != "episode-followups-v1"
             or snapshot.get("scope") != asdict(scope)
@@ -33,7 +33,7 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
             or any(not isinstance(value, str) or not value for value in
                    (*snapshot["seed_memory_ids"], *snapshot["hydrated_memory_ids"]))):
         raise ValueError("activity_memory_validation_unavailable")
-    updates = SqlAlchemyEpisodeCandidates(db).collect_followups(scope=scope,
+    updates = SqlAlchemyEpisodeCandidates(db, source_reader=RuntimeEpisodeDetailReader(db)).collect_followups(scope=scope,
         seed_ids=tuple(snapshot["seed_memory_ids"]), now=now,
         limit=snapshot["traversal_limit"], depth_limit=snapshot["depth_limit"])
     if (updates.item_ids != tuple(snapshot["hydrated_memory_ids"])
@@ -48,7 +48,7 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
     if not result.get("packets"):
         return
     packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(
-        scope=scope, item_ids=ids, now=now)
+        scope=scope, item_ids=ids, now=now, validation=validation)
     fresh_by_ref = {packet.reference: packet for packet in episode_provider_view(packets)}
     for old in result["packets"]:
         fresh = fresh_by_ref.get(old.get("ref"))
@@ -83,22 +83,24 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now):
                     if source.status != "verified" or any(previous_source.get(k) != getattr(source, k)
                         for k in ("start_offset", "end_offset")):
                         raise ValueError("activity_memory_source_changed")
-                elif previous_source != asdict(source):
+                elif previous_source != episode_source_payload(source):
                     raise ValueError("activity_memory_source_changed")
 
 
 def assert_memories_current(db, *, owner_id, world_id, actor_id, memories, validations=None):
     scope = MemoryScope(owner_id, world_id, actor_id)
     now = datetime.now(UTC)
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    validation = MemoryAccessValidation(db, now)
     for target, result in memories.items():
         snapshot = (validations or {}).get(target)
         if snapshot is not None:
-            _assert_snapshot_current(db, scope=scope, result=result, snapshot=snapshot, now=now)
+            _assert_snapshot_current(db, scope=scope, result=result, snapshot=snapshot, now=now, validation=validation)
             continue
         ids = tuple(result.get("ranked_memory_ids", ()))
         if not ids or not result.get("packets"):
             continue
-        linked = SqlAlchemyEpisodeCandidates(db).followups(scope=scope, item_ids=ids, now=now, limit=12)
+        linked = SqlAlchemyEpisodeCandidates(db, source_reader=RuntimeEpisodeDetailReader(db)).followups(scope=scope, item_ids=ids, now=now, limit=12)
         # Hydration already bounded the follow-up graph. Re-running traversal
         # with hydrated rows as roots can discover pre-existing omitted rows;
         # that is not a concurrent correction. New links/items still invalidate.
@@ -117,7 +119,7 @@ def assert_memories_current(db, *, owner_id, world_id, actor_id, memories, valid
                 MemoryEpisodeLink.created_at > threshold).limit(1))
             if new_item or new_link:
                 raise ValueError("activity_memory_followup_changed")
-        packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(scope=scope, item_ids=ids, now=now)
+        packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(scope=scope, item_ids=ids, now=now, validation=validation)
         refreshed = bounded_episode_packets(episode_provider_view(packets)).packets
         by_ref = {p["ref"]: p for p in refreshed}
         for old in result["packets"]:

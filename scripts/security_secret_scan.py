@@ -17,6 +17,7 @@ from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import sys
+import tempfile
 from typing import Iterable
 
 try:
@@ -664,54 +665,51 @@ def _scan_git_blobs(
     if not entries_by_oid:
         return report
 
-    process = subprocess.run(
-        ["git", "cat-file", "--batch"],
-        cwd=repo_root,
-        input=("\n".join(entries_by_oid) + "\n").encode("ascii"),
-        capture_output=True,
-        check=False,
-    )
-    if process.returncode != 0:
-        raise RuntimeError(
-            process.stderr.decode("utf-8", errors="replace").strip()
-            or "git cat-file failed"
-        )
-    output = BytesIO(process.stdout)
-
-    while True:
-        header = output.readline()
-        if not header:
-            break
-        parts = header.decode("ascii", errors="replace").strip().split()
-        if len(parts) < 3:
-            raise RuntimeError("invalid git cat-file response")
-        oid, object_type, size_text = parts[:3]
-        size = int(size_text)
-        data = output.read(size)
-        output.read(1)
-        if object_type != "blob":
-            continue
-        for entry in entries_by_oid.get(oid, []):
-            if entry.mode == "120000":
-                report.findings.append(
-                    Finding(
-                        source=normalize_path(entry.path),
-                        rule="git-symlink-entry",
-                        ref=f"blob={oid}",
-                        fatal=False,
-                    )
-                )
-            _merge_report(
-                report,
-                scan_blob(
-                    entry.path,
-                    data,
-                    allowlist=allowlist,
-                    asset_manifest=asset_manifest,
-                    ref=f"blob={oid}",
-                    strict_public=False,
-                ),
-            )
+    # Request and drain one object at a time. Sending the entire request list
+    # before reading stdout can deadlock pipes; capture_output retains all
+    # historical versions at once. A temporary stderr file also cannot fill a
+    # pipe while the parent is reading a large object.
+    with tempfile.TemporaryFile() as errors:
+        process = subprocess.Popen(["git", "cat-file", "--batch"], cwd=repo_root,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors)
+        try:
+            for requested_oid, entries in entries_by_oid.items():
+                process.stdin.write((requested_oid + "\n").encode("ascii"))
+                process.stdin.flush()
+                parts = process.stdout.readline().decode("ascii", errors="replace").strip().split()
+                if len(parts) != 3:
+                    raise RuntimeError("invalid git cat-file response")
+                oid, object_type, size_text = parts
+                try:
+                    size = int(size_text)
+                except ValueError as exc:
+                    raise RuntimeError("invalid git cat-file size") from exc
+                if (oid != requested_oid or size < 0
+                        or object_type not in {"blob", "tree", "commit", "tag"}):
+                    raise RuntimeError("invalid git cat-file object identity")
+                data = process.stdout.read(size)
+                if len(data) != size or process.stdout.read(1) != b"\n":
+                    raise RuntimeError("truncated git cat-file object")
+                if object_type != "blob":
+                    continue
+                for entry in entries:
+                    if entry.mode == "120000":
+                        report.findings.append(Finding(source=normalize_path(entry.path),
+                            rule="git-symlink-entry", ref=f"blob={oid}", fatal=False))
+                    _merge_report(report, scan_blob(entry.path, data, allowlist=allowlist,
+                        asset_manifest=asset_manifest, ref=f"blob={oid}", strict_public=False))
+            process.stdin.close()
+            if process.wait() != 0:
+                errors.seek(0)
+                raise RuntimeError(errors.read().decode("utf-8", errors="replace").strip()
+                                   or "git cat-file failed")
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait()
+            process.stdout.close()
+            if not process.stdin.closed:
+                process.stdin.close()
 
     return report
 

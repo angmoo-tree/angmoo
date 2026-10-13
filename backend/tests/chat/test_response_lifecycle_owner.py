@@ -18,9 +18,9 @@ from app.runtime.chat.message_composition import generation_service
 from app.runtime.chat.message_composition import thread_service
 from chat.test_p8_l_d_world_chat_identity import (
     _character,
-    _create_tables,
+    _create_tables as _create_chat_tables,
     _installation,
-    _seed_world,
+    _seed_world as _seed_world_roles,
     _user,
 )
 from chat.test_p8_l_j_response_generation_lifecycle import (
@@ -29,6 +29,28 @@ from chat.test_p8_l_j_response_generation_lifecycle import (
     _ready_to_commit,
     response_session,
 )
+
+
+def _create_tables(engine):
+    """Prepare the real Chat admission schema, including its Memory collaborator."""
+    from app.runtime.persistence.model_registration import register_models
+
+    _create_chat_tables(engine)
+    register_models().create_all(engine)
+
+
+def _seed_world(db, **values):
+    """Seed the native Chat key alongside roles in the caller's transaction."""
+    from app.domains.identity.service import world_credentials
+    from identity.test_world_credentials import write
+
+    requester, responding = _seed_world_roles(db, **values)
+    world_credentials.save(
+        db, owner_id=values["owner"].id, world_id=values["world_id"],
+        world_character_id=responding.id, purpose="chat",
+        data=write(key="synthetic-durable-chat-key"),
+    )
+    return requester, responding
 
 
 def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) -> None:

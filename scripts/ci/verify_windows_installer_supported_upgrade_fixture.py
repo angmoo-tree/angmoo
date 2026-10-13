@@ -358,10 +358,18 @@ def _verify_database(data_root: Path, fixture: dict[str, Any]) -> None:
             "FROM llm_credentials WHERE id = ?",
             ("credential-supported-v2",),
         ).fetchone()
+        source = _source_database(data_root, fixture)
+        with sqlite3.connect(source.as_uri() + "?mode=ro", uri=True) as predecessor:
+            predecessor.execute("PRAGMA query_only=ON")
+            expected_credential = predecessor.execute(
+                "SELECT encrypted_api_key, key_fingerprint, enabled "
+                "FROM llm_credentials WHERE id = ?",
+                ("credential-supported-v2",),
+            ).fetchone()
         if (
             credential is None
-            or credential["encrypted_api_key"] != "synthetic-encrypted-value"
-            or credential["key_fingerprint"] != "synthetic-fingerprint"
+            or expected_credential is None
+            or tuple(credential) != tuple(expected_credential)
             or not bool(credential["enabled"])
         ):
             _fail("supported_upgrade_credential_changed")

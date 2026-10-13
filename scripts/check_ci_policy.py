@@ -52,7 +52,12 @@ FORBIDDEN_TEXT = {
 # Core test jobs use synthetic fixtures and have no repository secrets. Allow
 # only these result files, never an entire workspace, log directory or DB.
 CORE_TEST_REPORT_PATHS = {
-    "backend": ("backend/.ci/backend-junit.xml", "backend/.ci/backend-test-identity.json"),
+    "backend": (".ci/backend-shard-reports/backend-shard-coverage.json",),
+    "backend-preflight": ("backend/.ci/backend-test-identity.json",),
+    "backend-tests": (
+        "backend/.ci/backend-junit.xml", "backend/.ci/backend-test-identity.json",
+        "backend/.ci/backend-shard-report.json", "backend/.ci/backend-shard-events.jsonl",
+    ),
     "frontend": (
         "browser-tests/.ci/web.xml", "browser-tests/.ci/settings.xml",
         "browser-tests/.ci/static.xml", "browser-tests/.ci/lifecycle.xml",
@@ -66,6 +71,12 @@ CORE_TEST_REPORT_PATHS = {
         "browser-tests/.ci/daily-next.xml", "browser-tests/.ci/daily-static.xml",
         "browser-tests/.ci/browser-test-identity.json",
     ),
+}
+CORE_TEST_REPORT_NAMES = {
+    "backend": "backend-coverage-${{ github.sha }}-${{ github.run_attempt }}",
+    "backend-preflight": "backend-preflight-${{ github.sha }}-${{ github.run_attempt }}",
+    "backend-tests": "backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-${{ matrix.shard }}",
+    "frontend": "browser-tests-${{ github.sha }}-${{ github.run_attempt }}",
 }
 
 
@@ -87,9 +98,8 @@ def check_report_uploads(document: object, workflow_name: str, text: str) -> lis
     for job_name, step in uploads:
         paths = CORE_TEST_REPORT_PATHS.get(job_name)
         options = step.get("with", {})
-        prefix = "backend" if job_name == "backend" else "browser"
         expected = {
-            "name": prefix + "-tests-${{ github.sha }}-${{ github.run_attempt }}",
+            "name": CORE_TEST_REPORT_NAMES.get(job_name),
             "path": "\n".join(paths or ()),
             "include-hidden-files": True,
             "if-no-files-found": "error",
@@ -215,6 +225,34 @@ def check_pytest_paths(document: dict, root: Path) -> list[str]:
     return errors
 
 
+def check_backend_partitions(jobs: dict) -> list[str]:
+    """Allow only a complete, always-run aggregate of the four isolated jobs."""
+    if not {"backend-preflight", "backend-tests"}.intersection(jobs):
+        return []  # Retain the older unpartitioned policy fixtures.
+    backend, tests, preflight = (jobs.get(name, {}) for name in ("backend", "backend-tests", "backend-preflight"))
+    errors = []
+    if backend.get("if") != "always()" or backend.get("needs") != ["backend-preflight", "backend-tests"]:
+        errors.append("backend aggregate must always require preflight and all partitions")
+    if (tests.get("needs") != "backend-preflight" or "if" in tests
+            or tests.get("timeout-minutes") != 75
+            or tests.get("strategy") != {"fail-fast": False, "matrix": {"shard": [0, 1, 2, 3]}}):
+        errors.append("backend partitions must retain all four jobs without fail-fast or filtering")
+    runner = 'uv run python ../scripts/ci/run_backend_shard.py --index "${{ matrix.shard }}" --source-sha "$TEST_SOURCE_SHA"'
+    if sum(step.get("run") == runner and step.get("working-directory") == "backend"
+            for step in tests.get("steps", [])) != 1:
+        errors.append("backend partitions must use the whole-corpus execution owner")
+    baseline = "uv run python ../scripts/check_test_node_baseline.py --profile public"
+    if sum(step.get("run") == baseline for step in preflight.get("steps", [])) != 1:
+        errors.append("backend preflight must preserve the original protected full collection")
+    command = ('set -euo pipefail\n'
+        'test "$PREFLIGHT_RESULT" = success\n'
+        'test "$TESTS_RESULT" = success\n'
+        'python scripts/ci/check_backend_shards.py --directory .ci/backend-shard-reports --source-sha "$TEST_SOURCE_SHA" --checkout-sha "$GITHUB_SHA"')
+    if sum(str(step.get("run", "")).strip() == command for step in backend.get("steps", [])) != 1:
+        errors.append("backend aggregate must verify every result and exact full coverage")
+    return errors
+
+
 def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], list[str]]:
     text = path.read_text(encoding="utf-8")
     errors: list[str] = []
@@ -251,13 +289,18 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
     if not isinstance(jobs, dict):
         errors.append("workflow jobs must be a mapping")
         return errors, []
+    partition_errors = check_backend_partitions(jobs) if path.name == "ci.yml" else []
+    errors.extend(partition_errors)
     for job_name, value in jobs.items():
         if not isinstance(value, dict):
             errors.append(f"job must be a mapping: {job_name}")
             continue
         if "timeout-minutes" not in value:
             errors.append(f"job timeout is missing: {job_name}")
-        if job_name in REQUIRED_JOBS and "if" in value:
+        complete_backend_aggregate = (path.name == "ci.yml" and job_name == "backend"
+            and value.get("if") == "always()" and {"backend-preflight", "backend-tests"}.issubset(jobs)
+            and not partition_errors)
+        if job_name in REQUIRED_JOBS and "if" in value and not complete_backend_aggregate:
             errors.append(f"required job must not be conditionally skipped: {job_name}")
     for label, image in _service_images(jobs):
         if "@sha256:" not in image:

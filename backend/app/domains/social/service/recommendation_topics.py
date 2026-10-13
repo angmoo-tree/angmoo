@@ -11,7 +11,7 @@ import re
 import unicodedata
 from uuid import uuid4
 
-from sqlalchemy import delete, select, update, or_
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 from app.core.search_text import literal_boundary, normalize_search_text
 
@@ -76,6 +76,8 @@ def ensure_catalog(db: Session, world_id: str) -> RecommendationCatalog:
 def mark_new_subject(db: Session, *, world_id: str, world_character_id: str | None = None):
     """Creation commands only. No read/startup/import caller may enroll a subject."""
     ensure_catalog(db, world_id)
+    if world_character_id is None:
+        return  # World initialization retains the catalog; only actors enroll work.
     key = world_character_id or "world"
     existing = db.scalar(select(RecommendationPreparation.id).where(
         RecommendationPreparation.world_id == world_id, RecommendationPreparation.source_key == key,
@@ -145,8 +147,7 @@ def available_topics(db: Session, world_id: str) -> list[RecommendationTopic]:
     return list(db.scalars(select(RecommendationTopic).join(
         RecommendationTopicSource, RecommendationTopicSource.topic_id == RecommendationTopic.id,
     ).where(RecommendationTopicSource.world_id == world_id,
-            or_(RecommendationTopicSource.world_character_id.is_(None),
-                RecommendationTopicSource.world_character_id.in_(valid_interest_subjects(db, world_id))),
+            RecommendationTopicSource.world_character_id.in_(valid_interest_subjects(db, world_id)),
     ).distinct().order_by(RecommendationTopic.id)))
 
 

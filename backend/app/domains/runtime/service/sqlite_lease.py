@@ -62,7 +62,9 @@ class SqliteSchedulerLeaseService:
                 ):
                     raise SchedulerLeaseHeldError("scheduler lease is already held")
                 current_epoch = int(row["fencing_epoch"])
-                next_epoch = current_epoch + (current_owner != owner_id)
+                next_epoch = current_epoch + (
+                    current_owner != owner_id or current_expiry is None or current_expiry <= now
+                )
                 result = lease_repository.acquire_existing(
                     connection,
                     current_epoch=current_epoch,

@@ -17,7 +17,7 @@ from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.worlds import router as world_routes
 from app.config import settings
-from app.models import Base
+from app.runtime.persistence.model_registration import register_models
 from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )
@@ -34,7 +34,7 @@ def _app():
     def _foreign_keys(dbapi_connection, _connection_record) -> None:
         dbapi_connection.execute("PRAGMA foreign_keys=ON")
 
-    Base.metadata.create_all(engine)
+    register_models().create_all(engine)
     app = FastAPI()
     from app.runtime.social.composition import configure_social_runtime
     configure_social_runtime(app)
@@ -141,10 +141,10 @@ def test_creator_route_lifecycle_and_stable_conflict() -> None:
     with Session(engine) as db:
         assert db.query(models.Post).count() == 0
         assert db.query(models.AgentRun).count() == 0
-        from app.domains.social.models.topics import RecommendationPreparation, RecommendationTopic
-        prep = db.query(RecommendationPreparation).one()
-        assert prep.state == "pending" and prep.request_id == "initial-completed"
-        assert db.query(RecommendationTopic).count() == 0  # No key: retain World without AI.
+        from app.domains.social.models.topics import RecommendationCatalog, RecommendationPreparation, RecommendationTopic
+        assert db.get(RecommendationCatalog, world_id) is not None
+        assert db.query(RecommendationPreparation).count() == 0  # World-level generation is retired.
+        assert db.query(RecommendationTopic).count() == 0
 
 
 def test_reserved_no_role_is_system_owned_and_survives_user_definition_sync() -> None:
@@ -310,7 +310,9 @@ def test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes() -> No
     navigation = (frontend_root / "utils" / "safe-navigation.ts").read_text(
         encoding="utf-8"
     )
-    assert "World Creator · P1" in client
+    assert 'useUiText("worlds")' in client
+    assert "PRODUCT_ROUTES.studioNewWorld" in client
+    assert "studioWorldRoute(worldId)" in client
     assert "activity-templates" not in client
     assert "^\\/worlds\\/new$" in navigation
     assert "creator\\/$" not in navigation

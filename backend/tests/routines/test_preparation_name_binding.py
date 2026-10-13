@@ -10,15 +10,13 @@ from app.domains.social.schemas.recommendation import TopicGenerationResult
 from app.contracts.name_binding import read_name_binding
 from app.runtime.social import topic_preparation
 from tests.characters.name_binding_fixture import create_profile, rename_profile
-from tests.routines.test_daily_preparation import preparation_scope, output
+from tests.routines.test_daily_preparation import preparation_scope, output, update_world_settings
 
 
 def test_daily_names_use_accepted_snapshot_and_next_date_uses_new_name(preparation_scope):
     db, world, ready, runtime = preparation_scope
     create_profile(db, world, ready.user.id)
-    ready.character.worldview = "{{char}}는 {{user}}와 게임을 즐긴다."
-    ready.character.speech_style = "대화 상대: 반가워"
-    db.commit()
+    update_world_settings(db, ready, worldview="{{char}}는 {{user}}와 게임을 즐긴다.", speech_style="대화 상대: 반가워")
     now = datetime.now(UTC)
     inputs = []
     async def generate(**kwargs):
@@ -40,7 +38,8 @@ def test_daily_names_use_accepted_snapshot_and_next_date_uses_new_name(preparati
     job = db.scalar(select(ActivityPreparationJob).where(ActivityPreparationJob.request_id == "accepted-first"))
     assert read_name_binding(job.input_snapshot).user_display_name == "민식"
     assert all(item["title"] == "민식와 휴식" for item in job.applied_snapshot["items"])
-    assert ready.character.worldview == "{{char}}는 {{user}}와 게임을 즐긴다."
+    from app.domains.world_characters.service.configuration import effective_configuration
+    assert effective_configuration(db, world_character_id=ready.world_character.id).settings.worldview == "{{char}}는 {{user}}와 게임을 즐긴다."
     reused = asyncio.run(runtime.ensure_preparation(db, **args, now=now))
     assert reused.plan_id == first.plan_id and len(inputs) == 1
     next_date = asyncio.run(runtime.ensure_preparation(db, **args, now=now + timedelta(days=1), request_id="next-date"))
@@ -71,8 +70,7 @@ def test_invalid_preparation_snapshot_stops_before_ai_and_records_failure(prepar
 def test_topic_regeneration_keeps_request_names_and_raw_persona(preparation_scope):
     db, world, ready, _ = preparation_scope
     create_profile(db, world, ready.user.id)
-    ready.character.worldview = "{{user}}의 동료 {{char}}."
-    db.commit()
+    update_world_settings(db, ready, worldview="{{user}}의 동료 {{char}}.")
     seen = []
     async def generate(material, character_id, source):
         seen.append(source)

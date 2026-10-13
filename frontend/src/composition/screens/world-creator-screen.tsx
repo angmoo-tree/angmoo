@@ -3,11 +3,10 @@ import { WorldCreatorClient as WorldDefinitionEditor } from "@/features/worlds/c
 import type { WorldRoleInput } from "@/features/worlds/types/worlds";
 import { StudioWorldCharacterList } from "@/features/creator-studio/components/studio-world-character-list";
 import { WorldPackageExportPanel } from "@/features/world-packages/components/world-package-export-panel";
-import { WorldRecommendationTools } from "@/composition/screens/world-recommendation-tools";
 import { LocalMyProfileEditor } from "@/composition/screens/my-profile-editor";
 function renderWorldTools(worldId: string, roles: WorldRoleInput[]) {
-  return <><StudioWorldCharacterList worldId={worldId} roles={roles} /><WorldRecommendationTools key={worldId} worldId={worldId} /><WorldPackageExportPanel worldId={worldId} /></>;
+  return <><StudioWorldCharacterList worldId={worldId} roles={roles} /><WorldPackageExportPanel worldId={worldId} /></>;
 }
 export function WorldCreatorClient({ worldId }: { worldId?: string }) {
-  return <WorldDefinitionEditor worldId={worldId} renderWorldTools={renderWorldTools} renderMyProfile={(id) => <LocalMyProfileEditor worldId={id} />} />;
+  return <WorldDefinitionEditor worldId={worldId} renderWorldTools={renderWorldTools} renderDeleteExport={id => <WorldPackageExportPanel worldId={id} />} renderMyProfile={(id) => <LocalMyProfileEditor worldId={id} />} />;
 }

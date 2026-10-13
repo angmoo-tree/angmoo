@@ -10,7 +10,7 @@ const labels = (language: "ko" | "en") => ({ cancel: language === "ko" ? "취소
 
 for (const language of ["ko", "en"] as const) {
   test(`T33-T35 native memory dialog centers, scrolls and restores focus (${language})`, async ({ page }, info) => {
-    const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), language);
     await page.goto(chatRoute());
     const settings = page.getByRole("button", { name: labels(language).settings, exact: true });
     const field = page.locator("[data-world-chat-surface=thread] textarea");
@@ -74,7 +74,7 @@ for (const language of ["ko", "en"] as const) {
   });
 
   test(`T36-T39 list delete is scoped, accessible and preserves other row DOM (${language})`, async ({ page }, info) => {
-    const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), language);
     state.count = 2;
     await page.goto(`/worlds/${FEED_WORLD}/chat`);
     const rows = page.locator("[data-thread-row-id]"); await expect(rows).toHaveCount(2);
@@ -112,7 +112,7 @@ for (const language of ["ko", "en"] as const) {
   });
 
   test(`T38-T39/T46 room Settings then Trash preserves draft on cancel and replaces on success (${language})`, async ({ page }, info) => {
-    const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), language);
     await page.setViewportSize({ width: 360, height: 850 });
     await page.goto(chatRoute());
     const header = page.locator("[data-world-chat-surface=thread] > header"), buttons = header.locator("button");
@@ -161,7 +161,7 @@ for (const language of ["ko", "en"] as const) {
 
 for (const mode of ["409", "500", "403", "404", "offline", "corrupt", "wrong_world", "wrong_thread", "lost"] as const) {
   test(`T45 deletion ${mode} keeps room/draft and retries the same identity`, async ({ page }, info) => {
-    const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+    const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
     state.deleteMode = mode;
     await page.goto(chatRoute());
     const field = page.locator("[data-world-chat-surface=thread] textarea"); await field.fill("Retained text after failure");
@@ -186,7 +186,7 @@ for (const mode of ["409", "500", "403", "404", "offline", "corrupt", "wrong_wor
 }
 
 test("T43 header delete stays disabled during a known nonterminal response", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.activeResponse = true;
   await page.goto(chatRoute());
   await expect(page.locator("[data-world-chat-surface=thread] > header button").last()).toBeDisabled();
@@ -194,7 +194,7 @@ test("T43 header delete stays disabled during a known nonterminal response", asy
 });
 
 test("T47 old deletion cannot redirect after runtime change", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.delay = 700;
   await page.goto(chatRoute());
   await page.locator("[data-world-chat-surface=thread] > header button").last().click();
@@ -207,7 +207,7 @@ test("T47 old deletion cannot redirect after runtime change", async ({ page }, i
 });
 
 test("T42 pending deletion keeps native dialog open and blocks repeat and cancellation", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.delay = 1000;
   await page.goto(chatRoute());
   await page.locator("[data-world-chat-surface=thread] > header button").last().click();
@@ -221,7 +221,7 @@ test("T42 pending deletion keeps native dialog open and blocks repeat and cancel
 });
 
 test("T47 late 401 from old identity cannot clear replacement auth", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.delay = 700; state.deleteMode = "401";
   await page.goto(chatRoute());
   await page.locator("[data-world-chat-surface=thread] > header button").last().click();
@@ -240,7 +240,7 @@ test("T47 late 401 from old identity cannot clear replacement auth", async ({ pa
 });
 
 test("T47 pending delete cannot survive navigation into another World", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.delay = 700;
   await page.goto(chatRoute());
   await page.locator("[data-world-chat-surface=thread] > header button").last().click();
@@ -253,7 +253,7 @@ test("T47 pending delete cannot survive navigation into another World", async ({
 });
 
 test("T37 a scrolled list preserves a surviving anchor and loaded rows after one deletion", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   await page.setViewportSize({ width: 960, height: 800 });
   await page.goto(`/worlds/${FEED_WORLD}/chat`);
   const rows = page.locator("[data-thread-row-id]"); await expect(rows).toHaveCount(20);
@@ -273,7 +273,7 @@ test("T37 a scrolled list preserves a surviving anchor and loaded rows after one
 });
 
 test("T47 a late collection read cannot restore the previous World after navigation", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.listDelay = 800;
   await page.goto(`/worlds/${FEED_WORLD}/chat`, { waitUntil: "domcontentloaded" });
   await expect.poll(() => state.reads.filter(path => path.endsWith("/chat/threads")).length, { timeout: 15000 }).toBeGreaterThan(0);
@@ -285,7 +285,7 @@ test("T47 a late collection read cannot restore the previous World after navigat
 });
 
 test("T47 a successful old deletion cannot restore auth or navigate after logout", async ({ page }, info) => {
-  const state = await installChatDeleteFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), "en");
+  const state = await installChatDeleteFixture(page, (info.project.name === "static-export" || info.project.name === "static"), String(info.project.use.baseURL), "en");
   state.delay = 700;
   await page.goto(chatRoute());
   await page.locator("[data-world-chat-surface=thread] > header button").last().click();

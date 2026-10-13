@@ -9,6 +9,8 @@ from app.domains.runtime.contracts.status_queries import RuntimeStatusQueries
 from app.domains.runtime.repository import status as owned
 from app.domains.runtime.service.status import RuntimeStatusService
 from app.runtime.diagnostics import status_queries as foreign
+from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
 
 def create_runtime_status_reader(
@@ -25,4 +27,9 @@ def create_runtime_status_reader(
         recent_runs=partial(foreign.recent_runs, db),
         rollback=db.rollback,
     )
-    return RuntimeStatusService(queries, config=config, now=now)
+    return RuntimeStatusService(
+        queries,
+        migration_head_revision=load_sqlite_manifest(SQLITE_SCHEMA_VERSION).source_revision,
+        config=config,
+        now=now,
+    )

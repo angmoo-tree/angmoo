@@ -1,0 +1,3 @@
+[
+  "\nCREATE TABLE memory_situation_result_bindings (\n\treceipt_sequence INTEGER NOT NULL, \n\tvalidation_revision VARCHAR(40) NOT NULL, \n\trules_revision VARCHAR(64) NOT NULL, \n\tscope_setting_id VARCHAR(64) NOT NULL, \n\trecheck_run_id VARCHAR(64), \n\tproof JSON NOT NULL, \n\tPRIMARY KEY (receipt_sequence, validation_revision, rules_revision), \n\tFOREIGN KEY(recheck_run_id) REFERENCES memory_situation_runs (id) ON DELETE SET NULL, \n\tFOREIGN KEY(scope_setting_id) REFERENCES memory_scope_settings (id) ON DELETE CASCADE, \n\tFOREIGN KEY(receipt_sequence) REFERENCES memory_situation_receipts (sequence) ON DELETE CASCADE\n)\n\n"
+]

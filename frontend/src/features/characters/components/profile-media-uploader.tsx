@@ -1,23 +1,23 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useUiErrorText } from "@/hooks/use-ui-error-text";
 
 
-import { Check, ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { ImageIcon, Loader2, Upload } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
+import { Button } from "@/components/ui/button";
+import { ImageCropDialog } from "@/components/media/image-crop-dialog";
+import { cropToBlob, blobToBase64, type CropState } from "@/utils/image-crop";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import type { AgentProfileMediaUploadInput } from "@/features/characters/types/agents";
 import { usePrivateMediaUrl } from "@/hooks/use-private-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 type MediaKind = "avatar" | "banner";
-
-type CropState = {
-  scale: number;
-  offsetX: number;
-  offsetY: number;
-};
 
 const SPECS: Record<MediaKind, { width: number; height: number; label: string }> = {
   avatar: { width: 768, height: 768, label: "아바타" },
@@ -42,9 +42,10 @@ export function ProfileMediaUploader({
   generationOverlay?: { kind: MediaKind; label: string } | null;
   onUpload: (data: AgentProfileMediaUploadInput) => Promise<void>;
 }) {
-  const uiText = useUiText("characters");
+  const uiText = useUiText("characters"), errorText = useUiErrorText("characters");
   const avatarInputId = useId();
   const bannerInputId = useId();
+  const mounted = useRef(true), operationRef = useRef(0);
   const draftBitmapRef = useRef<ImageBitmap | null>(null);
   const [draft, setDraft] = useState<{
     kind: MediaKind;
@@ -58,8 +59,11 @@ export function ProfileMediaUploader({
   const privateBannerUrl = usePrivateMediaUrl(bannerUrl);
   const resolvedBannerUrl = useRuntimeMediaUrl(privateBannerUrl);
 
+  useProductLeaveGuard(Boolean(draft) || uploading);
   useEffect(() => {
+    mounted.current = true;
     return () => {
+      mounted.current = false; operationRef.current += 1;
       draftBitmapRef.current?.close();
       draftBitmapRef.current = null;
     };
@@ -77,14 +81,16 @@ export function ProfileMediaUploader({
       return;
     }
     if (nextFile.size > MAX_MEDIA_BYTES) {
-      setError(uiText("이미지는 5MB 이하만 사용할 수 있습니다."));
+      setError(uiText("이미지는 5MB 이하로 선택해주세요."));
       return;
     }
 
+    const operation = ++operationRef.current, requestScope = captureAuthRequestScope();
     let bitmap: ImageBitmap | null = null;
     try {
       bitmap = await createImageBitmap(nextFile);
-      closeCropper();
+      if (!mounted.current || operationRef.current !== operation || !isCurrentAuthRequestScope(requestScope)) { bitmap.close(); return; }
+      closeCropper(false);
       draftBitmapRef.current = bitmap;
       setDraft({
         kind,
@@ -94,11 +100,12 @@ export function ProfileMediaUploader({
       setCrop({ scale: 1, offsetX: 0, offsetY: 0 });
     } catch {
       bitmap?.close();
-      setError(uiText("이미지를 열 수 없습니다."));
+      if (mounted.current && operationRef.current === operation && isCurrentAuthRequestScope(requestScope)) setError(uiText("이미지를 열 수 없습니다."));
     }
   }
 
-  function closeCropper() {
+  function closeCropper(advance = true) {
+    if (advance) operationRef.current += 1;
     draftBitmapRef.current?.close();
     draftBitmapRef.current = null;
     setDraft(null);
@@ -106,51 +113,54 @@ export function ProfileMediaUploader({
   }
 
   async function handleUpload() {
-    if (!draft) return;
+    if (!draft || uploading) return;
+    const operation = ++operationRef.current, requestScope = captureAuthRequestScope();
+    const current = () => mounted.current && operationRef.current === operation && isCurrentAuthRequestScope(requestScope);
     setUploading(true);
     setError(null);
     try {
       const blob = await cropToBlob(draft.bitmap, draft.naturalSize, spec, crop);
       const dataBase64 = await blobToBase64(blob);
+      if (!current()) return;
       await onUpload({
         media_type: draft.kind,
         filename: `${draft.kind}.webp`,
         content_type: blob.type,
         data_base64: dataBase64,
       });
-      closeCropper();
+      if (current()) closeCropper(false);
     } catch (err) {
-      setError(err instanceof Error ? uiText(err.message) : uiText("이미지를 저장하지 못했습니다."));
+      if (current()) setError(errorText(err, "이미지를 저장하지 못했습니다."));
     } finally {
-      setUploading(false);
+      if (current()) setUploading(false);
     }
   }
 
   return (
     <div>
-      <div className="overflow-hidden rounded-[8px] border border-[#eaedf2] bg-white">
-        <div className="relative h-[190px] bg-[#eef1f5]">
+      <div className="overflow-hidden rounded-[var(--radius-control)] border border-border-default bg-surface-base">
+        <div className="relative h-[190px] bg-surface-muted">
           {resolvedBannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={resolvedBannerUrl} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-center justify-center text-[#98a2b3]">
+            <div className="flex h-full items-center justify-center text-text-muted">
               <ImageIcon size={28} aria-hidden="true" />
             </div>
           )}
           <UploadButton
             inputId={bannerInputId}
             label={uiText("배너 업로드")}
-            disabled={disabled}
+            disabled={disabled || uploading}
             onChange={(event) => handleFileChange("banner", event)}
-            className="absolute right-4 top-4 bg-white/95 shadow-[0_8px_20px_rgba(16,24,40,0.16)]"
+            className="absolute right-4 top-4 bg-surface-base shadow-[var(--shadow-summary)]"
           />
           {generationOverlay?.kind === "banner" ? (
             <MediaGenerationOverlay label={generationOverlay.label} />
           ) : null}
         </div>
         <div className="relative px-6 pb-6 pt-[70px]">
-          <div className="absolute left-6 top-[-54px] rounded-full border-[5px] border-white bg-white shadow-[0_10px_26px_rgba(16,24,40,0.14)]">
+          <div className="absolute left-6 top-[-54px] rounded-full border-[5px] border-surface-base bg-surface-base shadow-[var(--shadow-summary)]">
             <ProfileAvatar
               name={name}
               avatarUrl={resolvedAvatarUrl}
@@ -166,90 +176,18 @@ export function ProfileMediaUploader({
             <UploadButton
               inputId={avatarInputId}
               label={uiText("아바타 업로드")}
-              disabled={disabled}
+              disabled={disabled || uploading}
               onChange={(event) => handleFileChange("avatar", event)}
             />
           </div>
         </div>
       </div>
 
-      {error ? <p className="mt-3 text-[13px] font-bold text-[#c24141]">{error}</p> : null}
+      {error && !draft ? <p role="alert" className="mt-3 text-sm font-bold text-text-danger">{error}</p> : null}
 
       {draft ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#101828]/55 px-4 py-6">
-          <div className="w-full max-w-[640px] rounded-[8px] bg-white p-5 shadow-[0_24px_80px_rgba(16,24,40,0.32)]">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-[20px] font-extrabold text-[#101828]">
-                {uiText(SPECS[draft.kind].label)} {uiText("자르기")}</h2>
-              <button
-                type="button"
-                onClick={closeCropper}
-                className="inline-flex size-10 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#f2f4f7]"
-                title={uiText("닫기")}
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
-            </div>
-
-            <div
-              className={`relative mx-auto overflow-hidden rounded-[8px] bg-[#f2f4f7] ${
-                draft.kind === "avatar" ? "aspect-square w-full max-w-[360px]" : "aspect-[3/1] w-full"
-              }`}
-            >
-              <CropPreview
-                bitmap={draft.bitmap}
-                naturalSize={draft.naturalSize}
-                spec={spec}
-                crop={crop}
-              />
-            </div>
-
-            <div className="mt-5 grid gap-4">
-              <Slider
-                label={uiText("확대")}
-                min={1}
-                max={3}
-                step={0.05}
-                value={crop.scale}
-                onChange={(value) => setCrop((current) => ({ ...current, scale: value }))}
-              />
-              <Slider
-                label={uiText("가로")}
-                min={-45}
-                max={45}
-                step={1}
-                value={crop.offsetX}
-                onChange={(value) => setCrop((current) => ({ ...current, offsetX: value }))}
-              />
-              <Slider
-                label={uiText("세로")}
-                min={-45}
-                max={45}
-                step={1}
-                value={crop.offsetY}
-                onChange={(value) => setCrop((current) => ({ ...current, offsetY: value }))}
-              />
-            </div>
-
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={closeCropper}
-                disabled={uploading}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[#e1e5eb] px-5 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {uiText("취소")}</button>
-              <button
-                type="button"
-                onClick={handleUpload}
-                disabled={uploading || disabled}
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Check size={17} aria-hidden="true" />
-                {uiText("저장")}</button>
-            </div>
-          </div>
-        </div>
+        <ImageCropDialog bitmap={draft.bitmap} spec={spec} crop={crop} onCrop={setCrop} onApply={() => void handleUpload()} onCancel={() => closeCropper()}
+          busy={uploading} disabled={disabled || uploading} error={error} labels={{ title: `${uiText(SPECS[draft.kind].label)} ${uiText("자르기")}`, close: uiText("닫기"), zoom: uiText("확대"), horizontal: uiText("가로"), vertical: uiText("세로"), apply: uiText("저장"), cancel: uiText("취소"), applying: uiText("이미지를 적용하는 중…") }} />
       ) : null}
     </div>
   );
@@ -264,13 +202,13 @@ function MediaGenerationOverlay({
 }) {
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center bg-white/72 backdrop-blur-[1px] ${
+      className={`absolute inset-0 flex items-center justify-center bg-surface-base/70 backdrop-blur-[1px] ${
         rounded === "full" ? "rounded-full" : ""
       }`}
     >
-      <div className="absolute inset-0 animate-pulse bg-[#ff6b6b]/10" />
-      <div className="relative z-10 flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-[13px] font-extrabold text-[#344054] shadow-[0_10px_24px_rgba(16,24,40,0.14)]">
-        <Loader2 size={16} aria-hidden="true" className="animate-spin text-[#ff6b6b]" />
+      <div className="absolute inset-0 animate-pulse motion-reduce:animate-none bg-action-primary/10" />
+      <div className="relative z-10 flex items-center gap-2 rounded-full bg-surface-base px-4 py-2 text-[13px] font-extrabold text-text-primary shadow-[var(--shadow-summary)]">
+        <Loader2 size={16} aria-hidden="true" className="animate-spin motion-reduce:animate-none text-action-primary" />
         {label}
       </div>
     </div>
@@ -292,141 +230,20 @@ function UploadButton({
 }) {
   return (
     <>
-      <label
-        htmlFor={inputId}
-        className={`inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-[#e1e5eb] px-4 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] ${
-          disabled ? "pointer-events-none opacity-60" : ""
-        } ${className ?? "bg-white"}`}
-      >
-        <Upload size={16} aria-hidden="true" />
-        {label}
-      </label>
+      <Button type="button" variant="secondary" disabled={disabled} className={className}
+        onClick={() => (document.getElementById(inputId) as HTMLInputElement | null)?.click()}>
+        <Upload size={16} aria-hidden="true" />{label}
+      </Button>
       <input
         id={inputId}
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
         disabled={disabled}
         onChange={onChange}
       />
     </>
   );
-}
-
-function Slider({
-  label,
-  min,
-  max,
-  step,
-  value,
-  onChange,
-}: {
-  label: string;
-  min: number;
-  max: number;
-  step: number;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <label className="grid gap-2">
-      <span className="text-[13px] font-extrabold text-[#667085]">{label}</span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-[#ff6b6b]"
-      />
-    </label>
-  );
-}
-
-function CropPreview({
-  bitmap,
-  naturalSize,
-  spec,
-  crop,
-}: {
-  bitmap: ImageBitmap;
-  naturalSize: { width: number; height: number };
-  spec: { width: number; height: number };
-  crop: CropState;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.width = spec.width;
-    canvas.height = spec.height;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    drawCroppedImage(context, bitmap, naturalSize, spec, crop);
-  }, [bitmap, crop, naturalSize, spec]);
-
-  return <canvas ref={canvasRef} aria-hidden="true" className="h-full w-full" />;
-}
-
-async function cropToBlob(
-  bitmap: ImageBitmap,
-  naturalSize: { width: number; height: number },
-  spec: { width: number; height: number },
-  crop: CropState,
-) {
-  const canvas = document.createElement("canvas");
-  canvas.width = spec.width;
-  canvas.height = spec.height;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("이미지를 처리하지 못했습니다.");
-
-  drawCroppedImage(context, bitmap, naturalSize, spec, crop);
-
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("이미지를 저장하지 못했습니다."));
-      },
-      "image/webp",
-      0.8,
-    );
-  });
-}
-
-function drawCroppedImage(
-  context: CanvasRenderingContext2D,
-  bitmap: ImageBitmap,
-  naturalSize: { width: number; height: number },
-  spec: { width: number; height: number },
-  crop: CropState,
-) {
-  context.clearRect(0, 0, spec.width, spec.height);
-  const baseScale = Math.max(spec.width / naturalSize.width, spec.height / naturalSize.height);
-  const drawWidth = naturalSize.width * baseScale * crop.scale;
-  const drawHeight = naturalSize.height * baseScale * crop.scale;
-  const centerX = spec.width * (0.5 + crop.offsetX / 100);
-  const centerY = spec.height * (0.5 + crop.offsetY / 100);
-
-  context.drawImage(
-    bitmap,
-    centerX - drawWidth / 2,
-    centerY - drawHeight / 2,
-    drawWidth,
-    drawHeight,
-  );
-}
-
-function blobToBase64(blob: Blob) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      resolve(result.includes(",") ? result.split(",")[1] : result);
-    };
-    reader.onerror = () => reject(new Error("이미지를 읽지 못했습니다."));
-    reader.readAsDataURL(blob);
-  });
 }

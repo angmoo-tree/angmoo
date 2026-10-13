@@ -1,6 +1,7 @@
 """Canonical retrieval admission and Unicode entity eligibility policies."""
 
 from __future__ import annotations
+from dataclasses import replace
 
 from sqlalchemy.orm import Session
 
@@ -131,3 +132,23 @@ class RetrievalPolicyResolver:
             first_world_character_id=first_id,
             second_world_character_id=second_id,
         )
+
+    def resolve_named_entity_mentions(self, scope, mentions, *, chat_identity):
+        if chat_identity is None or len(mentions) > 4:
+            raise RetrievalContractError("selection_protocol_identity_required")
+        results = []
+        blocked_cache = {}
+        for ref, mention in mentions:
+            frozen_ids = tuple(identifier for identifier, name in chat_identity.names.items() if name == mention)
+            read = self.reads.named_entity_mentions(self._session, world_id=scope.world_id,
+                mention=mention, frozen_ids=frozen_ids)
+            candidates = {}
+            for candidate in read.candidates:
+                identifier = candidate.world_character_id
+                if identifier not in blocked_cache:
+                    blocked_cache[identifier] = self._pair_is_blocked(scope.world_id,
+                        scope.responding_world_character_id, identifier)
+                candidates[identifier] = replace(candidate, blocked=blocked_cache[identifier],
+                    observable=candidate.observable and not blocked_cache[identifier])
+            results.append(RetrievalEntityResolution(ref, tuple(candidates.values()), complete=read.complete, named=True))
+        return tuple(results)

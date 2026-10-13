@@ -112,7 +112,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       }
       setPendingAcknowledgement(null);
       setMessage(
-        uiText("World Package v{{value0}}을 내보냈습니다. ({{value1}})", {value0: prepared.preview.package_version, value1: formatBytes(prepared.archive_bytes)}),
+        uiText("World 패키지를 내보냈어요. ({{size}})", {size: formatBytes(prepared.archive_bytes)}),
       );
     } catch (reason) {
       if (prepared && nativeWriteCompleted) {
@@ -177,7 +177,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
         <div>
           <h2 className="text-xl font-black text-[#101828]">{uiText("Package 내보내기")}</h2>
           <p className="mt-2 text-sm font-medium leading-6 text-[#667085]">
-            {uiText("자율 캐릭터와 관리된 미디어만 포함합니다. owner-controlled 프로필, 세션, credential, P2~P4 실행 기록과 관계 projection은 제외합니다. 캐릭터는 최종 편집한 설정과 표시 이미지를 공유하며, 가져온 카드 원본은 포함하지 않습니다.")}</p>
+            {uiText("World 설정과 자율 캐릭터의 설정·이미지를 패키지로 내보내요. 내 프로필, 로그인 정보, API 키와 앱에 쌓인 활동·관계 기록은 포함하지 않아요. 캐릭터는 현재 편집한 설정과 표시 이미지를 공유하며, 가져온 캐릭터 카드의 원본 파일은 제외해요.")}</p>
         </div>
       </div>
 
@@ -236,7 +236,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
         />
         <Confirmation
           checked={confirmations.exclusions}
-          label={uiText("개인 프로필·runtime 기록·외부 URL 자산이 제외됨을 확인했습니다.")}
+          label={uiText("개인 프로필·활동 기록·외부 링크의 미디어는 포함되지 않음을 확인했어요.")}
           onChange={(checked) => setConfirmations((value) => ({ ...value, exclusions: checked }))}
         />
       </fieldset>
@@ -312,16 +312,14 @@ function ExportPreviewCard({ preview }: { preview: WorldPackageExportPreview }) 
     <div className="mt-5 rounded-[22px] border border-[#d0d5dd] p-5" aria-live="polite">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <strong className="text-[#101828]">{preview.recommended_filename}</strong>
-        <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-xs font-black text-[#475467]">v{preview.package_version}</span>
       </div>
       <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
         <PreviewValue label={uiText("포함 자율 캐릭터")} value={uiText("{{value0}}명", {value0: preview.included_autonomous_characters})} />
-        <PreviewValue label={uiText("포함 관리 자산")} value={uiText("{{value0}}개", {value0: preview.included_assets})} />
-        <PreviewValue label={uiText("제외 owner-controlled")} value={uiText("{{value0}}명", {value0: preview.excluded_owner_controlled_characters})} />
+        <PreviewValue label={uiText("포함된 이미지·미디어")} value={uiText("{{value0}}개", {value0: preview.included_assets})} />
+        <PreviewValue label={uiText("제외한 내 프로필")} value={uiText("{{value0}}명", {value0: preview.excluded_owner_controlled_characters})} />
         <PreviewValue label={uiText("제외 외부 자산")} value={uiText("{{value0}}개", {value0: preview.excluded_external_assets})} />
       </dl>
-      <p className="mt-4 break-all font-mono text-[11px] leading-5 text-[#667085]">seed {preview.seed_digest}</p>
-      {preview.warnings.length ? <ul className="mt-3 list-disc pl-5 text-xs font-bold leading-5 text-[#b54708]">{preview.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul> : null}
+      {preview.warnings.length ? <p className="mt-3 text-sm text-text-secondary">{uiText("포함되지 않는 정보가 있어요. 위 안내와 제외 항목을 확인해주세요.")}</p> : null}
     </div>
   );
 }

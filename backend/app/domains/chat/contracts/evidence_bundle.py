@@ -48,6 +48,9 @@ class EvidenceLocator:
     source_revision: str | None = None
     actor_world_character_id: str | None = None
     target_world_character_id: str | None = None
+    # Private prepared facts, retained until situation delivery is frozen.
+    relationship_facts_digest: str | None = None
+    relationship_view_version: int | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id or len(self.source_id) > 128:
@@ -62,6 +65,12 @@ class EvidenceLocator:
             not self.actor_world_character_id or not self.target_world_character_id
         ):
             raise EvidenceBundleContractError("evidence_locator_relationship_invalid")
+        if self.relationship_facts_digest is not None and (
+            self.kind is not EvidenceLocatorKind.GRAPH_RELATIONSHIP
+            or len(self.relationship_facts_digest) != 64
+            or type(self.relationship_view_version) is not int or self.relationship_view_version < 0
+        ):
+            raise EvidenceBundleContractError("evidence_locator_relationship_basis_invalid")
 
 
 class EvidenceBundleContractError(ValueError):
@@ -78,6 +87,9 @@ class EvidenceItem:
     source_succeeded: bool = True
     observable: bool = True
     locator: EvidenceLocator | None = None
+    # Optional, server-verified authors. Not part of v1 text/hash/serialization.
+    author_identities: tuple[tuple[str, str], ...] = ()
+    relationship_projection: dict | None = None
 
     def __post_init__(self) -> None:
         if (

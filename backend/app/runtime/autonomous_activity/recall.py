@@ -93,10 +93,11 @@ class SelectedRecall:
         if query.get("image_hint"):
             from dataclasses import replace
             request = replace(request, image_base_text=query["image_base_text"], image_hint=query["image_hint"])
+        deadline = monotonic() + 15
         try:
-            async with self._limit:
+            async with asyncio.timeout(max(0, deadline-monotonic())), self._limit:
                 retrieved_after = datetime.now(UTC).isoformat()
-                result = await self.service.execute(request, deadline=monotonic() + 15)
+                result = await self.service.execute(request, deadline=deadline)
         except (TimeoutError, OSError):
             return {"status": "unavailable", "reason": "recall_transport_unavailable", "packets": []}
         except RuntimeError as exc:

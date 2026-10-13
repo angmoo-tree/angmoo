@@ -75,27 +75,33 @@ class ImageHttp:
     def __init__(self, client: httpx.AsyncClient | None = None):
         self.client = client
 
-    async def request(self, method, url, *, key=None, timeout=120.0, **kwargs):
+    async def request(self, method, url, *, key=None, timeout=120.0, error_body_limit=None, **kwargs):
         headers = {**kwargs.pop("headers", {}), **({"Authorization": f"Bearer {key}"} if key else {})}
         limit = 24 * 1024 * 1024 if method == "POST" or "/view" in url else 2 * 1024 * 1024
         owned = self.client is None
         client = self.client or httpx.AsyncClient(follow_redirects=False, trust_env=False)
         try:
-            async with client.stream(method, url, headers=headers, timeout=timeout, **kwargs) as response:
-                if response.status_code >= 300:
+            async with client.stream(method, url, headers=headers, timeout=timeout, follow_redirects=False, **kwargs) as response:
+                if response.status_code >= 300 and error_body_limit is None:
                     # Never put remote bodies, URLs with secrets or headers into exceptions.
                     raise ImageSubmissionError(f"provider_http_{response.status_code}", outcome_unknown=method == "POST" and response.status_code >= 500)
+                body_limit = error_body_limit if response.status_code >= 300 else limit
                 data = bytearray()
+                truncated = False
                 async for chunk in response.aiter_bytes():
-                    data.extend(chunk)
-                    if len(data) > limit:
+                    if len(data) + len(chunk) > body_limit:
+                        if response.status_code >= 300 and error_body_limit is not None:
+                            data.extend(chunk[:body_limit - len(data)])
+                            truncated = True
+                            break
                         raise ImageSubmissionError("provider_response_too_large", outcome_unknown=method == "POST")
+                    data.extend(chunk)
                 # aiter_bytes already decoded HTTP content encoding. Reusing
                 # gzip/br headers would make the materialized Response decode
                 # the same body again; its original wire length is also stale.
                 headers = {name: value for name, value in response.headers.items()
                     if name.lower() not in {"content-encoding", "content-length", "transfer-encoding"}}
-                return httpx.Response(response.status_code, headers=headers, content=bytes(data))
+                return httpx.Response(response.status_code, headers=headers, content=bytes(data), extensions={"angmoo_body_truncated": truncated})
         except httpx.TransportError as exc:
             raise ImageSubmissionError("provider_transport_error", outcome_unknown=method == "POST") from exc
         finally:

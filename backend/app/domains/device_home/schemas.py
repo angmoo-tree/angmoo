@@ -19,6 +19,8 @@ class DeviceHomeSchema(BaseModel):
 
 
 class WorldSurfaceItemRead(DeviceHomeSchema):
+    can_delete: bool = False
+    is_default_space: bool = False
     icon_media_id: str | None = None
     world_id: str
     name: str

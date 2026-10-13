@@ -51,6 +51,9 @@ def database(path):
 
 
 def pair(db):
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service import world_credentials
+
     world, first, original_second = _seed(db, two_characters=True)
     # The original fixture has an explicit Seoul user calendar. Direct planning
     # calls below must freeze that same environment instead of defaulting to UTC.
@@ -67,6 +70,13 @@ def pair(db):
     create_profile(db, world, first.user.id, "Alex")
     db.add(models.WorldRole(id="joint-test-role", world_id=world.id, role_key="student", name="주민"))
     for ready in (first, second):
+        world_credentials.save(
+            db, owner_id=ready.user.id, world_id=world.id,
+            world_character_id=ready.world_character.id, purpose="sns",
+            data=WorldCredentialWrite(expected_revision=0, provider="google",
+                model="gemini-3.1-flash-lite", thinking_level="high",
+                api_key="synthetic-joint-preparation-sns-key"),
+        )
         ready.world_character.autonomous_enabled = True
         ready.world_character.feed_runtime_mode = "topic_recommendation_v1"
         ready.world_character.activity_runtime_mode = "routine_resident_v1"
@@ -328,10 +338,6 @@ def test_acceptance_during_generation_fences_apply_and_keeps_both_reserved_plans
                         decision="accept", now=now, resolved_schedule=schedule)
                 run_sqlite_session_immediate(writer, accept, require_clean=True)
             return new_output(kwargs["source"]), SimpleNamespace(calls=[])
-        from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
-        monkeypatch.setattr(preparation.CredentialResolver, "resolve_llm_credential", lambda *a, **k:
-            CredentialMaterial("race-credential", "google", "gemini-3.1-flash-lite", "fake",
-                CredentialPurpose.WORLD_CHARACTER_SETUP_LLM, "unused"))
         result = asyncio.run(preparation.ensure_preparation(db, character_id=first.character.id, world_id=world.id,
             user=first.user, request_id="acceptance-race", now=now, generator=generate))
         assert len(calls) == 1 and result.request_reason_code == "preparation_source_changed"

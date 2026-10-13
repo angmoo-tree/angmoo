@@ -157,6 +157,18 @@ class SqliteMemoryVectorIndex:
             connection.execute("DELETE FROM documents WHERE document_id=?", (document_id,))
             connection.commit()
 
+    def erase_items(self, identifiers):
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            for identifier in identifiers:
+                docs = {f"memory-item:{identifier}"} | {row[0] for row in connection.execute("SELECT document_id FROM documents WHERE memory_item_id=?", (identifier,))}
+                connection.execute("DELETE FROM vectors WHERE rowid IN (SELECT rowid FROM documents WHERE memory_item_id=?)", (identifier,))
+                connection.execute("DELETE FROM documents WHERE memory_item_id=?", (identifier,))
+                if connection.execute("SELECT 1 FROM sqlite_master WHERE name='embedding_attempts_v2'").fetchone():
+                    for doc in docs:
+                        connection.execute("DELETE FROM embedding_attempts_v2 WHERE document_id=?", (doc,))
+            connection.commit()
+
     def identity(self, document_id):
         with self._connect(read_only=True) as connection:
             return connection.execute("SELECT d.version,d.content_hash,v.profile FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=?", (document_id,)).fetchone()

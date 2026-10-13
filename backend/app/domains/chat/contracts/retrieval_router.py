@@ -45,9 +45,8 @@ ROUTER_INTENTS = frozenset(
         "clarification_required",
     }
 )
-ROUTER_ENTITY_ROLES = frozenset(
-    {"counterpart", "mentioned_third_party", "actor", "target", "subject"}
-)
+from app.domains.chat.contracts.person_roles import PERSON_ROLES
+ROUTER_ENTITY_ROLES = PERSON_ROLES
 ROUTER_RELATIONSHIP_DIMENSIONS = frozenset(
     {"affinity", "trust", "conflict", "familiarity", "support", "rivalry"}
 )
@@ -435,6 +434,7 @@ def parse_retrieval_intent_payload(
     payload: Mapping[str, Any],
     *,
     validation_step: Callable[[str, str], None] | None = None,
+    exact_mentions: bool = False,
 ) -> RetrievalIntentEnvelope:
     """Parse one untrusted Router payload with exact-key validation."""
 
@@ -474,9 +474,8 @@ def parse_retrieval_intent_payload(
         entities.append(
             RetrievalEntityMention(
                 ref=_required_string(entity.get("ref"), "entity_ref", maximum=64),
-                mention=_required_string(
-                    entity.get("mention"), "entity_mention", maximum=160
-                ),
+                mention=_required_string(entity.get("mention"), "entity_mention", maximum=160,
+                    exact=exact_mentions),
                 role=_closed_string(
                     entity.get("role"), ROUTER_ENTITY_ROLES, "entity_role"
                 ),
@@ -630,13 +629,13 @@ def _require_exact_keys(
         raise RetrievalContractError(f"retrieval_router_{field}_keys_invalid")
 
 
-def _required_string(value: Any, field: str, *, maximum: int) -> str:
+def _required_string(value: Any, field: str, *, maximum: int, exact: bool = False) -> str:
     reference_value(field, value)
     if not isinstance(value, str):
         if field in {"entity_ref", "relationship_from", "relationship_to"}:
             reference_failure(field, value, rule="required_string.v1", reason="invalid_type")
         raise RetrievalContractError(f"retrieval_router_{field}_invalid")
-    normalized = " ".join(value.split())
+    normalized = value.strip() if exact else " ".join(value.split())
     if not normalized or len(normalized) > maximum:
         if field in {"entity_ref", "relationship_from", "relationship_to"}:
             reference_failure(field, normalized, rule="required_string.v1", reason="empty_after_normalization" if not normalized else "length_exceeded")

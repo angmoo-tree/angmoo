@@ -5,6 +5,7 @@ from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
 from app.domains.world_characters.schemas import management as schemas
 from app.domains.world_characters.schemas.identity import WorldCharacterProfileRead
+from app.domains.world_characters.schemas.basic_activity import BasicActivitySettingsRead, BasicActivityPolicy
 from app.domains.world_characters.service.configuration import effective_configuration, configuration_value
 from app.domains.characters.service.import_configuration import ImportProfile, ImportSettings
 from app.domains.characters.exceptions import InvalidCharacterHandleError
@@ -32,6 +33,7 @@ class WorldCharacterManagementService:
         configs = {item.world_character_id: item for item in self.db.scalars(select(WorldCharacterConfiguration).where(
             WorldCharacterConfiguration.world_character_id.in_([role.id for role, _ in rows])))}
         managed_world = world.owner_user_id == user.id and is_claimed_local_owner(self.db, user.id)
+        role_names = self.queries.role_names(self.db, world_id)
         items = []
         for role, character in rows:
             stored = configs.get(role.id)
@@ -51,6 +53,7 @@ class WorldCharacterManagementService:
             profile = WorldCharacterProfileRead(world_id=world_id, world_character_id=role.id, character_id=character.id,
                 **value.profile.model_dump(), role_key=role.role_key, control_mode=role.control_mode,
                 status="active", profile_capability="available")
+            profile.role_name = role_names.get(role.role_key)
             if user_role:
                 status, activity = schemas.DashboardStatus(state="user"), None
             else:
@@ -109,9 +112,51 @@ class WorldCharacterManagementService:
             supported_generation_models=self.references.generation_model_options(),
             supported_image_models=self.references.image_model_options(self.db, character_id=role.character_id))
 
-    def _claim(self, role, expected_revision):
+    def _basic_owned_role(self, *, world_id, world_character_id, user):
+        if not is_claimed_local_owner(self.db, user.id):
+            raise WorldManagementError("local_owner_required", 403)
+        require_creator_access(self.db, world_id=world_id, user=user)
+        row = self.queries.basic_settings_row(self.db, world_id, world_character_id)
+        if row is None:
+            raise WorldManagementError("world_character_not_found", 404)
+        role, character = row
+        if character.owner_id != user.id or role.control_mode != "autonomous":
+            raise WorldManagementError("world_character_forbidden", 403)
+        return role, character
+
+    def activity_settings(self, *, world_id, world_character_id, user):
+        role, _ = self._basic_owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
+        value = effective_configuration(self.db, world_character_id=role.id)
+        facts = self.references.states(self.db, world_id=world_id, character_ids=[role.character_id])[role.character_id]
+        ready = facts["ready"]
+        return BasicActivitySettingsRead(world_id=world_id, world_character_id=role.id,
+            character_id=role.character_id, revision=role.version, timezone=facts["timezone"],
+            autonomous_enabled=role.autonomous_enabled,
+            policy=BasicActivityPolicy.model_validate(value.settings.model_dump()),
+            can_activate=ready and not role.autonomous_enabled,
+            can_deactivate=role.autonomous_enabled and role.status == "active",
+            reason=None if ready else facts["reason"])
+
+    def patch_activity_settings(self, *, world_id, world_character_id, user, data):
+        self._save_settings(world_id=world_id, world_character_id=world_character_id, user=user,
+            changes=data.editable_policy().model_dump(exclude_unset=True), expected_revision=data.expected_revision, basic=True)
+        return self.activity_settings(world_id=world_id, world_character_id=world_character_id, user=user)
+
+    def authorize_credentials(self, *, world_id, world_character_id, user, mutation=False, basic=False):
+        """Public authorization boundary for purpose settings and privacy writes."""
+        authorize = self._basic_owned_role if basic else self._owned_role
+        role, character = authorize(world_id=world_id, world_character_id=world_character_id, user=user)
+        if mutation:
+            changed = self.db.execute(update(WorldCharacter).where(WorldCharacter.id == role.id,
+                WorldCharacter.world_id == world_id, WorldCharacter.status.in_(("pending", "inactive", "active") if basic else ("active",)))
+                .values(version=WorldCharacter.version))
+            if changed.rowcount != 1:
+                raise WorldManagementError("world_character_not_found", 404)
+        return role, character
+
+    def _claim(self, role, expected_revision, *, basic=False):
         claimed = self.db.execute(update(WorldCharacter).where(WorldCharacter.id == role.id,
-            WorldCharacter.version == expected_revision, WorldCharacter.status == "active")
+            WorldCharacter.version == expected_revision, WorldCharacter.status.in_(("pending", "inactive", "active") if basic else ("active",)))
             .values(version=WorldCharacter.version+1).execution_options(synchronize_session="fetch"))
         if claimed.rowcount != 1:
             raise WorldManagementError("world_character_revision_conflict")
@@ -150,15 +195,20 @@ class WorldCharacterManagementService:
         return self.management(world_id=world_id, world_character_id=world_character_id, user=user)
 
     def patch_settings(self, *, world_id, world_character_id, user, data):
+        self._save_settings(world_id=world_id, world_character_id=world_character_id, user=user,
+            changes=data.settings.model_dump(exclude_unset=True), expected_revision=data.expected_revision)
+        return self.settings(world_id=world_id, world_character_id=world_character_id, user=user)
+
+    def _save_settings(self, *, world_id, world_character_id, user, changes, expected_revision, basic=False):
         try:
             lock_environment_admission(self.db, user.id)
-            role, _ = self._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
+            authorize = self._basic_owned_role if basic else self._owned_role
+            role, _ = authorize(world_id=world_id, world_character_id=world_character_id, user=user)
             if role.control_mode != "autonomous":
                 raise WorldManagementError("world_character_settings_not_available", 403)
             stored = self.db.get(WorldCharacterConfiguration, role.id)
             if stored is None:
                 raise WorldManagementError("world_configuration_missing")
-            changes = data.settings.model_dump(exclude_unset=True)
             for name in ("image_style", "appearance_prompt"):
                 if name in changes and changes[name] is None:
                     changes[name] = ""
@@ -166,13 +216,12 @@ class WorldCharacterManagementService:
             settings = ImportSettings.model_validate({**stored.settings, **changes})
             if {"active_hours_start", "active_hours_end"} & changes.keys():
                 self.references.validate_activity_settings(settings)
-            self._claim(role, data.expected_revision)
+            self._claim(role, expected_revision, basic=basic)
             stored.settings = settings.model_dump(mode="json")
             self.db.commit()
         except Exception:
             self.db.rollback()
             raise
-        return self.settings(world_id=world_id, world_character_id=world_character_id, user=user)
 
     def set_autonomy(self, *, world_id, world_character_id, user, data, enabled):
         try:

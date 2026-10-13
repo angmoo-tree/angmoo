@@ -25,7 +25,7 @@ def database(tmp_path):
         user = registered_models.User(id="owner", display_name="Owner")
         db.add(user)
         db.commit()
-        character = profile.create_character(db, user=user, character_id="bird", data=schemas.AgentCreate(name="Bird", execution_mode="local"))
+        character = profile.create_character(db, user=user, character_id="bird", data=schemas.AgentCreate(api_key="fixture", worldview="A synthetic character for current registration tests", name="Bird", execution_mode="llm"))
         yield db, user, character
     engine.dispose()
 

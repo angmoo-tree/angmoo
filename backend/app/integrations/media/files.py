@@ -1,6 +1,7 @@
 """Managed file paths and reversible quarantine shared by deletion workflows."""
 from dataclasses import dataclass, field
 from pathlib import Path
+import re
 import shutil
 from typing import Iterable
 from uuid import uuid4
@@ -109,14 +110,25 @@ def resolve_private_media_file(
     if not media_url.startswith(url_prefix):
         raise InvalidProfileMediaError("Invalid private media URL")
     relative = media_url[len(url_prefix):]
-    lexical_path = settings.media_root_path / Path(relative)
-    expected_root = settings.media_root_path / expected_directory
+    # Managed URLs contain opaque server-generated components. Reject POSIX and
+    # Windows traversal/drive syntax before any filesystem operation, even on
+    # an OS where the other platform's separators are ordinary characters.
+    parts = relative.split("/")
+    directory_parts = expected_directory.split("/")
+    if any(
+        not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_.-]*", part)
+        for part in parts + directory_parts
+    ):
+        raise InvalidProfileMediaError("Invalid private media path")
+    media_root = settings.media_root_path.resolve()
+    lexical_path = media_root.joinpath(*parts)
+    expected_root = media_root.joinpath(*directory_parts)
     try:
         lexical_path.relative_to(expected_root)
     except ValueError as exc:
         raise InvalidProfileMediaError("Invalid private media path") from exc
     current = lexical_path
-    while current != expected_root:
+    while current != media_root:
         if current.is_symlink():
             raise InvalidProfileMediaError("Private media symlinks are not allowed")
         current = current.parent

@@ -28,6 +28,7 @@ class WorldCharacterPublicProfile:
     control_mode: WorldCharacterControlMode
     status: Literal["active"] = "active"
     profile_capability: Literal["available"] = "available"
+    role_name: str | None = None
 
 
 __all__ = [

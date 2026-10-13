@@ -176,6 +176,9 @@ class PostImageGenerationJob(Base):
         nullable=False,
     )
 
+    # Append-only order matches the forward SQLite ALTER TABLE delta.
+    provider_diagnostic_json: Mapped[str | None] = mapped_column(Text)
+
     post: Mapped[Post] = relationship()
     character: Mapped["Character"] = relationship()
     quota_reservation: Mapped[Optional["PostImageQuotaReservation"]] = relationship(

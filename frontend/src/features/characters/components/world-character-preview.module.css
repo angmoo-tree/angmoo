@@ -1,0 +1,13 @@
+.root { min-width: 0; margin-top: 28px; border-top: 1px solid var(--color-border-default); padding-top: 24px; }
+.heading { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
+.heading h2 { margin: 0; color: var(--color-text-strong); font-size: 1.3rem; font-weight: 800; }
+.all { display: inline-flex; min-height: 44px; min-width: 44px; align-items: center; gap: 4px; color: var(--color-text-secondary); font-size: 0.86rem; text-decoration: none; }
+.list { display: flex; gap: 16px; margin: 0; padding: 4px 4px 12px; overflow-x: auto; overscroll-behavior-x: contain; list-style: none; }
+.list > li { width: clamp(88px, 22.5vw, 112px); flex: 0 0 clamp(88px, 22.5vw, 112px); }
+.character { display: flex; min-width: 0; min-height: 44px; align-items: center; flex-direction: column; gap: 12px; color: var(--color-text-strong); text-decoration: none; }
+.avatar { width: 72px; height: 72px; }
+.initial { font-size: 28px; }
+.name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; max-width: 100%; overflow: hidden; text-align: center; font-size: 0.87rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere; }
+.all:focus-visible, .character:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; border-radius: var(--radius-control); }
+.empty { color: var(--color-text-secondary); font-size: 0.9rem; }
+@media (min-width: 640px) { .list { gap: 24px; } .list > li { width: 100px; flex-basis: 100px; } .avatar { width: 80px; height: 80px; } }

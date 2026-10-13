@@ -1,8 +1,10 @@
 """Actual public/World reads and accepted Social writes on file SQLite only."""
 import pytest
+import hashlib
+from datetime import UTC, datetime
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import event, select
+from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -33,13 +35,34 @@ pytestmark = pytest.mark.usefixtures("deny_external_network")
 @pytest.fixture(params=("creation", "legacy_transition"))
 def fixture(tmp_path, request):
     legacy = request.param == "legacy_transition"
-    engine = seed_configuration_fixture(tmp_path / "post-authors.sqlite", legacy=legacy)
+    root = tmp_path / "isolated-runtime"
+    source = root / "canonical/generations/v27-fixture/angmoo.sqlite3" if legacy else tmp_path / "post-authors.sqlite"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    engine = seed_configuration_fixture(source, legacy=legacy)
     if legacy:
-        from app.runtime.migrations.sqlite_versions import world_configuration_v28
+        from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeCoordinator
+        from app.runtime.migrations.generation import EmbeddedGenerationController
+        from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+        from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+        from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION, sqlite_schema_contract_digest, sqlite_schema_digest
+        manifest = load_sqlite_manifest(27)
         with engine.begin() as connection:
-            before = world_configuration_v28.capture_delta(connection)
-            world_configuration_v28.upgrade(connection)
-            world_configuration_v28.verify_delta(connection, before)
+            assert sqlite_schema_contract_digest(connection) == manifest.schema_digest
+            connection.exec_driver_sql("INSERT INTO angmoo_schema_version VALUES(1,?,?,?,?,?)",
+                (27, manifest.source_revision, manifest.source_migration_count,
+                 sqlite_schema_digest(connection), datetime.now(UTC).isoformat()))
+        engine.dispose()
+        original_sha = hashlib.sha256(source.read_bytes()).hexdigest()
+        controller = EmbeddedGenerationController(root / "canonical", artifact_relative_path="angmoo.sqlite3")
+        controller.promote("generations/v27-fixture", manifest_sha256=manifest.manifest_sha256, data_version=27)
+        result = SqliteCanonicalUpgradeCoordinator(StaticRuntimeDataPath(root), fallback_generation="v27-fixture").upgrade()
+        assert result.source_version == 27 and result.target_version == SQLITE_SCHEMA_VERSION
+        assert result.database_path != source and hashlib.sha256(source.read_bytes()).hexdigest() == original_sha
+        engine = create_engine(f"sqlite:///{result.database_path}", connect_args={"check_same_thread": False, "timeout": 10})
+        event.listen(engine, "connect", lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"))
+        with engine.connect() as connection:
+            assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
+            assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
         with Session(engine) as db:
             for suffix in ("a", "b"):
                 OwnerControlledIdentityService(db).ensure(world_id=f"config-world-{suffix}", current_user_id="fixture-owner")

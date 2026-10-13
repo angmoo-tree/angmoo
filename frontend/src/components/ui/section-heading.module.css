@@ -1,0 +1,5 @@
+.root { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--color-border-default); }
+.icon { display: inline-flex; width: 48px; height: 48px; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 17px; background: var(--color-brand-soft); color: var(--color-brand-accent); }
+.content { min-width: 0; }
+.title { margin: 2px 0 0; font-family: inherit; font-size: 1.45rem; font-weight: 400; line-height: 1.5; color: var(--color-text-strong); overflow-wrap: anywhere; }
+.description { display: block; margin: 3px 0 0; font-family: inherit; font-size: 0.73rem; font-weight: 750; line-height: 1.5; color: var(--color-text-secondary); overflow-wrap: anywhere; }

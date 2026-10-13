@@ -56,6 +56,8 @@ class SqlAlchemyWorldSurfaceRepository:
                 """
                 SELECT
                     w.id AS world_id,
+                    (w.owner_user_id=wm.user_id) AS owns_world,
+                    EXISTS(SELECT 1 FROM owner_default_worlds od WHERE od.world_id=w.id) AS is_default_space,
                     w.name,
                     w.tagline,
                     w.banner_media_id,
@@ -71,7 +73,7 @@ class SqlAlchemyWorldSurfaceRepository:
                     ON wm.world_id = w.id
                     AND wm.user_id = :owner_user_id
                     AND wm.status = 'active'
-                WHERE w.id = :world_id
+                WHERE w.id = :world_id AND NOT EXISTS(SELECT 1 FROM world_deletion_requests d WHERE d.world_id=w.id)
                 LIMIT 1
                 """
             ),
@@ -92,6 +94,7 @@ class SqlAlchemyWorldSurfaceRepository:
     ) -> WorldSurfacePage:
         cursor_updated_at, cursor_world_id = _decode_cursor(cursor)
         where = [
+            "NOT EXISTS(SELECT 1 FROM world_deletion_requests d WHERE d.world_id=w.id)",
             "wm.user_id = :owner_user_id",
             "wm.status = 'active'",
         ]
@@ -124,6 +127,8 @@ class SqlAlchemyWorldSurfaceRepository:
                 f"""
                 SELECT
                     w.id AS world_id,
+                    (w.owner_user_id=wm.user_id) AS owns_world,
+                    EXISTS(SELECT 1 FROM owner_default_worlds od WHERE od.world_id=w.id) AS is_default_space,
                     w.name,
                     w.tagline,
                     w.banner_media_id,
@@ -167,6 +172,8 @@ def _surface_item(row) -> WorldSurfaceItem:
     if isinstance(updated_at, str):
         updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
     return WorldSurfaceItem(
+        can_delete=bool(row["owns_world"]) and row["membership_role"] == "owner" and not bool(row["is_default_space"]),
+        is_default_space=bool(row["is_default_space"]),
         icon_media_id=str(row["icon_media_id"]) if row["icon_media_id"] else None,
         world_id=str(row["world_id"]),
         name=str(row["name"]),

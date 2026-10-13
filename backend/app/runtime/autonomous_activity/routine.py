@@ -191,7 +191,7 @@ class RoutineLane:
                 completed_replies(self.ctx, world_id=self.actor.world_id, actor_id=self.actor.id),
                 state["shared_context"].get("today_activity", {})),
             "input_purpose": {"routine.previous_success": "last_original_routine_scene", "today_activity": "completed_interaction_history", "source_manifest": "observed_evidence", "completed_social_replies": "already_published_replies"},
-            "image_output_enabled": image_output_enabled(self.ctx.db, self.ctx.character.id),
+            "image_output_enabled": image_output_enabled(self.ctx.db, self.ctx.character.id, input_snapshot=self.ctx.input_snapshot),
             "memories": context_memories(refreshed.get("memories", state["memories"])), "source_manifest": manifest,
             "metric_sources": source_prompt(manifest), "relationships": relations})}
 
@@ -340,7 +340,9 @@ class RoutineLane:
         elif common["known"]:
             after.update(mood=common["mood"], mood_intensity=common["mood_intensity"], action_note=common["state_note"])
         generation = RoutineGeneration(validated.plan, validated.draft, after)
+        from app.runtime.autonomous_activity.situation_memory import participant
         return {"executions": [plain(publish_routine_activity(self.ctx, prepared=self.prepared, generation=generation,
+            situation_admission=participant(self, state, "routine-post"),
             relationship_validator=self.effect_relationship_validator(state)))]}
 
     async def settle(self, state):

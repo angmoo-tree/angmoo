@@ -203,3 +203,56 @@ class CredentialUpsert(BaseModel):
     auth_profile_id: str | None = Field(default=None, max_length=120)
     label: str | None = Field(default=None, max_length=80)
     world_id: str | None = Field(default=None, min_length=1, max_length=64)
+
+from enum import StrEnum
+from pydantic import SecretStr
+
+class WorldCredentialPurpose(StrEnum):
+    SNS = "sns"
+    IMAGE = "image"
+    CHAT = "chat"
+    VISION = "vision"
+    CONSOLIDATION = "consolidation"
+    EMBEDDING = "embedding"
+
+
+class WorldCredentialRead(BaseModel):
+    purpose: WorldCredentialPurpose
+    provider: str
+    model: str
+    thinking_level: str | None
+    has_key: bool
+    fingerprint: str | None
+    revision: int
+    configuration_revision: int | None = None
+    has_partner_key: bool = False
+    key_revision: int | None = None
+
+
+class WorldImageProviderKeyRead(BaseModel):
+    provider: Literal["novelai", "nanogpt", "openrouter", "comfyui"]
+    purpose: Literal["user_image", "comfy_partner_image"]
+    has_key: bool
+    fingerprint: str | None
+    key_revision: int
+
+
+class WorldCredentialWrite(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=0)
+    provider: str = Field(min_length=1, max_length=40)
+    model: str = Field(min_length=1, max_length=120)
+    thinking_level: str | None = None
+    api_key: SecretStr | None = None
+    expected_configuration_revision: int | None = Field(default=None, ge=0)
+    expected_key_revision: int | None = Field(default=None, ge=0)
+    partner_api_key: SecretStr | None = None
+    clear_partner_key: bool = False
+
+
+class WorldCredentialDelete(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_revision: int = Field(ge=1)
+    provider: Literal["novelai", "nanogpt", "openrouter", "comfyui"] | None = None
+    expected_key_revision: int | None = Field(default=None, ge=0)
+    expected_configuration_revision: int | None = Field(default=None, ge=0)

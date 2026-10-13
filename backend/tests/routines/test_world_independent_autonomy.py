@@ -49,10 +49,14 @@ def engine(tmp_path, monkeypatch):
     monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", True)
     result = seed_configuration_fixture(tmp_path / "world-autonomy.sqlite")
     with Session(result) as db:
+        from app.domains.identity.service import world_credentials
+        from identity.test_world_credentials import write
         for suffix in ("a", "b"):
             row = db.get(WorldCharacterConfiguration, f"config-role-{suffix}")
             row.settings = {**row.settings, "active_hours_start": "09:00", "active_hours_end": "02:00",
                 "generation_model": "gemini-3.1-flash-lite", "personality": f"World {suffix} persona"}
+            world_credentials.save(db, owner_id="fixture-owner", world_id=f"config-world-{suffix}",
+                world_character_id=f"config-role-{suffix}", purpose="sns", data=write(key=f"synthetic-own-sns-{suffix}"))
         db.commit()
     yield result
     result.dispose()
@@ -174,9 +178,14 @@ def test_world_default_generation_model_and_thinking_captured_once(engine):
         credential = db.get(LlmCredential, "config-credential-a")
         credential.thinking_level = "medium"
         db.commit()
+        from app.domains.identity.service import world_credentials
+        from identity.test_world_credentials import write
+        own_scope = dict(owner_id="fixture-owner", world_id="config-world-a", world_character_id="config-role-a", purpose="sns")
+        world_credentials.save(db, **own_scope, data=write(1, "", thinking="medium"))
         metadata = capture_activity_input(db, character_id="config-actor-a")
         credential.model, credential.thinking_level = "gemini-3.5-flash-lite", "high"
         db.commit()
+        world_credentials.save(db, **own_scope, data=write(2, "", model="gemini-3.5-flash-lite", thinking="high"))
         view = character_for_input(db.get(Character, "config-actor-a"), metadata)
         policy = build_activity_policy(db, character_id=view.id, now=NOW, frozen_input=True, input_snapshot=metadata)
         ctx = LangGraphResidentContext(db=db, run_id="not-requeried", user_id="fixture-owner", agent_id="test",

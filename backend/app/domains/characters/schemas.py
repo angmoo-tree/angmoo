@@ -64,7 +64,7 @@ class AgentCreate(BaseModel):
         return normalize_persona_text(value) if isinstance(value, str) else value
 
 
-    execution_mode: AgentExecutionMode = "llm"
+    execution_mode: Literal["llm"] = "llm"
     name: str = Field(min_length=1, max_length=80)
     handle: str | None = Field(default=None, min_length=2, max_length=40)
     avatar_url: str | None = Field(default=None, max_length=500)
@@ -164,7 +164,7 @@ AgentProfileImageBucket = Literal[
 ]
 
 class AgentCreationDraftCreate(BaseModel):
-    execution_mode: Literal["llm", "local"] = "llm"
+    execution_mode: Literal["llm"] = "llm"
     target_world_id: str | None = Field(default=None, max_length=64)
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
@@ -174,6 +174,8 @@ class AgentCreationDraftCreate(BaseModel):
 class AgentCreationDraftUpdate(BaseModel):
     revision: int | None = Field(default=None, ge=1)
     status: Literal["cancelled"] | None = None
+    creation_method: Literal["direct"] | None = None
+    target_world_id: str | None = Field(default=None, max_length=64)
     @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
     @classmethod
     def normalize_persona(cls, value):
@@ -380,7 +382,14 @@ class AgentActivityProfileReadinessRead(BaseModel):
     can_view_graph: bool = False
 
 
+class CharacterRegistrationScope(BaseModel):
+    world_id: str
+    world_character_id: str
+    character_id: str
+
+
 class AgentDetailRead(BaseModel):
+    registration_scope: CharacterRegistrationScope | None = None
     character: CharacterRead
     state: CharacterStateRead | None = None
     credential: CredentialRead | None

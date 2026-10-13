@@ -16,6 +16,7 @@ from app.domains.runtime import router as runtime_status
 from app.domains.tree import router as tree
 from app.domains.world_characters.router import entry as worlds
 from app.domains.worlds import router as world_creator
+from app.domains.worlds.router_deletion import router as world_deletion_router
 from app.api.v1.routes import world_character_setup
 from app.domains.world_characters.router import setup as autonomy_setup
 from app.api.v1.routes import world_activity_runtime
@@ -62,6 +63,7 @@ PUBLIC_ROUTERS = (
     tree.router,
     worlds.router,
     world_creator.router,
+    world_deletion_router,
     world_character_setup.router,
     autonomy_setup.router,
     world_activity_runtime.router,

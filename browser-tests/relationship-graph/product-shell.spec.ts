@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { uiDWorld } from "../continuity-next-fixture";
 
 type GraphPhase =
   | "ready"
@@ -20,7 +21,7 @@ const OWNER = {
   ui_preference_revision: 0,
 };
 
-function graphRead(phase: Exclude<GraphPhase, "provider-error">) {
+export function graphRead(phase: Exclude<GraphPhase, "provider-error">) {
   const hasRelationship = phase !== "empty";
   return {
     world_id: "world-ui-e-graph",
@@ -91,16 +92,23 @@ async function json(route: Route, body: unknown, status = 200) {
   });
 }
 
-async function installGraphFixture(
+export async function installGraphFixture(
   page: Page,
   getPhase: () => GraphPhase,
   requestedProviders: Array<string | null>,
 ) {
-  await page.route("**/api/backend/**", async (route) => {
+  const staticShell = (await page.evaluate(() => Boolean((window as any).__ANGMOO_RUNTIME_CONFIG__))) || process.env.ANGMOO_GRAPH_STATIC === "1";
+  if (process.env.ANGMOO_GRAPH_STATIC === "1") await page.addInitScript(() => Object.assign(window,{__ANGMOO_RUNTIME_CONFIG__:{profile:"tauri-static",apiBaseUrl:"http://127.0.0.1:8080",graphProvider:"ladybug",launchToken:"graph-fixture-token-0000000000000"}}));
+  await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.pathname === "/api/backend/auth/me") {
+    if (url.pathname.endsWith("/auth/me")) {
       await json(route, OWNER);
+      return;
+    }
+    if (url.pathname.endsWith("/worlds/mine/world-ui-e-graph")) {
+      await json(route, { schema_version: "local-world-app-v1", surface: "world_app",
+        world: uiDWorld("world-ui-e-graph") });
       return;
     }
     if (url.pathname.endsWith("/relationship-review")) {
@@ -135,8 +143,8 @@ test("UI-E Relationship Graph keeps ready, empty, degraded, and unavailable dist
     "/characters/character-ui-e-center/worlds/world-ui-e-graph/relationship-graph";
   await page.goto(route);
 
-  await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();
-  await expect(page.locator('[data-product-shell="device"]')).toHaveCount(0);
+  await expect(page.locator('[data-product-content="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('main[data-product-surface="world-app"]')).toHaveAttribute("data-world-id", "world-ui-e-graph");
   await expect(page.locator('[data-relationship-graph-state="ready"]')).toBeVisible();
   await expect(page.getByText("LadybugDB 검증 결과", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "방향 관계 지도" })).toBeVisible();

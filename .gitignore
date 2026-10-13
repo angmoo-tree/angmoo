@@ -8,6 +8,7 @@
 *credentials*.local
 
 .next/
+.next-*/
 frontend/static-shell/out/
 frontend/static-shell/.next/
 frontend/static-shell/next-env.d.ts

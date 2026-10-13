@@ -53,7 +53,11 @@ def _artifact_files(root: Path, *, version: str) -> list[Path]:
     if extensions != {".exe", ".msi"}:
         raise SystemExit("Both NSIS and MSI installer artifacts are required")
     for candidate in root.rglob("*"):
-        if candidate.is_file() and candidate.name in FORBIDDEN_ARTIFACT_NAMES:
+        name=candidate.name.lower()
+        private_root=candidate.relative_to(root).parts[0].lower() in {
+            "secrets","runtime","canonical","private-image-assets","backups"}
+        if candidate.is_file() and (name in FORBIDDEN_ARTIFACT_NAMES or name.startswith("app-secret.tmp-")
+                or private_root or name==".env" or name.startswith(".env.") or candidate.suffix.lower() in {".sqlite",".sqlite3"}):
             raise SystemExit(f"Private migration artifact refused: {candidate.name}")
     return files
 

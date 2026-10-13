@@ -16,17 +16,26 @@
 
 .title {
   margin: 2px 0 0;
-  color: var(--color-text-strong);
+  color: var(--color-brand-accent);
+  font-family: "AngmooQuicksand", var(--font-sans);
   font-size: 1.35rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .content {
   padding: var(--spacing-dense);
+  padding-bottom: max(var(--spacing-dense), env(safe-area-inset-bottom));
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px var(--spacing-control);
+}
+@font-face {
+  font-family: "AngmooQuicksand";
+  src: url("../../assets/fonts/quicksand/Quicksand-wght.ttf") format("truetype");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
 }

@@ -197,14 +197,8 @@ def _required_environment(name: str) -> str:
 
 
 def _write_new_secret(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(secrets.token_urlsafe(48) + "\n", encoding="utf-8")
-    try:
-        temporary.chmod(0o600)
-    except OSError:
-        pass
-    temporary.replace(path)
+    from app.core.secret_file_access import create_secret_once
+    create_secret_once(path,(secrets.token_urlsafe(48)+"\n").encode("utf-8"))
 
 
 def _selected_generation(data_root: Path) -> str:
@@ -259,6 +253,9 @@ def _build_embedded_runtime_config(
         if has_existing_data:
             raise RuntimeError("app_secret_missing_for_existing_data")
         _write_new_secret(secret_path)
+    else:
+        from app.core.secret_file_access import protect_existing_secret
+        protect_existing_secret(secret_path,protect_parent=True)
     # Register the complete canonical model inventory before inspecting or
     # creating a SQLite generation. The same ordering is used by the
     # contributor entrypoint and is required for an exact v1/v2 manifest.

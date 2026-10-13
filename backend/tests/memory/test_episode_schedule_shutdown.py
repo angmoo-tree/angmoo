@@ -21,7 +21,7 @@ def test_scheduled_then_new_activity_shutdown_uses_episode_lane_once(memory_sess
     factory = sessionmaker(bind=db.bind)
     provider = Provider()
     runtime = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1",
-        episode_provider_factory=lambda *args: provider)
+        episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
     install_memory_delivery(factory)
     try:
         with factory() as current:
@@ -39,7 +39,7 @@ def test_scheduled_then_new_activity_shutdown_uses_episode_lane_once(memory_sess
         assert provider.calls == 2
         # Repeated shutdown and a freshly constructed worker do not summarize again.
         restarted = MemoryBatchRuntime(factory, lambda *args: None, generation_policy="episode_v1",
-            episode_provider_factory=lambda *args: provider)
+            episode_provider_factory=lambda *args: provider, activity_provider_factory=lambda *args: provider)
         assert asyncio.run(restarted.tick(shutdown=True)) == "memory_batch_queue_empty"
         assert provider.calls == 2
         with factory() as current:

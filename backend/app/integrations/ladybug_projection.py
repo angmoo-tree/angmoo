@@ -898,6 +898,20 @@ class LadybugRelationshipProjection:
         with self._access_lock:
             if isinstance(command, NoGraphMutationCommand):
                 return "noop"
+            if isinstance(command, RelationshipStateProjectionCommand):
+                world_id = (
+                    command.event.world_id
+                    if command.event is not None
+                    else command.world_id
+                )
+            else:
+                world_id = command.world_id
+            if not world_id:
+                raise LadybugProjectionError("world_missing")
+            erased = self._execute("MATCH (meta:ProjectionMeta {id: $id}) RETURN count(meta)",
+                {"id": "world-erasure:" + world_id})
+            if erased and int(erased[0][0]):
+                return "world_erased"
             if isinstance(command, SourceExclusionProjectionCommand):
                 rows = self._execute(
                     """
@@ -932,9 +946,7 @@ class LadybugRelationshipProjection:
                 self._merge_event(event)
                 parameters = _event_parameters(event)
             else:
-                if not command.world_id:
-                    raise LadybugProjectionError("world_missing")
-                parameters = {"world_id": command.world_id}
+                parameters = {"world_id": world_id}
             parameters.update(
                 {
                     "actor_world_character_id": command.actor_world_character_id,
@@ -1052,6 +1064,24 @@ class LadybugRelationshipProjection:
                     f"MATCH (node:{label} {{world_id: $world_id}}) DETACH DELETE node",
                     {"world_id": world_id},
                 )
+
+    def erase_world(self, world_id: str, *, batch_size: int = 100) -> bool:
+        """Permanently fence late commands, then remove a bounded graph page."""
+        if not 1 <= batch_size <= 100:
+            raise ValueError("world_erasure_graph_batch_invalid")
+        with self._access_lock:
+            self._execute("MERGE (meta:ProjectionMeta {id: $id}) SET meta.schema_version=$version, meta.adapter=$adapter RETURN meta.id",
+                {"id": "world-erasure:" + world_id, "version": LADYBUG_PROJECTION_SCHEMA_VERSION, "adapter": "world-erasure.v1"})
+            remaining = batch_size
+            for label, key in (("SocialEvent", "event_id"), ("WorldCharacter", "world_character_id"), ("World", "world_id")):
+                rows = self._execute(f"MATCH (node:{label} {{world_id: $world_id}}) RETURN node.{key} LIMIT {remaining}", {"world_id": world_id})
+                identifiers = [row[0] for row in rows]
+                if identifiers:
+                    self._execute(f"MATCH (node:{label}) WHERE node.{key} IN $ids DETACH DELETE node", {"ids": identifiers})
+                    remaining -= len(identifiers)
+                if remaining == 0:
+                    return False
+            return True
 
     def world_digest(self, world_id: str) -> dict[str, list[str]]:
         def entry(*values: object) -> str:

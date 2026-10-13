@@ -384,6 +384,8 @@ class WorldGlossaryTermRead(WorldGlossaryTermInput):
 
 
 class WorldRead(WorldSchema):
+    can_delete: bool = False
+    is_default_space: bool = False
     runtime_timezone: str = "UTC"
     icon_media_id: str | None = None
     id: str

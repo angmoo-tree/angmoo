@@ -7,6 +7,7 @@ it cannot approve a generic deleted class, proxy, or weakened assertion.
 from __future__ import annotations
 
 import ast
+import copy
 from collections import Counter
 from functools import lru_cache
 import hashlib
@@ -187,6 +188,78 @@ def _product_change_module():
     return changes
 
 
+def validate_message_settings_retirement(path, original_source, current_source, matches):
+    """Permit only the proved native-World retirement of the shared key write.
+
+    The original HTTP frame and every other endpoint remain exact. The one
+    changed body must be the specified 410 response AND have independently
+    validated committed pre/post AST evidence; an approved arbitrary body,
+    changed dependency, import, argument, or decorator remains invalid.
+    """
+    original = ast.parse(original_source)
+    current = ast.parse(current_source)
+    before = [node for node in original.body if isinstance(node, ast.FunctionDef)
+              and node.name == "update_message_settings"]
+    after = [node for node in current.body if isinstance(node, ast.FunctionDef)
+             and node.name == "update_message_settings"]
+    retired = ast.parse('raise HTTPException(410, detail="world_character_settings_required")').body
+    if (len(before) == len(after) == 1
+            and dump(ast.Module(body=after[0].body, type_ignores=[]))
+            == dump(ast.Module(body=retired, type_ignores=[]))
+            and matches(path, "update_message_settings", before[0], after[0])):
+        before[0].body = after[0].body
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
+
+
+def validate_situation_policy_composition(path, original_source, current_source, matches):
+    """Prove only the committed Memory-policy port, retaining the whole DI frame."""
+    original, current = ast.parse(original_source), ast.parse(current_source)
+
+    def binding(tree):
+        return [node for node in tree.body if isinstance(node, ast.Assign)
+                and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                and node.targets[0].id == "generation_service"]
+
+    before, after = binding(original), binding(current)
+    if len(before) == len(after) == 1 and dump(before[0]) != dump(after[0]):
+        expected = copy.deepcopy(before[0])
+        old_call = ast.parse(
+            "GenerationService(thread_service, settings_service, generation_workflows)",
+            mode="eval",
+        ).body
+        if dump(expected.value) == dump(old_call):
+            expected.value.keywords.append(ast.keyword(
+                arg="memory_policy",
+                value=ast.parse("generation_workflows.capture_memory_policy", mode="eval").body,
+            ))
+            if (dump(after[0]) == dump(expected)
+                    and matches(path, "generation_service", before[0], after[0])):
+                original.body[original.body.index(before[0])] = after[0]
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual service construction changed")
+
+
+def validate_world_stream_product_change(path, original_source, current_source, matches):
+    """Retain HTTP/auth/DI framing around the committed erasure stream change.
+
+    Retirement does not freeze a product endpoint's body forever. Only this
+    named stream can use exact committed definition evidence, and its arguments,
+    decorators, return type and every surrounding module binding stay frozen.
+    """
+    original, current = ast.parse(original_source), ast.parse(current_source)
+    name = "stream_world_response_events"
+    before = [node for node in original.body if isinstance(node, ast.FunctionDef) and node.name == name]
+    after = [node for node in current.body if isinstance(node, ast.FunctionDef) and node.name == name]
+    if len(before) == len(after) == 1:
+        old_frame, new_frame = copy.deepcopy(before[0]), copy.deepcopy(after[0])
+        old_frame.body = new_frame.body = [ast.Pass()]
+        if dump(old_frame) == dump(new_frame) and matches(path, name, before[0], after[0]):
+            original.body[original.body.index(before[0])] = after[0]
+    if dump(original) != dump(current):
+        raise ValueError("Chat actual stream HTTP/auth/dependency frame or committed body changed")
+
+
 def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if enabled is False or enabled is None:
         return None
@@ -257,7 +330,8 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     expected_composition = ast.parse(before(composition))
     # B6 already replaced the Runtime re-export with this same Social query.
     # Prove the signed re-export and the entire actual query module before
-    # allowing precisely that one import change; construction stays exact.
+    # allowing precisely that one import change. The Memory-policy port below
+    # additionally requires its exact committed pre/post construction evidence.
     block_query = "world_character_pair_is_blocked"
     block_module = "app.domains.social.repository.blocks"
     old_block_module = "app.runtime.relationships.sqlalchemy_social_event"
@@ -269,8 +343,10 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if len(imports) != 1:
         raise ValueError("Chat historical Social block query import changed")
     imports[0].module = block_module
-    if dump(expected_composition) != dump(ast.parse((root / composition).read_text(encoding="utf-8-sig"))):
-        raise ValueError("Chat actual service construction changed")
+    validate_situation_policy_composition(
+        composition, ast.unparse(expected_composition),
+        (root / composition).read_text(encoding="utf-8-sig"), matches,
+    )
     # These three original route files only imported the actual HTTP endpoints
     # and the service instances whose construction was proved above. Retire the
     # import surface only after proving the complete original HTTP/DI modules;
@@ -295,7 +371,15 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
                 # world_generation forwarding proof above; no other alias is allowed.
                 if not (route.endswith("/world_chat_response.py") and node.module == "app.runtime.chat" and [(a.name, a.asname) for a in node.names] == [("world_generation", "chat_service")]):
                     raise ValueError("Chat historical route facade binding changed")
-        if dump(ast.parse(before(actual_route))) != dump(ast.parse((root / actual_route).read_text(encoding="utf-8-sig"))):
+        original_route = before(actual_route)
+        current_route = (root / actual_route).read_text(encoding="utf-8-sig")
+        if actual_route == "backend/app/domains/chat/router/messages.py":
+            validate_message_settings_retirement(
+                actual_route, original_route, current_route, matches,
+            )
+        elif actual_route == "backend/app/domains/chat/router/world_chat_response.py":
+            validate_world_stream_product_change(actual_route, original_route, current_route, matches)
+        elif dump(ast.parse(original_route)) != dump(ast.parse(current_route)):
             raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
     dependency = "backend/app/domains/chat/dependencies.py"
     if dump(ast.parse(before(dependency))) != dump(ast.parse((root / dependency).read_text(encoding="utf-8-sig"))):

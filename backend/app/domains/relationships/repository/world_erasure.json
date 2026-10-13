@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "owner": "relationships",
+  "tables": {
+    "activity_proposals": {
+      "world_column": "world_id"
+    },
+    "agent_relationship_points": {
+      "joins": [
+        {
+          "columns": [
+            "consumed_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "selected_run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "reply_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "source_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "consumed_run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "reply_run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "source_run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "graph_projection_outbox": {
+      "world_column": "world_id"
+    },
+    "graph_projection_replay_runs": {
+      "world_column": "world_id"
+    },
+    "relationship_experience_receipts": {
+      "world_column": "world_id"
+    },
+    "relationship_metric_applications": {
+      "joins": [
+        {
+          "columns": [
+            "experience_id"
+          ],
+          "target_table": "relationship_experience_receipts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "relationship_metric_budgets": {
+      "world_column": "world_id"
+    },
+    "relationship_policies": {
+      "world_column": "world_id"
+    },
+    "relationship_review_memory_receipts": {
+      "world_column": "world_id"
+    },
+    "relationship_review_requests": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "memory_request_id"
+          ],
+          "target_table": "memory_consolidation_requests",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "relationship_review_work": {
+      "world_column": "world_id"
+    },
+    "relationship_state_changes": {
+      "world_column": "world_id"
+    },
+    "relationship_states": {
+      "world_column": "world_id"
+    },
+    "social_event_evidence": {
+      "joins": [
+        {
+          "columns": [
+            "public_action_execution_id"
+          ],
+          "target_table": "agent_public_action_executions",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "source_notification_id"
+          ],
+          "target_table": "notifications",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "social_event_id"
+          ],
+          "target_table": "social_events",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "source_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "root_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "agent_run_id"
+          ],
+          "target_table": "agent_runs",
+          "target_columns": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "target_post_id"
+          ],
+          "target_table": "posts",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "social_events": {
+      "world_column": "world_id"
+    }
+  }
+}

@@ -235,11 +235,13 @@
   margin: 0;
 }
 
-@media (max-width: 380px) {
+@media (min-width: 768px) {
   .content {
-    padding-inline: var(--spacing-control);
+    padding-inline: 36px;
   }
+}
 
+@media (max-width: 380px) {
   .sectionCard {
     padding: var(--spacing-dense);
   }

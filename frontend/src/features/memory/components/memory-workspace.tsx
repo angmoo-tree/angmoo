@@ -5,6 +5,7 @@ import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
 
+import { SettingsCard } from "@/components/ui/settings-card";
 import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 import {
@@ -41,7 +42,10 @@ import { correctMemoryItem, deleteMemoryItem, getMemoryItem, getMemorySetting, l
 import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
+import { MemoryProcessingControls } from "@/features/memory/components/memory-processing-controls";
+import { useSavedEmbedding, embeddingStorageNotice } from "../hooks/use-saved-embedding";
 import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
 import type { MemoryScopeLoaders, MemoryWorldOption, MemoryCharacterOption } from "@/features/memory/types/scope-options";
 
@@ -49,6 +53,7 @@ export type MemoryWorkspaceProps = {
   initialMemoryId?: string;
   initialSubjectId?: string;
   initialWorldId?: string;
+  verifyWorldScope?: (worldId:string,signal:AbortSignal)=>Promise<boolean|null>;
 } & MemoryScopeLoaders;
 
 type OwnerMutation =
@@ -65,6 +70,7 @@ export function MemoryWorkspace({
   initialWorldId,
   getLocalWorldSurface,
   listWorldCharacterProfiles,
+  verifyWorldScope,
 }: MemoryWorkspaceProps) {
   const formatNumber = useUiNumberFormatter();
   const formatDate = useUiDateFormatter();
@@ -91,8 +97,43 @@ export function MemoryWorkspace({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
+  const embedding = useSavedEmbedding(worldId, subjectId, phase === "ready", mutationKind !== null);
   const correctionRef = useRef<HTMLTextAreaElement>(null);
   const mutationLockRef = useRef(false);
+  const active = useRef(true), generation = useRef(0);
+  const operations = useRef(new Set<AbortController>());
+  useEffect(()=>{
+    if(!worldId||!verifyWorldScope||phase!=="ready")return;
+    const abort=new AbortController(),scope=captureAuthRequestScope();let reading=false;
+    async function check(){
+      if(reading||document.visibilityState==="hidden")return;reading=true;
+      try {const available=await verifyWorldScope!(worldId,abort.signal);
+        if(!abort.signal.aborted&&isCurrentAuthRequestScope(scope)&&available===false){
+          generation.current++;operations.current.forEach(operation=>operation.abort());
+          setSetting(null);setList(null);setDetail(null);setCharacters([]);setPhase("empty-scope");
+          setCorrectionOpen(false);setDeleteOpen(false);setMutationFailure(null);
+        }
+      }finally{reading=false;}
+    }
+    const focus=()=>void check();window.addEventListener("focus",focus);document.addEventListener("visibilitychange",focus);
+    const timer=setInterval(focus,15_000);
+    return()=>{abort.abort();clearInterval(timer);window.removeEventListener("focus",focus);document.removeEventListener("visibilitychange",focus);};
+  },[worldId,phase,verifyWorldScope]);
+  useEffect(() => {
+    active.current = true;
+    const pending = operations.current;
+    return () => { active.current = false; generation.current += 1; pending.forEach(controller => controller.abort()); };
+  }, []);
+
+  function beginOperation() {
+    const controller = new AbortController(), version = generation.current, scope = captureAuthRequestScope();
+    operations.current.add(controller);
+    return {
+      controller,
+      current: () => active.current && version === generation.current && !controller.signal.aborted && isCurrentAuthRequestScope(scope),
+      end: () => operations.current.delete(controller),
+    };
+  }
   const acquireBatch = useCallback(() => {
     if (mutationLockRef.current) return false;
     mutationLockRef.current = true;
@@ -170,6 +211,7 @@ export function MemoryWorkspace({
         setPhase("ready");
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setError(uiText(memoryErrorMessage(reason)));
         setPhase("error");
@@ -182,10 +224,12 @@ export function MemoryWorkspace({
     const controller = new AbortController();
     void getMemoryItem(worldId, subjectId, memoryId, { signal: controller.signal })
       .then((read) => {
+        if (controller.signal.aborted) return;
         setDetail(read);
         setDetailPhase("ready");
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setDetail(null);
         setDetailPhase("error");
@@ -206,6 +250,7 @@ export function MemoryWorkspace({
   }
 
   function chooseWorld(nextWorldId: string) {
+    generation.current += 1; operations.current.forEach(controller => controller.abort());
     setPhase("loading");
     setError(null);
     setWorldId(nextWorldId);
@@ -219,6 +264,7 @@ export function MemoryWorkspace({
   }
 
   function chooseSubject(nextSubjectId: string) {
+    generation.current += 1; operations.current.forEach(controller => controller.abort());
     setPhase("loading");
     setError(null);
     setSubjectId(nextSubjectId);
@@ -242,8 +288,10 @@ export function MemoryWorkspace({
   async function loadMore() {
     if (!list?.next_cursor || pagePhase === "loading") return;
     setPagePhase("loading");
+    const operation = beginOperation();
     try {
-      const next = await listMemoryItems(worldId, subjectId, { cursor: list.next_cursor });
+      const next = await listMemoryItems(worldId, subjectId, { cursor: list.next_cursor, signal: operation.controller.signal });
+      if (!operation.current()) return;
       setList((current) => {
         if (!current) return next;
         const known = new Set(current.items.map((item) => item.id));
@@ -254,35 +302,42 @@ export function MemoryWorkspace({
       });
       setPagePhase("idle");
     } catch {
-      setPagePhase("error");
-    }
+      if (operation.current()) setPagePhase("error");
+    } finally { operation.end(); }
   }
 
-  async function reloadCurrentScope(nextMemoryId = memoryId) {
+  async function reloadCurrentScope(nextMemoryId = memoryId, pending?: ReturnType<typeof beginOperation>) {
     if (!worldId || !subjectId) return;
-    setMutationFailure(null);
-    const [settingRead, listRead] = await Promise.all([
-      getMemorySetting(worldId, subjectId),
-      listMemoryItems(worldId, subjectId),
-    ]);
-    setSetting(settingRead);
-    setList(listRead);
-    if (nextMemoryId && listRead.items.some((item) => item.id === nextMemoryId)) {
-      const detailRead = await getMemoryItem(worldId, subjectId, nextMemoryId);
-      setMemoryId(nextMemoryId);
-      setDetail(detailRead);
-      setDetailPhase("ready");
-      syncRoute(worldId, subjectId, nextMemoryId);
-    } else {
-      setMemoryId("");
-      setDetail(null);
-      setDetailPhase("idle");
-      syncRoute(worldId, subjectId);
-    }
+    const operation = pending ?? beginOperation();
+    try {
+      setMutationFailure(null);
+      const [settingRead, listRead] = await Promise.all([
+        getMemorySetting(worldId, subjectId, { signal: operation.controller.signal }),
+        listMemoryItems(worldId, subjectId, { signal: operation.controller.signal }),
+      ]);
+      if (!operation.current()) return;
+      setSetting(settingRead);
+      setList(listRead);
+      if (nextMemoryId && listRead.items.some((item) => item.id === nextMemoryId)) {
+        const detailRead = await getMemoryItem(worldId, subjectId, nextMemoryId, { signal: operation.controller.signal });
+        if (!operation.current()) return;
+        setMemoryId(nextMemoryId);
+        setDetail(detailRead);
+        setDetailPhase("ready");
+        syncRoute(worldId, subjectId, nextMemoryId);
+      } else {
+        setMemoryId("");
+        setDetail(null);
+        setDetailPhase("idle");
+        syncRoute(worldId, subjectId);
+      }
+    } catch (error) { if (operation.current()) throw error; }
+    finally { if (!pending) operation.end(); }
   }
 
   async function runOwnerMutation(ownerRequest: OwnerMutation) {
-    if (mutationLockRef.current) return;
+    if (!active.current || mutationLockRef.current) return;
+    const operation = beginOperation(), options = { signal: operation.controller.signal };
     mutationLockRef.current = true;
     setMutationKind(ownerRequest.kind);
     setMutationFailure(null);
@@ -293,7 +348,8 @@ export function MemoryWorkspace({
           expected_version: ownerRequest.expectedVersion,
           enabled: ownerRequest.enabled,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setSetting(result.setting);
         setList((current) => current ? { ...current, memory_enabled: result.setting.enabled } : current);
         setMutationNotice(ownerRequest.enabled
@@ -304,7 +360,8 @@ export function MemoryWorkspace({
           expected_version: ownerRequest.expectedVersion,
           pinned: ownerRequest.pinned,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setList((current) => current ? {
           ...current,
           items: current.items.map((item) => item.id === result.item.id ? result.item : item),
@@ -319,28 +376,33 @@ export function MemoryWorkspace({
           expected_scope_version: ownerRequest.expectedScopeVersion,
           summary: ownerRequest.summary,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setCorrectionOpen(false);
         setCorrectionText("");
-        await reloadCurrentScope(result.item.id);
+        await reloadCurrentScope(result.item.id, operation);
+        if (!operation.current()) return;
         setMutationNotice(uiText("기억을 정정했어요. 이전 기억은 교체됨으로 남고 새 기억만 회상에 사용됩니다."));
       } else {
         await deleteMemoryItem(worldId, subjectId, ownerRequest.memoryId, {
           expected_version: ownerRequest.expectedVersion,
           idempotency_key: ownerRequest.idempotencyKey,
-        });
+        }, options);
+        if (!operation.current()) return;
         setDeleteOpen(false);
-        await reloadCurrentScope("");
+        await reloadCurrentScope("", operation);
+        if (!operation.current()) return;
         setMutationNotice(uiText("기억을 삭제했어요. 이후 회상에서는 즉시 제외되며 검색용 사본은 자동으로 정리됩니다."));
       }
     } catch (reason: unknown) {
+      if (!operation.current()) return;
       const stale = reason instanceof MemoryApiError && reason.status === 409;
       if (ownerRequest.kind === "correct") setCorrectionOpen(false);
       if (ownerRequest.kind === "delete") setDeleteOpen(false);
       setMutationFailure({ message: uiText(mutationErrorMessage(reason)), request: ownerRequest, stale });
     } finally {
-      mutationLockRef.current = false;
-      setMutationKind(null);
+      operation.end();
+      if (operation.current()) { mutationLockRef.current = false; setMutationKind(null); }
     }
   }
 
@@ -438,31 +500,31 @@ export function MemoryWorkspace({
       {phase === "ready" && list ? (
         <div className={styles.workspace}>
           <section className={styles.listPane} aria-label={uiText("저장된 기억 목록")}>
-            <div className={styles.scopeNotice} data-memory-enabled={setting?.enabled ?? false}>
-              <ShieldCheck aria-hidden="true" size={18} />
-              <div className={styles.scopeNoticeCopy}>
-                <strong>{setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")}</strong>
-                <p>{setting?.enabled ? uiText("검증된 새 기억을 만들고 이후 대화에서 회상합니다.") : uiText("새 장기 기억 생성과 회상은 중단되지만 기존 기억은 관리할 수 있습니다. 현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.")}</p>
-              </div>
-              <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
-                {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
-              </Button>
+            <div className={styles.settingsCards}>
+              <SettingsCard elevated title={setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")} description={uiText("검증된 경험을 기억하고 이후 대화에서 회상해요.")} icon={<ShieldCheck size={20} />} data-memory-enabled={setting?.enabled ?? false}>
+                <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-text-secondary">{uiText("기억을 꺼도 저장된 기억은 관리할 수 있어요.")}</p>
+                <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
+                  {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
+                </Button></div>
+                <p role="status">{setting?.enabled ? uiText(embeddingStorageNotice(embedding)) : uiText("현재 저장된 임베딩 설정입니다. 기억 사용 여부는 위에서 따로 설정해요.")}</p>
+                <MemoryProcessingControls key={`processing:${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+              </SettingsCard>
+              {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
+              <MemoryEmbeddingControls key={embedding.identity} embedding={embedding} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
+              <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+              {mutationFailure ? (
+                <div className={styles.mutationError} role="alert">
+                  <p>{mutationFailure.message}</p>
+                  <Button compact onClick={() => {
+                    if (mutationFailure.stale) {
+                      void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: uiText("최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.") }));
+                    } else {
+                      void runOwnerMutation(mutationFailure.request);
+                    }
+                  }} variant="secondary">{mutationFailure.stale ? uiText("최신 상태 불러오기") : uiText("다시 시도")}</Button>
+                </div>
+              ) : null}
             </div>
-            {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
-            <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
-            {mutationFailure ? (
-              <div className={styles.mutationError} role="alert">
-                <p>{mutationFailure.message}</p>
-                <Button compact onClick={() => {
-                  if (mutationFailure.stale) {
-                    void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: uiText("최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.") }));
-                  } else {
-                    void runOwnerMutation(mutationFailure.request);
-                  }
-                }} variant="secondary">{mutationFailure.stale ? uiText("최신 상태 불러오기") : uiText("다시 시도")}</Button>
-              </div>
-            ) : null}
             {list.items.length === 0 ? (
               <MemoryState icon={<BookOpenText />} title={uiText("아직 저장된 기억이 없어요")} description={uiText("기억이 켜진 뒤 성공한 대화와 활동에서 검증된 기억이 생기면 여기에 표시됩니다.")} />
             ) : (
@@ -533,8 +595,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
   const uiText = useUiText("memory");
   const active = detail.lifecycle === "active";
   return (
-    <article className={styles.detail}>
-      <p className={styles.kind}>{uiText(memoryKindLabel(detail.memory_kind))}</p>
+    <SettingsCard title={uiText(memoryKindLabel(detail.memory_kind))} description={uiText("기억 내용과 연결된 원문, 생각, 보존 상태를 확인해요.")} icon={<BookOpenText size={20} />} className={styles.detail}>
       <h2>{detail.summary}</h2>
       {active ? (
         <div className={styles.ownerActions} aria-label={uiText("기억 관리")}>
@@ -567,7 +628,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
           </ol>
         )}
       </section>
-    </article>
+    </SettingsCard>
   );
 }
 

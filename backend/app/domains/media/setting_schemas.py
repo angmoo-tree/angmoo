@@ -1,7 +1,7 @@
 """HTTP writes contain user preferences; effective state is server-owned."""
 from typing import Literal
 from pydantic import Field, SecretStr
-from app.domains.media.generation_contracts import StrictInput, ImageProvider
+from app.domains.media.generation_contracts import StrictInput, ImageProvider, Binding, AutoImageOutput, ExplicitImageOutput
 
 
 class GenerationSettingsWrite(StrictInput):
@@ -35,7 +35,7 @@ class InterpretationSettingsWrite(StrictInput):
 
 
 class AssetUpload(StrictInput):
-    scope_kind: Literal["character", "world", "thread"]
+    scope_kind: Literal["character", "world", "thread", "world_character"]
     scope_id: str = Field(min_length=1, max_length=64)
     content_type: Literal["image/png", "image/jpeg", "image/webp"]
     data_base64: str = Field(min_length=1, max_length=13981016)
@@ -44,3 +44,16 @@ class AssetUpload(StrictInput):
 class InstallationUsageWrite(StrictInput):
     expected_revision: int = Field(ge=0)
     daily_limit: int = Field(ge=1, le=10000)
+
+
+class ComfyRetainedContract(StrictInput):
+    bindings: dict[str, Binding] | None = None
+    output: AutoImageOutput | ExplicitImageOutput | None = None
+    legacy_output_node: str | None = Field(default=None,min_length=1,max_length=80)
+    reference_required: bool = False
+
+
+class ComfyAnalysisWrite(StrictInput):
+    source_json: str = Field(min_length=1, max_length=2 * 1024 * 1024)
+    input_mode: Literal["placeholders", "node_bindings"] = "placeholders"
+    retained_contract: ComfyRetainedContract | None = None

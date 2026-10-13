@@ -195,6 +195,7 @@ export type AgentPromotionUsageRead = {
 };
 
 export type AgentDetailRead = {
+  registration_scope?: { world_id: string; world_character_id: string; character_id: string } | null;
   character: CharacterRead;
   state: CharacterStateRead | null;
   credential: CredentialRead | null;
@@ -257,7 +258,7 @@ export type CharacterLoreStatusRead = {
 };
 
 export type AgentCreateInput = {
-  execution_mode?: AgentExecutionMode;
+  execution_mode?: "llm";
   name: string;
   handle?: string;
   avatar_url?: string;
@@ -385,6 +386,8 @@ export type AgentCreationDraftUpdateInput = Partial<
   > & {
   image_style?: AgentCreationDraftImageStyle;
   revision?: number;
+  creation_method?: "direct";
+  target_world_id?: string;
   status?: "cancelled";
   avatar_temp_url?: string | null;
   banner_temp_url?: string | null;

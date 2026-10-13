@@ -4,6 +4,7 @@ The application composes concrete readers and credential readiness here.
 Memory services own the actual consent, mutation and transaction decisions.
 """
 from sqlalchemy.orm import Session
+from app.config import settings
 from app.runtime.memory.composition import memory_repository, memory_batch_repository
 
 
@@ -22,10 +23,12 @@ from app.domains.identity.repository.credentials import embedding_credential_opt
 
 def _service(db: Session) -> MemoryReadService:
     from app.runtime.memory.episode_inspector import episode_detail_view
+    from app.runtime.memory.situation_detail import situation_detail
     return MemoryReadService(
         memory_repository(db),
         SqlAlchemyMemorySourceEvidenceReader(db),
         episode_reader=lambda scope, item_id, now: episode_detail_view(db, scope, item_id, now),
+        situation_detail_reader=lambda scope, item_id, now: situation_detail(db, scope, item_id, now),
     )
 
 
@@ -52,15 +55,20 @@ def _character_names(db: Session, scope: MemoryScope) -> dict[str, str]:
 
 
 
-def _validate_provider(db: Session, owner_id: str, model_id: str) -> None:
-    # Original Save-time credential readiness; no generation or replacement Session.
-    memory_provider(lambda: nullcontext(db), owner_id, model_id)
+def _validate_provider(db: Session, scope: MemoryScope, model_id: str) -> None:
+    from app.runtime.memory.scope_queries import read_consolidation_binding
+    from app.domains.memory.exceptions import MemoryValidationError
+    binding = read_consolidation_binding(db, scope)
+    if binding is None or binding.model != model_id:
+        raise MemoryValidationError("memory_selection_settings_required")
 
 
 def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
     from app.runtime.relationships.manual_review import ManualRelationshipFollowup
+    from app.runtime.memory.situation_sources import SituationSources
     return MemoryWorkflows(
         consolidation_followup=ManualRelationshipFollowup,
+        generation_policy=settings.MEMORY_GENERATION_POLICY,
         read_service=_service,
         scope_service=_scope_service,
         write_service=_write_service,
@@ -68,6 +76,7 @@ def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
         character_names=_character_names,
         validate_provider=_validate_provider,
         validate_embedding_credential=validate_embedding_credential,
-        embedding_credential_options=embedding_credential_options,
+        embedding_credential_options=None,
         embedding_runtime_status=embedding_runtime_status,
+        situation_validator=SituationSources,
     )

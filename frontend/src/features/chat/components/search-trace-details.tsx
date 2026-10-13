@@ -30,6 +30,11 @@ export function SearchTraceDetails({ trace }: { trace: SearchDiagnosticTrace }) 
   return <section aria-label={uiText("상세 검색 실행 진단")}>
     <p>{uiText("실행 진단:")}{trace.coverage === "complete" ? uiText("수집한 기록에 생략 없음") : uiText("일부만 확인됨")} · {trace.version}</p>
     <p>{uiText("단계 기록")}{trace.stage_events_dropped}{uiText("개, 연결 기록")}{trace.lineage_edges_dropped}{uiText("개, 별칭")}{trace.aliases_dropped}{uiText("개, 검색 조건")}{trace.detail_rows_dropped ?? 0}{uiText("개가 생략되었습니다. 기록이 완전해도 답변의 정확성을 보장하지 않습니다.")}</p>
+    {(trace.canonical_reads ?? []).slice(0, 2).map(row => <div key={row.stage}>
+      <strong>{uiText("기억 원문 확인 작업")} · {row.stage} · {row.status}</strong>
+      <dl><dt>{uiText("SQL 조회 횟수")}</dt><dd>{value(row.sql_count)}</dd>
+        <dt>{uiText("소요 시간 / 대기 시간 / 연결 정리")}</dt><dd>{value(row.elapsed_ms)} ms / {value(row.wait_ms)} ms / {value(row.cleaned)}</dd></dl>
+    </div>)}
     {trace.terminals.map(terminal => <div key={terminal.axis}>
       <strong>{terminal.axis === "vector" ? uiText("벡터") : "FTS"}: {name(terminal.axis_status ?? null)}</strong>
       <p>{uiText("작업 종료 상태:")}{name(terminal.terminal_state)}</p>

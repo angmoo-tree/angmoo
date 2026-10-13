@@ -6,6 +6,7 @@ from io import BytesIO
 from pathlib import Path
 import subprocess
 import sys
+import pytest
 
 from PIL import Image, PngImagePlugin
 
@@ -17,6 +18,73 @@ assert SPEC is not None and SPEC.loader is not None
 scanner = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = scanner
 SPEC.loader.exec_module(scanner)
+
+
+class BatchProcess:
+    def __init__(self, output, returncode=0):
+        self.requests = []
+        owner = self
+        class Sink(BytesIO):
+            def write(self, value):
+                owner.requests.append(value)
+                return super().write(value)
+        class BoundedOutput(BytesIO):
+            def read(self, size=-1):
+                assert size >= 0, "whole-history reads are forbidden"
+                return super().read(size)
+        self.stdin = Sink()
+        self.stdout = BoundedOutput(output)
+        self.returncode = returncode
+        self.finished = False
+        self.killed = False
+    def wait(self):
+        self.finished = True
+        return self.returncode
+    def poll(self):
+        return self.returncode if self.finished else None
+    def kill(self):
+        self.killed = True
+        self.returncode = -9
+
+
+def test_batch_stream_drains_each_object_and_checks_every_path(monkeypatch, tmp_path):
+    first, second = "1" * 40, "2" * 40
+    sensitive = b"GOOGLE_API_KEY=AIza12345678901234567890\n"
+    harmless = b"no credential\n"
+    output = (f"{first} blob {len(sensitive)}\n".encode() + sensitive + b"\n"
+              + f"{second} blob {len(harmless)}\n".encode() + harmless + b"\n")
+    process = BatchProcess(output)
+    monkeypatch.setattr(scanner.subprocess, "Popen", lambda *args, **kwargs: process)
+    allow = (scanner.AllowEntry(path="safe.env", rule="google-api-key", value="AIza12345678901234567890"),
+             scanner.AllowEntry(path="safe.env", rule="sensitive-env-assignment", value="AIza12345678901234567890"))
+    report = scanner._scan_git_blobs(tmp_path, [scanner.GitBlob(first, "safe.env"),
+        scanner.GitBlob(first, "unsafe.env"), scanner.GitBlob(second, "other.txt")], allowlist=allow, asset_manifest={})
+    assert process.requests == [(first + "\n").encode(), (second + "\n").encode()]
+    assert report.files_scanned == 3
+    assert report.fatal_findings and all(f.source == "unsafe.env" for f in report.fatal_findings)
+    assert not process.killed and process.stdin.closed and process.stdout.closed
+
+
+@pytest.mark.parametrize("output", [
+    b"", b"1" * 40 + b" missing\n", b"2" * 40 + b" blob 1\na\n",
+    b"1" * 40 + b" blob -1\n", b"1" * 40 + b" blob wrong\n",
+    b"1" * 40 + b" blob 8\nshort", b"1" * 40 + b" blob 1\na!",
+])
+def test_batch_stream_rejects_invalid_or_truncated_objects_and_closes_process(monkeypatch, tmp_path, output):
+    process = BatchProcess(output)
+    monkeypatch.setattr(scanner.subprocess, "Popen", lambda *args, **kwargs: process)
+    with pytest.raises(RuntimeError):
+        scanner._scan_git_blobs(tmp_path, [scanner.GitBlob("1" * 40, "source.txt")], allowlist=(), asset_manifest={})
+    assert process.killed and process.stdin.closed and process.stdout.closed
+
+
+def test_batch_stream_requires_successful_git_exit(monkeypatch, tmp_path):
+    oid = "1" * 40
+    process = BatchProcess(f"{oid} blob 1\na\n".encode(), returncode=1)
+    monkeypatch.setattr(scanner.subprocess, "Popen", lambda *args, **kwargs: process)
+    with pytest.raises(RuntimeError, match="git cat-file failed"):
+        scanner._scan_git_blobs(tmp_path, [scanner.GitBlob(oid, "source.txt")], allowlist=(), asset_manifest={})
+    assert process.stdin.closed and process.stdout.closed
 
 
 def _git(repo: Path, *args: str) -> None:

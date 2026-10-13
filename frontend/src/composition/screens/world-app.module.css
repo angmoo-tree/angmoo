@@ -53,16 +53,15 @@
 
 .homeReturn {
   display: inline-flex;
-  min-height: 36px;
+  width: 44px;
+  height: 44px;
+  flex: none;
   align-items: center;
+  justify-content: center;
   border: 1px solid var(--color-border-control);
   border-radius: 999px;
   background: var(--color-surface);
   color: var(--color-text-default);
-  font-size: 0.72rem;
-  font-weight: 850;
-  gap: 5px;
-  padding: 7px 10px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -77,26 +76,10 @@
   box-shadow: var(--focus-ring);
 }
 
-.worldOverview,
 .capability {
   padding: 22px 20px 28px;
 }
 
-.overviewHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.role {
-  color: var(--color-text-secondary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.worldOverview h2,
 .capability h2 {
   margin: 22px 0 8px;
   color: var(--color-text-strong);
@@ -104,7 +87,6 @@
   line-height: 1.2;
 }
 
-.tagline,
 .capability > p {
   margin: 0;
   color: var(--color-text-default);
@@ -112,7 +94,6 @@
   line-height: 1.65;
 }
 
-.scopeNotice,
 .legacyNotice {
   margin-top: 26px;
   border: 1px solid var(--color-border-default);
@@ -121,13 +102,11 @@
   padding: 18px;
 }
 
-.scopeNotice strong,
 .legacyNotice strong {
   color: var(--color-text-strong);
   font-size: 0.88rem;
 }
 
-.scopeNotice p,
 .legacyNotice p {
   margin: 7px 0 0;
   color: var(--color-text-default);
@@ -234,3 +213,6 @@
   color: var(--color-text-default);
   line-height: 1.6;
 }
+
+.myProfile { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: 0.9rem; text-decoration: none; }
+.myProfile:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; border-radius: var(--radius-control); }

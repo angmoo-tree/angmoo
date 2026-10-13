@@ -8,7 +8,7 @@ from app.domains.social.service.image_intent_generation import source_revision
 from app.runtime.media.binding import current
 
 
-def snapshots(db, owner_id, post_ids):
+def snapshots(db, owner_id, post_ids, *, actor_id=None):
     media = current()
     if media is None:
         return []
@@ -23,8 +23,12 @@ def snapshots(db, owner_id, post_ids):
         asset = media.assets.owned(db, owner_id=owner_id, asset_id=row.asset_id, scope_kind="world", scope_id=post.world_id)
         value = {"post_id": post.id, "media_id": row.id, "asset_id": asset.id,
             "asset_revision": asset.revision, "asset_hash": asset.content_hash, "source": "unrecognized",
-            "context": None, "recall_hint": None, "selector_delivered": False}
-        if analysis := media.interpretation.cached(db, owner_id, asset.id):
+            "context": None, "recall_hint": None, "selector_delivered": False, "observer_actor_id": actor_id}
+        try:
+            analysis = media.interpretation.cached(db, owner_id, asset.id, actor_id=actor_id)
+        except ImagePreparationError:
+            analysis = None
+        if analysis:
             value.update(source="actual_image_analysis", context=analysis.description, recall_hint=analysis.recall_hint,
                 interpretation_id=analysis.id)
         elif row.generation_intent_id:
@@ -74,7 +78,7 @@ async def prepare_selected(db, owner_id, candidate):
     for value in values:
         if value.get("source") in {"actual_image_analysis", "generation_intent"} and value.get("context"):
             continue
-        fresh = next((item for item in snapshots(db, owner_id, [value["post_id"]]) if item["asset_id"] == value["asset_id"]), None)
+        fresh = next((item for item in snapshots(db, owner_id, [value["post_id"]], actor_id=value.get("observer_actor_id")) if item["asset_id"] == value["asset_id"]), None)
         if fresh and fresh["context"]:
             value.update({key: fresh[key] for key in ("source", "context", "recall_hint")})
             continue
@@ -83,7 +87,7 @@ async def prepare_selected(db, owner_id, candidate):
         asset_id = value["asset_id"]
         db.commit()  # This lane owns the preceding preparation boundary.
         try:
-            analysis = await media.interpretation.interpret(db, owner_id, asset_id)
+            analysis = await media.interpretation.interpret(db, owner_id, asset_id, actor_id=value.get("observer_actor_id"))
             value.update(source="actual_image_analysis", context=analysis.description, recall_hint=analysis.recall_hint,
                 interpretation_id=analysis.id)
         except (ImagePreparationError, RuntimeError):

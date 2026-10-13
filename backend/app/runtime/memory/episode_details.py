@@ -42,7 +42,7 @@ class _SourceQueries:
             (identifier for kind, identifier in identities if kind in {"POST", "REPLY"}))}
         self.posts.update({row.id: row for row in _rows(session, Post, Post.id,
             (row.reply_to_post_id for row in tuple(self.posts.values()) if row.reply_to_post_id))})
-        self.active_cache, self.block_cache = {}, {}
+        self.active_cache, self.block_cache, self.observations = {}, {}, {}
 
     def __getattr__(self, name):
         return getattr(source_queries, name)
@@ -54,6 +54,12 @@ class _SourceQueries:
 
     def post_row(self, session, source_id): return self.posts.get(source_id)
     def reply_parent(self, session, post): return self.posts.get(post.reply_to_post_id)
+
+    def post_observation(self, session, scope, post):
+        key = scope, post.id
+        if key not in self.observations:
+            self.observations[key] = source_queries.post_observation(session, scope, post)
+        return self.observations[key]
 
     def active_participant_ids(self, session, ids, world_id):
         key = world_id, frozenset(ids)
@@ -70,6 +76,20 @@ class _SourceQueries:
 
 class RuntimeEpisodeDetailReader:
     def __init__(self, session): self.session = session
+
+    def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
+        from app.runtime.memory.situation_sources import SituationSources
+        situations = SituationSources(self.session) if validation is None or validation.runtime_sources is None else validation.runtime_sources
+        return situations.validate(manifest, source, now=now,
+            ancestors=ancestors, validation=validation)
+
+    def prepare_situation_sources(self, contexts, *, validation):
+        from app.runtime.memory.situation_source_batch import prepare_sources
+        prepare_sources(self.session, contexts, validation=validation, queries_factory=_SourceQueries)
+
+    def read_evidence(self, *, scope, source_type, source_id):
+        from app.runtime.memory.source_composition import source_evidence_reader
+        return source_evidence_reader(self.session).read_evidence(scope=scope, source_type=source_type, source_id=source_id)
 
     def read_sources(self, *, scope, identities):
         if len(identities) > 10_000:
@@ -95,7 +115,27 @@ class RuntimeEpisodeDetailReader:
             else:
                 # Non-text activities are typed canonical execution records.
                 text = canonical.deterministic_summary
-            result[(kind, identifier)] = EpisodeSourceDetail(canonical, text)
+            result[(kind, identifier)] = EpisodeSourceDetail(canonical, text, canonical.actor_world_character_id)
+        return result
+
+    def read_situation_sources(self, *, scope, identities, context, entries, now, validation=None):
+        if len(identities) > 100 or context.snapshot.scope != scope:
+            raise ValueError("situation_source_manifest_invalid")
+        result = {}
+        for entry in entries:
+            identity = entry.source_type, entry.source_id
+            if identity not in identities or identity in result:
+                continue
+            access = self.validate_situation_source(context, entry, now=now, validation=validation)
+            if access.state != "available" or access.evidence is None:
+                continue
+            if entry.source_type in {"POST", "REPLY"}:
+                text = (self.session.get(Post, entry.source_id, populate_existing=True) if validation is None else validation.get(Post, entry.source_id)).body
+            elif entry.source_type in {"CHAT_MESSAGE", "OWNER_MEMORY_REQUEST"}:
+                text = (self.session.get(MessageMessage, int(entry.source_id), populate_existing=True) if validation is None else validation.get(MessageMessage, int(entry.source_id))).content
+            else:
+                text = access.evidence.deterministic_summary
+            result[identity] = EpisodeSourceDetail(access.evidence, text, access.evidence.actor_world_character_id)
         return result
 
     def read_thoughts(self, *, scope, references):

@@ -169,6 +169,7 @@ class _FakeCoordinator:
 
     def heartbeat(self, *, owner_id: str, fencing_epoch: int):
         self.calls.append(f"heartbeat:{owner_id}:{fencing_epoch}")
+        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_expires_at=datetime.now(UTC))
 
     def finish_tick(
         self,
@@ -179,6 +180,7 @@ class _FakeCoordinator:
         error_code: str | None = None,
     ):
         self.calls.append(f"finish:{result.value}:{error_code}")
+        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_expires_at=datetime.now(UTC))
 
     def release(self, *, owner_id: str, fencing_epoch: int):
         self.calls.append(f"release:{owner_id}:{fencing_epoch}")
@@ -223,6 +225,7 @@ def test_scheduler_readiness_exists_only_while_lease_is_held(tmp_path: Path) -> 
     assert not ready.exists()
     assert coordinator.calls == [
         "acquire:owner-test",
+        "heartbeat:owner-test:7",
         "begin:owner-test:7",
         "finish:no_action:None",
         "release:owner-test:7",
@@ -298,10 +301,7 @@ def test_shutdown_before_first_tick_releases_lease_without_claiming_work(
         )
     )
 
-    assert coordinator.calls == [
-        "acquire:owner-stop-before-tick",
-        "release:owner-stop-before-tick:7",
-    ]
+    assert coordinator.calls == []
 
 
 def test_shutdown_during_tick_drains_then_releases_without_second_tick(
@@ -339,6 +339,7 @@ def test_shutdown_during_tick_drains_then_releases_without_second_tick(
 
     assert coordinator.calls == [
         "acquire:owner-drain",
+        "heartbeat:owner-drain:7",
         "begin:owner-drain:7",
         "finish:success:None",
         "release:owner-drain:7",
@@ -377,6 +378,7 @@ def test_shutdown_drain_timeout_cancels_tick_and_releases_lease(
 
     assert coordinator.calls == [
         "acquire:owner-timeout",
+        "heartbeat:owner-timeout:7",
         "begin:owner-timeout:7",
         "finish:failed:SchedulerShutdownDrainTimeout",
         "release:owner-timeout:7",

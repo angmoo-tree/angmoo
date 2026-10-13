@@ -20,7 +20,7 @@ def test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction(t
     monkeypatch.setattr(settings, 'OPENCLAW_AGENT_IDS', 'request-slot')
     engine = _engine(tmp_path)
     with Session(engine, expire_on_commit=False) as db:
-        fixture = _seed(db)
+        fixture = _seed(db, with_owned_sns=True)
         actor = fixture.character.id
         events = []
         def gate(session):
@@ -53,7 +53,10 @@ def test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction(t
             db, user_id=fixture.user.id, character_id=actor, credential_id='credential-routine',
             heartbeat_interval_seconds=1800, commit=commit, workflows=workflows,
         )
-        assert events == ['gate', 'credential', 'timezone', 'slot']
+        # World SNS identity is resolved by the scoped references before clock
+        # reads; the old Character credential lookup must not be borrowed.
+        assert events == ['gate', 'slot', 'timezone', 'slot']
+        assert result.assigned_credential_id is None
         assert result.agent_id == 'request-slot'
         assert result.assigned_character_id == actor
         assert result.next_tick_at is not None

@@ -336,13 +336,13 @@ function WorldChatThread({
       const scope = generationScope(request);
       activeGenerationRef.current = scope;
       clearTypingTimer();
-      setGeneration({
+      setGeneration((current) => ({
         phase: "pending",
         request,
         retrying: false,
         text: "",
-        typingVisible: false,
-      });
+        typingVisible: current?.phase === "pending" && generationScope(current.request) === scope && current.typingVisible,
+      }));
       typingTimerRef.current = setTimeout(() => {
         if (activeGenerationRef.current !== scope) return;
         setGeneration((current) =>
@@ -351,6 +351,7 @@ function WorldChatThread({
             : current,
         );
       }, 300);
+      let terminalObserved = false;
       try {
         await streamWorldChatResponse(
           worldId,
@@ -380,6 +381,7 @@ function WorldChatThread({
               return;
             }
             if (event.type === "failed") {
+              terminalObserved = true;
               clearTypingTimer();
               const failure = event.payload as {
                 failure_class: string;
@@ -402,6 +404,7 @@ function WorldChatThread({
               return;
             }
             if (event.type === "cancelled") {
+              terminalObserved = true;
               clearTypingTimer();
               setGeneration({
                 phase: "failed",
@@ -418,6 +421,7 @@ function WorldChatThread({
               return;
             }
             if (event.type === "completed") {
+              terminalObserved = true;
               const status = await getWorldChatResponseRequest(
                 worldId,
                 threadId,
@@ -431,6 +435,11 @@ function WorldChatThread({
           },
           { signal: controller.signal },
         );
+        if (!terminalObserved && !controller.signal.aborted && activeGenerationRef.current === scope) {
+          // A graceful transport EOF is not a completed generation. Recover
+          // from canonical status just as for a broken connection.
+          throw new WorldChatApiError(502, "world_chat_stream_interrupted");
+        }
       } catch {
         if (controller.signal.aborted) return;
         try {
@@ -475,8 +484,17 @@ function WorldChatThread({
           ) {
             await showTerminalRequest(status);
           }
-        } catch {
-          if (controller.signal.aborted) return;
+        } catch (reason) {
+          if (controller.signal.aborted || activeGenerationRef.current !== scope) return;
+          if (reason instanceof WorldChatApiError && ["world_deleting", "world_deleted"].includes(reason.detail)) {
+            activeGenerationRef.current = null;
+            clearTypingTimer();
+            setGeneration(null);
+            setThread(null);
+            setError(reason);
+            setState("error");
+            return;
+          }
           setGeneration({
             phase: "failed",
             request: {
@@ -877,9 +895,7 @@ function WorldChatThread({
             >
               <ProfileAvatar avatarUrl={thread.responding.avatar_url} name={thread.responding.display_name} sizeClassName={styles.messageAvatar} />
               <div className={styles.messageBubble}>
-              {generation.phase === "pending" && generation.request.image_analysis_state === "waiting" ? (
-                <p role="status">{uiText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.")}</p>
-              ) : generation.phase === "pending" && generation.typingVisible ? (
+              {generation.phase === "pending" && generation.typingVisible ? (
                 <TypingPresence name={thread.responding.display_name} />
               ) : generation.phase === "streaming" ? (
                 <p className={styles.streamingText} aria-live="polite">
@@ -1099,9 +1115,12 @@ function WorldChatError({
   const oldLimitPolicy =
     error instanceof WorldChatApiError && error.detail === "world_chat_limit_policy_outdated";
   const denied = status === 403;
+  const worldRemoved = error instanceof WorldChatApiError && ["world_deleting", "world_deleted"].includes(error.detail);
   const missing = status === 404;
-  const retryable = !denied && !missing && !scopeMismatch;
-  const title = oldLimitPolicy
+  const retryable = !worldRemoved && !denied && !missing && !scopeMismatch;
+  const title = worldRemoved
+    ? uiText(error?.message === "world_deleted" ? "이 World는 삭제되었어요." : "이 World를 삭제 중이에요.")
+    : oldLimitPolicy
     ? uiText("대화 제한 정책 업데이트가 필요해요")
     : scopeMismatch
     ? uiText("World 경계를 확인했어요")
@@ -1114,7 +1133,7 @@ function WorldChatError({
     ? uiText("서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.")
     : scopeMismatch
     ? uiText("다른 World의 응답은 표시하지 않았습니다.")
-    : denied || missing
+    : worldRemoved || denied || missing
       ? uiText("다른 World나 대화로 자동 이동하지 않습니다.")
       : uiText("로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.");
 

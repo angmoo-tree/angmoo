@@ -78,6 +78,11 @@ class CombinedActivityProvider(ActivityProvider):
         from app.contracts.sns_generation import read_generation_policies
         self.generation_policies = read_generation_policies(policies)
         self.input_budget = input_budget
+        from app.domains.memory.service.situation_policy import restore
+        self.situation_snapshot = restore((policies or {}).get("_situation_policy"))
+        self.situation_state = None
+        self.situation_output_active = False
+        self.situation_writer_results = []
 
     async def call(self, **kwargs):
         request_guard = getattr(self, "request_guard", None)
@@ -86,6 +91,8 @@ class CombinedActivityProvider(ActivityProvider):
             await request_guard(1)
         node = kwargs["node"]
         planning = node in {"InboxActionPlanner", "FeedActionPlanner", "RoutineActionPlanner"}
+        writing = node in {"InboxWriter", "FeedWriter", "RoutineWriter"}
+        self.situation_output_active = self.situation_snapshot is not None and (planning or writing)
         from app.domains.world_characters.contracts.social_io import BOUNDED_ROUTINE_OUTPUT
         token_budget = self.generation_policies.sns_input_budget_policy is not None
         admission_reservation = None
@@ -99,7 +106,22 @@ class CombinedActivityProvider(ActivityProvider):
             original_validator = kwargs["validator"]
             image_enabled = lane == "routine" and getattr(self, "image_enabled", False)
             kwargs["schema"] = envelope_schema(kwargs["schema"], lane, image_enabled, policy=self.social_io_policy)
-            kwargs["validator"] = lambda value: parse_envelope(value, original_validator)
+            if self.situation_snapshot is not None:
+                from app.domains.memory.policies.situation_generation import with_social_situations, instructions
+                from app.domains.memory.policies.situation_output import parse_situations
+                from dataclasses import asdict
+                kwargs["schema"] = with_social_situations(kwargs["schema"])
+                def validate_situations(value):
+                    base = parse_envelope(value, original_validator)
+                    targets = tuple(row["target_id"] for row in base.get("decisions", []) if row["action"] != "no_action") if lane != "routine" else ("routine-post",)
+                    return {**base, "_situations": {key: asdict(draft) for key, draft in parse_situations(value, targets).items()},
+                        "_situation_draft_digest": sha256(json.dumps(value.get("draft"), ensure_ascii=False, sort_keys=True).encode()).hexdigest()}
+                kwargs["validator"] = validate_situations
+                kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane) + (
+                    "\nReturn situations only for targets with actual actions; copy their target_id. "
+                    "For Routine use target_id=\"routine-post\". Output decision, draft, then situations in that order.")
+            else:
+                kwargs["validator"] = lambda value: parse_envelope(value, original_validator)
             kwargs["node"] = lane.title() + "DecisionDraft"
             kwargs["lane"] = lane + "_decision_draft"
             from app.domains.world_characters.contracts.social_io import COMMON_IO
@@ -123,6 +145,32 @@ class CombinedActivityProvider(ActivityProvider):
                 kwargs["system"] += IMAGE_INSTRUCTIONS
             kwargs["recover_truncation"] = False
             kwargs["json_retry_policy"] = combined_retry
+        elif self.situation_output_active:
+            from dataclasses import asdict
+            from app.domains.memory.policies.situation_generation import with_social_situations, instructions
+            from app.domains.memory.policies.situation_output import parse_situations
+            lane = node.removesuffix("ActionPlanner").removesuffix("Writer").lower()
+            original_validator = kwargs["validator"]
+            kwargs["schema"] = with_social_situations(kwargs["schema"])
+            def validate_separate(value):
+                base = original_validator({key: item for key, item in value.items() if key != "situations"})
+                if lane == "routine":
+                    targets = ("routine-post",)
+                elif writing:
+                    targets = tuple(row["source"]["target_id"] for row in self.situation_state["assignments"]
+                        if any(item.get("task_id") == row["task_id"] for item in value.get("replies", [])))
+                else:
+                    targets = tuple(row["target_id"] for row in base.get("decisions", []) if row["action"] == "like")
+                self.separate_situations = {key: asdict(draft) for key, draft in parse_situations(
+                    value, targets, base_fields=tuple(key for key in value if key != "situations")).items()}
+                return base
+            kwargs["validator"] = validate_separate
+            kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane) + (
+                "\nThis is the existing separate Writer or Planner call. Complete its original fields first, then situations. "
+                "For replies use assignments[].source.target_id (the target ID mapped to task_id), with the final reply body. "
+                "For a separate Planner describe only like actions; a later Writer describes replies. "
+                "For Routine use target_id=\"routine-post\". Never fabricate missing decision/draft fields.")
+            kwargs["max_tokens"] = max(kwargs["max_tokens"], COMBINED_OUTPUT_TOKENS)
         if self.repairing:
             # A split writer can make several physical calls; reserve each one.
             signature = sha256(json.dumps(kwargs["payload"].get("assignments", []),
@@ -175,7 +223,41 @@ class CombinedActivityProvider(ActivityProvider):
                 self.ledger.reserve(f"{node}:json")
             recovery_admitted = True
         kwargs["before_json_retry"] = before_retry
+        correlation = {}
+        if self.situation_output_active:
+            from app.runtime.diagnostics.situation_observation import output_shape, safe_event, stage_attempt
+            stage_id = stage_attempt.get()
+            def observed_targets(value):
+                if lane == "routine":
+                    return ("routine-post",)
+                if writing:
+                    return tuple(row["source"]["target_id"] for row in (self.situation_state or {}).get("assignments", []))
+                base = value.get("decision", value)
+                known = {row.get("target_id") for row in (self.situation_state or {}).get("candidates", [])}
+                return tuple(row.get("target_id") for row in base.get("decisions", [])
+                    if isinstance(row, dict) and row.get("target_id") in known and row.get("action") not in {None, "no_action"}) if isinstance(base, dict) else ()
+            def facts(value, attempt):
+                fields = ("decision", "draft") if self.mode == "combined" and planning else tuple(key for key in value if key != "situations")
+                current = {**attempt, "lane": lane, "node": kwargs["node"], "stage_attempt_id": stage_id,
+                    "input_payload_hash": self.situation_manifest.payload_digest,
+                    "writer_replaced": writing and self.repairing, **output_shape(value, observed_targets(value), base_fields=fields)}
+                return safe_event(current)
+            def before(value, attempt):
+                self.tracker._notify("situation_output_shape", facts(value, attempt))
+            def after(value, base, attempt):
+                current = facts(value, attempt)
+                correlation.clear()
+                correlation.update({key: current.get(key) for key in ("lane", "node", "stage_attempt_id", "call_order", "provider_call_order", "json_attempt", "input_payload_hash", "writer_replaced")})
+                self.tracker._notify("situation_output_parsed", current)
+            kwargs["on_json_object"], kwargs["on_json_validated"] = before, after
         result = await super().call(**kwargs)
+        if planning and self.situation_output_active:
+            result = {**result, "_situation_manifest": self.situation_manifest.to_dict(), "_situation_attempt": correlation}
+            if self.mode == "split":
+                result["_situations"] = self.separate_situations
+        if writing and self.situation_output_active:
+            self.situation_writer_results.append({"manifest": self.situation_manifest.to_dict(),
+                "situations": self.separate_situations, "output": result, "attempt": correlation})
         if recovery_admitted and recovery_reason == "comment_intent_missing":
             result = {**result, "_json_recovery_receipt": {
                 "reason": recovery_reason, "attempt": 2, "node": kwargs["node"]}}

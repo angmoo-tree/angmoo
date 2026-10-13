@@ -1,6 +1,6 @@
 """Owner-only Memory HTTP endpoints and stable error translation."""
 from __future__ import annotations
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import browser_session
@@ -39,8 +39,110 @@ from app.domains.memory.schemas.batch import (
 
 router = APIRouter(prefix="/worlds/{world_id}/world-characters/{subject_id}", tags=["memory"])
 
+from app.domains.memory.schemas.situation import MemoryProcessingRead, MemoryProcessingUpdate, MemorySaveRequest
+from app.domains.memory.service import situation_management
+from app.domains.memory.schemas.situation import (
+    MemoryIndividualRecheckRequest, MemorySituationDiscardRequest, MemorySituationDiscardRead, MemoryUnsavedExperiencesRead,
+)
+from app.domains.memory.service import situation_recovery_management
+
+
+@router.get("/memory/unsaved-experiences", response_model=MemoryUnsavedExperiencesRead)
+def read_memory_unsaved(world_id: str, subject_id: str, request: Request,
+    cursor: str | None = Query(default=None, max_length=512), limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return situation_recovery_management.list_unsaved(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, cursor=cursor, limit=limit)
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+
+
+@router.post("/memory/recheck", response_model=MemoryProcessingRead)
+def recheck_memory_unsaved(world_id: str, subject_id: str, data: MemorySaveRequest, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.recheck(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/situations/{receipt_sequence}/recheck", response_model=MemoryProcessingRead)
+def recheck_memory_experience(world_id: str, subject_id: str, data: MemoryIndividualRecheckRequest, request: Request,
+    receipt_sequence: int = Path(ge=1), db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.recheck(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows,
+            data=data, sequence=receipt_sequence)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/situations/{receipt_sequence}/discard", response_model=MemorySituationDiscardRead)
+def discard_memory_experience(world_id: str, subject_id: str, data: MemorySituationDiscardRequest, request: Request,
+    receipt_sequence: int = Path(ge=1), db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_recovery_management.discard_experience(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, data=data, sequence=receipt_sequence)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.get("/memory/processing-settings", response_model=MemoryProcessingRead)
+def read_memory_processing(world_id: str, subject_id: str, request: Request,
+    request_key: str | None = Query(default=None, min_length=8, max_length=128),
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return situation_management.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows,
+            request_key=request_key)
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+
+
+@router.put("/memory/processing-settings", response_model=MemoryProcessingRead)
+def update_memory_processing(world_id: str, subject_id: str, data: MemoryProcessingUpdate, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_management.save_settings(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/save", response_model=MemoryProcessingRead)
+def save_memory_situations(world_id: str, subject_id: str, data: MemorySaveRequest, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_management.save_now(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
 from app.domains.memory.schemas.embedding import MemoryEmbeddingRead, MemoryEmbeddingUpdate
 from app.domains.memory.service import embedding_management
+from app.domains.memory.schemas.embedding import MemoryPreparationStart
+
+
+@router.post("/memory/embedding-preparation")
+def start_memory_embedding_preparation(world_id: str, subject_id: str, data: MemoryPreparationStart,
+    request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return embedding_management.start_preparation(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
 
 
 @router.get("/memory/embedding-settings", response_model=MemoryEmbeddingRead)

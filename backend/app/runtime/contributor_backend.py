@@ -66,13 +66,11 @@ def _prepare_contributor_data_root(data_root: Path, *, retention_owner=None):
         canonical = data_root / "canonical"
         if canonical.exists() and any(canonical.rglob("*")):
             raise RuntimeError("app_secret_missing_for_existing_data")
-        secret_path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = secret_path.with_suffix(".tmp")
-        temporary.write_text(
-            secrets.token_urlsafe(48) + "\n",
-            encoding="utf-8",
-        )
-        temporary.replace(secret_path)
+        from app.core.secret_file_access import create_secret_once
+        create_secret_once(secret_path,(secrets.token_urlsafe(48)+"\n").encode("utf-8"))
+    else:
+        from app.core.secret_file_access import protect_existing_secret
+        protect_existing_secret(secret_path,protect_parent=True)
 
     from app.runtime.migrations.embedded_data import (
         EmbeddedDataUpgradeCoordinator,

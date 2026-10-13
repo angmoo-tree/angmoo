@@ -91,7 +91,7 @@ Package authors retain all rights granted by their respective licenses.
 - `xxhash 3.7.0` — BSD
 - `zstandard 0.25.0` — BSD-3-Clause
 
-## JavaScript production packages (66)
+## JavaScript production packages (67)
 
 - `@babel/code-frame 7.29.7` — MIT
 - `@babel/compat-data 7.29.7` — MIT
@@ -116,7 +116,7 @@ Package authors retain all rights granted by their respective licenses.
 - `@jridgewell/resolve-uri 3.1.2` — MIT
 - `@jridgewell/sourcemap-codec 1.5.5` — MIT
 - `@jridgewell/trace-mapping 0.3.31` — MIT
-- `@next/env 16.3.6` — MIT
+- `@next/env 16.3.8` — MIT
 - `@swc/helpers 0.5.23` — Apache-2.0
 - `@types/node 20.19.40` — MIT
 - `baseline-browser-mapping 2.11.14` — Apache-2.0
@@ -135,11 +135,12 @@ Package authors retain all rights granted by their respective licenses.
 - `js-tokens 4.0.0` — MIT
 - `jsesc 3.1.0` — MIT
 - `json5 2.2.3` — MIT
+- `libheif-js 1.23.5` — LGPL-3.0
 - `lru-cache 5.1.1` — ISC
 - `lucide-react 1.29.0` — ISC
 - `ms 2.1.3` — MIT
 - `nanoid 3.3.18` — MIT
-- `next 16.3.6` — MIT
+- `next 16.3.8` — MIT
 - `node-releases 2.0.53` — MIT
 - `picocolors 1.1.1` — ISC
 - `postcss 8.5.23` — MIT
@@ -149,7 +150,7 @@ Package authors retain all rights granted by their respective licenses.
 - `scheduler 0.27.0` — MIT
 - `semver 6.3.1` — ISC
 - `semver 7.8.5` — ISC
-- `sharp 0.35.4` — Apache-2.0
+- `sharp 0.35.5` — Apache-2.0
 - `source-map-js 1.2.2` — BSD-3-Clause
 - `styled-jsx 5.1.6` — MIT
 - `supports-color 7.2.0` — MIT
@@ -171,6 +172,17 @@ Package authors retain all rights granted by their respective licenses.
 - Recorded obligations:
   - Preserve attribution to the caniuse-lite and Can I Use data sources.
   - Provide the CC-BY-4.0 license link with redistributed data.
+
+### `node/libheif-js 1.23.5`
+
+- Reported license: `LGPL-3.0`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Unmodified pinned local libheif-js WASM module, lazily bundled in a terminable photo Worker in the GPL-3.0-only frontend.
+- Upstream license source: <https://github.com/catdad-experiments/libheif-js/tree/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d>
+- Recorded obligations:
+  - Preserve upstream copyright, LGPL-3.0 and accompanying GPL-3.0 texts in frontend/public/licenses.
+  - Provide exact library and codec source/build links and keep rebuild/replacement rights available; no proprietary wrapping or remote conversion.
+  - Redistribution must include corresponding source for the shipped library and its compiled dependencies. See docs/operations/local-photo-codec.md.
 
 ### `python/certifi 2026.4.22`
 
@@ -233,6 +245,7 @@ These services and CI tools are separate components and retain their own license
 - **Angmoo application icon** — `GPL-3.0-only`; First-party project asset; trademark and official-status use remains subject to BRANDING.md.
 - **Lucide Icons** — `ISC`; source <https://lucide.dev/license>
 - **Feather Icons** — `MIT`; source <https://github.com/feathericons/feather/blob/main/LICENSE>
+- **Quicksand variable font (300-700)** — `OFL-1.1`; Unmodified local font. Copyright 2011 The Quicksand Project Authors. Reserved Font Name: Quicksand. OFL-1.1 preserved in source and frontend/public/licenses/Quicksand-OFL.txt; no CDN.
 - `backend/scripts/seed_p1_world_fixture.py` — first-party synthetic seed source; `GPL-3.0-only`
 - `backend/tests/fixtures/core_experience/p0-contract-v1` — first-party synthetic contract fixtures; `GPL-3.0-only`
 

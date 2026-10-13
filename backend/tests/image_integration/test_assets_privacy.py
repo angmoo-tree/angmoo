@@ -51,6 +51,8 @@ def test_authenticated_http_upload_scope_private_read_and_revision_conflict(tmp_
     sessions=sessionmaker(engine)
     fake=FakeInterpreter();media=MediaRuntime(sessions,SimpleNamespace(media_root_path=tmp_path),interpreter=fake)
     client.app.state.media_runtime=media;client.app.include_router(router,prefix="/api/v1")
+    from app.domains.world_characters.router.management import router as management_router
+    client.app.include_router(management_router, prefix="/api/v1")
     try:
         payload={"scope_kind":"world","scope_id":"world-a","content_type":"image/png","data_base64":base64.b64encode(pixels()).decode()}
         assert client.post("/api/v1/media/assets",json=payload).status_code==403
@@ -67,9 +69,18 @@ def test_authenticated_http_upload_scope_private_read_and_revision_conflict(tmp_
         assert bad.status_code==422
         setting=client.get("/api/v1/media/interpretation-settings").json()
         update={"expected_revision":setting["revision"],"enabled":True,"daily_limit":2,"api_key":"synthetic-only"}
-        saved=client.put("/api/v1/media/interpretation-settings",headers=FRONTEND_HEADERS,json=update)
-        assert saved.status_code==200 and "synthetic-only" not in saved.text
-        assert client.put("/api/v1/media/interpretation-settings",headers=FRONTEND_HEADERS,json=update).status_code==409
+        assert client.put("/api/v1/media/interpretation-settings",headers=FRONTEND_HEADERS,json=update).status_code==410
+        native="/api/v1/worlds/world-a/world-characters/wc-requester/credentials/vision"
+        metadata=client.get(native).json()
+        own={"expected_revision": metadata["revision"], "provider": "google", "model": "gemini-3.1-flash-lite",
+            "thinking_level": "medium", "api_key": "synthetic-only"}
+        saved=client.put(native,headers=FRONTEND_HEADERS,json=own)
+        assert saved.status_code==200 and "synthetic-only" not in saved.text and saved.json()["has_key"]
+        assert client.put(native,headers=FRONTEND_HEADERS,json=own).status_code==409
+        principal["user"]=outsider
+        assert client.get(native).status_code==403
+        principal["user"]=owner
+        assert fake.calls==0
         removed=client.delete(asset["url"].removesuffix("/content"),headers=FRONTEND_HEADERS)
         assert removed.status_code==204 and client.get(asset["url"]).status_code==422
     finally:client.close();engine.dispose()

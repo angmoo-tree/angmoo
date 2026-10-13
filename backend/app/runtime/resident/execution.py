@@ -35,6 +35,7 @@ from app.domains.routines.constants import TOOL_CHOICE_THREAD_OR_COMPLETE
 from app.domains.routines.exceptions import AgentRunConflictError
 from app.domains.routines.exceptions import AgentSessionBusyError
 from app.domains.routines.exceptions import AgentSlotUnavailableError
+from app.domains.routines.exceptions import ActivityRuntimeValidationError
 from app.domains.routines.exceptions import CredentialSyncError
 from app.domains.routines.exceptions import OpenClawNotConfiguredError
 from app.domains.routines.exceptions import ReadOnlyLaneDeferredError
@@ -260,7 +261,8 @@ async def run_community_once(
     post = social_posts_service.get_post(db, post_id) if post_id else None
     user_id = _resolve_run_owner(character, data.user_id)
 
-    credential = _resolve_run_credential(
+    input_snapshot = capture_activity_input(db, character_id=character.id)
+    credential = None if input_snapshot else _resolve_run_credential(
         SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
         user_id=user_id, character=character, credential_id=data.credential_id,
     )
@@ -274,7 +276,6 @@ async def run_community_once(
     )
     from app.domains.identity.service.environment import lock_environment_admission
     lock_environment_admission(db, user_id)
-    input_snapshot = capture_activity_input(db, character_id=character.id)
     character = character_for_input(character, input_snapshot)
     lease_seconds = timeout_seconds + 90
     slot = slot_pool.claim_agent_slot(
@@ -1382,7 +1383,7 @@ async def _run_resident_slot_once(
     if (
         slot.assigned_user_id is None
         or slot.assigned_character_id is None
-        or slot.assigned_credential_id is None
+        or (slot.assigned_credential_id is None and not (input_snapshot or {}).get("_world_credential"))
     ):
         raise AgentSlotUnavailableError(f"slot {slot.agent_id} has no assignment")
 
@@ -1443,12 +1444,22 @@ async def _run_resident_slot_once(
     setting: models.AgentActivitySetting | None = None
     selected_post_id = post_id
     try:
-        character, credential = _validate_character_and_credential(
-            SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
-            user_id=slot.assigned_user_id,
-            character_id=slot.assigned_character_id,
-            credential_id=slot.assigned_credential_id,
-        )
+        if (input_snapshot or {}).get("_world_credential"):
+            from app.runtime.world_credential_binding import resolve
+            binding = input_snapshot["_world_credential"]
+            resolve(db, binding, owner_id=slot.assigned_user_id, world_id=binding["world_id"],
+                actor_id=binding["actor_id"], purpose="sns")
+            character = _read_available_run_character(
+                SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential), slot.assigned_character_id)
+            if character.owner_id != slot.assigned_user_id or not use_langgraph_resident:
+                raise ActivityRuntimeValidationError("world_credential_scope_unavailable")
+        else:
+            character, credential = _validate_character_and_credential(
+                SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
+                user_id=slot.assigned_user_id,
+                character_id=slot.assigned_character_id,
+                credential_id=slot.assigned_credential_id,
+            )
         character = character_for_input(character, input_snapshot)
         selected_post_id = _select_resident_run_post_id(
             SqlAlchemyPostSelectionReferences(db),
@@ -1467,7 +1478,7 @@ async def _run_resident_slot_once(
         now = datetime.now(UTC)
         cooldown_until = (
             _aware_utc(credential.cooldown_until)
-            if credential.cooldown_until is not None
+            if credential is not None and credential.cooldown_until is not None
             else None
         )
         if cooldown_until is not None and cooldown_until > now:
@@ -1478,7 +1489,7 @@ async def _run_resident_slot_once(
                 user_id=slot.assigned_user_id,
                 character_id=character.id,
                 post_id=selected_post_id,
-                credential_id=credential.id,
+                credential_id=credential.id if credential else None,
                 agent_id=slot.agent_id,
                 session_key=session_key,
                 tool_auth_key=tool_auth_key,
@@ -1552,7 +1563,7 @@ async def _run_resident_slot_once(
                 user_id=slot.assigned_user_id,
                 character_id=character.id,
                 post_id=selected_post_id,
-                credential_id=credential.id,
+                credential_id=credential.id if credential else None,
                 agent_id=slot.agent_id,
                 session_key=session_key,
                 tool_auth_key=tool_auth_key,
@@ -1720,7 +1731,7 @@ async def _run_resident_slot_once(
             user_id=slot.assigned_user_id,
             character_id=character.id,
             post_id=selected_post_id,
-            credential_id=credential.id,
+            credential_id=credential.id if credential else None,
             agent_id=slot.agent_id,
             session_key=session_key,
             tool_auth_key=tool_auth_key,
@@ -1862,7 +1873,7 @@ async def _run_resident_slot_once(
                 status,
                 gateway_result=_stored_gateway_result(gateway_result),
             )
-            if credential.cooldown_until is not None:
+            if credential is not None and credential.cooldown_until is not None:
                 credential_cooldown.set_cooldown_until(credential, cooldown_until=None)
             slot_leases.complete_resident_slot_run(
                 db,
@@ -2574,7 +2585,7 @@ async def _run_resident_slot_once(
                 reason="resident_tick_observe",
                 result=observation_result,
             )
-    if credential.cooldown_until is not None:
+    if credential is not None and credential.cooldown_until is not None:
         credential_cooldown.set_cooldown_until(credential, cooldown_until=None)
     slot_leases.complete_resident_slot_run(
         db,

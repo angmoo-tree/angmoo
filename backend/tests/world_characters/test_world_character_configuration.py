@@ -272,8 +272,8 @@ def test_t56_dashboard_batch_queries_do_not_grow_per_character(engine):
     from app.domains.worlds.models import WorldMembership
     from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     statements = []
-    def count_query(*_args):
-        statements.append(1)
+    def count_query(_connection, _cursor, statement, *_args):
+        statements.append(statement)
     event.listen(engine, "before_cursor_execute", count_query)
     with Session(engine) as db:
         owner = fixture_owner(db)
@@ -302,7 +302,10 @@ def test_t56_dashboard_batch_queries_do_not_grow_per_character(engine):
         expanded = management_service(db).dashboard(world_id="config-world-a", user=owner)
         assert len(expanded.items) == len(initial.items) + 7
         assert len(statements) == first_count
-        assert first_count <= 22
+        assert first_count <= 23
+        # Three fixed admission fences (World/profile/basic configuration) are
+        # independent of character count, as the equality above proves.
+        assert sum("FROM world_deletion_requests" in statement for statement in statements) == 3
     event.remove(engine, "before_cursor_execute", count_query)
 
 
@@ -408,6 +411,11 @@ def test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_a
         role = db.get(WorldCharacter, "config-role-a")
         role.autonomous_enabled = True
         role.activity_runtime_mode = "legacy_resident_v1"
+        from app.domains.identity.service import world_credentials
+        from app.domains.identity.schemas import WorldCredentialWrite
+        key_scope = dict(owner_id=owner.id, world_id=role.world_id, world_character_id=role.id, purpose="sns")
+        world_credentials.save(db, **key_scope, data=WorldCredentialWrite(expected_revision=0, provider="google",
+            model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-dashboard-key"))
         stored = db.get(WorldCharacterConfiguration, role.id)
         stored.settings = {**stored.settings, "active_hours_start": "09:00", "active_hours_end": "02:00"}
         db.commit()
@@ -437,6 +445,6 @@ def test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_a
         stored.settings = {**stored.settings, "active_hours_start": "00:00", "active_hours_end": "00:30"}
         db.commit()
         state("outside_hours")
-        db.get(LlmCredential, "config-credential-a").enabled = False
+        world_credentials.delete(db, **key_scope, expected_revision=1)
         db.commit()
         assert state("not_ready").status.reason == "credential_required"

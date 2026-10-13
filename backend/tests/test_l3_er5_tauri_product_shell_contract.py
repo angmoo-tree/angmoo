@@ -148,8 +148,8 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert "targetKind === state.kind" in desktop_runtime
     world_app = _read("frontend/src/composition/screens/world-app.tsx")
     product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
-    assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
-    assert "내 조종 앵무 관계망 열기" in world_app
+    assert "relationshipGraphRoute(relationshipCharacterId, worldId)" in world_app
+    assert "<WorldRelationshipsScreen characterId={relationshipCharacterId ?? ownerActor?.character_id ?? null} worldId={worldId}" in world_app
     assert "export function relationshipGraphRoute" in product_routes
 
 

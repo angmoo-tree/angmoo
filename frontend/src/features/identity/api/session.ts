@@ -24,7 +24,9 @@ export function getCurrentUser(
 }
 
 export function issueLocalSession() {
-  return authRequest<AuthRead>("/auth/local/session", { method: "POST" });
+  // AuthProvider owns bootstrap failure; another auth event would recursively
+  // start a refresh and prevent that failure from clearing the current owner.
+  return authRequest<AuthRead>("/auth/local/session", { method: "POST", suppressAuthFailureEvent: true });
 }
 
 export function updateUserFeedPreferences(data: {

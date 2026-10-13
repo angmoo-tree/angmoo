@@ -126,6 +126,7 @@ def create_lifespan(
         activity_runtime_binding = getattr(runtime_app.state, "activity_runtime_binding", None)
         maintenance = getattr(runtime_app.state, "checkpoint_maintenance", None)
         media_runtime = getattr(runtime_app.state, "media_runtime", None)
+        deletion_worker = getattr(runtime_app.state, "world_deletion_worker", None)
         configuration_registered = False
         extension_started = False
         component_manager = None
@@ -171,6 +172,8 @@ def create_lifespan(
                 await memory_hybrid_runtime.start()
             if media_runtime is not None and getattr(runtime_app.state, "media_worker_enabled", False):
                 await media_runtime.start()
+            if deletion_worker is not None:
+                await deletion_worker.start()
             yield
         finally:
             shutdown_error = None
@@ -182,7 +185,7 @@ def create_lifespan(
                 runtime_app.state.runtime_cleanup_incomplete = True
             finally:
                 try:
-                    for worker in (media_runtime, memory_hybrid_runtime, memory_runtime, component_manager):
+                    for worker in (deletion_worker, media_runtime, memory_hybrid_runtime, memory_runtime, component_manager):
                         if worker is None:
                             continue
                         try:
@@ -250,21 +253,30 @@ def create_app(
         if runtime_config is not None:
             composition = compose_runtime(runtime_config, base_settings=settings)
             from app.runtime.memory.batch_runtime import MemoryBatchRuntime
-            from app.runtime.memory_selection_provider import memory_provider
+            from app.runtime.memory_selection_provider import memory_provider, subject_memory_provider
             from app.runtime.memory.episode_prior_search import episode_prior_search
 
             from app.runtime.relationships.review_runtime import RelationshipReviewRuntime
+            from app.domains.memory.contracts.scope import MemoryScope
             relationship_review = RelationshipReviewRuntime(composition.session_factory,
-                lambda material: memory_provider(composition.session_factory, material["owner_id"],
-                    material["model_id"], material["thinking_level"], relationship=True))
+                lambda material: subject_memory_provider(composition.session_factory,
+                    MemoryScope(material["owner_id"], material["credential_binding"]["world_id"], material["credential_binding"]["actor_id"]),
+                    model=material["model_id"], thinking_level=material["thinking_level"],
+                    credential_id=material["credential_binding"]["credential_id"],
+                    credential_revision=material["credential_binding"]["revision"], relationship=True))
             memory_runtime = MemoryBatchRuntime(
                 composition.session_factory,
                 lambda owner, model, thinking: memory_provider(
                     composition.session_factory, owner, model, thinking
                 ),
                 generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
+                data_root=composition.config.data_paths.root,
                 episode_provider_factory=lambda owner, model, thinking: memory_provider(
                     composition.session_factory, owner, model, thinking, episode=True),
+                activity_provider_factory=lambda batch: subject_memory_provider(
+                    composition.session_factory, batch.setting.scope, model=batch.model_id,
+                    thinking_level=batch.thinking_level, credential_id=batch.credential_id,
+                    credential_revision=batch.credential_revision),
                 episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
                 idle_work=relationship_review.tick,
             )
@@ -417,6 +429,8 @@ def create_app(
             create_public_api_router(extension.routers if extension else ()),
             prefix=runtime_settings.api_v1_prefix,
         )
+        from app.domains.worlds.router import legacy_media_router
+        runtime_app.include_router(legacy_media_router)
         mount_public_media(
             runtime_app,
             runtime_settings,
@@ -442,12 +456,17 @@ def create_app(
                 MemoryShutdownAdmissionMiddleware,
             )
 
-            runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime)
+            from app.runtime.memory.situation_indexing import SituationSearchDrain
+            runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime,
+                search=SituationSearchDrain(composition.memory_hybrid_runtime, composition.memory_recall_projection)
+                    if composition is not None and memory_runtime.situations is not None else None)
             runtime_app.add_middleware(
                 MemoryShutdownAdmissionMiddleware,
                 coordinator=runtime_app.state.memory_shutdown,
             )
         runtime_app.state.world_package_import_committer = world_package_import_committer
+        from app.runtime.world_deletion_composition import configure_world_deletion
+        configure_world_deletion(runtime_app, composition)
         runtime_app.state.dispose_runtime = dispose_runtime if composition is not None else None
         runtime_app.state.restore_process_settings = (
             dispose_runtime if composition is not None else None
@@ -509,6 +528,10 @@ def runtime_health(request: Request) -> dict[str, object]:
             observed = observations.get(component)
             if observed is None or observed.state not in allowed:
                 raise RuntimeError(f"{component}_not_ready")
+            if component == "scheduler":
+                from app.runtime.resident.scheduler import scheduler_is_ready
+                if observed.state != RuntimeComponentState.READY or not scheduler_is_ready(composition.settings):
+                    raise RuntimeError("scheduler_not_ready")
 
         graph = borrow_runtime_graph_client(composition.settings)
         if graph is None:

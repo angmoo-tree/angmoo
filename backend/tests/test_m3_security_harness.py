@@ -159,7 +159,18 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 134
+    assert len(session_mutations) == 149
+    assert {
+        "DELETE /api/v1/worlds/{world_id}",
+        "POST /api/v1/world-deletions/{request_id}/retry",
+        "PATCH /api/v1/worlds/{world_id}/world-characters/{world_character_id}/activity-settings",
+        "POST /api/v1/media/comfy-workflows/analyze",
+    } <= session_mutations
+    assert {
+        "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/recheck",
+        "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/situations/{receipt_sequence}/recheck",
+        "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/situations/{receipt_sequence}/discard",
+    } <= session_mutations
     assert {
         "PUT /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",
         "DELETE /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",

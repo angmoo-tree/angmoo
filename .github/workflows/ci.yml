@@ -18,10 +18,9 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
-  backend:
+  backend-preflight:
     runs-on: ubuntu-latest
-    # Run 37394042290 reached 97% of 5,415 nodes at 60m, including all 28
-    # real predecessor upgrade CLIs. Preserve the whole suite and its failures.
+    # Keep baseline, model, inventory and route/license gates before every partition.
     timeout-minutes: 75
     env:
       APP_ENV: test
@@ -95,22 +94,111 @@ jobs:
       - name: Verify Memory batch runtime and frozen predecessor inventory
         run: uv run python ../scripts/ci/generate_p8_l_r_memory_batch_inventory.py --check
         working-directory: backend
-      - name: Run backend suite
-        run: uv run python -m pytest -q tests --durations=25 --junitxml=.ci/backend-junit.xml
-        working-directory: backend
       - name: Verify route and project contracts
         run: |
           uv run python ../scripts/generate_public_route_inventory.py --check
           uv run python ../scripts/check_project_license.py --repo-root .. --policy ../security/license_policy.json
         working-directory: backend
-      - name: Preserve backend test reports
+      - name: Preserve backend preflight identity
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: backend-tests-${{ github.sha }}-${{ github.run_attempt }}
+          name: backend-preflight-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            backend/.ci/backend-test-identity.json
+          include-hidden-files: true
+          if-no-files-found: error
+
+  backend-tests:
+    needs: backend-preflight
+    runs-on: ubuntu-latest
+    # At 7bcc22bb the serial suite timed out at 75%, including many completed
+    # failures and costly actual-Git preservation negatives. Keep every node
+    # and the same timeout; isolate four deterministic full-corpus partitions.
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    env:
+      APP_ENV: test
+      APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}-${{ matrix.shard }}
+      DATABASE_URL: sqlite+pysqlite:///./.ci/angmoo.sqlite3
+      LADYBUG_DATABASE_ROOT: ./.ci/graph
+      GRAPH_PROVIDER: ladybug
+      LOCAL_RUNTIME_COMPONENT_MODE: in_process
+      AGENT_ACTIVITY_ENGINE: langgraph
+      SERVER_LLM_ENGINE: direct
+      RESIDENT_TICK_SCHEDULER_ENABLED: "false"
+      POST_IMAGE_JOB_WORKER_ENABLED: "false"
+      POLLINATIONS_SERVICE_IMAGE_ENABLED: "false"
+      CREDENTIAL_ENCRYPTION_PROVIDER: local
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Install locked backend dependencies
+        run: uv sync --frozen
+        working-directory: backend
+      - name: Build pinned Vec1 for native hybrid regression
+        run: |
+          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1"
+          echo "ANGMOO_TEST_VEC1_EXTENSION=$RUNNER_TEMP/angmoo-test-vec1/vec1.so" >> "$GITHUB_ENV"
+      - name: Run complete backend corpus partition with durable progress
+        env:
+          TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        working-directory: backend
+        run: uv run python ../scripts/ci/run_backend_shard.py --index "${{ matrix.shard }}" --source-sha "$TEST_SOURCE_SHA"
+      - name: Preserve every partition result and interruption progress
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-${{ matrix.shard }}
           path: |
             backend/.ci/backend-junit.xml
             backend/.ci/backend-test-identity.json
+            backend/.ci/backend-shard-report.json
+            backend/.ci/backend-shard-events.jsonl
+          include-hidden-files: true
+          if-no-files-found: error
+
+  backend:
+    if: always()
+    needs: [backend-preflight, backend-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-*
+          path: .ci/backend-shard-reports
+      - name: Require all gates and exact complete backend coverage
+        env:
+          PREFLIGHT_RESULT: ${{ needs.backend-preflight.result }}
+          TESTS_RESULT: ${{ needs.backend-tests.result }}
+          TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$PREFLIGHT_RESULT" = success
+          test "$TESTS_RESULT" = success
+          python scripts/ci/check_backend_shards.py --directory .ci/backend-shard-reports --source-sha "$TEST_SOURCE_SHA" --checkout-sha "$GITHUB_SHA"
+      - name: Preserve verified aggregate coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-coverage-${{ github.sha }}-${{ github.run_attempt }}
+          path: .ci/backend-shard-reports/backend-shard-coverage.json
           include-hidden-files: true
           if-no-files-found: error
 
@@ -170,6 +258,9 @@ jobs:
           JS
       - name: Lint
         run: pnpm lint
+        working-directory: frontend
+      - name: Verify patched Next root discovery and active link rule
+        run: pnpm test:next-root-glob
         working-directory: frontend
       - name: Typecheck
         run: pnpm typecheck

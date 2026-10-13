@@ -8,8 +8,11 @@ from sqlalchemy.orm import aliased
 from app.core.ids import uuid7_string
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
-from app.domains.memory.models.batch import MemoryBatchProfile, MemoryBatchSetting
+from app.domains.memory.models.batch import MemoryBatchSetting
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.episode import MemoryEpisodeInfo
+from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemorySituationReceipt, MemoryActivitySituationSource
+from app.domains.memory.repository.situation_reads import situation_origin
 from app.domains.memory.service.items import memory_evidence_blocked_code
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.relationships.contracts.daily_review import manifest_digest
@@ -32,6 +35,27 @@ def resolve_memory_batch(db, *, scope, items, activation, now):
     sources = RuntimeEpisodeDetailReader(db).read_sources(scope=scope, identities=identities)
     resolved = []
     for item in items:
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        if not currently_accessible(db, RuntimeEpisodeDetailReader(db), scope, item, now):
+            resolved.append((None, {"memory_id": item.id, "digest": _digest(item)}, "source_unavailable_or_changed"))
+            continue
+        situation = situation_origin(db, item)
+        if situation is not None:
+            receipt = db.get(MemorySituationReceipt, situation.receipt_sequence)
+            target = receipt.result.get("counterpart_id")
+            cores = list(db.scalars(select(MemoryActivitySituationSource).where(
+                MemoryActivitySituationSource.memory_item_id == situation.memory_item_id)))
+            participants = {identifier for core in cores for identifier in (core.source.get("actor_id"), core.source.get("counterpart_id")) if identifier}
+            reason = None
+            if target is None or target == scope.subject_world_character_id or target not in participants:
+                reason = "counterpart_ambiguous_or_missing"
+            elif _utc(situation.occurred_at) < _utc(activation):
+                reason = "no_post_activation_experience"
+            payload = {"memory_id": item.id, "summary": item.summary, "digest": _digest(item),
+                "source_refs": sorted({f"{core.source['source_type']}:{core.source['source_id']}" for core in cores}),
+                "occurred_at": situation.occurred_at.isoformat()}
+            resolved.append((target, payload, reason))
+            continue
         rows = by_item[item.id]
         counterpart_ids = set()
         reason = None
@@ -67,8 +91,9 @@ def resolve_memory_batch(db, *, scope, items, activation, now):
 def episode_lineage_ids(scope):
     # Owner corrections create replacement IDs while retaining the original
     # episode row. Follow that canonical chain; do not relabel arbitrary memories.
-    lineage = select(MemoryEpisodeInfo.memory_item_id.label("id")).join(
-        MemoryItem, MemoryItem.id == MemoryEpisodeInfo.memory_item_id).where(
+    lineage = select(MemoryItem.id.label("id")).where(
+            or_(exists(select(MemoryEpisodeInfo.memory_item_id).where(MemoryEpisodeInfo.memory_item_id == MemoryItem.id)),
+                exists(select(MemoryActivitySituationInfo.memory_item_id).where(MemoryActivitySituationInfo.memory_item_id == MemoryItem.id))),
             MemoryItem.owner_id == scope.owner_id, MemoryItem.world_id == scope.world_id,
             MemoryItem.subject_world_character_id == scope.subject_world_character_id).cte("relationship_episode_lineage", recursive=True)
     previous = aliased(MemoryItem)
@@ -118,6 +143,10 @@ class ReviewMemoryReferences:
 
     def revalidate(self, work):
         base = work.manifest["base"]
+        from app.runtime.relationships.situation_ordering import require_application_complete
+        require_application_complete(self.db, base["setting_id"])
+        from app.runtime.relationships.review_credentials import validate
+        validate(self.db, work, base)
         from app.runtime.relationships.review_identity import review_identity_context
         identity = review_identity_context(self.db, owner_id=base["owner_id"], world_id=work.world_id,
             actor_id=work.actor_world_character_id, target_id=work.target_world_character_id)
@@ -125,7 +154,7 @@ class ReviewMemoryReferences:
             raise ValueError("relationship_review_identity_changed")
         setting = self.db.get(MemoryScopeSettingModel, base["setting_id"], populate_existing=True)
         batch = self.db.get(MemoryBatchSetting, base["setting_id"], populate_existing=True)
-        profile = self.db.get(MemoryBatchProfile, base["owner_id"], populate_existing=True)
+        profile = self.db.get(MemorySubjectProfile, base["setting_id"], populate_existing=True)
         policy = interpreted_policy(self.db, work.world_id)
         actor = self.db.get(WorldCharacter, work.actor_world_character_id)
         if (setting is None or not setting.enabled or batch is None or not batch.ai_enabled or not batch.consent_version

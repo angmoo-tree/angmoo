@@ -5,12 +5,16 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select, or_, case, update
 
 from app.domains.memory.models.items import MemoryScopeSettingModel
-from app.domains.memory.models.batch import MemoryBatchSetting, MemoryBatchProfile
+from app.domains.memory.models.batch import MemoryBatchSetting
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.relationships.models.personalization import RelationshipReviewWork, RelationshipPolicy
 from app.domains.relationships.service.daily_review import plan_review, run_review_step, apply_review
 from app.runtime.relationships.review_memories import collect_new_review_memories, ReviewMemoryReferences
 from app.runtime.relationships.review_refresh import refresh_review_inputs
 from app.runtime.relationships.review_identity import review_identity_context
+from app.runtime.relationships.review_credentials import snapshot as credential_snapshot
+from app.domains.memory.contracts.scope import MemoryScope
+from app.runtime.relationships.situation_ordering import application_pending, scope_application_pending
 
 
 class RelationshipReviewRuntime:
@@ -23,12 +27,18 @@ class RelationshipReviewRuntime:
         with self.session_factory() as db:
             from app.domains.identity.service.environment import snapshot, lock_environment_admission
             lock_environment_admission(db)
-            settings = db.execute(select(MemoryScopeSettingModel, MemoryBatchSetting, MemoryBatchProfile).join(
+            settings = db.execute(select(MemoryScopeSettingModel, MemoryBatchSetting, MemorySubjectProfile).join(
                 MemoryBatchSetting, MemoryBatchSetting.scope_setting_id == MemoryScopeSettingModel.id).join(
-                MemoryBatchProfile, MemoryBatchProfile.owner_id == MemoryScopeSettingModel.owner_id).where(
+                MemorySubjectProfile, MemorySubjectProfile.scope_setting_id == MemoryScopeSettingModel.id).where(
                 MemoryScopeSettingModel.enabled.is_(True), MemoryBatchSetting.ai_enabled.is_(True),
                 MemoryBatchSetting.consent_version.is_not(None), MemoryBatchSetting.schedule_enabled.is_(True))).all()
             for setting, batch, profile in settings:
+                if application_pending(db, setting.id, lock=True):
+                    continue  # Freeze this scope only after its admitted cutoff is canonical.
+                try:
+                    credential = credential_snapshot(db, MemoryScope(setting.owner_id, setting.world_id, setting.subject_world_character_id), profile)
+                except ValueError:
+                    continue
                 environment = snapshot(db, setting.owner_id)
                 local = now.astimezone(ZoneInfo(environment.timezone))
                 if local.strftime("%H:%M") < batch.local_time:
@@ -50,7 +60,7 @@ class RelationshipReviewRuntime:
                         continue
                     plan_review(db, world_id=setting.world_id, actor_id=setting.subject_world_character_id,
                         target_id=target, period_key=period, memories=memories,
-                        base={"identity": identity, "environment": environment.to_dict(),
+                        base={**credential, "identity": identity, "environment": environment.to_dict(),
                               "owner_id": setting.owner_id, "setting_id": setting.id, "profile_version": profile.version,
                               "model_id": profile.model_id, "thinking_level": profile.thinking_level})
             db.commit()
@@ -73,12 +83,17 @@ class RelationshipReviewRuntime:
             self._next_discovery = now + timedelta(minutes=1)
         with self.session_factory() as db:
             ready = db.scalar(select(RelationshipReviewWork).where(RelationshipReviewWork.parent_id.is_(None),
+                ~scope_application_pending(RelationshipReviewWork.world_id, RelationshipReviewWork.actor_world_character_id),
                 RelationshipReviewWork.status == "ready").order_by(RelationshipReviewWork.created_at, RelationshipReviewWork.id).limit(1))
             if ready is not None:
+                if application_pending(db, ready.manifest["base"]["setting_id"], lock=True):
+                    return "relationship_memory_application_deferred"
                 try:
                     refresh_review_inputs(db, ready)
                     result = apply_review(db, work_id=ready.id, references=ReviewMemoryReferences(db), now=now)
                 except ValueError as exc:
+                    if str(exc) == "relationship_memory_application_pending":
+                        return "relationship_memory_application_deferred"
                     ready.status = "failed"
                     ready.error_code = str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed"
                     ready.next_attempt_at = now + timedelta(minutes=5)
@@ -86,6 +101,7 @@ class RelationshipReviewRuntime:
                 db.commit()
                 return "relationship_" + result
             work = db.scalar(select(RelationshipReviewWork).where(
+                ~scope_application_pending(RelationshipReviewWork.world_id, RelationshipReviewWork.actor_world_character_id),
                 or_(RelationshipReviewWork.status.in_(("pending", "failed")),
                     (RelationshipReviewWork.status == "running") & (RelationshipReviewWork.lease_until <= now)),
                 or_(RelationshipReviewWork.next_attempt_at.is_(None), RelationshipReviewWork.next_attempt_at <= now)).order_by(
@@ -96,6 +112,8 @@ class RelationshipReviewRuntime:
                 root = work
                 while root.parent_id:
                     root = db.get(RelationshipReviewWork, root.parent_id)
+                if application_pending(db, root.manifest["base"]["setting_id"], lock=True):
+                    return "relationship_memory_application_deferred"
                 try:
                     refresh_review_inputs(db, root)
                 except ValueError:

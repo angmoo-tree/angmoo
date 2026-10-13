@@ -19,6 +19,8 @@ def read_work(session, item_id):
     item = session.get(MemoryItem, item_id)
     if registration is None or item is None or not _item_retrievable(item, datetime.now(UTC)):
         return None
+    if registration.registration_revision not in {"memory-vector.incremental.v2", "memory-vector.prepared.v2"}:
+        return None
     scope = _item_scope(item)
     setting = session.scalar(select(MemoryScopeSettingModel).where(
         MemoryScopeSettingModel.owner_id == scope.owner_id, MemoryScopeSettingModel.world_id == scope.world_id,

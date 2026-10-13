@@ -103,6 +103,9 @@ class MemoryRepositoryPort(Protocol):
         now: datetime,
     ) -> tuple[MemoryCandidateRecord, MemoryItemRecord]: ...
 
+    def situation_correction_evidence(self, *, scope: MemoryScope, item_id: str,
+        reader, now: datetime) -> tuple[CanonicalMemoryEvidence, ...] | None: ...
+
     def correct_item_summary(
         self,
         *,

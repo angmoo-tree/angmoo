@@ -1,6 +1,7 @@
 """Recheck a provider's frozen source ranges and own thoughts before persistence."""
 
 from app.contracts.activity_thought import ActivityThought
+from hashlib import sha256
 from app.domains.memory.exceptions import MemoryConflictError
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
@@ -25,6 +26,8 @@ def revalidate_episode_bundle(session, bundle):
                 raise MemoryConflictError("episode_apply_source_missing")
             if (current.evidence.source_digest != member.source_digest
                 or (member.total_characters is not None and len(current.text) != member.total_characters)
-                or current.text[member.start_offset:member.start_offset + len(member.text)] != member.text):
+                or ("".join(current.text[start:end] for start, end in member.segments) if member.segments
+                    else current.text[member.start_offset:member.start_offset + len(member.text)]) != member.text
+                or member.whole_hash is not None and sha256(current.text.encode("utf-8")).hexdigest() != member.whole_hash):
                 raise MemoryConflictError("episode_apply_source_changed")
     return {key: value.evidence for key, value in sources.items()}

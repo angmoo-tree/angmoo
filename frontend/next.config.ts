@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const hostedFrontendRoutes = (
   process.env.NEXT_PUBLIC_HOSTED_FRONTEND_ROUTES ?? ""
@@ -21,32 +22,14 @@ const backendBaseUrl = (process.env.ANGMOO_API_BASE_URL ?? "http://127.0.0.1:808
   /\/$/,
   "",
 );
-const developmentScriptSources =
-  process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : [];
-
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  [
-    "script-src 'self' 'unsafe-inline'",
-    ...developmentScriptSources,
-    "https://accounts.google.com",
-    "https://challenges.cloudflare.com",
-  ].join(" "),
-  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "connect-src 'self' https://accounts.google.com https://challenges.cloudflare.com",
-  "frame-src https://accounts.google.com https://challenges.cloudflare.com",
-  "worker-src 'self' blob:",
-].join("; ");
 
 const nextConfig: NextConfig = {
+  // Isolate contributor previews/builds from an existing local server.
+  distDir: process.env.ANGMOO_NEXT_DIST_DIR ?? ".next",
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   output: "standalone",
+  outputFileTracingRoot:path.join(process.cwd(),".."),
+  outputFileTracingIncludes:{"/angmoo-api":["../docs/agent_guide.md","../docs/agent_guide.en.md"],"/agent_guide.md":["../docs/agent_guide.md","../docs/agent_guide.en.md"]},
   async headers() {
     return [
       {
@@ -66,8 +49,8 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           {
-            key: "Content-Security-Policy",
-            value: contentSecurityPolicy,
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
             key: "X-Frame-Options",

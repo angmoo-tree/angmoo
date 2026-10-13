@@ -9,6 +9,7 @@ from app.contracts.activity_thought import ActivityThought
 from app.contracts.environment import EnvironmentSnapshot
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION, MemoryActivity, private_thread_intersection
 
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
 
@@ -35,6 +36,10 @@ class EpisodeSourceMember:
     total_characters: int | None = None
     actor_label: str | None = None
     occurred_at: str | None = None
+    segments: tuple[tuple[int, int], ...] = ()
+    omitted_characters: int = 0
+    excerpt_policy: str | None = None
+    whole_hash: str | None = None
 
     def __post_init__(self) -> None:
         if (self.source_type not in MemorySourceTypeV1.values() or not self.source_id
@@ -46,6 +51,17 @@ class EpisodeSourceMember:
             raise ValueError("episode_source_actor_label_invalid")
         if self.occurred_at is not None and datetime.fromisoformat(self.occurred_at).tzinfo is None:
             raise ValueError("episode_source_time_invalid")
+        if self.segments:
+            last = 0
+            for start, end in self.segments:
+                if type(start) is not int or type(end) is not int or not last <= start <= end <= (self.total_characters or 0):
+                    raise ValueError("episode_source_segments_invalid")
+                last = end
+            if (sum(end - start for start, end in self.segments) != len(self.text)
+                or self.total_characters - len(self.text) != self.omitted_characters
+                or self.excerpt_policy != "chat-head350-tail150.v1"
+                or not _DIGEST.fullmatch(self.whole_hash or "")):
+                raise ValueError("episode_source_excerpt_invalid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +116,8 @@ class EpisodeBundle:
     activation_epoch: str = ""
     cutoff_sequence: int = 0
     environment: EnvironmentSnapshot | None = None
+    policy_version: str = EPISODE_VERSION
+    activities: tuple[MemoryActivity, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.bundle_ref or not self.new_units or len(self.prior_episodes) > MAX_PRIOR_EPISODES:
@@ -109,6 +127,25 @@ class EpisodeBundle:
             raise ValueError("episode_bundle_scope_mismatch")
         if len({unit.unit_key for unit in units}) != len(units):
             raise ValueError("episode_bundle_duplicate_unit")
+        if self.policy_version == ACTIVITY_POLICY_VERSION:
+            if not 1 <= len(self.activities) <= 32 or len({a.activity_id for a in self.activities}) != len(self.activities):
+                raise ValueError("episode_activity_bundle_invalid")
+            keys = [key for activity in self.activities for key in activity.unit_keys]
+            if len(keys) != len(set(keys)) or set(keys) != {u.unit_key for u in self.new_units}:
+                raise ValueError("episode_activity_coverage_invalid")
+            known = {u.unit_key: u for u in units}
+            for activity in self.activities:
+                for key in (*activity.unit_keys, *activity.context_keys):
+                    if key not in known or known[key].thread_id != activity.thread_id or (known[key].kind == "chat_turn") != (activity.kind == "chat"):
+                        raise ValueError("episode_activity_source_invalid")
+            if {key for a in self.activities for key in a.context_keys} - set(keys) != {u.unit_key for u in self.context_units}:
+                raise ValueError("episode_activity_context_invalid")
+            private_thread_intersection(tuple(u.thread_id for u in units))
+            if len({p.item_id for p in self.prior_episodes}) != len(self.prior_episodes):
+                raise ValueError("episode_bundle_duplicate_prior")
+            return
+        if self.policy_version != EPISODE_VERSION or self.activities:
+            raise ValueError("episode_policy_unknown")
         is_chat = self.new_units[0].kind == "chat_turn"
         if any((unit.kind == "chat_turn") != is_chat for unit in units):
             raise ValueError("episode_bundle_kind_mismatch")

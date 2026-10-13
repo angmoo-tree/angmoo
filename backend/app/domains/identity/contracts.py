@@ -27,6 +27,7 @@ class CredentialPurpose(StrEnum):
     MESSAGE_LLM = "message_llm"
     LORE_EMBEDDING = "lore_embedding"
     MEMORY_EMBEDDING = "memory_embedding"
+    MEMORY_CONSOLIDATION = "memory_consolidation"
     USER_IMAGE = "user_image"
     COMFY_PARTNER_IMAGE = "comfy_partner_image"
     IMAGE_INTERPRETATION = "image_interpretation"

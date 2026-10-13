@@ -1,4 +1,5 @@
 export type StudioWorldItem = {
+  can_delete?: boolean; is_default_space?: boolean;
   world_id: string; name: string; tagline: string; launchable: boolean;
   status: "draft" | "published" | "archived";
   visibility: "private" | "unlisted" | "public";

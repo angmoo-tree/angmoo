@@ -1186,6 +1186,12 @@ def build_activity_management_references() -> ActivityManagementReferences:
         timezone_reader=agent_activity_policy.activity_timezone,
     )
 
+def _prepare_activation_detail(db: Session, character_id: str) -> None:
+    image_setting_repository.ensure_image_generation_setting(
+        db, character_id, commit=False,
+    )
+
+
 def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetailRead]:
     from app.runtime.resident.autonomy_composition import build_autonomy_admission_references
     admission = build_autonomy_admission_references(evaluate_readiness=_activity_profile_readiness,
@@ -1212,6 +1218,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetai
         bind_profile=admission.bind_profile,
         release_profile=admission.release_profile,
         reload_secrets=admission.reload_secrets,
+        prepare_activation_detail=_prepare_activation_detail,
         build_detail=_build_agent_detail,
         character_not_found_error=AgentNotFoundError,
         credential_required_error=CredentialRequiredError,
@@ -1221,7 +1228,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetai
     )
 
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
-    from app.runtime.routines.configuration_reads import read_effective_setting
+    from app.runtime.routines.configuration_reads import read_effective_setting, capture_activity_input
     return ManualActivityWorkflows(
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
@@ -1249,6 +1256,7 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
         execution_mode_error=AgentExecutionModeError,
         credential_required_error=CredentialRequiredError,
         resolve_activity_setting=read_effective_setting,
+        capture_activity_input=capture_activity_input,
     )
 
 def build_feed_cue_workflows() -> FeedCueWorkflows:

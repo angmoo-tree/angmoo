@@ -1,0 +1,3 @@
+[
+  "\nCREATE TABLE memory_situation_source_bindings (\n\tmanifest_id VARCHAR(64) NOT NULL, \n\tentry_ordinal INTEGER NOT NULL, \n\tresolution_policy VARCHAR(64) NOT NULL, \n\toriginal_entry_digest VARCHAR(64) NOT NULL, \n\tbasis_ordinal INTEGER NOT NULL, \n\tbasis_source_id VARCHAR(160) NOT NULL, \n\tbasis_source_digest VARCHAR(64) NOT NULL, \n\tresolved_source JSON NOT NULL, \n\tresolved_at DATETIME NOT NULL, \n\tresolution_digest VARCHAR(64) NOT NULL, \n\tPRIMARY KEY (manifest_id, entry_ordinal), \n\tFOREIGN KEY(manifest_id) REFERENCES memory_situation_manifests (id) ON DELETE CASCADE, \n\tCONSTRAINT ck_situation_binding_ordinals CHECK (entry_ordinal >= 0 AND basis_ordinal >= 0)\n)\n\n"
+]

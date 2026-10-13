@@ -34,7 +34,7 @@ def test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes() -> None
     ):
         source = _read(relative_path)
         support_contents = {
-            "frontend/src/app/angmoo-api/page.tsx": ("angmoo-api", "AngmooApiContent"),
+            "frontend/src/app/angmoo-api/page.tsx": ("angmoo-api-server", "AngmooApiServerContent"),
             "frontend/src/app/licenses/page.tsx": ("licenses", "LicensesContent"),
         }
         if relative_path in support_contents:
@@ -42,6 +42,9 @@ def test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes() -> None
             assert f"@/features/support/components/{slug}-content" in source
             assert f"<{component}" in source
             source += _read(f"frontend/src/features/support/components/{slug}-content.tsx")
+            if slug == "angmoo-api-server":
+                assert "<AngmooApiContent" in source
+                source += _read("frontend/src/features/support/components/angmoo-api-content.tsx")
         assert "<main" not in source
         assert content_marker in source
 

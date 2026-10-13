@@ -13,7 +13,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.config import Settings, settings
 from app.domains.runtime.constants import (
     RuntimeDiagnosticCode,
-    RUNTIME_MIGRATION_HEAD,
     RECENT_PROVIDER_WINDOW,
 )
 from app.domains.runtime.contracts.status import ActivityRuntimeStatus
@@ -42,10 +41,12 @@ class RuntimeStatusService:
         self,
         queries: RuntimeStatusQueries,
         *,
+        migration_head_revision: str,
         config: Settings = settings,
         now: datetime | None = None,
     ) -> None:
         self._queries = queries
+        self._migration_head_revision = migration_head_revision
         self._config = config
         self._now = _aware_utc(now or datetime.now(UTC))
 
@@ -137,11 +138,11 @@ class RuntimeStatusService:
             return MigrationRuntimeStatus(
                 state=RuntimeComponentState.DEGRADED,
                 current_revision=None,
-                head_revision=RUNTIME_MIGRATION_HEAD,
+                head_revision=self._migration_head_revision,
                 reason_code=RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT,
             )
         current_revision = str(current) if current is not None else None
-        is_current = current_revision == RUNTIME_MIGRATION_HEAD
+        is_current = current_revision == self._migration_head_revision
         return MigrationRuntimeStatus(
             state=(
                 RuntimeComponentState.READY
@@ -149,7 +150,7 @@ class RuntimeStatusService:
                 else RuntimeComponentState.DEGRADED
             ),
             current_revision=current_revision,
-            head_revision=RUNTIME_MIGRATION_HEAD,
+            head_revision=self._migration_head_revision,
             reason_code=(
                 None if is_current else RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT
             ),

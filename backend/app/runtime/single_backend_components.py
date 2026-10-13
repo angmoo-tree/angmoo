@@ -16,7 +16,6 @@ from app.domains.runtime.service.components import ComponentObservationRegistry
 from app.domains.runtime.contracts.status import RuntimeComponentState
 from app.domains.runtime.constants import RuntimeDiagnosticCode
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError
-from app.domains.runtime.exceptions import SchedulerLeaseLostError
 from app.domains.runtime.service.components import component_observations
 
 
@@ -45,7 +44,6 @@ class SingleBackendRuntimeComponents:
         projector_runner: ProjectorRunner = run_projector_component,
         startup_timeout_seconds: float | None = None,
         shutdown_timeout_seconds: float | None = None,
-        scheduler_restart_delay_seconds: float = 1.0,
         registry: ComponentObservationRegistry = component_observations,
     ) -> None:
         self._scheduler_runner = scheduler_runner
@@ -61,9 +59,6 @@ class SingleBackendRuntimeComponents:
             shutdown_timeout_seconds
             if shutdown_timeout_seconds is not None
             else settings.LOCAL_RUNTIME_COMPONENT_SHUTDOWN_TIMEOUT_SECONDS,
-        )
-        self._scheduler_restart_delay_seconds = max(
-            0.0, scheduler_restart_delay_seconds
         )
         self._registry = registry
         self._scheduler_stop: asyncio.Event | None = None
@@ -86,7 +81,7 @@ class SingleBackendRuntimeComponents:
 
         def scheduler_listener(state: str) -> None:
             self._observe_scheduler_state(state)
-            if state in {"ready", "degraded"}:
+            if state == "ready":
                 scheduler_started.set()
 
         def projector_listener(state: str) -> None:
@@ -199,53 +194,25 @@ class SingleBackendRuntimeComponents:
         stop_event: asyncio.Event,
         listener: ComponentStateListener,
     ) -> None:
-        while True:
-            try:
-                await self._scheduler_runner(stop_event, listener)
-            except SchedulerLeaseHeldError:
-                self._registry.update(
-                    "scheduler",
-                    RuntimeComponentState.FAILED,
-                    reason_code=RuntimeDiagnosticCode.SCHEDULER_DUPLICATE_ACTIVE,
-                )
-                raise
-            except SchedulerLeaseLostError:
-                # A Windows sleep can advance the database clock beyond the
-                # lease TTL before the event loop can heartbeat.  The former
-                # standalone container recovered because its restart policy
-                # relaunched the worker.  Preserve the same behavior after
-                # moving the worker into the FastAPI lifespan: expose the
-                # bounded failure, then acquire a fresh fencing epoch without
-                # replaying missed ticks.
-                self._registry.update(
-                    "scheduler",
-                    RuntimeComponentState.FAILED,
-                    reason_code=RuntimeDiagnosticCode.SCHEDULER_LEASE_LOST,
-                )
-                if stop_event.is_set():
-                    return
-                try:
-                    await asyncio.wait_for(
-                        stop_event.wait(),
-                        timeout=self._scheduler_restart_delay_seconds,
-                    )
-                except TimeoutError:
-                    continue
-                return
-            except asyncio.CancelledError:
-                self._registry.update("scheduler", RuntimeComponentState.STOPPED)
-                raise
-            except Exception:
-                logger.exception("in-process scheduler component failed")
-                self._registry.update(
-                    "scheduler",
-                    RuntimeComponentState.FAILED,
-                    reason_code=RuntimeDiagnosticCode.SCHEDULER_LEASE_LOST,
-                )
-                raise
-            else:
-                self._registry.update("scheduler", RuntimeComponentState.STOPPED)
-                return
+        # The resident runner alone owns lease recovery and tracks its children.
+        # A runner that actually exits cannot be restarted by a second owner.
+        try:
+            await self._scheduler_runner(stop_event, listener)
+        except SchedulerLeaseHeldError:
+            self._registry.update("scheduler", RuntimeComponentState.FAILED,
+                reason_code=RuntimeDiagnosticCode.SCHEDULER_DUPLICATE_ACTIVE)
+            raise
+        except asyncio.CancelledError:
+            self._registry.update("scheduler", RuntimeComponentState.STOPPED)
+            raise
+        except Exception as exc:
+            logger.error("scheduler_component_failed code=%s", type(exc).__name__)
+            self._registry.update("scheduler", RuntimeComponentState.FAILED,
+                reason_code=RuntimeDiagnosticCode.SCHEDULER_LEASE_LOST)
+            raise
+        else:
+            self._registry.update("scheduler", RuntimeComponentState.STOPPED)
+            return
 
     def _run_projector(
         self,

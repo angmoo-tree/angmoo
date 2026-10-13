@@ -318,7 +318,7 @@ def _utc(local_value: datetime) -> datetime:
     return local_value.replace(tzinfo=ZoneInfo("Asia/Seoul")).astimezone(UTC)
 
 
-def _seed(db: Session, *, autonomous_enabled: bool = True) -> RoutineFixture:
+def _seed(db: Session, *, autonomous_enabled: bool = True, with_owned_sns: bool = False) -> RoutineFixture:
     now = _utc(datetime(2026, 8, 10, 9, 0))
     user = models.User(
         id="user-routine",
@@ -556,6 +556,12 @@ def _seed(db: Session, *, autonomous_enabled: bool = True) -> RoutineFixture:
             morning_episode = episode
     from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     initialize_created_world_character(db, character=character, world_character=world_character)
+    if with_owned_sns:
+        from app.domains.identity.service import world_credentials
+        from app.domains.identity.schemas import WorldCredentialWrite
+        world_credentials.save(db, owner_id=user.id, world_id=world.id, world_character_id=world_character.id,
+            purpose="sns", data=WorldCredentialWrite(expected_revision=0, provider="google",
+                model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-routine-owned-key"))
     db.commit()
     assert morning_episode is not None
     return RoutineFixture(

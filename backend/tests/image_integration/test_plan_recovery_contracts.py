@@ -147,8 +147,9 @@ def test_chat_does_not_replace_reserved_analysis_after_settings_change(tmp_path)
         accepted = chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,
             WorldChatMessageCreate(content="예약한 사진", attachment_asset_id=asset, idempotency_key="image-admission-change-001"))
         reservation = chat.db.get(MessageAttachment, accepted.user_message.id).interpretation_id
-        setting = chat.db.get(InterpretationSetting, chat.owner.id)
-        setting.thinking_level = "high"
+        from app.domains.media.models_world_policy import WorldImagePolicy
+        setting = chat.db.get(WorldImagePolicy, "p-responding")
+        setting.vision_enabled = False
         setting.revision += 1
         chat.db.commit()
         events = asyncio.run(stream(chat, accepted.response_request.request_id))
@@ -171,7 +172,11 @@ def test_chat_retry_binding_uses_new_cache_without_reusing_old_snapshot(tmp_path
         attachment = chat.db.get(MessageAttachment, accepted.user_message.id)
         old_id = attachment.interpretation_id
         assert attachment.snapshot_json and fake.calls == 1
-        chat.db.get(InterpretationSetting, chat.owner.id).thinking_level = "high"
+        from app.domains.identity.service import world_credentials
+        from app.domains.identity.schemas import WorldCredentialWrite
+        world_credentials.save(chat.db, owner_id=chat.owner.id, world_id=chat.world_id,
+            world_character_id="p-responding", purpose="vision", data=WorldCredentialWrite(
+                expected_revision=1, provider="google", model="gemini-3.1-flash-lite", thinking_level="high"))
         chat.db.commit()
         chat.generation.images.reserve_retry(chat.db, chat.owner.id, chat.thread_id, accepted.user_message.id)
         assert attachment.interpretation_id != old_id and attachment.snapshot_json is None

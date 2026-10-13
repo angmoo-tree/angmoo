@@ -6,6 +6,7 @@ function selectFields(row: object, keys: readonly string[]) {
 function exportSearchTrace(trace: NonNullable<RetrievalDiagnosticsRead["search_trace"]>) {
   return {
     ...selectFields(trace, ["version", "coverage", "stage_events_dropped", "lineage_edges_dropped", "aliases_dropped", "detail_rows_dropped"]),
+    ...(trace.canonical_reads ? { canonical_reads: trace.canonical_reads.slice(0, 2).map(row => selectFields(row, ["stage", "status", "wait_ms", "elapsed_ms", "sql_count", "unique_nodes", "memo_hits", "cleaned"])) } : {}),
     stages: trace.stages.slice(0, 48).map(row => selectFields(row, [
       "axis", "stage", "clock_domain", "state", "start_ms", "end_ms", "elapsed_ms",
       "budget_at_start_ms", "remaining_at_end_ms", "deadline_exceeded"])),

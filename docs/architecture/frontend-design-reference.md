@@ -1,5 +1,32 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-13 World deletion dialog: **LOCAL** reuse of the existing semantic
+Dialog, Button and Field/Input. The World feature owns the compact target and
+deletion/preservation summary, bordered name confirmation and optional collapsed
+package-export slot. Header/actions stay visible while the body scrolls. Next
+and static share the same controller; backend confirmation, scope, default SNS
+protection and response-loss idempotency remain unchanged. No external assets,
+fonts, dependencies or raw colors are added. Verification is recorded in
+`docs/verification/world-delete-dialog-20261013.md`.
+
+2026-10-12 image recovery: **LOCAL** preservation of the existing ProfileAvatar,
+World preview and shared crop UI. Exact API serialization, guarded World reads and
+scoped blob transport restore actual images without new copy, colors, assets or
+Hosted behavior. Two functional screenshot capture sites are explicitly inventoried;
+all eleven canonical PNGs and visual thresholds remain unchanged. Related Next/static
+behavior and actual Docker source sync are separate from installed-app USER CHECK.
+Evidence: `docs/verification/world-image-recovery-20261012.md`.
+
+2026-10-09 World summaries, graph and settings: **LOCAL** reuse of existing
+SettingsCard, ProfileAvatar, WorldApp/Device scroll ownership, semantic coral
+icons, controls and dialogs. New plan/topic summaries reuse feature presentation;
+the graph moves into the shared World Phone shell without changing directional
+content. Saved embedding guidance and provider-key metadata remain scoped data,
+not decoration or hosted semantics. No new hosted code, assets, fonts or dependency
+is imported, and no design baseline/policy exception is relaxed. Evidence is in
+`docs/verification/world-ui-settings-improvements-20261009.md`; dev/static/native
+unit checks remain separate from actual export, installed-app and AI observations.
+
 2026-10-05 World post/chat/character management: **ADAPTED** shared Device Home
 management cards, Profile/Status/Settings layout, neutral Network/Mail actions,
 inline statistics and ProfileAvatar. **LOCAL** stored World settings, server-confirmed
@@ -726,6 +753,36 @@ rights-cleared.
 
 ## Contributor workflow
 
+### 2026-10-08 activity situation processing — LOCAL
+
+The Memory usage card now contains the shared
+`features/memory/components/memory-processing-controls.tsx` controls for pending
+receipts, explicit save, daily time and native-quit saving. The existing second
+card retains relationship review settings, and the third retains semantic search.
+This is a `LOCAL` adaptation of the existing cards, spacing, coral Button, Field,
+native time input and semantic feedback tokens. It adds no hosted assets, fonts,
+raw colors, route-specific presentation or synthetic product counts.
+
+The same components and Korean/English catalogs serve Next and static/native.
+Local Playwright evidence covers both routers, both locales, repeat submission,
+timeout replay, dirty settings and 390px layout. Diagnostic screenshots are local
+evidence rather than new canonical visual baselines or native USER CHECK.
+Implementation and verification records are in
+`docs/operations/10-08-activity-situation-implementation.md`.
+
+### 2026-10-07 World introduction — LOCAL
+
+The user-provided banner-first World mockup is a local presentation reference.
+`features/worlds/components/world-introduction.tsx` and
+`features/characters/components/world-character-preview.tsx` use existing semantic
+tokens, navigation, Button, feedback and ProfileAvatar primitives. Composition
+connects their real World reads and owner-profile links for both Next and static.
+`frontend/public/world-default-banner.svg` is a repo-native vector interpretation
+of the supplied sky, sun and city shapes, with no external asset/font/dependency.
+The image palette belongs to the illustration; product CSS uses semantic tokens.
+Genre/mood tags and expanded original text come from the canonical World DTO.
+Evidence is recorded in `docs/verification/world-introduction-20261007.md`.
+
 ### 2026-09-18 SNS recommendation topics
 
 World Creator recommendation tools and the character settings topic panel are
@@ -782,3 +839,23 @@ ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 `features/characters/components/personalized-activity-panel.tsx`의 engine 선택과 전환 안내는 **LOCAL** 작성이다. 기존 같은 feature·semantic form/status 토큰·44px control·focus 스타일을 사용한다. 지원되지 않는 current 신규 선택만 제거하며 역사 current/abandoned와 backend의 pending_settlement/needs_preparation/pending_conversion 상태는 표시한다. hosted asset·raw color·별도 route나 static 전용 구현은 추가하지 않는다.
 
 같은 `browser-tests/personalized-activity-fixture.ts`를 Next와 static에서 각 1회 실행했다. 실제 payload의 current/abandoned·준비 필요 상태, V2 쓰기/상속 null·expected_version, OFF 보존·keyboard focus·390px overflow와 control 크기를 확인했다. Windows 로컬 진단 PNG를 검토했으며 고정 Linux pixel baseline 또는 실제 사용자 USER CHECK로 대체하지 않는다. frontend architecture/design checker, lint/typecheck, 일반/static build의 로컬 결과는 `docs/verification/sns-v2-routine-io-retirement-20261002.md`에 기록한다.
+
+## 2026-10-10 LOCAL user-approved extension
+
+The Creator Studio I00–I60 plan authorizes authored-copy cleanup, conditional World
+icon/banner draft previews and a shared neutral crop display/calculation. It retains
+feature-owned auth/revisions and package digest approval. The Home wordmark alone
+uses locally bundled Quicksand Bold 700, exact Google Fonts source/hash/OFL registration
+and existing coral brand token. All other typography keeps the offline system stack.
+Settings and creation explicitly omit local bottom navigation in Next/static;
+other navigation is preserved. Character directory/embedded Relationship alone share
+SectionHeading, retaining their h2/h1 semantics and the measured 400 title weight.
+
+World Feed and Chat share Media's bounded local photo Worker/HEIF preparation and
+feedback. Input/output/request limits remain separate from the World/profile crop
+contract. See [codec/source/rights contract](../operations/local-photo-codec.md) and
+[local verification](../verification/creator-studio-copy-media-scheduler-20261010.md).
+These are LOCAL extensions, not post-common Hosted code transplants. Exact registered
+font and diagnostic fixture hashes are accepted by the design checker; remote fonts,
+unreviewed assets, canonical snapshot/diff rules and historical Gates remain intact.
+No canonical screenshots are replaced with Windows diagnostic images.

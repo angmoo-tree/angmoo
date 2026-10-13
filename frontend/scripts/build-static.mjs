@@ -36,9 +36,14 @@ for (const asset of [
   "pwa-icon-192.png",
   "pwa-icon-512.png",
   "pwa-maskable-512.png",
+  "world-default-banner.svg",
 ]) {
   cpSync(join(publicRoot, asset), join(productOutput, asset));
 }
 cpSync(join(frontendRoot, "src", "app", "icon.svg"), join(productOutput, "icon.svg"));
+cpSync(join(publicRoot, "licenses"), join(productOutput, "licenses"), { recursive: true });
+for (const guide of ["agent_guide.md", "agent_guide.en.md"]) {
+  cpSync(join(frontendRoot, "..", "docs", guide), join(productOutput, guide));
+}
 
 console.log(`Angmoo Tauri static shell exported to ${productOutput}`);

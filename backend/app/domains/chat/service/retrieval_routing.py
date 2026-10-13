@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+from collections.abc import Callable
 from dataclasses import replace
 from datetime import UTC, date, datetime, time, timedelta
 from time import monotonic
@@ -11,8 +12,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.domains.chat.contracts.reference_observation import resolved_references
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.recall_interpretation import (
-    HYBRID_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
+    HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
 )
+from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL
 
 from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
 from app.domains.chat.contracts.resolved_envelope import (
@@ -71,11 +73,13 @@ class RetrievalRoutingService:
         policy: RetrievalPolicyResolverPort,
         caps: RetrievalHardCaps | None = None,
         recall_mode: ChatRecallMode = ChatRecallMode.LEGACY,
+        before_named_provider: Callable[[], None] | None = None,
     ) -> None:
         self._router = router
         self._policy = policy
         self._caps = caps or RetrievalHardCaps()
         self._recall_mode = ChatRecallMode(recall_mode)
+        self._before_named_provider = before_named_provider
 
     async def route(
         self,
@@ -84,6 +88,8 @@ class RetrievalRoutingService:
         recent_context: tuple[RetrievalRouterContextMessage, ...] = (),
         today_sns_context: dict | None = None,
         social_snapshot=None,
+        chat_identity=None,
+        selection_protocol=None,
         now: datetime,
         deadline_at: datetime,
     ) -> RetrievalRoutingResult:
@@ -91,18 +97,25 @@ class RetrievalRoutingService:
             raise RetrievalContractError("retrieval_router_deadline_timezone_required")
         if now >= deadline_at:
             raise RetrievalContractError("retrieval_router_deadline_exceeded")
+        if selection_protocol is not None and self._recall_mode is not ChatRecallMode.SOCIAL_HYBRID:
+            raise RetrievalContractError("selection_protocol_mode_mismatch")
 
         # Deterministic canonical preflight happens before any provider call.
         scope = self._policy.load_scope(command)
         self._validate_scope_binding(command, scope)
+        if chat_identity is not None:
+            chat_identity.assert_scope(command.owner_id, command.world_id, command.thread_id,
+                command.requester_world_character_id, command.responding_world_character_id)
         router_request = RetrievalRouterRequest(
             user_message=command.user_message,
             image_context=command.image_context,
             recent_context=recent_context,
-            responding_character_name=scope.responding_character_name,
+            responding_character_name=chat_identity.responder.name if chat_identity else scope.responding_character_name,
             world_language=scope.world_language,
             today_sns_context=today_sns_context,
             social_snapshot=social_snapshot,
+            chat_identity=chat_identity,
+            selection_protocol=selection_protocol,
         )
 
         first_physical = 0
@@ -144,16 +157,25 @@ class RetrievalRoutingService:
                 ) from repaired_exc
             repair_physical = provider_result.physical_attempt_count
 
+        if selection_protocol is not None and provider_result.argument_protocol != selection_protocol:
+            raise RetrievalContractError("selection_protocol_result_mismatch")
         original_intent = provider_result.intent
         intent, sufficiency_guard_reason = _apply_today_sns_sufficiency_guard(
             original_intent,
             user_message=command.user_message,
             today_sns_context=today_sns_context,
         )
-        resolutions = self._policy.resolve_entity_mentions(
-            scope,
-            tuple((entity.ref, entity.mention) for entity in intent.entities),
-        )
+        mentions_to_resolve = tuple((entity.ref, entity.mention) for entity in intent.entities)
+        named = selection_protocol == NAME_SELECTION_PROTOCOL
+        advisory = selection_protocol == ADVISORY_SELECTION_PROTOCOL
+        if advisory:
+            if intent.person_hints is None or chat_identity is None:
+                raise RetrievalContractError("recall_interpretation_hints_invalid")
+            resolutions = ()
+        elif named:
+            resolutions = self._policy.resolve_named_entity_mentions(scope, mentions_to_resolve, chat_identity=chat_identity)
+        else:
+            resolutions = self._policy.resolve_entity_mentions(scope, mentions_to_resolve)
         resolution_by_ref = {item.ref: item for item in resolutions}
         resolved_references(intent, resolutions, phase="repair" if repair_used else "first", subject=scope.responding_world_character_id)
         if set(resolution_by_ref) != {entity.ref for entity in intent.entities}:
@@ -191,10 +213,6 @@ class RetrievalRoutingService:
             and not scope.world_ambiguous):
             clarification = None
 
-        resolved_references(intent, resolutions, phase="repair" if repair_used else "first",
-                            subject=scope.responding_world_character_id, bindings=bindings,
-                            direction=(direction_from, direction_to, direction_outcome))
-
         if (
             clarification is not None
             and intent.route is not RetrievalRoute.CLARIFICATION
@@ -204,10 +222,21 @@ class RetrievalRoutingService:
             direction_to = None
             time_from = None
             time_to = None
+            if named:
+                # A clarification keeps the requested meaning, but applies no
+                # relationship/time filter. The new interpretation must agree
+                # with the final resolved envelope, rather than the pre-guard IDs.
+                direction_outcome = "ambiguous" if intent.relationship is not None else "not_requested"
+                if time_outcome == "resolved":
+                    time_outcome = "ambiguous"
         elif intent.route is RetrievalRoute.CLARIFICATION and clarification is None:
             clarification = ClarificationResolution(
                 slot=intent.clarification_slot or "entity_identity"
             )
+
+        resolved_references(intent, resolutions, phase="repair" if repair_used else "first",
+                            subject=scope.responding_world_character_id, bindings=bindings,
+                            direction=(direction_from, direction_to, direction_outcome))
 
         if intent.coordination_source == "code":
             intent = replace(intent, coordination_hint=(
@@ -269,7 +298,7 @@ class RetrievalRoutingService:
             thinking_level=provider_result.thinking_level,
             max_output_tokens=provider_result.max_output_tokens,
             finish_reason=provider_result.finish_reason,
-            admission_policy=(HYBRID_ADMISSION_REVISION
+            admission_policy=((ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION)
                 if self._recall_mode is ChatRecallMode.SOCIAL_HYBRID else "legacy"),
             route_change_reason=(clarification.slot if clarification is not None
                 and intent.route != original_intent.route else sufficiency_guard_reason),
@@ -280,7 +309,7 @@ class RetrievalRoutingService:
             for entity in intent.entities:
                 result = resolution_by_ref[entity.ref]
                 safe = sum(candidate.safe_for_clarification for candidate in result.candidates)
-                status = ("resolved" if safe == 1 else "multiple" if safe > 1
+                status = result.status if named else ("resolved" if safe == 1 else "multiple" if safe > 1
                     else "unavailable" if result.candidates else "unmatched")
                 mentions.append((entity.ref, entity.mention, status))
             interpretation = RecallInterpretationContext(
@@ -292,6 +321,10 @@ class RetrievalRoutingService:
                 time_expression=None if intent.time_scope is None else intent.time_scope.expression,
                 time_status=time_outcome, direction_status=direction_outcome,
                 time_bounds=None if time_from is None else (time_from, time_to),
+                revision=ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION,
+                person_roles=tuple(entity.role for entity in intent.entities) if named else (),
+                person_hints=intent.person_hints.confirm_participants(chat_identity) if advisory else None,
+                identity_digest=chat_identity.to_dict()["digest"] if advisory else None,
             )
         return RetrievalRoutingResult(
             intent=intent,
@@ -310,6 +343,10 @@ class RetrievalRoutingService:
         *,
         timeout_seconds: float,
     ):
+        if request.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and self._before_named_provider is not None:
+            # The existing transaction owner closes canonical admission reads;
+            # no Session or commit policy belongs in the provider adapter.
+            self._before_named_provider()
         try:
             async with asyncio.timeout(timeout_seconds):
                 return await self._router.route(request)
@@ -362,7 +399,7 @@ class RetrievalRoutingService:
                 for candidate in resolution.candidates
                 if candidate.safe_for_clarification
             )
-            if len(safe) != 1:
+            if (resolution.named and resolution.status != "resolved") or len(safe) != 1:
                 return ClarificationResolution(
                     slot="entity_identity",
                     candidates=tuple(
@@ -391,7 +428,7 @@ class RetrievalRoutingService:
                 for candidate in resolution.candidates
                 if candidate.safe_for_clarification
             ]
-            if len(safe) == 1:
+            if len(safe) == 1 and (not resolution.named or resolution.status == "resolved"):
                 bindings.append(
                     ResolvedEntityBinding(
                         ref=resolution.ref,
@@ -510,7 +547,8 @@ class RetrievalRoutingService:
             sum(candidate.safe_for_clarification for candidate in item.candidates)
             for item in resolutions
         ]
-        return "resolved" if all(count == 1 for count in counts) else "ambiguous"
+        return "resolved" if all(count == 1 and (not item.named or item.status == "resolved")
+            for count, item in zip(counts, resolutions, strict=True)) else "ambiguous"
 
 
 def _relative_range(

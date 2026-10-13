@@ -9,24 +9,22 @@ def test_next_config_defines_csp_and_clickjacking_headers() -> None:
     source = (REPO_ROOT / "frontend" / "next.config.ts").read_text(
         encoding="utf-8"
     )
-    double_quoted_literals = set(
-        re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', source)
-    )
-
     assert "async headers()" in source
     assert 'source: "/:path*"' in source
-    assert 'key: "Content-Security-Policy"' in source
-    assert "frame-ancestors 'none'" in source
-    assert "object-src 'none'" in source
-    assert "base-uri 'self'" in source
-    required_external_origins = {
-        "https://accounts.google.com",
-        "https://challenges.cloudflare.com",
-    }
-    assert not required_external_origins.difference(double_quoted_literals)
-    assert 'process.env.NODE_ENV === "development"' in source
-    assert 'developmentScriptSources' in source
-    assert '["\'unsafe-eval\'"] : []' in source
+    proxy = (REPO_ROOT / "frontend/src/proxy.ts").read_text("utf-8")
+    policy = (REPO_ROOT / "frontend/src/lib/security/csp.ts").read_text("utf-8")
+    assert 'key: "Content-Security-Policy"' not in source  # Per-request owner only.
+    assert 'randomBytes(18)' in proxy and 'headers.set("x-nonce",nonce)' in proxy
+    assert 'response.headers.set("Content-Security-Policy",policy)' in proxy
+    assert 'headers.set("Content-Security-Policy",policy)' in proxy
+    assert 'Content-Security-Policy-Report-Only' not in proxy
+    assert "private, no-store" in proxy
+    assert "frame-ancestors 'none'" in policy and "object-src 'none'" in policy
+    assert "base-uri 'self'" in policy and "script-src-attr 'none'" in policy
+    script = next(line for line in policy.splitlines() if "`script-src " in line)
+    assert "nonce-${nonce}" in script and "wasm-unsafe-eval" in script
+    assert "unsafe-inline" not in script and 'development?" \'unsafe-eval\'":""' in script
+    assert all(origin in policy for origin in ("https://accounts.google.com", "https://challenges.cloudflare.com"))
     assert 'key: "X-Frame-Options"' in source
     assert 'value: "DENY"' in source
 

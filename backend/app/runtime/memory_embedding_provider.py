@@ -1,25 +1,29 @@
-"""Owner-authorized selected key reuse without copying the underlying secret."""
+"""Subject-owned embedding bindings with exact admitted revision resolution."""
 from app.domains.identity.contracts import CredentialPurpose
-from app.domains.identity.repository.credentials import get_credential
-from app.domains.identity.service.credential_resolution import CredentialResolver
+from app.domains.identity.service.world_credentials import resolve
 from app.domains.memory.exceptions import MemoryValidationError
 
 
-def embedding_material(session, owner_id, credential_id):
+def embedding_material(session, scope, credential_id=None, *, revision=None):
     try:
-        row = get_credential(session, credential_id)
-        # No character filter: explicit selection authorizes reuse within this owner.
-        material = CredentialResolver.resolve_llm_credential(row,
-            purpose=CredentialPurpose.MEMORY_EMBEDDING, owner_id=owner_id)
-        if material.provider != "google":
-            raise ValueError("provider_mismatch")
+        from app.runtime.subject_scope import read_scope_presence
+        if any(value is None for value in read_scope_presence(session, scope)):
+            raise ValueError("embedding_scope_unavailable")
+        material = resolve(session, owner_id=scope.owner_id, world_id=scope.world_id,
+            world_character_id=scope.subject_world_character_id, purpose="embedding", revision=revision)
+        if material.model != "gemini-embedding-2":
+            raise ValueError("embedding_model_mismatch")
         return material
     except Exception:
         raise MemoryValidationError("memory_embedding_credential_unavailable") from None
 
 
-def validate_embedding_credential(session, owner_id, credential_id):
-    embedding_material(session, owner_id, credential_id)
+def validate_embedding_credential(session, scope, credential_id=None, *, revision=None):
+    embedding_material(session, scope, revision=revision)
+    from app.domains.identity.service.world_credentials import find
+    current = find(session, owner_id=scope.owner_id, world_id=scope.world_id,
+        world_character_id=scope.subject_world_character_id, purpose="embedding").revision
+    return revision if revision is not None else current
 
 
 class MemoryQueryEmbedder:
@@ -40,7 +44,8 @@ class MemoryQueryEmbedder:
                 return None
             if config.profile != request.profile:
                 raise MemoryValidationError("memory_embedding_profile_changed")
-            material = embedding_material(session, request.scope.owner_id, config.credential_id)
+            revision = validate_embedding_credential(session, request.scope)
+            material = embedding_material(session, request.scope, revision=revision)
         # The canonical session is closed before network IO begins.
         remaining = min(30.0, deadline-monotonic())
         if remaining <= 0:
@@ -52,7 +57,7 @@ class MemoryQueryEmbedder:
                 current = self._repository_factory(session).read(request.scope)
                 if current != config:
                     raise MemoryValidationError("memory_embedding_settings_changed")
-                current_material = embedding_material(session, request.scope.owner_id, config.credential_id)
+                current_material = embedding_material(session, request.scope, revision=revision)
                 if current_material.fingerprint != material.fingerprint:
                     raise MemoryValidationError("memory_embedding_credential_changed")
         except Exception as exc:

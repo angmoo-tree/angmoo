@@ -1,4 +1,6 @@
 {
+  "이 World를 삭제 중이에요.": "This World is being deleted.",
+  "이 World는 삭제되었어요.": "This World has been deleted.",
   "대화 삭제": "Delete conversation",
   "대화 삭제 중": "Deleting conversation",
   "{{name}}와의 대화 삭제": "Delete conversation with {{name}}",
@@ -133,7 +135,6 @@
   "이 응답은 완료되지 않았어요.": "This response did not complete.",
   "근거": "Evidence",
   "개 보기": "items",
-  "사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.": "Analyzing the image. The reply will be generated after analysis.",
   "에게 보낼 메시지": "Message to",
   "메시지를 입력하세요": "Write a message",
   "메시지 보내기": "Send message",
@@ -157,7 +158,6 @@
   "로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.": "Check local runtime status, then retry.",
   "대화 목록으로": "Back to chats",
   "후보": "Candidates",
-  "취소": "Cancel",
   "켜짐 · 남은 요청 {{value0}}개": "On · {{value0}} requests remaining",
   "확인 불가": "Unavailable",
   "{{value0}}의 World 프로필 열기": "Open {{value0}} World profile",
@@ -216,5 +216,8 @@
   "기억과 진단 보기": "Open memory and diagnostics",
   "메시지 보내는 중": "Sending message",
   "대화 제한 정책 업데이트가 필요해요": "The conversation limit policy needs an update",
-  "서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.": "The server returned the previous conversation limit. Check the server update status."
+  "서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.": "The server returned the previous conversation limit. Check the server update status.",
+  "기억 원문 확인 작업": "Canonical memory read",
+  "SQL 조회 횟수": "SQL query count",
+  "소요 시간 / 대기 시간 / 연결 정리": "Elapsed time / wait time / connection cleanup"
 }

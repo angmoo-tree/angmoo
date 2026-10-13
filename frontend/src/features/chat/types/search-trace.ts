@@ -29,4 +29,5 @@ export type SearchDiagnosticTrace = {
   stages: SearchStage[]; terminals: SearchTerminal[]; lineage: SearchLineage[];
   stage_events_dropped: number; lineage_edges_dropped: number; aliases_dropped: number;
   detail_rows_dropped?: number;
+  canonical_reads?: { stage: "revalidate" | "hydrate"; status: string; wait_ms: number | null; elapsed_ms: number | null; sql_count: number | null; unique_nodes?: number | null; memo_hits?: number | null; cleaned: boolean | null }[];
 };

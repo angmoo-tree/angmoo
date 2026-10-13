@@ -35,6 +35,7 @@ from app.domains.worlds.models import WorldMembership as _model_WorldMembership
 from app.domains.worlds.models import WorldRole as _model_WorldRole
 from app.runtime.persistence.model_registration import register_models
 register_models()
+from app.core.security import SecretScope, encrypt_local_secret
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
@@ -81,7 +82,9 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -332,7 +335,12 @@ def _seed_supported_predecessor(
                     model="fixture-model",
                     auth_profile_id="fixture-profile",
                     label="Existing credential metadata",
-                    encrypted_api_key="synthetic-encrypted-value",
+                    encrypted_api_key=encrypt_local_secret(
+                        "synthetic-supported-fixture-key",
+                        scope=SecretScope(owner_id=owner.id, character_id=characters[0].id,
+                                          provider="google", purpose="agent"),
+                        app_secret=(root / "secrets" / "app-secret").read_text(encoding="utf-8").strip(),
+                    ),
                     key_fingerprint="synthetic-fingerprint",
                     enabled=True,
                 ),
@@ -613,11 +621,60 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                # This synthetic predecessor must not carry newer write fences
+                # or additive vault/binding tables. Shipped manifests/forward
+                # migrations and actual installed data are never modified here.
+                if source_version < 37:
+                    for (name,) in sql_connection.exec_driver_sql(
+                        "SELECT name FROM sqlite_master WHERE type='trigger' "
+                        "AND name LIKE 'world_erasure_%'"
+                    ).all():
+                        quoted = '"' + name.replace('"', '""') + '"'
+                        sql_connection.exec_driver_sql(f"DROP TRIGGER {quoted}")
+                for version, tables in (
+                    (37, ("world_deletion_cleanup_items", "world_deletion_requests")),
+                    (36, ("memory_situation_result_bindings",)),
+                    (35, ("memory_situation_source_bindings",)),
+                    (34, ("world_image_provider_credentials",)),
+                ):
+                    if source_version < version:
+                        for name in tables:
+                            sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
                 from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )
                 from app.models import Base
                 from sqlalchemy.schema import CreateIndex, CreateTable
+
+                # Current initialization includes v30/v31/v32/v33. Remove only those
+                # later deltas from this synthetic predecessor before freezing
+                # its historical manifest; production upgrades stay forward-only.
+                from app.runtime.persistence.sqlite_schema import SITUATION_V31_TABLES, build_sqlite_v31_metadata
+                from app.runtime.migrations.sqlite_versions.world_activity_v30 import NEW_TABLES as WORLD_ACTIVITY_TABLES
+                if source_version < 33:
+                    sql_connection.exec_driver_sql('ALTER TABLE "post_image_generation_jobs" DROP COLUMN "provider_diagnostic_json"')
+                if source_version < 32:
+                    sql_connection.exec_driver_sql('DROP TABLE "memory_situation_recheck_attempts"')
+                if source_version < 31:
+                    for name in reversed(SITUATION_V31_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection)
+                elif source_version == 31:
+                    historical = build_sqlite_v31_metadata()
+                    for name in ("memory_situation_runs", "memory_situation_receipts"):
+                        table = historical.tables[name]
+                        columns = ", ".join(f'"{column.name}"' for column in table.columns)
+                        sql_connection.exec_driver_sql(f'CREATE TEMP TABLE "{name}_fixture_copy" AS SELECT {columns} FROM "{name}"')
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
+                        sql_connection.execute(CreateTable(table))
+                        sql_connection.exec_driver_sql(f'INSERT INTO "{name}" ({columns}) SELECT {columns} FROM "{name}_fixture_copy"')
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}_fixture_copy"')
+                        for index in table.indexes:
+                            sql_connection.execute(CreateIndex(index))
+                if source_version < 30:
+                    for name in sorted(WORLD_ACTIVITY_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection)
+                    for column in ("credential_id", "credential_revision"):
+                        sql_connection.exec_driver_sql(f'ALTER TABLE "memory_batch_runs" DROP COLUMN "{column}"')
 
                 # Only this isolated historical fixture moves backwards. Final
                 # v28 already has v29's shape; earlier sources must omit all

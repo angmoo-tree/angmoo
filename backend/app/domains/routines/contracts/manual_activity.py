@@ -46,3 +46,4 @@ class ManualActivityWorkflows:
     execution_mode_error: type[Exception]
     credential_required_error: type[Exception]
     resolve_activity_setting: Callable | None = None
+    capture_activity_input: Callable | None = None

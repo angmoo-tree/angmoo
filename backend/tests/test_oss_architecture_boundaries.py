@@ -155,13 +155,34 @@ def test_secret_decryption_is_confined_to_credential_resolver():
         "core/security.py",
         "runtime/startup_security.py",
         "domains/identity/service/credential_resolution.py",
+        "domains/identity/service/world_credentials.py",
+        "domains/identity/service/migration_secrets.py",
     }
     violations: list[str] = []
+    # World credential metadata and provider selection remain Identity-owned
+    # vault operations after the command/state split. Permit only their exact
+    # private projection/decoder functions, not arbitrary calls in the modules.
+    vault_functions = {
+        "domains/identity/service/world_credential_state.py": {"metadata"},
+        "domains/identity/service/world_image_credentials.py": {"_secret"},
+    }
     for path in sorted(APP_ROOT.rglob("*.py")):
         relative = path.relative_to(APP_ROOT).as_posix()
         if relative in allowed:
             continue
-        if "decrypt_secret(" in path.read_text(encoding="utf-8"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        confined = {
+            id(node) for definition in tree.body
+            if isinstance(definition, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and definition.name in vault_functions.get(relative, set())
+            for node in ast.walk(definition)
+        }
+        calls = {
+            node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id
+            for node in ast.walk(tree) if id(node) not in confined
+            if isinstance(node, ast.Call) and isinstance(node.func, (ast.Attribute, ast.Name))
+        }
+        if calls & {"decrypt_secret", "decrypt_local_secret"}:
             violations.append(relative)
 
     assert violations == []
@@ -216,6 +237,11 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         # Scoped media material is revealed only for the selected physical transport.
         "domains/media/service/interpretation.py": {"_execute"},
         "runtime/media/composition.py": {"validate_connection", "_prepare"},
+        # Actor-owned material: unwrap only after owner, purpose and admitted
+        # revision checks; never expose it in public read schemas or diagnostics.
+        "domains/identity/service/world_credentials.py": {"resolve", "resolve_image_keys"},
+        "runtime/media/world_generation.py": {"prepare_execution"},
+        "runtime/world_characters/image_policy.py": {"check"},
     }
     observed: dict[str, set[str]] = {}
 

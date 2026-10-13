@@ -6,6 +6,7 @@ from typing import Protocol, TYPE_CHECKING
 from sqlalchemy.orm import Session
 
 from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.situation_validation import SituationSourceValidator
 
 if TYPE_CHECKING:
     from app.domains.memory.repository.batch import SqlAlchemyMemoryBatchRepository
@@ -39,8 +40,10 @@ class MemoryWorkflows:
     write_service: Callable[[Session], MemoryWriteLifecycleService]
     batch_repository: Callable[[Session], SqlAlchemyMemoryBatchRepository]
     character_names: Callable[[Session, MemoryScope], dict[str, str]]
-    validate_provider: Callable[[Session, str, str], None]
+    validate_provider: Callable[[Session, MemoryScope, str], None]
     validate_embedding_credential: Callable[[Session, str, str], None] | None = None
     embedding_credential_options: Callable[[Session, str, str | None], list[dict[str, str]]] | None = None
     consolidation_followup: Callable[[Session], ConsolidationFollowup] | None = None
+    generation_policy: str = "legacy"
     embedding_runtime_status: Callable[[], str] | None = None
+    situation_validator: Callable[[Session], SituationSourceValidator] | None = None

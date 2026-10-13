@@ -428,7 +428,7 @@ regexes = [
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
-description = "Exact release-integration public source Git blobs independently verified at signed source commits; not credentials; reviewed 2026-10-06"
+description = "Exact release-integration public source Git blobs independently verified at signed source commits; not credentials; reviewed 2026-10-13"
 condition = "AND"
 regexTarget = "line"
 paths = [
@@ -447,11 +447,16 @@ regexes = [
   '''^\s*"frontend/src/lib/auth/auth\-context\.ts":\s*"16eb25cdf26923a2b3feb047e1fda4df0f5366aa",?\s*$''',
   '''^\s*"frontend/src/lib/http/api\-request\.ts":\s*"1fea05cbc02605d24ce98c1c2b92aa6cf13770b6",?\s*$''',
   '''^\s*"frontend/src/lib/http/api\-request\.ts":\s*"2a70207309b02ccb2c24e41b2138468cbd0c6066",?\s*$''',
+  '''^\s*"backend/tests/test_t2_secret_allowlist\.py":\s*"05f9d788ddaa1d35b6cf6647668121fc1eba1881",?\s*$''',
+  '''^\s*"backend/security/secret_scan_allowlist\.json":\s*"cdfa774f0fa21b50ab29e7ed9ae345f79a737729",?\s*$''',
+  '''^\s*"backend/tests/test_t2_secret_allowlist\.py":\s*"fd6be4d63213ad086e7096d9a7c2f4d23cba13fc",?\s*$''',
+  '''^\s*"backend/security/secret_scan_allowlist\.json":\s*"238944f9a08254cb18035aab4d58d9ae18900ee9",?\s*$''',
+  '''^\s*"backend/tests/world_characters/test_world_key_execution\.py":\s*"6266e382e8a87f9f534bd048e935adc9427340f5",?\s*$''',
 ]
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
-description = "Exact release-integration provenance test vectors independently verified as public committed Git blob IDs; not credentials; reviewed 2026-10-06"
+description = "Exact release-integration provenance test vectors independently verified as public committed Git blob IDs; not credentials; reviewed 2026-10-13"
 condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)backend/tests/test_release_gitleaks_provenance\.py$''']
@@ -469,4 +474,168 @@ regexes = [
   '''^\s*\('security/post_refactor_contract_changes\.json',\ 'frontend/src/lib/http/api\-request\.ts',\ '2a70207309b02ccb2c24e41b2138468cbd0c6066',\ '77aa85f75e3f8ae6157d0aa41ac07a3018cc058c'\),\s*$''',
   '''^\s*\('security/refactor_backend_additions\.json',\ 'browser\-tests/playwright\.world\-character\-api\.config\.ts',\ 'ac228d6d97249b6b5262bf8d22601a9d10c4e114',\ '8551ea27c5b521504b9c22e22646b9637f5af758'\),\s*$''',
   '''^\s*\('security/refactor_backend_additions\.json',\ 'browser\-tests/world\-character\-configuration\-api\.spec\.ts',\ '51b0aec04167bfb00e085a262d09da2e5975c54b',\ '8551ea27c5b521504b9c22e22646b9637f5af758'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/tests/test_t2_secret_allowlist\.py',\ '05f9d788ddaa1d35b6cf6647668121fc1eba1881',\ 'b19eca0196f92f7d48bf258df5ea3c466a1767c8'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/security/secret_scan_allowlist\.json',\ 'cdfa774f0fa21b50ab29e7ed9ae345f79a737729',\ 'c10ee037a1b13851d54b52e38be1a8fac4d28607'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/tests/test_t2_secret_allowlist\.py',\ 'fd6be4d63213ad086e7096d9a7c2f4d23cba13fc',\ 'c10ee037a1b13851d54b52e38be1a8fac4d28607'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/security/secret_scan_allowlist\.json',\ '238944f9a08254cb18035aab4d58d9ae18900ee9',\ '20332573326b98ec66fc57f6d3b728ec4156b9b1'\),\s*$''',
+  '''^\s*\('security/post_refactor_contract_changes\.json',\ 'backend/tests/world_characters/test_world_key_execution\.py',\ '6266e382e8a87f9f534bd048e935adc9427340f5',\ '6482483a0995321fc5525d8e5db3df349c8e6df4'\),\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["angmoo-sensitive-env-value"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/tests/identity/test_migration_secrets\.py$''',
+]
+regexes = [
+  '''^synthetic\-migration\-app\-secret$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/app/domains/chat/contracts/relationship_evidence\.py$''',
+]
+regexes = [
+  '''^_relationship_evidence_delivery_v2$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/app/domains/memory/repository/situation_runs\.py$''',
+]
+regexes = [
+  '''^lease_until=now$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/tests/memory/test_activity_situation_application\.py$''',
+]
+regexes = [
+  '''^situation\-correction\-001$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/tests/memory/test_activity_situation_transition\.py$''',
+]
+regexes = [
+  '''^legacy\-transition\-001$''',
+  '''^legacy\-transition\-002$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/tests/memory/test_situation_recovery_actions\.py$''',
+]
+regexes = [
+  '''^global\-competing\-001$''',
+  '''^quit\-competing\-001$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)backend/tests/worlds/test_world_deletion\.py$''',
+]
+regexes = [
+  '''^0123456789abcdef$''',
+  '''^idempotency_key=$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Reviewed PR365 exact noncredential values: public Git/schema fingerprints, protocol fields or synthetic fixture identifiers; 2026-10-13"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)security/refactor_backend_additions\.json$''',
+  '''(^|/)security/post_refactor_contract_changes\.json$''',
+]
+regexes = [
+  '''^060ac3df03e0bff42ce7e221cb97ea2d8757442e$''',
+  '''^0817552b418a904658b8025c992038811b3b472e$''',
+  '''^0cfdb287a76bc11284046306e1506b1b815c7a07$''',
+  '''^1d50508cf4ce1fcd382ca7b0cd3b103286c36b16$''',
+  '''^22ce5b9837d23687dcc37f63bbb425354aa21718$''',
+  '''^2945704d9fbae8d015418d5f2084bf94f03dc3c6$''',
+  '''^29ed77f7bdb0144657efbe58fa04207404bcd28f$''',
+  '''^2c2a185939187f6db9fd1c61c3eb117e61f75e8d$''',
+  '''^2d14a832e140b1a8868af8d76c4ce729f3c41e34$''',
+  '''^37b11c1e2dadcfb0c0541d8fe0be8afe279da064$''',
+  '''^3adbb5d194063e94147ba9ee9109c14b3049afb2$''',
+  '''^3e29ff72bb48c3c2f0cf054301a9654f077dc316$''',
+  '''^4014cc0b9162e313521cb446ba5d80a3fd9c0f11$''',
+  '''^45f11fd8b64050c64fcfda771b8b9ab5c8033ece$''',
+  '''^463d443c7f90353d40560e4c01c254186c6c8488$''',
+  '''^483fb1c2562fd62403c1bb156bba13b3be5cf71c$''',
+  '''^4b38cba52a1041583eb0cfa0890995f2beb1c660$''',
+  '''^65534947e5f264e4676ec716de81a1e0a1231da1$''',
+  '''^6996a8eacc5f3d4bd17a4ef6dcd7a55ee5c139c5$''',
+  '''^754882b1b09add60a37ddf20f1add1106fecb8f5$''',
+  '''^7b2e682bf0ff8b9d1dac5109f6ec12643c5e09e7$''',
+  '''^813feb6be17887dd341fd1244949b4cef2a38f5d$''',
+  '''^81946eaef9fa643d46da4b7ab848714d79f7b315$''',
+  '''^85129facb26c4490da55e92eec4636c2eeb0a2d4$''',
+  '''^8568ab38a10ab5f5b842f7fe49f3eda5da154b5c$''',
+  '''^8984df5134aab04227273fba88542d74cc6b2c90$''',
+  '''^89ac495c80d17093f6450e8e3ba1ff35feec4a6a$''',
+  '''^8de587b99123574f4aa4b0dd55ca9e49998b9150$''',
+  '''^9161c34f4c6a48593f5ef753798d7a4ff0de0f15$''',
+  '''^99ee7514482d85597a28e5e3cdfa0d7b00e32601$''',
+  '''^9db136fa27902fad7acb3ee4f2449e35cbbe5ed4$''',
+  '''^a64157ce9f69ae3ad1762b14af034d4f72ae4541$''',
+  '''^b2676c8fa402925c9fd8768dfb5c8856847677d3$''',
+  '''^b32053e0936e38e39ad67fbc5c5ce28f158d162f$''',
+  '''^b39d85489a9f47b5957d1769f2a5cecff81959a5$''',
+  '''^b83f6def3399fab324410652b2793963b5ff2fe0$''',
+  '''^b8d52f15747cc310e10b724a1e28e9064106f66e$''',
+  '''^b94733e768a3115afa26b7723951ecf5837963cf$''',
+  '''^bccf1c683219387224f3b4d0c3e329fa4d2bc026$''',
+  '''^bce496d9cad35d4b12cd5b2bc744253eae5a90e1$''',
+  '''^c08df2863c48bd4a5ef48c1c54c9673cfe64c01a$''',
+  '''^c2b8e48f1ba978b74309ef0b93a6c8485d96d403$''',
+  '''^c4f18ea57df88431e4cfab531b34f9bde49c4221$''',
+  '''^cca2a289b47920ccd7327eb08ef615c1f0629aaa$''',
+  '''^d53c6b61695f47e4deef0dec8d439f2943a11797$''',
+  '''^db3ace6d38c63ab1e0768e780593ce8c54f233dd$''',
+  '''^e1c9c8da0d189e987d80a3fc85f7ea76ace32625$''',
+  '''^e645c7120ab812b8b1cf9c8303c8a644f9b01573$''',
+  '''^e716c482ab55d292f0890269bebba629805b02c9$''',
+  '''^e85cd7ea8eceef3a69db15d0db3b607b25c56f2c$''',
+  '''^e9eb2667730ba1058a2211ce3ff5e5a3a4171d5a$''',
+  '''^ec7d1d95b369d993a3d7eae6d3b13037c4d8033b$''',
+  '''^ef8dabbad578097f917c71bf0fc1e8d3bc41b224$''',
+  '''^efb3f101ebf47e0f22b0ae9138e4d1ed07f02b78$''',
+  '''^f130c2d58bb9ef5f3331fe301427cf8f49819586$''',
+  '''^f138a43fe5b80cd2eaba36061f3bef98e736a481$''',
+  '''^f3192d7a9a4630e5b1d3d10c62add17e85dbb88d$''',
+  '''^fc6e22e848e497b21684ea0c1ea77faccd5dd115$''',
+  '''^fdfab20378fa96f8bd4e6c9c57979c9dedde7162$''',
+  '''^legacy\-transition\-001$''',
 ]

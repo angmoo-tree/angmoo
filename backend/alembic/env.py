@@ -7,6 +7,7 @@ from app.runtime.persistence.model_registration import register_models
 register_models()  # noqa: F401
 from app.config import settings
 from app.models import Base
+from app.domains.identity.service.migration_secrets import migration_secret_source
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
@@ -48,7 +49,7 @@ def run_migrations_online() -> None:
             connection.exec_driver_sql("BEGIN IMMEDIATE")
         context.configure(connection=connection, target_metadata=target_metadata)
         try:
-            with context.begin_transaction():
+            with migration_secret_source(lambda: settings.app_secret), context.begin_transaction():
                 context.run_migrations()
             if sqlite:
                 connection.commit()

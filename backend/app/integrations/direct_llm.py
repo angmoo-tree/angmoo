@@ -101,6 +101,8 @@ class DirectLlmResponse:
     usage: dict[str, int | None]
     finish_reason: str | None = None
     tool_calls: tuple[ProviderToolCall, ...] = ()
+    call_order: int | None = None
+    provider_call_order: int | None = None
 
 
 @dataclass
@@ -863,6 +865,8 @@ async def generate_text(
                 usage=usage,
                 finish_reason=response.finish_reason,
                 tool_calls=response.tool_calls,
+                call_order=call_order,
+                provider_call_order=provider_call_order,
             )
             tracker.record_call(
                 context=context,
@@ -1113,6 +1117,8 @@ async def generate_json(
     before_provider_request: Callable[[], Awaitable[None]] | None = None,
     request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
     on_request_submission: Callable[[ProviderRequest], None] | None = None,
+    on_json_object: Callable[[dict, dict], None] | None = None,
+    on_json_validated: Callable[[dict, Any, dict], None] | None = None,
 ) -> Any:
     if json_retry_policy is not None and (
         should_retry_json_error is not None or retry_max_output_tokens is not None
@@ -1197,7 +1203,19 @@ async def generate_json(
             payload = _coerce_json_payload(response)
             payload_coerced = True
             last_payload = payload
+            attempt_context = {"call_order": getattr(response, "call_order", None),
+                "provider_call_order": getattr(response, "provider_call_order", None), "json_attempt": attempt + 1}
+            if on_json_object is not None:
+                try:
+                    on_json_object(payload, attempt_context)
+                except Exception:
+                    pass  # Optional diagnostics never change validation/retry.
             result = validator(payload) if validator is not None else payload
+            if on_json_validated is not None:
+                try:
+                    on_json_validated(payload, result, attempt_context)
+                except Exception:
+                    pass
             tracker._notify("json_attempt", {
                 "node": context.node, "lane": context.lane,
                 "json_attempt": attempt + 1, "status": "valid",

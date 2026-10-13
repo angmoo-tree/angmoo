@@ -4,28 +4,20 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-control);
-  padding-bottom: 14px;
+  padding-bottom: 18px;
 }
 
 .identity {
+  display: flex;
   min-width: 0;
-}
-
-.eyebrow {
+  align-items: center;
+  gap: 8px;
   color: var(--color-text-secondary);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .title {
-  overflow: hidden;
-  margin: 2px 0 0;
-  font-size: 1.2rem;
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .content {

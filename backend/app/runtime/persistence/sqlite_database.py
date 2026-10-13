@@ -168,6 +168,8 @@ class SqliteCanonicalDatabase:
             json_serializer=encode_json_document,
             json_deserializer=decode_json_document,
             pool_pre_ping=True,
+            # Shared pool checkout must not hide the short SQLite lease budget.
+            pool_timeout=0.05,
         )
         _configure_sqlite_engine(engine, self.settings)
         self._engine = engine
@@ -281,6 +283,8 @@ class SqliteCanonicalDatabase:
                     )
                 create_schema_version_table(connection)
                 build_sqlite_baseline_metadata().create_all(connection)
+                from app.runtime.world_deletion.fences import install_fences
+                install_fences(connection)
                 digest = sqlite_schema_digest(connection)
                 connection.exec_driver_sql(
                     f"""

@@ -48,7 +48,7 @@ class InboxLane(SocialLane):
                 data[key].update(proposal_id=proposal.id, proposal_version=proposal.version)
         from app.runtime.media.social_context import snapshots, allocate
         for candidate in candidates:
-            candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"])
+            candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"], actor_id=self.actor.id)
         return {"candidates": allocate(candidates), "lane_data": data, "relationship_validation_receipts": receipts}
 
     async def guard(self, state):

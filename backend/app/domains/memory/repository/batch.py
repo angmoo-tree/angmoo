@@ -47,6 +47,8 @@ from app.domains.memory.models.items import (
 from app.domains.memory.contracts.batch import MemoryBatchSettings, MemorySelectionBatch
 from app.domains.memory.repository.capacity import stored_count, STORAGE_LIMIT
 from app.domains.memory.repository.consolidation_requests import independently_requested_job
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
+from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
 
 
 class SqlAlchemyMemoryBatchRepository:
@@ -65,7 +67,7 @@ class SqlAlchemyMemoryBatchRepository:
     def settings(self, scope: MemoryScope) -> MemoryBatchSettings:
         zone = self.timezone(scope)
         setting = self.memory.get_scope_setting(scope)
-        profile = self.session.get(MemoryBatchProfile, scope.owner_id)
+        profile = self.session.get(MemorySubjectProfile, setting.id) if setting is not None else None
         config = (
             None
             if setting is None
@@ -217,7 +219,7 @@ class SqlAlchemyMemoryBatchRepository:
                 raise MemoryValidationError("memory_selection_model_unsupported") from None
         setting = self.memory.get_or_create_scope_setting(scope)
         current = self.session.get(MemoryBatchSetting, setting.id)
-        profile = self.session.get(MemoryBatchProfile, scope.owner_id)
+        profile = self.session.get(MemorySubjectProfile, setting.id)
         digest = hashlib.sha256(
             json.dumps(
                 [
@@ -258,8 +260,8 @@ class SqlAlchemyMemoryBatchRepository:
                 raise MemoryConflictError("memory_batch_settings_version_conflict")
         if model_id:
             if profile is None:
-                profile = MemoryBatchProfile(
-                    owner_id=scope.owner_id,
+                profile = MemorySubjectProfile(
+                    scope_setting_id=setting.id,
                     model_id=model_id,
                     thinking_level=thinking_level,
                     version=1,
@@ -268,10 +270,10 @@ class SqlAlchemyMemoryBatchRepository:
                 self.session.add(profile)
             elif (profile.model_id, profile.thinking_level) != (model_id, thinking_level):
                 changed = self.session.execute(
-                    update(MemoryBatchProfile)
+                    update(MemorySubjectProfile)
                     .where(
-                        MemoryBatchProfile.owner_id == scope.owner_id,
-                        MemoryBatchProfile.version == expected_profile_version,
+                        MemorySubjectProfile.scope_setting_id == setting.id,
+                        MemorySubjectProfile.version == expected_profile_version,
                     )
                     .values(
                         model_id=model_id,
@@ -340,7 +342,10 @@ class SqlAlchemyMemoryBatchRepository:
         generation_policy: str = "legacy",
         request_id: str | None = None,
     ) -> str | None:
-        if generation_policy not in {"legacy", "episode_v1"}:
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, scope_setting_id):
+            return None
+        if generation_policy not in {"legacy", "episode_v1", "activity32"}:
             raise MemoryValidationError("memory_generation_policy_invalid")
         if not candidate_ids:
             return None
@@ -354,16 +359,25 @@ class SqlAlchemyMemoryBatchRepository:
             or config.consent_version != MEMORY_CONSENT_VERSION
         ):
             return None
-        profile = self.session.get(MemoryBatchProfile, scope.owner_id)
+        subject_binding = self._references.read_consolidation_binding(
+            MemoryScope(scope.owner_id, scope.world_id, scope.subject_world_character_id)
+        ) if self._references.read_consolidation_binding and generation_policy in {"activity32", "episode_v1"} else None
+        own_binding = generation_policy == "activity32" or subject_binding is not None
+        profile = self.session.get(MemorySubjectProfile, scope_setting_id) if own_binding else self.session.get(MemoryBatchProfile, scope.owner_id)
         if profile is None:
             return None
+        binding = None
+        if own_binding:
+            binding = subject_binding
+            if binding is None or (binding.model, binding.thinking_level) != (profile.model_id, profile.thinking_level):
+                raise MemoryValidationError("memory_selection_settings_required")
         # Key excludes trigger/clock/settings: re-opening or changing schedules
         # cannot reset this batch's durable retry budget.
         if trigger == "explicit" and not explicit_key:
             explicit_key = config.retry_request_key or ""
         ids_json = json.dumps(sorted(candidate_ids), separators=(",", ":"))
         key = (
-            ("ep1:" if generation_policy == "episode_v1" else "mb2:")
+            ("activity32:" if generation_policy == "activity32" else "ep1:" if generation_policy == "episode_v1" else "mb2:")
             + hashlib.sha256(
                 (scope_setting_id + ids_json + explicit_key).encode()
             ).hexdigest()
@@ -384,10 +398,12 @@ class SqlAlchemyMemoryBatchRepository:
                     profile_version=profile.version,
                     model_id=profile.model_id,
                     thinking_level=profile.thinking_level,
-                    policy_version="episode-selection.v1" if generation_policy == "episode_v1" else MEMORY_BATCH_POLICY_VERSION,
+                    policy_version=ACTIVITY_POLICY_VERSION if generation_policy == "activity32" else "episode-selection.v1" if generation_policy == "episode_v1" else MEMORY_BATCH_POLICY_VERSION,
                     cutoff_sequence=cutoff,
                     candidate_ids_json=ids_json,
                     available_at=now,
+                    credential_id=None if binding is None else binding.credential_id,
+                    credential_revision=None if binding is None else binding.revision,
                 )
             )
             self.session.flush()
@@ -427,6 +443,9 @@ class SqlAlchemyMemoryBatchRepository:
         setting = self.memory.get_scope_setting(scope)
         if setting is None:
             raise MemoryValidationError("memory_selection_settings_required")
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, setting.id):
+            raise MemoryConflictError("memory_legacy_generation_retired")
         config = self.settings(scope)
         if not config.memory_enabled or not config.ai_enabled:
             raise MemoryValidationError("memory_selection_settings_required")
@@ -456,7 +475,7 @@ class SqlAlchemyMemoryBatchRepository:
         # assignments; preparation re-reads evidence and partitions by privacy.
         job_ids = []
         for run in runs:
-            if run.policy_version == "episode-selection.v1":
+            if run.policy_version in {"episode-selection.v1", ACTIVITY_POLICY_VERSION}:
                 from app.domains.memory.repository.episode_work import SqlAlchemyEpisodeWork
                 job = self.session.get(MemoryMaintenanceJob, run.job_id)
                 SqlAlchemyEpisodeWork(self.session).grant_explicit_retry(job_id=run.job_id,
@@ -484,6 +503,7 @@ class SqlAlchemyMemoryBatchRepository:
         self.session.flush()
 
     def claim(self, *, lease_token: str, now: datetime) -> MemorySelectionBatch | None:
+        from app.domains.memory.models.activity_situation import MemorySituationTransition
         # Runtime calls this on a fresh session; SQLite serializes read/claim.
         if self.session.bind.dialect.name == "sqlite":
             self.session.connection().exec_driver_sql("BEGIN IMMEDIATE")
@@ -493,6 +513,8 @@ class SqlAlchemyMemoryBatchRepository:
             .where(
                 MemoryMaintenanceJob.status == "running",
                 MemoryMaintenanceJob.lease_expires_at > now,
+                ~exists(select(MemorySituationTransition.scope_setting_id).where(
+                    MemorySituationTransition.scope_setting_id == MemoryBatchRun.scope_setting_id)),
             )
             .limit(1)
         )
@@ -513,6 +535,8 @@ class SqlAlchemyMemoryBatchRepository:
             )
             .where(
                 MemoryScopeSettingModel.enabled.is_(True),
+                ~exists(select(MemorySituationTransition.scope_setting_id).where(
+                    MemorySituationTransition.scope_setting_id == MemoryBatchRun.scope_setting_id)),
                 MemoryBatchSetting.ai_enabled.is_(True),
                 MemoryBatchSetting.consent_version == MEMORY_CONSENT_VERSION,
                 MemoryBatchRun.available_at <= now,
@@ -530,6 +554,9 @@ class SqlAlchemyMemoryBatchRepository:
             .limit(50)
         ).all()
         for run in rows:
+            from app.domains.memory.repository.situation_transition import retired
+            if retired(self.session, run.scope_setting_id):
+                continue
             scope = self.session.get(MemoryScopeSettingModel, run.scope_setting_id)
             config = self.session.get(MemoryBatchSetting, run.scope_setting_id)
             if (
@@ -540,7 +567,7 @@ class SqlAlchemyMemoryBatchRepository:
                 or config.consent_version != MEMORY_CONSENT_VERSION
             ):
                 continue
-            profile = self.session.get(MemoryBatchProfile, scope.owner_id)
+            profile = self.session.get(MemorySubjectProfile, run.scope_setting_id) if run.credential_id is not None else self.session.get(MemoryBatchProfile, scope.owner_id)
             if profile is None:
                 continue
             job = self.session.get(MemoryMaintenanceJob, run.job_id)
@@ -575,11 +602,15 @@ class SqlAlchemyMemoryBatchRepository:
             )
             if work is None:
                 continue
-            # A retry starts a new immutable settings snapshot, never revives an
-            # earlier response. Attempt counters remain on this same job.
-            run.scope_version, run.settings_version = scope.version, config.execution_version
-            run.profile_version, run.model_id = profile.version, profile.model_id
-            run.thinking_level = profile.thinking_level
+            # Already accepted work keeps its original model/profile snapshot.
+            if (run.scope_version != scope.version or run.settings_version != config.execution_version
+                or (run.credential_id is None and
+                    (run.profile_version != profile.version or run.model_id != profile.model_id
+                    or run.thinking_level != profile.thinking_level))):
+                job.status, job.completed_at = "failed", now
+                job.lease_token = job.lease_expires_at = None
+                job.last_error_code = run.last_code = "memory_selection_snapshot_changed"
+                continue
             config.last_claimed_at = now
             ids = json.loads(run.candidate_ids_json)
             candidates = self.session.scalars(
@@ -598,23 +629,28 @@ class SqlAlchemyMemoryBatchRepository:
                 run.model_id,
                 scope.version,
                 config.execution_version,
-                profile.version,
+                run.profile_version,
                 work.attempt_count,
                 lease_token,
                 run.thinking_level,
                 run.policy_version,
                 run.cutoff_sequence,
                 EnvironmentSnapshot.from_dict(job.environment_snapshot),
+                run.credential_id,
+                run.credential_revision,
             )
         self.session.flush()
         return None
 
     def fence(self, batch: MemorySelectionBatch, *, now: datetime) -> None:
+        from app.domains.memory.repository.situation_transition import retired
+        if retired(self.session, batch.setting.id):
+            raise MemoryConflictError("memory_legacy_generation_retired")
         self.session.expire_all()
         self.memory.validate_scope(batch.setting.scope)
         scope = self.session.get(MemoryScopeSettingModel, batch.setting.id)
         config = self.session.get(MemoryBatchSetting, batch.setting.id)
-        profile = self.session.get(MemoryBatchProfile, batch.setting.scope.owner_id)
+        profile = self.session.get(MemorySubjectProfile, batch.setting.id) if batch.credential_id is not None else self.session.get(MemoryBatchProfile, batch.setting.scope.owner_id)
         if (
             scope is None
             or not scope.enabled
@@ -626,6 +662,11 @@ class SqlAlchemyMemoryBatchRepository:
             or profile is None
         ):
             raise MemoryConflictError("memory_selection_scope_changed")
+        if batch.credential_id is not None:
+            binding = self._references.read_consolidation_revision(batch.setting.scope, batch.credential_id, batch.credential_revision) if self._references.read_consolidation_revision else None
+            if (binding is None or (binding.credential_id, binding.revision, binding.model, binding.thinking_level)
+                != (batch.credential_id, batch.credential_revision, batch.model_id, batch.thinking_level)):
+                raise MemoryConflictError("memory_selection_credential_changed")
         self.queue.renew(
             job_id=batch.job_id,
             lease_token=batch.lease_token,

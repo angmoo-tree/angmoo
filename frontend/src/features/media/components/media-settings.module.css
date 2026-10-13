@@ -1,6 +1,6 @@
-.panel { display: grid; gap: 1rem; margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-border-default); border-radius: var(--radius-reference-card); background: var(--color-surface); color: var(--color-text-default); }
+.panel { display: grid; min-width: 0; gap: 1rem; margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-border-default); border-radius: var(--radius-reference-card); background: var(--color-surface); color: var(--color-text-default); box-shadow: var(--shadow-summary); overflow-wrap: anywhere; }
 .panel h3 { color: var(--color-text-strong); font-weight: 700; }
-.panel label { display: grid; gap: .375rem; }
+.panel label { display: grid; min-width: 0; gap: .375rem; }
 .panel input:not([type="checkbox"]), .panel select, .panel textarea { width: 100%; min-height: 44px; padding: .625rem; border: 1px solid var(--color-border-control); border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text-strong); }
 .panel input:focus-visible, .panel select:focus-visible, .panel textarea:focus-visible, .fileLabel:focus-within { outline: 2px solid var(--color-brand-accent); outline-offset: 2px; }
 .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .75rem; }
@@ -14,3 +14,21 @@
 .fileLabel input { width: 100%; max-width: 100%; min-width: 0; }
 .preview { display: block; max-width: 100%; width: auto; height: auto; max-height: 360px; object-fit: contain; border: 1px solid var(--color-border-default); border-radius: var(--radius-control); }
 .binding { padding: .75rem 0; border-bottom: 1px solid var(--color-border-default); }
+.jsonEditor { max-width: 100%; resize: vertical; font-family: var(--font-geist-mono), monospace; overflow: auto; }
+.locations { max-height: 240px; overflow: auto; padding-inline-start: 1.25rem; }
+.panel summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; }
+.panel summary:focus-visible { outline: 2px solid var(--color-brand-accent); outline-offset: 2px; }
+.fileInput {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.fileInput::file-selector-button {
+  min-height: 44px;
+  padding: 0 var(--spacing-control);
+  color: var(--color-text-strong);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}

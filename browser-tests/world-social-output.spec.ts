@@ -170,20 +170,20 @@ for(const language of ["ko","en"] as const) test(`Chat IME, newline and selected
   expect(state.base.providerCalls).toEqual([]);
 });
 
-for(const language of ["ko","en"] as const) test(`only Home retains World shell across both World routes (${language})`,async({page},info)=>{
+for(const language of ["ko","en"] as const) test(`only World introduction retains the shell header across both World routes (${language})`,async({page},info)=>{
   const state=await installSocialChatFixture(page,info.project.name==="static-export",String(info.project.use.baseURL),language);
   for(const world of [FEED_WORLD,OTHER_FEED_WORLD]){
     await page.goto(`/worlds/${world}`);const app=page.locator('[data-product-surface="world-app"]');await expect(app).toBeVisible();
-    await expect(app.getByText("World App",{exact:true})).toBeVisible();
+    await expect(app.locator("[data-world-introduction-header]")).toBeVisible();
     for(const section of ["feed","chat","characters","relationships"]){
       await page.goto(`/worlds/${world}/${section}`);await expect(app).toBeVisible();
-      await expect(app.getByText("World App",{exact:true})).toHaveCount(0);
+      await expect(app.locator("[data-world-introduction-header]")).toHaveCount(0);
       await expect(app.getByText("WORLD CHARACTERS",{exact:true})).toHaveCount(0);
       await expect(app.locator(`a[href="/worlds/${world}"]`).first()).toBeVisible();
       if(section==="characters") await expect(app.locator('[data-world-character-surface="list"]')).toBeVisible();
     }
     await app.locator(`a[href="/worlds/${world}"]`).first().click();
-    await expect(page).toHaveURL(new RegExp(`/worlds/${world}/?$`));await expect(app.getByText("World App",{exact:true})).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/worlds/${world}/?$`));await expect(app.locator("[data-world-introduction-header]")).toBeVisible();
   }
   expect(state.writes).toEqual([]);expect(state.base.providerCalls).toEqual([]);
 });

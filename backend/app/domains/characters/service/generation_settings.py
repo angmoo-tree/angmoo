@@ -40,6 +40,8 @@ def read_settings(db, user, character_id, *, limits):
 def write_settings(db, user, character_id, data, *, assets, limits, validated_connection=None):
     _get_owned_character(db, user, character_id)
     ensure_demo_user_mutable(user)
+    if data.provider == "comfyui" and data.api_key is not None and data.api_key.get_secret_value().strip():
+        raise ImagePreparationError("comfy_server_key_not_supported")
     row = ensure_image_generation_setting(db, character_id, commit=False)
     if data.expected_revision not in (row.generation_revision, 0 if row.generation_provider is None else -1):
         raise ImagePreparationError("settings_revision_conflict")
@@ -47,16 +49,28 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
     if provider != "comfyui" and f"{provider}:{model}" not in MODEL_CATALOG:
         raise ImagePreparationError("model_not_supported")
     option_type = NovelOptions if provider == "novelai" else ComfyOptions if provider == "comfyui" else ApiImageOptions
-    options = option_type.model_validate(data.options).model_dump(exclude_none=True)
+    typed = option_type.model_validate(data.options)
+    profiles = json.loads(row.generation_profiles_json)
+    key = profile_key(provider, model, typed.model_dump(exclude_none=True))
+    previous = profiles.get(key)
+    if provider == "comfyui":
+        from app.domains.media.service.comfy_workflows import validate_app_workflow, validate_base_url, validate_partner_configuration
+        validate_base_url(typed.base_url)
+        withdrawing_key = data.clear_partner_api_key and data.partner_api_key is None and not data.auto_enabled
+        newly_selected = (row.generation_provider,row.generation_model) != (provider,model)
+        if not withdrawing_key:
+            validate_partner_configuration(typed,previous=None if newly_selected else previous,auto_enabled=data.auto_enabled,
+                new_key=bool(data.partner_api_key and data.partner_api_key.get_secret_value().strip()))
+        for workflow in (typed.workflow, typed.text_workflow):
+            if workflow is not None:
+                validate_app_workflow(workflow)
+    options = typed.model_dump(exclude_none=True)
     if provider != "comfyui" and (data.partner_api_key is not None or data.clear_partner_api_key):
         raise ImagePreparationError("comfy_partner_credential_scope_invalid")
     if data.reference_asset_id:
         asset = assets.owned(db, owner_id=user.id, asset_id=data.reference_asset_id, scope_kind="character", scope_id=character_id)
         if asset.state == "draft":
             assets.attach(db, owner_id=user.id, asset_id=asset.id, scope_kind="character", scope_id=character_id)
-    profiles = json.loads(row.generation_profiles_json)
-    key = profile_key(provider, model, options)
-    previous = profiles.get(key)
     connection = validated_connection or (previous or {}).get("connection")
     if provider == "comfyui" and previous and options != previous.get("options"):
         connection = validated_connection
@@ -132,3 +146,14 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
     db.flush()
     db.expire(row)
     return read_settings(db, user, character_id, limits=limits)
+
+
+def read_provider_key(db, user, character_id, provider):
+    _get_owned_character(db, user, character_id)
+    if provider not in {"novelai", "nanogpt", "openrouter", "comfyui"}:
+        raise ImagePreparationError("model_not_supported")
+    purpose = CredentialPurpose.COMFY_PARTNER_IMAGE if provider == "comfyui" else CredentialPurpose.USER_IMAGE
+    row = media_credentials.find_credential(db, owner_id=user.id, character_id=character_id, provider=provider, purpose=purpose)
+    ready = bool(row and row.enabled and row.encrypted_secret)
+    return {"provider": provider, "purpose": purpose.value, "has_key": ready,
+        "fingerprint": row.fingerprint if ready else None, "key_revision": row.revision if row else 0}

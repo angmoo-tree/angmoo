@@ -43,9 +43,10 @@ from app.domains.memory.models.items import (
 class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
     """One canonical adapter that also satisfies the existing write port."""
 
-    def __init__(self, session: Session, *, references: MemoryScopeReferences) -> None:
+    def __init__(self, session: Session, *, references: MemoryScopeReferences, source_reader=None) -> None:
         super().__init__(session, references=references)
         self._session = session
+        self._source_reader = source_reader
 
     def get_scope_setting_by_id(
         self,
@@ -314,13 +315,27 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
                 MemoryItem.updated_at.desc(),
                 MemoryItem.id,
             )
-            .limit(limit)
         )
         if for_update:
             statement = statement.with_for_update().execution_options(
                 populate_existing=True
             )
-        return tuple(self._session.scalars(statement))
+        from app.domains.memory.models.episode import MemoryEpisodeInfo
+        from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        result, offset = [], 0
+        while len(result) < limit:
+            page = tuple(self._session.scalars(statement.offset(offset).limit(100)))
+            if not page:
+                break
+            offset += len(page)
+            for item in page:
+                if not currently_accessible(self._session, self._source_reader, setting.scope, item, now):
+                    continue
+                result.append(item)
+                if len(result) == limit:
+                    break
+        return tuple(result)
 
     @staticmethod
     def _active_item_predicates(

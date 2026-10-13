@@ -170,7 +170,8 @@ def test_new_candidate_failure_rejection_and_approval_keep_feed_pair_contract():
 
 def test_topic_regeneration_does_not_rewrite_approved_provenance(monkeypatch):
     import asyncio
-    from types import SimpleNamespace
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service import world_credentials
     from app.runtime.social import topic_preparation as topics
     from app.domains.social.schemas.recommendation import TopicGenerationResult, TopicDefinition
     with Session(_engine(), expire_on_commit=False) as db:
@@ -180,14 +181,17 @@ def test_topic_regeneration_does_not_rewrite_approved_provenance(monkeypatch):
         character = refs.character(entry.character_id)
         from app.runtime.world_characters.creation_configuration import initialize_created_world_character
         initialize_created_world_character(db, character=character, world_character=entry)
+        world_credentials.save(
+            db, owner_id=owner.id, world_id=entry.world_id, world_character_id=entry.id,
+            purpose="sns", data=WorldCredentialWrite(expected_revision=0, provider="google",
+                model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-approved-topic-key"),
+        )
         db.commit()
         def baseline():
             pair = refs.approved_pair(entry.id)
             return (refs.character_hash(character), entry.character_contract_hash,
                     tuple((p.id, p.character_contract_hash, p.world_contract_hash) for p in pair))
         before = baseline()
-        monkeypatch.setattr(topics, "find_world_character_credential", lambda *a, **k: SimpleNamespace(id="fixture"))
-        monkeypatch.setattr(topics.CredentialResolver, "resolve_llm_credential", lambda *a, **k: SimpleNamespace(provider="google", credential_id="fixture", fingerprint="fixture-fingerprint"))
         async def generator(*args):
             assert args[2]["profile_id"] == approved.profile.id
             assert "persona" not in args[2]

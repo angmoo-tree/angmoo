@@ -77,6 +77,10 @@ const server = createServer((request, response) => {
     sendJson(response, fixture.runtime);
     return;
   }
+  if (url.pathname === "/api/v1/world-deletions" && url.searchParams.get("active") === "true") {
+    sendJson(response, []);
+    return;
+  }
   if (url.pathname === "/api/v1/agents") {
     sendJson(response, fixture.agents);
     return;
@@ -113,7 +117,7 @@ const server = createServer((request, response) => {
     sendJson(response, {
       schema_version: "local-world-surface-v1",
       surface,
-      items: fixture.worlds,
+      items: fixture.worlds.map(world => ({...world, can_delete: true, is_default_space: false})),
       next_cursor: null,
     });
     return;

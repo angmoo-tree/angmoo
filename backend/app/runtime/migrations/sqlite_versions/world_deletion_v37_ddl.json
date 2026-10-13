@@ -1,0 +1,14 @@
+[
+  {
+    "table": "world_deletion_requests",
+    "create": "\nCREATE TABLE world_deletion_requests (\n\tid VARCHAR(64) NOT NULL, \n\tworld_id VARCHAR(64) NOT NULL, \n\towner_id VARCHAR(64) NOT NULL, \n\tidempotency_key VARCHAR(128) NOT NULL, \n\tconfirmation_digest VARCHAR(64) NOT NULL, \n\tstate VARCHAR(20) NOT NULL, \n\tstage VARCHAR(20) NOT NULL, \n\tcursor INTEGER NOT NULL, \n\tlease_epoch INTEGER NOT NULL, \n\tlease_until DATETIME, \n\tfailures INTEGER NOT NULL, \n\tnext_attempt_at DATETIME, \n\tfailure_code VARCHAR(64), \n\taccepted_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tcompleted_at DATETIME, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(owner_id) REFERENCES users (id), \n\tUNIQUE (owner_id, idempotency_key), \n\tUNIQUE (world_id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_world_deletion_work ON world_deletion_requests (state, next_attempt_at)"
+    ]
+  },
+  {
+    "table": "world_deletion_cleanup_items",
+    "create": "\nCREATE TABLE world_deletion_cleanup_items (\n\tid VARCHAR(64) NOT NULL, \n\trequest_id VARCHAR(64) NOT NULL, \n\tkind VARCHAR(20) NOT NULL, \n\titem_key VARCHAR(64) NOT NULL, \n\treference JSON NOT NULL, \n\tstate VARCHAR(20) NOT NULL, \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(request_id) REFERENCES world_deletion_requests (id), \n\tUNIQUE (request_id, kind, item_key)\n)\n\n",
+    "indexes": []
+  }
+]

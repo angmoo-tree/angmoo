@@ -1,5 +1,43 @@
 # Angmoo 기능 보존과 현재 코드 읽기 지도
 
+## 2026-10-10 기기 홈·활동 설정·SNS 기억 출처·World 주제의 현재 경로
+
+이 절은 아래 10-09 표시 계약을 현재 10-10 구현에 맞게 보완한다. 역사 inventory,
+schema builder, baseline과 당시 검증 수는 재작성하지 않는다.
+
+| 기능 | 현재 소유와 조립 경로 | 보존하는 경계 |
+| --- | --- | --- |
+| 기기 홈·World 탐색 | frontend의 `composition/screens/device-home-shell`과 runtime navigation | 홈의 전역 footer와 전용 여백만 제거. 기존 아이콘·World 목록·다른 화면 복귀·World 5탭 유지 |
+| 기본 활동 설정·ON | `domains/world_characters/service/management`, `schemas/basic_activity`와 runtime activity | 개시 전 현재 소유 캐릭터의 세 카드 read/save 허용. 기존 저장 정책·credential·CAS·ON eligibility 공유, draft ON/일반 실행 권한은 허용하지 않음 |
+| 등록·선택 여섯 번째 단계 | `runtime/characters/registration`, frontend Characters와 `world-character-basic-settings` composition | 원자 OFF 등록·durable receipt·중복 방지. 연결 정보 실패는 등록 완료와 분리해 재확인/건너뛰기, 저장·ON은 명시적 조작만 허용 |
+| 미저장 입력 수명 | 중립 `hooks/use-auth-runtime-identity`와 각 feature의 DTO/abort 검사 | auth/runtime 변경 때 생성·credential·image policy/Partner 키의 미저장 입력 제거. 같은 scope의 편집 충돌과 각 feature의 권한 책임 유지 |
+| 오늘 활동·SNS 입력 | `domains/social/contracts/today_activity`, Social Today 생산자, runtime SNS 입력·상황기억 capture | parent ID/body의 실제 전달 쌍과 source/target/root 의미 유지. 부모 전체 트리·추가 AI·Feed 관찰 합성 없음 |
+| 과거 출처 정정·저장·소비 | Memory typed contracts/policy, `repository/situation_source_bindings`, `situation_apply`, runtime sources | fixed append-only binding·validation revision·같은 Session/UoW·원본 manifest 불변. 조회/정정/검색의 현재 자식·부모 접근 재검증, 기존 개별/전체 재검사·포기·공유 근거 보존 |
+| 스키마·사용자 자료 | SQLite v35 / Alembic 20261010_0112, runtime staged upgrade | 새 binding table 이외 과거 schema/row/암호화 key 보존. 원본 36건은 자동 처리하지 않으며 사본 판독과 원본 적용 구분 |
+| World 주제 종료 | Social recommendation lifecycle/API/catalog·topic dictionary, Creator Studio composition | 접근 검사 후 World 전용 GET/PUT/POST 410. 유효 actor 관심·OFF 출처·shared ID/cache/history/기존 PostTopic 보존. World marker·늦은 result·Studio 전용 도구 종료 |
+| 상태·관계·주제 표시 | Characters/Social/Relationships feature와 World composition, 중립 status card | 저장 mood·메모·확인 시각, 관계 graph·깊이·근거, 최근 활동 내부 scroll 보존. 44px 독립 chevron과 actor 관심 기능 유지, Feed 진단/이력은 해당 설정 DOM에서만 제거하고 DTO 보존 |
+
+제품 코드·로컬 검증의 최초 근거는 [통합 구현 기록](../verification/home-activity-memory-topics-integration-20261010.md),
+64단계 재검토와 예외 보완은 [재검토 기록](../verification/home-activity-memory-topics-review-20261010.md)을 따른다.
+원본 사용자 데이터 적용·실제 AI·CI/PR/main·설치 앱과 별도로 읽는다.
+
+## 2026-10-09 World 요약·관계와 설정 변경 기록
+
+상태 탭의 Characters 일과/ Social 주제는 composition 슬롯에서 조립하며 설정의
+생성·키·당시 Feed 상세와 최근 활동 내부 스크롤을 유지했다. 현재 설정의 Feed 진단
+표시는 위 10-10 계약으로 대체되며 API DTO는 보존한다. 관계 탭/직접 관계 URL은
+`composition/screens/world-app`과 `world-relationships-screen`에서 동일한 Phone 틀을
+사용하고 `features/relationships`의 방향·깊이·근거·정리 표시는 그대로 유지한다.
+신규 외부 생성만 제한하며 기존 외부 캐릭터 읽기·완료 receipt·초안 원문은 보존한다.
+
+World 이미지 키는 Identity의 `world_image_credentials`와 제공사별 ORM 보관소가
+소유하고 기존 current/revision 실행 계약을 유지한다. Comfy 서버 키는 정식 v34
+forward 이관·입력/실행 경계에서 폐기하고 Partner·다른 서비스 키는 보존한다.
+Memory의 변경은 saved embedding controller와 카드 표시이며 기존 접수·검증·저장·
+FTS/Vec1·재검사/포기·관계 정리 업무를 바꾸지 않는다. 역사 inventory/baseline을
+재작성하지 않으며 이번 범위의 코드·계약·검증은
+[관련 검증 기록](../verification/world-ui-settings-improvements-20261009.md)으로 연결한다.
+
 기능을 수정할 때는 [Backend ARCHITECTURE](../../backend/ARCHITECTURE.md)의 역할 설명과 [기능 inventory](../../security/refactor_feature_inventory.json)의 현재 경로를 함께 확인한다. 이 문서는 기능별 실제 구현과 그 기능을 보존하는 증거의 관계를 설명한다. 원래 파일이 여러 업무로 나뉜 경우 대표 파일 하나가 원래 기능 전체를 대신하지 않는다.
 
 ## 현재 적용 범위와 검증 상태
@@ -245,3 +283,32 @@ AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계�
 AR-B8 LocalBot A5는 실제 18행동/읽기와 18HTTP를 own service/router로 닫는다. 이전 LocalBot 72정의 split의 실제 목적지·소비자와 Identity deps 원본의 Authorization 2/Bot 인증 1 분할을 갱신했다. 기존 원본 snapshot/assertion은 불변이며 typed 협력은 같은 Session·nullable 조회·오류객체·deferred commit·quota/rollback·aftercommit image 요청을 보존한다. G07 route inventory는 module 필드 26개만 현재 owner로 전환했다. B5/G5/G06 최종 합류와 원본 source introduction은 root 순차 통합 범위다.
 
 </details>
+
+## 2026-10-11 Chat·Memory·World 통합 변경의 보존 경계 (LOCAL)
+
+신규 Chat v3는 관계 쌍과 검색용 ref 작성 요구를 없애고 인물 이름·역할을
+선택적 보조 자료로 전달한다. legacy v1/v2 marker/hash·재개·이력은 그대로이며,
+identity가 보존된 명시 retry만 새 v3 attempt를 만든다. 원래 질문과 독립 검색문,
+실제 참가자·출처·권한 및 상황 설명 언어를 보존한다. 공통 role/발화자 지침을
+재사용하고 Supervisor/CRG await의 실제 checkpoint를 유지한다.
+
+Memory read batch/memo는 같은 operation·Session·now에만 적용한다. prior/correction
+cycle·private 전파와 current item/source 검증을 유지하고, 후보/hydrate/모델 전후 guard는
+새로 판정한다. Runtime의 한 worker/capacity8 안에서만 Session을 열고 deadline·취소,
+SQLite hook 정리·drain 후 dispose를 수행한다. HTTP/Chat 상황 상세는 exact 연결과
+공통 current-source 판정을 사용하며 손상된 상황 origin의 legacy fallback은 금지한다.
+
+Worlds는 기존 API/row_version/권한·이미지 형식/크기를 유지하면서 semantic Button과
+공통 crop으로 같은 페이지에서 이미지 작업을 마친다. 미저장 이름·소개·태그와
+충돌 시 crop을 보존한다. 공통 crop의 recovery slot은 feature 의존을 추가하지 않는다.
+Feed/Chat은 요청된 placeholder/고정 설명만 바꾸고 실제 첨부·상태·오류 정책은 유지한다.
+기존 canonical PNG11개·visual tolerance·dependency·원계획은 변경하지 않았다.
+
+현재 소스의 import/design inventory를 갱신했다. 변경 전 실제 HEAD AST와 비교해
+backend 신규 위반은 0이며 기존 deep import2/cycle2는 남아 있다. frontend 전역
+dependency freeze2개도 현재 변경과 분리한다. 두 Feed placeholder 시험의 기대값은
+사용자가 승인한 문구 교체만 정확히 provenance 기록으로 연결한다. 이를 기존 전역
+검사 PASS나 설치 앱/실제 모델 품질 PASS로 표현하지 않는다.
+
+80단계·원계획 A54/B32 대응, 관련 회귀·격리 Docker·성능·미관찰·복구 근거는
+[통합 구현 결과](../verification/chat-memory-world-integrated-20261011.md)에 기록한다.

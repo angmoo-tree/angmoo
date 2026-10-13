@@ -78,7 +78,7 @@ def test_committed_source_requires_exact_closed_retirement(evidence, monkeypatch
     arbitrary = "backend/app/current_unrecorded.py"
     def committed_reader(*args, **kwargs):
         if args[0] == "log":
-            return (SOURCE + "\n" + arbitrary + "\n").encode()
+            return (SOURCE + "\0" + arbitrary + "\0").encode()
         return reader(*args, **kwargs)
     monkeypatch.setattr(preservation, "git_bytes", committed_reader)
     if damage == "remaining_source":
@@ -116,6 +116,9 @@ def reviewed_owner_change(evidence):
     save()
     def reader(*args, **kwargs):
         if args[0] in {"log", "merge-base"}: return b""
+        if args == ("rev-parse", "HEAD"): return ("d"*40).encode()
+        if args == ("rev-list", "--reverse", "--topo-order", "HEAD"):
+            return (("b"*40) + "\n" + ("d"*40) + "\n").encode()
         if args == ("rev-parse", "b"*40 + ":" + OWNER): return ("c"*40).encode()
         if args == ("rev-parse", "d"*40 + ":" + OWNER): return ("e"*40).encode()
         if args == ("show", "d"*40 + "^:" + OWNER): return AFTER.encode()

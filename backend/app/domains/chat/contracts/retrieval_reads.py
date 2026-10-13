@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Protocol
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 from app.contracts.environment import EnvironmentSnapshot
@@ -12,7 +13,13 @@ from app.domains.chat.contracts.context import (
     ChatInstallation,
     ChatWorldCharacter,
 )
-from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
+from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand, RetrievalEntityCandidate
+
+
+@dataclass(frozen=True, slots=True)
+class NamedEntityRead:
+    candidates: tuple[RetrievalEntityCandidate, ...]
+    complete: bool
 
 
 class RetrievalWorld(Protocol):
@@ -32,6 +39,8 @@ class RetrievalMembership(Protocol):
 
 
 class RetrievalPolicyReads(Protocol):
+    def named_entity_mentions(self, session: Session, *, world_id: str, mention: str,
+        frozen_ids: tuple[str, ...]) -> NamedEntityRead: ...
     def environment(self, session: Session, command: RetrievalPreflightCommand) -> EnvironmentSnapshot: ...
     def installation(
         self, session: Session, command: RetrievalPreflightCommand

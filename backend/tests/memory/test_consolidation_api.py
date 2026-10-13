@@ -5,8 +5,16 @@ from memory.test_p8_l_q_memory_read_inspector import _fixture, _seed, FRONTEND_H
 
 
 def test_manual_http_scope_consent_versions_replay_and_read_only_progress(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "MEMORY_GENERATION_POLICY", "activity32")
     client, engine, principal = _fixture()
     _seed(engine, principal)
+    from app.domains.identity.schemas import WorldCredentialWrite
+    from app.domains.identity.service.world_credentials import save as save_key
+    with Session(engine) as db:
+        save_key(db, owner_id=principal["user"].id, world_id="q-world", world_character_id="q-responding", purpose="consolidation",
+            data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-own-memory-key"))
+        db.commit()
     readiness = []
     monkeypatch.setattr(memory_routes, "memory_provider", lambda factory, owner, model: readiness.append(model))
     path = "/api/v1/worlds/q-world/world-characters/q-responding/memory"

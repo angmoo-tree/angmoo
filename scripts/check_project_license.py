@@ -23,6 +23,7 @@ EXPECTED_CONDITIONAL_REVIEWS = {
     ("python", "crc32c"),
     ("python", "orjson"),
     ("node", "caniuse-lite"),
+    ("node", "libheif-js"),
 }
 
 

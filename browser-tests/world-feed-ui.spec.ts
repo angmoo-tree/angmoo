@@ -200,15 +200,15 @@ test("profile edit and return refresh the same World header and composer identit
   await page.goto(feedRoute()); await expect(composer(page)).toBeVisible();
   await page.locator("[data-feed-header]").getByRole("link", { name: "내 프로필" }).click();
   await page.getByRole("button", { name: "내 프로필 편집", exact: true }).click();
-  const editor = page.getByRole("region", { name: "내 프로필 편집", exact: true });
+  const editor = page.getByRole("dialog", { name: "이 World의 프로필 편집", exact: true });
   await editor.getByRole("textbox", { name: "이름", exact: true }).fill("Edited World User");
   await editor.getByRole("textbox", { name: "핸들", exact: true }).fill("edited_world_user");
   await editor.getByRole("button", { name: "프로필 저장", exact: true }).click();
   // Saving reloads the parent profile and remounts the editor. Verify the
   // durable edit result rather than its transient, unmounted notice.
   await expect.poll(() => audit.displayName).toBe("Edited World User");
-  await expect(page.getByRole("heading", { name: "Edited World User", exact: true })).toBeVisible();
-  await page.getByRole("navigation", { name: "World 앱 기능" }).getByRole("link", { name: "Feed", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Edited World User", exact: true, level: 1 })).toBeVisible();
+  await page.getByRole("navigation", { name: "World 앱 기능" }).getByRole("link", { name: "피드", exact: true }).click();
   await expect(composer(page)).toContainText("Edited World User"); await expect(composer(page)).toContainText("@edited_world_user");
   await expect(page.locator("[data-feed-header]").getByRole("img", { name: "Edited World User 프로필 이미지", exact: true })).toBeVisible();
   expect(audit.writes.filter(write => write.method === "PATCH")).toHaveLength(1);
@@ -300,9 +300,9 @@ test("global and World header/composer anchors match and global controls remain 
 test("detail and other World sections keep their own shell and detail navigation", async ({ page }, info) => {
   const audit = await installWorldFeedFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
   await page.goto(`/worlds/${FEED_WORLD}/posts/original`);
-  await expect(page.getByRole("heading", { name: "게시글과 답글", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true, level: 2 })).toBeVisible();
   await expect(page.locator("[data-feed-header]")).toHaveCount(0); await expect(composer(page)).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Feed", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "피드", exact: true })).toBeVisible();
   await page.goto(`/worlds/${FEED_WORLD}`); await expect(page.getByRole("heading", { name: uiWorldName(), level: 1, exact: true })).toBeVisible();
   await expect(page.locator("[data-feed-header]")).toHaveCount(0); expect(audit.providerCalls).toEqual([]);
 });

@@ -1,12 +1,14 @@
 "use client";
 import { requestFailureMessage } from "@/lib/http/error-presentation";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { useAuth } from "@/hooks/use-auth";
 
 
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
+import { AgentCreationScreen } from "@/composition/screens/agent-creation-screen";
 import { AgentDetailClient } from "@/composition/screens/agent-detail-screen";
 import { AgentsDashboardClient } from "@/features/characters/components/agents-dashboard-client";
 import { AppShell } from "@/composition/shells/app-shell";
@@ -15,8 +17,6 @@ import { PostDetailClient } from "@/composition/screens/post-detail-screen";
 import { getSocialPostThread, listSocialFeed } from "@/features/social/api/social-feed-client";
 import { type FeedPage, type PostThreadRead } from "@/features/social/types/social-feed-contract";
 import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
-import { RelationshipGraphClient } from "@/features/relationships/components/relationship-graph-client";
-import { RelationshipGraphFrame } from "@/features/relationships/components/relationship-graph-frame";
 import { SettingsClient } from "@/composition/screens/settings-screen";
 import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
 import { WorldCreatorClient } from "@/composition/screens/world-creator-screen";
@@ -32,7 +32,6 @@ import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
-import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
 import { isStaticLocalProductRouteSupported } from "@/lib/navigation/device-navigation";
 
 type BrowserLocation = {
@@ -171,14 +170,14 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (pathname === "/agents/new") {
     return (
-      <AppShell>
-        <AgentCreateClient />
+      <AppShell navigation="none">
+        <AgentCreationScreen />
       </AppShell>
     );
   }
   if (pathname === "/settings") {
     return (
-      <AppShell>
+      <AppShell navigation="none">
         <SettingsClient />
       </AppShell>
     );
@@ -300,16 +299,7 @@ function renderStaticRoute(location: BrowserLocation) {
       );
     }
     if (characterId && worldId && segments[4] === "relationship-graph") {
-      const provider = getRuntimeConfig()?.graphProvider ?? "ladybug";
-      return (
-        <RelationshipGraphFrame>
-          <RelationshipGraphClient
-            characterId={characterId}
-            provider={provider}
-            worldId={worldId}
-          />
-        </RelationshipGraphFrame>
-      );
+      return <WorldAppRouteClient sectionId="relationships" relationshipCharacterId={characterId} worldId={worldId} />;
     }
   }
   return <StaticNotFound pathname={pathname} />;
@@ -334,12 +324,19 @@ function staticWorldSection(segment: string | undefined): WorldAppSectionId | nu
 }
 
 function StaticFeedRoute() {
+  const identity = useAuthRuntimeIdentity("global-feed");
+  const { status } = useAuth();
+  return <ScopedStaticFeedRoute key={identity} canRead={status !== "checking"} />;
+}
+
+function ScopedStaticFeedRoute({ canRead }: { canRead: boolean }) {
   const uiText = useUiText("shell");
   const [feed, setFeed] = useState<FeedPage>(EMPTY_FEED);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!canRead) return;
     let active = true;
     listSocialFeed({ limit: 10 })
       .then((result) => {
@@ -356,7 +353,7 @@ function StaticFeedRoute() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [canRead]);
 
   if (!ready) {
     return (
@@ -375,12 +372,19 @@ function StaticFeedRoute() {
 }
 
 function StaticPostRoute({ postId }: { postId: string }) {
+  const identity = useAuthRuntimeIdentity(`global-post:${postId}`);
+  const { status } = useAuth();
+  return <ScopedStaticPostRoute key={identity} postId={postId} canRead={status !== "checking"} />;
+}
+
+function ScopedStaticPostRoute({ postId, canRead }: { postId: string; canRead: boolean }) {
   const uiText = useUiText("shell");
   const [thread, setThread] = useState<PostThreadRead | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!canRead) return;
     let active = true;
     getSocialPostThread(postId)
       .then((result) => {
@@ -397,7 +401,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
     return () => {
       active = false;
     };
-  }, [postId]);
+  }, [postId, canRead]);
 
   if (!ready) {
     return (

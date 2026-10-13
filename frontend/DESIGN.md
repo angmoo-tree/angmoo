@@ -14,10 +14,151 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-13 릴리스 준비 visual 증거 정렬 (LOCAL)
+
+기존 UI-B/UI-F의 canonical PNG 11장은 원본 그대로 보존한다. 이미 구현된
+기기 홈·Feed·World 사용 상태·삭제·embedded 관계 화면의 의도한 변화는
+`browser-tests/snapshots/ui-f/release-readiness-20261013/`의 추가 8장으로 기록한다.
+Next production과 static export는 동일한 새 expected PNG와 기존 25px/0.1
+오차 정책을 사용한다. 기존 61개 screenshot mapping·raw-color 한도는 유지한다.
+생성 inventory에는 역사적 11장과 새 8장 모두를 기록한다. 이미지 생성 자체는
+비교 PASS가 아니며, 자동 비교·최종 platform 리뷰·설치본 USER CHECK를 분리한다.
+근거: [의도한 변화와 검증 범위](../docs/verification/release-readiness-visual-deltas-20261013.md).
+
+## 2026-10-11 World 이미지 업로드·Feed/Chat 작성 안내 (LOCAL)
+
+기기 홈 아이콘 미리보기 아래의 `아이콘 업로드 / Upload icon`, World 배너 우상단의
+`배너 업로드 / Upload banner`가 현재 화면의 파일 선택과 이미지 조정 창을 연다.
+기존 한 열 배치, 아이콘 모양, 기본 배너, 이름·소개·태그와 이미지 제거를 유지한다.
+선택·조정·취소는 저장하지 않고 명시적 적용만 이미지 API에 저장한다. 기존 World는
+초안 재저장/페이지 이동을 요구하지 않는다. 버전 충돌에서는 입력과 조정을 유지하고
+현재 상태를 명시적으로 새로고침한 뒤 다시 적용한다. 공통 semantic Button, focus,
+키보드와 기존 crop/dimension/5MiB 정책을 사용한다.
+
+Feed 본문 안내는 `본문을 적어주세요 / Write your post.`다. 제목 안내는
+`오늘 이 World에 남길 이야기의 제목을 적어주세요`를 유지한다. Feed와 Chat의
+고정 20MB 원본 설명 문단은 제거하되 실제 첨부 한도와 준비·인식·취소·오류는 유지한다.
+Chat의 검색 진단은 원문 조회 작업의 관측된 시간/SQL/연결 정리만 표시하며 관측하지
+못한 값은 0이나 성공으로 표현하지 않는다. 구조·화면 근거는 LOCAL이고 정식 CI,
+기존 11개 canonical PNG/visual tolerance와 설치 앱 USER CHECK는 별도다.
+
+검증: [통합 구현 결과와 I00–I79 ledger](../docs/verification/chat-memory-world-integrated-20261011.md).
+
+## 2026-10-10 기기 홈·활동 설정·상태·관심 주제 표시 계약
+
+기기 홈은 기존 아이콘과 World 목록을 유지하고 하단 전역 4개 메뉴 및 그 전용
+여백을 제거한다. 다른 로컬 화면의 복귀와 World 5개 탭, 단일 스크롤과 safe-area는
+유지한다. 관계 embedded header는 대화/캐릭터와 같은 20px 여백·12px 간격·48px
+아이콘을 사용하며, 추가 기준 캐릭터 이름 줄만 제거한다. 그래프의 이름·방향·깊이·
+근거·관계 정리 기능은 유지한다.
+
+등록은 자율활동 OFF로 완료하고 여섯 번째 선택 단계에 활동 설정 → 캐릭터 활동
+API key → SNS 게시글 이미지 생성의 세 카드를 조립한다. 같은 카드가 Studio의
+활동 설정 URL에서도 제공된다. 기존 코랄 아이콘·큰 제목·설명·좌우 여백·카드 간격·
+그림자를 재사용한다. 각 카드는 따로 명시적으로 저장하며 완료/건너뛰기는 미입력을
+자동 저장하거나 ON으로 만들지 않는다. 이미지 생성은 기본 OFF·20회, 인식은
+10회이며 기존 값은 덮어쓰지 않는다. 충돌·일부 저장 실패는 입력/성공한 저장을
+보존하고 dirty/busy 상태에서는 이동을 확인한다.
+
+등록 성공 뒤 활동 설정 연결을 확인하지 못해도 같은 여섯 번째 단계에서 등록 완료를
+유지한다. 연결 오류 안내와 등록 결과 확인·완료·건너뛰기를 제공하며, 확인되지 않은
+캐릭터의 설정 카드는 표시하지 않는다. 사용자나 실행 환경이 바뀌면 이전 화면의
+미저장 입력과 Partner 키 입력을 비운다. 같은 사용자·환경의 일반 새로고침에는
+기존 저장 값과 편집 충돌 보호를 유지한다. 안내와 조작 이름은 ko/en으로 제공한다.
+
+World 상태 최상단에는 상태 → 감정·강도 → 저장된 원문 설명 → 확인 시각 →
+이름·소개 → 최근/다음 활동을 배치한다. World 핸들 배지만 없애고 Device는 유지한다.
+활동 방식 카드는 방식·상속·설정 출처·전환 안내와 저장 기능을 유지하며 현재 상태와
+실행 이력은 표시하지 않는다. 계획 4개 행은 각각 처음 접힘, 관심 주제는 처음 6개를
+표시한다. 설정 이동 버튼·보이는 상세/접기 문구·+N 개수는 없고 44px chevron으로
+펼친다. aria-expanded/controls와 Enter/Space/focus를 제공하며 원문은 번역하지 않는다.
+
+캐릭터 설정 관심 주제 카드에는 Feed 진단/이력/빈 영역을 표시하지 않는다. 주제
+상태·모델·태그·재생성·새로고침은 유지한다. Studio의 세 관심 주제 도구는 제거한다.
+변경한 UI 안내·placeholder·접근성 이름은 한국어와 영어에 함께 반영한다. 이번
+관련 개발 브라우저 검증을 정식 CI·생산 build·설치 앱 USER CHECK로 표현하지 않는다.
+
+## 2026-10-09 World 요약·관계망과 설정 표시 계약
+
+World 상태는 현재 상태 → 최근 활동 → 오늘 하루 계획 → 캐릭터 관심 주제 →
+페르소나 → 활동 요약의 6개 카드다. 기존 좌우 여백·카드 간격·그림자·최근
+활동 내부 스크롤을 유지한다. 새 요약은 SettingsCard의 밝은 코랄 원·아이콘과
+제목·설명을 재사용한다. 일과는 서버 원문 순서의 4개 행이며 현재 시간대 강조와
+실제 실행 상태 배지는 독립이다. 전체 제목·활동 원문은 각 행에서 따로 펼친다.
+관심 주제의 현재 계약은 위 2026-10-10 항목이며, 처음 6개와 chevron으로 표시한다.
+
+관계 탭은 공용 World 헤더·5개 하단 목적지와 하나의 main/본문 스크롤 안에서
+관계망을 즉시 표시한다. 다른 캐릭터 직접 URL도 같은 틀과 실제 기준 이름을
+사용한다. 44px 밝은 코랄 원의 관계 아이콘과 공통 SettingsCard를 재사용하며
+방향·깊이·근거·목록·빈 상태·canonical fallback·정리 상태를 유지한다.
+**이 계약은 아래 역사적 표의 독립 wide RelationshipGraphFrame/창 분류를
+해당 관계 URL에 한해 대체한다.** Studio와 Memory의 폭·창 계약은 유지한다.
+기존 relationship-graph enum은 이전 launch metadata 읽기 호환성만 보존한다.
+
+캐릭터 생성 후보는 직접 만들기·카드 가져오기·조건부 설정 복사다. 이전 외부
+초안의 입력은 보존하고 명시적인 지원 방식 재선택 안내를 표시한다. ComfyUI에는
+일반 서버 키 입력·상태·지문·삭제·숨은 DOM을 두지 않는다. 별도 Partner 계정 키는
+유지한다. 외부 이미지 서비스에는 선택한 서비스의 저장된 키/미등록/조회 실패를
+구분하며 평문 자동 채움·키 복원 버튼·전환 확인창을 추가하지 않는다.
+
+기억은 저장 → 임베딩 모델 API 키 → 관계 정리 순서다. 저장된 ON/OFF·키 상태와
+조회 실패를 안내하고 미저장 입력으로 색인 준비를 약속하지 않는다. 임베딩의
+문서 준비·검색 질의 두 사용처와 비용을 ko/en으로 설명한다. 바로가기는 추가하지
+않고 기존 저장·검색 자료 준비·재검사·포기·정리 동작과 focus를 유지한다.
+
+출처는 **LOCAL**이며 semantic token과 기존 아이콘/공통 UI만 사용한다.
+신규 외부 자산·폰트·의존성은 없다. 관련 Next/static-shell dev 검증은
+[검증 기록](../docs/verification/world-ui-settings-improvements-20261009.md)에 분리한다.
+
+## 2026-10-08 저장하지 못한 경험의 재확인과 저장 포기
+
+기존 기억 처리 카드의 여백·그림자·설정 위치를 유지한다. 실패 경험 제목과 현재 개수
+옆에 `저장하지 못한 경험 다시 확인`을 배치한다. 전체 동작의 설명은 현재 선택한
+캐릭터와 World에 한정되고, 확인 가능한 경험만 저장된다는 범위를 명시한다.
+
+내부 목록은 최대 높이 440px, 기본 조회 20개와 cursor 기반 더 보기로 구성한다.
+시간 → 안전하게 확인한 설명 → 사용자용 실패 이유 → 원래 채팅·SNS 보존 안내 →
+`다시 확인`·`이 경험 저장 포기` 순서다. 확인 불가능한 설명은 원문 대신 안전한
+대체 안내를 표시한다. 일반 source ID·manifest·내부 오류 코드를 노출하지 않는다.
+
+공통 semantic 색상과 Button/Dialog를 사용하며 44px 동작 크기와 키보드 focus를
+유지한다. 포기 확인 창의 첫 focus는 취소이고, 원래 활동 보존 및 되돌릴 수 없음을
+ko/en 모두 설명한다. 실제 저장/거절/건너뜀 수와 현재 미해결 수는 구분하고,
+완료하지 못한 worker 요청을 완료 메시지로 표현하지 않는다. OFF에서는 재검사만
+제한하고 각 경험의 정리 권한은 서버 capability를 따른다. 모바일 줄바꿈, 내부
+스크롤, scope 변경·늦은 응답·동일 요청 재확인도 Next/static 모두 검증한다.
+
+## 2026-10-07 World 소개 화면
+
+World 첫 탭의 표시 명칭은 ko/en 모두 `World`, 내부 ID `home`과 루트 URL은 유지한다.
+상단은 Globe·World 문맥과 44px 원형 Device Home 아이콘으로 구성한다. 정상 상태에서
+중복 World 이름, 실행 가능·OWNER 배지와 내부 경계 안내를 반복하지 않는다. 기존 오류·접근
+차단과 복구 동선은 유지한다.
+
+배너 → World 이름 → 장르 전체·분위기 전체의 중립 태그 행 → 한 줄 소개 → World 소개 →
+원형 캐릭터 사진·이름 → 작은 내 프로필 동선 순서다. 등록된 배너와 같은 크기의
+`/world-default-banner.svg`를 미등록·표시 실패 시 사용한다. 이미지 ID·저장 데이터·AI 실행을 변경하지 않는다.
+World 소개의 기본 원문은 4줄까지 표시하고, 한 번의 펼침으로 원문 전체·일상·장소·역할·직업·추가
+생성 지침을 저장 순서대로 보여준다. 일상은 작은 소제목, 이후 세 영역은 큰 소제목이다.
+빈 값과 조회 실패를 구분하고, 소개 안에는 별도 세로 스크롤을 만들지 않는다.
+
+캐릭터 미리보기는 정식 World 공개 프로필 조회의 자율 캐릭터만 표시한다. owner-controlled
+프로필은 별도 내 프로필 링크로 연결한다. 이름은 두 줄, 접근성 이름은 전체 이름이며,
+가로 목록과 전체 보기·상세 링크는 현재 World를 유지한다. 출처는 사용자 목업에 따른 **LOCAL** 구현이다.
+
 Device Character dashboard summary and empty-state UI appear only after a
 successful read. A failed read keeps its retry feedback and any previously loaded
 cards; it must not show an unconfirmed zero count or claim that no characters exist.
 This correction is LOCAL and reuses the existing error, summary and card layout.
+
+## 2026-10-06 World 캐릭터 관리 상단 새로고침 제거
+
+World 캐릭터 관리 상세의 상단 `관리 상태 새로고침` 아이콘 버튼은 제거한다.
+버튼 자리에 placeholder나 예약 폭을 남기지 않고 기존 활동 버튼을 정상 flex 배치한다.
+최초 조회·저장 응답 반영·활동 요청 후 조회와 오류의 명시적 재시도는 유지한다.
+설정 카드의 개별 조회/새로고침, browser/native 문서 새로고침은 이 제거 범위에 포함하지 않는다.
+출처는 **LOCAL**이며 Next/static의 동일 관리 컴포넌트에 적용한다. 다른 상태/설정 UI의 계획을
+완료했다고 표시하거나 신규 polling·AI 호출·실행 정책을 추가하지 않는다.
 
 ## 2026-10-05 World 게시글·관리·관계망 표시 계약
 
@@ -1362,3 +1503,79 @@ child 창 닫기·화면 이동은 종료로 처리하지 않고, 내부 provide
 새 Media 화면은 LOCAL 작성으로 분류하고 기존 화면에 조합한다. 기존 semantic form/control/status 토큰을 사용하고 API 키는 저장 여부만 표시하며 input/localStorage에 되돌리지 않는다. Provider 모델/비용 모드의 참조 강제 OFF와 검증 여부, 생성·인식 사용량의 예약/시도, 오류/결과 미확정/로컬 첨부 복구를 구분한다. 참조 선호를 자동 생성 활성화로 표시하지 않는다.
 
 첨부는 한 장의 인증된 미리보기와 제거 버튼을 제공한다. 인식이 불가능한 Chat 첨부는 미리보기를 유지한 채 전송을 막으며 본문을 지우지 않는다. 사용자가 사진을 제거하면 원래 본문을 전송할 수 있다. SNS 작성은 제목과 본문 조건을 유지한다. 44px control, keyboard focus, reduced motion, 360/390/436/1440 폭과 확대 상태를 검증한다. Windows 브라우저 결과를 고정 Linux 환경의 pixel baseline 통과로 기록하지 않는다.
+
+## ComfyUI 공통 설정 편집 (2026-10-09)
+
+LOCAL 화면의 기존 설정 카드·semantic border/background/text/shadow와 44px control, keyboard focus를 사용한다. 서비스 선택과 독립된 서버/Partner 인증, API JSON 편집, 감지 위치, 필요한 값, 참조 설명, 기본 첫 이미지 선택, 접힌 고급 출력·연결/상한 안내의 순서로 설정한다. 기존 직접 입력 설정의 표시와 명시 전환은 별도로 안내한다.
+
+긴 JSON은 monospaced textarea 안에서 스크롤하고 위치 목록도 내부 스크롤한다. 명시적 label-for 및 오류 aria-describedby를 사용하며 invalid 원문을 보존한다. 후보 조회 실패는 입력을 계속할 수 있는 안내로 표시한다. 서버 연결 확인은 이미지 생성 성공으로 표현하지 않는다. 오류 정보는 접힌 plain-text 상세이며 prompt/key/Base64를 표시하지 않는다. ko/en 문구를 함께 관리한다.
+
+이번 LOCAL 진단 캡처는 360/1440 화면과 Next/static·ko/en 동작 확인에 사용한다. screenshot 호출 목록 42개, canonical PNG 11개 및 pixel threshold는 구분하며 기존 PNG·기준을 변경하지 않는다. Windows 기능 시험은 Linux canonical visual PASS나 native USER CHECK를 의미하지 않는다.
+
+## 2026-10-10 LOCAL 승인 적용
+
+사용자 Creator Studio 계획 I00–I60의 표시 변경이다. 기존 역사/Hosted/Gate 기록은 보존하며
+이번 로컬 결과를 CI·설치 앱·사용자 확인 완료로 합치지 않는다.
+
+- 앱 안내의 원시 enum/P1/P2/품질 등급/버전/hash 노출만 정리한다. 사용자 본문과 고급 JSON,
+  필수/선택 입력, 원래 권한·저장·승인 기능은 보존한다. ko/en 모두 적용하고 한국어는
+  자연스러운 해요체, 제목/버튼은 간결한 명사형을 사용한다.
+- Home wordmark만 Quicksand Bold 700·1.35rem·brand-accent #ff6b6b로 표현한다. 공식 source pin,
+  정확한 licensed hash와 원문 OFL을 등록하고 로컬 번들로 제공한다. 일반 UI는 system stack이다.
+- /settings·/agents/new는 명시 AppShell navigation=none으로 조립한다. 빈 footer/예약 공간도
+  제외하며 다른 local 탐색과 World 탭, 생성 완료 세 버튼·safe-area·인증은 보존한다.
+- Character directory h2와 embedded Relationship h1만 neutral SectionHeading을 공유한다.
+  48px/radius17px 아이콘 배경·21px icon·gap12/padding20/border-bottom과 실제 제목
+  1.45rem/400/line1.5/margin2px, 설명 .73rem/750/line1.5/margin3px를 공통 사용한다.
+  standalone 관계 페이지와 관계 본문은 기존 표시를 유지한다.
+- World 아이콘/배너 preview는 실제 Home icon/World banner 표시를 공유하고 draft의 이름·태그·
+  소개를 즉시 반영한다. 빈 메타 영역을 생략하며 저장된 공개 준비와 draft를 구분한다.
+  기존 프로필의 공용 crop UI/계산을 사용하고 적용만 사진을 저장한다. 취소/실패는 draft와
+  기존 사진을 보존한다. icon768²·banner1024×384·WebP0.8·실제 MIME/5MiB를 확인한다.
+- 게시글/Chat 사진의 로컬 준비 단계와 ko/en 오류만 추가한다. 원본·최종·요청 상한과 Worker/
+  WASM 자산은 [코덱 계약](../docs/operations/local-photo-codec.md)을 따른다. 사진 처리만으로
+  게시/Chat/AI가 실행되지 않는다. World/프로필은 별도 기존 5MiB 계약이다.
+
+디자인 검사에는 정확한 Quicksand 자산/원문 고지와 다섯 합성 진단 사진만 명시 등록한다.
+그 외 remote font·미등록 asset 제한과 기존 11개 canonical snapshot·diff 허용치는 유지한다.
+새 진단 screenshot 호출 수와 raw-color의 실제 감소만 baseline에 반영하며 허용치를 넓히지
+않는다. [LOCAL 근거](../docs/architecture/frontend-design-reference.md)와
+[구현·검증 기록](../docs/verification/creator-studio-copy-media-scheduler-20261010.md)을 참조한다.
+
+## Chat 이미지 대기·World 사용/삭제 표시 (2026-10-12 LOCAL)
+
+정상 이미지 인식과 응답 대기는 약300ms 후 기존 입력 중/Typing·캐릭터명 status·aria-hidden 점
+애니메이션 하나로 표시한다. accepted만으로 내리지 않고 유효 delta/실제 terminal/scope 종료에서
+정리한다. 인식 실패와 명시 재시도/text-only의 안내는 유지한다. reduced-motion을 존중한다.
+
+Studio는 visibility와 분리해 사용 가능한 World/작성 중/보관됨을 표시한다. 사용 시작은 World의
+기존 published 준비 검사를 이용하며 자율활동 ON과 별개다. 일반 목록에 접근 범위 배지를 추가하지
+않고 실제 ACL/visibility는 유지한다. 기본 SNS는 서버 binding으로 표시·보호하며 이름으로 추측하지 않는다.
+
+World 삭제에는 기존 semantic danger Button/Dialog와 취소 기본 focus·focus trap·44px 조작을 쓴다.
+삭제 확인 창은 저장된 대상 이름, 삭제/보존 범위, 공통 Field/Input의 이름 확인, 독립 확인 체크 순서로 보여 준다.
+이름 입력에는 항상 보이는 테두리·전체 폭·연결된 label/helper를 적용한다. 선택적인 패키지 내보내기는
+확인 입력 아래에 접힌 disclosure로 제공하며 필수 단계가 아니다. 제목·닫기와 취소/삭제 footer는
+창 안에 유지하고 긴 본문만 스크롤한다. 좁은 화면·긴 이름·키보드에서도 확인 조작을 가리지 않는다.
+대상 저장명과 World별 기록 삭제, 최초 원본/초기 이미지·타 World/공용 설정 보존을 ko/en으로 설명한다.
+선택적인 기존 export는 전체 기록 백업이나 필수 단계로 표현하지 않는다. 접수 이후 취소/복원은 없고
+실제 삭제 중/완료/실패/조회 실패를 구분한다. 새 보관/복원 화면이나 외부 디자인 자산은 추가하지 않는다.
+
+[LOCAL 통합 검증](../docs/verification/chat-world-lifecycle-integration-20261012.md)을 참조한다.
+
+## ComfyUI 예시와 안전한 연결 안내 (2026-10-12, LOCAL)
+
+기본 입력은 실행용 API JSON과 자리표시자다. 파일 가져오기/예시 사용은 선택 경로의 입력 연결과
+출력을 초기화하고 편집창 수정은 유효한 기존 연결을 보존한다는 안내를 함께 표시한다.
+다운로드는 독립 버튼이고 적용·저장·생성을 하지 않는다. 모델은 실제 설치 이름을 사용자가 지정한다.
+참조 예시는 ETN_LoadImageBase64 추가 노드와 PNG Base64 계약을 적용 전에 알리고 자동 설치하지 않는다.
+기존 직접 입력/출력은 고급 설정에서 유지한다. 기존 공통 Button/focus/44px/좁은 화면/scroll을 사용한다.
+
+Partner ON은 지정 서버에 계정 키가 전달된다는 신뢰 안내와 HTTPS/정확한 loopback 요구를 ko/en으로
+표시한다. localhost HTTP의 일시적인 IPv4 송신과 IPv6-only [::1] 입력도 설명한다. 저장 거절이 키나
+URL·graph draft를 지우거나 Partner를 자동 OFF로 바꾸지 않는다.
+API 안내는 UI 언어와 같은 Guide 원문/미리보기를 제공하고 JSON/Markdown은 안전한 pre 텍스트다.
+
+Comfy 연속 시험의 LOCAL 진단 capture 1개를 추가해 screenshot call inventory는 60개다.
+기존 canonical PNG 11개, pinned Linux 환경, raw color 기준, 25-pixel/0.1 diff 기준은 바꾸지 않는다.
+[관련 검증](../docs/verification/comfy-security-20261012.md)은 설치 앱/실모델/USER CHECK와 구분한다.

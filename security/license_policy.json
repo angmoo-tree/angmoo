@@ -108,7 +108,8 @@
     "Modified BSD License": "BSD-3-Clause",
     "OSI Approved :: BSD License": "BSD-3-Clause",
     "OSI Approved :: MIT License": "MIT",
-    "Universal Permissive License 1.0 or Apache License 2.0": "UPL-1.0 OR Apache-2.0"
+    "Universal Permissive License 1.0 or Apache License 2.0": "UPL-1.0 OR Apache-2.0",
+    "LGPL-3.0": "LGPL-3.0-only"
   },
   "metadata_overrides": [
     {
@@ -215,6 +216,20 @@
         "Provide the CC-BY-4.0 license link with redistributed data."
       ],
       "source": "https://github.com/browserslist/caniuse-lite/blob/main/LICENSE"
+    },
+    {
+      "ecosystem": "node",
+      "name": "libheif-js",
+      "version": "1.23.5",
+      "reported_expression": "LGPL-3.0",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified pinned local libheif-js WASM module, lazily bundled in a terminable photo Worker in the GPL-3.0-only frontend.",
+      "obligations": [
+        "Preserve upstream copyright, LGPL-3.0 and accompanying GPL-3.0 texts in frontend/public/licenses.",
+        "Provide exact library and codec source/build links and keep rebuild/replacement rights available; no proprietary wrapping or remote conversion.",
+        "Redistribution must include corresponding source for the shipped library and its compiled dependencies. See docs/operations/local-photo-codec.md."
+      ],
+      "source": "https://github.com/catdad-experiments/libheif-js/tree/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d"
     }
   ],
   "bundled_content": [
@@ -294,7 +309,6 @@
       "distribution_boundary": "Digest-pinned independent CI SBOM container; not bundled into Angmoo runtime images.",
       "source": "https://github.com/anchore/syft/blob/v1.51.0/LICENSE"
     }
-
   ],
   "actions": [
     {
@@ -360,7 +374,6 @@
       "license_expression": "MIT",
       "source": "https://github.com/actions/attest-build-provenance/blob/4d101475d8b20a2381f78447822ac1eab6504dd8/LICENSE"
     }
-
   ],
   "assets": [
     {
@@ -411,6 +424,14 @@
       "notice_marker": "Feather Icons - MIT License",
       "license_expression": "MIT",
       "source": "https://github.com/feathericons/feather/blob/main/LICENSE"
+    },
+    {
+      "name": "Quicksand variable font (300-700)",
+      "path": "frontend/src/assets/fonts/quicksand/Quicksand-wght.ttf",
+      "sha256": "39c9b64223561f56aaff6062a6f04063c4fc86809ad6768722c06614d977e1cc",
+      "license_expression": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/e3b5462bdd8153237ad58a3766d456d89c6a2f48/ofl/quicksand",
+      "note": "Unmodified local font. Copyright 2011 The Quicksand Project Authors. Reserved Font Name: Quicksand. OFL-1.1 preserved in source and frontend/public/licenses/Quicksand-OFL.txt; no CDN."
     }
   ]
 }

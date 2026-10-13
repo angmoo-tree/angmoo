@@ -32,14 +32,18 @@ def _available(item, now):
 
 
 class SqlAlchemyEpisodeCandidates:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, session, *, source_reader=None):
+        self.session, self.source_reader = session, source_reader
+
+    def _current(self, scope, item, now):
+        from app.domains.memory.repository.episode_privacy import currently_accessible
+        return currently_accessible(self.session, self.source_reader, scope, item, now)
 
     def _enabled(self, scope):
         return self.session.scalar(select(MemoryScopeSettingModel.id).where(
             _owned(MemoryScopeSettingModel, scope), MemoryScopeSettingModel.enabled.is_(True))) is not None
 
-    def priors(self, *, scope, now, thread_id=None, source_identities=(), ranked_fts_ids=()):
+    def priors(self, *, scope, now, thread_id=None, source_identities=(), ranked_fts_ids=(), allow_paged_sources=False):
         """Exact source links, then scoped FTS hits, then bounded recent items.
 
         Runtime supplies already bounded lexical hits if available. They are
@@ -49,7 +53,7 @@ class SqlAlchemyEpisodeCandidates:
         """
         identities = tuple(dict.fromkeys(source_identities))
         ranked = tuple(dict.fromkeys(ranked_fts_ids))
-        if len(identities) > 100 or len(ranked) > 50:
+        if len(identities) > (10_000 if allow_paged_sources else 100) or len(ranked) > 50:
             raise ValueError("episode_prior_candidate_limit")
         if not self._enabled(scope):
             return ()
@@ -63,15 +67,19 @@ class SqlAlchemyEpisodeCandidates:
             for row in rows:
                 if len(result) >= MAX_PRIOR_EPISODES:
                     break
-                if _item_retrievable(row, now) and len(row.summary) <= 2000:
+                if _item_retrievable(row, now) and self._current(scope, row, now) and len(row.summary) <= 2000:
                     result.setdefault(row.id, EpisodePriorCandidate(row.id, row.version, row.summary))
 
         if identities:
-            linked = exists(select(MemoryItemEvidence.id).where(
-                MemoryItemEvidence.memory_item_id == MemoryItem.id,
-                or_(*(and_(MemoryItemEvidence.source_type == kind,
-                           MemoryItemEvidence.source_id == identifier) for kind, identifier in identities))))
-            add(self.session.scalars(base.where(linked).order_by(MemoryItem.created_at.desc(), MemoryItem.id).limit(8)))
+            linked_rows = {}
+            for offset in range(0, len(identities), 100):
+                linked = exists(select(MemoryItemEvidence.id).where(
+                    MemoryItemEvidence.memory_item_id == MemoryItem.id,
+                    or_(*(and_(MemoryItemEvidence.source_type == kind,
+                               MemoryItemEvidence.source_id == identifier) for kind, identifier in identities[offset:offset + 100]))))
+                for row in self.session.scalars(base.where(linked).order_by(MemoryItem.created_at.desc(), MemoryItem.id).limit(8)):
+                    linked_rows[row.id] = row
+            add(sorted(linked_rows.values(), key=lambda row: (row.created_at, row.id), reverse=True))
         if len(result) < 8 and ranked:
             rows = {row.id: row for row in self.session.scalars(base.where(MemoryItem.id.in_(ranked)))}
             add(rows[identifier] for identifier in ranked if identifier in rows)

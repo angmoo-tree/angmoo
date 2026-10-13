@@ -2,25 +2,29 @@
 from sqlalchemy import func, or_, select
 from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest as Request, MemoryConsolidationJob as Link
 from app.domains.memory.models.batch import MemoryActivationEpoch, MemoryBatchProfile, MemoryBatchSetting, MemorySourceDelivery
+from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.items import MemoryCandidate, MemoryMaintenanceJob, MemoryScopeSettingModel
 from app.domains.memory.repository.reconciliation import recover_catalog
 from app.domains.memory.repository.consolidation_requests import progress
 
 
 def pending_requests(session):
-    return session.scalars(select(Request).where(Request.state == "preparing", Request.coalesced_to_request_id.is_(None))
+    from sqlalchemy import exists
+    from app.domains.memory.models.activity_situation import MemorySituationTransition
+    return session.scalars(select(Request).where(Request.state == "preparing", Request.coalesced_to_request_id.is_(None),
+        ~exists().where(MemorySituationTransition.scope_setting_id == Request.scope_setting_id))
         .order_by(Request.accepted_at).limit(16)).all()
 
 
 def request_context(session, row):
     setting = session.get(MemoryScopeSettingModel, row.scope_setting_id)
     config = session.get(MemoryBatchSetting, row.scope_setting_id)
-    profile = session.get(MemoryBatchProfile, setting.owner_id)
+    profile = session.get(MemorySubjectProfile, setting.id)
     return setting, config, profile
 
 
-def profile_model(session, owner_id):
-    return session.get(MemoryBatchProfile, owner_id).model_id
+def profile_model(session, setting_id):
+    return session.get(MemorySubjectProfile, setting_id).model_id
 
 
 def recover_request(session, *, row, setting, source_catalog_factory):

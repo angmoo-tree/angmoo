@@ -55,7 +55,8 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     assert 'id: "relationships"' in contract
     assert 'availability: "available"' in contract
     assert "worldAppSectionRoute(worldId, section)" in world_app
-    assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
+    assert "relationshipGraphRoute(relationshipCharacterId, worldId)" in world_app
+    assert "<WorldRelationshipsScreen characterId={relationshipCharacterId ?? ownerActor?.character_id ?? null} worldId={worldId}" in world_app
     assert "다른 World로 자동 이동하지 않습니다" in world_app
     assert "WorldSocialFeed" in world_app
     assert 'from "@/features/social/components/world-social-feed"' in world_app

@@ -236,3 +236,23 @@ class HybridSearchAxis(Protocol):
 class HybridCanonicalReader(Protocol):
     def revalidate(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...]) -> tuple[CanonicalRecallRecord, ...]: ...
     def hydrate(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...]) -> HybridHydrationResult: ...
+
+
+class AsyncHybridCanonicalReader(Protocol):
+    async def revalidate_async(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...], *, deadline: float) -> tuple[CanonicalRecallRecord, ...]: ...
+    async def hydrate_async(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...], *, deadline: float) -> HybridHydrationResult: ...
+
+
+class SyncCanonicalAdapter:
+    """Explicit compatibility adapter for direct, synchronous fixture readers."""
+    def __init__(self, reader):
+        self.reader = reader
+
+    def axis_request(self, request):
+        return getattr(self.reader, "axis_request", lambda value: value)(request)
+
+    async def revalidate_async(self, request, candidates, *, deadline):
+        return self.reader.revalidate(request, candidates)
+
+    async def hydrate_async(self, request, records, *, deadline):
+        return self.reader.hydrate(request, records)

@@ -124,8 +124,24 @@ from app.runtime.migrations.sqlite_versions import images_v26
 from app.runtime.migrations.sqlite_versions import environment_v27
 from app.runtime.migrations.sqlite_versions import world_configuration_v28
 from app.runtime.migrations.sqlite_versions import world_configuration_v29
+from app.runtime.migrations.sqlite_versions import world_activity_v30
+from app.runtime.migrations.sqlite_versions import activity_situation_v31
+from app.runtime.migrations.sqlite_versions import situation_recovery_v32
+from app.runtime.migrations.sqlite_versions import comfy_diagnostics_v33
+from app.runtime.migrations.sqlite_versions import image_provider_vault_v34
+from app.runtime.migrations.sqlite_versions import situation_source_binding_v35
+from app.runtime.migrations.sqlite_versions import situation_result_binding_v36
+from app.runtime.migrations.sqlite_versions import world_deletion_v37
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    36: world_deletion_v37.upgrade,
+    35: situation_result_binding_v36.upgrade,
+    34: situation_source_binding_v35.upgrade,
+    33: image_provider_vault_v34.upgrade,
+    32: comfy_diagnostics_v33.upgrade,
+    31: situation_recovery_v32.upgrade,
+    30: activity_situation_v31.upgrade,
+    29: world_activity_v30.upgrade,
     28: world_configuration_v29.upgrade,
     27: world_configuration_v28.upgrade,
     26: environment_v27.upgrade,
@@ -157,6 +173,14 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    36: SqliteMigrationContract(source_version=36, target_version=37, name="world_deletion", mutable_identity_tables=world_deletion_v37.MUTABLE_IDENTITY_TABLES, capture=world_deletion_v37.capture_delta, verify=world_deletion_v37.verify_delta),
+    35: SqliteMigrationContract(source_version=35, target_version=36, name="situation_result_binding", mutable_identity_tables=situation_result_binding_v36.MUTABLE_IDENTITY_TABLES, capture=situation_result_binding_v36.capture_delta, verify=situation_result_binding_v36.verify_delta),
+    34: SqliteMigrationContract(source_version=34, target_version=35, name="situation_source_binding", mutable_identity_tables=situation_source_binding_v35.MUTABLE_IDENTITY_TABLES, capture=situation_source_binding_v35.capture_delta, verify=situation_source_binding_v35.verify_delta),
+    33: SqliteMigrationContract(source_version=33, target_version=34, name="image_provider_vault", mutable_identity_tables=image_provider_vault_v34.MUTABLE_IDENTITY_TABLES, capture=image_provider_vault_v34.capture_delta, verify=image_provider_vault_v34.verify_delta),
+    32: SqliteMigrationContract(source_version=32, target_version=33, name="comfy_safe_diagnostics", mutable_identity_tables=comfy_diagnostics_v33.MUTABLE_IDENTITY_TABLES, capture=comfy_diagnostics_v33.capture_delta, verify=comfy_diagnostics_v33.verify_delta),
+    31: SqliteMigrationContract(source_version=31, target_version=32, name="situation_delivery_recovery", mutable_identity_tables=situation_recovery_v32.MUTABLE_IDENTITY_TABLES, capture=situation_recovery_v32.capture_delta, verify=situation_recovery_v32.verify_delta),
+    30: SqliteMigrationContract(source_version=30, target_version=31, name="activity_situation_admission", mutable_identity_tables=activity_situation_v31.MUTABLE_IDENTITY_TABLES, capture=activity_situation_v31.capture_delta, verify=activity_situation_v31.verify_delta),
+    29: SqliteMigrationContract(source_version=29, target_version=30, name="world_activity_credentials_batch32", mutable_identity_tables=world_activity_v30.MUTABLE_IDENTITY_TABLES, capture=world_activity_v30.capture_delta, verify=world_activity_v30.verify_delta),
     28: SqliteMigrationContract(source_version=28, target_version=29, name="world_configuration_v28_recovery", mutable_identity_tables=world_configuration_v29.MUTABLE_IDENTITY_TABLES, capture=world_configuration_v29.capture_delta, verify=world_configuration_v29.verify_delta),
     27: SqliteMigrationContract(source_version=27, target_version=28, name="world_character_configuration", mutable_identity_tables=world_configuration_v28.MUTABLE_IDENTITY_TABLES, capture=world_configuration_v28.capture_delta, verify=world_configuration_v28.verify_delta),
     26: SqliteMigrationContract(source_version=26, target_version=27, name="local_environment", mutable_identity_tables=environment_v27.MUTABLE_IDENTITY_TABLES, capture=environment_v27.capture_delta, verify=environment_v27.verify_delta),

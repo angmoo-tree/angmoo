@@ -15,7 +15,9 @@ def test_worker_deadline_keeps_last_native_stage_and_does_not_return_late_succes
     workers = FaultWorkers("slow")
     try:
         with pytest.raises(TimeoutError):
-            asyncio.run(workers.search(None, deadline=monotonic()+8))
+            # This fault targets nn_query, not cold spawn/import. Leave enough
+            # startup budget to reach that stage; the child cannot finish in it.
+            asyncio.run(workers.search(None, deadline=monotonic()+30))
         terminal = observation.search_trace.payload()["terminals"][0]
         assert terminal["terminal_state"] == "deadline"
         assert terminal["failure"]["failure_code"] == "deadline_exceeded"
@@ -82,7 +84,7 @@ def fault_child(pipe, case, query, deadline):
     if case == "slow":
         current_worker.get().metadata["eligible_vector_count"] = 7
         with phase("nn_query"):
-            time.sleep(20)
+            time.sleep(60)
     if case in {"busy", "locked", "load", "mapping"}:
         stage = "extension_load" if case == "load" else "mapping_read" if case == "mapping" else "db_open"
         with phase(stage):

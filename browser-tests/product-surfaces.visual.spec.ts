@@ -143,7 +143,7 @@ test("UI-F captures compact and centered Device Home parity", async ({ page }, t
   await expect(page.locator('[data-runtime-state="healthy"]')).toBeVisible();
   await expect(page.getByText("루멘 히어로 아카데미", { exact: true })).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "device-home-phone-360x800.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "device-home-phone-360x800.png"]);
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.reload();
@@ -153,7 +153,7 @@ test("UI-F captures compact and centered Device Home parity", async ({ page }, t
   expect(deviceBox).not.toBeNull();
   expect(Math.abs(deviceBox!.x + deviceBox!.width / 2 - 720)).toBeLessThanOrEqual(1);
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "device-home-centered-1440x1000.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "device-home-centered-1440x1000.png"]);
 
   expectReadOnlyFixture(audit, 2, testInfo.project.name === "static-export");
 });
@@ -193,7 +193,7 @@ test("UI-F captures the persistent World composer and long Korean stream", async
   );
   await expect(page.locator('[data-social-post-row="world-post-ui-f-1"]')).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "world-feed-composer-phone-436x880.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "world-feed-composer-phone-436x880.png"]);
 
   expectReadOnlyFixture(audit);
 });
@@ -225,7 +225,9 @@ test("UI-F captures populated and empty Creator Studio states", async ({ page },
   await expect(page.getByRole("heading", { name: "내 World" })).toBeVisible();
   await expect(page.getByText("루멘 히어로 아카데미", { exact: true })).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "creator-studio-populated-1440x900.png"]);
+  await expect(page.getByText("삭제 상태를 확인하지 못했어요.", {exact: true})).toHaveCount(0);
+  await expect(page.getByRole("button", {name: "World 삭제", exact: true}).first()).toBeEnabled();
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "creator-studio-populated-1440x900.png"]);
 
   await overrideApiRead(page, "worlds/mine?surface=creator_studio", {
     body: {
@@ -236,9 +238,9 @@ test("UI-F captures populated and empty Creator Studio states", async ({ page },
     },
   });
   await page.reload();
-  await expect(page.getByRole("heading", { name: "아직 만든 World가 없습니다" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "아직 만든 World가 없어요.", exact: true })).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "creator-studio-empty-1440x900.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "creator-studio-empty-1440x900.png"]);
 
   expectReadOnlyFixture(audit);
 });
@@ -250,11 +252,14 @@ test("UI-F captures ready and degraded Relationship Graph states", async ({
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(GRAPH_ROUTE);
 
-  await expect(page.locator('[data-product-shell="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('[data-product-content="relationship-graph"]')).toBeVisible();
+  await expect(page.locator('[data-product-shell="relationship-graph"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", {name: "이 World의 관계", exact: true})).toBeVisible();
+  await expect(page.getByRole("navigation", {name: "World 앱 기능"}).getByRole("link")).toHaveCount(5);
   await expect(page.locator('[data-relationship-graph-state="ready"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "방향 관계 지도" })).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "relationship-graph-ready-1440x900.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "relationship-graph-ready-1440x900.png"]);
 
   await overrideApiRead(page, "relationship-graph", {
     body: {
@@ -272,7 +277,7 @@ test("UI-F captures ready and degraded Relationship Graph states", async ({
   await expect(page.locator('[data-relationship-graph-state="degraded"]')).toBeVisible();
   await expect(page.getByText("Canonical DB 안전 대체", { exact: true })).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "relationship-graph-degraded-1440x900.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "relationship-graph-degraded-1440x900.png"]);
 
   expectReadOnlyFixture(audit);
 });
@@ -291,7 +296,7 @@ test("UI-F captures runtime-offline truth without hiding launchability", async (
   await expect(page.locator('[data-runtime-state="degraded"]')).toBeVisible();
   await expect(page.locator('[data-world-launchability="launchable"]')).toBeVisible();
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "device-home-runtime-offline-390x844.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "device-home-runtime-offline-390x844.png"]);
 
   expectReadOnlyFixture(audit, 1, testInfo.project.name === "static-export");
 });

@@ -7,6 +7,7 @@ import logging
 import hashlib
 from pathlib import Path
 
+from app.config import settings
 from app.database import create_database_engine, create_session_factory
 from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.integrations.ladybug_projection import (
@@ -53,14 +54,23 @@ class EmbeddedDataUpgradeCoordinator:
         self._fallback_generation = fallback_generation
 
     def upgrade(self, *, retention_owner=None) -> EmbeddedDataUpgradeResult:
+        managed_secret=self._paths.secrets / "app-secret"
+        if managed_secret.is_file():
+            from app.core.secret_file_access import protect_existing_secret
+            protect_existing_secret(managed_secret,protect_parent=True)
         secret_before = _file_sha256(self._paths.secrets / "app-secret")
         media_before = _tree_fingerprint(self._paths.media)
         with EmbeddedUpgradeLock(
             self._paths.runtime / "embedded-data-migration.lock"
         ):
+            from app.domains.identity.service.migration_secrets import MigrationSecretInterpreter
+            migration_settings = settings.model_copy(update={
+                "APP_SECRET_FILE": str(self._paths.secrets / "app-secret"),
+            })
             canonical = SqliteCanonicalUpgradeCoordinator(
                 self._data_paths,
                 fallback_generation=self._fallback_generation,
+                secret_interpreter=MigrationSecretInterpreter(secret_source=lambda: migration_settings.app_secret),
             ).upgrade()
             engine = create_database_engine(
                 "sqlite+pysqlite:///" + canonical.database_path.resolve().as_posix()

@@ -269,6 +269,16 @@ class SqliteMemoryRecallIndex:
             )
             self._refresh_state(connection)
 
+    def erase_memory_items(self, identifiers) -> None:
+        """Physical scoped erasure; ordinary tombstoning retains old source text."""
+        self._require_open()
+        with self._write_transaction() as connection:
+            for identifier in identifiers:
+                item_id = _required_identifier(identifier, "memory_item_id")
+                connection.execute("DELETE FROM memory_recall_fts WHERE document_id IN (SELECT document_id FROM memory_recall_documents WHERE memory_item_id=?)", (item_id,))
+                connection.execute("DELETE FROM memory_recall_documents WHERE memory_item_id=?", (item_id,))
+            self._refresh_state(connection)
+
     def tombstone_scope(
         self,
         *,

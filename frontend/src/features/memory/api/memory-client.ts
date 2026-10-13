@@ -1,16 +1,106 @@
-import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { captureAuthRequestScope, isCurrentAuthRequestScope, clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 import type { MemoryEmbeddingSetting, MemoryEmbeddingUpdate } from "@/features/memory/types/memory-embedding-contract";
+import type { MemoryProcessingSetting, MemoryProcessingUpdate, MemorySaveRequest } from "../types/memory-processing-contract";
+import type { MemoryUnsavedExperiences, MemoryIndividualRecheckRequest, MemoryDiscardRequest, MemoryDiscardResult } from "../types/memory-processing-contract";
+
+function validateProcessing(value: MemoryProcessingSetting, worldId: string, subjectId: string) {
+  if (!value || !matchesScope(value.scope, worldId, subjectId) ||
+    !Number.isSafeInteger(value.version) || value.version < 1 ||
+    [value.pending_count, value.blocked_count, value.applied_count].some(n => !Number.isSafeInteger(n) || n < 0) ||
+    [value.memory_enabled, value.daily_enabled, value.shutdown_apply_enabled].some(v => typeof v !== "boolean") ||
+    !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) || typeof value.timezone !== "string" ||
+    !["idle", "accepted", "applying", "saved", "partial_error"].includes(value.status) ||
+    ![null, "accepted", "empty"].includes(value.result) ||
+    (value.resolved_request_key != null && (typeof value.resolved_request_key !== "string" || value.resolved_request_key.length < 8 || value.resolved_request_key.length > 128)) ||
+    [value.rejected_count, value.skipped_count].some(n => n !== undefined && (!Number.isSafeInteger(n) || n < 0)) ||
+    [value.scope_busy, value.can_recheck].some(v => v !== undefined && typeof v !== "boolean") ||
+    (value.operation != null && !["pending_apply", "blocked_recheck"].includes(value.operation)) ||
+    (value.run_id != null && (typeof value.run_id !== "string" || !value.run_id)) ||
+    (value.run_state != null && !["pending", "running", "deferred", "completed", "error"].includes(value.run_state)) ||
+    [value.next_due_at, value.last_applied_at].some(v => v !== null && (typeof v !== "string" || !Number.isFinite(Date.parse(v))))) {
+    throw new MemoryApiError(502, "memory_processing_contract_invalid");
+  }
+  return value;
+}
+export function getMemoryProcessing(worldId: string, subjectId: string, signal?: AbortSignal, requestKey?: string) {
+  const query = requestKey ? `?request_key=${encodeURIComponent(requestKey)}` : "";
+  return requestMemoryApi<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings${query}`, { signal })
+    .then(value => {
+      validateProcessing(value, worldId, subjectId);
+      if (value.resolved_request_key != null && value.resolved_request_key !== requestKey) {
+        throw new MemoryApiError(502, "memory_processing_contract_invalid");
+      }
+      return value;
+    });
+}
+export function saveMemoryProcessing(worldId: string, subjectId: string, data: MemoryProcessingUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-settings`,
+    { method: "PUT", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
+}
+export function savePendingMemories(worldId: string, subjectId: string, data: MemorySaveRequest, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/save`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
+}
+
+export function getUnsavedExperiences(worldId: string, subjectId: string, signal?: AbortSignal, cursor?: string) {
+  const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+  return requestMemoryApi<MemoryUnsavedExperiences>(`${scopePath(worldId, subjectId)}/memory/unsaved-experiences${query}`, { signal }).then(value => {
+    if (!value || !matchesScope(value.scope, worldId, subjectId) || !Array.isArray(value.items) || value.items.length > 100 ||
+        !Number.isSafeInteger(value.blocked_count) || value.blocked_count < 0 || typeof value.scope_busy !== "boolean" || typeof value.can_recheck !== "boolean" ||
+        (value.next_cursor !== null && (typeof value.next_cursor !== "string" || value.next_cursor.length > 512)) ||
+        value.items.some(row => !row || !Number.isSafeInteger(row.receipt_sequence) || row.receipt_sequence < 1 ||
+          !Number.isSafeInteger(row.state_version) || row.state_version < 1 || !Number.isFinite(Date.parse(row.occurred_at)) ||
+          (row.description !== null && (typeof row.description !== "string" || Array.from(row.description).length > 1000)) ||
+          !["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "result_invalid", "validation_failed"].includes(row.reason) ||
+          typeof row.can_recheck !== "boolean" || typeof row.can_discard !== "boolean") ||
+        new Set(value.items.map(row => row.receipt_sequence)).size !== value.items.length) {
+      throw new MemoryApiError(502, "memory_unsaved_contract_invalid");
+    }
+    return value;
+  });
+}
+
+export function recheckUnsavedExperiences(worldId: string, subjectId: string, data: MemorySaveRequest | MemoryIndividualRecheckRequest, signal?: AbortSignal, sequence?: number) {
+  const suffix = sequence === undefined ? "/memory/recheck" : `/memory/situations/${sequence}/recheck`;
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}${suffix}`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => {
+      validateProcessing(value, worldId, subjectId);
+      if (value.resolved_request_key !== data.idempotency_key || (value.run_id != null && value.operation !== "blocked_recheck")) {
+        throw new MemoryApiError(502, "memory_recheck_contract_invalid");
+      }
+      return value;
+    });
+}
+
+export function discardUnsavedExperience(worldId: string, subjectId: string, sequence: number, data: MemoryDiscardRequest, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryDiscardResult>(`${scopePath(worldId, subjectId)}/memory/situations/${sequence}/discard`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => {
+      if (!value || !matchesScope(value.scope, worldId, subjectId) || value.receipt_sequence !== sequence || value.state !== "discarded" ||
+          !Number.isSafeInteger(value.state_version) || value.state_version < 1 || !Number.isFinite(Date.parse(value.discarded_at)) ||
+          value.operation !== "discard" || !["discarded", "already_discarded"].includes(value.result) || value.resolved_request_key !== data.idempotency_key ||
+          [value.pending_count, value.blocked_count].some(n => !Number.isSafeInteger(n) || n < 0)) {
+        throw new MemoryApiError(502, "memory_discard_contract_invalid");
+      }
+      return value;
+    });
+}
 
 export function getMemoryEmbeddingSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
   return requestMemoryApi<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { signal })
     .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
 }
 
-export function saveMemoryEmbeddingSetting(worldId: string, subjectId: string, data: MemoryEmbeddingUpdate) {
-  return requestMemoryMutation<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { method: "PUT", body: JSON.stringify(data) })
+export function saveMemoryEmbeddingSetting(worldId: string, subjectId: string, data: MemoryEmbeddingUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { method: "PUT", body: JSON.stringify(data), signal })
     .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
+}
+
+export function startMemoryEmbeddingPreparation(worldId: string, subjectId: string, expectedRevision: number, signal?: AbortSignal) {
+  return requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/embedding-preparation`, {
+    method: "POST", body: JSON.stringify({ expected_revision: expectedRevision }), signal,
+  });
 }
 
 function validateEmbeddingSetting(value: MemoryEmbeddingSetting, worldId: string, subjectId: string) {
@@ -34,8 +124,8 @@ export function getMemoryBatchSetting(worldId: string, subjectId: string, signal
     .then((value) => validateBatchSetting(value, worldId, subjectId));
 }
 
-export function saveMemoryBatchSetting(worldId: string, subjectId: string, data: MemoryBatchUpdate) {
-  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { method: "PUT", body: JSON.stringify(data) })
+export function saveMemoryBatchSetting(worldId: string, subjectId: string, data: MemoryBatchUpdate, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { method: "PUT", body: JSON.stringify(data), signal })
     .then((value) => validateBatchSetting(value, worldId, subjectId));
 }
 
@@ -58,7 +148,7 @@ function validateBatchSetting(value: MemoryBatchSetting, worldId: string, subjec
     typeof value.timezone !== "string" ||
     !["disabled", "paused", "waiting", "running", "pending", "attention", "completed", "capacity_blocked"].includes(value.status) ||
     !Array.isArray(value.available_models) || value.available_models.some((model) => typeof model !== "string") ||
-    (value.model_id !== null && !value.available_models.includes(value.model_id)) ||
+    (value.model_id !== null && (typeof value.model_id !== "string" || value.model_id.length > 200)) ||
     [value.next_due_at, value.last_completed_at].some((time) => time !== null && (typeof time !== "string" || !Number.isFinite(Date.parse(time))))) {
     throw new MemoryApiError(502, "memory_batch_contract_invalid");
   }
@@ -155,7 +245,7 @@ function episodeDetailMatches(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
-  return ["episode_v1", "legacy_summary"].includes(String(v.representation)) &&
+  return ["episode_v1", "activity_situation_v1", "legacy_summary"].includes(String(v.representation)) &&
     typeof v.partial === "boolean" && Number.isInteger(v.omitted_units) && Number(v.omitted_units) >= 0 &&
     Number.isInteger(v.followup_count) && Number(v.followup_count) >= 0 &&
     Array.isArray(v.units) && v.units.every((unit: unknown) => {
@@ -178,12 +268,14 @@ export function updateMemorySetting(
   worldId: string,
   subjectId: string,
   data: { expected_version: number; enabled: boolean; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestMemoryMutation<MemorySettingMutationRead>(
     `${scopePath(worldId, subjectId)}/memory/settings`,
     {
       method: "PUT",
       body: JSON.stringify({ schema_version: "memory-setting-update.v1", ...data }),
+      ...options,
     },
   ).then((read) => {
     if (
@@ -203,6 +295,7 @@ export function setMemoryPin(
   subjectId: string,
   memoryId: string,
   data: { expected_version: number; pinned: boolean; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -212,6 +305,7 @@ export function setMemoryPin(
     {
       method: "PUT",
       body: JSON.stringify({ schema_version: "memory-pin-update.v1", ...data }),
+      ...options,
     },
     data.pinned ? "pin" : "unpin",
   ).then((read) => {
@@ -232,6 +326,7 @@ export function correctMemoryItem(
     summary: string;
     idempotency_key: string;
   },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -241,6 +336,7 @@ export function correctMemoryItem(
     {
       method: "POST",
       body: JSON.stringify({ schema_version: "memory-correction-create.v1", ...data }),
+      ...options,
     },
     "correct",
   ).then((read) => {
@@ -256,6 +352,7 @@ export function deleteMemoryItem(
   subjectId: string,
   memoryId: string,
   data: { expected_version: number; idempotency_key: string },
+  options: { signal?: AbortSignal } = {},
 ) {
   return requestItemMutation(
     worldId,
@@ -265,6 +362,7 @@ export function deleteMemoryItem(
     {
       method: "DELETE",
       body: JSON.stringify({ schema_version: "memory-delete.v1", ...data }),
+      ...options,
     },
     "delete",
   ).then((read) => {
@@ -293,6 +391,7 @@ export function getWorldChatEvidence(
       !["available", "degraded"].includes(read.capability) ||
       !Array.isArray(read.items) ||
       read.items.length > 12 ||
+      !evidenceLimitationsMatch(read) ||
         read.items.some((item) => !chatEvidenceMatches(item, worldId)) ||
         (read.current_context !== undefined && (!Array.isArray(read.current_context) ||
           read.current_context.length > 12 || read.current_context.some((item) =>
@@ -307,6 +406,7 @@ async function requestMemoryApi<T>(
   path: string,
   options: { signal?: AbortSignal },
 ): Promise<T> {
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     cache: "no-store",
     credentials: "same-origin",
@@ -314,6 +414,7 @@ async function requestMemoryApi<T>(
     signal: options.signal,
   });
   const payload = (await response.json().catch(() => null)) as unknown;
+  if (options.signal?.aborted || !isCurrentAuthRequestScope(scope)) throw new DOMException("Request scope changed", "AbortError");
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredUser();
@@ -325,6 +426,7 @@ async function requestMemoryApi<T>(
 }
 
 async function requestMemoryMutation<T>(path: string, init: RequestInit): Promise<T> {
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...init,
     cache: "no-store",
@@ -336,6 +438,7 @@ async function requestMemoryMutation<T>(path: string, init: RequestInit): Promis
     },
   });
   const payload = (await response.json().catch(() => null)) as unknown;
+  if (init.signal?.aborted || !isCurrentAuthRequestScope(scope)) throw new DOMException("Request scope changed", "AbortError");
   if (!response.ok) {
     if (response.status === 401) {
       clearStoredUser();
@@ -428,6 +531,7 @@ function chatEvidenceMatches(value: unknown, worldId: string) {
     typeof item.reference === "string" &&
     ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity", "episode_memory", "current_image_analysis"].includes(item.kind) &&
     episodeDetailMatches(item.episode) &&
+    relationshipFieldsMatch(item) &&
     typeof item.label === "string" &&
     (item.excerpt === null || typeof item.excerpt === "string") &&
     (item.occurred_at === null || typeof item.occurred_at === "string") &&
@@ -500,3 +604,4 @@ export async function retryMemoryConsolidation(worldId: string, subjectId: strin
   await requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/batch-run/${encodeURIComponent(requestId)}/retry`,
     { method: "POST", body: JSON.stringify({ idempotency_key: key }) });
 }
+import { evidenceLimitationsMatch, relationshipFieldsMatch } from "../utils/chat-evidence-presentation";

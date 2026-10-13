@@ -164,6 +164,10 @@ export async function runtimeFetch(
 }
 
 export function resolveRuntimeMediaUrl(path: string) {
+  const worldMedia = /^\/media\/worlds\/([A-Za-z0-9_-]+)\/([A-Za-z0-9._-]+)([?#].*)?$/.exec(path);
+  if (worldMedia) {
+    return resolveRuntimeRequestUrl(`/api/backend/worlds/${worldMedia[1]}/media/${worldMedia[2]}${worldMedia[3] ?? ""}`);
+  }
   if (path.startsWith("/api/v1/media/assets/")) {
     return resolveRuntimeRequestUrl(`/api/backend${path.slice("/api/v1".length)}`);
   }

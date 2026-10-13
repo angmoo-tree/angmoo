@@ -22,7 +22,21 @@ REQUIRED_FIELDS = {
     "review_due",
     "removal_condition",
 }
-EXPECTED_COUNT = 27
+EXPECTED_COUNT = 31
+PR365_CANARY_SHA256 = "aca32a5f456daa79bae5dfc7d0110a3bd19f8a9172bffe6f4d7d5365cad9d79c"
+PR365_CANARY_PATHS = frozenset({
+    "backend/tests/test_t2_secret_allowlist.py",
+    "security/refactor_backend_additions.json",
+    "security/post_refactor_contract_changes.json",
+    "backend/security/secret_scan_allowlist.json",
+})
+PR365_CANARY_EVIDENCE = {
+    "evidence_commit": "b19eca0196f92f7d48bf258df5ea3c466a1767c8",
+    "evidence_path": "backend/tests/test_t2_secret_allowlist.py",
+    "evidence_test": "test_pr365_noncredential_allowlists_never_hide_other_values_paths_or_rules",
+    "evidence_git_blob": "05f9d788ddaa1d35b6cf6647668121fc1eba1881",
+    "value_sha256": PR365_CANARY_SHA256,
+}
 EXPECTED_LAST_REVIEWED = "2026-08-14"
 EXPECTED_REVIEW_DUE = "2026-11-14"
 CHECKPOINT_PATH = "security/refactor_backend_checkpoint.json"
@@ -54,6 +68,7 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
     checkpoint_entries = 0
     restored_history_entries = 0
     additions_entries = 0
+    canary_paths = set()
     for index, entry in enumerate(entries):
         label = f"entries[{index}]"
         if not isinstance(entry, dict):
@@ -76,6 +91,17 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
         if entry.get("scope") != "exact path+rule+value tuple only":
             errors.append(f"{label}.scope must stay exact")
         reviewed, due = EXPECTED_LAST_REVIEWED, EXPECTED_REVIEW_DUE
+        canary = entry.get("evidence_commit") == PR365_CANARY_EVIDENCE["evidence_commit"]
+        if canary:
+            canary_paths.add(entry.get("path"))
+            reviewed, due = "2026-10-13", "2027-01-13"
+            if entry.get("path") not in PR365_CANARY_PATHS or entry.get("rule") != "openai-api-key":
+                errors.append(f"{label} is outside the exact reviewed PR365 canary scope")
+            for field, expected in PR365_CANARY_EVIDENCE.items():
+                if entry.get(field) != expected:
+                    errors.append(f"{label}.{field} differs from the reviewed PR365 canary evidence")
+            if hashlib.sha256(str(entry.get("value", "")).encode()).hexdigest() != PR365_CANARY_SHA256:
+                errors.append(f"{label}.value differs from the reviewed noncredential test canary")
         if entry.get("path") == CHECKPOINT_PATH:
             checkpoint_entries += 1
             reviewed, due = "2026-09-05", "2026-12-05"
@@ -90,7 +116,7 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
                 errors.append(f"{label}.rule differs from the reviewed historical fixture")
             if hashlib.sha256(str(entry.get("value", "")).encode()).hexdigest() != CHECKPOINT_FIXTURE_SHA256:
                 errors.append(f"{label}.value differs from the exact reviewed historical fixture")
-        if entry.get("path") == ADDITIONS_PATH:
+        if entry.get("path") == ADDITIONS_PATH and not canary:
             additions_entries += 1
             reviewed, due = "2026-09-28", "2026-12-28"
             for field, expected in CHECKPOINT_EVIDENCE.items():
@@ -118,6 +144,8 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
         errors.append("allowlist must contain exactly one reviewed historical fixture tuple")
     if additions_entries != 1:
         errors.append("allowlist must contain exactly one reviewed additive fixture tuple")
+    if canary_paths != PR365_CANARY_PATHS:
+        errors.append("allowlist must retain exactly the four reviewed PR365 canary paths")
     return errors
 
 

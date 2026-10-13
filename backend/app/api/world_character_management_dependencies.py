@@ -21,3 +21,23 @@ def manual_activity_workflow():
         return await run_world_character_now(service, workflows=build_manual_activity_workflows(), **kwargs)
 
     return run
+
+
+def credential_workflows():
+    from app.runtime.world_characters import credentials
+    return credentials
+
+
+def status_workflow():
+    from app.runtime.world_characters.status import read
+    return read
+
+
+def image_policy_workflows():
+    from app.runtime.world_characters import image_policy
+    return image_policy
+
+
+def instance_deletion_workflow():
+    from app.runtime.world_characters.instance_deletion import erase
+    return erase

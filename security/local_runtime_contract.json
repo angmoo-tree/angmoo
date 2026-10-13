@@ -159,6 +159,13 @@
       "reason": "Only shared NFKC/control/space normalization and LIKE escaping/term helpers remain. Social Post fields/order/limits are owned by domains.social.service.search_documents."
     },
     {
+      "module": "app.core.secret_file_access",
+      "disposition": "keep",
+      "owner_stage": "AR-COMFY-WINDOWS-MANAGED-KEY",
+      "removal_condition": null,
+      "reason": "Product-neutral owned secret-file creation, existing-file ACL protection and containment; domains and runtime retain key contents, policy and lifetime."
+    },
+    {
       "disposition": "keep",
       "module": "app.core.security",
       "owner_stage": "L1",

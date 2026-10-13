@@ -1,6 +1,7 @@
 """CANONICAL-route orchestration for the P8-L-L specialist Planner."""
 
 from __future__ import annotations
+from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
 
 from app.contracts.retrieval_observation import observe
 from app.domains.chat.service.planner_diagnostics import observe_canonical_rejection
@@ -52,6 +53,7 @@ class CanonicalRetrievalCommand:
     workflow_dependency: WorkflowDependencyBinding | None = None
     call_id: str | None = None
     image_context: str | None = None
+    chat_identity: ChatIdentityContext | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -307,6 +309,7 @@ class CanonicalRetrievalPlanningService:
             envelope_version=command.resolved.version,
             envelope_hash=command.resolved.envelope_hash,
             user_message=command.user_message,
+            chat_participants=command.chat_identity.participants() if command.chat_identity else None,
             image_context=command.image_context,
             intent=command.intent.intent,
             entities=tuple(

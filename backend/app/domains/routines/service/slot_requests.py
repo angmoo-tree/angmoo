@@ -15,19 +15,23 @@ def assign_resident_slot(
     *,
     user_id: str,
     character_id: str,
-    credential_id: str,
+    credential_id: str | None,
     heartbeat_interval_seconds: int,
     next_tick_at: datetime | None = None,
     commit: bool = True,
     workflows: SlotRequestWorkflows,
 ) -> schemas.AgentSlotRead:
     workflows.ensure_auto_ticks_available(db)
-    _validate_character_and_credential(
-        workflows.identity_references(),
-        user_id=user_id,
-        character_id=character_id,
-        credential_id=credential_id,
-    )
+    metadata = workflows.slot_references().capture_activity_input(character_id)
+    if metadata:
+        if metadata["_world_credential"]["owner_id"] != user_id:
+            raise AgentSlotUnavailableError("world_credential_scope_unavailable")
+        credential_id = None
+    else:
+        _validate_character_and_credential(
+            workflows.identity_references(), user_id=user_id,
+            character_id=character_id, credential_id=credential_id,
+        )
     candidate_agent_ids = settings.openclaw_agent_ids
     setting = activity_settings.ensure_setting(db, character_id, commit=commit)
     timezone = workflows.timezone_reader(db, character_id=character_id)
@@ -64,18 +68,22 @@ def claim_temporary_resident_slot(
     *,
     user_id: str,
     character_id: str,
-    credential_id: str,
+    credential_id: str | None,
     heartbeat_interval_seconds: int,
     timeout_seconds: int,
     workflows: SlotRequestWorkflows,
 ) -> models.AgentSlot:
     workflows.ensure_run_now_available(db)
-    _validate_character_and_credential(
-        workflows.identity_references(),
-        user_id=user_id,
-        character_id=character_id,
-        credential_id=credential_id,
-    )
+    metadata = workflows.slot_references().capture_activity_input(character_id)
+    if metadata:
+        if metadata["_world_credential"]["owner_id"] != user_id:
+            raise AgentSlotUnavailableError("world_credential_scope_unavailable")
+        credential_id = None
+    else:
+        _validate_character_and_credential(
+            workflows.identity_references(), user_id=user_id,
+            character_id=character_id, credential_id=credential_id,
+        )
     slot = slot_assignments.claim_temporary_resident_slot_assignment(
         db,
         agent_ids=settings.openclaw_agent_ids,

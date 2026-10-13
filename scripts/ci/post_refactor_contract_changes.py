@@ -15,8 +15,22 @@ import hashlib
 from pathlib import Path
 import re
 import subprocess
+import zlib
 
 MANIFEST = "security/post_refactor_contract_changes.json"
+
+
+@lru_cache(maxsize=128)
+def _compressed_git_history(root: str, object_path: str) -> bytes:
+    # Store compressed immutable bytes, never parsed/validated candidate state.
+    return zlib.compress(subprocess.check_output(["git", "show", object_path], cwd=root), level=1)
+
+
+def committed_history_bytes(root: Path, object_path: str) -> bytes:
+    """Read one pinned ledger object exactly, with bounded compressed storage."""
+    if not re.fullmatch(r"[0-9a-f]{40}:" + re.escape(MANIFEST), object_path):
+        raise ValueError("history cache requires an exact committed ledger object")
+    return zlib.decompress(_compressed_git_history(str(root.resolve()), object_path))
 
 
 @lru_cache(maxsize=8192)
@@ -42,7 +56,7 @@ def load(root: Path, *, reader=None) -> list[dict]:
     # One immutable committed file can contain many changed definitions. Read
     # its Git object once per validation, retaining every provenance check.
     @lru_cache(maxsize=None)
-    def git(*args: str) -> bytes:
+    def cached_git(*args: str) -> bytes:
         if reader is not None:
             return reader(*args, root=root)
         if args[:2] == ("log", "--format=%H"):
@@ -51,6 +65,16 @@ def load(root: Path, *, reader=None) -> list[dict]:
             args = (*args[:-1], head)
         # Every command issued below now names an immutable commit/object.
         return _committed_git(str(root.resolve()), head, args)
+
+    def git(*args: str) -> bytes:
+        # Reuse only compressed, pinned historical bytes. Parse and compare the
+        # complete prefix again; the candidate and current owners remain fresh.
+        if len(args) == 2 and args[0] == "show" and args[1].endswith(":" + MANIFEST):
+            if reader is not None:
+                return reader(*args, root=root)
+            return committed_history_bytes(root, args[1])
+        return cached_git(*args)
+
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
         old = json.loads(git("show", f"{commit}:{MANIFEST}"))["records"]
         if records[:len(old)] != old:
@@ -113,6 +137,25 @@ def load(root: Path, *, reader=None) -> list[dict]:
                 for path in folder.rglob("*"):
                     if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".jsx", ".css"} and imported.search(path.read_text(encoding="utf-8")):
                         raise ValueError("retired style still has an active consumer")
+        for removed in record.get("retired_frontend_product_views", []):
+            source = removed["source"]
+            owners = ("frontend/src/composition/screens/world-creator-screen.tsx",
+                      "backend/app/domains/social/recommendation_router.py",
+                      "backend/tests/social/test_world_topics_retirement.py",
+                      "browser-tests/home-activity-memory.spec.ts")
+            if (source != "frontend/src/composition/screens/world-recommendation-tools.tsx"
+                    or any(owner not in record["source_blobs"] for owner in owners)):
+                raise ValueError("retired World topic view requires exact consumer, owner and behavior evidence")
+            before = git("show", f"{commit}^:{source}").decode("utf-8")
+            if (text_digest(before) != removed["before_sha256"]
+                    or git("ls-tree", commit, "--", source).strip() or (root / source).exists()):
+                raise ValueError("retired World topic view preimage or actual absence differs")
+            imported = re.compile(r"\bWorldRecommendationTools\b|world-recommendation-tools")
+            for folder in (root / "frontend/src", root / "frontend/static-shell/app"):
+                for path in folder.rglob("*"):
+                    if (path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".jsx"}
+                            and imported.search(path.read_text(encoding="utf-8"))):
+                        raise ValueError("retired World topic view still has an active consumer")
         for removed in record.get("retired_native_chrome", []):
             source = removed["source"]
             owners = ("desktop/src-tauri/src/lib.rs", "desktop/src-tauri/src/window_policy.rs",
@@ -143,6 +186,17 @@ def load(root: Path, *, reader=None) -> list[dict]:
                             for target in (node.targets if isinstance(node, ast.Assign) else [node.target])))]
             if definitions(before) != [removed["before_ast"]] or definitions(after) or definitions((root / source).read_text(encoding="utf-8-sig")):
                 raise ValueError("removed binding preimage or actual absence differs")
+    # Evidence can be appended after its implementation was committed. Ledger
+    # append order is immutable audit history; it is not the product timeline.
+    # Use actual Git topology only after every record's ancestry and exact
+    # committed preimage have passed the checks above. No dates or IDs order a
+    # transition, and a missing source remains an error rather than an omission.
+    if len(records) > 1:
+        timeline = git("rev-list", "--reverse", "--topo-order", "HEAD").decode().splitlines()
+        positions = {commit: position for position, commit in enumerate(timeline)}
+        if any(record["implementation_commit"] not in positions for record in records):
+            raise ValueError("product change source absent from committed timeline")
+        return sorted(records, key=lambda record: positions[record["implementation_commit"]])
     return records
 
 
@@ -189,12 +243,12 @@ def frontend_style_retirement_matches(source: str, original: str, records: list[
     return False
 
 
-@lru_cache(maxsize=2048)
+@lru_cache(maxsize=64)
 def definition_body(source: str) -> list[ast.stmt]:
     return ast.parse(source).body
 
 
-@lru_cache(maxsize=8192)
+@lru_cache(maxsize=1024)
 def definition_ast(source: str, symbol: str) -> str:
     body = definition_body(source)
     for part in symbol.split("."):
@@ -209,7 +263,7 @@ def definition_ast(source: str, symbol: str) -> str:
     return ast.dump(node, include_attributes=False)
 
 
-@lru_cache(maxsize=8192)
+@lru_cache(maxsize=2048)
 def normalize_ast_dump(value: str) -> str:
     """Normalize AST dumps or captured assertion source without executing text."""
     if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):

@@ -1,0 +1,9 @@
+.card { min-width: 0; padding: var(--spacing-section); }
+.header { display: flex; align-items: flex-start; gap: var(--spacing-control); margin-bottom: var(--spacing-phone); }
+.icon { display: inline-flex; flex: 0 0 40px; width: 40px; height: 40px; border-radius: var(--radius-pill); align-items: center; justify-content: center; background: var(--color-action-primary); color: var(--color-on-action-primary); }
+.title { margin: 0; font-size: var(--text-section-title); font-weight: 800; color: var(--color-text-strong); overflow-wrap: anywhere; }
+.description { margin: var(--spacing-compact) 0 0; color: var(--color-text-secondary); font-size: var(--text-meta); line-height: 1.6; }
+.content { display: grid; gap: var(--spacing-phone); min-width: 0; }
+.danger { border-color: var(--color-state-danger); }
+.softIcon { background: var(--color-brand-soft); color: var(--color-action-primary); }
+@media (max-width: 480px) { .card { padding: var(--spacing-phone); } }

@@ -105,6 +105,21 @@ export function LicensesContent() {
             <LicenseBlock title="Lucide Icons - ISC License" body={LUCIDE_ISC_LICENSE} />
             <LicenseBlock title="Feather Icons - MIT License" body={FEATHER_MIT_LICENSE} />
           </div>
+          <div className="mt-6 rounded-3xl border border-border-soft bg-surface p-6">
+            <h2 className="text-xl font-bold">Quicksand · libheif</h2>
+            <p>{uiText("홈 제목에는 로컬 Quicksand 글꼴을 사용해요. HEIF 사진 변환에는 기기에 포함된 libheif를 사용하며 외부 변환 서비스로 사진을 보내지 않아요.")}</p>
+            <p>Quicksand: © 2011 The Quicksand Project Authors · Reserved Font Name: Quicksand · OFL-1.1</p>
+            <p>libheif-js 1.23.5: Kiril Vatev · LGPL-3.0 · libheif: Dirk Farin and contributors · LGPL-3.0-or-later · libde265: struktur AG and contributors · LGPL-3.0</p>
+            <ul>
+              <li><a href="/licenses/Quicksand-OFL.txt">Quicksand — OFL-1.1</a></li>
+              <li><a href="/licenses/libheif-js-LGPL-3.0.txt">libheif-js — LGPL-3.0</a></li>
+              <li><a href="/licenses/libheif-LICENSE.txt">libheif — LGPL-3.0 / MIT</a></li>
+              <li><a href="/licenses/libde265-LGPL.txt">libde265 — LGPL-3.0</a></li>
+              <li><a href="/licenses/Angmoo-GPL-3.0.txt">GPL-3.0</a></li>
+              <li><a href="https://github.com/catdad-experiments/libheif-js/tree/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d">libheif-js 1.23.5 source</a></li>
+              <li><a href="https://github.com/catdad-experiments/libheif-emscripten/tree/5c8968a44e9c68ae677e24790d77d001ed7fe7cc">libheif WASM source and build</a></li>
+            </ul>
+          </div>
         </section>
       </div>
   );

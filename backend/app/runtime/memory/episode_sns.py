@@ -13,7 +13,7 @@ from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 def sns_episode_text(db, *, scope, target_post_id=None, now=None):
     now = now or datetime.now(UTC)
-    candidates = SqlAlchemyEpisodeCandidates(db)
+    candidates = SqlAlchemyEpisodeCandidates(db, source_reader=RuntimeEpisodeDetailReader(db))
     priors = candidates.priors(scope=scope, now=now, thread_id=None,
         source_identities=(("POST", target_post_id), ("REPLY", target_post_id)) if target_post_id else ())
     if not priors:

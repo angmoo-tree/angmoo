@@ -32,7 +32,7 @@ class Provider:
         return {"exact_verified": False, "generation_available": True, "state": "synthetic_only"}
     async def discover(self, model):
         return CATALOG[f"{self.provider}:{model}"]["payload"]["endpoints"][0]
-    async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None):
+    async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None, on_diagnostic=None):
         if self.error == "preparation":
             raise ImagePreparationError("test_preparation_failure")
         if receipt is None:
@@ -63,7 +63,8 @@ def configured(tmp_path, provider="nanogpt", model="krea-v2/turbo", cap=4):
         setting = media.read_generation(db, owner, CHARACTER)
         media.write_generation(db, owner, CHARACTER, GenerationSettingsWrite(expected_revision=setting["revision"],
             provider=provider, model=model, auto_enabled=True, daily_limit=cap, installation_daily_limit=cap,
-            appearance="short hair", style="ink", negative="blur", options=options, api_key="only-a-fake-key"),
+            appearance="short hair", style="ink", negative="blur", options=options,
+            api_key=None if provider == "comfyui" else "only-a-fake-key"),
             validated_connection=connection)
         db.commit()
     return sessions, media, fake

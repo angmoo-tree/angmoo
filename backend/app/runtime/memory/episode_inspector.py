@@ -1,7 +1,7 @@
 """Owner-visible bounded episode material without internal source identifiers."""
 
 from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePackets
-from app.domains.memory.policies.episode_packets import bounded_episode_packets
+from app.domains.memory.policies.episode_packets import bounded_episode_packets, episode_source_payload
 from app.domains.memory.policies.episode_provider_view import episode_provider_view
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
@@ -53,7 +53,7 @@ def episode_receipt_view(db, scope, item_id, now, text):
                 if source.get("already_in_context"):
                     continue
                 fresh = sources.get((source["reference"], source["start_offset"], source["end_offset"]))
-                if fresh is None or asdict(fresh) != source:
+                if fresh is None or episode_source_payload(fresh) != source:
                     source["text"] = None
                     source["status"] = "unavailable" if fresh is None else fresh.status if fresh.status != "verified" else "changed"
                     value["partial"] = True

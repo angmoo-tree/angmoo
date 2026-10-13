@@ -2,6 +2,31 @@
 
 from __future__ import annotations
 
+from app.domains.chat.exceptions import MessageCredentialInvalidError, MessageCredentialRequiredError
+from app.domains.identity.exceptions import CredentialResolutionError
+from app.runtime import world_credential_binding
+
+
+def capture_memory_policy(db, **values):
+    from app.config import settings
+    from app.domains.memory.service.situation_policy import capture
+    return capture(db, policy=settings.MEMORY_GENERATION_POLICY, **values)
+
+
+def capture_credential(db, *, owner_id, world_id, actor_id):
+    try:
+        return world_credential_binding.capture(db, owner_id=owner_id, world_id=world_id, actor_id=actor_id, purpose="chat")
+    except CredentialResolutionError:
+        raise MessageCredentialRequiredError("world_chat_credential_required") from None
+
+
+def resolve_credential(db, metadata, *, owner_id, world_id, actor_id):
+    try:
+        return world_credential_binding.resolve(db, metadata.get("_world_credential"), owner_id=owner_id,
+            world_id=world_id, actor_id=actor_id, purpose="chat")
+    except CredentialResolutionError:
+        raise MessageCredentialInvalidError("world_chat_credential_changed") from None
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -37,7 +62,9 @@ from app.integrations.llm import (
 )
 from app.runtime.chat.evidence_reads import today_reader as today_reader
 from app.runtime.chat import name_binding
+from app.domains.world_characters.service.configuration import batch_effective_profiles
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
+from app.runtime.chat.situation_memory import ChatSituationMemory
 from app.runtime.chat.response_graph import LangGraphResponseExecutor
 from app.integrations.llm.supervisor_selection import DirectLlmSupervisorSelectionProvider
 from app.runtime.chat.retrieval_tools import ToolPlanningService, ToolBothCoordinator, parallel_tools, RetryingRead
@@ -160,7 +187,9 @@ def build(
     )
     canonical = ToolPlanningService("CANONICAL", canonical)
     graph = ToolPlanningService("GRAPH", graph)
-    character_labels = _character_labels(db, world_id)
+    character_labels = {}
+    unit_of_work = SupervisorResponseWorkflowUnitOfWork(db,
+        relationship_world_id=world_id if relationship_enabled else None)
     workflow = ResponseGenerationWorkflowService(
         graph_executor=LangGraphResponseExecutor(),
         lifecycle=lifecycle,
@@ -175,6 +204,7 @@ def build(
             ),
             policy=SqlAlchemyRetrievalPolicyResolver(db),
             recall_mode=recall_mode,
+            before_named_provider=unit_of_work.checkpoint,
         ),
         canonical=canonical,
         graph=graph,
@@ -182,13 +212,16 @@ def build(
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
             DirectLlmCharacterResponseGenerator(
-                material, **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
+                material, before_named_provider=unit_of_work.checkpoint,
+                **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
             )
         ),
-        unit_of_work=SupervisorResponseWorkflowUnitOfWork(db, relationship_world_id=world_id if relationship_enabled else None),
+        unit_of_work=unit_of_work,
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
+        situation_memory=ChatSituationMemory(db),
         recall_mode=recall_mode,
-        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
+        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels,
+            label_reader=lambda ids: character_names(db, world_id, ids)),
         today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(
             db, character_labels
         ),
@@ -196,15 +229,23 @@ def build(
     return GenerationExecution(workflow, character_labels)
 
 
-def _character_labels(db: Session, world_id: str) -> dict[str, str]:
-    rows = db.execute(
-        select(WorldCharacter.id, Character.name)
+def character_names(db: Session, world_id: str, identifiers) -> dict[str, str]:
+    """Bounded profiles of already selected IDs, with existing active filters."""
+    ids = tuple(dict.fromkeys(identifiers))
+    if len(ids) > 100:
+        raise ValueError("chat_identity_limit")
+    if not ids:
+        return {}
+    rows = db.scalars(
+        select(WorldCharacter.id)
         .join(Character, Character.id == WorldCharacter.character_id)
         .where(
             WorldCharacter.world_id == world_id,
+            WorldCharacter.id.in_(ids),
             WorldCharacter.status == "active",
             Character.deleted_at.is_(None),
             Character.moderation_status == "active",
         )
     ).all()
-    return {identifier: name for identifier, name in rows}
+    return {identifier: profile.display_name for identifier, profile in
+        batch_effective_profiles(db, world_id=world_id, world_character_ids=rows).items()}

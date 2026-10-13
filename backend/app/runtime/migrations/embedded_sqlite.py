@@ -70,10 +70,12 @@ class SqliteCanonicalUpgradeCoordinator:
         data_paths: RuntimeDataPathPort,
         *,
         fallback_generation: str,
+        secret_interpreter=None,
     ) -> None:
         self._data_paths = data_paths
         self._paths = data_paths.resolve()
         self._fallback_generation = fallback_generation
+        self._secret_interpreter = secret_interpreter
         self._controller = EmbeddedGenerationController(
             self._paths.canonical,
             artifact_relative_path="angmoo.sqlite3",
@@ -158,7 +160,7 @@ class SqliteCanonicalUpgradeCoordinator:
             record_creation(staging, relative=final_relative,
                 schema_version=latest.schema_version, manifest_sha256=latest.manifest_sha256)
             _backup_database(source_database, staging_database)
-            _apply_chain(staging_database, chain)
+            _apply_chain(staging_database, chain, secret_interpreter=self._secret_interpreter)
             _validate_database(staging_database, latest)
             record_validated(staging)
             if _database_file_fingerprint(source_database) != source_fingerprint:
@@ -310,6 +312,7 @@ def _validate_database(path: Path, manifest: SqliteVersionManifest) -> None:
 def _apply_chain(
     path: Path,
     chain: tuple[tuple[int, SqliteMigration], ...],
+    *, secret_interpreter=None,
 ) -> None:
     engine = create_engine(URL.create("sqlite+pysqlite", database=str(path)))
     try:
@@ -328,7 +331,9 @@ def _apply_chain(
                         excluded_tables=set(contract.mutable_identity_tables),
                     )
                     snapshot = contract.capture(connection)
-                    migration(connection)
+                    from app.runtime.migrations.sqlite_versions.world_activity_v30 import secret_interpreter as migration_secrets
+                    with migration_secrets(secret_interpreter):
+                        migration(connection)
                     contract.verify(connection, snapshot)
                     if _connection_identity(
                         connection,

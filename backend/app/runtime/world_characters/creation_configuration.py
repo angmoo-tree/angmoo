@@ -31,12 +31,20 @@ def creation_configuration(db, character, *, inherited=None):
 
 
 def initialize_created_world_character(db, *, character, world_character, draft_id=None):
+    from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+    fresh = db.get(WorldCharacterConfiguration, world_character.id) is None
     copied = attach_copy_origin(db, draft_id=draft_id, character_id=character.id) if draft_id else None
     inherited = get_import_snapshot(db, character.id)[1].settings if copied else None
     configuration = creation_configuration(db, character, inherited=inherited)
     origin = copied or capture_creation(db, character_id=character.id, configuration=configuration,
         provenance=f"registration:{draft_id}" if draft_id else "verified_creation_uow")
     initialize_configuration(db, world_character=world_character, snapshot_id=origin.id, configuration=configuration)
+    from app.domains.media.service.world_policy import initialize_new_actor
+    image = db.get(AgentImageGenerationSetting, character.id)
+    cap = image.generation_daily_limit if image is not None else None
+    if fresh:
+        initialize_new_actor(db, world_character_id=world_character.id,
+            generation_limit=cap if type(cap) is int and 1 <= cap <= 10000 else 20)
     return configuration
 
 
@@ -48,7 +56,13 @@ def initialize_entered_world_character(db, *, world_character_id):
     if role is None:
         raise WorldCharacterSetupValidationError("world_character_not_ready")
     try:
+        from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+        fresh = db.get(WorldCharacterConfiguration, role.id) is None
         origin, configuration = get_import_snapshot(db, role.character_id)
-        return initialize_configuration(db, world_character=role, snapshot_id=origin.id, configuration=configuration)
+        result = initialize_configuration(db, world_character=role, snapshot_id=origin.id, configuration=configuration)
+        from app.domains.media.service.world_policy import initialize_new_actor
+        if fresh:
+            initialize_new_actor(db, world_character_id=role.id)
+        return result
     except ValueError as exc:
         raise WorldCharacterSetupValidationError("character_import_origin_invalid") from exc
