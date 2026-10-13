@@ -1,8 +1,8 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4447,
-      "internal_edge_count": 6540,
+      "external_import_count": 4448,
+      "internal_edge_count": 6541,
       "legacy_import_exception_count": 0,
       "module_count": 1518,
       "module_cycles": [],
@@ -2375,6 +2375,7 @@
               "app.domains.relationships.service.projection_state",
               "app.domains.relationships.service.sqlite_projection_state",
               "app.domains.worlds.service.projection_sources",
+              "app.exceptions",
               "app.runtime.graph_projection.sqlalchemy_commands"
             ],
             "module": "app.runtime.graph_projection.sqlalchemy_outbox",
@@ -3488,7 +3489,7 @@
       },
       {
         "path": "backend/tests/relationships/test_graph_projection_worker.py",
-        "sha256": "9c8aaa36825ac75a9301771712a0f8194f15755587d5392d7a23b9678b8a5ea9"
+        "sha256": "5a99b860cfafc4daecf7c82d9e3f4f1cdcb2a5ae5438fa2bea4f5546c82eda4f"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
@@ -3535,9 +3536,11 @@
         "sha256": "aed01497163fa24346b3fd62f7ec5ba4728d09192758488fef750b7199a4cda9"
       }
     ],
-    "parity_test_node_count": 102,
+    "parity_test_node_count": 104,
     "parity_test_nodes": [
       "backend/tests/relationships/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_outbox_adapter_does_not_disguise_other_failures_as_capacity",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_outbox_adapters_translate_checkout_pressure_to_the_port",
       "backend/tests/relationships/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
       "backend/tests/relationships/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",
       "backend/tests/relationships/test_graph_projection_worker.py::test_pool_exhaustion_recovers_in_same_loop_and_projects_once",
@@ -3658,7 +3661,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "bd468510bf765d1e456b950b5519c019004713a8ad3d0c433feacd6b5253f12e"
+    "workflow_sha256": "d6534a329e5c904afe1698270ebec35ea11d9a09042a5aa9f8c89e549044a0b9"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {

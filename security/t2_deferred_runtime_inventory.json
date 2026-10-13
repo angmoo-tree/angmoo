@@ -215,10 +215,14 @@
     },
     {
       "markers": [
-        "hosted-extension-type"
+        "hosted-extension-type",
+        "privacy-contact",
+        "product-host"
       ],
       "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
+        "L0-L4 hosted extension compatibility audit",
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "security/refactor_backend_additions.json"
     },
