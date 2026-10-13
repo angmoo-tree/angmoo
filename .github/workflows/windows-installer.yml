@@ -1,5 +1,5 @@
 name: Windows Installer
-true:
+'on':
   push:
     branches:
       - main

@@ -133,6 +133,18 @@ class _UniqueKeyLoader(yaml.SafeLoader):
     pass
 
 
+# Actions follows YAML 1.2 boolean spelling. PyYAML's default YAML 1.1
+# resolver turns the required `on` key into True, which can hide an invalid
+# serialized `true:` event key. Keep an independent resolver for this loader.
+_UniqueKeyLoader.yaml_implicit_resolvers = {
+    char: [(tag, expression) for tag, expression in resolvers if tag != "tag:yaml.org,2002:bool"]
+    for char, resolvers in yaml.SafeLoader.yaml_implicit_resolvers.items()
+}
+_UniqueKeyLoader.add_implicit_resolver(
+    "tag:yaml.org,2002:bool", re.compile(r"^(?:true|false|True|False|TRUE|FALSE)$"), list("tTfF")
+)
+
+
 def _construct_unique_mapping(
     loader: _UniqueKeyLoader,
     node: yaml.MappingNode,
@@ -167,6 +179,8 @@ def _events(document: dict[object, object]) -> object:
 def _check_triggers(document: object, *, release: bool, weekly: bool = False) -> list[str]:
     if not isinstance(document, dict):
         return ["workflow root must be a mapping"]
+    if "on" not in document or any(not isinstance(key, str) for key in document):
+        return ["workflow event key must be the string on, not a YAML boolean"]
     events = _events(document)
     if not isinstance(events, dict):
         return ["workflow events must be a mapping"]
