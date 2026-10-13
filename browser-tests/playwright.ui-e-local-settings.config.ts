@@ -23,7 +23,7 @@ export default defineConfig({
   webServer: process.env.ANGMOO_UI_E_SETTINGS_BASE_URL
     ? undefined
     : {
-        command: `pnpm --dir ../frontend dev --hostname 127.0.0.1 --port ${port}`,
+        command: `pnpm --dir ../frontend ${process.env.CI ? "start" : "dev"} --hostname 127.0.0.1 --port ${port}`,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         url: baseURL,

@@ -32,6 +32,8 @@ No deletion percentage or 10–20 minute time cap is a requirement. Rebalance sh
 
 ## Download trust and preparation reuse
 
+Core CI builds the production Next frontend before starting proxy or browser fixtures. With `CI` set, those fixtures run that build using `next start`; local interactive fixtures retain `next dev`. This keeps generated development-route files out of the production build inputs and tests the actual built frontend. Type checking, proxy limits, browser assertions and existing process cleanup remain enabled. Build first when running these fixtures locally with `CI=true`.
+
 `setup-uv` is pinned by full SHA, with uv/Python/tool versions unchanged. Vec1 sources and SQLite headers retain their source-controlled SHA-256 digests. Temporary network errors have three bounded attempts; invalid bytes, oversized inputs, permanent HTTP errors and TLS failures fail immediately. Every cache hit is rehashed. The optional source cache publishes complete verified bytes atomically; cold user/Docker builds still retrieve the same official sources. Native binaries are built per target rather than reused across incompatible platforms.
 
 ## Release validation

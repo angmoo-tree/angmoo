@@ -40,7 +40,7 @@ const nextCli = fileURLToPath(
 );
 const next = spawn(
   command,
-  [nextCli, "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)],
+  [nextCli, process.env.CI ? "start" : "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)],
   {
     cwd: fileURLToPath(new URL("..", import.meta.url)),
     env: {

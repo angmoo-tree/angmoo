@@ -76,7 +76,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
 
     const nextCli = join(repository, "frontend", "node_modules", "next", "dist", "bin", "next");
     frontend = spawn(process.execPath,
-      [nextCli, "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)], {
+      [nextCli, process.env.CI ? "start" : "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)], {
         cwd: join(repository, "frontend"),
         env: {
           ...process.env,
