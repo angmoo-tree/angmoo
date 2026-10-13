@@ -285,6 +285,8 @@ def valid_required_gate(name: str, value: dict, jobs: dict) -> bool:
     if name not in {"backend", "frontend", "embedded-data-migration", "local-core-smoke", "local-autonomy-smoke", "local-full-graph"}:
         return False
     required = ["backend-preflight", "backend-tests"] if name == "backend" else [name + "-work"]
+    if name == "frontend":
+        required.append("tauri-windows")
     expected_env = {"CI_IMPACT_PLAN": "${{ needs.impact.outputs.plan }}", "CI_NEEDS": "${{ toJSON(needs) }}"}
     if (value.get("if") != "always()" or value.get("needs") != ["impact", *required]
             or value.get("env") != expected_env or "continue-on-error" in value):
@@ -292,7 +294,8 @@ def valid_required_gate(name: str, value: dict, jobs: dict) -> bool:
     selector = jobs.get("impact", {})
     if not any(step.get("id") == "select" and step.get("run") == "python scripts/ci/impact.py" for step in selector.get("steps", [])):
         return False
-    if any(jobs.get(work, {}).get("if") != f"needs.impact.outputs.{name.replace('-', '_')} == 'true'" for work in required):
+    if any(jobs.get(work, {}).get("if") != f"needs.impact.outputs.{('tauri-windows' if work == 'tauri-windows' else name).replace('-', '_')} == 'true'"
+           or "continue-on-error" in jobs.get(work, {}) for work in required):
         return False
     return any(step.get("run") == f"python scripts/ci/gate.py --gate {name}" and "if" not in step and "continue-on-error" not in step for step in value.get("steps", []))
 

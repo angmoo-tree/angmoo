@@ -133,6 +133,41 @@ def test_not_applicable_requires_successful_impact_and_skipped_or_successful_wor
         verify("frontend", plan, needs)
 
 
+@pytest.mark.parametrize("state", ["failure", "cancelled", "skipped", None])
+def test_selected_windows_build_blocks_frontend_gate_even_when_browser_passes(state):
+    selection = classify(["frontend/src/page.tsx"])
+    assert selection["windows"] == "build" and not selection["jobs"]["windows-installer"]
+    plan = {"effective": selection, "selection_sha256": digest(selection)}
+    needs = {"impact": {"result": "success"}, "frontend-work": {"result": "success"}}
+    if state is not None:
+        needs["tauri-windows"] = {"result": state}
+    with pytest.raises(ValueError, match="required_work"):
+        verify("frontend", plan, needs)
+    needs["tauri-windows"] = {"result": "success"}
+    assert verify("frontend", plan, needs)["required_jobs"] == ["frontend-work", "tauri-windows"]
+
+
+def test_browser_only_changes_do_not_require_an_unselected_windows_build():
+    selection = classify(["browser-tests/chat.spec.ts"])
+    plan = {"effective": selection, "selection_sha256": digest(selection)}
+    needs = {"impact": {"result": "success"}, "frontend-work": {"result": "success"},
+             "tauri-windows": {"result": "skipped"}}
+    assert verify("frontend", plan, needs)["required_jobs"] == ["frontend-work"]
+
+
+@pytest.mark.parametrize("damage", ["missing_dependency", "skip_build", "ignore_build_failure"])
+def test_frontend_policy_keeps_the_selected_windows_build_in_the_required_gate(damage):
+    jobs = ci_policy.yaml.load((ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"), Loader=ci_policy._UniqueKeyLoader)["jobs"]
+    assert ci_policy.valid_required_gate("frontend", jobs["frontend"], jobs)
+    if damage == "missing_dependency":
+        jobs["frontend"]["needs"].remove("tauri-windows")
+    elif damage == "skip_build":
+        jobs["tauri-windows"]["if"] = "false"
+    else:
+        jobs["tauri-windows"]["continue-on-error"] = True
+    assert not ci_policy.valid_required_gate("frontend", jobs["frontend"], jobs)
+
+
 def test_full_installer_requires_every_partition_and_recovery():
     selection = classify([], force_full=True)
     plan = {"effective": selection, "selection_sha256": digest(selection)}
