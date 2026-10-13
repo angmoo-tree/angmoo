@@ -387,3 +387,23 @@ those three files and finished44 passed/12 failed with ENOENT; that environment
 failure is retained separately, and no product patch or weakened assertion was
 used to remove it. Final corrected-head hosted CI and human platform review are
 still separate pending Gates.
+
+The `af123e06` Windows installer build, clean-install and failure-recovery jobs
+passed. Its direct supported-predecessor upgrade failed with exit42. A file-only
+replay of the identical synthetic v1 builder reported
+`world_activity_secret_authentication_failed`: the fixture stored a non-envelope
+placeholder where the current migration correctly requires an authenticated
+credential. The builder now uses the existing scoped local encryption helper
+with its owned fixture secret. No process-secret/KMS fallback or migration change
+is introduced. The verifier compares ciphertext, fingerprint and enabled state
+with the digest-verified immutable predecessor, rather than expecting a literal
+placeholder. It still rejects any target credential drift.
+
+The related Windows module passed35 cases, preserving all31 frozen-predecessor
+cases and adding three actual file-only v1/v29/v32 upgrades. Linux passed7 related
+cases, including those upgrades plus verifier and owned-secret regressions. These
+checks preserve the original DB/secret/media bytes and process settings, require
+a healthy graph and current SQLite target, and reject an incorrect secret and
+different target ciphertext even if it decrypts to the same synthetic value.
+No executable or service was launched. The corrected-head real Windows NSIS
+matrix remains a required hosted Gate before review/merge.

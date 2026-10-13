@@ -35,6 +35,7 @@ from app.domains.worlds.models import WorldMembership as _model_WorldMembership
 from app.domains.worlds.models import WorldRole as _model_WorldRole
 from app.runtime.persistence.model_registration import register_models
 register_models()
+from app.core.security import SecretScope, encrypt_local_secret
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
@@ -332,7 +333,12 @@ def _seed_supported_predecessor(
                     model="fixture-model",
                     auth_profile_id="fixture-profile",
                     label="Existing credential metadata",
-                    encrypted_api_key="synthetic-encrypted-value",
+                    encrypted_api_key=encrypt_local_secret(
+                        "synthetic-supported-fixture-key",
+                        scope=SecretScope(owner_id=owner.id, character_id=characters[0].id,
+                                          provider="google", purpose="agent"),
+                        app_secret=(root / "secrets" / "app-secret").read_text(encoding="utf-8").strip(),
+                    ),
                     key_fingerprint="synthetic-fingerprint",
                     enabled=True,
                 ),
