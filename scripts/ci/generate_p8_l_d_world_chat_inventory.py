@@ -305,18 +305,16 @@ def _installer_contract() -> dict[str, Any]:
             "supported_upgrade_world_chat_messages_changed",
         ),
     )
-    _require_text(
-        "scripts/ci/run_windows_installer_supported_upgrade.ps1",
-        ("SupportedV3FixtureArchive", "v3 -> v4"),
-    )
-    _require_text(
-        ".github/workflows/windows-installer.yml",
-        (
-            "--source-version 3",
-            "supported-v3.zip",
-            "-SupportedV3FixtureArchive",
-        ),
-    )
+    # The schema-derived runner replaces one argument per historical version.
+    # Preserve the v3 evidence, but verify today's complete execution wiring.
+    from check_windows_installer_supported_upgrade_matrix import validate_matrix
+
+    try:
+        predecessors = validate_matrix(ROOT)
+    except ValueError as exc:
+        raise InventoryError(str(exc)) from exc
+    if 3 not in predecessors:
+        raise InventoryError("installer v3 native execution is missing")
     return {
         "required_predecessor": 3,
         "supported_predecessor_present": True,

@@ -90,3 +90,25 @@ def test_representative_smoke_cannot_claim_full_predecessor_coverage():
     assert value["profile"] == "installer-smoke" and value["covered"] == 2
     with pytest.raises(ValueError, match="partitions_missing"):
         coverage.verify_reports([receipt], versions=versions, source_sha="a" * 40, run_id="123", run_attempt="1")
+
+
+@pytest.mark.parametrize("fault", ("partition", "restore", "union"))
+def test_current_matrix_checker_rejects_broken_historical_upgrade_execution(tmp_path, monkeypatch, fault):
+    monkeypatch.syspath_prepend(str(ROOT / "scripts/ci"))
+    from check_windows_installer_supported_upgrade_matrix import validate_matrix
+
+    paths = (".github/workflows/windows-installer.yml", "scripts/ci/run_windows_installer_supported_upgrade.ps1")
+    for relative in paths:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text((ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8")
+    assert 3 in validate_matrix(tmp_path)
+    relative, token = {
+        "partition": (paths[0], "-UpgradePartition ${{ matrix.partition }}"),
+        "restore": (paths[1], "Restore-IsolatedFixture $archive"),
+        "union": (paths[0], "windows_installer_upgrade_coverage.py"),
+    }[fault]
+    target = tmp_path / relative
+    target.write_text(target.read_text(encoding="utf-8").replace(token, "disabled_fixture"), encoding="utf-8")
+    with pytest.raises(ValueError, match="windows_installer_"):
+        validate_matrix(tmp_path)
