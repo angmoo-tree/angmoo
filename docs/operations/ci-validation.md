@@ -6,6 +6,8 @@ Normal PR and main checks validate changed behavior. A conservative, source-cont
 
 Backend source edits still select the full backend corpus because runtime composition and cross-domain consumers make a narrow path-only map unsafe. Isolated test edits can select the affected test modules and their consumers. Frontend source changes retain the frontend suite and Windows product build. Runtime lock changes additionally run installer smoke. Installation, upgrade, recovery, data or CI policy changes run the full supported Windows matrix.
 
+The required `frontend` gate also consumes the selected `tauri-windows` result. A successful browser suite cannot hide a failed, cancelled, missing or skipped required Windows product build, including the build-only profile where the installer matrix is not applicable. Browser-test-only changes may skip the unselected Windows build.
+
 The classifier defaults to `active` after the hosted observer comparison recorded in `docs/verification/ci-validation-review-20261014.md`. The explicit `observe` option remains available for future classifier changes: it reports the recommendation while executing full validation. Manual `full` and weekly scheduled full runs may widen selection, never narrow it. Newer commits cancel superseded runs; a cancelled required job never becomes a successful result.
 
 ## Test decisions for the 2026-10-14 transition
