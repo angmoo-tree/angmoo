@@ -116,6 +116,9 @@ def reviewed_owner_change(evidence):
     save()
     def reader(*args, **kwargs):
         if args[0] in {"log", "merge-base"}: return b""
+        if args == ("rev-parse", "HEAD"): return ("d"*40).encode()
+        if args == ("rev-list", "--reverse", "--topo-order", "HEAD"):
+            return (("b"*40) + "\n" + ("d"*40) + "\n").encode()
         if args == ("rev-parse", "b"*40 + ":" + OWNER): return ("c"*40).encode()
         if args == ("rev-parse", "d"*40 + ":" + OWNER): return ("e"*40).encode()
         if args == ("show", "d"*40 + "^:" + OWNER): return AFTER.encode()

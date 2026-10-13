@@ -22,13 +22,9 @@ def seed_configuration_fixture(path, *, legacy=False, browser_ready=False, schem
     @event.listens_for(engine, "connect")
     def _fk(connection, _):
         connection.execute("PRAGMA foreign_keys=ON")
-    if legacy:
-        from app.runtime.persistence.sqlite_schema import build_sqlite_v27_metadata, create_schema_version_table
-        build_sqlite_v27_metadata().create_all(engine)
-        with engine.begin() as connection:
-            create_schema_version_table(connection)
-    else:
-        (schema_metadata if schema_metadata is not None else Base.metadata).create_all(engine)
+    # Current services require the current admission schema. Seed only a disposable
+    # current fixture, then copy the explicitly frozen predecessor columns below.
+    Base.metadata.create_all(engine)
     with Session(engine, expire_on_commit=False) as db:
         owner = User(id="fixture-owner", email="owner@example.test", display_name="Owner", display_name_normalized="owner",
             privacy_policy_version="test", terms_version="test", profile_setup_completed=True)
@@ -83,6 +79,16 @@ def seed_configuration_fixture(path, *, legacy=False, browser_ready=False, schem
         if not legacy:
             for suffix in ("a", "b"):
                 OwnerControlledIdentityService(db).ensure(world_id=f"config-world-{suffix}", current_user_id=owner.id)
+    if legacy or schema_metadata is not None:
+        from app.runtime.persistence.sqlite_schema import build_sqlite_v27_metadata, create_schema_version_table
+        from historical_schema_fixture import rebuild_frozen_schema
+        historical = build_sqlite_v27_metadata() if legacy else schema_metadata
+        with engine.begin() as connection:
+            create_schema_version_table(connection)
+            rebuild_frozen_schema(connection, historical)
+        with engine.connect() as connection:
+            connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+            assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one() == 1
     return engine
 
 

@@ -28,7 +28,7 @@ def seed_v31(path):
     register_models()
     engine = create_engine(f"sqlite:///{path}")
     metadata = build_sqlite_v31_metadata()
-    metadata.create_all(engine)
+    register_models().create_all(engine)
     with Session(engine) as db:
         scope, setting, *_ = _stack(db)
         post = real_source(db, scope)
@@ -59,8 +59,10 @@ def seed_v31(path):
             run_id="old-completed-run", result_code="accepted", created_at=NOW))
         db.commit()
     with engine.begin() as connection:
-        connection.exec_driver_sql("UPDATE sqlite_sequence SET seq=500 WHERE name='memory_situation_receipts'")
         create_schema_version_table(connection)
+        from historical_schema_fixture import rebuild_frozen_schema
+        rebuild_frozen_schema(connection, metadata)
+        connection.exec_driver_sql("UPDATE sqlite_sequence SET seq=500 WHERE name='memory_situation_receipts'")
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(31).schema_digest
         connection.exec_driver_sql("INSERT INTO angmoo_schema_version VALUES(1,31,'20261008_0108',107,?,?)",
             (sqlite_schema_digest(connection), NOW.isoformat()))

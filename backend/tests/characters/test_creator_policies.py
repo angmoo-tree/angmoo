@@ -131,7 +131,7 @@ def test_owned_profile_mutations_preserve_commits_without_activity_or_credential
     with Session(engine) as db:
         event.listen(db, "after_commit", lambda session: commits.append(session))
         character = mutations.create_owned_character(
-            db, owner, schemas.AgentCreate(execution_mode="local", name="Bird", promotion_usage_allowed=True),
+            db, owner, schemas.AgentCreate(api_key="fixture", worldview="A synthetic character for current registration tests", execution_mode="llm", name="Bird", promotion_usage_allowed=True),
         )
         assert commits == [db, db]
         assert character.status == "inactive"

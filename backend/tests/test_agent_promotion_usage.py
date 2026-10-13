@@ -55,13 +55,13 @@ def _create_local_agent(
     return agent_service.create_agent(
         db,
         user,
-        schemas.AgentCreate(
-            execution_mode="local",
+        schemas.AgentCreate(api_key="fixture",
+            execution_mode="llm",
             name=name,
             one_liner="",
             personality="",
             speech_style="",
-            worldview="",
+            worldview="A synthetic character for current registration tests",
             topic_preferences="",
             safety_rules="",
             promotion_usage_allowed=promotion_usage_allowed,

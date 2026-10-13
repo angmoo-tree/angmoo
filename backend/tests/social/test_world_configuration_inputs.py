@@ -96,7 +96,8 @@ def world_values(db, suffix, *, name=None, image=False):
         stored.settings = {**stored.settings, "image_model": model}
         world_credentials.save(db, owner_id="fixture-owner", world_id=actor.world_id,
             world_character_id=actor.id, purpose="image", data=WorldCredentialWrite(
-                provider="comfyui", model="workflow", thinking_level=None, expected_revision=0))
+                provider="comfyui", model="workflow", thinking_level=None, expected_revision=0,
+                expected_key_revision=0))
         common = db.get(AgentImageGenerationSetting, actor.character_id)
         profile = json.loads(common.generation_profiles_json)["comfyui:fixture-workflow:"]
         policy = db.get(WorldImagePolicy, actor.id)

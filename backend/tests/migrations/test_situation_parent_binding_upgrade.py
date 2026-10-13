@@ -24,7 +24,7 @@ from memory.test_activity_situation_contract import NOW
 def seed(path):
     register_models()
     engine = create_engine(f"sqlite:///{path}")
-    schema.build_sqlite_v34_metadata().create_all(engine)
+    register_models().create_all(engine)
     with Session(engine, expire_on_commit=False) as db:
         scope, setting, *_ = _stack(db)
         row, *_ = historic(db, scope)
@@ -34,6 +34,8 @@ def seed(path):
         db.commit()
     with engine.begin() as connection:
         schema.create_schema_version_table(connection)
+        from historical_schema_fixture import rebuild_frozen_schema
+        rebuild_frozen_schema(connection, schema.build_sqlite_v34_metadata())
         manifest = registry.load_sqlite_manifest(34)
         assert schema.sqlite_schema_contract_digest(connection) == manifest.schema_digest
         connection.exec_driver_sql("INSERT INTO angmoo_schema_version VALUES(1,34,?,?,?,?)",
@@ -102,5 +104,5 @@ def test_staging_failure_preserves_db_key_and_selected_generation(tmp_path, monk
     assert not list(controller.generations.glob(".*.tmp-*"))
     monkeypatch.setitem(registry.MIGRATIONS, 34, original_upgrade)
     upgraded = coordinator.upgrade()
-    assert upgraded.source_version == 34 and upgraded.target_version == 36
+    assert upgraded.source_version == 34 and upgraded.target_version == schema.SQLITE_SCHEMA_VERSION
     assert sha256(path.read_bytes()).hexdigest() == original and secret.read_bytes() == key

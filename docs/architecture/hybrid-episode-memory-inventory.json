@@ -1906,7 +1906,7 @@
     },
     {
       "path": "backend/app/runtime/memory/episode_inspector.py",
-      "sha256": "8c832840dbf5b7f042963ca2fe2195ce84eaa1bfa86869cafb6cbd3631455cf7"
+      "sha256": "a41f35e0b16d645ec2170b3519bb879ac43ce07297f885e81a49e86b10cf18c1"
     },
     {
       "path": "backend/app/runtime/memory/episode_job_inputs.py",
@@ -2754,7 +2754,7 @@
     },
     {
       "path": "backend/tests/chat/test_generation_composition.py",
-      "sha256": "3ac14d9a619ef2811b8112811cd90c3d557516c9e4d4952b0463ee8864c53844"
+      "sha256": "03f49ed341c9424d74a65e79244fb1d68231b0bbf34beddfe1a91d75f0c7eaaf"
     },
     {
       "path": "backend/tests/chat/test_graph_failure_diagnostics.py",
@@ -2774,7 +2774,7 @@
     },
     {
       "path": "backend/tests/chat/test_http_ownership.py",
-      "sha256": "a479fa99621864d366e9e9967198057c2e9a9dab6bb108b0be33645b0224a1b9"
+      "sha256": "59879a1fa95f1b390415093f7def05a2eb43bd7d12ab3377749d3348bb899b2c"
     },
     {
       "path": "backend/tests/chat/test_hybrid_admission.py",
@@ -2822,7 +2822,7 @@
     },
     {
       "path": "backend/tests/chat/test_p8_l_d_world_chat_identity.py",
-      "sha256": "ca8e7d06486f2317be35cf0115826a13e614e422b85f20e1f884139100fd64fe"
+      "sha256": "5444277d637a05231e80a9804bfd1ed585eefd6032756083276c261baf3f422f"
     },
     {
       "path": "backend/tests/chat/test_p8_l_d_world_chat_migration.py",
@@ -3242,7 +3242,7 @@
     },
     {
       "path": "backend/tests/memory/test_scope_composition.py",
-      "sha256": "a30f5fe627be64e0aca032901d4d112afefd7e5dc802558663d08f86f508d5a6"
+      "sha256": "22d8c00b8faddd5840d75f990386fb4d9d8c346d50a7141d964d97e0f882defc"
     },
     {
       "path": "backend/tests/memory/test_search_diagnostics.py",
@@ -3310,7 +3310,7 @@
     },
     {
       "path": "backend/tests/migrations/test_activity_situation_upgrade.py",
-      "sha256": "6f9d407afbd13020c4597a77922aafd950ad936d0f876130461c8b2dfd58616d"
+      "sha256": "790f48e974702c4233f006228cc841b4d9a6a5950e645950687cea5f015ee0c9"
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
@@ -3326,7 +3326,7 @@
     },
     {
       "path": "backend/tests/migrations/test_comfy_diagnostics_v33.py",
-      "sha256": "a2eeb4326c4942b96a7a47185406a113f31288239896d4b58c3e8d998ac53516"
+      "sha256": "b339a144da17d1a65401e87606f5585c72c2b61dd1159e34c697daf478b84ceb"
     },
     {
       "path": "backend/tests/migrations/test_consolidation_schema_parity.py",
@@ -3342,7 +3342,7 @@
     },
     {
       "path": "backend/tests/migrations/test_image_provider_vault_v34.py",
-      "sha256": "4609bf66a3b11bb22260bda1c21c65ba4acd786001c77ede2bcb6a734ba2d17c"
+      "sha256": "6f3e450d961123d28ef35505ef16c1370e5452fb9c7327004ed42b3cb7d27fd4"
     },
     {
       "path": "backend/tests/migrations/test_observation_outbox_v20.py",
@@ -3354,15 +3354,15 @@
     },
     {
       "path": "backend/tests/migrations/test_situation_parent_binding_upgrade.py",
-      "sha256": "e40377c6e0370af17cb77c431b704131c63a35c75ef24a72ee15fa4e7abb05de"
+      "sha256": "7d67a6889f8bf4109d70480617ef7294ed11f37b8d4e381ac965e2d4e457e46a"
     },
     {
       "path": "backend/tests/migrations/test_situation_recovery_v32.py",
-      "sha256": "7594d9de5dd50088328069f909f6b57fbc85ca4c91cf4baee886e42a26d6cc9b"
+      "sha256": "00fcc0baec0aa1b97233c40f63ef43c22e56efde2565d1f07ca325fd2fe76dc7"
     },
     {
       "path": "backend/tests/migrations/test_situation_result_binding_upgrade.py",
-      "sha256": "fe5552ca3bd6258e8d890d41dc4b059db489978ac75ea8712d1e841464f12a65"
+      "sha256": "4a86504d8bc68facc14692255d06ce61958484bb6f96f9fef9aebab6007dbb78"
     },
     {
       "path": "backend/tests/migrations/test_topic_request_v25.py",
@@ -3370,7 +3370,7 @@
     },
     {
       "path": "backend/tests/migrations/test_world_activity_v30.py",
-      "sha256": "7102ce19c16c600118d6e677df4edd1730d45dda58910a4742c2d515dc9322d5"
+      "sha256": "63682ea22d87b2d7646669e9cfad925530847bd028cd7f5264f8ea774cfc7446"
     },
     {
       "path": "backend/tests/migrations/test_world_character_configuration_postgres.py",
@@ -3382,7 +3382,7 @@
     },
     {
       "path": "backend/tests/migrations/test_world_configuration_v28_recovery.py",
-      "sha256": "fcba70310592a9a05fcbc4176020c34bad5cd0eb97b46d56144b52633c853bb7"
+      "sha256": "eed90e10ffff1e2e0a8f7429256ed3abd24e10ed48b12d24fdf6436e874736d2"
     },
     {
       "path": "backend/tests/routines/test_activity_thought_output.py",

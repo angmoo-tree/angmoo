@@ -261,3 +261,66 @@ current captures to the pre-existing implementation decisions. All actual source
 assertion, browser and new-file transitions are appended after the real repair
 commit, retaining the original provenance prefix. These local results do not replace
 required corrected-head hosted CI, final human platform review or merge-SHA main CI.
+
+## Backend completion and current fixture contracts
+
+The backend job for source `7bcc22bb` was cancelled at the existing 75-minute
+limit, after 4752 completed progress entries in its actual 6323-node collection.
+Ninety entries were failures/errors. Its identity artifact survived; no completed
+JUnit report survived. This is an incomplete, failing run, not a whole-suite PASS.
+The completed source/provenance/collection and privacy checks at `35c5f340` are
+separate: protected/current 6327 nodes, frontend preservation 324, DCO and both
+current-tree/unlimited-history custom and Gitleaks scans passed.
+
+Current corrections preserve the implemented registration and admission contracts:
+new `AgentCreate` inputs use LLM mode with the required description and synthetic
+key, while legacy Local Bot ORM fixtures remain. Minimal current test schemas
+include World's two deletion control tables, and injected HTTP runtimes use the
+same temporary session factory for the actual deletion admission read. Read-count
+assertions include admission while still checking the actor lock before target or
+evidence access. Deferred bounded character labels and the retained legacy v1
+selection protocol remain explicitly tested.
+
+Historical fixtures seed current services only in disposable current databases,
+then project the exact frozen predecessor tables and columns. Row counts, FK,
+schema digest and sequence checks remain. Tests of the published individual
+deltas retain their original versions; the production coordinator is expected to
+reach the declared `SQLITE_SCHEMA_VERSION`. Social tests use its actual
+copy-on-write promotion path before invoking current services and verify that
+the original predecessor bytes remain unchanged. Fixture schema markers are
+created exactly once, and image profile writes explicitly state key revision0.
+Released manifests, DDL and historical data contracts remain unchanged.
+
+An actual receipt-inspection defect compared a delivered v1 source (which omits
+private author metadata) with the whole canonical dataclass. Unchanged material
+was therefore incorrectly marked partial. The inspector now reuses the existing
+`episode_source_payload` serializer for comparison. Current source access, status,
+offsets, changed text and private-SNS exclusion remain enforced; canonical author
+metadata is still private. Existing unchanged/changed/private-source regressions
+exercise this behavior without changing their assertions.
+
+The backend corpus now runs through four independent jobs. Each fixed runner
+collects `tests` in full and partitions exact node IDs by SHA256 modulo4. No new
+filter, skip, xfail, maxfail or timeout extension is introduced. Every setup,
+call and teardown result is written to a bounded-schema progress journal, and a
+final report is written only after pytest returns. The required `backend` job
+requires successful preflight and all partitions, then verifies matching source,
+checkout, Python, lock and collection identities plus exact, nonduplicated full
+coverage. Failed setup/teardown, missing results, interruption or a missing job
+cannot become aggregate success. Existing normal pytest skips are recorded
+separately. Exact artifact allowlists retain only synthetic test reports.
+
+The tradeoff is four runner/dependency/collection preparations and distributed
+module fixtures, in exchange for finishing the unchanged corpus within the
+existing per-job limit and retaining exact failure locations. Real pytest child
+sessions, a teardown failure, missing/unexecuted reports and six damaged-workflow
+cases are covered by focused tests; the combined CI policy/report/coverage
+regressions passed46 cases. Required hosted full-corpus and target-OS execution
+must still complete on the final corrected source head before review and merge.
+
+The additional isolated migration/Social correction run passed24 cases, including
+authenticated/failed vault upgrade, old receipt/sequence preservation, rollback,
+both fresh and production-upgraded World-author paths and worker deadline cleanup.
+These tests used a recorded dirty-source overlay over `35c5f340`; they are focused
+precommit evidence. A broader related-file run and final committed-source gates
+are tracked separately, and no in-progress run is counted as successful.

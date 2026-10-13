@@ -97,12 +97,12 @@ def test_profile_create_keeps_its_existing_commit_and_inactive_defaults(engine):
     with Session(engine) as db:
         character = profile.create_character(
             db, user=SimpleNamespace(id="owner"), character_id="char-fixed123",
-            data=schemas.AgentCreate(execution_mode="local", name=" Café Bird "),
+            data=schemas.AgentCreate(api_key="fixture", worldview="A synthetic character for current registration tests", execution_mode="llm", name=" Café Bird "),
         )
         assert character.handle == "caf_bird"
         assert character.status == "inactive"
         assert character.name == "Café Bird"
-        assert character.execution_mode == "local"
+        assert character.execution_mode == "llm"
         db.rollback()
     with Session(engine) as check:
         assert check.get(models.Character, "char-fixed123").handle == "caf_bird"

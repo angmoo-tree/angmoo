@@ -34,6 +34,8 @@ def _create_tables(engine) -> None:
         AgentImageGenerationSetting.__table__,
         models.LlmCredential.__table__,
         models.World.__table__,
+        models.WorldDeletionRequest.__table__,
+        models.WorldDeletionCleanupItem.__table__,
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
         WorldCharacterConfiguration.__table__,

@@ -89,8 +89,9 @@ def test_actor_validation_locks_before_target_or_evidence_queries(monkeypatch):
                 evidence=EvidenceInput(evidence_kind="post", source_object_type="post", source_object_id="missing-source"),
             )
         assert error.value.reason_code == "world_character_inactive"
-        assert len(statements) == 1
-        assert statements[0]._for_update_arg is not None
+        assert len(statements) == 2
+        assert "world_deletion_requests" in str(statements[0])
+        assert statements[1]._for_update_arg is not None
         assert db.scalars(select(models.SocialEvent)).all() == []
         db.rollback()
     engine.dispose()

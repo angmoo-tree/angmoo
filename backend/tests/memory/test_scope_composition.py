@@ -57,9 +57,10 @@ def test_memory_scope_keeps_three_reads_and_invalid_scope_error(tmp_path, invali
         with pytest.raises(MemoryScopeError, match="^memory_scope_invalid$"):
             memory_repository(caller).validate_scope(scope)
         event.remove(engine, "before_cursor_execute", record)
-        assert len(statements) == 3
-        assert "FROM users" in statements[0]
-        assert "FROM worlds" in statements[1]
-        assert "FROM world_characters" in statements[2]
+        assert len(statements) == 4
+        assert "FROM world_deletion_requests" in statements[0]
+        assert "FROM users" in statements[1]
+        assert "FROM worlds" in statements[2]
+        assert "FROM world_characters" in statements[3]
         caller.rollback()
     engine.dispose()

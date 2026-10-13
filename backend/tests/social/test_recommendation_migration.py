@@ -6,7 +6,8 @@ from app.runtime.migrations.sqlite_versions.v14_to_v15_recommendation import TAB
 
 def test_additive_migration_does_not_enroll_or_generate():
     register_models()
-    metadata = build_sqlite_baseline_metadata()
+    from app.runtime.persistence.sqlite_schema import build_sqlite_v14_metadata
+    metadata = build_sqlite_v14_metadata()
     engine = create_engine("sqlite://")
     with engine.begin() as connection:
         metadata.create_all(connection, tables=[t for t in metadata.tables.values() if t.name not in TABLES])

@@ -164,5 +164,5 @@ def test_local_comfy_partner_only_is_migrated_without_inventing_a_primary_key(tm
         value = world_credentials.metadata(world_credentials.find(db, **kwargs, purpose="image"), purpose="image")
         assert not value.has_key and value.has_partner_key
         primary, partner = world_credentials.resolve_image_keys(db, **kwargs)
-        assert primary.reveal() == "" and partner == "synthetic-comfy-partner"
+        assert primary is None and partner == "synthetic-comfy-partner"
     engine.dispose()

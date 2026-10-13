@@ -14,7 +14,7 @@ from app.runtime.migrations.sqlite_versions import image_provider_vault_v34 as m
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeCoordinator, SqliteCanonicalUpgradeError
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
-from app.runtime.persistence.sqlite_schema import build_sqlite_v33_metadata, create_schema_version_table, sqlite_schema_contract_digest, sqlite_schema_digest
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION, build_sqlite_v33_metadata, sqlite_schema_contract_digest, sqlite_schema_digest
 from app.runtime.persistence.model_registration import register_models
 from world_configuration_fixture_support import seed_configuration_fixture
 
@@ -29,7 +29,6 @@ def seed(path, *, corrupt=False):
     register_models()
     engine=seed_configuration_fixture(path,schema_metadata=build_sqlite_v33_metadata())
     with engine.begin() as c:
-        create_schema_version_table(c)
         assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(33).schema_digest
         values=dict(id="image",owner="fixture-owner",world="config-world-a",actor="config-role-a",secret=envelope(json.dumps({"version":"comfy-secrets.v1","key":"synthetic-server","partner":"synthetic-partner"}),"comfyui"))
         c.execute(text("INSERT INTO world_credentials (id,owner_id,world_id,world_character_id,purpose,provider,model,revision,aad_character_id,aad_purpose,encrypted_secret) VALUES (:id,:owner,:world,:actor,'image','comfyui','workflow',4,:actor,'user_image',:secret)"),values)
@@ -82,5 +81,5 @@ def test_staged_upgrade_preserves_source_and_rolls_back_auth_failure(tmp_path,fa
         assert not (tmp_path/'canonical/current-generation.json').exists()
         assert not list(path.parent.parent.glob('.*.tmp-*'))
     else:
-        result=coordinator.upgrade();assert result.source_version==33 and result.target_version==34
+        result=coordinator.upgrade();assert result.source_version==33 and result.target_version==SQLITE_SCHEMA_VERSION
     assert hashlib.sha256(path.read_bytes()).hexdigest()==before

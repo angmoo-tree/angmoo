@@ -23,12 +23,14 @@ from chat.test_supervisor_control_tools import native
 
 def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     monkeypatch.setattr("app.domains.relationships.service.personalized_metrics.interpreted_policy", lambda db, world: None)
-    db = object()
+    commits = []
+    db = SimpleNamespace(commit=lambda: commits.append("checkpoint"))
     material = selection_material()
     # This ordering contract specifically exercises the retained legacy planners.
     config = SimpleNamespace(CHAT_RECALL_MODE="legacy_checkpoint")
     lifecycle = object()
-    labels = {"character": "Name"}
+    labels = {}
+    deferred_labels = []
     observed = []
     selector_class = generation_workflows.DirectLlmSupervisorSelectionProvider
 
@@ -38,7 +40,11 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
             observed.append(name)
             if name == "router":
                 return selector_class(value, **options)
-            assert not options
+            if name == "response":
+                assert set(options) == {"before_named_provider"}
+                assert callable(options["before_named_provider"])
+            else:
+                assert not options
             return SimpleNamespace(name=name)
 
         return create
@@ -65,11 +71,11 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
         generation_workflows, "SqlAlchemyRelationshipGraphReadGateway", graph_gateway
     )
 
-    def character_labels(session, world_id):
+    def character_labels(session, world_id, identifiers):
         assert session is db
         assert world_id == "world"
-        observed.append("labels")
-        return labels
+        deferred_labels.append(tuple(identifiers))
+        return {"character": "Name"}
 
     def memory_producer(session):
         assert session is db
@@ -78,11 +84,11 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
 
     def today_validator(session, current_labels):
         assert session is db
-        assert current_labels is labels
+        assert current_labels == labels
         observed.append("today")
         return SimpleNamespace(session=session)
 
-    monkeypatch.setattr(generation_workflows, "_character_labels", character_labels)
+    monkeypatch.setattr(generation_workflows, "character_names", character_labels)
     monkeypatch.setattr(
         generation_workflows, "SqlAlchemySuccessfulChatMemoryProducer", memory_producer
     )
@@ -101,13 +107,16 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
         "canonical",
         "graph_gateway",
         "graph",
-        "labels",
         "router",
         "response",
         "memory",
         "today",
     ]
-    assert execution.character_labels is labels
+    assert execution.character_labels == labels
+    assert deferred_labels == []
+    reader = execution.workflow._social_context_provider._service._label_reader
+    assert reader(("character",)) == {"character": "Name"}
+    assert deferred_labels == [("character",)]
     assert execution.workflow._lifecycle is lifecycle
     assert execution.workflow._unit_of_work._session is db
     assert execution.workflow._memory_producer.session is db
@@ -144,6 +153,7 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     for tool in captured[0]["tools"]:
         assert "coordination_hint" not in tool.parameters["properties"]
         assert "ref" in tool.parameters["properties"]["entities"]["items"]["required"]
+    assert commits == []  # Direct selector construction/call does not own a transaction.
 
 
 def test_unavailable_memory_fails_durably_before_any_provider_builder(
