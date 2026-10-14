@@ -250,6 +250,61 @@ test("Comfy accepted warning stays visible with safe details and causes no retry
   await expect(page.getByText("오류 정보 일부가 생략되었습니다.",{exact:true})).toBeVisible();await expect(page.getByRole("button",{name:"이미지 생성 다시 시도"})).toHaveCount(0);expect(submissions).toBe(0);
 });
 
+for (const language of ["ko", "en"] as const) {
+  test(`received image recovery shows durable status and honest unavailable result (${language})`, async ({page}, info) => {
+    await fixtures(page, info.project.name === "static", {language});
+    const catalog = JSON.parse(readFileSync(`../frontend/src/features/media/locales/${language}.json`, "utf8"));
+    const t = (key: string) => catalog[key] ?? key;
+    const post = uiDManualPost({id: "recovery-status-post", title: "Received image", body: "Existing result"});
+    let status = "result_pending", retryable = true, checks = 0, hold = false;
+    let finishOld: (() => Promise<void>) | undefined;
+    await page.route(info.project.name === "static" ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+      if (path.endsWith("/manual-social/feed")) return json(route, uiDManualFeed([post]));
+      if (/\/image-generation(?:\/retry)?$/.test(path)) {
+        if (route.request().method() !== "GET") {
+          checks++;
+          if (hold) {
+            finishOld = () => json(route, {job_id: 11, post_id: post.id, status: "result_ready", reason: null,
+              attempt_count: 1, cancellable: false, retryable: true}).catch(() => undefined);
+            return;
+          }
+          status = "result_ready";
+        }
+        return json(route, {job_id: 11, post_id: post.id, status, reason: null, attempt_count: 1, cancellable: status === "result_pending", retryable});
+      }
+      return route.fallback();
+    });
+    await page.setViewportSize({width: 375, height: 812});
+    await page.goto(`/worlds/${uiDWorld().world_id}/feed`);
+    await expect(page.getByRole("status").filter({hasText: t("받은 이미지를 저장하고 있어요.")})).toBeVisible();
+    await expect(page.getByText(t("새 이미지를 자동으로 만들지 않아요. 기존 결과가 남아 있어야 복구할 수 있어요."), {exact: true})).toBeVisible();
+    const check = page.getByRole("button", {name: t("기존 결과 확인"), exact: true});
+    await check.focus(); await page.keyboard.press("Enter");
+    await expect(page.getByText(t("이미지 저장 중"), {exact: true})).toBeVisible();
+    expect(checks).toBe(1);
+    status = "outcome_unknown"; retryable = false;
+    await page.reload();
+    await expect(page.getByText(t("생성 결과를 확인해야 해요."), {exact: true})).toBeVisible();
+    await expect(check).toHaveCount(0);
+    await expect(page.getByRole("button", {name: t("이미지 생성 다시 시도"), exact: true})).toHaveCount(0);
+    expect(checks).toBe(1);
+    status = "result_pending"; retryable = true; hold = true;
+    await page.reload();
+    await page.getByRole("button", {name: t("기존 결과 확인"), exact: true}).click();
+    await expect.poll(() => Boolean(finishOld)).toBe(true);
+    status = "outcome_unknown"; retryable = false;
+    await page.evaluate(() => window.dispatchEvent(new Event("angmoo:desktop-runtime-config-changed")));
+    await expect(page.getByText(t("생성 결과를 확인해야 해요."), {exact: true})).toBeVisible();
+    await finishOld!();
+    await expect(page.getByText(t("이미지 저장 중"), {exact: true})).toHaveCount(0);
+    status = "succeeded";
+    await page.reload();
+    await expect(page.getByText(post.title, {exact: false})).toBeVisible();
+    await expect(page.getByText(t("새 이미지를 자동으로 만들지 않아요. 기존 결과가 남아 있어야 복구할 수 있어요."), {exact: true})).toHaveCount(0);
+  });
+}
+
 test("World recognition is separate, defaults medium, and usage retains character scope",async({page},info)=>{
   const state=await installWorldCharacterManagementFixture(page,info.project.name==="static",String(info.project.use.baseURL));await page.goto(`${worldCharacterRoute()}?view=settings`);
   const panel=page.getByRole("region",{name:"SNS·Chat 이미지 인식 API key"});

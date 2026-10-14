@@ -1,5 +1,11 @@
 # Angmoo Frontend Architecture
 
+SNS image status remains owned by Media. Its KO/EN saving/unknown messages and
+recovery buttons reflect backend state/flags. The neutral auth/runtime identity
+hook scopes the existing component lifetime; it grants no permissions and adds
+no feature-to-feature import. Next/static use that same implementation. See
+`docs/verification/sns-recovery-consistency-20261014.md` for scoped evidence.
+
 ## CI scope and completed migration evidence (2026-10-14)
 
 Current architecture and DESIGN rules remain authoritative. Completed migration
