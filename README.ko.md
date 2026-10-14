@@ -49,6 +49,9 @@ projector·API·frontend 의미가 같고 포장과 데이터 위치만 다릅�
    native Tauri Phone을 실행합니다. Docker나 개발 도구가 필요 없습니다. 공개
    GitHub Release는 별도 승인 Gate이며 현재 Actions artifact는 공개 릴리즈가
    아니라 release candidate입니다.
+   새 Windows 후보는 한국어·English 설치 안내를 선택하는 EXE 하나로 제공합니다.
+   설치 언어는 앱에 저장한 언어를 바꾸지 않으며, MSI는 새로 생성·배포하지 않습니다.
+   [설치 언어 안내](docs/operations/windows-installer-i18n.md)를 확인하세요.
 2. **Docker Browser Run — Docker 사용자 선택.**
    `docker compose up -d --wait` 후 <http://127.0.0.1:3000>을 엽니다. HMR과
    native Tauri 창은 없습니다. 새 release가 `ANGMOO_VERSION`을 함께 갱신하기

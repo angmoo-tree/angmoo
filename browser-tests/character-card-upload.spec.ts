@@ -45,8 +45,8 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
   let dataRoot = "";
 
   test.beforeAll(async () => {
-    const backendPort = await availablePort();
-    const frontendPort = await availablePort();
+    const [backendPort, frontendPort] = await availablePorts(2);
+    expect(backendPort).not.toBe(frontendPort);
     const backendUrl = `http://127.0.0.1:${backendPort}`;
     backendBase = backendUrl;
     base = `http://127.0.0.1:${frontendPort}`;
@@ -90,7 +90,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       });
     frontendLog = captureOutput(frontend);
     console.log(`Owned card test services: backend=${backend.pid}:${backendPort}, frontend=${frontend.pid}:${frontendPort}`);
-    await ready(base + "/", () => frontend!, frontendLog, 120_000);
+    await ready(base + "/api/backend/auth/local/bootstrap", () => frontend!, frontendLog, 120_000);
   });
 
   test.afterAll(async () => {
@@ -305,7 +305,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
 }
 
 test("isolated service cleanup closes its descendant server before another build", async () => {
-  const port = await availablePort();
+  const [port] = await availablePorts(1);
   const url = `http://127.0.0.1:${port}`;
   const descendant = `require('node:http').createServer((_, response) => response.end('ready')).listen(${port}, '127.0.0.1');`;
   const parent = `require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], { stdio: 'inherit' }); setInterval(() => {}, 1000);`;
@@ -390,22 +390,33 @@ async function ready(url: string, child: () => ChildProcess, output: () => strin
     if (child().exitCode !== null) throw new Error(`Isolated service exited: ${child().exitCode}\n${output()}`);
     try {
       const response = await fetch(url, { redirect: "manual" });
-      if (response.status > 0) return;
+      if (response.ok) return;
     } catch {}
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
   throw new Error(`Isolated service did not start: ${url}\n${output()}`);
 }
 
-async function availablePort(): Promise<number> {
-  const server = createServer();
-  server.listen(0, "127.0.0.1");
-  await once(server, "listening");
-  const address = server.address();
-  if (!address || typeof address === "string") throw new Error("Failed to allocate local port");
-  server.close();
-  await once(server, "close");
-  return address.port;
+async function availablePorts(count: number): Promise<number[]> {
+  const reservations: ReturnType<typeof createServer>[] = [];
+  try {
+    const ports: number[] = [];
+    for (let index = 0; index < count; index++) {
+      const server = createServer();
+      reservations.push(server);
+      server.listen(0, "127.0.0.1");
+      await once(server, "listening");
+      const address = server.address();
+      if (!address || typeof address === "string") throw new Error("Failed to allocate local port");
+      ports.push(address.port);
+    }
+    return ports;
+  } finally {
+    // Keep every reservation open until all ports are chosen. Closing each
+    // immediately lets the OS return the same port for the next service.
+    await Promise.all(reservations.filter((server) => server.listening).map((server) =>
+      new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()))));
+  }
 }
 
 async function stopChild(child: ChildProcess) {

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import tomllib
 from datetime import UTC, datetime
 from pathlib import Path
@@ -40,26 +41,67 @@ def _sha256(path: Path) -> str:
 
 
 def _artifact_files(root: Path, *, version: str) -> list[Path]:
-    candidates = sorted(
-        candidate
-        for candidate in root.rglob("*")
-        if candidate.is_file() and candidate.suffix.lower() in {".exe", ".msi"}
-    )
-    versioned = [candidate for candidate in candidates if version in candidate.name]
-    files = versioned or candidates
-    if not files:
-        raise SystemExit("No Windows installer artifacts were found")
-    extensions = {candidate.suffix.lower() for candidate in files}
-    if extensions != {".exe", ".msi"}:
-        raise SystemExit("Both NSIS and MSI installer artifacts are required")
-    for candidate in root.rglob("*"):
-        name=candidate.name.lower()
-        private_root=candidate.relative_to(root).parts[0].lower() in {
-            "secrets","runtime","canonical","private-image-assets","backups"}
-        if candidate.is_file() and (name in FORBIDDEN_ARTIFACT_NAMES or name.startswith("app-secret.tmp-")
-                or private_root or name==".env" or name.startswith(".env.") or candidate.suffix.lower() in {".sqlite",".sqlite3"}):
+    if root.is_symlink() or root.is_junction() or not root.is_dir():
+        raise SystemExit("Installer bundle root must be an ordinary directory")
+    expected = root / "nsis" / f"Angmoo_{version}_x64-setup.exe"
+    files: list[Path] = []
+    for candidate in sorted(root.rglob("*")):
+        if candidate.is_symlink() or candidate.is_junction():
+            raise SystemExit("Linked installer artifact refused")
+        relative = candidate.relative_to(root)
+        name = candidate.name.lower()
+        private_root = relative.parts[0].lower() in {
+            "secrets", "runtime", "canonical", "private-image-assets", "backups"
+        }
+        if candidate.is_file() and (
+            name in FORBIDDEN_ARTIFACT_NAMES
+            or name.startswith("app-secret.tmp-")
+            or private_root
+            or name == ".env"
+            or name.startswith(".env.")
+            or candidate.suffix.lower() in {".db", ".sqlite", ".sqlite3"}
+        ):
             raise SystemExit(f"Private migration artifact refused: {candidate.name}")
-    return files
+        if candidate.is_file():
+            files.append(candidate)
+    if files != [expected] or expected.stat().st_size == 0:
+        raise SystemExit(
+            "Exactly one current NSIS installer is required: "
+            f"nsis/{expected.name}; extra, stale or MSI files are refused"
+        )
+    return [expected]
+
+
+def _source_identity(version: str, commit: str) -> dict[str, Any]:
+    config = json.loads(
+        (REPOSITORY_ROOT / "desktop/src-tauri/tauri.conf.json").read_text(encoding="utf-8")
+    )
+    if version != config["version"]:
+        raise SystemExit("Installer version differs from the source configuration")
+    desktop = REPOSITORY_ROOT / "desktop"
+    package = json.loads((desktop / "package.json").read_text(encoding="utf-8"))
+    npm_lock = json.loads((desktop / "package-lock.json").read_text(encoding="utf-8"))
+    cargo = tomllib.loads((desktop / "src-tauri/Cargo.toml").read_text(encoding="utf-8"))
+    cargo_lock = tomllib.loads((desktop / "src-tauri/Cargo.lock").read_text(encoding="utf-8"))
+    root_crates = [p for p in cargo_lock["package"] if p["name"] == cargo["package"]["name"]]
+    versions = {
+        package["version"], npm_lock["version"], npm_lock["packages"][""]["version"],
+        cargo["package"]["version"], *(p["version"] for p in root_crates),
+    }
+    if len(root_crates) != 1 or versions != {version}:
+        raise SystemExit("Desktop product version settings disagree with the installer")
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
+    ).strip()
+    if not re.fullmatch("[0-9a-f]{40}", commit) or commit != head:
+        raise SystemExit("Installer source commit differs from the checked-out source")
+    # Local uncommitted candidates are explicitly labelled; only clean final
+    # commit builds can be promoted by the separate release procedure.
+    dirty = bool(subprocess.check_output(
+        ["git", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=REPOSITORY_ROOT, text=True,
+    ).strip())
+    return {"sourceCommit": head, "sourceWorktreeDirty": dirty}
 
 
 def _component_id(kind: str, name: str, version: str) -> str:
@@ -247,7 +289,10 @@ def _provenance(
             "buildDefinition": {
                 "buildType": "https://github.com/angmoo-tree/angmoo/er6-windows-installer/v1",
                 "externalParameters": {"version": version, "commit": commit},
-                "internalParameters": {"runnerOs": os.environ.get("RUNNER_OS", "local")},
+                "internalParameters": {
+                    "runnerOs": os.environ.get("RUNNER_OS", "local"),
+                    **_source_identity(version, commit),
+                },
                 "resolvedDependencies": [
                     {
                         "uri": path.relative_to(REPOSITORY_ROOT).as_posix(),
@@ -272,10 +317,15 @@ def _provenance(
 
 def main() -> int:
     args = _parser().parse_args()
+    _source_identity(args.version, args.commit)
+    if args.bundle_root.is_symlink() or args.bundle_root.is_junction():
+        raise SystemExit("Linked installer bundle root refused")
     bundle_root = args.bundle_root.resolve()
     output_root = args.output_root.resolve()
-    output_root.mkdir(parents=True, exist_ok=True)
+    if output_root == bundle_root or bundle_root in output_root.parents:
+        raise SystemExit("Metadata must be written outside the installer bundle")
     artifacts = _artifact_files(bundle_root, version=args.version)
+    output_root.mkdir(parents=True, exist_ok=True)
     created_at = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     checksums = "".join(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import sqlite3
 import sys
@@ -305,3 +306,112 @@ def test_installer_mode_fatal_code_is_stable() -> None:
         )
         == "installer_sqlite_data_incompatible"
     )
+
+
+class _InvalidConsole:
+    def __init__(self, *, fail_on_flush: bool = False) -> None:
+        self.fail_on_flush = fail_on_flush
+        self.output = ""
+
+    def write(self, value: str) -> int:
+        if not self.fail_on_flush:
+            raise OSError(22, "Invalid argument")
+        self.output += value
+        return len(value)
+
+    def flush(self) -> None:
+        raise OSError(22, "Invalid argument")
+
+
+@pytest.mark.parametrize("console_state", ("absent", "closed", "write", "flush"))
+def test_process_failure_exits_nonzero_even_when_console_is_unusable(
+    console_state: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stream = None
+    if console_state == "closed":
+        stream = io.StringIO()
+        stream.close()
+    elif console_state in {"write", "flush"}:
+        stream = _InvalidConsole(fail_on_flush=console_state == "flush")
+
+    def fail() -> int:
+        raise RuntimeError("installer_result_path_outside_runtime_root")
+
+    monkeypatch.setattr(desktop_sidecar, "main", fail)
+    with monkeypatch.context() as context:
+        context.setattr(sys, "stderr", stream)
+        assert desktop_sidecar._run_process() == 1
+
+
+def test_process_failure_emits_only_stable_code(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stream = io.StringIO()
+
+    def fail() -> int:
+        raise RuntimeError("private fixture text must not be disclosed")
+
+    monkeypatch.setattr(desktop_sidecar, "main", fail)
+    with monkeypatch.context() as context:
+        context.setattr(sys, "stderr", stream)
+        assert desktop_sidecar._run_process() == 1
+    assert json.loads(stream.getvalue()) == {
+        "event": "fatal",
+        "code": "desktop_sidecar_startup_failed",
+    }
+
+
+@pytest.mark.parametrize("console_state", ("absent", "closed", "write", "flush"))
+def test_preflight_durable_result_survives_unusable_console(
+    console_state: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    result_path = data_root / "runtime" / "installer-result.json"
+    monkeypatch.setattr(sys, "argv", [
+        "angmoo-sidecar", "--installer-data-preflight",
+        "--data-root", str(data_root),
+        "--legacy-data-root", str(tmp_path / "legacy"),
+        "--runtime-root", str(data_root / "runtime"),
+        "--payload-manifest", str(_manifest(tmp_path / "payload.json")),
+        "--installer-result-path", str(result_path),
+    ])
+    stream = None
+    if console_state == "closed":
+        stream = io.StringIO()
+        stream.close()
+    elif console_state in {"write", "flush"}:
+        stream = _InvalidConsole(fail_on_flush=console_state == "flush")
+    with monkeypatch.context() as context:
+        context.setattr(sys, "stdout", stream)
+        assert desktop_sidecar._run_installer_mode() == 0
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["status"] == "compatible"
+    assert result["operation"] == "preflight"
+    assert result["build_commit"] == BUILD_COMMIT
+
+
+def test_preflight_rejects_result_outside_runtime_before_operation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_root = tmp_path / "Angmoo"
+    result_path = tmp_path / "forbidden-result.json"
+    monkeypatch.setattr(sys, "argv", [
+        "angmoo-sidecar", "--installer-data-preflight",
+        "--data-root", str(data_root),
+        "--legacy-data-root", str(tmp_path / "legacy"),
+        "--runtime-root", str(data_root / "runtime"),
+        "--payload-manifest", str(tmp_path / "unused-payload.json"),
+        "--installer-result-path", str(result_path),
+    ])
+
+    def unexpected_operation(*args, **kwargs):
+        pytest.fail("An unsafe result path must be rejected before data preparation")
+
+    monkeypatch.setattr(desktop_sidecar, "_run_installer_operation", unexpected_operation)
+    assert desktop_sidecar._run_process() == 1
+    assert not result_path.exists()
+    assert not data_root.exists()
