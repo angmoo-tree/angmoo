@@ -108,3 +108,30 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
     session.add(row)
     session.flush()
     return row
+
+
+def confirm_committed_result(session, *, scope_setting_id, logical_activity_id, lane, target_key,
+                             manifest_digest, source_type, source_id, effect_kind):
+    """Read an existing effect binding, including invalid auxiliary descriptions.
+
+    This does not create a receipt or change historical description/state.
+    """
+    row = session.scalar(select(MemorySituationReceipt).where(
+        MemorySituationReceipt.scope_setting_id == scope_setting_id,
+        MemorySituationReceipt.logical_activity_id == logical_activity_id,
+        MemorySituationReceipt.lane == lane, MemorySituationReceipt.target_key == target_key))
+    if row is None or row.manifest_id != manifest_digest:
+        raise MemoryConflictError("situation_committed_receipt_missing")
+    stored = session.get(MemorySituationManifest, manifest_digest, populate_existing=True)
+    result = dict(row.result)
+    admission = result.pop("_admission", None)
+    draft = admission.get("draft") if admission else asdict(SituationDraft(row.target_key, row.description, row.description_status))
+    if (stored is None or stored.scope_setting_id != scope_setting_id
+            or stable_digest(stored.payload) != manifest_digest
+            or stable_digest({"manifest": stored.payload, "draft": draft, "result": result}) != row.content_digest
+            or result.get("logical_activity_id") != logical_activity_id or result.get("lane") != lane
+            or result.get("target_key") != target_key
+            or result.get("planned_effects") != [effect_kind]
+            or result.get("effects") != [{"kind": effect_kind, "source_type": source_type, "source_id": source_id, "status": "succeeded"}]):
+        raise MemoryConflictError("situation_committed_receipt_binding_invalid")
+    return row

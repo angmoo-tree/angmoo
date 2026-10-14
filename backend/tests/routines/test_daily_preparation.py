@@ -384,6 +384,7 @@ def test_new_policy_rejects_unexecuted_old_checkpoint_actions(preparation_scope,
     db, world, ready, runtime = preparation_scope
     lane = object.__new__(SocialLane)
     lane.ctx = SimpleNamespace(db=db, run_id="nonexistent-run", character=ready.character)
+    lane.actor = ready.world_character
     lane.lane = "feed"
     executed = []
     lane.action_executor = lambda *a, **k: executed.append(k)

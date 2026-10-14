@@ -136,7 +136,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
         if row is not None and row.status in TERMINAL_STATUSES:
             raise ActivityScopeChangedError("activity_already_completed")
-        if row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]:
+        if (row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]
+                or (row.world_id, row.world_character_id) != (actor.world_id, actor.id)):
             raise ActivityScopeChangedError("activity_contract_changed")
         if (row.result or {}).get("routine_policy") != policy:
             raise ActivityScopeChangedError("routine_policy_changed")
@@ -160,6 +161,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         canonical = ctx.db.get(AgentRun, lease_run_id, populate_existing=True)
         now = datetime.now(UTC)
         if (slot is None or canonical is None or canonical.status != "running"
+            or canonical.user_id != ctx.user_id or canonical.character_id != ctx.character.id or canonical.agent_id != ctx.agent_id
             or slot.locked_by_run_id != lease_run_id or slot.assigned_character_id != ctx.character.id
             or slot.assigned_user_id != ctx.user_id or slot.lease_expires_at is None
             or utc(slot.lease_expires_at) <= now):
@@ -181,13 +183,22 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         if state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             from app.domains.world_characters.service.activity_state import read_state
             from app.runtime.autonomous_activity.revalidation import assert_memories_current
-            if any(value.get("packets") and target not in state.get("memory_validations", {})
+            from app.runtime.autonomous_activity.committed_resume import settlement, committed_executions
+            adapter = adapters.get(state.get("_lane"))
+            confirmed = settlement(adapter, state, state["_lane"]) if adapter is not None else None
+            completed = (adapter is not None and confirmed is not None
+                and committed_executions(adapter, state, state["_lane"]) is not None)
+            if not completed and any(value.get("packets") and target not in state.get("memory_validations", {})
                    for target, value in state.get("memories", {}).items()):
                 raise ActivityScopeChangedError("activity_memory_validation_unavailable")
-            assert_memories_current(ctx.db, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id,
-                memories=state.get("memories", {}), validations=state.get("memory_validations", {}))
+            if not completed:
+                assert_memories_current(ctx.db, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id,
+                    memories=state.get("memories", {}), validations=state.get("memory_validations", {}))
             expected = state.get("shared_context", {}).get("current_state")
-            if expected and read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)["version"] != expected["version"]:
+            current_version = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)["version"]
+            own_change = confirmed is not None and confirmed.outcome in {"updated", "kept"}
+            if expected and not completed and current_version != expected["version"] and (
+                    not own_change or current_version != confirmed.resulting_version):
                 raise ActivityScopeChangedError("activity_state_changed")
         slot.lease_expires_at = now + timedelta(minutes=10)
         completed_paths = {path: state[f"{path}_result"] for path in ("inbox", "routine", "feed") if f"{path}_result" in state}

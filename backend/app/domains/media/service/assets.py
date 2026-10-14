@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from PIL import Image, ImageOps, ImageCms
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from app.domains.media.contracts import InvalidProfileMediaError
+from app.domains.media.contracts import InvalidProfileMediaError, GENERATED_ASSET_MAX_BYTES
 from app.domains.media.models import MediaAsset
 from app.domains.media.service.pixel_validation import validate_pixels
 from app.core.image_bytes import ImageInspection
@@ -56,10 +56,21 @@ class AssetService:
     def upload(self, db: Session, *, owner_id: str, scope_kind: str, scope_id: str,
                content_type: str, content: bytes, draft: bool = True) -> MediaAsset:
         self.authorize_scope(db, owner_id, scope_kind, scope_id)
-        limit = (10 if draft else 24) * 1024 * 1024
+        prepared = self.prepare_upload(content_type, content, draft=draft)
+        return self.store_prepared(db, owner_id=owner_id, scope_kind=scope_kind, scope_id=scope_id,
+                                   prepared=prepared, draft=draft)
+
+    @staticmethod
+    def prepare_upload(content_type: str, content: bytes, *, draft: bool = True):
+        """CPU-only preparation; no Session or writer remains open."""
+        limit = 10 * 1024 * 1024 if draft else GENERATED_ASSET_MAX_BYTES
         if len(content) > limit:
             raise InvalidProfileMediaError("asset_upload_too_large")
-        prepared = prepare_asset_image(content_type, content, max_bytes=limit)
+        return prepare_asset_image(content_type, content, max_bytes=limit)
+
+    def store_prepared(self, db: Session, *, owner_id: str, scope_kind: str, scope_id: str,
+                       prepared, draft: bool = True) -> MediaAsset:
+        self.authorize_scope(db, owner_id, scope_kind, scope_id)
         pixels, info = prepared.content, prepared.info
         asset = MediaAsset(id=uuid4().hex, owner_id=owner_id, scope_kind=scope_kind, scope_id=scope_id,
             storage_key=f"{uuid4().hex}.{info.extension}", content_type=info.content_type, content_hash=hashlib.sha256(pixels).hexdigest(),
@@ -76,6 +87,11 @@ class AssetService:
             path.unlink(missing_ok=True)
             raise
         return asset
+
+    def discard_unregistered(self, db: Session, asset: MediaAsset) -> None:
+        """Fresh read after rollback: never remove an ambiguous committed file."""
+        if db.get(MediaAsset, asset.id, populate_existing=True) is None:
+            self.path(asset).unlink(missing_ok=True)
 
     def attach(self, db: Session, *, owner_id: str, asset_id: str, scope_kind: str, scope_id: str) -> MediaAsset:
         asset = self.owned(db, owner_id=owner_id, asset_id=asset_id, scope_kind=scope_kind, scope_id=scope_id)

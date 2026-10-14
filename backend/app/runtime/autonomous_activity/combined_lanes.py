@@ -36,11 +36,20 @@ class CombinedGeneration:
         # unsolicited text is never allowed to become a public action.
         if state.get("generation_mode") == "combined" and not result["assignments"]:
             try:
-                parse_social_draft(state["decision"].get("provisional_draft"),
+                parse_social_draft(self.pending_draft(state),
                     lane=self.lane, assignments=[], policy=self.provider.social_io_policy)
             except ValueError:
                 result["failure"] = {"stage": "ValidateDraft", "reason": "unsolicited_or_invalid_draft"}
         return result
+
+    def pending_draft(self, state):
+        raw = state["decision"].get("provisional_draft")
+        if not isinstance(self, RoutineLane) and isinstance(raw, dict) and state.get("lane_data"):
+            completed = {row["target_id"] for row in state["decision"].get("decisions", [])
+                if row["action"] == "comment" and self.completed_action(state, row["target_id"]) is not None}
+            if completed:
+                return {**deepcopy(raw), "replies": [row for row in raw.get("replies", []) if row.get("target_id") not in completed]}
+        return raw
 
     async def write(self, state):
         self.provider.situation_state = state
@@ -57,7 +66,7 @@ class CombinedGeneration:
             return self.with_writer_situations(state, await super().write(state))
         if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
-        raw = state["decision"].get("provisional_draft")
+        raw = self.pending_draft(state)
         try:
             if mode == "split":
                 return self.with_writer_situations(state, await super().write(state))

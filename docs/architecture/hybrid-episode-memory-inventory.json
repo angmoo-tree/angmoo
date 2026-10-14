@@ -486,7 +486,7 @@
     },
     {
       "path": "backend/app/domains/memory/contracts/activity_situation.py",
-      "sha256": "b68848a19f49daedd71f5df23277c6b5bbac9d84663123a6e857f055034e53cf"
+      "sha256": "4965ea0773e4a970bf3a8c093176b62728a4a0796649242d40d9f557c3b3857b"
     },
     {
       "path": "backend/app/domains/memory/contracts/batch.py",
@@ -746,7 +746,7 @@
     },
     {
       "path": "backend/app/domains/memory/policies/situation_generation.py",
-      "sha256": "01b7706bb889c987652c75ccdde43d7ba2672f889a60cf2457e58e0a273d27fd"
+      "sha256": "ab17779e4d5959db53928f0119fd23ace63c2a8a8fee12d3c6ec6516959454ca"
     },
     {
       "path": "backend/app/domains/memory/policies/situation_output.py",
@@ -874,11 +874,11 @@
     },
     {
       "path": "backend/app/domains/memory/repository/situation_admission.py",
-      "sha256": "2444bfeacb0e9e932539a284c3b148902da1ba12ed2eeed81e452a73466a0f71"
+      "sha256": "8d3cf41552bd41b7c89610c41f78989543ca0e0d2e58273abfe7aa90dbba2645"
     },
     {
       "path": "backend/app/domains/memory/repository/situation_apply.py",
-      "sha256": "a889404ce8c4476512cd5ec17be5dadd9903b4c1a90fc9c492a77cee99989c64"
+      "sha256": "5dc7595ca1593ca7a7900b4160fda41284bff5467695bce898f3fa7501b1742f"
     },
     {
       "path": "backend/app/domains/memory/repository/situation_packets.py",
@@ -910,7 +910,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/situation_validation.py",
-      "sha256": "39e0a6f08c7b8f9797029f6d3cd41db31f7a4c0ca44fadc453cb0e6c7d8c8055"
+      "sha256": "7e39a3030efe10aa657199bbaba0525fb8d202325733ce904de36c403d03fb6e"
     },
     {
       "path": "backend/app/domains/memory/repository/transaction.py",
@@ -1030,7 +1030,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/situation_policy.py",
-      "sha256": "559295d09717b13f61cdc928f95e9b69a85856e658ee1933ad9b73dcd88505a8"
+      "sha256": "7fd10840dd81ab2a720fa8bb675aac95659e43db0ddce8c40b69e2f7ef446e0f"
     },
     {
       "path": "backend/app/domains/memory/service/situation_recovery_management.py",
@@ -1566,7 +1566,7 @@
     },
     {
       "path": "backend/app/domains/social/service/image_intent_generation.py",
-      "sha256": "619735f0ffce9e041ac52ebe31b37375c1cfb59208a82470a832369ebe08dba0"
+      "sha256": "bad33688eb00587f8c587f25a410c9230120fe899316c40ade236e6273cbebdd"
     },
     {
       "path": "backend/app/domains/social/service/image_jobs.py",
@@ -1986,7 +1986,7 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_result_basis.py",
-      "sha256": "80c39f7bc6e70ee68efa97b311135eb216d185ff018e58c349401a322d0f0593"
+      "sha256": "de1175a560b2737b610f14959f1c7c8ab3ffd55243464d6fdd545d961e467866"
     },
     {
       "path": "backend/app/runtime/memory/situation_retirement.py",
@@ -1994,7 +1994,7 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_runtime.py",
-      "sha256": "10e10c088dae3e2038a4948682c38c78707c0290f326b6e56f60c5e4c1a72f4c"
+      "sha256": "d463705c4eb37d2ab484652091e8912063d4c2ad3a863a4e4d9c8b2bd6b99297"
     },
     {
       "path": "backend/app/runtime/memory/situation_source_batch.py",
@@ -2482,7 +2482,7 @@
     },
     {
       "path": "backend/app/runtime/resident/lease_executor.py",
-      "sha256": "073ed9d109fa046a9979a51a28450c5bda006ebee4a50787d69cedb8229a1e7b"
+      "sha256": "3dc5227f74b8b5e24fbf7bff067d220a69f54b2053c5fe5333808c9421b47a4e"
     },
     {
       "path": "backend/app/runtime/resident/post_selection.py",
@@ -2498,7 +2498,7 @@
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
-      "sha256": "36e8946b2c1de19b79eeda0d6709ab0a9523aa21b33c3dd67dfdd0b2dc50a906"
+      "sha256": "2355ea44c8ec2a6383eaa514aa3e4db0cf4af64d3dee8bdd80489531ccdcf852"
     },
     {
       "path": "backend/app/runtime/resident/slot_references.py",
@@ -3269,6 +3269,10 @@
       "sha256": "be7117ed8d4b31dc88bb75514c188ce420e1bbcf35e3e88bab70421e8ec42808"
     },
     {
+      "path": "backend/tests/memory/test_situation_prepared_page.py",
+      "sha256": "bcd58890ce6a32f3a3566f5f9724dd2b902da87d0e35a997c6a59035e2ca7e3b"
+    },
+    {
       "path": "backend/tests/memory/test_situation_proof_guards.py",
       "sha256": "0cc8c0899fe84d58dfcefa407f12f7035aedc6cefd8da693ba3d1dda1266ccf3"
     },
@@ -3283,6 +3287,10 @@
     {
       "path": "backend/tests/memory/test_situation_result_normalization.py",
       "sha256": "b9d82c824c56f46b0db3f1af4783e9a486ceb750b23ca41f42ba99700eb910a1"
+    },
+    {
+      "path": "backend/tests/memory/test_situation_target_schema.py",
+      "sha256": "d57582c49dd1d7eb9735cd58a962f19459152662c63923ae52d9ff06ef880692"
     },
     {
       "path": "backend/tests/memory/test_sqlite_vec1.py",

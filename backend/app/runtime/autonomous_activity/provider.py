@@ -104,7 +104,7 @@ class ActivityProvider:
                    before_provider_request: Callable[[int], Awaitable[None]] | None = None,
                    before_admitted_request: Callable[[], None] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None,
-                   on_json_object=None, on_json_validated=None):
+                   on_json_object=None, on_json_validated=None, on_submission=None):
         from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
         system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
         # Remove optional whole units before rejecting an oversized required
@@ -178,9 +178,7 @@ class ActivityProvider:
             })
         if not token_budget:
             record_input(user)
-        dispatched = not token_budget
-        if delivery is not None and dispatched:
-            delivery.dispatched()
+        dispatched = False
         async def guard_request():
             if before_provider_request is not None:
                 await before_provider_request(0)
@@ -219,6 +217,8 @@ class ActivityProvider:
             if delivery is not None and not dispatched:
                 delivery.dispatched()
             dispatched = True
+            if on_submission is not None:
+                on_submission()
             record_input(request.user_prompt)
             db = getattr(self.context, "db", None)
             if db is not None and db.in_transaction():

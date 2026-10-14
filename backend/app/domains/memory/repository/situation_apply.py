@@ -1,11 +1,14 @@
 """Canonical application in one short caller-owned transaction, with no AI I/O."""
-from dataclasses import asdict
+from dataclasses import asdict, dataclass, replace
+from copy import deepcopy
+import json
 from datetime import datetime, timedelta
 from uuid import uuid4
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func, cast, LargeBinary
 
 from app.core.calendar import utc_instant
-from app.domains.memory.contracts.activity_situation import SITUATION_POLICY, LEGACY_VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS
+from app.domains.memory.contracts.activity_situation import (SITUATION_POLICY, LEGACY_VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS,
+    DELIVERED_SOURCE_LIMIT, SITUATION_BASIS_DOCUMENT_MAX_BYTES)
 from app.domains.memory.contracts.situation_validation import SituationSourceAccess, SituationSourceValidator
 from app.domains.memory.repository.situation_validation import restore_admission, complete_context
 from app.domains.memory.contracts.provenance import MemoryKindV1, MemoryItemStatus
@@ -22,7 +25,131 @@ from app.domains.memory.repository.situation_runs import require_run_fence
 from app.domains.memory.repository.vector_eligibility import register_content
 
 
-def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, token, now, page_size=100):
+@dataclass(frozen=True)
+class SituationReadRow:
+    """Owned column values; no Session or ORM identity crosses preparation."""
+    values: tuple
+
+    def __getattr__(self, name):
+        return dict(self.values)[name]
+
+
+@dataclass(frozen=True)
+class PreparedSituationPage:
+    run_id: str
+    cursor: int
+    cutoff: int
+    revision: str
+    materials: tuple
+    admissions: tuple
+    contexts: tuple
+    collections: tuple
+    byte_size: int
+
+
+class SituationPageStale(MemoryConflictError):
+    pass
+
+
+def _read_row(row):
+    return None if row is None else SituationReadRow(tuple((column.key, deepcopy(getattr(row, column.key)))
+        for column in row.__mapper__.columns))
+
+
+def _assert_prepared(session, prepared):
+    materials = {}
+    for model, key, expected in prepared.materials:
+        materials.setdefault(model, {})[key] = expected
+    for model, expected in materials.items():
+        primary, = model.__mapper__.primary_key
+        rows = session.scalars(select(model).where(primary.in_(expected)).execution_options(populate_existing=True))
+        current = {getattr(row, primary.key): _read_row(row) for row in rows}
+        if any(current.get(key) != value for key, value in expected.items()):
+            raise SituationPageStale("situation_prepared_material_changed")
+    groups = {}
+    for model, column, key, expected in prepared.collections:
+        groups.setdefault((model, column), {})[key] = expected
+    for (model, column), expected in groups.items():
+        current = {key: [] for key in expected}
+        for row in session.scalars(select(model).where(getattr(model, column).in_(expected))
+                .order_by(*model.__mapper__.primary_key).execution_options(populate_existing=True)):
+            current[getattr(row, column)].append(_read_row(row))
+        if any(tuple(current[key]) != value for key, value in expected.items()):
+            raise SituationPageStale("situation_prepared_binding_changed")
+
+
+def _pending(run):
+    conditions = (
+        MemorySituationReceipt.scope_setting_id == run.scope_setting_id,
+        MemorySituationReceipt.sequence > run.cursor,
+        MemorySituationReceipt.sequence <= run.cutoff_sequence,
+        MemorySituationReceipt.state == ("blocked" if run.work_kind == "blocked_recheck" else "pending"))
+    if run.settings_snapshot.get("receipt_sequence") is not None:
+        conditions += (MemorySituationReceipt.sequence == run.settings_snapshot["receipt_sequence"],)
+    if (cutoff_at := run.settings_snapshot.get("cutoff_at")) is not None:
+        conditions += (MemorySituationReceipt.captured_at <= utc_instant(datetime.fromisoformat(cutoff_at)),)
+    return conditions
+
+
+def prepare_page(session, *, run_id, token, now, page_size=16):
+    """Read/parse/hash a contiguous bounded page without acquiring a writer."""
+    if not 1 <= page_size <= 16:
+        raise ValueError("situation_page_size_invalid")
+    run = require_run_fence(session, run_id, token, now)
+    revision = run.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION)
+    materials, admissions, contexts, collections, byte_size = {}, [], [], [], 0
+    class Reader:
+        def __init__(self):
+            self.collections = {}
+        def get(self, model, key):
+            identity = model, key
+            if identity not in materials:
+                document = (MemorySituationManifest.payload if model is MemorySituationManifest else
+                    MemorySituationReceipt.result if model is MemorySituationReceipt else None)
+                if document is not None and session.get_bind().dialect.name == "sqlite":
+                    primary, = model.__mapper__.primary_key
+                    size = session.scalar(select(func.length(cast(document, LargeBinary))).where(primary == key))
+                    if size is not None and size > SITUATION_BASIS_DOCUMENT_MAX_BYTES:
+                        raise MemoryConflictError("situation_prepare_document_limit")
+                materials[identity] = _read_row(session.get(model, key, populate_existing=True))
+            return materials[identity]
+    reader = Reader()
+    rows = list(session.scalars(select(MemorySituationReceipt).where(*_pending(run))
+        .order_by(MemorySituationReceipt.sequence).limit(page_size)))
+    for row in rows:
+        frozen = reader.get(MemorySituationReceipt, row.sequence)
+        try:
+            admission = restore_admission(session, frozen, revision=revision, validation=reader)
+            from app.domains.memory.models.situation_source_binding import MemorySituationSourceBinding
+            from app.domains.memory.models.situation_result_binding import MemorySituationResultBinding
+            for model, label, column, key in (
+                (MemorySituationSourceBinding, "source_bindings", MemorySituationSourceBinding.manifest_id, admission.manifest_digest),
+                (MemorySituationResultBinding, "result_bindings", MemorySituationResultBinding.receipt_sequence, row.sequence)):
+                values = tuple(_read_row(value) for value in session.scalars(select(model).where(column == key).order_by(*model.__mapper__.primary_key)))
+                if len(values) > DELIVERED_SOURCE_LIMIT:
+                    raise ValueError("situation_source_binding_invalid")
+                reader.collections[(label, key)] = values
+                collections.append((model, column.key, key, values))
+            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck" and revision == "situation-validation.v4"):
+                contexts.append((row.sequence, complete_context(session, admission, revision=revision, validation=reader)))
+            admissions.append((row.sequence, admission, None))
+        except MemoryConflictError:
+            raise  # A preparation bound must not skip a receipt or advance the prefix.
+        except (AttributeError, ValueError, TypeError, KeyError) as exc:
+            code = str(exc) if isinstance(exc, ValueError) and str(exc).startswith("situation_") else "situation_manifest_invalid"
+            admissions.append((row.sequence, None, code[:80]))
+        byte_size = (sum(len(json.dumps(value.values, default=str).encode()) for value in materials.values() if value is not None)
+            + sum(len(json.dumps(row.values, default=str).encode()) for _, _, _, rows in collections for row in rows))
+        # Same bound as the existing checkpoint document reader. Never skip a
+        # large earlier receipt and advance the cursor past it.
+        if byte_size > SITUATION_BASIS_DOCUMENT_MAX_BYTES:
+            raise MemoryConflictError("situation_prepare_document_limit")
+    return PreparedSituationPage(run_id, run.cursor, run.cutoff_sequence, revision,
+        tuple((model, key, value) for (model, key), value in materials.items()), tuple(admissions),
+        tuple(contexts), tuple(collections), byte_size)
+
+
+def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, token, now, page_size=100, prepared=None):
     if not 1 <= page_size <= 100:
         raise ValueError("situation_page_size_invalid")
     run = require_run_fence(session, run_id, token, now)
@@ -34,6 +161,10 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
         return 0
     session.execute(update(MemoryScopeSettingModel).where(MemoryScopeSettingModel.id == run.scope_setting_id).values(id=MemoryScopeSettingModel.id, updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
     run = require_run_fence(session, run_id, token, now)
+    if prepared is not None:
+        if (run.id, run.cursor, run.cutoff_sequence, revision) != (prepared.run_id, prepared.cursor, prepared.cutoff, prepared.revision):
+            raise SituationPageStale("situation_prepared_run_changed")
+        _assert_prepared(session, prepared)
     pending = (
         MemorySituationReceipt.scope_setting_id == run.scope_setting_id,
         MemorySituationReceipt.sequence > run.cursor,
@@ -71,12 +202,22 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
             processed(receipt, before_version, previous)
             continue
         try:
-            admission = restore_admission(session, receipt, revision=revision)
+            if prepared is None:
+                admission = restore_admission(session, receipt, revision=revision)
+            else:
+                entries = {sequence: (value, error) for sequence, value, error in prepared.admissions}
+                if receipt.sequence not in entries:
+                    raise SituationPageStale("situation_prepared_prefix_changed")
+                admission, error = entries[receipt.sequence]
+                if error:
+                    raise ValueError(error)
+                admission = replace(admission, receipt=receipt)
             # A formatting proof can only be approved in the fenced recheck
             # savepoint below. Ordinary pending work never resolves history.
             if not (admission.requires_result_binding and run.work_kind == "blocked_recheck"
                     and revision == "situation-validation.v4"):
-                complete_context(session, admission, revision=revision)
+                if prepared is None:
+                    complete_context(session, admission, revision=revision)
             result_sources = admission.result_sources
         except (AttributeError, ValueError, TypeError, KeyError) as exc:
             code = str(exc) if isinstance(exc, ValueError) and str(exc).startswith("situation_") else "situation_manifest_invalid"
@@ -115,7 +256,9 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                     if admission.requires_result_binding:
                         from app.domains.memory.repository.situation_result_bindings import prepare_binding
                         prepare_binding(session, admission, validator, revision=revision, run_id=run.id, now=now)
-                    manifest = complete_context(session, admission, revision=revision)
+                    manifest = dict(prepared.contexts).get(receipt.sequence) if prepared is not None else None
+                    if manifest is None:
+                        manifest = complete_context(session, admission, revision=revision)
                     from app.domains.memory.repository.situation_source_bindings import prepare_bindings
                     manifest = prepare_bindings(session, manifest, validator, captured_at=receipt.captured_at, now=now)
                     access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]

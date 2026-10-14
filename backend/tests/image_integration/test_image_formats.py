@@ -18,6 +18,7 @@ from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImageSubmissionError, ImageResult, ImagePreparationError
 from app.domains.media.models import MediaAsset
 from app.domains.social.models.posts import PostMedia, PostImageGenerationJob
+from app.domains.social.models.image_intents import ImageGenerationAttempt
 from app.integrations.image_api import ImageApiClient
 from app.integrations.image_api import parse_image_result, prepare_api_reference
 from app.integrations.media.images import inspect_image_bytes, ImageBytesError
@@ -82,7 +83,7 @@ def test_worker_received_format_recovers_without_another_provider_call(tmp_path,
         return ImageResult(content, mime)
     fake.generate = generate
     identity = admit(sessions, media)
-    target, name = {"spool": (media.worker, "_write_received"), "asset": (media.assets, "upload"),
+    target, name = {"spool": (media.worker, "_write_received"), "asset": (media.assets, "store_prepared"),
         "db": (media.worker, "_persist_result"), "attachment": (media.worker, "_attach")}[fault]
     original = getattr(target, name)
     def fail(*args, **kwargs):
@@ -98,7 +99,10 @@ def test_worker_received_format_recovers_without_another_provider_call(tmp_path,
     monkeypatch.setattr(target, name, fail)
     asyncio.run(media.worker.process(identity))
     with sessions() as db:
-        assert db.get(PostImageGenerationJob, identity).status == ("result_ready" if fault == "attachment" else "result_pending")
+        assert db.get(PostImageGenerationJob, identity).status == ("result_ready" if fault == "attachment" else "running" if fault == "spool" else "result_pending")
+        if fault == "spool":
+            assert db.scalar(select(ImageGenerationAttempt)).status == "submitted"
+            assert len(media.worker.received_results) == 1
         assert db.scalar(select(PostMedia)) is None
     monkeypatch.setattr(target, name, original)
     asyncio.run(media.worker.process(identity))

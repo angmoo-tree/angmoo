@@ -39,8 +39,10 @@ def test_received_journal_recovers_disk_error_without_resubmit(tmp_path, monkeyp
         patch.setattr(__import__("pathlib").Path, "open", fail_once)
         asyncio.run(media.worker.process(identity))
     with sessions() as db:
-        assert db.get(PostImageGenerationJob, identity).status == "result_pending"
-        assert db.scalar(select(ImageGenerationAttempt)).status == "result_received"
+        durable = suffix == "pixels.tmp"
+        assert db.get(PostImageGenerationJob, identity).status == ("result_pending" if durable else "running")
+        assert db.scalar(select(ImageGenerationAttempt)).status == ("result_received" if durable else "submitted")
+        assert len(media.worker.received_results) == 1
     if suffix == "pixels.tmp":
         # A new worker has no memory buffer. Its complete atomic journal suffices.
         media.worker = GenerationWorker(sessions, media.assets, media, spool=media.worker.spool)

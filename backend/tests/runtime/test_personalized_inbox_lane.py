@@ -50,6 +50,8 @@ def test_inbox_selects_one_branch_and_preserves_unselected_and_late_notification
 def test_partial_execution_restart_uses_public_success_receipt():
     from sqlalchemy import select, func
     from app.domains.routines.models import AgentPublicActionExecution
+    from app.domains.routines.policies.execution_results import _brief_hash, _action_signature
+    from app.domains.routines.policies.writer_tasks import _reply_task_id
     import pytest
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:
@@ -63,12 +65,23 @@ def test_partial_execution_restart_uses_public_success_receipt():
                 if post_id == second.id and not failed[0]:
                     failed[0] = True
                     raise RuntimeError("process_exit_after_first_reply")
-                row = AgentPublicActionExecution(run_id=ctx.run_id, character_id=ctx.character.id, signature="test:" + post_id, scope="inbox", action_type="reply", target_post_id=post_id, status="succeeded")
+                index = kwargs["index"]
+                task = _reply_task_id(scope="inbox", index=index, post_id=post_id, clip=lambda value, limit: str(value or "")[:limit])
+                body = next(row["body"] for row in kwargs["writing"]["reply_task_results"] if row["task_id"] == task)
+                brief = _brief_hash(body, None)
+                row = AgentPublicActionExecution(run_id=ctx.run_id, character_id=ctx.character.id,
+                    signature=_action_signature(run_id=ctx.run_id, scope="inbox", action_type="reply", target_id=post_id, brief_hash=brief),
+                    brief_hash=brief, world_id=actor.world_id, actor_world_character_id=actor.id,
+                    completed_at=datetime.now(UTC), result={"status": "succeeded"},
+                    scope="inbox", action_type="reply", target_post_id=post_id, status="succeeded")
                 db.add(row); db.commit()
                 return {"status":"succeeded", "execution_id":row.id}
             async def guard(state): return {}
             lane = InboxLane(ctx, actor=actor, lane="inbox", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard, action_executor=execute)
-            state = {"decision":{"decisions":[{"target_id":p.id,"action":"comment","brief":"Reply"} for p in (source,second)]}, "lane_data":{p.id:{"post_id":p.id} for p in (source,second)}, "drafts":[]}
+            drafts = [{"task_id": _reply_task_id(scope="inbox", index=index, post_id=post.id,
+                clip=lambda value, limit: str(value or "")[:limit]), "body": "A scoped reply " + post.id}
+                for index, post in enumerate((source, second))]
+            state = {"decision":{"decisions":[{"target_id":p.id,"action":"comment","brief":"Reply"} for p in (source,second)]}, "lane_data":{p.id:{"post_id":p.id} for p in (source,second)}, "drafts":drafts}
             with pytest.raises(RuntimeError, match="process_exit_after_first_reply"):
                 await lane.execute(state)
             result = await lane.execute(state)

@@ -9,6 +9,20 @@ from app.runtime.autonomous_activity.provider import SELECTOR_INSTRUCTIONS, Targ
 from app.runtime.autonomous_activity.queries import validate_selection
 
 
+class SelectionInputInvalid(ActivityRetryGuardError):
+    def __init__(self, original, *, lane, submitted):
+        super().__init__(original)
+        self.lane, self.submitted = lane, submitted
+
+
+def independent_input_failure(exc):
+    from app.runtime.autonomous_activity.inputs import ActivityRelationshipValidationError
+    if isinstance(exc, ActivityRelationshipValidationError):
+        return exc.failure_scope == "lane"
+    return isinstance(exc, ValueError) and str(exc) in {
+        "activity_source_changed", "activity_proposal_changed", "feed_target_stale", "feed_affordance_changed", "feed_claim_changed"}
+
+
 class CombinedSelection:
     def __init__(self, adapters, lanes):
         self.adapters, self.lanes = adapters, lanes
@@ -98,14 +112,20 @@ class CombinedSelection:
                     result[lane] = {"preparation_error": {"path": lane, "status": "failed",
                         "reason": "selection_invalid", "public_action_count": 0}}
             return result
+        submitted = False
+        def mark_submitted():
+            nonlocal submitted
+            submitted = True
         async def guard_retry(_attempt):
-            try:
-                for lane in needed:
+            for lane in needed:
+                try:
                     await self.lanes[lane].guard({**prepared[lane], "identity": state["identity"],
                         "shared_context": prepared[lane].get("shared_context", state["shared_context"]),
                         "stage": "TargetSelector"})
-            except Exception as exc:
-                raise ActivityRetryGuardError(exc) from exc
+                except Exception as exc:
+                    if independent_input_failure(exc):
+                        raise SelectionInputInvalid(exc, lane=lane, submitted=submitted) from exc
+                    raise ActivityRetryGuardError(exc) from exc
         feed = prepared["feed"]
         delivery = self.adapters["feed"].delivery({**feed, "identity": state["identity"]})
         try:
@@ -116,10 +136,27 @@ class CombinedSelection:
                 payload=request, schema={"type": "object", "properties": properties,
                     "required": list(properties)},
                 validator=validate, max_tokens=4096, recover_truncation=True,
-                before_json_retry=guard_retry, before_provider_request=guard_retry, delivery=delivery)
+                before_json_retry=guard_retry, before_provider_request=guard_retry, delivery=delivery,
+                on_submission=mark_submitted)
             for lane in needed:
                 prepared[lane].update(result[lane])
         except Exception as exc:
+            if isinstance(exc, SelectionInputInvalid) and not exc.submitted:
+                failed_lane = exc.lane
+                prepared[failed_lane]["preparation_error"] = await self.lanes[failed_lane].on_error(exc.original)
+                # One rebuild only, through the existing single-lane owner. Its
+                # own final guard runs again; no stale combined request is sent.
+                for lane in needed:
+                    if lane == failed_lane:
+                        continue
+                    item = prepared[lane]
+                    try:
+                        item.update(await self.adapters[lane].select({**item, "identity": state["identity"],
+                            "shared_context": item.get("shared_context", state["shared_context"])}))
+                    except Exception as remaining:
+                        original = remaining.original if isinstance(remaining, ActivityRetryGuardError) else remaining
+                        item["preparation_error"] = await self.lanes[lane].on_error(original)
+                return {"prepared_lanes": prepared}
             if isinstance(exc, ActivityRetryGuardError):
                 exc = exc.original
             for lane in needed:

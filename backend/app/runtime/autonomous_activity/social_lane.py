@@ -38,10 +38,14 @@ class SocialLane:
     def ports(self):
         return LanePorts(self.load, self.select, self.recall, self.context, self.plan,
             self.validate, self.write, self.execute, self.settle, self.finalize, self.guard,
-            prepare_recall=self.prepare_recall)
+            prepare_recall=self.prepare_recall, resume=self.resume)
+
+    async def resume(self, state):
+        from app.runtime.autonomous_activity.committed_resume import resume
+        return await resume(self, state, self.lane)
 
     async def guard(self, state):
-        await self.scope_guard(state)
+        await self.scope_guard({**state, "_lane": self.lane})
         from app.contracts.read_deadline import bounded_read
         with bounded_read(2.0):
             self.guard_selected_inputs(state)
@@ -52,12 +56,10 @@ class SocialLane:
         # snapshots after Execute. Settlement validates its own source receipts.
         if state.get("stage") in {"TargetSelector", "PrepareImageRecall", "RecallSelected", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             selected = {s["target_id"] for s in state.get("selections", [])}
-            for candidate in state.get("candidates", []):
-                if selected and candidate["target_id"] not in selected:
-                    continue
-                if state.get("stage") == "Execute" and self.completed_action(state, candidate["target_id"]):
-                    continue  # Reuse committed effects; scope authorization still ran.
-                self.validate_relationship_candidate(state, candidate)
+            candidates = [candidate for candidate in state.get("candidates", [])
+                if (not selected or candidate["target_id"] in selected) and not self.completed_action(state, candidate["target_id"])]
+            self.validate_relationship_candidates(state, candidates)
+            for candidate in candidates:
                 from app.runtime.media.social_context import assert_current
                 frozen_images = state.get("image_recall_snapshots", {}).get(candidate["target_id"], {}).get("images", candidate.get("images", []))
                 assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
@@ -65,6 +67,25 @@ class SocialLane:
                     post = self.ctx.db.get(Post, identifier, populate_existing=True)
                     if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
                         raise ValueError("activity_source_changed")
+
+    def validate_relationship_candidates(self, state, candidates):
+        if not candidates:
+            return
+        from app.runtime.autonomous_activity.inputs import validate_relationship_batch
+        identity = state.get("identity", {})
+        if (identity.get("activity_id", self.ctx.run_id) != self.ctx.run_id
+                or identity.get("world_id", self.actor.world_id) != self.actor.world_id
+                or identity.get("actor_id", self.actor.id) != self.actor.id):
+            raise ActivityRelationshipValidationError("receipt_invalid", lane=self.lane)
+        requests = [{"binding": RelationshipValidationBinding(self.ctx.run_id, self.lane, row["target_id"], row.get("counterpart_id")),
+            "prompt": row.get("relationship", {}), "receipt": state.get("relationship_validation_receipts", {}).get(row["target_id"]),
+            "policy": read_currentness_policy(identity)} for row in candidates]
+        try:
+            for result in validate_relationship_batch(self.ctx, self.actor, requests):
+                self.observe_relationship_validation(result.outcome, result.reason, result.checked_count, result.revision)
+        except SocialContextValidationError as exc:
+            self.observe_relationship_validation("invalid", exc.reason, 0, read_currentness_policy(identity))
+            raise ActivityRelationshipValidationError(exc.reason, lane=self.lane, original=exc) from exc
     def validate_relationship_candidate(self, state, candidate):
         binding = RelationshipValidationBinding(self.ctx.run_id, self.lane,
             candidate["target_id"], candidate.get("counterpart_id"))
@@ -81,7 +102,7 @@ class SocialLane:
         except SocialContextValidationError as exc:
             self.observe_relationship_validation("invalid", exc.reason, 0,
                 (state.get("identity") or {}).get("relationship_validation_policy", "social-context-currentness.legacy.v1"))
-            raise ActivityRelationshipValidationError(exc.reason, lane=self.lane) from exc
+            raise ActivityRelationshipValidationError(exc.reason, lane=self.lane, original=exc) from exc
         self.observe_relationship_validation(result.outcome, result.reason, result.checked_count, result.revision)
 
     def observe_relationship_validation(self, outcome, reason, count, revision):
@@ -113,13 +134,34 @@ class SocialLane:
             return None
         from sqlalchemy import select
         from app.domains.routines.models import AgentPublicActionExecution
-        return self.ctx.db.scalar(select(AgentPublicActionExecution).where(
+        receipt = self.ctx.db.scalar(select(AgentPublicActionExecution).where(
             AgentPublicActionExecution.run_id == self.ctx.run_id,
             AgentPublicActionExecution.character_id == self.ctx.character.id,
+            AgentPublicActionExecution.world_id == self.actor.world_id,
+            AgentPublicActionExecution.actor_world_character_id == self.actor.id,
             AgentPublicActionExecution.scope == self.lane,
             AgentPublicActionExecution.action_type == ("reply" if decision["action"] == "comment" else decision["action"]),
             AgentPublicActionExecution.target_post_id == state["lane_data"][target_id]["post_id"],
             AgentPublicActionExecution.status == "succeeded"))
+        from app.runtime.autonomous_activity.committed_resume import public_receipt_current
+        if not public_receipt_current(self, receipt):
+            return None
+        from app.domains.routines.policies.execution_results import _brief_hash, _action_signature
+        body = None
+        if decision["action"] == "comment":
+            from app.domains.routines.policies.writer_tasks import _reply_task_id
+            index = state["decision"]["decisions"].index(decision)
+            task = _reply_task_id(scope=self.lane, index=index, post_id=receipt.target_post_id,
+                clip=lambda value, limit: str(value or "")[:limit])
+            body = next((row["body"] for row in state.get("drafts", []) if row.get("task_id") == task), None)
+            if body is None:
+                raise ValueError("activity_resume_draft_unproven")
+        brief = _brief_hash(body or decision.get("brief"), state["lane_data"][target_id].get("notification_id"))
+        signature = _action_signature(run_id=self.ctx.run_id, scope=self.lane, action_type=receipt.action_type,
+            target_id=receipt.target_post_id, brief_hash=brief)
+        if receipt.brief_hash != brief or receipt.signature != signature:
+            raise ValueError("activity_resume_decision_changed")
+        return receipt
 
     def selected(self, state):
         ids = {s["target_id"] for s in state.get("selections", [])}
@@ -201,6 +243,8 @@ class SocialLane:
         assignments = []
         for index, decision in enumerate(state["decision"]["decisions"]):
             if decision["action"] != "comment":
+                continue
+            if self.completed_action(state, decision["target_id"]) is not None:
                 continue
             post_id = state["lane_data"][decision["target_id"]]["post_id"]
             assignments.append({"task_id": _reply_task_id(scope=self.lane, index=index, post_id=post_id),
@@ -340,7 +384,8 @@ class SocialLane:
     async def finalize(self, state):
         return {"result": {"path": self.lane, "status": "failed" if state.get("failure") else "completed" if state.get("executions") else "no_action",
             "failure": state.get("failure"),
-            "public_action_count": sum(r["status"] == "succeeded" for r in state.get("executions", [])),
+            "public_action_count": sum(r["status"] in {"succeeded", "reused"} for r in state.get("executions", [])),
+            "new_public_action_count": sum(r["status"] == "succeeded" for r in state.get("executions", [])),
             "selected_ids": [s["target_id"] for s in state.get("selections", [])],
             "recall_status": {key: item["status"] for key, item in state.get("memories", {}).items()},
             "settlement": state.get("settlement", {})}}

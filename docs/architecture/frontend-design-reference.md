@@ -1,5 +1,13 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-14 SNS image recovery: **LOCAL** reuse of GenerationStatus, shared Button
+and semantic tokens. KO/EN distinguish durable saving and unknown result without
+promising recovery when output is absent. Backend flags remain authoritative;
+auth/runtime identity scopes the component lifetime. Next/static, narrow-screen,
+keyboard and stale-response cases share one implementation. See
+`docs/verification/sns-recovery-consistency-20261014.md` for scoped evidence and
+the separately unmeasured deployment/provider boundaries.
+
 2026-10-13 World deletion dialog: **LOCAL** reuse of the existing semantic
 Dialog, Button and Field/Input. The World feature owns the compact target and
 deletion/preservation summary, bordered name confirmation and optional collapsed

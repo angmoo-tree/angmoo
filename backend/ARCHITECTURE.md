@@ -1,5 +1,19 @@
 # Angmoo Backend Architecture
 
+## SNS recovery and canonical receipt boundaries (2026-10-14)
+
+Social owns bounded received-result slots and attempt-bound atomic journals;
+Media owns pixel preparation and asset registration. Runtime injects their
+existing interfaces and owns canonical worker/session/future lifetimes. Durable
+received state requires verified bytes; no automatic replacement submission is
+authorized by a lost result. Activity recovery validates current scope/claims
+and exact committed effects/state/situation receipts before old snapshot guards.
+Memory prepares immutable bounded pages outside the writer and freshly validates
+the prefix under its existing SQLite UoW. Relationship validation batches only
+within one guard and distinguishes canonical read failures from changed facts.
+See [source verification](../docs/verification/sns-recovery-consistency-20261014.md)
+for regression evidence and separate deployment/provider limitations.
+
 ## Current CI protection after completed refactors (2026-10-14)
 
 Current import boundaries, ownership, authorization, persistence and runtime behavior

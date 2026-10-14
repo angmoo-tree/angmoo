@@ -83,7 +83,7 @@ def _canonical_read_deadline(db):
     def before_statement(_connection, _cursor, _statement, _parameters, _context, _many):
         remaining = deadline - monotonic()
         if remaining <= 0:
-            raise SocialContextValidationError("canonical_unavailable")
+            raise SocialContextValidationError("canonical_read_deadline")
         driver.execute(f"PRAGMA busy_timeout={max(0, min(previous_timeout, int(remaining * 1000)))}")
     # No other app path installs a progress handler on this owned connection.
     # It is removed, and the connection's prior busy policy restored, on exit.

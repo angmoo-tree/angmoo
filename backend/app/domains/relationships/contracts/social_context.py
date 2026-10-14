@@ -116,8 +116,9 @@ def read_currentness_policy(value: dict | None) -> str:
 
 
 class SocialContextValidationError(SocialContextChangedError):
-    def __init__(self, reason: str):
+    def __init__(self, reason: str, *, failure_scope="lane", error_type=None, sqlite_code=None):
         self.reason = reason
+        self.failure_scope, self.error_type, self.sqlite_code = failure_scope, error_type, sqlite_code
         super().__init__(reason)
 
 

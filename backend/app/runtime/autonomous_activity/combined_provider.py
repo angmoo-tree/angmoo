@@ -80,9 +80,22 @@ class CombinedActivityProvider(ActivityProvider):
         self.input_budget = input_budget
         from app.domains.memory.service.situation_policy import restore
         self.situation_snapshot = restore((policies or {}).get("_situation_policy"))
+        self.situation_output_revision = ((policies or {}).get("_situation_policy") or {}).get("output_revision")
         self.situation_state = None
         self.situation_output_active = False
         self.situation_writer_results = []
+
+    def situation_targets(self, payload, lane, *, writing=False):
+        from app.domains.memory.policies.situation_generation import TARGET_OUTPUT_REVISION
+        if self.situation_output_revision is None:
+            return None  # Preserve schemas/digests of previously frozen requests.
+        if self.situation_output_revision != TARGET_OUTPUT_REVISION:
+            raise ValueError("situation_output_revision_unsupported")
+        if lane == "routine":
+            return ("routine-post",)
+        if writing:
+            return tuple(row["source"]["target_id"] for row in payload.get("assignments", []))
+        return tuple(row["target_id"] for row in payload.get("selected_targets", []))
 
     async def call(self, **kwargs):
         request_guard = getattr(self, "request_guard", None)
@@ -110,7 +123,7 @@ class CombinedActivityProvider(ActivityProvider):
                 from app.domains.memory.policies.situation_generation import with_social_situations, instructions
                 from app.domains.memory.policies.situation_output import parse_situations
                 from dataclasses import asdict
-                kwargs["schema"] = with_social_situations(kwargs["schema"])
+                kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane))
                 def validate_situations(value):
                     base = parse_envelope(value, original_validator)
                     targets = tuple(row["target_id"] for row in base.get("decisions", []) if row["action"] != "no_action") if lane != "routine" else ("routine-post",)
@@ -151,7 +164,7 @@ class CombinedActivityProvider(ActivityProvider):
             from app.domains.memory.policies.situation_output import parse_situations
             lane = node.removesuffix("ActionPlanner").removesuffix("Writer").lower()
             original_validator = kwargs["validator"]
-            kwargs["schema"] = with_social_situations(kwargs["schema"])
+            kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane, writing=writing))
             def validate_separate(value):
                 base = original_validator({key: item for key, item in value.items() if key != "situations"})
                 if lane == "routine":

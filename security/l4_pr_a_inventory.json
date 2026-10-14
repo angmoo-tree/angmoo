@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4448,
-      "internal_edge_count": 6541,
+      "external_import_count": 4454,
+      "internal_edge_count": 6558,
       "legacy_import_exception_count": 0,
-      "module_count": 1518,
+      "module_count": 1519,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -718,6 +718,7 @@
           {
             "imports": [
               "app.contracts.read_deadline",
+              "app.core.sqlite_concurrency",
               "app.domains.relationships.contracts.graph_recall_gateway",
               "app.domains.relationships.contracts.social_context",
               "app.domains.relationships.policies.graph_recall",

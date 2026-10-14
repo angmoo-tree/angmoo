@@ -184,7 +184,7 @@ async def _run_fenced_tick_with_heartbeat(
     async def heartbeat() -> None:
         while True:
             await sleep(config.RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS)
-            snapshot = await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
+            snapshot = await _heartbeat_with_budget(coordinator, owner_id=owner_id, fencing_epoch=fencing_epoch, config=config)
             _record_proof(config, snapshot)
 
     tick_task = asyncio.create_task(run_tick())
@@ -261,7 +261,7 @@ async def _sleep_until_next_tick_with_heartbeat(
             finally:
                 sleep_task.cancel(); stop_task.cancel()
                 await asyncio.gather(sleep_task, stop_task, return_exceptions=True)
-        snapshot = await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
+        snapshot = await _heartbeat_with_budget(coordinator, owner_id=owner_id, fencing_epoch=fencing_epoch, config=config)
         _record_proof(config, snapshot)
     return True
 
@@ -406,6 +406,35 @@ async def run_resident_tick_scheduler(
 
 # Content-free proof consumed by health; expires even when an event loop stalls.
 _scheduler_proofs: dict[str, Any] = {}
+
+
+async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config):
+    """Only exhausted BUSY may retry, within the last committed lease's margin."""
+    started = monotonic()
+    try:
+        return await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
+    except SqliteBusyRetryExhausted as first:
+        proof = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH)
+        if (proof is None or proof.lease_expires_at is None
+                or proof.lease_owner_id != owner_id or proof.fencing_epoch != fencing_epoch):
+            raise
+        expiry = proof.lease_expires_at.replace(tzinfo=UTC)
+        safe_seconds = (expiry - datetime.now(UTC)).total_seconds() - config.resident_tick_shutdown_drain_seconds - 1
+        deadline = min(started + 2.0, monotonic() + safe_seconds)
+        error = first
+        for delay in (0.05, 0.1):
+            if monotonic() + delay >= deadline:
+                raise error
+            await asyncio.sleep(delay)
+            remaining = deadline - monotonic()
+            if remaining <= 0:
+                raise error
+            try:
+                return await asyncio.wait_for(lease_call(coordinator, "heartbeat", owner_id=owner_id,
+                    fencing_epoch=fencing_epoch, queue_deadline=deadline), timeout=remaining)
+            except SqliteBusyRetryExhausted as exc:
+                error = exc
+        raise error
 
 def _record_proof(config: Settings, lease: Any) -> None:
     _scheduler_proofs[config.RESIDENT_TICK_READY_PATH] = lease

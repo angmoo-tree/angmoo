@@ -26,6 +26,21 @@ def read_state(db: Session, *, world_id: str, actor_id: str) -> dict:
             "confirmed_at": utc(row.confirmed_at).isoformat() if row.confirmed_at else None}
 
 
+def confirmed_settlement(db, *, world_id, actor_id, activity_id, decision_key,
+                         expected_version, source_keys, judged_at):
+    receipt = db.get(ActivityStateReceipt, decision_key, populate_existing=True)
+    if receipt is None:
+        return None
+    if ((receipt.world_id, receipt.world_character_id, receipt.activity_id, receipt.expected_version)
+            != (world_id, actor_id, activity_id, expected_version)
+            or sorted(receipt.source_keys) != sorted(set(source_keys))
+            or utc(receipt.judged_at) != utc(judged_at)
+            or receipt.outcome not in {"updated", "kept", "unknown_kept", "already_interpreted", "conflict_not_applied"}
+            or (receipt.outcome in {"updated", "kept"} and receipt.resulting_version != expected_version + 1)):
+        raise ValueError("activity_state_receipt_binding_invalid")
+    return receipt
+
+
 def settle_state(db: Session, *, world_id: str, actor_id: str, activity_id: str,
                  decision_key: str, expected_version: int, proposal: StateUpdate | None,
                  judged_at: datetime, source_keys: list[str], valid_source_keys: set[str],
@@ -38,8 +53,8 @@ def settle_state(db: Session, *, world_id: str, actor_id: str, activity_id: str,
     snapshot = read_state(db, world_id=world_id, actor_id=actor_id)
     receipt = db.get(ActivityStateReceipt, decision_key)
     if receipt:
-        if (receipt.world_id, receipt.world_character_id, receipt.activity_id) != (world_id, actor_id, activity_id):
-            raise ValueError("activity_state_receipt_scope_invalid")
+        confirmed_settlement(db, world_id=world_id, actor_id=actor_id, activity_id=activity_id,
+            decision_key=decision_key, expected_version=expected_version, source_keys=source_keys, judged_at=judged_at)
         return receipt.outcome
     if not set(source_keys) <= valid_source_keys or (not source_keys and not context_reassessment):
         return "invalid_evidence"

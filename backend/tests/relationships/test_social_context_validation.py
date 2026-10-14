@@ -24,6 +24,44 @@ from runtime.test_activity_relationship_validation import relation_case
 pytestmark = pytest.mark.usefixtures("deny_external_network")
 
 
+@pytest.mark.parametrize("code,reason", [(5, "canonical_database_busy"), (6, "canonical_database_error"),
+    (10, "canonical_database_error"), (13, "canonical_database_error"), (9, "canonical_read_deadline")])
+def test_canonical_error_codes_keep_safe_reason_and_metadata(relation_case, code, reason):
+    import sqlite3
+    case = relation_case
+    prompt, receipt = prepared(case)
+    error = sqlite3.OperationalError("private SQL and body must not appear")
+    error.sqlite_errorcode = code
+    def fail(**kwargs):
+        raise error
+    case.gateway.canonical_social_context_facts = fail
+    with pytest.raises(SocialContextValidationError) as caught:
+        validate(case, prompt, receipt)
+    assert caught.value.reason == reason
+    assert caught.value.sqlite_code == code
+    assert "private" not in str(caught.value)
+
+
+def test_batch_reads_once_and_next_guard_detects_changed_version(relation_case):
+    case = relation_case
+    prompt, receipt = prepared(case)
+    requests = [{"binding": binding(case), "prompt": prompt, "receipt": receipt, "policy": CURRENTNESS_REVISION}] * 3
+    original = case.gateway.canonical_social_context_facts
+    calls = []
+    def read(**kwargs):
+        calls.append(len(kwargs["references"]))
+        return original(**kwargs)
+    case.gateway.canonical_social_context_facts = read
+    service = SocialContextValidationService(case.gateway)
+    assert len(service.validate_many(scope=case.scope, requests=requests)) == 3
+    assert calls == [2]
+    case.rows[0].version += 1
+    case.db.commit()
+    with pytest.raises(SocialContextValidationError, match="version_changed"):
+        service.validate_many(scope=case.scope, requests=requests)
+    assert calls == [2, 2]
+
+
 def binding(case):
     return RelationshipValidationBinding(case.ctx.run_id, "feed", "post-target", "world-character-author")
 
@@ -242,7 +280,7 @@ def test_t12_t25_canonical_failure_is_never_empty_success(relation_case, failure
     else:
         ticks = iter([0.0, 2.1])
         service = SocialContextValidationService(case.gateway, clock=lambda: next(ticks))
-    with pytest.raises(SocialContextValidationError, match="canonical_unavailable"):
+    with pytest.raises(SocialContextValidationError, match="canonical_read_error" if failure == "exception" else "canonical_read_deadline"):
         service.validate(scope=case.scope, binding=binding(case), prompt=prompt, receipt=receipt, policy=CURRENTNESS_REVISION)
 
 
@@ -409,7 +447,7 @@ def test_t25_native_sqlite_deadline_interrupts_and_restores_connection(relation_
                 pytest.fail("native deadline did not interrupt SQLite")
             monkeypatch.setattr(case.gateway, "graph_recall_scope_access", slow_scope)
         started = monotonic()
-        with pytest.raises(SocialContextValidationError, match="canonical_unavailable"):
+        with pytest.raises(SocialContextValidationError, match="canonical_database_busy" if blocked == "lock" else "canonical_read_deadline"):
             SocialContextValidationService(case.gateway, deadline_seconds=0.05).validate(scope=case.scope,
                 binding=binding(case), prompt=prompt, receipt=receipt, policy=CURRENTNESS_REVISION)
         assert monotonic() - started < 1

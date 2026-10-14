@@ -12,6 +12,8 @@ from app.contracts.activity_situation import SITUATION_POLICY, SituationDraft
 PARENT_BINDING_POLICY = "sns-today-parent-binding.v1"
 SITUATION_REPRESENTATION = "activity_situation_v1"
 DESCRIPTION_LIMIT = 1000
+DELIVERED_SOURCE_LIMIT = 256
+SITUATION_BASIS_DOCUMENT_MAX_BYTES = 8 * 1024 * 1024
 Lane = Literal["chat", "inbox", "feed", "routine"]
 VALIDATION_REVISION = "situation-validation.v4"
 PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", VALIDATION_REVISION})
@@ -174,7 +176,7 @@ class DeliveredInputManifest:
     def __post_init__(self):
         threads = {row.thread_id for row in self.sources if row.thread_id}
         if (self.version not in {1, 2} or not self.call_identity or len(self.payload_digest) != 64
-                or len(self.sources) > 256 or len(threads) > 1
+                or len(self.sources) > DELIVERED_SOURCE_LIMIT or len(threads) > 1
                 or (threads and threads != {self.private_thread_id})
                 or any(row.world_id != self.snapshot.scope.world_id for row in self.sources)
                 or len({row.ordinal for row in self.sources}) != len(self.sources)):

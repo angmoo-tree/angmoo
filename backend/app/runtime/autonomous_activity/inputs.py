@@ -53,10 +53,17 @@ def validate_relationship(ctx, actor, *, prompt, receipt, binding, policy):
         binding=binding, prompt=prompt, receipt=receipt, policy=policy)
 
 
+def validate_relationship_batch(ctx, actor, requests):
+    service = SocialContextValidationService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings))
+    return service.validate_many(scope=GraphRecallScope(ctx.user_id, actor.world_id, actor.id), requests=requests)
+
+
 class ActivityRelationshipValidationError(SocialContextValidationError):
     """Stable lane failure code with a content-free internal validation reason."""
-    def __init__(self, reason, *, lane):
-        super().__init__(reason)
+    def __init__(self, reason, *, lane, original=None):
+        super().__init__(reason, failure_scope=getattr(original, "failure_scope", "lane"),
+            error_type=getattr(original, "error_type", None), sqlite_code=getattr(original, "sqlite_code", None))
+        self.lane = lane
         self.args = ("routine_relationship_changed" if lane == "routine" else "activity_relationship_changed",)
 
 

@@ -50,13 +50,17 @@ class RoutineLane:
 
     def ports(self):
         return LanePorts(self.load, self.unused, self.recall, self.context, self.plan,
-            self.validate, self.write, self.execute, self.settle, self.finalize, self.guard, self.query)
+            self.validate, self.write, self.execute, self.settle, self.finalize, self.guard, self.query, resume=self.resume)
+
+    async def resume(self, state):
+        from app.runtime.autonomous_activity.committed_resume import resume
+        return await resume(self, state, "routine")
 
     async def unused(self, state):
         raise AssertionError("routine_has_no_selector")
 
     async def guard(self, state):
-        await self.scope_guard(state)
+        await self.scope_guard({**state, "_lane": "routine"})
         if state.get("lane_data", {}).get("prepared") and self.prepared is None:
             from app.runtime.autonomous_activity.routine_resume import restore_prepared
             self.prepared = restore_prepared(self.ctx, state["lane_data"]["prepared"], self.tracker)
@@ -71,7 +75,7 @@ class RoutineLane:
             elif beat.status != "succeeded":
                 raise ValueError("routine_claim_lost")
         if state.get("decision_context") and state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
-            if state.get("stage") == "Execute" and self.completed_publication():
+            if self.completed_publication():
                 return {}  # Own effects may have changed the historical input.
             from app.runtime.autonomous_activity.routine_sources import source_manifest
             expected = state["decision_context"]
@@ -97,16 +101,16 @@ class RoutineLane:
                     or identity.get("world_id", self.actor.world_id) != self.actor.world_id
                     or identity.get("actor_id", self.actor.id) != self.actor.id):
                 raise SocialContextValidationError("receipt_invalid")
-            for counterpart, prompt in state.get("decision_context", {}).get("relationships", {}).items():
-                result = validate_relationship(self.ctx, self.actor, prompt=prompt,
-                    receipt=state.get("relationship_validation_receipts", {}).get(counterpart),
-                    binding=RelationshipValidationBinding(self.ctx.run_id, "routine", counterpart, counterpart),
-                    policy=read_currentness_policy(identity))
+            from app.runtime.autonomous_activity.inputs import validate_relationship_batch
+            requests = [{"prompt": prompt, "receipt": state.get("relationship_validation_receipts", {}).get(counterpart),
+                "binding": RelationshipValidationBinding(self.ctx.run_id, "routine", counterpart, counterpart),
+                "policy": read_currentness_policy(identity)} for counterpart, prompt in state.get("decision_context", {}).get("relationships", {}).items()]
+            for result in validate_relationship_batch(self.ctx, self.actor, requests) if requests else ():
                 self.observe_relationship_validation(result.outcome, result.reason, result.checked_count, result.revision)
         except SocialContextValidationError as exc:
             self.observe_relationship_validation("invalid", exc.reason, 0,
                 (state.get("identity") or {}).get("relationship_validation_policy", "social-context-currentness.legacy.v1"))
-            raise ActivityRelationshipValidationError(exc.reason, lane="routine") from exc
+            raise ActivityRelationshipValidationError(exc.reason, lane="routine", original=exc) from exc
 
     def observe_relationship_validation(self, outcome, reason, count, revision):
         tracker = getattr(self, "tracker", None)
