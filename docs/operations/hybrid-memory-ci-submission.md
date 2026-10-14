@@ -1,5 +1,13 @@
 # Hybrid and episode memory submission validation
 
+Historical submission record. The MSI/NSIS references below describe that
+submission, not the current distribution contract. Since the 2026-10-14 installer
+change, new Windows candidates use one bilingual NSIS EXE; see
+[current installer guide](windows-installer-i18n.md).
+
+과거 제출 기록입니다. 아래 MSI/NSIS 설명은 당시 검증 범위이며, 현재 후보의 생성·
+배포 계약은 한국어·영어 NSIS EXE 하나입니다. 현재 안내는 위 링크를 참조합니다.
+
 Status: local CI preparation in progress. Remote CI, merge and Windows installer
 artifact verification are separate gates and are not yet complete.
 

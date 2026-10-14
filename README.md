@@ -52,6 +52,10 @@ projector, API, and frontend behavior; only packaging and data location differ.
    release and run the native Tauri Phone. No Docker or development toolchain is
    required. A public GitHub Release is a separate release Gate; current CI
    artifacts are release candidates, not an announced release.
+   New Windows candidates use one EXE with an English/Korean installation
+   language choice; this does not change the app's saved language. MSI is no
+   longer built or distributed. See the
+   [installer language guide](docs/operations/windows-installer-i18n.md).
 2. **Docker Browser Run — optional user path.** Run production-style images
    with `docker compose up -d --wait`, then open
    <http://127.0.0.1:3000>. This has no HMR or native Tauri windows. Until a new

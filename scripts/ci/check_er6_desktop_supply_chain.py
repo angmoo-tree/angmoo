@@ -8,9 +8,13 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_windows_installer_i18n import validate as validate_installer_i18n  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -97,6 +101,13 @@ def main() -> int:
     )
     hooks_path = ROOT / "desktop" / "src-tauri" / "installer-hooks.nsh"
     hooks = hooks_path.read_text(encoding="utf-8")
+    try:
+        validate_installer_i18n(
+            config, hooks,
+            (ROOT / "desktop/src-tauri/installer-languages.nsh").read_text(encoding="utf-8"),
+        )
+    except ValueError as error:
+        raise SystemExit(f"installer language contract: {error}") from error
     launcher = (
         ROOT / "desktop" / "src-tauri" / "src" / "desktop_runtime.rs"
     ).read_text(encoding="utf-8")
@@ -251,7 +262,6 @@ def main() -> int:
         "StrCpy $AngmooFullDeleteConfirmed 0",
         "StrCpy $AngmooFullDeleteConfirmed 1",
         "${If} $AngmooFullDeleteConfirmed = 1",
-        "Permanently delete every Angmoo World",
     ):
         _require(required in hooks, f"full-delete safety contract missing: {required}")
     _require(

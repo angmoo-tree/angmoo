@@ -187,5 +187,11 @@ uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boun
 provider 설정, dependency major, transaction 의미, 일괄 formatting,
 Hosted·Private·Production 설정을 섞지 않습니다.
 
+Windows 설치 후보는 한국어·English 선택이 가능한 NSIS EXE 하나로 생성합니다.
+MSI의 신규 build·upload·attestation은 종료하며 기존 검증 기록은 보존합니다.
+설치 안내 언어와 앱 화면 언어는 분리합니다.
+관련 검증과 실제 화면 확인 범위는
+[설치 언어·EXE 안내](docs/operations/windows-installer-i18n.md)를 따릅니다.
+
 보안 문제는 public Issue에 작성하지 말고 `SECURITY.md`의 비공개 신고 절차를
 사용해 주세요.

@@ -150,7 +150,7 @@ include:
 - `architecture-boundary`
 - `tauri-windows`
 - `tauri-windows-host-dev`
-- `windows-installer-build` for the exact-SHA NSIS/MSI candidate
+- `windows-installer-build` for the exact-SHA bilingual NSIS EXE candidate
 - `windows-installer-clean-install` for an empty LocalAppData install/start
 - `windows-installer-supported-upgrade` for every supported predecessor
 - `windows-installer-failure-recovery` for fail-closed app/data rollback

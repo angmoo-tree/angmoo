@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ; ER6 product filesystem policy:
 ; - the installer owns only %LOCALAPPDATA%\Angmoo\app;
 ; - silent uninstall always preserves local data;
@@ -20,7 +21,23 @@ Var AngmooPreviousUninstallString
 Var AngmooPreviousMainBinaryName
 Var AngmooHadStartMenuShortcut
 Var AngmooHadDesktopShortcut
+Var AngmooMessagePath
 !define ANGMOO_INSTALLER_HOOK_DIR "${__FILEDIR__}"
+
+; Official MUI settings: show the choice again on interactive reinstall, keep
+; /S noninteractive, and leave the app's separately saved ko/en setting alone.
+!define MUI_LANGDLL_ALWAYSSHOW
+!define MUI_LANGDLL_WINDOWTITLE "설치 언어 / Installer language"
+!define MUI_LANGDLL_INFO "설치 안내 언어를 선택해주세요.$\r$\nChoose the language for installation."
+; Override only the confirmed awkward generic welcome text via official MUI.
+!define MUI_WELCOMEPAGE_TEXT "$(AngmooWelcomeText)"
+; Welcome has no page header. The following standard License page consumes
+; and unsets this supported header override; later pages keep their defaults.
+!define MUI_PAGE_HEADER_SUBTEXT "$(AngmooLicenseSubtitle)"
+!define MUI_LICENSEPAGE_TEXT_BOTTOM "$(AngmooLicenseBottomText)"
+; LangString is a global NSIS declaration, never a section instruction. The
+; Windows language IDs bind to the languages Tauri registers later.
+!include /CHARSET=UTF8 "${ANGMOO_INSTALLER_HOOK_DIR}\installer-languages.nsh"
 
 !macro ANGMOO_VERIFY_NOT_REPARSE Target Label
   System::Call 'kernel32::GetFileAttributesW(w "${Target}") i .r0'
@@ -29,8 +46,9 @@ Var AngmooHadDesktopShortcut
   ${EndIf}
   IntOp $1 $0 & 0x400
   ${If} $1 <> 0
+    StrCpy $AngmooMessagePath "${Target}"
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo filesystem operation stopped because an owned path is a reparse point: ${Target}"
+      "$(AngmooReparseRejected)"
     Abort
   ${EndIf}
 ${Label}_verified:
@@ -101,7 +119,7 @@ angmoo_case_root_exists:
   IfFileExists "$LOCALAPPDATA\Angmoo.__casefix__" angmoo_case_temp_conflict angmoo_case_begin
 angmoo_case_temp_conflict:
   MessageBox MB_OK|MB_ICONSTOP \
-    "Angmoo installation stopped because a stale product-root case migration directory exists."
+    "$(AngmooCaseConflict)"
   Abort
 angmoo_case_begin:
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\angmoo" angmoo_case_root
@@ -110,7 +128,7 @@ angmoo_case_begin:
   IfErrors angmoo_case_first_failed angmoo_case_second
 angmoo_case_first_failed:
   MessageBox MB_OK|MB_ICONSTOP \
-    "Angmoo installation could not normalize the LocalAppData product directory name."
+    "$(AngmooCaseRenameFailed)"
   Abort
 angmoo_case_second:
   ClearErrors
@@ -122,7 +140,7 @@ angmoo_case_second_failed:
   ClearErrors
   Rename "$LOCALAPPDATA\Angmoo.__casefix__" "$LOCALAPPDATA\angmoo"
   MessageBox MB_OK|MB_ICONSTOP \
-    "Angmoo installation could not finish the LocalAppData directory case migration."
+    "$(AngmooCaseMigrationFailed)"
   Abort
 angmoo_case_root_done:
   ReadRegStr $AngmooPreviousRegistrationRoot SHCTX "${MANUPRODUCTKEY}" ""
@@ -169,7 +187,7 @@ angmoo_case_root_done:
     IfSilent angmoo_preflight_silent angmoo_preflight_interactive
 angmoo_preflight_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo installation stopped because the existing Angmoo runtime did not close normally. Close Angmoo and retry."
+      "$(AngmooRuntimeNotClosed)"
     Goto angmoo_preflight_abort
 angmoo_preflight_silent:
     Goto angmoo_preflight_abort
@@ -188,7 +206,7 @@ angmoo_preflight_abort:
     IfSilent angmoo_prepare_silent angmoo_prepare_interactive
 angmoo_prepare_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo installation could not prepare a trustworthy app update. User data was not changed."
+      "$(AngmooPrepareFailed)"
     Goto angmoo_prepare_abort
 angmoo_prepare_silent:
     Goto angmoo_prepare_abort
@@ -218,7 +236,7 @@ angmoo_prepare_abort:
     IfSilent angmoo_staging_verify_silent angmoo_staging_verify_interactive
 angmoo_staging_verify_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo installation stopped because the staged app payload did not match this installer. The previous app and user data were preserved."
+      "$(AngmooStagingMismatch)"
     Goto angmoo_staging_verify_abort
 angmoo_staging_verify_silent:
     Goto angmoo_staging_verify_abort
@@ -238,7 +256,7 @@ angmoo_staging_verify_abort:
     IfSilent angmoo_data_preflight_silent angmoo_data_preflight_interactive
 angmoo_data_preflight_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "This Angmoo installer cannot safely read the existing local data version. No user data was changed."
+      "$(AngmooDataIncompatible)"
     Goto angmoo_data_preflight_abort
 angmoo_data_preflight_silent:
     Goto angmoo_data_preflight_abort
@@ -260,7 +278,7 @@ angmoo_data_preflight_abort:
     IfSilent angmoo_promote_silent angmoo_promote_interactive
 angmoo_promote_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo installation could not promote the verified app payload. The previous app and user data were preserved."
+      "$(AngmooPromoteFailed)"
     Goto angmoo_promote_abort
 angmoo_promote_silent:
     Goto angmoo_promote_abort
@@ -317,7 +335,7 @@ angmoo_promote_abort:
       IfSilent angmoo_data_restore_silent angmoo_data_restore_interactive
 angmoo_data_restore_interactive:
       MessageBox MB_OK|MB_ICONSTOP \
-        "Angmoo local data could not be upgraded and the verified previous app could not be restored automatically. Existing data generations were preserved."
+        "$(AngmooRestoreFailed)"
       Goto angmoo_data_restore_abort
 angmoo_data_restore_silent:
       Goto angmoo_data_restore_abort
@@ -329,7 +347,7 @@ angmoo_data_restore_abort:
     IfSilent angmoo_data_upgrade_silent angmoo_data_upgrade_interactive
 angmoo_data_upgrade_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo local data could not be upgraded safely. The verified previous app was restored and existing data generations were preserved."
+      "$(AngmooUpgradeFailedRestored)"
     Goto angmoo_data_upgrade_abort
 angmoo_data_upgrade_silent:
     Goto angmoo_data_upgrade_abort
@@ -346,7 +364,7 @@ angmoo_data_upgrade_abort:
     IfSilent angmoo_finalize_silent angmoo_finalize_interactive
 angmoo_finalize_interactive:
     MessageBox MB_OK|MB_ICONSTOP \
-      "Angmoo update validation passed, but installer cleanup did not finish. Rerun this installer before starting Angmoo."
+      "$(AngmooCleanupFailed)"
     Goto angmoo_finalize_abort
 angmoo_finalize_silent:
     Goto angmoo_finalize_abort
@@ -373,7 +391,7 @@ angmoo_finalize_abort:
     Goto angmoo_keep_local_data
   ${EndIf}
   MessageBox MB_YESNO|MB_ICONSTOP \
-    "Permanently delete every Angmoo World, Character, post, relationship, local credential, and setting from this Windows account? This cannot be undone." \
+    "$(AngmooConfirmFullDelete)" \
     IDNO angmoo_keep_local_data
 
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo" angmoo_root

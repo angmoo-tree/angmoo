@@ -104,7 +104,7 @@ def _make_directory_reparse(link: Path, target: Path) -> None:
 
 def test_confirmed_state_is_ordered_after_all_validations() -> None:
     hooks = HOOKS_PATH.read_text(encoding="utf-8")
-    warning = hooks.index("Permanently delete every Angmoo World")
+    warning = hooks.index('"$(AngmooConfirmFullDelete)"')
     final_validation = hooks.index(
         '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\com.angmoo.desktop" angmoo_legacy'
     )

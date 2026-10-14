@@ -4,7 +4,11 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_windows_installer_i18n import validate as validate_installer_i18n  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -23,9 +27,9 @@ def main() -> int:
     bundle = config["bundle"]
     windows = bundle["windows"]
     nsis = windows["nsis"]
-    wix = windows["wix"]
     _require(bundle["active"] is True, "desktop bundle must be active")
-    _require(set(bundle["targets"]) == {"nsis", "msi"}, "NSIS and MSI required")
+    _require(bundle["targets"] == ["nsis"], "only the NSIS installer is supported")
+    _require("wix" not in windows, "retired MSI configuration must not remain active")
     _require(bundle["license"] == "GPL-3.0-only", "GPL license metadata missing")
     _require(
         bundle["resources"]["../../THIRD_PARTY_NOTICES.md"]
@@ -39,15 +43,17 @@ def main() -> int:
     _require(windows["allowDowngrades"] is False, "installer downgrade must fail")
     _require(nsis["installMode"] == "currentUser", "per-user install is required")
     _require(nsis["installerHooks"] == "installer-hooks.nsh", "hooks missing")
-    _require(bool(wix["upgradeCode"]), "stable MSI upgrade code missing")
-    _require(
-        wix["template"] == "wix/product-main.wxs",
-        "the reviewed per-user WiX template is required",
-    )
 
     hooks = (ROOT / "desktop" / "src-tauri" / "installer-hooks.nsh").read_text(
         encoding="utf-8"
     )
+    try:
+        validate_installer_i18n(
+            config, hooks,
+            (ROOT / "desktop/src-tauri/installer-languages.nsh").read_text(encoding="utf-8"),
+        )
+    except ValueError as error:
+        raise SystemExit(f"installer language contract: {error}") from error
     for required in (
         "NSIS_HOOK_PREINSTALL",
         "NSIS_HOOK_PREUNINSTALL",
@@ -58,7 +64,6 @@ def main() -> int:
         "StrCpy $AngmooFullDeleteConfirmed 0",
         "StrCpy $AngmooFullDeleteConfirmed 1",
         "${If} $AngmooFullDeleteConfirmed = 1",
-        "Permanently delete every Angmoo World",
         "ANGMOO_VERIFY_NOT_REPARSE",
         "$LOCALAPPDATA\\com.angmoo.desktop",
         "$LOCALAPPDATA\\Angmoo.__casefix__",
@@ -97,7 +102,7 @@ def main() -> int:
         "post-uninstall cleanup must not treat a checked box as confirmation",
     )
     confirmation = hooks.index("StrCpy $AngmooFullDeleteConfirmed 1")
-    final_warning = hooks.index("Permanently delete every Angmoo World")
+    final_warning = hooks.index('"$(AngmooConfirmFullDelete)"')
     final_validation = hooks.index(
         '!insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\\com.angmoo.desktop" angmoo_legacy'
     )
@@ -113,22 +118,6 @@ def main() -> int:
         "$DeleteAppDataCheckboxState" not in post_uninstall,
         "post-uninstall must be guarded only by confirmed full deletion",
     )
-
-    wix_template = (
-        ROOT / "desktop" / "src-tauri" / "wix" / "product-main.wxs"
-    ).read_text(encoding="utf-8")
-    for required in (
-        'InstallScope="perUser"',
-        'Directory Id="$(var.PlatformProgramFilesFolder)"',
-        'Directory Id="INSTALLDIR" Name="Angmoo"',
-        'Id="INSTALLDIR"',
-        'Value="[LocalAppDataFolder]Angmoo\\app"',
-        'Before="CostFinalize"',
-        'Sequence="both"',
-    ):
-        _require(required in wix_template, f"WiX app-root contract missing: {required}")
-    for forbidden in ('InstallScope="perMachine"',):
-        _require(forbidden not in wix_template, f"machine-wide WiX path forbidden: {forbidden}")
 
     workflow = (ROOT / ".github" / "workflows" / "windows-installer.yml").read_text(
         encoding="utf-8"
@@ -252,7 +241,7 @@ def main() -> int:
     )
     installer_command = desktop_package["scripts"]["build:installer"]
     _require(
-        "tauri build --bundles nsis,msi" in installer_command,
+        installer_command == "npm run build:sidecar && tauri build --bundles nsis",
         "installer build must run the reviewed Tauri bundle path",
     )
     for marker in (

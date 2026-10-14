@@ -479,7 +479,9 @@ def _run_installer_mode() -> int:
         **payload,
     }
     _write_installer_result(result_path, result)
-    print(json.dumps(result, sort_keys=True), flush=True)
+    # The durable result is authoritative. A windowed executable may have no
+    # console, or a non-None stream whose Windows handle is already invalid.
+    _write_optional_console(result, stream=sys.stdout)
     return 0
 
 
@@ -608,16 +610,29 @@ def _stable_fatal_code(exc: Exception) -> str:
     return "desktop_sidecar_startup_failed"
 
 
+def _write_optional_console(payload: dict[str, Any], *, stream: Any) -> None:
+    if stream is None:
+        return
+    try:
+        print(json.dumps(payload, sort_keys=True), file=stream, flush=True)
+    except (OSError, ValueError):
+        # Diagnostic output must not replace a failure with a second exception
+        # or turn a successfully written installer result into a failed run.
+        pass
+
+
+def _run_process() -> int:
+    try:
+        return main()
+    except Exception as exc:  # noqa: BLE001 - process boundary must emit one code
+        _write_optional_console(
+            {"event": "fatal", "code": _stable_fatal_code(exc)},
+            stream=sys.stderr,
+        )
+        return 1
+
+
 if __name__ == "__main__":
     import multiprocessing
     multiprocessing.freeze_support()
-    try:
-        raise SystemExit(main())
-    except Exception as exc:  # noqa: BLE001 - process boundary must emit one code
-        if sys.stderr is not None:
-            print(
-                json.dumps({"event": "fatal", "code": _stable_fatal_code(exc)}),
-                file=sys.stderr,
-                flush=True,
-            )
-        raise SystemExit(1) from None
+    raise SystemExit(_run_process())
