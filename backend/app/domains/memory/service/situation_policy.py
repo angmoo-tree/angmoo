@@ -16,7 +16,9 @@ def capture(session, *, owner_id, world_id, actor_id, environment, policy):
         from app.domains.memory.repository.situation_transition import retire_admission
         retire_admission(session, value.setting_id, now=datetime.now(UTC))
         get_or_create_settings(session, value.setting_id, timezone=environment.timezone, now=datetime.now(UTC))
-    return {"policy": SITUATION_POLICY, "snapshot": asdict(value) if value else None}
+    from app.domains.memory.policies.situation_generation import TARGET_OUTPUT_REVISION
+    return {"policy": SITUATION_POLICY, "snapshot": asdict(value) if value else None,
+            "output_revision": TARGET_OUTPUT_REVISION}
 
 
 def restore(value):

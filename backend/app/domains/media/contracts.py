@@ -1,5 +1,7 @@
 """Managed-media validation failure shared by storage and HTTP consumers."""
 
+GENERATED_ASSET_MAX_BYTES = 24 * 1024 * 1024
+
 
 class InvalidProfileMediaError(Exception):
     pass

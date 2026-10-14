@@ -143,7 +143,7 @@ def test_t10_new_run_pins_policy_and_existing_legacy_run_is_not_rewritten(relati
 def test_t25_multiple_candidates_share_one_guard_deadline(relation_case, monkeypatch):
     from time import monotonic
     from app.contracts.read_deadline import current_read_deadline
-    from app.runtime.autonomous_activity import social_lane as owner
+    from app.domains.relationships.service.social_context_validation import SocialContextValidationService
     case = relation_case
     lane, state = _lane(case), _new_state(case)
     second = deepcopy(state["candidates"][0])
@@ -153,20 +153,20 @@ def test_t25_multiple_candidates_share_one_guard_deadline(relation_case, monkeyp
     receipt = deepcopy(state["relationship_validation_receipts"]["post-target"])
     receipt["binding"]["target_id"] = second["target_id"]
     state["relationship_validation_receipts"][second["target_id"]] = receipt
-    original = owner.validate_relationship
+    original = SocialContextValidationService._canonical
     checked = []
     def validate(*args, **kwargs):
         assert current_read_deadline.get() is not None
-        checked.append(kwargs["binding"].target_id)
+        checked.append(len(args[2]))
         result = original(*args, **kwargs)
         # Move the clock boundary past the accumulated budget without sleep.
         current_read_deadline.set(monotonic() - 1)
         return result
-    monkeypatch.setattr(owner, "validate_relationship", validate)
+    monkeypatch.setattr(SocialContextValidationService, "_canonical", validate)
     with pytest.raises(SocialContextValidationError) as caught:
         asyncio.run(lane.guard(state))
-    assert caught.value.reason == "canonical_unavailable"
-    assert checked == ["post-target", "second-target"]
+    assert caught.value.reason == "canonical_read_deadline"
+    assert checked == [2]  # Both candidates share the same two references.
     assert current_read_deadline.get() is None
 
 
@@ -334,8 +334,13 @@ def test_t18_completed_effect_replay_does_not_validate_changed_historical_facts(
     lane.lane = "inbox"
     state["decision"] = {"decisions": [{"target_id": "post-target", "action": "like", "brief": "Acknowledge"}]}
     state["lane_data"] = {"post-target": {"post_id": "post-target"}}
+    from app.domains.routines.policies.execution_results import _brief_hash, _action_signature
+    brief = _brief_hash("Acknowledge", None)
     row = models.AgentPublicActionExecution(run_id=case.ctx.run_id, character_id=case.ctx.character.id,
-        signature="complete-inbox", scope="inbox", action_type="like", target_post_id="post-target", status="succeeded")
+        signature=_action_signature(run_id=case.ctx.run_id, scope="inbox", action_type="like", target_id="post-target", brief_hash=brief),
+        brief_hash=brief, scope="inbox", action_type="like", target_post_id="post-target", status="succeeded",
+        world_id=case.actor.world_id, actor_world_character_id=case.actor.id,
+        completed_at=datetime.now(UTC), result={"status": "succeeded"})
     case.db.add(row); case.db.commit()
     case.rows[0].version += 1; case.db.commit()
     lane.action_executor = lambda *_a, **_kw: pytest.fail("committed action submitted again")

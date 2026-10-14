@@ -37,6 +37,7 @@ class LanePorts:
     on_error: Callable[[Exception], Awaitable[dict]] | None = None
     observe: Callable[..., None] | None = None
     prepare_recall: Node | None = None
+    resume: Node | None = None
 
 
 def build_lane(lane: str, ports: LanePorts, *, combined=False):
@@ -61,13 +62,15 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
                 raise
             if name == "Execute" and state.get("failure"):
-                result = {"executions": []}
+                result = await ports.resume({**state, "stage": name}) if ports.resume is not None else None
+                result = result if result is not None else {"executions": []}
                 trace("node_completed", name, state=state, result=result,
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
                 return result
             try:
                 from app.runtime.diagnostics.situation_observation import in_stage
-                result = await in_stage(callback, state, stage_attempt_id)
+                resumed = await ports.resume({**state, "stage": name}) if ports.resume is not None else None
+                result = resumed if resumed is not None else await in_stage(callback, state, stage_attempt_id)
             except BaseException as exc:
                 from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
                 if isinstance(exc, ActivityRetryGuardError):

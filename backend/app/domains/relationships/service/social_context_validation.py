@@ -1,7 +1,9 @@
 """Revalidate frozen SNS facts using a bounded canonical read, never ranking."""
 from time import monotonic
+import sqlite3
+from app.core.sqlite_concurrency import sqlite_error_identity
 
-from app.contracts.read_deadline import bounded_read
+from app.contracts.read_deadline import bounded_read, current_read_deadline
 from app.domains.relationships.contracts.social_context import (
     CURRENTNESS_REVISION, LEGACY_CURRENTNESS, CanonicalSocialContextReference,
     RelationshipValidationReceipt, SocialContextItem, SocialContextValidationError,
@@ -29,19 +31,24 @@ class SocialContextValidationService:
             with bounded_read(self.deadline_seconds):
                 facts = self.gateway.canonical_social_context_facts(scope=scope, references=references)
             if self.clock() >= deadline:
-                raise SocialContextValidationError("canonical_unavailable")
+                raise SocialContextValidationError("canonical_read_deadline")
         except SocialContextValidationError:
             raise
         except Exception as exc:
             # Do not expose SQL/provider messages or treat an outage as empty.
-            raise SocialContextValidationError("canonical_unavailable") from exc
+            code, _ = sqlite_error_identity(exc)
+            primary = code & 0xFF if code is not None else None
+            reason = ("canonical_database_busy" if primary == sqlite3.SQLITE_BUSY else
+                "canonical_read_deadline" if primary == sqlite3.SQLITE_INTERRUPT or isinstance(exc, TimeoutError) else
+                "canonical_database_error" if primary is not None else "canonical_read_error")
+            raise SocialContextValidationError(reason, error_type=type(exc).__name__, sqlite_code=code) from exc
         access = facts.scope_access
         if (not access.subject_exists or access.character_deleted
                 or access.character_owner_id != scope.owner_id
                 or access.subject_world_id != scope.world_id
                 or access.membership_world_id != scope.world_id
                 or access.world_character_status != "active" or access.membership_status != "active"):
-            raise SocialContextValidationError("visibility_lost")
+            raise SocialContextValidationError("visibility_lost", failure_scope="shared")
         return facts
 
     @staticmethod
@@ -57,9 +64,29 @@ class SocialContextValidationService:
             raise SocialContextValidationError("visibility_lost")
         return SocialContextItem(_relationship_record(hit), display_name(facts.nodes[reference.target_world_character_id].display_name), (), "canonical")
 
-    def validate(self, *, scope, binding, prompt, receipt, policy):
+    def validate_many(self, *, scope, requests):
+        """One guard, one canonical read; no cache survives this invocation."""
+        references = []
+        for request in requests:
+            if request["receipt"] is None and request["policy"] == LEGACY_CURRENTNESS:
+                if request["prompt"]:
+                    references.extend(CanonicalSocialContextReference(row["target_id"]) for row in original_rows(request["prompt"]))
+            else:
+                parsed = RelationshipValidationReceipt.from_dict(request["receipt"])
+                if parsed.scope != scope or parsed.binding != request["binding"]:
+                    raise SocialContextValidationError("receipt_invalid")
+                assert_prompt_receipt(request["prompt"], parsed)
+                references.extend(CanonicalSocialContextReference(ref.target_world_character_id, ref.relationship_state_id) for ref in parsed.references)
+        with bounded_read(self.deadline_seconds):
+            facts = self._canonical(scope, tuple(dict.fromkeys(references)))
+            return tuple(self.validate(scope=scope, _facts=facts, **request) for request in requests)
+
+    def validate(self, *, scope, binding, prompt, receipt, policy, _facts=None):
+        deadline = current_read_deadline.get()
+        if deadline is not None and monotonic() >= deadline:
+            raise SocialContextValidationError("canonical_read_deadline")
         if policy == LEGACY_CURRENTNESS and receipt is None:
-            return self._legacy(scope=scope, prompt=prompt)
+            return self._legacy(scope=scope, prompt=prompt, facts=_facts)
         if policy not in {CURRENTNESS_REVISION, LEGACY_CURRENTNESS} or receipt is None:
             raise SocialContextValidationError("receipt_invalid")
         parsed = RelationshipValidationReceipt.from_dict(receipt)
@@ -68,7 +95,7 @@ class SocialContextValidationService:
         assert_prompt_receipt(prompt, parsed)
         references = tuple(CanonicalSocialContextReference(ref.target_world_character_id,
             ref.relationship_state_id) for ref in parsed.references)
-        facts = self._canonical(scope, references)
+        facts = self._canonical(scope, references) if _facts is None else _facts
         for reference, expected in zip(references, parsed.references, strict=True):
             item = self._item(scope, facts, reference)
             if item.relationship.relationship_version != expected.relationship_version:
@@ -80,15 +107,16 @@ class SocialContextValidationService:
         return SocialContextValidationResult(parsed.revision,
             "valid" if parsed.basis == "facts" else parsed.basis, len(references))
 
-    def _legacy(self, *, scope, prompt):
+    def _legacy(self, *, scope, prompt, facts=None):
         if prompt == {}:
-            self._canonical(scope, ())
+            if facts is None:
+                self._canonical(scope, ())
             return SocialContextValidationResult(LEGACY_CURRENTNESS, "disabled", 0)
         rows = original_rows(prompt)
         if any(row["target_id"] == scope.subject_world_character_id for row in rows):
             raise SocialContextValidationError("legacy_unprovable")
         references = tuple(CanonicalSocialContextReference(row["target_id"]) for row in rows)
-        facts = self._canonical(scope, references)
+        facts = self._canonical(scope, references) if facts is None else facts
         versions = []
         for reference, row in zip(references, rows, strict=True):
             item = self._item(scope, facts, reference)

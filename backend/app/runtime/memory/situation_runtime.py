@@ -1,7 +1,10 @@
 """One bounded canonical consumer; background projections own embedding I/O."""
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
+import logging
+from time import monotonic
 from sqlalchemy import select, update, or_, exists
+from app.core.sqlite_concurrency import run_sqlite_session_immediate
 
 from app.core.calendar import utc_instant
 from app.domains.memory.contracts.activity_situation import stable_digest
@@ -10,7 +13,7 @@ from app.domains.memory.exceptions import MemoryCapacityReached, MemoryConflictE
 from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.memory.models.activity_situation import MemorySituationApplyRun, MemorySituationProcessingSetting, MemorySituationRequest
 from app.domains.memory.repository.situation_runs import claim_run, request_run, next_due
-from app.domains.memory.repository.situation_apply import apply_page
+from app.domains.memory.repository.situation_apply import apply_page, prepare_page, SituationPageStale
 from app.runtime.memory.composition import memory_repository
 from app.runtime.memory.situation_sources import SituationSources
 
@@ -78,11 +81,28 @@ class SituationRuntime:
         if token is None:
             return "situation_claim_conflict"
         try:
-            with self.session_factory() as db:
-                apply_page(db, memory_repository(db), SituationSources(db, result_basis=self.result_basis),
-                    run_id=run_id, token=token, now=datetime.now(UTC), page_size=16)
-                db.commit()
-            return "situation_page_applied"
+            for attempt in range(3):
+                started = monotonic()
+                with self.session_factory() as db:
+                    prepared = prepare_page(db, run_id=run_id, token=token, now=datetime.now(UTC), page_size=16)
+                basis = self.result_basis.prepare(prepared)
+                prepared_at = monotonic()
+                try:
+                    with self.session_factory() as db:
+                        run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db), SituationSources(db, result_basis=basis),
+                            run_id=run_id, token=token, now=datetime.now(UTC), page_size=16, prepared=prepared), require_clean=True)
+                    logging.getLogger(__name__).info("situation_page run=%s count=%s bytes=%s prepare_ms=%.3f writer_ms=%.3f",
+                        run_id, len(prepared.admissions), prepared.byte_size,
+                        (prepared_at - started) * 1000, (monotonic() - prepared_at) * 1000)
+                    return "situation_page_applied"
+                except SituationPageStale:
+                    if attempt == 2:
+                        with self.session_factory() as db:
+                            db.execute(update(MemorySituationApplyRun).where(MemorySituationApplyRun.id == run_id,
+                                MemorySituationApplyRun.lease_token == token).values(state="deferred", lease_token=None,
+                                    lease_until=None, error_code="situation_preparation_stale"))
+                            db.commit()
+                        return "situation_preparation_stale"
         except MemoryCapacityReached:
             code = "memory_capacity_reached"
         except MemoryConflictError:

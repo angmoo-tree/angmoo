@@ -1,6 +1,8 @@
 """Auxiliary description schema and instructions shared by existing activity calls."""
 from copy import deepcopy
 
+TARGET_OUTPUT_REVISION = "situation-target-output.v2"
+
 
 def instructions(locale: str, node: str = "chat") -> str:
     fields = {
@@ -31,11 +33,18 @@ def with_chat_situation(schema):
     return result
 
 
-def with_social_situations(schema):
+def with_social_situations(schema, target_ids=None):
     result = deepcopy(schema)
     result["properties"]["situations"] = {"type": "array", "maxItems": 3, "items": {
         "type": "object", "properties": {"target_id": {"type": "string"}, "description": {"type": "string", "maxLength": 1000}},
         "required": ["target_id", "description"], "additionalProperties": False}}
     result["required"] = [*result.get("required", []), "situations"]
+    if target_ids is not None:
+        targets = list(dict.fromkeys(target_ids))
+        if any(not isinstance(target, str) or not target for target in targets):
+            raise ValueError("situation_target_ids_invalid")
+        result["properties"]["situations"]["maxItems"] = min(3, len(targets))
+        if targets:
+            result["properties"]["situations"]["items"]["properties"]["target_id"]["enum"] = targets
     result["propertyOrdering"] = list(result["properties"])
     return result

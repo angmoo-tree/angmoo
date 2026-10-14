@@ -5,6 +5,7 @@ from app.domains.memory.contracts.activity_situation import (
     DeliveredInputManifest, DeliveredSourceEntry, SituationDraft, SituationValidationContext,
     SITUATION_POLICY, stable_digest,
     VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS,
+    DELIVERED_SOURCE_LIMIT,
 )
 from app.domains.memory.models.activity_situation import MemorySituationManifest
 from app.domains.memory.models.items import MemoryScopeSettingModel
@@ -60,6 +61,8 @@ def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validat
             or any(effect["status"] != "succeeded" for effect in result["effects"])
             or parse_description(receipt.description, target_key=receipt.target_key).status != "valid"):
         raise ValueError("situation_success_binding_invalid")
+    if len(result.get("result_sources", ())) > DELIVERED_SOURCE_LIMIT:
+        raise ValueError("situation_source_binding_invalid")
     sources = tuple(DeliveredSourceEntry.from_dict(value) for value in result.get("result_sources", ()))
     entries = (*manifest.sources, *sources)
     if manifest.version == 2:

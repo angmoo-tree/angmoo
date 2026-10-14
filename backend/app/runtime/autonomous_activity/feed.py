@@ -153,7 +153,9 @@ class FeedLane(SocialLane):
         from app.runtime.autonomous_activity.feed_effects import committed
         decision = next((row for row in state.get("decision", {}).get("decisions", [])
                          if row["target_id"] == target_id), None)
-        return committed(self, state, decision) if decision and decision["action"] != "no_action" else None
+        receipt = committed(self, state, decision) if decision and decision["action"] != "no_action" else None
+        from app.runtime.autonomous_activity.committed_resume import public_receipt_current
+        return receipt if public_receipt_current(self, receipt) else None
 
     def observe_delivered(self):
         from app.runtime.social.feed_observations import settle_delivery

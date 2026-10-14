@@ -27,10 +27,11 @@ class SchedulerLeaseExecutor:
         if self._closed:
             raise RuntimeError("scheduler_lease_executor_closed")
         submitted = monotonic()
+        deadline = kwargs.pop("queue_deadline", None)
 
         def execute() -> Any:
             delay = monotonic() - submitted
-            if delay > 1:
+            if delay > 1 or (deadline is not None and monotonic() >= deadline):
                 raise SqliteTaskQueueFull("scheduler_lease_queue_deadline")
             logger.info("scheduler_lease_queue operation=%s queue_ms=%.3f owner=%s epoch=%s",
                         operation, delay * 1000, kwargs.get("owner_id"), kwargs.get("fencing_epoch"))
@@ -87,4 +88,5 @@ async def lease_call(coordinator: Any, operation: str, **kwargs: Any) -> Any:
         return await coordinator.call(operation, **kwargs)
     # Compatibility for direct private-helper tests. Product runners always
     # receive the executor above and never run a lease operation on the loop.
+    kwargs.pop("queue_deadline", None)
     return getattr(coordinator, operation)(**kwargs)

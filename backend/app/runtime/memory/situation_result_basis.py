@@ -3,7 +3,7 @@ from contextlib import closing
 from pathlib import Path
 import sqlite3
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-from app.domains.memory.contracts.activity_situation import stable_digest
+from app.domains.memory.contracts.activity_situation import stable_digest, SITUATION_BASIS_DOCUMENT_MAX_BYTES
 from app.domains.memory.contracts.situation_result_binding import SituationResultBasis
 from app.domains.social.models.posts import Post
 from app.domains.social.utils.situation_output import NORMALIZATION_REVISION, stored_output
@@ -28,7 +28,7 @@ class CheckpointResultBasis:
                     "AND checkpoint_ns LIKE ? ORDER BY checkpoint_id DESC LIMIT 256",
                     ("activity:" + receipt.logical_activity_id, "%" + receipt.lane.capitalize() + "ActivityGraph:%"))
                 for namespace, kind, data in rows:
-                    if kind not in {"msgpack", "json"} or len(data) > 8 * 1024 * 1024:
+                    if kind not in {"msgpack", "json"} or len(data) > SITUATION_BASIS_DOCUMENT_MAX_BYTES:
                         continue
                     value = serde.loads_typed((kind, data))
                     state = value.get("channel_values", {}) if isinstance(value, dict) else {}
@@ -67,8 +67,18 @@ class CheckpointResultBasis:
             raise ValueError("situation_result_basis_invalid" if saw_candidate else "situation_result_basis_missing")
         return next(iter(matched.values()))
 
-    def resolve(self, session, admission):
-        raw = self.raw_output(admission)
+    def prepare(self, page):
+        outputs = {}
+        for sequence, admission, error in page.admissions:
+            if admission is not None and admission.requires_result_binding:
+                try:
+                    outputs[sequence] = self.raw_output(admission)
+                except ValueError as exc:
+                    outputs[sequence] = str(exc)
+        return PreparedCheckpointResultBasis(self, outputs)
+
+    def resolve(self, session, admission, *, raw=None):
+        raw = self.raw_output(admission) if raw is None else raw
         sources = [row for row in admission.result_sources if row.role == "committed_result" and row.source_type in {"POST", "REPLY"}]
         if len(sources) != 1:
             raise ValueError("situation_result_basis_invalid")
@@ -83,3 +93,17 @@ class CheckpointResultBasis:
         receipt = admission.receipt
         return SituationResultBasis(receipt.logical_activity_id, receipt.lane, receipt.target_key,
             raw, stored_output(raw), actual, NORMALIZATION_REVISION, source)
+
+
+class PreparedCheckpointResultBasis:
+    """One page's interpreted basis; canonical post/receipt checks remain fresh."""
+    def __init__(self, owner, outputs):
+        self.owner, self.outputs = owner, outputs
+
+    def resolve(self, session, admission):
+        raw = self.outputs.get(admission.receipt.sequence)
+        if isinstance(raw, str):
+            raise ValueError(raw)
+        if raw is None:
+            raise ValueError("situation_result_basis_missing")
+        return self.owner.resolve(session, admission, raw=raw)
