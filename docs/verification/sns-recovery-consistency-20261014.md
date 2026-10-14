@@ -115,3 +115,20 @@ automatic paid submission. Persistent contention or lost authority still stops
 work. PR/main integration and their actual runs are recorded separately in the
 execution plan and PR evidence; local source checks alone are not merge/deploy
 proof.
+
+## First PR CI and fixture correction
+
+PR #374 first head `55a82576`, Core run `38570276227` attempt 1 collected
+6,430 backend cases: 10 failures and 66 pre-existing skips. The failing parameter
+cases were old fault seams/state expectations and incomplete fixtures: image
+format recovery injected `upload` although generated assets now use
+`store_prepared`, buffer-only spool failures expected durable pending, daily
+policy execution omitted its actor, and partial Inbox replay wrote a fabricated
+signature without World/actor/result metadata. Fixtures now inject the actual
+owner phase, assert submitted plus retained bytes without a journal, and record
+the real action signature and scoped completion witness. Format/byte preservation,
+one submit/attachment, denial of disabled actions and partial replay assertions
+remain. The three related files/nodes passed **89 local cases**, no failure/skip.
+No required check, product guard, timeout or test retry policy was weakened.
+The updated head requires its own complete CI evidence before merge; first-head
+successes are not combined with its later partitions.
