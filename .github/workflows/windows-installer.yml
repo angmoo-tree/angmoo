@@ -67,10 +67,10 @@ jobs:
           persist-credentials: false
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: '22'
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413
         with:
           version: 11.22.0
           run_install: false
@@ -168,7 +168,7 @@ jobs:
         if: needs.impact.outputs.windows == 'full'
       - name: Preserve sanitized pre-install Defender diagnostics
         if: always() && needs.impact.outputs.windows == 'full'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: angmoo-defender-preinstall-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: .codex-temp/er6-defender-trigger-matrix/er6-defender-trigger-matrix.json
@@ -200,7 +200,7 @@ jobs:
             --version 0.4.0-1 `
             --commit $env:SOURCE_SHA
       - name: Upload release-candidate evidence
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           if-no-files-found: error
@@ -222,14 +222,14 @@ jobs:
             desktop/src-tauri/target/release/bundle/nsis/*.exe
             desktop/src-tauri/target/release/bundle/msi/*.msi
       - name: Preserve installer-legacy-fixture
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-legacy-fixture-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: .codex-temp/er6-localappdata-lifecycle/er6-localappdata-lifecycle.zip
           if-no-files-found: error
           retention-days: 14
       - name: Preserve installer-fixtures-payload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: |
@@ -238,7 +238,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Preserve installer-fixtures-first
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-fixtures-first-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: |
@@ -248,7 +248,7 @@ jobs:
           retention-days: 14
         if: needs.impact.outputs.windows == 'full'
       - name: Preserve installer-fixtures-second
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-fixtures-second-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: |
@@ -258,7 +258,7 @@ jobs:
           retention-days: 14
         if: needs.impact.outputs.windows == 'full'
       - name: Preserve installer-fixtures-recovery
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-fixtures-recovery-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: |
@@ -268,7 +268,7 @@ jobs:
           retention-days: 14
         if: needs.impact.outputs.windows == 'full'
       - name: Preserve installer-fixtures-representative
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-fixtures-representative-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: |
@@ -300,15 +300,15 @@ jobs:
           fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/payload
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-${{ matrix.partition }}-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/fixtures/${{ matrix.partition }}
@@ -331,7 +331,7 @@ jobs:
             -Mode Upgrade
       - name: Upload exact native upgrade coverage
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-${{ matrix.partition }}
           if-no-files-found: error
@@ -352,15 +352,15 @@ jobs:
           fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/payload
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-recovery-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/fixtures/recovery
@@ -390,11 +390,11 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-legacy-fixture-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/legacy
@@ -1092,7 +1092,7 @@ jobs:
             Set-Content -LiteralPath (Join-Path $evidence 'threat-detections.json') -Encoding utf8
       - name: Upload hosted Defender evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: angmoo-windows-defender-evidence-${{ env.SOURCE_SHA }}
           if-no-files-found: error
@@ -1126,7 +1126,7 @@ jobs:
         run: |-
           python scripts/ci/gate.py --gate windows-installer
           echo windows_installer_required_matrix_pass
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         if: needs.impact.outputs.windows_installer == 'true'
         with:
           pattern: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-*
@@ -1150,15 +1150,15 @@ jobs:
           fetch-depth: 0
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_SHA }}
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-payload-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/payload
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: installer-fixtures-representative-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-installer/fixtures/representative
@@ -1181,7 +1181,7 @@ jobs:
             -Mode Upgrade
       - name: Upload exact native upgrade coverage
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: windows-upgrade-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-representative
           if-no-files-found: error
