@@ -40,7 +40,9 @@ assert.equal(typeof upstreamAddress, "object");
 
 const frontendPort = await availablePort();
 const nextCli = fileURLToPath(new URL("../node_modules/next/dist/bin/next", import.meta.url));
-const next = spawn(process.execPath, [nextCli, "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)], {
+const next = spawn(process.execPath, process.env.CI
+  ? [fileURLToPath(new URL("./serve-production.mjs", import.meta.url)), "--port", String(frontendPort)]
+  : [nextCli, "dev", "--hostname", "127.0.0.1", "--port", String(frontendPort)], {
   cwd: fileURLToPath(new URL("..", import.meta.url)),
   env: {
     ...process.env,

@@ -374,6 +374,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
         working-directory: frontend
+      # Build before any server fixture writes generated development files.
+      # CI fixtures below execute this build with the shared production launcher.
+      - name: Build Local OSS profile offline
+        env:
+          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
+        run: pnpm build
+        working-directory: frontend
       - name: Verify World Package proxy capabilities
         run: pnpm test:world-package-proxy
         working-directory: frontend
@@ -461,11 +468,6 @@ jobs:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/card-upload.xml
         run: pnpm exec playwright test --config playwright.card-upload.config.ts --reporter=github,junit
         working-directory: browser-tests
-      - name: Build Local OSS profile offline
-        env:
-          NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
-        run: pnpm build
-        working-directory: frontend
       - name: Build Tauri static frontend profile
         env:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
