@@ -6,6 +6,7 @@ import logging
 import threading
 from functools import partial
 from typing import Any
+from app.core.sqlite_concurrency import SqliteAsyncTaskQueue
 
 from app.runtime.component_workers import (
     run_projector_component,
@@ -65,6 +66,7 @@ class SingleBackendRuntimeComponents:
         self._projector_stop: threading.Event | None = None
         self._scheduler_task: asyncio.Task[None] | None = None
         self._projector_task: asyncio.Task[None] | None = None
+        self._projector_work: SqliteAsyncTaskQueue | None = None
 
     async def start(self) -> None:
         if self._scheduler_task is not None or self._projector_task is not None:
@@ -93,8 +95,9 @@ class SingleBackendRuntimeComponents:
             self._run_scheduler(self._scheduler_stop, scheduler_listener),
             name="angmoo-in-process-scheduler",
         )
+        self._projector_work = SqliteAsyncTaskQueue(capacity=1)
         self._projector_task = asyncio.create_task(
-            asyncio.to_thread(
+            self._projector_work.call(
                 self._run_projector,
                 self._projector_stop,
                 projector_listener,
@@ -115,6 +118,18 @@ class SingleBackendRuntimeComponents:
             raise
 
     async def stop(self) -> None:
+        cleanup = asyncio.create_task(self._stop_owned(), name="angmoo-runtime-drain")
+        cancelled = False
+        while not cleanup.done():
+            try:
+                await asyncio.shield(cleanup)
+            except asyncio.CancelledError:
+                cancelled = True
+        await cleanup
+        if cancelled:
+            raise asyncio.CancelledError
+
+    async def _stop_owned(self) -> None:
         if self._scheduler_stop is not None:
             self._scheduler_stop.set()
         if self._projector_stop is not None:
@@ -129,10 +144,12 @@ class SingleBackendRuntimeComponents:
                 tasks,
                 timeout=self._shutdown_timeout_seconds,
             )
-            for task in pending:
-                task.cancel()
-            if pending:
-                await asyncio.gather(*pending, return_exceptions=True)
+            # Cancelling a to_thread wrapper does not stop the projector. Keep
+            # owning it until the underlying store operation returns, before
+            # persistence resources can be disposed by the lifespan owner.
+            if self._scheduler_task in pending:
+                self._scheduler_task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
             if self._scheduler_task in pending:
                 self._registry.update(
                     "scheduler",
@@ -145,6 +162,10 @@ class SingleBackendRuntimeComponents:
                     RuntimeComponentState.FAILED,
                     reason_code=RuntimeDiagnosticCode.PROJECTOR_STALLED,
                 )
+        if self._projector_work is not None:
+            await self._projector_work.drain()
+            self._projector_work.close()
+            self._projector_work = None
         self._scheduler_task = None
         self._projector_task = None
         self._scheduler_stop = None
@@ -158,6 +179,7 @@ class SingleBackendRuntimeComponents:
             done, _ = await asyncio.wait({self._scheduler_task}, timeout=4)
             if not done:
                 self._scheduler_task.cancel()
+            await asyncio.gather(self._scheduler_task, return_exceptions=True)
 
     async def _wait_started(
         self,

@@ -30,6 +30,8 @@ class ProjectionWorkItem:
 
 @runtime_checkable
 class OutboxPort(Protocol):
+    def has_unfinished(self) -> bool: ...
+
     def claim(
         self,
         *,

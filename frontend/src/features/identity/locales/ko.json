@@ -69,6 +69,7 @@
   "saving": "저장 중…",
   "languageSaveFailed": "언어를 저장하지 못했습니다. 최신 설정을 확인하고 다시 시도해주세요.",
   "detectionFailed": "감지 정보를 동기화하지 못했습니다. 마지막 정상 환경은 유지됩니다.",
+  "detectionDelayed": "환경 정보를 아직 동기화하지 못했어요. 잠시 후 다시 시도해요.",
   "detectedLanguage": "감지한 선호 언어: {{language}}",
   "detectedTimezone": "감지한 시간대: {{zone}}",
   "detectionPending": "감지 환경 확인 중…",

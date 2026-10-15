@@ -19,7 +19,8 @@ const events = [];
 const browser = { sessionStorage: storage(), localStorage: storage(), dispatchEvent: event => events.push(event.type) };
 let runtimeFetch = async () => new Response("{}", {status: 200});
 const context = vm.createContext({ console, window: browser, Event, FormData, File, Headers, Response, URL,
-  Date, AbortController, navigator: { languages: ["ja-JP"], language: "ja-JP" }, Intl, process });
+  Date, AbortController, DOMException, setTimeout, clearTimeout,
+  navigator: { languages: ["ja-JP"], language: "ja-JP" }, Intl, process });
 const modules = new Map();
 function load(filename) {
   if (modules.has(filename)) return modules.get(filename).exports;
@@ -127,7 +128,7 @@ for (const request of [apiRequest, auth.authRequest, authenticatedSocial]) {
     if (transition === "runtime-replaced") browser.__ANGMOO_RUNTIME_CONFIG__ = {apiBaseUrl: "http://127.0.0.1:12346", launchToken: "new-in-memory"};
     if (transition === "aborted") controller.abort();
     respond(new Response('{"detail":"not_authenticated"}', {status: 401}));
-    await assert.rejects(pending, error => error.status === 401);
+    await assert.rejects(pending, error => request === auth.authRequest ? error.status === 401 : error.name === "AbortError");
     assert.equal(auth.getStoredUser().id, transition === "new-owner" ? "owner-b" : "owner-a");
   }
   runtimeFetch = async () => new Response('{"detail":"not_authenticated"}', {status: 401});
@@ -135,3 +136,53 @@ for (const request of [apiRequest, auth.authRequest, authenticatedSocial]) {
   assert.equal(auth.getStoredUser(), null);
 }
 console.log("User environment contracts PASS: isolated i18next/SSR, interpolation escaping, detectors, UTC display, typed HTTP errors across shared transports and 12 late-response session transitions.");
+
+const {synchronizeEnvironment} = source("composition/providers/environment-synchronization.ts");
+const baseEnvironment = { environment_revision: 1, timezone: "UTC", preferred_language: "en" };
+const lease = () => ({clientId: "synthetic-client", token: null, sequence: 0});
+const busy = after => new ApiRequestError("safe", 503, "environment_temporarily_busy", {}, after);
+for (const failure of [busy("1"), new ApiRequestError("safe",503,"other_failure"), new Error("unknown outcome")]) {
+  const calls = [], waits = [];
+  let reads = 0, time = 0, detected = "ko-KR";
+  const current = lease();
+  const run = synchronizeEnvironment(current, {
+    read: async () => ({...baseEnvironment, environment_revision: ++reads}),
+    detect: () => ({preferred_language: detected, timezone: "Asia/Seoul"}),
+    write: async data => { calls.push(data); if (calls.length < 3) throw failure; return {...baseEnvironment, lease_token: "fresh-lease"}; },
+    now: () => time, wait: async ms => {waits.push(ms); time += ms; detected = "en-US";},
+  }, new AbortController().signal);
+  if (failure.code === "environment_temporarily_busy") {
+    await run;
+    assert.equal(calls.length, 3); assert.equal(reads, 3); assert.deepEqual(waits, [1000,1000]);
+    assert.deepEqual(calls.map(x => [x.expected_revision,x.sequence,x.preferred_language]), [[1,1,"ko-KR"],[2,2,"en-US"],[3,3,"en-US"]]);
+    assert.equal(current.token, "fresh-lease");
+  } else { await assert.rejects(run); assert.equal(calls.length,1); assert.equal(reads,1); }
+}
+for (const after of ["1","60"]) {
+  let writes = 0, waits = 0;
+  await assert.rejects(synchronizeEnvironment(lease(), {
+    read: async () => baseEnvironment, detect: () => ({preferred_language:"ko",timezone:"UTC"}),
+    write: async () => {writes++; throw busy(after);}, wait: async () => {waits++;},
+  }, new AbortController().signal), error => error.code === "environment_temporarily_busy");
+  assert.equal(writes, after === "1" ? 3 : 1); assert.equal(waits, after === "1" ? 2 : 0);
+}
+{
+  let reads = 0, writes = 0;
+  const current = {...lease(), token:"old-lease"};
+  const result = await synchronizeEnvironment(current, {
+    read: async () => {reads++; return baseEnvironment;}, detect: () => ({preferred_language:"ko",timezone:"UTC"}),
+    write: async () => {writes++; throw new ApiRequestError("safe",409,"environment_detector_owned");},
+  }, new AbortController().signal);
+  assert.equal(result,baseEnvironment); assert.equal(reads,2); assert.equal(writes,1); assert.equal(current.token,null);
+}
+for (const phase of ["wait","response"]) {
+  const controller = new AbortController(), current = lease();
+  let writes = 0;
+  await assert.rejects(synchronizeEnvironment(current, {
+    read: async () => baseEnvironment, detect: () => ({preferred_language:"ko",timezone:"UTC"}),
+    write: async () => {writes++; if(phase === "wait") throw busy("1"); controller.abort(); return {...baseEnvironment,lease_token:"late"};},
+    wait: async (_ms, signal) => {controller.abort(); signal.throwIfAborted();},
+  }, controller.signal));
+  assert.equal(writes,1); assert.equal(current.token,null);
+}
+console.log("Environment contention PASS: typed retries only, three attempts, fresh GET/detection/sequence, excessive Retry-After, conflicts, cancellation and late lease rejection.");

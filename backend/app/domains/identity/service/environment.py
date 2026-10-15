@@ -4,6 +4,7 @@ import secrets
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
+from app.core.sqlite_concurrency import is_sqlite_contention, run_sqlite_session_immediate, SqliteConcurrencyError
 
 from app.contracts.environment import EnvironmentSnapshot, AccountingPeriod
 from app.core.calendar import utc_instant, local_period
@@ -114,8 +115,28 @@ def read_environment(db, owner_id: str, *, now=None) -> EnvironmentRead:
         synchronization="active_owner" if live else "awaiting_detector", lease_expires_at=row.lease_expires_at if row else None)
 
 
+class EnvironmentTemporarilyBusy(RuntimeError):
+    pass
+
+
 def report_environment(db, owner_id: str, data: EnvironmentReport, *, session_hash: str | None,
                        now=None, on_timezone_change=None) -> EnvironmentRead:
+    """Own this request's UoW; caller may have only authenticated read state."""
+    if db.new or db.dirty or db.deleted:
+        raise SqliteConcurrencyError("environment_writer_requires_clean_session")
+    db.rollback()
+    try:
+        return run_sqlite_session_immediate(db, lambda: apply_environment_report(db, owner_id, data,
+            session_hash=session_hash, now=now, on_timezone_change=on_timezone_change), require_clean=True)
+    except Exception as exc:
+        if is_sqlite_contention(exc):
+            raise EnvironmentTemporarilyBusy("environment_temporarily_busy") from exc
+        raise
+
+
+def apply_environment_report(db, owner_id: str, data: EnvironmentReport, *, session_hash: str | None,
+                             now=None, on_timezone_change=None) -> EnvironmentRead:
+    """Caller-owned canonical mutation and DTO; no nested commit or postcommit read."""
     now = utc_instant(now or datetime.now(UTC))
     lock_environment_admission(db, owner_id)
     existing = read_environment(db, owner_id, now=now)
@@ -163,9 +184,8 @@ def report_environment(db, owner_id: str, data: EnvironmentReport, *, session_ha
         lease_sequence=data.sequence, lease_expires_at=now + timedelta(seconds=LEASE_SECONDS)),
         execution_options={"synchronize_session": False})
     if changed_row.rowcount != 1:
-        db.rollback()
         raise EnvironmentConflict("environment_revision_conflict")
-    db.commit()
+    db.flush()
     db.expire_all()
     result = read_environment(db, owner_id, now=now)
     return result.model_copy(update={"lease_token": token})
