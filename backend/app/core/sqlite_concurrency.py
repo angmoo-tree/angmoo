@@ -5,6 +5,8 @@ from __future__ import annotations
 import sqlite3
 import time
 import asyncio
+import logging
+from contextlib import contextmanager, nullcontext
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
@@ -25,7 +27,12 @@ T = TypeVar("T")
 SqliteWriteObserver = Callable[[dict[str, object]], None]
 
 
+class SqlitePostCommitError(RuntimeError):
+    """A commit succeeded; cleanup failure must never replay its operation."""
+
+
 def _notify(observer: SqliteWriteObserver | None, **facts: object) -> None:
+    logging.getLogger(__name__).debug("sqlite_writer_attempt %s", facts)
     if observer is not None:
         try:
             observer(facts)
@@ -85,6 +92,7 @@ def run_sqlite_immediate(
     for attempt in range(1, policy.max_attempts + 1):
         attempt_started = monotonic()
         acquired_at: float | None = None
+        committed = False
         try:
             with engine.connect() as connection:
                 driver = connection.connection.driver_connection
@@ -97,6 +105,7 @@ def run_sqlite_immediate(
                     try:
                         result = operation(connection)
                         connection.commit()
+                        committed = True
                         _notify(observer, result="committed", attempt=attempt,
                                 max_attempts=policy.max_attempts,
                                 acquire_ms=round((acquired_at - attempt_started) * 1000, 3),
@@ -108,10 +117,15 @@ def run_sqlite_immediate(
                         connection.rollback()
                         raise
                 finally:
+                    # BEGIN may fail after SQLAlchemy has opened its transaction.
+                    # Keep the bounded timeout through rollback, too.
+                    connection.rollback()
                     _set_busy_timeout(driver, previous_timeout_ms)
         except PoolCheckoutTimeout as exc:
             raise SqliteTaskQueueFull("sqlite_connection_checkout_deadline") from exc
         except OperationalError as exc:
+            if committed:
+                raise SqlitePostCommitError("sqlite_cleanup_failed_after_commit") from exc
             if not _is_busy_error(exc):
                 raise
             last_error = exc
@@ -122,6 +136,8 @@ def run_sqlite_immediate(
                     acquire_ms=round((monotonic() - attempt_started) * 1000, 3),
                     attempt_ms=round((monotonic() - attempt_started) * 1000, 3))
         except sqlite3.OperationalError as exc:
+            if committed:
+                raise SqlitePostCommitError("sqlite_cleanup_failed_after_commit") from exc
             if not _is_busy_error(exc):
                 raise
             last_error = exc
@@ -191,19 +207,35 @@ def run_sqlite_session_immediate(
     last_error: BaseException | None = None
     for attempt in range(1, policy.max_attempts + 1):
         attempt_started = monotonic()
+        acquired_at: float | None = None
         session.rollback()
-        connection = session.connection()
-        driver_connection = connection.connection.driver_connection
-        remaining = max(0.001, policy.maximum_elapsed_seconds - (monotonic() - started))
-        timeout_ms = max(1, min(50, int(remaining * 1000)))
-        previous_timeout_ms = _get_busy_timeout(driver_connection)
-        _set_busy_timeout(driver_connection, timeout_ms)
+        committed = False
         try:
-            connection.exec_driver_sql("BEGIN IMMEDIATE")
-            acquired_at = monotonic()
-            result = operation()
-            _set_busy_timeout(driver_connection, previous_timeout_ms)
-            session.commit()
+            # Pin the Connection until AFTER Session commit/rollback and timeout
+            # restoration. A Session bound directly to an Engine otherwise returns
+            # the DBAPI connection to the pool from commit(), before our finally.
+            owner = bind.connect() if isinstance(bind, Engine) else nullcontext(bind)
+            with owner as connection:
+                original_bind = session.bind
+                driver_connection = connection.connection.driver_connection
+                previous_timeout_ms = _get_busy_timeout(driver_connection)
+                session.bind = connection
+                try:
+                    remaining = max(0.001, policy.maximum_elapsed_seconds - (monotonic() - started))
+                    _set_busy_timeout(driver_connection, max(1, min(50, int(remaining * 1000))))
+                    session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+                    acquired_at = monotonic()
+                    result = operation()
+                    session.commit()
+                    committed = True
+                finally:
+                    try:
+                        session.rollback()
+                    finally:
+                        try:
+                            _set_busy_timeout(driver_connection, previous_timeout_ms)
+                        finally:
+                            session.bind = original_bind
             _notify(observer, result="committed", attempt=attempt,
                     max_attempts=policy.max_attempts,
                     acquire_ms=round((acquired_at - attempt_started) * 1000, 3),
@@ -211,9 +243,11 @@ def run_sqlite_session_immediate(
                     attempt_ms=round((monotonic() - attempt_started) * 1000, 3),
                     total_ms=round((monotonic() - started) * 1000, 3))
             return result
-        except OperationalError as exc:
-            _set_busy_timeout(driver_connection, previous_timeout_ms)
-            session.rollback()
+        except PoolCheckoutTimeout as exc:
+            raise SqliteTaskQueueFull("sqlite_connection_checkout_deadline") from exc
+        except (OperationalError, sqlite3.OperationalError) as exc:
+            if committed:
+                raise SqlitePostCommitError("sqlite_cleanup_failed_after_commit") from exc
             if not _is_busy_error(exc):
                 raise
             last_error = exc
@@ -221,24 +255,10 @@ def run_sqlite_session_immediate(
             _notify(observer, result="busy", attempt=attempt, sqlite_code=error_code,
                     sqlite_primary_code=error_code & 0xFF if error_code is not None else None,
                     sqlite_name=error_name, max_attempts=policy.max_attempts,
-                    acquire_ms=round((monotonic() - attempt_started) * 1000, 3),
+                    stage="acquire" if acquired_at is None else "transaction",
+                    transaction_ms=None if acquired_at is None else round((monotonic() - acquired_at) * 1000, 3),
+                    acquire_ms=round(((acquired_at or monotonic()) - attempt_started) * 1000, 3),
                     attempt_ms=round((monotonic() - attempt_started) * 1000, 3))
-        except sqlite3.OperationalError as exc:
-            _set_busy_timeout(driver_connection, previous_timeout_ms)
-            session.rollback()
-            if not _is_busy_error(exc):
-                raise
-            last_error = exc
-            error_code, error_name = sqlite_error_identity(exc)
-            _notify(observer, result="busy", attempt=attempt, sqlite_code=error_code,
-                    sqlite_primary_code=error_code & 0xFF if error_code is not None else None,
-                    sqlite_name=error_name, max_attempts=policy.max_attempts,
-                    acquire_ms=round((monotonic() - attempt_started) * 1000, 3),
-                    attempt_ms=round((monotonic() - attempt_started) * 1000, 3))
-        except BaseException:
-            _set_busy_timeout(driver_connection, previous_timeout_ms)
-            session.rollback()
-            raise
 
         elapsed = monotonic() - started
         if attempt >= policy.max_attempts or elapsed >= policy.maximum_elapsed_seconds:
@@ -263,6 +283,39 @@ def run_sqlite_session_immediate(
     )
     exhausted.sqlite_errorcode, exhausted.sqlite_errorname = error_code, error_name
     raise exhausted from last_error
+
+
+@contextmanager
+def sqlite_session_attempt(session: Session):
+    """One non-replaying writer for a short fenced filesystem effect.
+
+    An external effect cannot be rolled back by SQLite. The durable owner must
+    reconcile its journal after an exception; this context NEVER retries it.
+    """
+    if session.in_transaction():
+        raise SqliteConcurrencyError("sqlite_writer_requires_clean_session")
+    bind = session.get_bind()
+    if bind.dialect.name != "sqlite":
+        raise SqliteConcurrencyError("SQLite writer received a non-SQLite session")
+    owner = bind.connect() if isinstance(bind, Engine) else nullcontext(bind)
+    with owner as connection:
+        original_bind = session.bind
+        driver = connection.connection.driver_connection
+        previous = _get_busy_timeout(driver)
+        session.bind = connection
+        try:
+            _set_busy_timeout(driver, 50)
+            session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+            yield session
+            session.commit()
+        finally:
+            try:
+                session.rollback()
+            finally:
+                try:
+                    _set_busy_timeout(driver, previous)
+                finally:
+                    session.bind = original_bind
 
 
 def _set_busy_timeout(driver_connection: object, timeout_ms: int) -> None:
@@ -386,6 +439,14 @@ class SqliteAsyncTaskQueue:
 
 
 def _is_busy_error(exc: BaseException) -> bool:
+    """Compatibility name for existing callers; new code uses is_sqlite_busy."""
+    return is_sqlite_busy(exc)
+
+
+def is_sqlite_busy(exc: BaseException) -> bool:
+    """Only SQLite BUSY (including SNAPSHOT), never LOCKED or generic SQL errors."""
+    if isinstance(exc, SqliteBusyRetryExhausted):
+        return True
     code, _ = sqlite_error_identity(exc)
     if code is not None:
         return code & 0xFF == sqlite3.SQLITE_BUSY
@@ -397,6 +458,11 @@ def _is_busy_error(exc: BaseException) -> bool:
     }
 
 
+def is_sqlite_contention(exc: BaseException) -> bool:
+    """Retryable canonical admission; saturation stays distinct from DB BUSY."""
+    return isinstance(exc, (SqliteTaskQueueFull, PoolCheckoutTimeout)) or is_sqlite_busy(exc)
+
+
 __all__ = [
     "SqliteAsyncTaskQueue",
     "SqliteBoundedTaskQueue",
@@ -404,6 +470,11 @@ __all__ = [
     "SqliteConcurrencyError",
     "SqliteRetryPolicy",
     "SqliteTaskQueueFull",
+    "SqlitePostCommitError",
     "run_sqlite_immediate",
     "run_sqlite_session_immediate",
+    "sqlite_error_identity",
+    "is_sqlite_busy",
+    "is_sqlite_contention",
+    "sqlite_session_attempt",
 ]

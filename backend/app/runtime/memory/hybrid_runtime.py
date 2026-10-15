@@ -55,6 +55,11 @@ class MemoryHybridRuntime:
 
     def erase_items(self, identifiers):
         """Remove exact registrations from every retained disposable generation."""
+        from app.runtime.received_results import result_journal
+        identifiers = tuple(identifiers)
+        journal = result_journal("memory-embedding")
+        for identifier in identifiers:
+            journal.close_item(identifier)
         root = self._generations.root / "generations"
         try:
             generations = tuple(root.iterdir())

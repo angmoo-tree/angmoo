@@ -70,6 +70,9 @@ for (const language of ["ko", "en"] as const) {
     await expect(page.getByRole("button", { name: language === "ko" ? "지금 관계 정리" : "Review relationships now", exact: true })).toBeVisible();
     await panel.getByRole("checkbox").first().check();
     await panel.locator('input[type="time"]').fill("21:20");
+    await expect(panel.getByText(language === "ko"
+      ? "부하가 한 번에 몰리지 않도록 기억 정리와 일일 관계 정리는 시간을 띄워 예약하는 것을 권장해요. 실행 시각은 직접 설정할 수 있어요."
+      : "To help spread the workload, schedule memory consolidation and daily relationship review at different times. You can choose the times.", {exact: true})).toBeVisible();
     expect(writes).toHaveLength(0);
     await save.click();
     await expect(save).toBeDisabled();

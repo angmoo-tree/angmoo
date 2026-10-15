@@ -27,19 +27,32 @@ def _digest(item):
 
 
 def resolve_memory_batch(db, *, scope, items, activation, now):
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    from app.domains.memory.repository.access_batch import prepare_access
+    reader = RuntimeEpisodeDetailReader(db)
+    validation = MemoryAccessValidation(db, now)
+    # One synchronous read operation only. No receipt writes/autoflush may
+    # invalidate the shared canonical rows before this operation returns.
+    with db.no_autoflush:
+        prepare_access(db, items, now, reader=reader, validation=validation)
+        return _resolve_memory_batch(db, scope=scope, items=items, activation=activation,
+            now=now, reader=reader, validation=validation)
+
+
+def _resolve_memory_batch(db, *, scope, items, activation, now, reader, validation):
     evidence = list(db.scalars(select(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id.in_([item.id for item in items]))))
     by_item = defaultdict(list)
     for row in evidence:
         by_item[row.memory_item_id].append(row)
     identities = tuple(dict.fromkeys((row.source_type, row.source_id) for row in evidence))
-    sources = RuntimeEpisodeDetailReader(db).read_sources(scope=scope, identities=identities)
+    sources = reader.read_sources(scope=scope, identities=identities)
     resolved = []
     for item in items:
         from app.domains.memory.repository.episode_privacy import currently_accessible
-        if not currently_accessible(db, RuntimeEpisodeDetailReader(db), scope, item, now):
+        if not currently_accessible(db, reader, scope, item, now, validation=validation):
             resolved.append((None, {"memory_id": item.id, "digest": _digest(item)}, "source_unavailable_or_changed"))
             continue
-        situation = situation_origin(db, item)
+        situation = situation_origin(db, item, validation=validation)
         if situation is not None:
             receipt = db.get(MemorySituationReceipt, situation.receipt_sequence)
             target = receipt.result.get("counterpart_id")
@@ -102,7 +115,7 @@ def episode_lineage_ids(scope):
         previous.world_id == scope.world_id, previous.subject_world_character_id == scope.subject_world_character_id))
 
 
-def collect_new_review_memories(db, *, setting, now):
+def collect_new_review_memories(db, *, setting, now, excluded=None):
     scope = MemoryScope(setting.owner_id, setting.world_id, setting.subject_world_character_id)
     policy = interpreted_policy(db, scope.world_id)
     actor = db.get(WorldCharacter, scope.subject_world_character_id)
@@ -118,6 +131,7 @@ def collect_new_review_memories(db, *, setting, now):
             MemoryItem.status == "active", MemoryItem.deleted_at.is_(None), MemoryItem.superseded_by_id.is_(None),
             MemoryItem.valid_from <= now, or_(MemoryItem.pinned_at.is_not(None), MemoryItem.valid_until.is_(None), MemoryItem.valid_until > now),
             MemoryItem.created_at >= policy.activated_at,
+            MemoryItem.created_at <= now,
             ~exists(select(RelationshipReviewMemoryReceipt.id).where(RelationshipReviewMemoryReceipt.memory_id == MemoryItem.id,
                 RelationshipReviewMemoryReceipt.world_id == scope.world_id,
                 RelationshipReviewMemoryReceipt.actor_world_character_id == scope.subject_world_character_id)))
@@ -128,9 +142,8 @@ def collect_new_review_memories(db, *, setting, now):
             break
         for target, payload, reason in resolve_memory_batch(db, scope=scope, items=items, activation=policy.activated_at, now=now):
             if reason:
-                db.add(RelationshipReviewMemoryReceipt(id=uuid7_string(), world_id=scope.world_id,
-                    actor_world_character_id=scope.subject_world_character_id, target_world_character_id=target,
-                    memory_id=payload["memory_id"], memory_digest=payload["digest"], status="excluded", reason=reason))
+                if excluded is not None:
+                    excluded.append((target, payload, reason))
             else:
                 grouped[target].append(payload)
         cursor = items[-1].id

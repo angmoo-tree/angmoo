@@ -263,7 +263,8 @@ def create_app(
                     MemoryScope(material["owner_id"], material["credential_binding"]["world_id"], material["credential_binding"]["actor_id"]),
                     model=material["model_id"], thinking_level=material["thinking_level"],
                     credential_id=material["credential_binding"]["credential_id"],
-                    credential_revision=material["credential_binding"]["revision"], relationship=True))
+                    credential_revision=material["credential_binding"]["revision"], relationship=True),
+                canonical_work=lambda function, *args: memory_runtime.run_canonical(function, *args))
             memory_runtime = MemoryBatchRuntime(
                 composition.session_factory,
                 lambda owner, model, thinking: memory_provider(

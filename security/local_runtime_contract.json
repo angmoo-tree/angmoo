@@ -152,6 +152,13 @@
       "removal_condition": null
     },
     {
+      "module": "app.core.result_journal",
+      "disposition": "keep",
+      "owner_stage": "SQLITE-RECOVERY-20261016",
+      "removal_condition": null,
+      "reason": "Bounded private result storage with atomic publication and erasure fences; runtime selects namespaces and domains retain authorization, result validity and retry policy."
+    },
+    {
       "disposition": "keep",
       "module": "app.core.search_text",
       "owner_stage": "AR-B8",

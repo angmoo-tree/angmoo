@@ -16,10 +16,11 @@ def claim_batch(
     rows = projection_repository.claimable_rows(db, now=now, batch_size=batch_size)
     lease_expires_at = now + timedelta(seconds=LEASE_TTL_SECONDS)
     for row in rows:
+        if row.status == "pending":
+            row.attempt_count += 1
         row.status = "processing"
         row.lease_owner = worker_id
         row.lease_expires_at = lease_expires_at
-        row.attempt_count += 1
         row.updated_at = now
     db.flush()
     return [row.id for row in rows]

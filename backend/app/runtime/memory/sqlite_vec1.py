@@ -102,10 +102,14 @@ class SqliteMemoryVectorIndex:
             yield connection
         except sqlite3.Error as exc:
             capture_failure(exc)
-            raise MemoryVectorProjectionError(
+            error = MemoryVectorProjectionError(
                 "memory_vector_cancelled" if cancellation and cancellation.expired()
                 else "memory_vector_database_error"
-            ) from None
+            )
+            # Keep only typed SQLite identity, never SQL text or bound values.
+            error.sqlite_errorcode = getattr(exc, "sqlite_errorcode", None)
+            error.sqlite_errorname = getattr(exc, "sqlite_errorname", None)
+            raise error from None
         finally:
             if cancellation is not None:
                 cancellation.detach()
@@ -158,6 +162,7 @@ class SqliteMemoryVectorIndex:
             connection.commit()
 
     def erase_items(self, identifiers):
+        identifiers = tuple(identifiers)
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             for identifier in identifiers:

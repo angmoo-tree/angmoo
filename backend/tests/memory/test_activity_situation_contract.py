@@ -88,7 +88,7 @@ def test_invalid_description_and_partial_result_are_audited_without_items(stack,
 class Access:
     def __init__(self, state="available"):
         self.state = state
-    def validate(self, manifest, source, *, now):
+    def validate(self, manifest, source, *, now, validation=None):
         return SituationSourceAccess(self.state)
 
 

@@ -1,5 +1,22 @@
 # Angmoo Frontend Architecture
 
+## Environment recovery and provider diagnostics (2026-10-16 LOCAL)
+
+Composition's existing environment provider remains the only synchronization
+owner. A typed temporary-busy 503 permits at most two additional POSTs within an
+eight-second round, with Retry-After, a fresh GET, current device detection and
+lease/sequence reconciliation. Unknown transport outcomes are not replayed.
+Focus/visibility/timer triggers coalesce; auth/runtime changes and unmount abort
+the round, and late responses cannot update a different owner. Identity owns the
+API DTO; composition does not import feature implementation details.
+
+Media reuses one diagnostic details component for ComfyUI and the allowlisted
+OpenRouter/NanoGPT HTTP projection, with provider-specific KO/EN labels and no
+client inference that generation completed or should be retried. Memory and
+Relationships add schedule-spacing advice beside the existing local-time controls;
+saved values, defaults and user-selected equal times remain valid. Next and static
+routes use the same components and controllers. See the [scoped evidence](../docs/verification/sqlite-recovery-world-erasure-20261016.md).
+
 ## World owner-profile notifications (2026-10-15 LOCAL)
 
 Social owns World notification API values, polling controllers and list/bell UI.

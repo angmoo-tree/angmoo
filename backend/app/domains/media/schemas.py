@@ -83,11 +83,32 @@ class DiagnosticMessage(StrictInput):
     exception_message: str | None = Field(default=None, max_length=2048)
 
 
+class HttpDiagnostic(StrictInput):
+    purpose: Literal["generation", "discovery", "result_download"]
+    category: Literal["connect_timeout", "read_timeout", "write_timeout", "pool_timeout",
+        "connect_error", "read_error", "write_error", "remote_protocol_error", "other_transport",
+        "http_error", "result_invalid"]
+    observed_phase: Literal["request_started", "response_headers", "response_body", "result_validation"]
+    elapsed_ms: float = Field(ge=0, allow_inf_nan=False)
+    headers_ms: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    connect_timeout_s: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    read_timeout_s: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    write_timeout_s: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    pool_timeout_s: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    status: int | None = Field(default=None, ge=100, le=599)
+    provider_code: Literal["400", "401", "402", "403", "408", "413", "422", "429", "500", "502", "503", "504",
+        "rate_limit_exceeded", "insufficient_quota", "invalid_api_key", "invalid_request_error", "unknown"] | None = None
+    request_id: str | None = Field(default=None, max_length=100, pattern=r"^(?:gen-[0-9]{1,20}-[A-Za-z0-9]{8,64}|[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12})$")
+    completeness: Literal["no_body", "complete", "non_json", "truncated", "time_budget", "body_read_failed", "no_safe_fields"]
+
+
 class ProviderDiagnostic(StrictInput):
     kind: Literal["error", "warning"]
     stage: Literal["submission", "execution", "history", "output"]
     messages: list[DiagnosticMessage] = Field(max_length=20)
     truncated: bool = False
+    provider: Literal["comfyui", "openrouter", "nanogpt"] | None = None
+    transport: HttpDiagnostic | None = None
 
     @model_validator(mode="after")
     def bounded(self):

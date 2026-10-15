@@ -43,6 +43,7 @@ def test_autonomous_owner_snapshot_survives_restart_while_idle_schedule_moves(tm
             db.flush()
             initialize_created_world_character(db, character=db.get(Character, "idle-b"),
                 world_character=db.get(WorldCharacter, "actor-b"))
+            db.commit()  # Fixture admission precedes the separate detector request UoW.
             first = report_environment(db, owner, EnvironmentReport(client_id="synthetic-screen-1",
                 expected_revision=0, sequence=1, preferred_language="ko-KR", timezone="Asia/Seoul"),
                 session_hash="session", now=NOW)

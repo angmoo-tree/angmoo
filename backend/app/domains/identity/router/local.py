@@ -34,7 +34,7 @@ router = APIRouter(prefix="/auth/local", tags=["auth"])
 
 from app.domains.identity.dependencies import get_authenticated_user_context_allow_incomplete, AuthenticatedSessionContext
 from app.domains.identity.schemas_environment import EnvironmentRead, EnvironmentReport
-from app.domains.identity.service.environment import EnvironmentConflict, read_environment, report_environment
+from app.domains.identity.service.environment import EnvironmentConflict, EnvironmentTemporarilyBusy, read_environment, report_environment
 
 
 @router.get("/environment", response_model=EnvironmentRead)
@@ -57,6 +57,8 @@ def synchronize_environment(data: EnvironmentReport, request: Request, db: Sessi
     except EnvironmentConflict as exc:
         db.rollback()
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EnvironmentTemporarilyBusy as exc:
+        raise HTTPException(status_code=503, detail="environment_temporarily_busy", headers={"Retry-After": "1"}) from exc
     except PermissionError as exc:
         db.rollback()
         raise HTTPException(status_code=403, detail=str(exc)) from exc

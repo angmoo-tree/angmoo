@@ -330,5 +330,14 @@
   "ComfyUI 서버 접근과 Partner 계정 조건을 확인해 주세요.": "Check access to the ComfyUI server and the conditions of your Partner account.",
   "Comfy 계정 키는 지정한 ComfyUI 서버에 전달돼요. 신뢰할 수 있는 서버만 사용해 주세요.": "Your Comfy account key is sent to the configured ComfyUI server. Use only a server you trust.",
   "Partner 인증으로 HTTP localhost에 연결할 때는 127.0.0.1을 사용해요. IPv6 전용 서버라면 [::1] 주소를 사용해 주세요.": "HTTP connections to localhost use 127.0.0.1 when Partner authentication is enabled. Use [::1] for an IPv6-only server.",
-  "같은 기기의 ComfyUI는 127.0.0.1 또는 ::1 주소로 HTTP 연결할 수 있어요.": "You can connect over HTTP to ComfyUI on the same device using 127.0.0.1 or ::1."
+  "같은 기기의 ComfyUI는 127.0.0.1 또는 ::1 주소로 HTTP 연결할 수 있어요.": "You can connect over HTTP to ComfyUI on the same device using 127.0.0.1 or ::1.",
+  "OpenRouter 요청 정보": "OpenRouter request details",
+  "NanoGPT 요청 정보": "NanoGPT request details",
+  "오류 분류": "Error category",
+  "마지막 확인 단계": "Last observed stage",
+  "요청 경과 시간": "Request elapsed time",
+  "제공자 오류 코드": "Provider error code",
+  "요청 식별자": "Request ID",
+  "진단 수집 상태": "Diagnostic completeness",
+  "이 정보만으로 제공자의 처리 완료 여부를 확인할 수는 없어요.": "These details alone cannot confirm whether the provider completed the request."
 }

@@ -9,6 +9,7 @@ import { EnvironmentContext } from "@/lib/i18n/environment-context";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 import { getUserEnvironment, synchronizeUserEnvironment } from "@/features/identity/api/environment";
 import { uiResources } from "@/composition/providers/ui-resources";
+import { synchronizeEnvironment } from "@/composition/providers/environment-synchronization";
 import type { UserEnvironment } from "@/types/user-environment";
 
 // Browser preference is display-only. Authentication still owns persistence,
@@ -32,7 +33,7 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   const [i18n] = useState(() => createUiI18n(uiResources));
   const [environment, setEnvironment] = useState<UserEnvironment | null>(null);
   const [ready, setReady] = useState(false);
-  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ scope: string; code: string } | null>(null);
   const [runtimeRevision, setRuntimeRevision] = useState(0);
   const [environmentScope, setEnvironmentScope] = useState("");
   const currentScope = `${userId ?? ""}:${runtimeRevision}:${sessionRevision}`;
@@ -48,34 +49,48 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
     if (status !== "authenticated" || !userId) return;
     const controller = new AbortController();
     const clientId = crypto.randomUUID();
-    let leaseToken: string | null = null;
-    let sequence = 0;
+    const lease = { clientId, token: null as string | null, sequence: 0 };
     let active = true;
     let busy = false;
-    let current: UserEnvironment | null = null;
+    let lastStarted = -Infinity;
+    let pending = false;
+    let followup: ReturnType<typeof setTimeout> | undefined;
+    let lastDetected: ReturnType<typeof detectUserEnvironment> | null = null;
+    const schedule = () => {
+      if (followup === undefined && active) followup = setTimeout(() => {
+        followup = undefined;
+        void synchronize();
+      }, Math.max(0, 250 - (Date.now() - lastStarted)));
+    };
     const synchronize = async () => {
-      if (!active || busy || document.visibilityState !== "visible") return;
+      if (!active || document.visibilityState !== "visible") return;
+      if (busy) { pending = true; return; }
+      if (Date.now() - lastStarted < 250) { schedule(); return; }
       busy = true;
+      pending = false;
+      let succeeded = false;
+      lastStarted = Date.now();
       try {
-        current = await getUserEnvironment(controller.signal);
-        const detected = detectUserEnvironment();
-        if (detected.preferred_language || detected.timezone) {
-          try {
-            current = await synchronizeUserEnvironment({ client_id: clientId, lease_token: leaseToken,
-              expected_revision: current.environment_revision, sequence: ++sequence, ...detected }, controller.signal);
-            leaseToken = current.lease_token ?? leaseToken;
-          } catch (error) {
-            if (!(error instanceof ApiRequestError) || error.status !== 409) throw error;
-            leaseToken = null;
-            current = await getUserEnvironment(controller.signal);
-          }
-        }
-        if (active) { setEnvironment(current); setEnvironmentScope(`${userId}:${runtimeRevision}:${sessionRevision}`); setReady(true); setErrorCode(null); }
+        const current = await synchronizeEnvironment(lease, { read: getUserEnvironment,
+          write: synchronizeUserEnvironment, detect: () => {
+            lastDetected = detectUserEnvironment();
+            return lastDetected;
+          } }, controller.signal);
+        succeeded = true;
+        if (active) { setEnvironment(current); setEnvironmentScope(`${userId}:${runtimeRevision}:${sessionRevision}`); setReady(true); setFailure(null); }
       } catch (error) {
         if (active && !controller.signal.aborted) {
-          setErrorCode(error instanceof ApiRequestError ? error.code ?? "environment_sync_failed" : "environment_sync_failed");
+          setReady(false);
+          setFailure({ scope: `${userId}:${runtimeRevision}:${sessionRevision}`,
+            code: error instanceof ApiRequestError ? error.code ?? "environment_sync_failed" : "environment_sync_failed" });
         }
-      } finally { busy = false; }
+      } finally {
+        busy = false;
+        // Merge events during a request, but never turn a failed bounded
+        // round into an unbounded immediate retry loop.
+        if (active && succeeded && pending && JSON.stringify(lastDetected) !== JSON.stringify(detectUserEnvironment())) schedule();
+        pending = false;
+      }
     };
     void synchronize();
     const refresh = () => { void synchronize(); };
@@ -85,6 +100,7 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
     document.addEventListener("visibilitychange", refresh);
     return () => {
       active = false; controller.abort(); window.clearInterval(timer);
+      if (followup !== undefined) clearTimeout(followup);
       window.removeEventListener("focus", refresh);
       window.removeEventListener("languagechange", refresh);
       document.removeEventListener("visibilitychange", refresh);
@@ -92,6 +108,7 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   }, [status, userId, runtimeRevision, sessionRevision]);
 
   const scopedEnvironment = environmentScope === currentScope ? environment : null;
+  const errorCode = status === "authenticated" && failure?.scope === currentScope ? failure.code : null;
   const language = resolveUiLanguage(user?.ui_language, scopedEnvironment?.preferred_language ?? detectedUiLanguage ?? undefined);
   useEffect(() => { void i18n.changeLanguage(language); document.documentElement.lang = language; }, [i18n, language]);
   const value = useMemo(() => ({ environment: status === "authenticated" ? scopedEnvironment : null,

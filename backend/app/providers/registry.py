@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from app.providers.contracts import ProviderCapabilities
+from app.providers.contracts import EmbeddingBatchLimits, ProviderCapabilities
 from app.providers.gemini import GeminiAdapter
+from app.providers.gemini_embedding_batch import LIMITS as GEMINI_EMBEDDING_LIMITS
 
 
 from app.providers.generation_profiles import GENERATION_MODELS
@@ -20,6 +21,7 @@ class ProviderModelSpec:
     provider: str
     model: str
     capabilities: ProviderCapabilities
+    embedding_batch_limits: EmbeddingBatchLimits | None = None
 
 
 _GENERATIVE_CAPABILITIES = ProviderCapabilities(
@@ -28,14 +30,14 @@ _GENERATIVE_CAPABILITIES = ProviderCapabilities(
     image_input=True,
     tool_calls=True,
 )
-_EMBEDDING_CAPABILITIES = ProviderCapabilities(embedding=True)
+_EMBEDDING_CAPABILITIES = ProviderCapabilities(embedding=True, embedding_batch=True)
 _MODEL_SPECS = {
     **{
         model: ProviderModelSpec("google", model, _GENERATIVE_CAPABILITIES)
         for model in dict.fromkeys((*AGENT_GOOGLE_MODELS, *MESSAGE_GOOGLE_MODELS))
     },
     **{
-        model: ProviderModelSpec("google", model, _EMBEDDING_CAPABILITIES)
+        model: ProviderModelSpec("google", model, _EMBEDDING_CAPABILITIES, GEMINI_EMBEDDING_LIMITS)
         for model in EMBEDDING_GOOGLE_MODELS
     },
 }

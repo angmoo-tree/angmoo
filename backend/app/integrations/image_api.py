@@ -1,6 +1,7 @@
 """Dedicated NanoGPT/OpenRouter image API, with per-endpoint admission."""
 import base64
 from io import BytesIO
+from time import monotonic
 from urllib.parse import quote
 import httpx
 from PIL import Image
@@ -75,19 +76,33 @@ class ImageHttp:
     def __init__(self, client: httpx.AsyncClient | None = None):
         self.client = client
 
-    async def request(self, method, url, *, key=None, timeout=120.0, error_body_limit=None, **kwargs):
+    async def request(self, method, url, *, key=None, timeout=120.0, error_body_limit=None, diagnostic_provider=None, diagnostic_purpose="generation", **kwargs):
+        from app.integrations.image_http_diagnostics import diagnostic, error_fields, transport_category
+        if diagnostic_provider not in {None, "openrouter", "nanogpt"}:
+            raise ValueError("image_diagnostic_provider_invalid")
+        started, phase, headers_ms = monotonic(), "request_started", None
         headers = {**kwargs.pop("headers", {}), **({"Authorization": f"Bearer {key}"} if key else {})}
         limit = 24 * 1024 * 1024 if method == "POST" or "/view" in url else 2 * 1024 * 1024
         owned = self.client is None
         client = self.client or httpx.AsyncClient(follow_redirects=False, trust_env=False)
         try:
             async with client.stream(method, url, headers=headers, timeout=timeout, follow_redirects=False, **kwargs) as response:
+                phase = "response_headers"
+                headers_ms = round((monotonic() - started) * 1000, 2)
+                if response.status_code >= 300 and diagnostic_provider:
+                    fields = await error_fields(response, diagnostic_provider, key)
+                    raise ImageSubmissionError(f"provider_http_{response.status_code}",
+                        outcome_unknown=method == "POST" and response.status_code >= 500,
+                        diagnostic=diagnostic(diagnostic_provider, category="http_error", phase=phase,
+                            started=started, timeout=timeout, headers_ms=headers_ms,
+                            status=response.status_code, purpose=diagnostic_purpose, **fields))
                 if response.status_code >= 300 and error_body_limit is None:
                     # Never put remote bodies, URLs with secrets or headers into exceptions.
                     raise ImageSubmissionError(f"provider_http_{response.status_code}", outcome_unknown=method == "POST" and response.status_code >= 500)
                 body_limit = error_body_limit if response.status_code >= 300 else limit
                 data = bytearray()
                 truncated = False
+                phase = "response_body"
                 async for chunk in response.aiter_bytes():
                     if len(data) + len(chunk) > body_limit:
                         if response.status_code >= 300 and error_body_limit is not None:
@@ -101,9 +116,18 @@ class ImageHttp:
                 # the same body again; its original wire length is also stale.
                 headers = {name: value for name, value in response.headers.items()
                     if name.lower() not in {"content-encoding", "content-length", "transfer-encoding"}}
-                return httpx.Response(response.status_code, headers=headers, content=bytes(data), extensions={"angmoo_body_truncated": truncated})
+                extensions = {"angmoo_body_truncated": truncated}
+                if diagnostic_provider:
+                    # Freeze HTTP timing at body completion. Decoding/validation
+                    # is a separate stage and must not extend this measurement.
+                    extensions["angmoo_http_validation_diagnostic"] = diagnostic(diagnostic_provider,
+                        category="result_invalid", phase="result_validation", started=started, timeout=timeout,
+                        headers_ms=headers_ms, status=response.status_code, purpose=diagnostic_purpose, completeness="complete")
+                return httpx.Response(response.status_code, headers=headers, content=bytes(data), extensions=extensions)
         except httpx.TransportError as exc:
-            raise ImageSubmissionError("provider_transport_error", outcome_unknown=method == "POST") from exc
+            value = (diagnostic(diagnostic_provider, category=transport_category(exc), phase=phase,
+                started=started, timeout=timeout, headers_ms=headers_ms, purpose=diagnostic_purpose) if diagnostic_provider else None)
+            raise ImageSubmissionError("provider_transport_error", outcome_unknown=method == "POST", diagnostic=value) from None
         finally:
             if owned:
                 await client.aclose()
@@ -118,7 +142,8 @@ class ImageApiClient:
     async def discover(self, model):
         if f"{self.provider}:{model}" not in MODEL_CATALOG:
             raise ImagePreparationError("model_not_supported")
-        response = await self.http.request("GET", f"{API_ROOTS[self.provider]}/models/{quote(model, safe='/')}/endpoints")
+        response = await self.http.request("GET", f"{API_ROOTS[self.provider]}/models/{quote(model, safe='/')}/endpoints",
+            diagnostic_provider=self.provider, diagnostic_purpose="discovery")
         payload = response.json()
         if payload.get("id") != model or not payload.get("endpoints"):
             raise ImagePreparationError("model_endpoint_unavailable")
@@ -150,5 +175,9 @@ class ImageApiClient:
             payload["provider"] = {"only": [tag], "allow_fallbacks": False}
         if on_submit:
             await on_submit()
-        response = await self.http.request("POST", API_ROOTS[self.provider], key=key, json=payload)
-        return parse_image_result(response)
+        response = await self.http.request("POST", API_ROOTS[self.provider], key=key, json=payload, diagnostic_provider=self.provider)
+        try:
+            return parse_image_result(response)
+        except ImageSubmissionError as exc:
+            exc.diagnostic = response.extensions.get("angmoo_http_validation_diagnostic")
+            raise

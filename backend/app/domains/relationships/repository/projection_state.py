@@ -7,6 +7,11 @@ from app.domains.relationships import models
 from app.domains.relationships.contracts.outbox import GraphOutboxCounts
 
 
+def has_unfinished(db: Session) -> bool:
+    return db.scalar(select(models.GraphProjectionOutbox.id).where(
+        models.GraphProjectionOutbox.status.in_(("pending", "processing"))).limit(1)) is not None
+
+
 def claimable_rows(db: Session, *, now: datetime, batch_size: int) -> list[models.GraphProjectionOutbox]:
     active_rebuild = exists(
             select(models.GraphProjectionReplayRun.id).where(

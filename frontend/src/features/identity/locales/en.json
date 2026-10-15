@@ -69,6 +69,7 @@
   "saving": "Saving…",
   "languageSaveFailed": "Could not save your language. Check the latest settings and retry.",
   "detectionFailed": "Could not synchronize detection. The last valid environment is preserved.",
+  "detectionDelayed": "Environment information hasn’t synced yet. We’ll try again shortly.",
   "detectedLanguage": "Detected preferred language: {{language}}",
   "detectedTimezone": "Detected time zone: {{zone}}",
   "detectionPending": "Checking the detected environment…",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 from collections.abc import Mapping
-from sqlalchemy import Connection, exists, or_, select, update
+from sqlalchemy import Connection, case, exists, or_, select, update
 from app.domains.relationships import models
 from app.domains.relationships.constants import LEASE_TTL_SECONDS
 from app.domains.relationships.contracts.outbox import OutboxFinalizeStatus, ProjectionWorkItem
@@ -49,7 +49,9 @@ def claim(connection: Any, *, worker_id: str, current: datetime, limit: int) -> 
                 status="processing",
                 lease_owner=worker_id,
                 lease_expires_at=lease_expires,
-                attempt_count=outbox.c.attempt_count + 1,
+                # Reclaim an unfinished lease as the same logical attempt.
+                # Only pending work begins a new attempt after a durable failure.
+                attempt_count=outbox.c.attempt_count + case((outbox.c.status == "pending", 1), else_=0),
                 updated_at=current,
             )
         )

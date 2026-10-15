@@ -25,6 +25,17 @@ from app.domains.memory.repository.situation_runs import require_run_fence
 from app.domains.memory.repository.vector_eligibility import register_content
 
 
+def _validate_sources(session, validator, manifest, result_sources, now):
+    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+    from app.domains.memory.contracts.situation_validation import SituationValidationPreparer
+    validation = MemoryAccessValidation(session, now)
+    with session.no_autoflush:
+        if isinstance(validator, SituationValidationPreparer):
+            validator.prepare_validation(manifest, validation=validation)
+        return [(source, validator.validate(manifest, source, now=now, validation=validation))
+            for source in (*manifest.sources, *result_sources)]
+
+
 @dataclass(frozen=True)
 class SituationReadRow:
     """Owned column values; no Session or ORM identity crosses preparation."""
@@ -91,7 +102,7 @@ def _pending(run):
     return conditions
 
 
-def prepare_page(session, *, run_id, token, now, page_size=16):
+def prepare_page(session, *, run_id, token, now, page_size=1):
     """Read/parse/hash a contiguous bounded page without acquiring a writer."""
     if not 1 <= page_size <= 16:
         raise ValueError("situation_page_size_invalid")
@@ -149,7 +160,7 @@ def prepare_page(session, *, run_id, token, now, page_size=16):
         tuple(contexts), tuple(collections), byte_size)
 
 
-def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, token, now, page_size=100, prepared=None):
+def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, token, now, page_size=1, prepared=None):
     if not 1 <= page_size <= 100:
         raise ValueError("situation_page_size_invalid")
     run = require_run_fence(session, run_id, token, now)
@@ -261,7 +272,10 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                         manifest = complete_context(session, admission, revision=revision)
                     from app.domains.memory.repository.situation_source_bindings import prepare_bindings
                     manifest = prepare_bindings(session, manifest, validator, captured_at=receipt.captured_at, now=now)
-                    access = [(source, validator.validate(manifest, source, now=now)) for source in (*manifest.sources, *result_sources)]
+                    # Bindings are canonical writes. Do not carry their earlier
+                    # permission decisions into this fresh, read-only operation.
+                    session.flush()
+                    access = _validate_sources(session, validator, manifest, result_sources, now)
                     legacy_deleted = run.work_kind == "blocked_recheck" and manifest.version == 1 and any(
                         value.state == "deleted" and source.role == "core" for source, value in access)
                     if (not access or any(value.state not in {"available", "deleted"}

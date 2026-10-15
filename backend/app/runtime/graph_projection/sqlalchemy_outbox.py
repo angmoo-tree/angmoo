@@ -73,6 +73,10 @@ class SqlAlchemyProjectionOutbox:
     def __init__(self, session_factory: SessionFactory) -> None:
         self._session_factory = session_factory
 
+    def has_unfinished(self) -> bool:
+        with _projection_session(self._session_factory) as db:
+            return state_repository.has_unfinished(db)
+
     def claim(
         self,
         *,
@@ -153,6 +157,10 @@ class SqliteProjectionOutbox:
             raise ValueError("SqliteProjectionOutbox requires SQLite")
         self._engine = engine
         self._retry_policy = retry_policy
+
+    def has_unfinished(self) -> bool:
+        with _projection_session(lambda: Session(self._engine)) as db:
+            return state_repository.has_unfinished(db)
 
     def claim(
         self, *, worker_id: str, now: datetime, batch_size: int

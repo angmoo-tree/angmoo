@@ -251,6 +251,36 @@ test("Comfy accepted warning stays visible with safe details and causes no retry
 });
 
 for (const language of ["ko", "en"] as const) {
+  test(`HTTP diagnostic keeps the actual provider and never resubmits (${language})`, async ({page}, info) => {
+    await fixtures(page, info.project.name === "static", {language});
+    const catalog = JSON.parse(readFileSync(`../frontend/src/features/media/locales/${language}.json`, "utf8"));
+    const t = (key: string) => catalog[key] ?? key;
+    const post = uiDManualPost({id: "transport-status-post", title: "Transport", body: "Saved text"});
+    let submissions = 0;
+    await page.route(info.project.name === "static" ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
+      const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+      if (path.endsWith("/manual-social/feed")) return json(route, uiDManualFeed([post]));
+      if (path.endsWith("/image-generation")) {
+        if (route.request().method() !== "GET") submissions++;
+        return json(route, {job_id: 12, post_id: post.id, status: "outcome_unknown", reason: "provider_http_502",
+          attempt_count: 1, cancellable: false, retryable: false,
+          provider_diagnostic: {kind: "error", stage: "submission", provider: "openrouter", messages: [], truncated: false,
+            transport: {purpose: "generation", category: "http_error", observed_phase: "response_headers", elapsed_ms: 120.5,
+              status: 502, request_id: "gen-123-synthetic123", completeness: "non_json"}}});
+      }
+      return route.fallback();
+    });
+    await page.setViewportSize({width: 390, height: 844});
+    await page.goto(`/worlds/${uiDWorld().world_id}/feed`);
+    const summary = page.getByText(t("OpenRouter 요청 정보"), {exact: true});
+    await summary.focus(); await page.keyboard.press("Enter");
+    await expect(page.getByText("502", {exact: true})).toBeVisible();
+    await expect(page.getByText(t("이 정보만으로 제공자의 처리 완료 여부를 확인할 수는 없어요."), {exact: true})).toBeVisible();
+    await expect(page.getByText(/ComfyUI (오류 정보|실행 안내|error details)/)).toHaveCount(0);
+    expect(submissions).toBe(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  });
+
   test(`received image recovery shows durable status and honest unavailable result (${language})`, async ({page}, info) => {
     await fixtures(page, info.project.name === "static", {language});
     const catalog = JSON.parse(readFileSync(`../frontend/src/features/media/locales/${language}.json`, "utf8"));

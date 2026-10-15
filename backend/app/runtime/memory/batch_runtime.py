@@ -111,7 +111,14 @@ class MemoryBatchRuntime:
     async def _loop(self) -> None:
         while not self.stop_event.is_set():
             try:
-                await self.tick()
+                # A receipt commits before each resubmission. The canonical
+                # queue is released between calls, and a bounded burst avoids
+                # adding five seconds of idle polling for every receipt.
+                for _ in range(16 if self.situations is not None else 1):
+                    if self.stop_event.is_set():
+                        break
+                    if await self.tick() != "situation_page_applied":
+                        break
             except Exception:
                 logger.warning("memory_batch_runtime_deferred")
             try:
@@ -208,6 +215,11 @@ class MemoryBatchRuntime:
             await self._canonical.call(self.prepare, shutdown=shutdown)
         else:
             self.prepare(shutdown=shutdown)
+
+    async def run_canonical(self, function, *args):
+        if self._canonical is not None:
+            return await self._canonical.call(function, *args)
+        return function(*args)
 
     async def fence_async(self):
         if self.situations is not None:
