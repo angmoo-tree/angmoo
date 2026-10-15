@@ -106,3 +106,44 @@ from `backend`:
 That local result does not stand in for the new commit's hosted CI. PR checks
 must finish on the actual final head; prior-head successful frontend/Windows
 jobs are not copied or treated as final-head approvals.
+
+## Scheduler timing and cold-start isolation
+
+On `224b4e68`, Core CI attempt 1 reports a restored-app startup timeout. The
+unchanged node passes locally alone and with its immediate preceding CI nodes;
+the precise readiness delay is not established. One bounded same-SHA Core retry
+is performed, retaining product startup and queue deadlines. That retry passes
+the real startup/restart node but finds a different recovery-test race:
+`test_runtime_adapter_recovers_on_same_loop_with_live_proof` counts two effects.
+
+The recovery fixture signalled completion inside the activity callback before
+`finish_tick` committed. It could acquire the competing SQLite writer first;
+the failed CI log explicitly records exhausted BUSY in `finish_tick`. It also
+used an uncontrolled wall clock for a ten-second logical window. The revised
+fixture deliberately holds `finish_tick` after the callback, verifies the receipt
+is still absent, releases it and waits for the actual committed SUCCESS receipt
+before acquiring the competing writer. The repository and health proof share
+one controlled wall clock, keeping this test inside its claimed logical window.
+Real SQLite locking, the real worker/adapter, heartbeat degradation/recovery,
+live proof, single committed effect and shutdown assertions remain active.
+
+The cold-start test now runs its original real factory/HTTP/SQLite/Ladybug
+startup and restart assertions in one dedicated child process, matching the
+sidecar's process ownership instead of inheriting graph clients/thread pools
+from thousands of previous test cases. Both lifespans still occur in the same
+child and use the same isolated data root. External networking is denied there.
+The 120-second bound applies to the whole child probe; production component
+startup, lease/queue deadlines and HTTP/data assertions are unchanged. Process
+isolation improves the test contract; it does not establish a precise cause for
+the original readiness delay.
+
+Focused local verification: **19 PASS** for the complete recovery module and
+official startup/restart module; current L4/hybrid/ER0 inventories and frontend
+design contract also pass. No production source changes are needed in this
+follow-up. The prior head's actual Windows install/recovery/all-37-upgrade CI
+also passed, but final-head CI is required again after committing these tests.
+
+```powershell
+# backend, with the existing offline environment
+./.venv/Scripts/python.exe -m pytest tests/test_creator_scheduler_recovery.py tests/test_world_activity_official_startup.py -q --tb=short
+```

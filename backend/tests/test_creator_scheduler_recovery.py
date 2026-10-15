@@ -117,8 +117,22 @@ def test_queue_capacity_cancelled_waiter_and_real_worker_lifetime():
     finally: release.set()
 
 
-def test_runtime_adapter_recovers_on_same_loop_with_live_proof(tmp_path):
+def test_runtime_adapter_recovers_on_same_loop_with_live_proof(tmp_path, monkeypatch):
     database = _database(tmp_path); _seed_installation(database)
+    # Keep this recovery inside one logical window, even when the runner pauses
+    # across a wall-clock boundary. Lease reads and health share the same clock.
+    clock = MutableClock(NOW + timedelta(seconds=9, microseconds=900_000))
+    finish_entered, allow_finish = Event(), Event()
+    class ClockedRepository(SqliteSchedulerLeaseRepository):
+        def __init__(self, engine):
+            super().__init__(engine, clock=clock)
+        def finish_tick(self, **kwargs):
+            finish_entered.set()
+            assert allow_finish.wait(3), "test did not release the finish operation"
+            return super().finish_tick(**kwargs)
+    monkeypatch.setattr(scheduler, "SqliteSchedulerLeaseRepository", ClockedRepository)
+    monkeypatch.setattr(scheduler, "datetime", SimpleNamespace(now=lambda _tz=None: clock()))
+    probe = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
     config = Settings().model_copy(update={"RESIDENT_TICK_INTERVAL_SECONDS": 10,
         "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS": 1, "RESIDENT_TICK_LEASE_TTL_SECONDS": 6,
         "RESIDENT_TICK_READY_PATH": str(tmp_path / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
@@ -128,22 +142,35 @@ def test_runtime_adapter_recovers_on_same_loop_with_live_proof(tmp_path):
         stop = asyncio.Event()
         task = asyncio.create_task(scheduler.run_resident_tick_scheduler(config=config,
             session_factory=database.session_factory, tick_runner=tick, stop_event=stop, state_listener=states.append))
-        await asyncio.wait_for(ticks.wait(), 3)
-        assert scheduler.scheduler_is_ready(config)
-        with sqlite3.connect(database.database_path) as holder:
-            holder.execute("BEGIN IMMEDIATE")
+        try:
+            await asyncio.wait_for(ticks.wait(), 3)
+            assert await asyncio.to_thread(finish_entered.wait, 3)
+            # The callback is deliberately complete before its durable receipt.
+            assert (await asyncio.to_thread(probe.read)).last_tick_finished_at is None
+            allow_finish.set()
             deadline = monotonic() + 3
-            while "degraded" not in states and monotonic() < deadline: await asyncio.sleep(0.05)
-            assert states[-1] == "degraded" and not scheduler.scheduler_is_ready(config)
-            holder.rollback()
-        deadline = monotonic() + 3
-        while states[-1] != "ready" and monotonic() < deadline: await asyncio.sleep(0.05)
-        assert states[-1] == "ready" and scheduler.scheduler_is_ready(config)
-        assert effects == ["one"]  # The already completed logical window was not replayed.
-        stop.set(); await asyncio.wait_for(task, 3)
+            while True:
+                receipt = await asyncio.to_thread(probe.read)
+                if receipt.last_tick_finished_at is not None: break
+                assert monotonic() < deadline, "first tick did not commit its receipt"
+                await asyncio.sleep(0.01)
+            assert receipt.last_tick_result is scheduler.SchedulerTickResult.SUCCESS
+            assert scheduler.scheduler_is_ready(config)
+            with sqlite3.connect(database.database_path) as holder:
+                holder.execute("BEGIN IMMEDIATE")
+                deadline = monotonic() + 3
+                while "degraded" not in states and monotonic() < deadline: await asyncio.sleep(0.05)
+                assert states[-1] == "degraded" and not scheduler.scheduler_is_ready(config)
+                holder.rollback()
+            deadline = monotonic() + 3
+            while states[-1] != "ready" and monotonic() < deadline: await asyncio.sleep(0.05)
+            assert states[-1] == "ready" and scheduler.scheduler_is_ready(config)
+            assert effects == ["one"]  # A committed logical window was not replayed.
+        finally:
+            allow_finish.set(); stop.set(); await asyncio.wait_for(task, 3)
         assert not scheduler.scheduler_is_ready(config)
     try: asyncio.run(scenario())
-    finally: database.close()
+    finally: allow_finish.set(); database.close()
 
 
 def test_health_rejects_registry_ready_without_a_live_proof(monkeypatch):

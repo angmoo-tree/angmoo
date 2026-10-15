@@ -1,4 +1,8 @@
 """Official composition, isolated SQLite/Ladybug startup and authenticated reads."""
+import os
+from pathlib import Path
+import subprocess
+import sys
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -18,6 +22,24 @@ from chat.test_p8_l_d_world_chat_api import _seed, FRONTEND_HEADERS
 
 def test_official_factory_cold_start_read_only_settings_health_and_restart(tmp_path, deny_external_network):
     root = tmp_path / "explicit-isolated-runtime"
+    repository = Path(__file__).resolve().parents[2]
+    environment = dict(os.environ)
+    environment["ANGMOO_DENY_EXTERNAL_NETWORK"] = "1"
+    environment["PYTHONPATH"] = os.pathsep.join((
+        str(repository / "scripts/testing/offline-python"), str(repository / "backend"),
+        environment.get("PYTHONPATH", ""),
+    ))
+    # A cold sidecar has its own process; do not inherit native graph clients,
+    # thread pools or app-global state from thousands of earlier test cases.
+    result = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve()), str(root)],
+        cwd=repository / "backend", env=environment, capture_output=True, text=True,
+        timeout=120, check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _verify_official_startup_and_restart(root):
     app = create_contributor_runtime_app(data_root=root)
     principal = {}
     with TestClient(app, base_url="http://127.0.0.1:3000") as client:
@@ -58,3 +80,7 @@ def test_official_factory_cold_start_read_only_settings_health_and_restart(tmp_p
             p = db.get(WorldImagePolicy, "wc-responding")
             assert (p.generation_limit, p.vision_limit) == (20, 10)
         assert restored.state.runtime_config.data_paths.root == root.resolve()
+
+
+if __name__ == "__main__":
+    _verify_official_startup_and_restart(Path(sys.argv[1]))
