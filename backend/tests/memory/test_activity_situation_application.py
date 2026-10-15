@@ -39,8 +39,14 @@ def apply(session, setting, memory):
     request = request_run(session, setting, trigger="manual", request_key="save-situation-0001", expected_version=1, now=NOW)
     token = claim_run(session, request.run_id, now=NOW)
     session.commit()
-    apply_page(session, memory, SituationSources(session), run_id=request.run_id, token=token, now=NOW)
-    session.commit()
+    from app.domains.memory.models.activity_situation import MemorySituationApplyRun
+    while token:
+        apply_page(session, memory, SituationSources(session), run_id=request.run_id, token=token, now=NOW)
+        session.commit()
+        if session.get(MemorySituationApplyRun, request.run_id).state == "completed":
+            break
+        token = claim_run(session, request.run_id, now=NOW)
+        session.commit()
 
 
 def test_deleted_original_preserves_canonical_summary_and_never_hydrates_body(stack):

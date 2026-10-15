@@ -133,79 +133,160 @@ def _root(db, work):
 
 
 async def run_review_step(session_factory, *, work_id: str, references_factory,
-                          provider_factory, now=None, timeout: float = 120.0) -> str:
-    """Run/resume one durable unit. Scheduler can yield to memory between units."""
+                          provider_factory, now=None, timeout: float = 120.0,
+                          journal=None, received=None) -> str:
+    """One provider submission, followed by independently replayable local storage."""
+    import asyncio
+    from app.core.sqlite_concurrency import is_sqlite_contention, run_sqlite_session_immediate
+    from app.core.result_journal import ResultJournalError
+    from app.domains.relationships.service.review_delivery import persist_received, may_publish
     clock = now or (lambda: datetime.now(UTC))
-    lease = uuid7_string()
+    received = received if received is not None else {}
     with session_factory() as db:
         work = db.get(RelationshipReviewWork, work_id)
         if work is None:
-            return "missing"
-        if work.status in {"ready", "applied", "stale"}:
-            return work.status
-        current = clock()
-        until = work.lease_until
-        if work.status == "running" and until and until.replace(tzinfo=UTC) > current:
-            return "leased"
+            received.pop(work_id, None)
+            return "lease_lost"
+        world_id = work.world_id
+    try:
+        record = received.get(work_id) or (journal.read(world_id, work_id) if journal else None)
+    except ResultJournalError:
+        return "result_journal_invalid"
+    if record is not None:
+        if "result" not in record:
+            with session_factory() as db:
+                def mark_unknown():
+                    row = db.get(RelationshipReviewWork, work_id, populate_existing=True)
+                    if row is not None and row.error_code == "relationship_review_outcome_unknown" and row.attempts == record["attempt"]:
+                        return "outcome_unknown"
+                    if row is not None and row.lease_token == record["lease"] and row.attempts == record["attempt"]:
+                        row.status, row.error_code = "failed", "relationship_review_outcome_unknown"
+                        row.lease_token, row.lease_until = None, None
+                        return "outcome_unknown"
+                    return "lease_lost"
+                outcome = run_sqlite_session_immediate(db, mark_unknown, require_clean=True)
+            if outcome == "lease_lost" and journal:
+                journal.remove(world_id, work_id)
+            return outcome  # Sent, but no durable response survived.
         try:
-            references_factory(db).revalidate(_root(db, work))
-            payload = _payload(db, work)
-        except ValueError as exc:
-            work.status = "failed"
-            work.error_code = str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed"
-            work.next_attempt_at = current + timedelta(minutes=5)
-            db.commit()
-            return "validation_deferred"
-        if payload is None:
-            db.commit()
-            return "waiting_for_parts"
-        root = _root(db, work)
-        allowed_refs = ({memory["memory_id"] for memory in payload["memories"]} if "memories" in payload
-                        else {ref for part in payload["partial_results"] for ref in part["memory_refs"]})
-        partial = work.phase in {"partial", "reduce"}
-        material = dict(root.manifest["base"])
-        changed = db.execute(update(RelationshipReviewWork).where(
-            RelationshipReviewWork.id == work_id, RelationshipReviewWork.status == work.status,
-            RelationshipReviewWork.attempts == work.attempts).values(status="running", lease_token=lease,
-                lease_until=current + timedelta(seconds=timeout + 60), attempts=work.attempts+1))
-        if changed.rowcount != 1:
-            db.rollback()
-            return "leased"
-        db.commit()
+            if journal:
+                journal.write(world_id, work_id, record)
+            outcome = persist_received(session_factory, work_id, record, references_factory)
+            if journal:
+                journal.remove(world_id, work_id)
+            received.pop(work_id, None)
+            return outcome
+        except Exception as exc:
+            if is_sqlite_contention(exc) or isinstance(exc, (OSError, ResultJournalError)):
+                return "local_result_pending"
+            if isinstance(exc, ValueError):
+                if journal:
+                    journal.remove(world_id, work_id)
+                received.pop(work_id, None)
+                return "validation_deferred"
+            raise
+    lease = uuid7_string()
+    try:
+        with session_factory() as db:
+            def claim():
+                current = clock()
+                work = db.get(RelationshipReviewWork, work_id, populate_existing=True)
+                if work is None:
+                    return "lease_lost"
+                if work.status in {"ready", "applied", "stale"}:
+                    return work.status
+                if work.error_code == "relationship_review_outcome_unknown":
+                    return "outcome_unknown"
+                if work.lease_until:
+                    until = work.lease_until.replace(tzinfo=UTC) if work.lease_until.tzinfo is None else work.lease_until
+                    if until > current:
+                        return "leased"
+                try:
+                    root = _root(db, work)
+                    references_factory(db).revalidate(root)
+                    payload = _payload(db, work)
+                except ValueError as exc:
+                    work.status, work.error_code = "failed", str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed"
+                    work.next_attempt_at = current + timedelta(minutes=5)
+                    return "validation_deferred"
+                if payload is None:
+                    return "waiting_for_parts"
+                refs = ({m["memory_id"] for m in payload["memories"]} if "memories" in payload
+                    else {ref for part in payload["partial_results"] for ref in part["memory_refs"]})
+                work.status, work.lease_token = "running", lease
+                work.lease_until, work.attempts = current + timedelta(seconds=timeout+60), work.attempts + 1
+                record = dict(lease=lease, attempt=work.attempts, manifest_digest=work.manifest_digest,
+                    root_digest=root.manifest_digest, partial=work.phase in {"partial", "reduce"}, allowed_refs=sorted(refs))
+                return payload, dict(root.manifest["base"]), record
+            claimed = run_sqlite_session_immediate(db, claim, require_clean=True)
+    except Exception as exc:
+        if is_sqlite_contention(exc):
+            return "storage_busy"
+        raise
+    if isinstance(claimed, str):
+        return claimed
+    payload, material, record = claimed
+    # A content-free submission marker makes the pre-journal crash boundary
+    # explicit. A restart cannot silently turn it into another paid request.
+    if journal:
+        try:
+            journal.write(world_id, work_id, record)
+        except (OSError, ResultJournalError):
+            return "result_journal_unavailable"
     try:
         started = perf_counter()
         provider = provider_factory(material)
-        raw = await provider.review(payload, partial=partial, timeout=timeout)
-        result = validate_review_result(raw, partial=partial, allowed_refs=allowed_refs)
-        with session_factory() as db:
-            row = db.get(RelationshipReviewWork, work_id)
-            if row is None or row.lease_token != lease or row.status != "running":
-                return "lease_lost"
-            usage = getattr(provider, "usage", None)
-            row.result = {**result, "_execution": {"duration_ms": round((perf_counter()-started)*1000, 2),
-                "usage": usage.as_direct_llm_usage() if hasattr(usage, "as_direct_llm_usage") else None,
-                "attempt": row.attempts, "result_digest": manifest_digest(result)}}
-
-            row.status = "ready"
-            row.lease_token = None
-            row.lease_until = None
-            row.error_code = None
-            db.commit()  # Persist model output before any final relationship write.
-        return "ready"
+        raw = await provider.review(payload, partial=record["partial"], timeout=timeout)
+        result = validate_review_result(raw, partial=record["partial"], allowed_refs=set(record["allowed_refs"]))
+    except asyncio.CancelledError:
+        raise
     except Exception as exc:
+        if journal:
+            journal.remove(world_id, work_id)
         with session_factory() as db:
-            row = db.get(RelationshipReviewWork, work_id)
-            if row is not None and row.lease_token == lease:
+            def fail():
+                row = db.get(RelationshipReviewWork, work_id, populate_existing=True)
+                if row is None or row.lease_token != lease:
+                    return "lease_lost"
                 if isinstance(exc, ReviewNeedsSplit) and split_incomplete_work(db, row, payload):
-                    db.commit()
                     return "split_pending"
-                row.status = "failed"
-                row.lease_token = None
-                row.lease_until = None
+                row.status, row.lease_token, row.lease_until = "failed", None, None
                 row.error_code = getattr(exc, "reason_code", None) or getattr(exc, "failure_class", None) or "relationship_review_retry_required"
                 row.next_attempt_at = clock() + timedelta(seconds=min(3600, 30 * 2 ** min(row.attempts, 7)))
-                db.commit()
-        return "retry_pending"
+                return "retry_pending"
+            try:
+                return run_sqlite_session_immediate(db, fail, require_clean=True)
+            except Exception as failure:
+                if is_sqlite_contention(failure):
+                    return "storage_busy"
+                raise
+    usage = getattr(provider, "usage", None)
+    record = {**record, "result": result, "result_digest": manifest_digest(result),
+        "duration_ms": round((perf_counter()-started)*1000, 2),
+        "usage": usage.as_direct_llm_usage() if hasattr(usage, "as_direct_llm_usage") else None}
+    received[work_id] = record
+    try:
+        if not may_publish(session_factory, work_id, record, clock()):
+            received.pop(work_id, None)
+            if journal:
+                journal.remove(world_id, work_id)
+            return "lease_lost"
+        if journal:
+            journal.write(world_id, work_id, record)
+        outcome = persist_received(session_factory, work_id, record, references_factory)
+        if journal:
+            journal.remove(world_id, work_id)
+        received.pop(work_id, None)
+        return outcome
+    except Exception as exc:
+        if is_sqlite_contention(exc) or isinstance(exc, (OSError, ResultJournalError)):
+            return "local_result_pending"
+        if isinstance(exc, ValueError):
+            if journal:
+                journal.remove(world_id, work_id)
+            received.pop(work_id, None)
+            return "validation_deferred"
+        raise
 
 
 def apply_review(db: Session, *, work_id: str, references: ReviewReferences, now: datetime) -> str:

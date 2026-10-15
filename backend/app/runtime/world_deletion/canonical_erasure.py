@@ -15,6 +15,9 @@ from app.domains.worlds.models import World
 from app.domains.worlds.models_deletion import WorldDeletionCleanupItem as Item
 from app.domains.characters.service.import_snapshots import retained_import_media_urls
 from app.runtime.world_deletion.inventory import ErasureInventory
+from app.runtime.world_deletion.media_references import (
+    DIRECT_REFERENCES, candidate_match, profile_image_urls, validate_reference_contract,
+)
 
 
 def stop_admission(db, world_id):
@@ -32,10 +35,15 @@ def stop_admission(db, world_id):
 class ScopedWorldErasure:
     def __init__(self, media_root, *, index_cleanup, graph_cleanup, checkpoint_cleanup=None):
         self.inventory = ErasureInventory()
+        validate_reference_contract(self.inventory.tables)
         self.media_root = Path(media_root).resolve()
         self.index_cleanup, self.graph_cleanup = index_cleanup, graph_cleanup
         self.checkpoint_cleanup = checkpoint_cleanup
         self.order = tuple(sorted(self.inventory.rules))
+
+    def close_result_admission(self, world_id):
+        from app.runtime.received_results import close_world_results
+        close_world_results(world_id, media_root=self.media_root)
 
     def _journal(self, db, request, kind, reference):
         encoded = json.dumps(reference, sort_keys=True, separators=(",", ":"), default=str)
@@ -48,7 +56,13 @@ class ScopedWorldErasure:
 
     def _file(self, db, request, path):
         if path:
-            self._journal(db, request, "file", {"path": path})
+            # A replay must not replace the original identity with a newer file
+            # occupying the same path. Old path-only journals remain retained.
+            if db.scalar(select(Item.id).where(Item.request_id == request.id, Item.kind == "file",
+                func.json_extract(Item.reference, "$.path") == path)) is not None:
+                return
+            from app.runtime.world_deletion.cleanup_effects import file_identity
+            self._journal(db, request, "file", {"path": path, "generation": file_identity(self._safe_path(path))})
 
     def drain(self, db, world_id):
         from app.domains.chat.contracts.generation_lifecycle import ResponseRequestState, TERMINAL_STATES
@@ -272,71 +286,27 @@ class ScopedWorldErasure:
             raise ValueError("world_erasure_path_outside_root")
         return path
 
-    def clean(self, db, request, limit):
-        rows = list(db.scalars(select(Item).where(Item.request_id == request.id, Item.kind != "row", Item.state == "pending").limit(limit)))
-        if not rows:
-            return True
-        protected = self._protected_files(db, request, {item.reference["path"] for item in rows if item.kind == "file"})
-        indexed = [item for item in rows if item.kind == "memory_index"]
-        if indexed:
-            self.index_cleanup(tuple(item.reference["item_id"] for item in indexed))
-            for item in indexed:
-                item.state = "done"
-        for item in rows:
-            if item.kind == "file":
-                relative = item.reference["path"]
-                if relative in protected:
-                    item.state = "retained"
-                    continue
-                self._safe_path(relative).unlink(missing_ok=True)
-            elif item.kind == "memory_index":
-                continue
-            elif item.kind == "checkpoint":
-                if self.checkpoint_cleanup is None:
-                    raise ValueError("world_erasure_checkpoint_unavailable")
-                self.checkpoint_cleanup(item.reference["activity_id"])
-            elif item.kind == "graph":
-                if self.graph_cleanup(request.world_id) is False:
-                    continue
-            elif item.kind == "origin":
-                from app.domains.world_characters.models import WorldCharacter
-                from app.domains.characters.service.preserved_originals import restore_unregistered_original
-                identifier = item.reference["character_id"]
-                if db.scalar(select(WorldCharacter.id).where(WorldCharacter.character_id == identifier).limit(1)) is None:
-                    restore_unregistered_original(db, identifier)
-            else:
-                raise ValueError("world_erasure_journal_kind_invalid")
-            item.state = "done"
-        return False
-
     def _protected_files(self, db, request, candidates):
         """Keep exact managed files still referenced outside the erased scope."""
-        protected = {self._relative_url(url) for url in retained_import_media_urls(db, excluding_character_id="", candidate_paths=candidates)}
         if not candidates:
-            return protected
-        def matches(column):
-            return or_(*(column.like("%/media/" + path.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%", escape="\\") for path in candidates))
+            return set()
+        protected = {self._relative_url(url) for url in retained_import_media_urls(db, excluding_character_id="", candidate_paths=candidates)}
         affected = select(func.json_extract(Item.reference, "$.character_id")).where(
             Item.request_id == request.id, Item.kind == "origin")
         actors = self.inventory.tables["world_characters"]
-        for table in self.inventory.tables.values():
-            columns = [table.c[name] for name in ("url", "media_url", "avatar_url", "banner_url", "avatar_temp_url",
-                "banner_temp_url", "icon_media_id", "banner_media_id") if name in table.c]
+        for name, fields in DIRECT_REFERENCES.items():
+            table = self.inventory.tables[name]
+            columns = [table.c[field] for field in fields]
             if columns:
-                query = select(*columns).where(or_(*(matches(column) for column in columns)))
+                query = select(*columns).where(or_(*(candidate_match(column, candidates) for column in columns)))
                 if table.name == "characters":
                     # Its mutable display cache is restored from the immutable
                     # origin later; it cannot retain the deleted World's edits.
                     query = query.where(or_(table.c.id.not_in(affected), table.c.id.in_(select(actors.c.character_id))))
                 for urls in db.execute(query):
                     protected.update(self._relative_url(url) for url in urls if url)
-            for column in ("local_profile", "profile"):
-                if column in table.c:
-                    matching = or_(*(matches(func.json_extract(table.c[column], "$." + key)) for key in ("avatar_url", "banner_url")))
-                    for profile in db.scalars(select(table.c[column]).where(matching)):
-                        if isinstance(profile, dict):
-                            protected.update(self._relative_url(profile.get(key)) for key in ("avatar_url", "banner_url"))
-        return protected
+        protected.update(self._relative_url(url) for url in profile_image_urls(db, self.inventory.tables, candidates))
+        return protected.intersection(candidates)
 
     def verify(self, db, request):
         if db.scalar(select(func.count()).select_from(Item).where(Item.request_id == request.id, Item.state == "pending")):

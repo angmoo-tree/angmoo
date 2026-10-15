@@ -1,9 +1,13 @@
-"""One bounded durable deletion worker, independent of autonomy scheduling."""
+"""One durable deletion owner; bounded DB retries never replay external effects."""
 import asyncio
 import logging
 from datetime import UTC, datetime, timedelta
-from sqlalchemy import and_, or_, select, update, delete
+
+from sqlalchemy import or_, select, delete
+
+from app.core.sqlite_concurrency import SqliteAsyncTaskQueue, is_sqlite_contention, run_sqlite_session_immediate
 from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeletionCleanupItem
+from app.runtime.world_deletion.cleanup_effects import ErasureLeaseLost, clean_step, require_lease
 
 log = logging.getLogger(__name__)
 
@@ -13,23 +17,33 @@ class WorldDeletionWorker:
         self.sessions, self.ports, self.batch_size = session_factory, ports, batch_size
         self.task = None
         self.stopping = asyncio.Event()
+        self._work = SqliteAsyncTaskQueue(capacity=1)
+        self._fenced_results = set()
 
     async def start(self):
+        if self.task is not None and not self.task.done():
+            return
+        if self._work.closed:
+            self._work = SqliteAsyncTaskQueue(capacity=1)
         self.stopping.clear()
         self.task = asyncio.create_task(self._run(), name="world-deletion")
 
     async def stop(self):
         self.stopping.set()
-        if self.task:
-            await asyncio.wait_for(self.task, timeout=10)
+        try:
+            if self.task:
+                await asyncio.shield(self.task)
+        finally:
+            await self._work.drain()
+            self._work.close()
             self.task = None
 
     async def _run(self):
         while not self.stopping.is_set():
             try:
-                worked = await asyncio.to_thread(self.tick)
-            except Exception:
-                log.exception("world_deletion_worker_tick_failed")
+                worked = await self._work.call(self.tick)
+            except Exception as exc:
+                log.error("world_deletion_worker_tick_failed error_type=%s", type(exc).__name__)
                 worked = False
             try:
                 await asyncio.wait_for(self.stopping.wait(), timeout=0.05 if worked else 1)
@@ -37,74 +51,106 @@ class WorldDeletionWorker:
                 pass
 
     def tick(self):
-        now = datetime.now(UTC)
-        with self.sessions() as db:
-            row = db.scalar(select(WorldDeletionRequest).where(
-                WorldDeletionRequest.state.not_in(("failed", "completed")),
-                or_(WorldDeletionRequest.lease_until.is_(None), WorldDeletionRequest.lease_until < now),
-                or_(WorldDeletionRequest.next_attempt_at.is_(None), WorldDeletionRequest.next_attempt_at <= now))
-                .order_by(WorldDeletionRequest.accepted_at).limit(1))
-            if row is None:
-                return False
-            request_id, epoch = row.id, row.lease_epoch
-            claimed = db.execute(update(WorldDeletionRequest).where(WorldDeletionRequest.id == request_id,
-                WorldDeletionRequest.lease_epoch == epoch,
-                or_(WorldDeletionRequest.lease_until.is_(None), WorldDeletionRequest.lease_until < now),
-                WorldDeletionRequest.state.not_in(("completed", "failed"))).values(lease_epoch=epoch + 1,
-                lease_until=now + timedelta(seconds=30))).rowcount
-            db.commit()
-            if not claimed:
-                return False
-        stage = "claim"
         try:
-            with self.sessions() as db:
-                row = db.get(WorldDeletionRequest, request_id)
-                if row.lease_epoch != epoch + 1:
-                    return False
-                stage = row.stage
-                row.state = stage if stage != "collecting" else "draining"
-                done = False
-                if stage == "draining":
-                    done = self.ports.drain(db, row.world_id)
-                    accepted = row.accepted_at.replace(tzinfo=UTC) if row.accepted_at.tzinfo is None else row.accepted_at
-                    if not done and now - accepted > timedelta(minutes=5):
-                        raise ValueError("world_erasure_effect_unsettled")
-                elif stage == "collecting":
-                    done = self.ports.collect(db, row, self.batch_size)
-                elif stage == "purging":
-                    done = self.ports.purge(db, row, self.batch_size)
-                elif stage == "cleaning":
-                    done = self.ports.clean(db, row, self.batch_size)
-                elif stage == "verifying":
-                    done = self.ports.verify(db, row)
-                if done:
-                    stages = ("draining", "collecting", "purging", "cleaning", "verifying", "completed")
-                    row.stage = stages[stages.index(stage) + 1]
-                    row.cursor = 0
-                    row.state = "draining" if row.stage == "collecting" else row.stage
-                    if row.state == "completed":
-                        row.completed_at = now
-                        # Completed receipts retain neither file paths nor row inventories.
-                        db.execute(delete(WorldDeletionCleanupItem).where(WorldDeletionCleanupItem.request_id == row.id))
-                row.lease_until = None
-                row.failure_code = None
-                row.next_attempt_at = now + timedelta(seconds=1) if not done and stage == "draining" else None
-                row.updated_at = now
-                db.commit()
+            claim = self._claim()
         except Exception as exc:
+            if is_sqlite_contention(exc):
+                return False
+            raise
+        if claim is None:
+            return False
+        request_id, epoch, stage = claim
+        try:
+            if request_id not in self._fenced_results:
+                with self.sessions() as db:
+                    world_id = require_lease(db, request_id, epoch).world_id
+                self.ports.close_result_admission(world_id)
+                self._fenced_results.add(request_id)
+            cleaned = clean_step(self.sessions, self.ports, request_id, epoch) if stage == "cleaning" else None
             with self.sessions() as db:
-                current = db.get(WorldDeletionRequest, request_id)
-                if current is None or current.lease_epoch != epoch + 1:
-                    return True  # The newer lease owns cursor/ack; no stale mutation.
-                delay = (2, 5, 15)[min(current.failures, 2)]
-                db.execute(update(WorldDeletionRequest).where(WorldDeletionRequest.id == request_id,
-                    WorldDeletionRequest.lease_epoch == epoch + 1).values(
-                    failures=WorldDeletionRequest.failures + 1, lease_until=None,
-                    state="retry_wait", failure_code="cleanup_failed", next_attempt_at=now + timedelta(seconds=delay)))
-                db.execute(update(WorldDeletionRequest).where(WorldDeletionRequest.id == request_id,
-                    WorldDeletionRequest.lease_epoch == epoch + 1, WorldDeletionRequest.failures >= 3).values(state="failed"))
-                db.commit()
-            # Original configuration validation may contain user text. Keep
-            # operational diagnostics to identity, stage and exception type.
-            log.error("world_deletion_stage_failed stage=%s error_type=%s request_id=%s", stage, type(exc).__name__, request_id)
+                run_sqlite_session_immediate(db,
+                    lambda: self._advance(db, request_id, epoch, cleaned), require_clean=True)
+        except ErasureLeaseLost:
+            return False
+        except Exception as exc:
+            busy = is_sqlite_contention(exc)
+            try:
+                self._record_failure(request_id, epoch, exc, busy=busy)
+            except ErasureLeaseLost:
+                return False
+            except Exception as recording_error:
+                if not is_sqlite_contention(recording_error):
+                    raise
+                # Keep durable stage/cursor/items and recover via lease expiry.
+            log.warning("world_deletion_deferred stage=%s code=%s error_type=%s request_id=%s",
+                stage, "storage_busy" if busy else "cleanup_failed", type(exc).__name__, request_id)
+            return False
         return True
+
+    def _claim(self):
+        with self.sessions() as db:
+            def claim():
+                now = datetime.now(UTC)
+                row = db.scalar(select(WorldDeletionRequest).where(
+                    WorldDeletionRequest.state.not_in(("failed", "completed")),
+                    or_(WorldDeletionRequest.lease_until.is_(None), WorldDeletionRequest.lease_until < now),
+                    or_(WorldDeletionRequest.next_attempt_at.is_(None), WorldDeletionRequest.next_attempt_at <= now))
+                    .order_by(WorldDeletionRequest.updated_at, WorldDeletionRequest.accepted_at).limit(1))
+                if row is None:
+                    return None
+                row.lease_epoch += 1
+                row.lease_until = now + timedelta(seconds=30)
+                return row.id, row.lease_epoch, row.stage
+            return run_sqlite_session_immediate(db, claim, require_clean=True)
+
+    def _advance(self, db, request_id, epoch, cleaned):
+        row = require_lease(db, request_id, epoch)
+        now, stage = datetime.now(UTC), row.stage
+        row.state = "draining" if stage == "collecting" else stage
+        if stage == "cleaning":
+            done = cleaned
+        elif stage == "draining":
+            done = self.ports.drain(db, row.world_id)
+            accepted = row.accepted_at.replace(tzinfo=UTC) if row.accepted_at.tzinfo is None else row.accepted_at
+            if not done and now - accepted > timedelta(minutes=5):
+                raise ValueError("world_erasure_effect_unsettled")
+        elif stage == "collecting":
+            done = self.ports.collect(db, row, self.batch_size)
+        elif stage == "purging":
+            done = self.ports.purge(db, row, self.batch_size)
+        elif stage == "verifying":
+            done = self.ports.verify(db, row)
+        else:
+            raise ValueError("world_erasure_stage_invalid")
+        if done:
+            stages = ("draining", "collecting", "purging", "cleaning", "verifying", "completed")
+            row.stage = stages[stages.index(stage) + 1]
+            row.cursor = 0
+            row.state = "draining" if row.stage == "collecting" else row.stage
+            if row.state == "completed":
+                row.completed_at = now
+                db.execute(delete(WorldDeletionCleanupItem).where(WorldDeletionCleanupItem.request_id == row.id))
+        row.lease_until = None
+        row.failure_code = None
+        row.next_attempt_at = now + timedelta(seconds=1) if not done and stage == "draining" else None
+        row.updated_at = now
+
+    def _record_failure(self, request_id, epoch, exc, *, busy):
+        with self.sessions() as db:
+            def record():
+                row = require_lease(db, request_id, epoch)
+                now = datetime.now(UTC)
+                row.lease_until = None
+                if busy:
+                    row.state, row.failure_code = "retry_wait", "storage_busy"
+                    row.next_attempt_at = now + timedelta(seconds=1)
+                else:
+                    row.failures += 1
+                    # Invalid preservation material will not heal by repeating
+                    # the same query. Retain the journal for explicit user retry.
+                    contract_error = isinstance(exc, ValueError) and str(exc) != "world_erasure_effect_unsettled"
+                    row.state = "failed" if contract_error or row.failures >= 3 else "retry_wait"
+                    row.failure_code = "cleanup_failed"
+                    row.next_attempt_at = now + timedelta(seconds=(2, 5, 15)[min(row.failures - 1, 2)])
+                row.updated_at = now
+            run_sqlite_session_immediate(db, record, require_clean=True)

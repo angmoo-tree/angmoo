@@ -17,9 +17,11 @@ from app.runtime.relationships.manual_review import TERMINAL
 from app.runtime.relationships.situation_ordering import application_pending
 
 
-def advance_manual_requests(db, now):
+def advance_manual_requests(db, now, *, limit=16):
+    if not 1 <= limit <= 16:
+        raise ValueError("relationship_manual_page_invalid")
     ids = list(db.scalars(select(Request.memory_request_id).where(Request.canonical_request_id.is_(None),
-        Request.state.not_in(TERMINAL + ("paused",))).order_by(Request.accepted_at).limit(16)))
+        Request.state.not_in(TERMINAL + ("paused",))).order_by(Request.accepted_at).limit(limit)))
     for identifier in ids:
         # SQLite write reservation / PostgreSQL row lock through the same update.
         db.execute(update(Request).where(Request.memory_request_id == identifier).values(state=Request.state))
@@ -54,7 +56,16 @@ def advance_manual_requests(db, now):
             continue
         db.execute(update(RelationshipPolicy).where(RelationshipPolicy.world_id == setting.world_id).values(version=RelationshipPolicy.version))
         if request.snapshot is None:
-            grouped = collect_new_review_memories(db, setting=setting, now=now)
+            excluded = []
+            grouped = collect_new_review_memories(db, setting=setting, now=now, excluded=excluded)
+            # The shared collector is read-only. This caller already owns one
+            # serialized manual request and writes only after validation ends.
+            from app.core.ids import uuid7_string
+            for target, payload, reason in excluded:
+                db.add(Receipt(id=uuid7_string(), world_id=setting.world_id,
+                    actor_world_character_id=setting.subject_world_character_id, target_world_character_id=target,
+                    memory_id=payload["memory_id"], memory_digest=payload["digest"], status="excluded", reason=reason))
+            db.flush()
             snapshot = [{"memory_id": m["memory_id"], "digest": m["digest"], "target_id": target}
                 for target, memories in grouped.items() for m in memories]
             # Include already claimed automatic work rather than treating it as no work.

@@ -494,6 +494,7 @@ class GeminiAdapter:
         structured_json=True,
         image_input=True,
         embedding=True,
+        embedding_batch=True,
         tool_calls=True,
     )
 
@@ -508,6 +509,10 @@ class GeminiAdapter:
 
     def embed_sync(self, request: EmbeddingRequest) -> list[float]:
         return _embed_sync(request)
+
+    async def embed_batch_measured(self, request, *, timeout_seconds):
+        from app.providers.gemini_embedding_batch import embed_batch
+        return await embed_batch(request, timeout_seconds=timeout_seconds)
 
     async def embed_measured(self, request: EmbeddingRequest, *, timeout_seconds: float) -> MeasuredEmbeddingResponse:
         """One cancellable native async HTTP attempt; legacy lore API stays intact."""

@@ -26,5 +26,6 @@ def application_pending(db, setting_id, *, lock=False):
 
 
 def require_application_complete(db, setting_id):
-    if application_pending(db, setting_id, lock=True):
+    # The final caller owns its writer; read-only preparation must stay read-only.
+    if application_pending(db, setting_id):
         raise ValueError("relationship_memory_application_pending")

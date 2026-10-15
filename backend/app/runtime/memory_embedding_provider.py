@@ -14,7 +14,10 @@ def embedding_material(session, scope, credential_id=None, *, revision=None):
         if material.model != "gemini-embedding-2":
             raise ValueError("embedding_model_mismatch")
         return material
-    except Exception:
+    except Exception as exc:
+        from app.core.sqlite_concurrency import is_sqlite_contention
+        if is_sqlite_contention(exc):
+            raise
         raise MemoryValidationError("memory_embedding_credential_unavailable") from None
 
 
@@ -34,7 +37,7 @@ class MemoryQueryEmbedder:
     async def query(self, request, *, deadline):
         from time import monotonic
         from app.domains.memory.contracts.embedding import embedding_text, EMBEDDING_DIMENSIONS
-        from app.providers.gemini import GeminiAdapter
+        from app.providers.registry import get_embedding_adapter
         from app.providers.contracts import EmbeddingRequest
         with self._factory() as session:
             repository = self._repository_factory(session)
@@ -50,7 +53,7 @@ class MemoryQueryEmbedder:
         remaining = min(30.0, deadline-monotonic())
         if remaining <= 0:
             raise TimeoutError("memory_embedding_deadline")
-        response = await GeminiAdapter().embed_measured(EmbeddingRequest(material.reveal(), config.model,
+        response = await get_embedding_adapter(config.provider, config.model).embed_measured(EmbeddingRequest(material.reveal(), config.model,
             embedding_text(request.search_text, query=True), EMBEDDING_DIMENSIONS), timeout_seconds=remaining)
         try:
             with self._factory() as session:

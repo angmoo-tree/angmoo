@@ -22,6 +22,12 @@ class SituationSourceValidator(Protocol):
 
 
 @runtime_checkable
+class SituationValidationPreparer(Protocol):
+    """Optional batched canonical reads within one post-binding validation."""
+    def prepare_validation(self, context: SituationValidationContext, *, validation) -> None: ...
+
+
+@runtime_checkable
 class SituationParentBindingResolver(Protocol):
     """Optional same-session canonical port; fixtures without it cannot infer."""
     def parent_binding_basis(self, context: SituationValidationContext,

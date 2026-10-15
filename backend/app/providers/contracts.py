@@ -27,6 +27,7 @@ class ProviderCapabilities:
     structured_json: bool = False
     image_input: bool = False
     embedding: bool = False
+    embedding_batch: bool = False
     tool_calls: bool = False
 
 
@@ -107,6 +108,38 @@ class MeasuredEmbeddingResponse:
     vector: tuple[float, ...]
     usage: ProviderUsage
     physical_attempts: int
+
+
+@dataclass(frozen=True)
+class EmbeddingBatchRequest:
+    api_key: str = field(repr=False)
+    model: str
+    texts: tuple[str, ...] = field(repr=False)
+    output_dimension: int
+
+
+@dataclass(frozen=True)
+class MeasuredEmbeddingBatchResponse:
+    vectors: tuple[tuple[float, ...], ...]
+    # Request-level usage; never multiply it by the number of items.
+    usage: ProviderUsage
+    physical_attempts: int
+
+
+@dataclass(frozen=True)
+class EmbeddingBatchLimits:
+    """Conservative admission limits declared by the selected model adapter."""
+    max_items: int
+    max_item_bytes: int
+    max_request_bytes: int
+    envelope_bytes_per_item: int = 256
+
+    def fits(self, texts: tuple[str, ...]) -> bool:
+        import json
+        return (0 < len(texts) <= self.max_items and all(isinstance(text, str) and text and
+            len(text.encode("utf-8")) <= self.max_item_bytes for text in texts) and
+            len(json.dumps(list(texts), ensure_ascii=True).encode()) +
+            len(texts) * self.envelope_bytes_per_item <= self.max_request_bytes)
 
 
 @dataclass(frozen=True)

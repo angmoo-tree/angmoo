@@ -49,5 +49,6 @@ class DurableIndex:
 
 
 @pytest.fixture
-def index(tmp_path):
+def index(tmp_path, monkeypatch):
+    monkeypatch.setattr("app.config.settings.MEDIA_ROOT", str(tmp_path / "media"))
     return DurableIndex(tmp_path / "test-worker-projection.sqlite3")
