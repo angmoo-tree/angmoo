@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
@@ -53,7 +54,7 @@ def test_state_service_keeps_owner_gate_legacy_error_and_deferred_write(database
 
 def test_state_http_retains_url_owner_visibility_and_same_route(database):
     db, owner, character = database
-    original = next(route for route in community_routes.router.routes if route.name == "save_character_state")
+    original = next(route for route in community_routes.router.routes if isinstance(route, APIRoute) and route.name == "save_character_state")
     canonical = next(route for route in router.state_router.routes if route.name == "save_character_state")
     assert original is canonical
     app = FastAPI()

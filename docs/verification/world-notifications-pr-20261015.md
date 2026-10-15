@@ -72,3 +72,37 @@ data with no external model calls. Original feature and bulk-read local checks
 remain in their separate verification records; overlapping tests are not added
 to a purported combined unique total. Remote final-head results and Windows
 platform review remain separate from these local results.
+
+## Complete-corpus follow-up
+
+The complete backend run for `abae86ab` finished with six failures across two
+partitions; the other two partitions passed. All reported cases are corrected
+without changing production behavior:
+
+- Two global-mention fixtures now explicitly identify their Post as global with
+  `world_id=None`, matching the real Post contract and retaining the exact
+  recipient/self/duplicate expectations. Production does not use a missing-field
+  fallback to hide an invalid World scope.
+- The Character state HTTP regression ignores non-APIRoute router inclusions
+  when locating the existing route. It still requires the identical route object,
+  successful owner HTTP write and foreign-owner 404 without changing saved state.
+- The home-shell contract now expects the approved World Feed destination while
+  retaining the launchability gate and legacy global feed checks.
+- Current SQL-marker and Next/static inventories are regenerated. The SQL marker
+  inventory retains the same 111 paths; only two current-source hashes/line
+  references change. Historical migration/Neo4j corpora and negative guards are
+  preserved. The new notification page accounts for the 44→45 route count, and
+  the test explicitly requires that page with no static blockers. The frontend
+  design report records this same current route inventory.
+
+The four relevant modules pass **22 tests** locally with external networking
+denied. The existing Starlette/httpx deprecation warnings are not hidden. Command
+from `backend`:
+
+```powershell
+./.venv/Scripts/python.exe -m pytest tests/social/test_community_posts_route.py tests/characters/test_character_state_http.py tests/test_l2_5_world_app_shell_contract.py tests/test_l3_er0_embedded_runtime_inventory.py -q --tb=short
+```
+
+That local result does not stand in for the new commit's hosted CI. PR checks
+must finish on the actual final head; prior-head successful frontend/Windows
+jobs are not copied or treated as final-head approvals.

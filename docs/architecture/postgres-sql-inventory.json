@@ -1131,7 +1131,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/models/posts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "b155816d3c6719fbb4849c1b44dc6eaf18eb93714d7409960b124eb72faf4d36",
+      "source_sha256": "9c77982fcda493bcbcbcdba2171e072a2bd2bca41e9e6de702b8ead7dc55716a",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1482,15 +1482,15 @@
           115,
           116,
           117,
-          368,
           369,
-          370
+          370,
+          371
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a1bff1f682f76a4612c737569f395ba180d43322afc95016024d43ff9c0baa67",
+      "source_sha256": "7025f38459f769bb52f6aff318388a3da5f1adeb6e49a414d02dc04fd9b27a99",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

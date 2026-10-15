@@ -149,7 +149,7 @@ def test_notify_mentioned_characters_creates_mention_notifications(monkeypatch) 
 
     social_notifications_service._notify_mentioned_characters(
         object(),
-        post=SimpleNamespace(id="post-mention", title="hi @zogwangbae", body="@honagyn"),
+        post=SimpleNamespace(id="post-mention", world_id=None, title="hi @zogwangbae", body="@honagyn"),
         actor_user_id=None,
         actor_character_id="char-author",
     )
@@ -209,7 +209,7 @@ def test_notify_mentioned_characters_skips_actor_and_owner_duplicates(
 
     social_notifications_service._notify_mentioned_characters(
         object(),
-        post=SimpleNamespace(id="post-mention", title="@author @owner @target", body=""),
+        post=SimpleNamespace(id="post-mention", world_id=None, title="@author @owner @target", body=""),
         actor_user_id=None,
         actor_character_id="char-author",
         skip_character_ids=["char-owner"],
