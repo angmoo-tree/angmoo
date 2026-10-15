@@ -419,6 +419,8 @@ class ProfileFollow(Base):
 class Notification(Base):
     __tablename__ = "notifications"
     __table_args__ = (
+        Index("uq_notifications_delivery_key", "delivery_key", unique=True),
+        Index("ix_notifications_world_recipient_id", "world_id", "recipient_world_character_id", "id"),
         CheckConstraint(
             "(recipient_user_id is null) <> (recipient_character_id is null)",
             name="ck_notifications_recipient_exactly_one",
@@ -459,3 +461,4 @@ class Notification(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    delivery_key: Mapped[Optional[str]] = mapped_column(String(64))

@@ -96,7 +96,21 @@ def _notify_post_owner(
     source_post_id: str | None,
     actor_user_id: str | None,
     actor_character_id: str | None,
-) -> None:
+) -> models.Notification | None:
+    if post.world_id is not None:
+        # Reply/quote sources have immutable Post identities. Reactions,
+        # including reposts, are delivered by the canonical successful event.
+        if source_post_id is None or notification_type == "repost":
+            return None
+        source = db.get(models.Post, source_post_id)
+        if source is None or source.world_id != post.world_id or source.author_character_id != actor_character_id:
+            raise ValueError("notification_source_scope_invalid")
+        from app.domains.social.service.world_notification_delivery import deliver_world_notification
+        return deliver_world_notification(db, world_id=post.world_id,
+            recipient_world_character_id=post.author_world_character_id, recipient_character_id=post.author_character_id,
+            actor_world_character_id=source.author_world_character_id, actor_character_id=actor_character_id,
+            notification_type=notification_type, source_kind="post", source_id=source.id,
+            post_id=post.id, source_post_id=source.id)
     create_notification(
         db,
         notification_type=notification_type,
@@ -116,10 +130,22 @@ def _notify_mentioned_characters(
     actor_user_id: str | None,
     actor_character_id: str | None,
     skip_character_ids: Iterable[str | None] = (),
+    world_recipients=(),
 ) -> None:
     skipped = {character_id for character_id in skip_character_ids if character_id}
     if actor_character_id:
         skipped.add(actor_character_id)
+    if post.world_id is not None:
+        from app.domains.social.service.world_notification_delivery import deliver_world_notification
+        for recipient in world_recipients:
+            if recipient.character_id in skipped:
+                continue
+            deliver_world_notification(db, world_id=post.world_id,
+                recipient_world_character_id=recipient.world_character_id, recipient_character_id=recipient.character_id,
+                actor_world_character_id=post.author_world_character_id, actor_character_id=actor_character_id,
+                notification_type="mention", source_kind="post", source_id=post.id,
+                post_id=post.id, source_post_id=post.id)
+        return
     for mention in _mentioned_characters_for_texts(db, post.title, post.body):
         if mention.character_id in skipped:
             continue

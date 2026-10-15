@@ -1,5 +1,36 @@
 # Angmoo Backend Architecture
 
+## World owner-profile notifications (2026-10-15 LOCAL)
+
+Social owns notification DTOs, the shared eligibility query, delivery identities
+and HTTP services. Runtime supplies bounded multi-domain reads using the caller's
+Session. Scope is the claimed local owner's active owner-controlled World profile;
+GET never ensures a profile. Home resolves up to 50 unique visible World IDs in
+one batch, with unavailable per ineligible World and no all-owned-character fallback.
+
+Canonical writers deliver in their existing UoW: immutable Post IDs for
+reply/quote/mention; successful SocialEvent IDs for like/repost/follow. The nullable
+unique delivery key deduplicates replay without resetting read/handled state.
+SQLite v38 / Alembic 20261015_0115 adds the field/indexes. Earlier manifests and
+data remain immutable. Migration fences use the actual schema generation; v38
+refreshes only Notification write fences in its migration UoW.
+
+List/count/read share visibility, ancestor, block and live-reaction predicates.
+Visibility projects post ID, World and parent into one materialized scoped set
+before recursive reachability; this avoids a World-only Post index rescan for
+each descendant without adding a schema/index or dropping ancestor/block checks.
+Explicit user read updates only the first read_at and returns canonical count;
+it creates no activity/relationship/memory event and never modifies handled_at.
+The read-all POST compares the expected recipient with the currently authorized
+scope inside the caller's immediate UoW. One set-based UPDATE covers eligible
+unread rows across all pages, preserving prior read_at values and later deliveries.
+SQLite changes() is read on the same connection because CTE UPDATE rowcount may
+be -1. There is no row-by-row commit, new schema, provider I/O or automatic replay
+after uncertain transport outcomes. The individual endpoint remains compatible.
+Closed post/profile targets grant no additional reader permissions. Evidence:
+[focused verification](../docs/verification/world-user-notifications-20261015.md).
+Bulk-read follow-up: [scoped verification](../docs/verification/world-notifications-bulk-20261015.md).
+
 ## SNS recovery and canonical receipt boundaries (2026-10-14)
 
 Social owns bounded received-result slots and attempt-bound atomic journals;

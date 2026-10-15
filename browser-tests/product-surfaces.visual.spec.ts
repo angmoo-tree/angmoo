@@ -192,8 +192,11 @@ test("UI-F captures the persistent World composer and long Korean stream", async
     "오늘 이 World에 남길 이야기의 제목을 적어주세요",
   );
   await expect(page.locator('[data-social-post-row="world-post-ui-f-1"]')).toBeVisible();
+  const notificationLink = page.getByRole("link", { name: /^알림/ });
+  await expect(notificationLink).toBeVisible();
+  await expect(notificationLink).toHaveAttribute("href", new RegExp(`/worlds/${WORLD_ID}/notifications/?$`));
   await settleVisualSurface(page);
-  await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "world-feed-composer-phone-436x880.png"]);
+  await expect(page).toHaveScreenshot(["ui-f", "world-notifications-20261015", "world-feed-composer-phone-436x880.png"]);
 
   expectReadOnlyFixture(audit);
 });

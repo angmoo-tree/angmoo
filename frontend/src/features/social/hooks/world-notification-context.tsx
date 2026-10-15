@@ -1,0 +1,38 @@
+"use client";
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { createWorldNotificationController, EMPTY_NOTIFICATION_STATE, sameNotificationScope, type NotificationMode, type WorldNotificationController } from "./world-notification-controller";
+import type { NotificationScope } from "../types/world-notifications";
+
+const ControllerContext = createContext<WorldNotificationController | null>(null);
+const ScopeContext = createContext<NotificationScope | null>(null);
+
+export function WorldNotificationProvider({ children }: { children: ReactNode }) {
+  const { user, status, sessionRevision } = useAuth();
+  const userId = user?.id;
+  const controller = useMemo(() => status === "authenticated" && userId ? createWorldNotificationController(userId, sessionRevision ?? 0) : null, [status, userId, sessionRevision]);
+  useEffect(() => {
+    if (!controller) return;
+    return controller.connect();
+  }, [controller]);
+  return <ControllerContext.Provider value={controller}>{children}</ControllerContext.Provider>;
+}
+
+export function WorldNotificationScope({ scope, mode, children }: { scope: NotificationScope | null; mode: NotificationMode; children: ReactNode }) {
+  const controller = useContext(ControllerContext);
+  const worldId = scope?.world_id, profileId = scope?.recipient_world_character_id;
+  useEffect(() => {
+    if (!controller || !worldId || !profileId) return;
+    controller.activate({ world_id: worldId, recipient_world_character_id: profileId }, mode);
+    return () => controller.deactivate();
+  }, [controller, worldId, profileId, mode]);
+  return <ScopeContext.Provider value={scope}>{children}</ScopeContext.Provider>;
+}
+
+const noopSubscribe = () => () => {};
+const empty = () => EMPTY_NOTIFICATION_STATE;
+export function useWorldNotificationView() {
+  const controller = useContext(ControllerContext), scope = useContext(ScopeContext);
+  const snapshot = useSyncExternalStore(controller?.subscribe ?? noopSubscribe, controller?.getSnapshot ?? empty, empty);
+  return { state: sameNotificationScope(snapshot.scope, scope) ? snapshot : EMPTY_NOTIFICATION_STATE, controller, scope };
+}

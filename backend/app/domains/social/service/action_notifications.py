@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from datetime import UTC, datetime
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.domains.social.models import posts as models
 from app.domains.social.contracts.source_writes import SourceWorldCharacter
@@ -24,6 +23,7 @@ def _link_notifications(
     occurred_at: datetime,
     handling_outcome: str,
     joint_activity_id: str | None,
+    action_type: str,
 ) -> None:
     if input_notification_id is not None:
         incoming = db.get(models.Notification, input_notification_id)
@@ -36,28 +36,15 @@ def _link_notifications(
         incoming.handled_at = occurred_at
         incoming.handling_outcome = handling_outcome
     generated = None
-    if source_post is not None:
-        generated = db.scalar(
-            select(models.Notification)
-            .where(
-                models.Notification.source_post_id == source_post.id,
-                models.Notification.recipient_character_id == target.character_id,
-                models.Notification.actor_character_id == actor.character_id,
-            )
-            .order_by(models.Notification.id.desc())
-            .limit(1)
-        )
-    elif target_post is not None:
-        generated = db.scalar(
-            select(models.Notification)
-            .where(
-                models.Notification.post_id == target_post.id,
-                models.Notification.recipient_character_id == target.character_id,
-                models.Notification.actor_character_id == actor.character_id,
-            )
-            .order_by(models.Notification.id.desc())
-            .limit(1)
-        )
+    if action_type in {"reply", "like", "quote", "repost", "follow"}:
+        from app.domains.social.service.world_notification_delivery import deliver_world_notification
+        generated = deliver_world_notification(db, world_id=actor.world_id,
+            recipient_world_character_id=target.id, recipient_character_id=target.character_id,
+            actor_world_character_id=actor.id, actor_character_id=actor.character_id,
+            notification_type=action_type, source_kind="post" if source_post is not None else "social_event",
+            source_id=source_post.id if source_post is not None else event.id,
+            post_id=target_post.id if target_post is not None else None,
+            source_post_id=source_post.id if source_post is not None else None, social_event_id=event.id)
     if generated is not None:
         generated.world_id = actor.world_id
         generated.recipient_world_character_id = target.id
@@ -147,22 +134,15 @@ def link_world_feed_notification(
         "repost": "repost",
         "follow": "follow",
     }[action]
-    notification_query = select(models.Notification).where(
-        models.Notification.notification_type == notification_type,
-        models.Notification.recipient_character_id == target_character_id,
-        models.Notification.actor_character_id == actor_character_id,
-    )
-    if isinstance(source, models.Post):
-        notification_query = notification_query.where(
-            models.Notification.source_post_id == source.id
-        )
-    elif action in {"like", "repost"}:
-        notification_query = notification_query.where(
-            models.Notification.post_id == target_post_id
-        )
-    notification = db.scalar(
-        notification_query.order_by(models.Notification.id.desc()).limit(1)
-    )
+    from app.domains.social.service.world_notification_delivery import deliver_world_notification
+    is_post = isinstance(source, models.Post)
+    notification = deliver_world_notification(db, world_id=world_id,
+        recipient_world_character_id=target_world_character_id, recipient_character_id=target_character_id,
+        actor_world_character_id=actor_world_character_id, actor_character_id=actor_character_id,
+        notification_type=notification_type, source_kind="post" if is_post else "social_event",
+        source_id=source.id if is_post else social_event_id,
+        post_id=target_post_id if action != "follow" else None,
+        source_post_id=source.id if is_post else None, social_event_id=social_event_id)
     if notification is not None:
         notification.world_id = world_id
         notification.recipient_world_character_id = target_world_character_id

@@ -14,6 +14,39 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## World feed notifications (2026-10-15 LOCAL)
+
+The feed header retains its centered logo and orders bell then own-profile on
+the right. Notifications are an auxiliary feed screen retaining five World tabs.
+The existing avatar/type/time/preview anatomy is shared. World rows replace their
+individual check with a dot and localized Unread text while unread. The exact
+existing 20px Check and 44px circular control are reused in the header immediately
+before Refresh; its localized name is Mark all as read. It is the only World
+read-write action and disables while pending/unknown/zero. Entry, source links,
+scrolling and departure never mark read. Back returns to the World's feed. Missing
+profile guidance links to World management without creating a profile.
+At narrow widths the title and header gaps adapt so both 44px actions remain
+fully inside the viewport, including 320px English. Icon/control shape is reused.
+
+Count badges reuse the selected Feed tab's brand-soft background with strong text,
+display 1–99/99+, hide confirmed zero and announce the exact KO/EN count.
+Unknown, unavailable and stale states remain explicit. Home badges sit outside
+the rounded image clipping while the green launchability badge stays inside.
+Controls retain 44px targets, keyboard focus and semantic colors. LOCAL evidence
+covers Next/static, 320/360/390/436/1280 CSSpx and badge contrast >=4.5:1.
+Native USER CHECK/hosted Windows validation remain separate. No external visual
+assets, libraries or raw-color allowances are added. See
+`docs/verification/world-user-notifications-20261015.md`.
+The bulk-read follow-up uses ADAPTED existing controls/list/tokens and LOCAL
+scoped behavior; see `docs/verification/world-notifications-bulk-20261015.md`.
+
+PR #375 pinned-Linux review adds the World feed bell snapshot under
+`browser-tests/snapshots/ui-f/world-notifications-20261015/`. The only visual
+delta from the previous feed image is the intended bell (57 comparison pixels).
+All earlier 19 PNGs and the 25-pixel/0.1 thresholds are preserved. Next/static
+continue comparing the same current image. Evidence:
+`docs/verification/world-notifications-pr-20261015.md`.
+
 ## 2026-10-13 릴리스 준비 visual 증거 정렬 (LOCAL)
 
 기존 UI-B/UI-F의 canonical PNG 11장은 원본 그대로 보존한다. 이미 구현된

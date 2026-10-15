@@ -26,7 +26,7 @@ def record_source_post_event(
     target_post: SourceEventPost | None = None,
     request_key: str,
     failure_injector: Callable[[str], None] | None,
-) -> None:
+) -> str:
     occurred_at = datetime.now(UTC)
     event_id = uuid7_string()
     event_type = "post_published" if operation == "post" else "reply_created"
@@ -77,3 +77,4 @@ def record_source_post_event(
     db.flush()
     if failure_injector is not None:
         failure_injector("after_source_evidence")
+    return event_id

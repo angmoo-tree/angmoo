@@ -37,6 +37,14 @@ export function worldAppRoute(worldId: string): string {
   return `/worlds/${encodeURIComponent(worldId)}`;
 }
 
+export function worldFeedRoute(worldId: string): string {
+  return `${worldAppRoute(worldId)}/feed`;
+}
+
+export function worldNotificationsRoute(worldId: string): string {
+  return `${worldAppRoute(worldId)}/notifications`;
+}
+
 export function worldPostDetailRoute(worldId: string, postId: string): string {
   return `${worldAppRoute(worldId)}/posts/${encodeURIComponent(postId)}`;
 }

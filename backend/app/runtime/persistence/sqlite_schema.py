@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text, event
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 37
-SOURCE_ALEMBIC_REVISION = "20261012_0114"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 113
+SQLITE_SCHEMA_VERSION = 38
+SOURCE_ALEMBIC_REVISION = "20261015_0115"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 114
 EXPECTED_CANONICAL_TABLE_COUNT = 174
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
@@ -331,6 +331,7 @@ def _copy_partial_index_predicates(metadata: MetaData) -> None:
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
     _remove_comfy_diagnostics(metadata)
+    _remove_notification_delivery_schema(metadata)
     _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:
         if name in metadata.tables:
@@ -786,10 +787,29 @@ def build_sqlite_v35_metadata() -> MetaData:
 
 
 def build_sqlite_v36_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v37_metadata()
     metadata.remove(metadata.tables["world_deletion_cleanup_items"])
     metadata.remove(metadata.tables["world_deletion_requests"])
     return metadata
+
+
+def build_sqlite_v37_metadata() -> MetaData:
+    """Frozen pre-notification-delivery schema, also used by older fixtures."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_notification_delivery_schema(metadata)
+    return metadata
+
+
+def _remove_notification_delivery_schema(metadata: MetaData) -> None:
+    """Keep both chained and direct-copy predecessors at their released shape."""
+    table = metadata.tables.get("notifications")
+    if table is None:
+        return
+    for index in tuple(table.indexes):
+        if index.name in {"uq_notifications_delivery_key", "ix_notifications_world_recipient_id"}:
+            table.indexes.remove(index)
+    if "delivery_key" in table.c:
+        table._columns.remove(table.c.delivery_key)
 
 
 def build_sqlite_v32_metadata() -> MetaData:

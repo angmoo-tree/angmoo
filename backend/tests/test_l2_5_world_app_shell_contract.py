@@ -78,6 +78,6 @@ def test_legacy_posts_route_remains_the_global_feed() -> None:
     assert "<FeedPage />" in posts_page
     assert "disabled={!world.launchable}" in device_home
     assert (
-        "href={world.launchable ? worldAppRoute(world.world_id) : undefined}"
+        "href={world.launchable ? worldFeedRoute(world.world_id) : undefined}"
         in device_home
     )

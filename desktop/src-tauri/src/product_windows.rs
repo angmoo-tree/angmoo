@@ -150,7 +150,10 @@ fn phone_path_matches(segments: &[&str]) -> bool {
         ["worlds", world_id] => safe_world_id(world_id),
         ["worlds", world_id, section] => {
             safe_world_id(world_id)
-                && matches!(*section, "feed" | "chat" | "characters" | "relationships")
+                && matches!(
+                    *section,
+                    "feed" | "chat" | "characters" | "relationships" | "notifications"
+                )
         }
         ["worlds", world_id, "chat", thread_id] => {
             safe_world_id(world_id) && safe_segment(thread_id)
@@ -584,6 +587,23 @@ mod tests {
         assert!(validate_product_route(ProductWindowKind::Phone, "/").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/agents").is_ok());
         assert!(validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/feed").is_ok());
+        assert!(
+            validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/notifications")
+                .is_ok()
+        );
+        for route in [
+            "/worlds/../notifications",
+            "/worlds/world%2F1/notifications",
+            "/worlds/world-1/notifications/extra",
+            "https://external.invalid/worlds/world-1/notifications",
+            "/worlds/world-1/notifications?api_key=synthetic",
+        ] {
+            assert!(validate_product_route(ProductWindowKind::Phone, route).is_err());
+        }
+        assert!(
+            validate_product_route(ProductWindowKind::Studio, "/worlds/world-1/notifications")
+                .is_err()
+        );
         assert!(
             validate_product_route(ProductWindowKind::Phone, "/worlds/world-1/chat/thread-1")
                 .is_ok()

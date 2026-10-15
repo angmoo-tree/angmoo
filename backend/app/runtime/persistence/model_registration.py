@@ -6,7 +6,7 @@ from app.models import Base
 def install_canonical_write_fences(target, connection, **kwargs):
     if connection.dialect.name == "sqlite" and "world_deletion_requests" in inspect(connection).get_table_names():
         from app.runtime.world_deletion.fences import install_fences
-        install_fences(connection)
+        install_fences(connection, metadata=target)
 
 
 def register_models() -> MetaData:

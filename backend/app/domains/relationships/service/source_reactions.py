@@ -27,3 +27,4 @@ def record_source_reaction_event(db: Session, *, world_id: str, actor_world_char
         content_sha256=sha256(json.dumps({"title":post.title,"body":post.body},ensure_ascii=False,sort_keys=True,separators=(",",":")).encode()).hexdigest(),
         source_visibility_at_event=post.visibility, source_author_id_at_event=target_world_character_id, occurred_at=now))
     db.flush()
+    return event.id

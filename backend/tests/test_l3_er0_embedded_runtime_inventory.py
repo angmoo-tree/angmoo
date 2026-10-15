@@ -99,7 +99,13 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     assert "historical schema evidence" in postgres["purpose"]
     assert "reintroduction guards" in postgres["purpose"]
     assert graph["query_count"] == 24
-    assert frontend["route_count"] == 44
+    assert frontend["route_count"] == 45
+    notification_route = next(
+        item for item in frontend["routes"]
+        if item["route"] == "/worlds/[worldId]/notifications"
+    )
+    assert notification_route["kind"] == "page"
+    assert notification_route["blockers"] == []
     assert {item["phase"] for item in runtime["parity"]["workloads"]} == {
         "P1", "P2", "P3", "P4", "P5", "P6", "P7"
     }

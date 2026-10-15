@@ -1,5 +1,23 @@
 # Angmoo 기능 보존과 현재 코드 읽기 지도
 
+## 2026-10-15 World 내 프로필 알림
+
+현재 World 알림은 Social의 범위별 list/count/read와 홈 batch를 사용한다.
+후속 일괄 확인은 현재 내 프로필을 다시 검증한 read-all POST 한 번으로 모든
+페이지의 eligible 미읽음을 갱신한다. World 행의 개별 체크·원문 자동 읽음은
+상단의 기존 Check 버튼으로 대체하며 전역 알림의 개별 읽음은 보존한다.
+처리 뒤 새 도착·최초 읽음 시각·Inbox handled 상태는 유지한다. 근거는
+[일괄 읽음 검증](../verification/world-notifications-bulk-20261015.md)에 기록한다.
+수신 범위는 현재 사용자의 활성 owner-controlled 프로필이고 소유 자율 캐릭터는
+포함하지 않는다. 기존 전역 호환 API와 캐릭터 Inbox는 별도로 유지한다.
+같은 원본 UoW의 delivery key로 재전송을 구분하며 read_at과 handled_at을
+혼용하지 않는다. Next/static의 공통 World 화면은 기존 5탭과 명시적 소개·상세
+경로를 유지한다. 일반 홈/Studio 열기만 명시적 feed로 연결한다.
+새 v38 migration은 이전 manifest·자료·읽음 기록을 재작성하지 않고,
+현재 구조/권한/원자성/삭제/실제 HTTP 검증을 추가한다. 퇴역한 리팩터링 소스
+스냅샷이나 과거 완료 기록은 이 제품 변경에 맞춰 재생성하지 않는다.
+로컬 근거: [구현 검증](../verification/world-user-notifications-20261015.md).
+
 ## 2026-10-10 기기 홈·활동 설정·SNS 기억 출처·World 주제의 현재 경로
 
 이 절은 아래 10-09 표시 계약을 현재 10-10 구현에 맞게 보완한다. 역사 inventory,

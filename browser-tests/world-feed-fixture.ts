@@ -15,6 +15,7 @@ export const profileRoute = (world = FEED_WORLD) => `/worlds/${world}/characters
 
 type Write = { path: string; method: string; body: Record<string, unknown> | null; key: string | null };
 export type FeedFixture = {
+  authUserId: string;
   language: "ko" | "en";
   feedFailures: number;
   postFailures: number;
@@ -42,6 +43,7 @@ export type FeedFixture = {
 
 export async function installWorldFeedFixture(page: Page, staticShell: boolean, baseURL: string, language: "ko" | "en" = "ko") {
   const state: FeedFixture = {
+    authUserId: "local-owner",
     language, feedFailures: 0, postFailures: 0, uploadFailures: 0,
     postDelay: 0, uploadDelay: 0, missingOwner: false, ownerFailures: 0, ownerDelays: {}, worldForbidden: false, avatar: true,
     globalName: "Synthetic Autonomous Agent", handle: OWNER_HANDLE,
@@ -89,7 +91,7 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
       (path === "/auth/local/environment" ? state.environmentWrites : state.writes).push(write);
     }
     if (/generate|completion|preflight/.test(path)) state.providerCalls.push(path);
-    if (path === "/auth/me") return reply(route, { id: "local-owner", display_name: "Local Owner", email: null, profile_setup_completed: true,
+    if (path === "/auth/me") return reply(route, { id: state.authUserId, display_name: "Local Owner", email: null, profile_setup_completed: true,
       ui_language: state.language, ui_preference_revision: 1, feed_content_filter: "all", is_admin: true });
     if (path === "/auth/local/environment") return reply(route, { ...VISUAL_ENVIRONMENT, preferred_language: state.language, memory_search_locale: state.language });
     if (path === "/runtime/status") return reply(route, { schema_version: "local-runtime-status-v1", installation_state: "ready" });
@@ -100,6 +102,9 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
         character: { ...agent.character, name: state.globalName, handle: OWNER_HANDLE, avatar_url: owner(FEED_WORLD).profile.avatar_url } }]);
     }
     if (path.endsWith("/feed-cue")) return reply(route, null);
+    const notificationCount = path.match(/^\/worlds\/([^/]+)\/notifications\/unread-count$/);
+    if (notificationCount) return reply(route, { scope: { world_id: notificationCount[1], recipient_world_character_id: ownerId(notificationCount[1]) }, unread_count: 0 });
+    if (path === "/notifications/world-unread-counts") return reply(route, { items: [...new Set(url.searchParams.getAll("world_ids"))].map(world => ({ world_id: world, recipient_world_character_id: ownerId(world), status: "available", unread_count: 0 })) });
     if (path === "/feed" || path.startsWith("/feed/following")) return reply(route, { items: state.posts.map(post => ({ ...post,
       author_character_id: "fixture-autonomous-author", mentioned_characters: [], media: [], quoted_post: null, reposted_post: null })), next_cursor: null });
     if (path === "/worlds/default-space/ensure") return reply(route, { id: FEED_WORLD, name: "SNS", timezone: "Asia/Seoul" });

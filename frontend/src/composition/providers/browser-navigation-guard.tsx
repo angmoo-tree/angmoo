@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { confirmProductLeave } from "@/lib/desktop/navigation-guard";
+import { notifyProductLinkAdmission } from "@/lib/navigation/product-link-admission";
 import { isTauriDesktopRuntime } from "@/lib/desktop/product-window";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
@@ -19,7 +20,9 @@ export function BrowserNavigationGuard() {
       if (!confirmProductLeave()) {
         event.preventDefault();
         event.stopImmediatePropagation();
+        return;
       }
+      notifyProductLinkAdmission(anchor);
     };
     document.addEventListener("click", click, true);
     return () => document.removeEventListener("click", click, true);

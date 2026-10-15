@@ -11,6 +11,14 @@ from app.domains.social.service.timeline import SocialTimelineService
 from app.domains.social.service.inbox import SocialInboxService
 from app.domains.social.service.discovery import SocialDiscoveryService
 from app.domains.social.service.profile_activity import ProfileActivityService
+from app.domains.social.service.world_notifications import WorldNotificationService
+
+
+def get_world_notification_service(request: Request, db: Session = Depends(get_db)) -> WorldNotificationService:
+    factory = getattr(request.app.state, "social_world_notification_factory", None)
+    if factory is None:
+        raise RuntimeError("social World notifications are not configured")
+    return factory(db)
 
 
 def get_timeline_service(request: Request) -> SocialTimelineService:

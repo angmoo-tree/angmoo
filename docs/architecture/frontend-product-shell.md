@@ -1,5 +1,14 @@
 # Frontend product-shell boundaries
 
+2026-10-15: World notifications reuse the World Phone shell as an auxiliary feed
+screen with five primary tabs. FeedHeader right slot orders bell then own-profile.
+Composition supplies home-visible World IDs to Social's single batch hook and
+injects badge/accessible-description slots into DeviceHome. AppIcon's outer badge
+container is separate from its rounded image clip and existing green status.
+Generic World open uses worldFeedRoute while worldAppRoute remains a neutral
+prefix and explicit World introduction destination. Evidence is LOCAL; hosted
+Windows/native user validation and remote publication have not been performed.
+
 2026-10-09: World Relationships renders its directional graph immediately in
 the shared WorldApp Phone shell. The existing explicit
 `/characters/{characterId}/worlds/{worldId}/relationship-graph` URL uses that

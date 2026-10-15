@@ -48,7 +48,7 @@ def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
     assert "world.visibility" not in grouping
     assert '!world.launchable || world.status !== "published" || world.readiness_status !== "publish_ready"' in grouping
     assert "studioWorldRoute(world.world_id)" in dashboard
-    assert "worldAppRoute(world.world_id)" in dashboard
+    assert "worldFeedRoute(world.world_id)" in dashboard
     assert 'label: "Creator Studio"' in device_contract
     studio_entry = device_contract.split('id: "studio"', 1)[1].split("},", 1)[0]
     assert 'availability: "available"' in studio_entry

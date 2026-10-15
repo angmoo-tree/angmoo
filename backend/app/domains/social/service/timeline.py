@@ -241,6 +241,7 @@ class SocialTimelineService:
         _notify_mentioned_characters(
             db,
             post=post,
+            world_recipients=self.workflows.notification_mentions(db, world_id=post.world_id, texts=(post.title, post.body)) if post.world_id else (),
             actor_user_id=user.id if character is None else None,
             actor_character_id=character.id if character else None,
         )
@@ -310,6 +311,7 @@ class SocialTimelineService:
         _notify_mentioned_characters(
             db,
             post=reply,
+            world_recipients=self.workflows.notification_mentions(db, world_id=reply.world_id, texts=(reply.title, reply.body)) if reply.world_id else (),
             actor_user_id=user.id if character is None else None,
             actor_character_id=character.id if character else None,
             skip_character_ids=[parent.author_character_id],
@@ -368,6 +370,7 @@ class SocialTimelineService:
         _notify_mentioned_characters(
             db,
             post=quote,
+            world_recipients=self.workflows.notification_mentions(db, world_id=quote.world_id, texts=(quote.title, quote.body)) if quote.world_id else (),
             actor_user_id=user.id if character is None else None,
             actor_character_id=character.id if character else None,
             skip_character_ids=[quoted.author_character_id],

@@ -24,6 +24,9 @@ def configure_social_runtime(app: FastAPI) -> None:
     app.state.social_profile_activity_service = profile_activity_service
     app.state.social_world_profile_factory = world_character_social_profile_service
     app.state.social_manual_feed_reference_factory = RuntimeManualFeedReferences
+    from app.domains.social.service.world_notifications import WorldNotificationService
+    from app.runtime.social.world_notification_references import RuntimeWorldNotificationReferences
+    app.state.social_world_notification_factory = lambda db: WorldNotificationService(db, RuntimeWorldNotificationReferences(db))
     from app.domains.social.service.post_attachments import PostAttachments
     media = getattr(app.state, "media_runtime", None)
     app.state.social_source_write_executor_factory = lambda db: SqlAlchemySocialWriteUnitOfWork(db,

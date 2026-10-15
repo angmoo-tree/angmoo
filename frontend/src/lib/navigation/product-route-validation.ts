@@ -27,7 +27,7 @@ export function isSupportedProductRoute(route: string, options: { validateQuery?
   }
   if (parts[0] === "studio") return parts.length === 1 || (parts.length === 2 && parts[1] === "import") || (parts.length === 3 && parts[1] === "worlds" && id(parts[2]));
   if (["settings", "login", "posts", "agents"].includes(parts[0])) return parts.length === 1 || (["posts", "agents"].includes(parts[0]) && parts.length === 2 && id(parts[1]));
-  if (parts[0] === "worlds" && world(parts[1])) return parts.length === 2 || (parts.length === 3 && ["feed", "chat", "characters", "relationships"].includes(parts[2])) || (parts.length === 4 && ["posts", "chat", "characters"].includes(parts[2]) && id(parts[3]));
+  if (parts[0] === "worlds" && world(parts[1])) return parts.length === 2 || (parts.length === 3 && ["feed", "chat", "characters", "relationships", "notifications"].includes(parts[2])) || (parts.length === 4 && ["posts", "chat", "characters"].includes(parts[2]) && id(parts[3]));
   if (parts.length === 5 && parts[0] === "characters" && id(parts[1]) && parts[2] === "worlds" && world(parts[3])) {
     if (parts[4] === "autonomy-setup") return true;
     if (parts[4] === "relationship-graph") return options.validateQuery === false || [...url.searchParams].every(([key, value]) => key === "provider" && value === "ladybug");

@@ -159,7 +159,11 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 149
+    assert len(session_mutations) == 151
+    assert {
+        "PATCH /api/v1/worlds/{world_id}/notifications/{notification_id}/read",
+        "POST /api/v1/worlds/{world_id}/notifications/read-all",
+    } <= session_mutations
     assert {
         "DELETE /api/v1/worlds/{world_id}",
         "POST /api/v1/world-deletions/{request_id}/retry",

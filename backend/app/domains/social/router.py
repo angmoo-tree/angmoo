@@ -78,6 +78,8 @@ from app.domains.world_characters.contracts.owner_identity import (
 from app.domains.worlds import service as world_service
 
 router = APIRouter(tags=["community"])
+from app.domains.social.router_world_notifications import router as world_notifications_router
+router.include_router(world_notifications_router)
 
 
 @router.get("/posts", response_model=list[schemas.PostSummary])

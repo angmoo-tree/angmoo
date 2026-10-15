@@ -26,12 +26,14 @@ import { WorldCharacterDirectory } from "@/features/characters/components/world-
 import { WorldCharacterPreview } from "@/features/characters/components/world-character-preview";
 import { WorldIntroduction } from "@/features/worlds/components/world-introduction";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
+import { WorldNotificationScope } from "@/features/social/hooks/world-notification-context";
+import { WorldNotificationBell, WorldNotifications } from "@/features/social/components/world-notifications";
 import { ImagePicker } from "@/features/media/components/image-picker";
 import { FeedHeader } from "@/components/layout/feed-header";
 import { LocalProductLink } from "@/components/navigation/local-product-link";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { GenerationStatus } from "@/features/media/components/generation-status";
-import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
+import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute, worldNotificationsRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
 import { getLocalWorldApp, getOwnerControlledActor, WorldAppApiError } from "@/features/worlds/api/world-app-client";
 import { ensureMyProfile, WorldApiError } from "@/features/worlds/api/worlds";
@@ -52,6 +54,7 @@ type WorldAppProps = {
   authStatus: WorldAppAuthStatus;
   chatThreadId?: string;
   postId?: string;
+  notifications?: boolean;
   relationshipCharacterId?: string;
   sectionId: WorldAppSectionId;
   worldCharacterId?: string;
@@ -81,6 +84,7 @@ function WorldAppContent({
   authStatus,
   chatThreadId,
   postId,
+  notifications = false,
   relationshipCharacterId,
   sectionId,
   worldCharacterId,
@@ -103,7 +107,7 @@ function WorldAppContent({
     void Promise.all([
       worldRead,
       sectionId === "relationships" && relationshipCharacterId ? Promise.resolve(null) : getOwnerControlledActor(worldId, { signal: controller.signal }).then(async (actor) => {
-        if (actor || sectionId === "relationships") return actor;
+        if (actor || sectionId === "relationships" || notifications) return actor;
         // Reads may overlap, but a new identity requires a verified launchable
         // owner World. A rejected or abandoned route must not start a write.
         await worldRead;
@@ -124,7 +128,7 @@ function WorldAppContent({
         if (current()) setLoading(false);
       });
     return () => controller.abort();
-  }, [authStatus, relationshipCharacterId, sectionId, worldId]);
+  }, [authStatus, relationshipCharacterId, sectionId, worldId, notifications]);
 
   const activeSection =
     WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];
@@ -141,7 +145,7 @@ function WorldAppContent({
   }
   if (authStatus === "unauthenticated") {
     const returnTo =
-      sectionId === "relationships" && relationshipCharacterId
+      notifications ? worldNotificationsRoute(worldId) : sectionId === "relationships" && relationshipCharacterId
         ? `${relationshipGraphRoute(relationshipCharacterId, worldId)}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`
         : sectionId === "characters" && worldCharacterId
         ? worldCharacterProfileRoute(worldId, worldCharacterId)
@@ -179,6 +183,8 @@ function WorldAppContent({
   }
 
   return (
+    <WorldNotificationScope scope={ownerActor ? { world_id: worldId, recipient_world_character_id: ownerActor.world_character_id } : null}
+      mode={notifications ? "list" : activeSection.id === "feed" && !postId ? "feed" : null}>
     <WorldAppShell
       headerMode={activeSection.id === "home" ? "shell" : "content"}
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
@@ -193,12 +199,14 @@ function WorldAppContent({
         chatThreadId={chatThreadId}
         ownerActor={ownerActor}
         postId={postId}
+        notifications={notifications}
         relationshipCharacterId={relationshipCharacterId}
         world={world}
         worldCharacterId={worldCharacterId}
         worldId={worldId}
       />
     </WorldAppShell>
+    </WorldNotificationScope>
   );
 }
 
@@ -245,13 +253,13 @@ function WorldFeedHeader({ ownerActor, worldId }: { ownerActor: OwnerControlledA
           <Image src="/icon.svg" alt={uiText("Angmoo 로고")} width={48} height={48} priority />
         </LocalProductLink>
       }
-      right={ownerActor ? (
+      right={<div className={styles.feedActions}><WorldNotificationBell worldId={worldId} />{ownerActor ? (
         <LocalProductLink ariaLabel={socialText("내 프로필")} title={socialText("내 프로필")} className={styles.feedProfile}
           href={worldCharacterProfileRoute(worldId, ownerActor.world_character_id)}>
           <ProfileAvatar name={ownerActor.profile.display_name} avatarUrl={ownerActor.profile.avatar_url}
             sizeClassName={styles.feedProfileAvatar} textClassName={styles.feedProfileInitial} />
         </LocalProductLink>
-      ) : null}
+      ) : null}</div>}
     />
   );
 }
@@ -261,6 +269,7 @@ function WorldSection({
   chatThreadId,
   ownerActor,
   postId,
+  notifications,
   relationshipCharacterId,
   world,
   worldCharacterId,
@@ -270,12 +279,14 @@ function WorldSection({
   chatThreadId?: string;
   ownerActor: OwnerControlledActorRead | null;
   postId?: string;
+  notifications?: boolean;
   relationshipCharacterId?: string;
   world: LocalWorldAppRead["world"];
   worldCharacterId?: string;
   worldId: string;
 }) {
   const uiText = useUiText("shell");
+  if (notifications) return <WorldNotifications worldId={worldId} />;
   if (activeSection.id === "home") {
     return (
       <WorldIntroduction key={worldId} world={world}

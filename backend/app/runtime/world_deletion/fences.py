@@ -15,10 +15,10 @@ SETTLEMENT_TABLES = frozenset({"agent_runs", "agent_public_action_executions", "
     "activity_preparation_jobs", "social_recommendation_preparations", "world_character_setup_attempts"})
 
 
-def install_fences(connection):
+def install_fences(connection, *, metadata=None):
     if connection.dialect.name != "sqlite":
         raise ValueError("world_deletion_requires_canonical_sqlite")
-    inventory = ErasureInventory.for_connection(connection)
+    inventory = ErasureInventory(metadata) if metadata is not None else ErasureInventory.for_connection(connection)
     for name in sorted(inventory.rules):
         table = inventory.tables[name]
         # NEW pseudo-table is represented by a correlated alias for compiler-safe identifiers.

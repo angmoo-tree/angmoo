@@ -21,7 +21,7 @@ def test_v36_to_v37_preserves_source_rows_and_matches_frozen_manifests():
         after = {row[0]: row[1] for row in db.exec_driver_sql("SELECT name, sql FROM sqlite_master WHERE type='table'")}
         assert all(after[name] == sql for name, sql in before)
         assert tuple(db.exec_driver_sql("PRAGMA foreign_key_check")) == ()
-    assert [version for version, _ in migration_chain(36)] == [36]
+    assert [version for version, _ in migration_chain(36)] == [36, 37]
     engine.dispose()
 
 

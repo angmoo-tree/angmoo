@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import type { StudioWorldItem as WorldSurfaceItem, StudioWorldLoader } from "@/features/creator-studio/types/studio-world-list";
-import { PRODUCT_ROUTES, studioWorldRoute, worldAppRoute } from "@/lib/navigation/product-routes";
+import { PRODUCT_ROUTES, studioWorldRoute, worldFeedRoute } from "@/lib/navigation/product-routes";
 
 import styles from "./creator-studio-dashboard.module.css";
 
@@ -153,7 +153,7 @@ function WorldCard({ world, actions }: { world: WorldSurfaceItem; actions?: Reac
         <Link className={styles.secondaryAction} href={studioWorldRoute(world.world_id)}>
           {uiText("편집")}</Link>
         {world.launchable ? (
-          <Link className={styles.primaryAction} href={worldAppRoute(world.world_id)}>
+          <Link className={styles.primaryAction} href={worldFeedRoute(world.world_id)}>
             {uiText("World 열기")}</Link>
         ) : null}
       </div>
