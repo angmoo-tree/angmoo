@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4454,
-      "internal_edge_count": 6558,
+      "external_import_count": 4474,
+      "internal_edge_count": 6599,
       "legacy_import_exception_count": 0,
-      "module_count": 1519,
+      "module_count": 1527,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1012,6 +1012,13 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.post_authors"
+            ],
+            "module": "app.domains.social.contracts.world_notifications",
+            "path": "backend/app/domains/social/contracts/world_notifications.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.writes",
               "app.domains.social.schemas.manual"
             ],
@@ -1033,6 +1040,7 @@
               "app.domains.social.service.inbox",
               "app.domains.social.service.profile_activity",
               "app.domains.social.service.timeline",
+              "app.domains.social.service.world_notifications",
               "app.domains.social.service.world_profile"
             ],
             "module": "app.domains.social.dependencies",
@@ -1312,6 +1320,15 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.world_notifications",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.world_notifications",
+            "path": "backend/app/domains/social/repository/world_notifications.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.profile_activity",
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
@@ -1330,6 +1347,7 @@
               "app.domains.social.contracts.writes",
               "app.domains.social.dependencies",
               "app.domains.social.exceptions",
+              "app.domains.social.router_world_notifications",
               "app.domains.social.schemas.activity",
               "app.domains.social.schemas.community",
               "app.domains.social.schemas.manual",
@@ -1349,6 +1367,18 @@
             ],
             "module": "app.domains.social.router",
             "path": "backend/app/domains/social/router.py"
+          },
+          {
+            "imports": [
+              "app.api.identity_dependencies",
+              "app.core.sqlite_concurrency",
+              "app.domains.social.contracts.world_notifications",
+              "app.domains.social.dependencies",
+              "app.domains.social.schemas.world_notifications",
+              "app.exceptions"
+            ],
+            "module": "app.domains.social.router_world_notifications",
+            "path": "backend/app/domains/social/router_world_notifications.py"
           },
           {
             "imports": [],
@@ -1405,6 +1435,13 @@
             "path": "backend/app/domains/social/schemas/recommendation.py"
           },
           {
+            "imports": [
+              "app.core.response_schemas"
+            ],
+            "module": "app.domains.social.schemas.world_notifications",
+            "path": "backend/app/domains/social/schemas/world_notifications.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.service",
             "path": "backend/app/domains/social/service/__init__.py"
@@ -1431,7 +1468,8 @@
               "app.domains.social.contracts.subjective_persistence",
               "app.domains.social.exceptions",
               "app.domains.social.models.posts",
-              "app.domains.social.service.action_sources"
+              "app.domains.social.service.action_sources",
+              "app.domains.social.service.world_notification_delivery"
             ],
             "module": "app.domains.social.service.action_notifications",
             "path": "backend/app/domains/social/service/action_notifications.py"
@@ -1868,7 +1906,8 @@
             "imports": [
               "app.core.unit_of_work",
               "app.domains.social.models.posts",
-              "app.domains.social.service.presentation"
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.world_notification_delivery"
             ],
             "module": "app.domains.social.service.notifications",
             "path": "backend/app/domains/social/service/notifications.py"
@@ -2170,6 +2209,22 @@
             ],
             "module": "app.domains.social.service.world_feed",
             "path": "backend/app/domains/social/service/world_feed.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.service.world_notification_delivery",
+            "path": "backend/app/domains/social/service/world_notification_delivery.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.world_notifications",
+              "app.domains.social.repository.world_notifications",
+              "app.domains.social.schemas.world_notifications"
+            ],
+            "module": "app.domains.social.service.world_notifications",
+            "path": "backend/app/domains/social/service/world_notifications.py"
           },
           {
             "imports": [
@@ -2575,6 +2630,7 @@
           {
             "imports": [
               "app.domains.social.service.post_attachments",
+              "app.domains.social.service.world_notifications",
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.manual_feed_references",
@@ -2583,7 +2639,8 @@
               "app.runtime.social.sqlalchemy_unit_of_work",
               "app.runtime.social.timeline",
               "app.runtime.social.topic_preparation",
-              "app.runtime.social.topic_scope"
+              "app.runtime.social.topic_scope",
+              "app.runtime.social.world_notification_references"
             ],
             "module": "app.runtime.social.composition",
             "path": "backend/app/runtime/social/composition.py"
@@ -2746,6 +2803,7 @@
               "app.domains.social.service.action_event_types",
               "app.domains.social.service.action_notifications",
               "app.domains.social.service.action_sources",
+              "app.domains.social.service.world_notification_delivery",
               "app.domains.world_characters.models",
               "app.runtime.activity_proposals.composition",
               "app.runtime.activity_proposals.references",
@@ -2913,6 +2971,7 @@
               "app.domains.social.contracts.actors",
               "app.domains.social.contracts.source_writes",
               "app.domains.social.models.posts",
+              "app.domains.social.service.world_notification_delivery",
               "app.domains.world_characters.contracts.owner_identity",
               "app.domains.world_characters.repository.source_writes",
               "app.domains.world_characters.service.owner_identity",
@@ -2982,8 +3041,11 @@
           {
             "imports": [
               "app.domains.routines.service.activity_logs",
+              "app.domains.social.constants",
               "app.domains.social.service.abuse_quota",
               "app.domains.social.service.timeline",
+              "app.domains.world_characters.configuration_models",
+              "app.domains.world_characters.models",
               "app.runtime.relationships.sqlalchemy_social_event",
               "app.runtime.social.post_authors"
             ],
@@ -3076,6 +3138,7 @@
               "app.domains.social.service.action_event_types",
               "app.domains.social.service.action_notifications",
               "app.domains.social.service.action_sources",
+              "app.domains.social.service.world_notification_delivery",
               "app.runtime.activity_proposals.composition",
               "app.runtime.relationships.sqlalchemy_social_event"
             ],
@@ -3113,6 +3176,23 @@
             ],
             "module": "app.runtime.social.world_feed_search",
             "path": "backend/app/runtime/social/world_feed_search.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.models",
+              "app.domains.identity.service.owner_context",
+              "app.domains.social.contracts.world_notifications",
+              "app.domains.social.models.posts",
+              "app.domains.world_characters.configuration_models",
+              "app.domains.world_characters.contracts.owner_identity",
+              "app.domains.world_characters.models",
+              "app.domains.world_characters.service.owner_identity",
+              "app.domains.worlds.models",
+              "app.domains.worlds.models_deletion",
+              "app.runtime.social.post_authors"
+            ],
+            "module": "app.runtime.social.world_notification_references",
+            "path": "backend/app/runtime/social/world_notification_references.py"
           }
         ],
         "legacy_horizontal": []
@@ -3120,7 +3200,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 19,
+      "candidate_consumer_edge_count": 18,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -3153,7 +3233,6 @@
         "frontend/src/features/social/api/community.ts": [
           "frontend/src/composition/screens/agent-detail-screen.tsx",
           "frontend/src/composition/screens/character-profile-screen.tsx",
-          "frontend/src/features/social/components/notifications-client.tsx",
           "frontend/src/features/social/components/profile-connections-client.tsx",
           "frontend/src/features/social/components/profile-list-row.tsx",
           "frontend/src/features/social/components/right-rail-insights.tsx",
@@ -3732,7 +3811,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "eaab59358abe00f823266d30c85e9d9ea52c42c6f1af01554ede5b81a2d58dcf"
+        "sha256": "6e2a2b9c7546233ffa36c8efe99f75e9c4ca168d7f6052c9256272d9e30150cc"
       },
       "steps": [
         {

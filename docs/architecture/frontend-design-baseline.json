@@ -338,7 +338,7 @@
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
-        "sha256": "a9b80427fa7f1ab618b7fce4a9c80cd5b48e3e0a8090aa4de20cd997885a0c10"
+        "sha256": "92d38d19358c7cb0b0aa761430498d9b2889da1fa068239b9a430218af1490af"
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
@@ -1484,7 +1484,8 @@
       "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-degraded-1440x900.png",
       "browser-tests/snapshots/ui-f/release-readiness-20261013/relationship-graph-ready-1440x900.png",
       "browser-tests/snapshots/ui-f/release-readiness-20261013/world-feed-composer-phone-436x880.png",
-      "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png"
+      "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
+      "browser-tests/snapshots/ui-f/world-notifications-20261015/world-feed-composer-phone-436x880.png"
     ],
     "manifest": {
       "canonical_environment": {
@@ -1650,13 +1651,18 @@
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
           "sha256": "8283ba408f849079b9bdc38e9e9e051d4ac01b5de27e4a4c3336e6bfe24049df"
+        },
+        {
+          "path": "browser-tests/snapshots/ui-f/world-notifications-20261015/world-feed-composer-phone-436x880.png",
+          "present": true,
+          "sha256": "80a346cff3279c3b46a910fac876ce25c3fb8baf7a87420d732b62e824793883"
         }
       ],
       "specs": [
         {
           "path": "browser-tests/product-surfaces.visual.spec.ts",
           "present": true,
-          "sha256": "a9b80427fa7f1ab618b7fce4a9c80cd5b48e3e0a8090aa4de20cd997885a0c10"
+          "sha256": "92d38d19358c7cb0b0aa761430498d9b2889da1fa068239b9a430218af1490af"
         },
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",

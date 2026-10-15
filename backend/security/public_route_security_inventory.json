@@ -407,6 +407,11 @@
       "module": "app.domains.social.router",
       "endpoint": "list_notifications"
     },
+    "GET /api/v1/notifications/world-unread-counts": {
+      "access": "owner-only",
+      "module": "app.domains.social.router_world_notifications",
+      "endpoint": "world_unread_counts"
+    },
     "GET /api/v1/posts": {
       "access": "public",
       "module": "app.domains.social.router",
@@ -612,6 +617,16 @@
       "module": "app.domains.worlds.router",
       "endpoint": "read_world_media"
     },
+    "GET /api/v1/worlds/{world_id}/notifications": {
+      "access": "owner-only",
+      "module": "app.domains.social.router_world_notifications",
+      "endpoint": "world_notifications"
+    },
+    "GET /api/v1/worlds/{world_id}/notifications/unread-count": {
+      "access": "owner-only",
+      "module": "app.domains.social.router_world_notifications",
+      "endpoint": "world_notification_count"
+    },
     "GET /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
@@ -801,6 +816,11 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "patch_my_profile"
+    },
+    "PATCH /api/v1/worlds/{world_id}/notifications/{notification_id}/read": {
+      "access": "owner-only",
+      "module": "app.domains.social.router_world_notifications",
+      "endpoint": "read_world_notification"
     },
     "PATCH /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
@@ -1206,6 +1226,11 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "upload_my_profile_media"
+    },
+    "POST /api/v1/worlds/{world_id}/notifications/read-all": {
+      "access": "owner-only",
+      "module": "app.domains.social.router_world_notifications",
+      "endpoint": "read_all_world_notifications"
     },
     "POST /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",

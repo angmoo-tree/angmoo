@@ -1,5 +1,12 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-15 PR #375 visual follow-up: **ADAPTED** World feed header adds the
+existing semantic bell. Pinned Linux/Chromium reproduces the same 57-pixel
+delta reported by hosted Next/static; direct image/diff review confines it to
+that icon. A new dated current PNG preserves all earlier 19 images and the
+unchanged 25-pixel/0.1 thresholds. This is technical visual evidence, separate
+from native USER CHECK. See `docs/verification/world-notifications-pr-20261015.md`.
+
 2026-10-15 World bulk-read follow-up: **ADAPTED** existing individual Check size20,
 44px control, list anatomy and selected Feed brand-soft token; **LOCAL** explicit
 single-flight read-all with row Unread markers. Header order is Back/title then

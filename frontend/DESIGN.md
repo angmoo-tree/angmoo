@@ -40,6 +40,13 @@ assets, libraries or raw-color allowances are added. See
 The bulk-read follow-up uses ADAPTED existing controls/list/tokens and LOCAL
 scoped behavior; see `docs/verification/world-notifications-bulk-20261015.md`.
 
+PR #375 pinned-Linux review adds the World feed bell snapshot under
+`browser-tests/snapshots/ui-f/world-notifications-20261015/`. The only visual
+delta from the previous feed image is the intended bell (57 comparison pixels).
+All earlier 19 PNGs and the 25-pixel/0.1 thresholds are preserved. Next/static
+continue comparing the same current image. Evidence:
+`docs/verification/world-notifications-pr-20261015.md`.
+
 ## 2026-10-13 릴리스 준비 visual 증거 정렬 (LOCAL)
 
 기존 UI-B/UI-F의 canonical PNG 11장은 원본 그대로 보존한다. 이미 구현된

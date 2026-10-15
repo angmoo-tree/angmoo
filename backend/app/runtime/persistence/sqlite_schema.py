@@ -331,6 +331,7 @@ def _copy_partial_index_predicates(metadata: MetaData) -> None:
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
     _remove_comfy_diagnostics(metadata)
+    _remove_notification_delivery_schema(metadata)
     _remove_world_activity_schema(metadata)
     for name in WORLD_CONFIGURATION_V28_TABLES:
         if name in metadata.tables:
@@ -795,12 +796,20 @@ def build_sqlite_v36_metadata() -> MetaData:
 def build_sqlite_v37_metadata() -> MetaData:
     """Frozen pre-notification-delivery schema, also used by older fixtures."""
     metadata = build_sqlite_baseline_metadata()
-    table = metadata.tables["notifications"]
+    _remove_notification_delivery_schema(metadata)
+    return metadata
+
+
+def _remove_notification_delivery_schema(metadata: MetaData) -> None:
+    """Keep both chained and direct-copy predecessors at their released shape."""
+    table = metadata.tables.get("notifications")
+    if table is None:
+        return
     for index in tuple(table.indexes):
         if index.name in {"uq_notifications_delivery_key", "ix_notifications_world_recipient_id"}:
             table.indexes.remove(index)
-    table._columns.remove(table.c.delivery_key)
-    return metadata
+    if "delivery_key" in table.c:
+        table._columns.remove(table.c.delivery_key)
 
 
 def build_sqlite_v32_metadata() -> MetaData:
