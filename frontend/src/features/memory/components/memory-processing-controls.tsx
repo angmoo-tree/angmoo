@@ -122,7 +122,7 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
       disabled={disabled || busy !== null} acquire={acquire} release={release} onCompleted={onCompleted} onProcessing={setSaved} />
     <fieldset disabled={disabled || busy !== null} className="grid gap-3">
       <label className={styles.batchCheck}><input type="checkbox" checked={draft.daily_enabled} onChange={event => { update.current = null; changeDraft({ ...draft, daily_enabled: event.target.checked }); }} />{uiText("매일 정해진 시각에 기억 저장")}</label>
-      <Field label={uiText("예약 시각 · {{value0}}", { value0: saved.timezone })}>{props => <Input {...props} type="time" required value={draft.local_time} onChange={event => { update.current = null; changeDraft({ ...draft, local_time: event.target.value }); }} />}</Field>
+      <Field label={uiText("예약 시각 · {{value0}}", { value0: saved.timezone })} helperText={uiText("부하가 한 번에 몰리지 않도록 기억 정리와 일일 관계 정리는 시간을 띄워 예약하는 것을 권장해요. 실행 시각은 직접 설정할 수 있어요.")}>{props => <Input {...props} type="time" required value={draft.local_time} onChange={event => { update.current = null; changeDraft({ ...draft, local_time: event.target.value }); }} />}</Field>
       <label className={styles.batchCheck}><input type="checkbox" checked={draft.shutdown_apply_enabled} onChange={event => { update.current = null; changeDraft({ ...draft, shutdown_apply_enabled: event.target.checked }); }} />{uiText("앱을 완전히 종료할 때 기억 저장")}</label>
     </fieldset>
     <p>{uiText("다음 예약:")}{saved.next_due_at ? formatDate(saved.next_due_at) : uiText("예약 없음")}</p>

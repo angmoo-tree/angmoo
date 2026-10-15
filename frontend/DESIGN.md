@@ -14,6 +14,19 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## Recovery guidance and diagnostic details (2026-10-16 LOCAL)
+
+Keep the existing settings layout, controls, semantic text styles and native
+details disclosure. Schedule spacing is advice in Korean and English, never a
+new required interval or automatically changed value. Environment failures must
+describe the actual failed synchronization; do not display a false ready state.
+Provider diagnostics use the actual provider heading. ComfyUI instructions belong
+only to ComfyUI; HTTP metadata is optional technical detail, not a new retry action
+or claim of provider completion. Existing World deletion retry/completion wording
+continues to reflect the canonical request and requires explicit user retry after
+a failed deletion. Browser verification covers both locales and Next/static;
+installed-app observation and historical deletion remain separate USER CHECKs.
+
 ## World feed notifications (2026-10-15 LOCAL)
 
 The feed header retains its centered logo and orders bell then own-profile on

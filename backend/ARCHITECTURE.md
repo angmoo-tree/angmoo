@@ -1,5 +1,55 @@
 # Angmoo Backend Architecture
 
+## SQLite recovery and private result delivery (2026-10-16 LOCAL)
+
+Domains retain authorization, source validation, persistence and state transitions;
+Runtime composes owned queues, projections and erasure. The common SQLite writer
+pins its physical connection through commit/rollback and timeout restoration.
+BUSY (including extended codes), queue/pool capacity, LOCKED, application defects
+and post-commit cleanup failure remain distinct. A committed operation is never
+replayed. Admission remains four bounded attempts / 0.25 seconds; the next worker
+turn uses its existing owner and lease, not nested unbounded retries.
+
+Situation application commits one receipt plus its evidence/counters/cursor.
+After binding flush, one synchronous, same-Session MemoryAccessValidation batches
+the current rows and lineage for that receipt; it never crosses a write, await,
+receipt or transaction. Relationship preparation reads the complete cutoff before
+creating a target/period root, then revalidates policy, environment, credentials and
+every input in a short target writer. Existing root/partial/reduce receipts remain
+the restart ledger. No new canonical schema or validation staging ledger is needed
+for the measured high-fanout fixtures; future growth must be measured again.
+
+The existing vector worker uses model-declared optional embedding batch limits.
+Only eligible missing/changed vectors are grouped by scope, settings, credential
+revision, model and profile. The Gemini adapter owns explicit Content boundaries
+and one physical HTTP request; providers with only single-input support remain
+valid. Query embedding remains single-input with its original deadline. Runtime
+holds no Session across provider awaits and revalidates each item before its
+idempotent Vec1 write. Request usage is counted once, not once per vector.
+
+Core ResultJournal owns bounded private files and content-free erasure fences;
+it has no ORM or provider policy. Relationship and embedding owners bind records
+to their current manifest/attempt or content/scope/credential digest, preserve
+received results before retrying local storage and remove them after delivery.
+World erasure closes both journals before canonical cleanup. Individual memory
+privacy erasure also closes the item even if no vector generation exists. A crash
+before durable receipt is not reported as recovered provider output.
+
+World file cleanup uses explicit direct-URL, image-profile, origin and draft
+selectors. Embedding profile strings are never parsed as image JSON. Exact file
+generation, live references and deletion epoch are checked before unlink in a
+non-replayed short writer; external graph/index/checkpoint effects remain outside
+canonical transactions and have fenced acknowledgements. Defaults, original
+character assets and other Worlds remain protected. Scheduler and SNS settlement
+keep their existing durable owners and fences; they do not gain a second retry loop.
+
+Image HTTP diagnostics preserve the original error and distinguish observed
+transport stages from local storage. The allowlisted DTO is bounded, contains no
+remote body/prompt/key/URL, preserves existing HTTP timeouts and never authorizes
+another generation. Identity returns typed 503 only after rollback-confirmed
+contention; revision conflict stays 409. Technical checks and operational user
+checks are separate: [execution evidence](../docs/verification/sqlite-recovery-world-erasure-20261016.md).
+
 ## World owner-profile notifications (2026-10-15 LOCAL)
 
 Social owns notification DTOs, the shared eligibility query, delivery identities

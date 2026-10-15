@@ -55,6 +55,7 @@ export function RelationshipReviewPanel({ characterId, worldId, revision, authen
       <p className="mt-2 text-sm">{data.mode === "interpreted" ? uiText("개인화 관계 적용 중") : uiText("관계 정책 전환 대기")} · {uiText(labels[data.configuration.status] ?? "정리 상태 확인 필요")}</p>
       {data.configuration.manual_available ? <p className="text-sm text-on-surface-variant">{uiText("기억 화면의 ‘지금 기억·관계 정리’로 예약 시간과 관계없이 실행할 수 있습니다.")}</p> : null}
       {data.configuration.local_time ? <p className="text-sm text-on-surface-variant">{uiText("예약")}{data.configuration.local_time} ({data.configuration.timezone})</p> : null}
+      {data.configuration.local_time ? <p className="text-sm text-on-surface-variant">{uiText("부하가 한 번에 몰리지 않도록 기억 정리와 일일 관계 정리는 시간을 띄워 예약하는 것을 권장해요. 실행 시각은 직접 설정할 수 있어요.")}</p> : null}
       {data.jobs.length === 0 ? <p className="mt-2 text-sm">{uiText("아직 관계 정리 기록이 없습니다. 적용 이후 새 경험에서 만들어진 기억을 사용합니다.")}</p> : <details className="mt-3">
         <summary className="cursor-pointer font-semibold">{uiText("최근 검토")}{data.jobs.length}{uiText("건")}</summary>
         <ul className="mt-2 space-y-2 text-sm">{data.jobs.map((job) => <li key={job.id}>

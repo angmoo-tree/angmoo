@@ -21,6 +21,7 @@ from app.domains.social.service.generation_usage import reserve_attempt
 from app.domains.media.service.comfy_workflows import freeze_comfy_request
 from app.domains.media.schemas import diagnostic_projection
 from app.domains.media.contracts import GENERATED_ASSET_MAX_BYTES
+from app.core.sqlite_concurrency import is_sqlite_contention, sqlite_error_identity
 
 
 @dataclass(frozen=True)
@@ -215,15 +216,21 @@ class GenerationWorker:
             try:
                 await self.tick()
             except Exception as exc:
-                logging.getLogger(__name__).warning("image_worker_local_failure:%s", type(exc).__name__)
+                code, name = sqlite_error_identity(exc)
+                logging.getLogger(__name__).warning("image_worker_local_failure type=%s stage=%s retryable_busy=%s sqlite_code=%s sqlite_name=%s",
+                    type(exc).__name__, getattr(exc, "image_local_stage", "tick"), is_sqlite_contention(exc), code, name)
             await asyncio.sleep(1)
 
     async def _local(self, operation, *args):
         # Runtime supplies an owned bounded worker; synchronous domain fixtures
         # may execute the same operation directly without transporting Sessions.
-        if self._local_work is None:
-            return operation(*args)
-        return await self._local_work(operation, *args)
+        try:
+            if self._local_work is None:
+                return operation(*args)
+            return await self._local_work(operation, *args)
+        except Exception as exc:
+            exc.image_local_stage = operation.__name__
+            raise
 
     async def tick(self):
         for job_id in await self._local(self._pending_jobs):
@@ -461,7 +468,7 @@ class GenerationWorker:
                     job = db.get(PostImageGenerationJob, job_id)
                     self._persist_result(db, job, content, metadata)
                     self._release(binding)
-                except (OSError, ValueError, RuntimeError, SQLAlchemyError):
+                except (OSError, ValueError, RuntimeError, SQLAlchemyError) as exc:
                     db.rollback()
                     current = db.get(PostImageGenerationJob, job_id)
                     if current and current.lease_token == token:
@@ -475,7 +482,10 @@ class GenerationWorker:
                         elif slot is None or slot.result is None:
                             self._fail(db, current, "generation_result_journal_invalid", unknown=True)
                             return
-                        current.failure_class = "local_result_persistence_pending"
+                        if isinstance(exc, SQLAlchemyError) and not is_sqlite_contention(exc):
+                            current.status, current.failure_class = "outcome_unknown", "generation_local_storage_error"
+                        else:
+                            current.failure_class = "local_result_persistence_pending"
                         db.commit()
                 return
             now = self.clock()
@@ -608,6 +618,11 @@ class GenerationWorker:
                     current.status = "result_pending" if durable else "running"
                     current.lease_until = self.clock()
                     current.failure_class = "local_result_persistence_pending"
+                    if isinstance(exc, SQLAlchemyError) and not is_sqlite_contention(exc):
+                        # A malformed query/schema/LOCKED error is not BUSY.
+                        # Preserve the received copy for explicit recovery,
+                        # without repeatedly retrying a deterministic defect.
+                        current.status, current.failure_class = "outcome_unknown", "generation_local_storage_error"
                     db.commit()
                 else:
                     current.provider_receipt = received_receipt or current.provider_receipt
