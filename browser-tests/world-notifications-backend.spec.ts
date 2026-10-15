@@ -6,7 +6,7 @@ test.afterEach(async ({ request }, info) => {
   await info.attach("actual-http-evidence", { body: await response.body(), contentType: "application/json" });
 });
 
-test("committed source → real HTTP batch/bell/list/read/selected reply → reconciled home; two Worlds and principals", async ({ page, request }, info) => {
+test("committed source → real HTTP bulk read → selected reply and reconciled home; two Worlds and principals", async ({ page, request }, info) => {
   const api = "http://127.0.0.1:3394";
   await request.post(`${api}/fixture/principal/owner`);
   await request.post(`${api}/fixture/reset`);
@@ -32,6 +32,10 @@ test("committed source → real HTTP batch/bell/list/read/selected reply → rec
   await expect(page.locator(`a[href^="${notices}"]`)).toHaveAccessibleName("알림, 읽지 않은 알림 1개");
   await page.locator(`a[href^="${notices}"]`).click();
   await expect(page.locator("[data-world-notification]")).toHaveCount(1);
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(1);
+  expect((await (await request.get(`${api}/fixture/evidence`)).json()).notifications.find((n: {world: string}) => n.world === FEED_WORLD)?.read).toBe(false);
+  await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).click();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(0);
   await page.locator("[data-world-notification] a[href*='/posts/']").first().click();
   await expect(page).toHaveURL(new RegExp(`/posts/${before.selected[FEED_WORLD]}/?$`));
   await expect(page.getByText(`A real committed reply in ${FEED_WORLD}`, { exact: false })).toBeVisible();
@@ -39,11 +43,13 @@ test("committed source → real HTTP batch/bell/list/read/selected reply → rec
   await page.goto("/"); await expect(page.locator(`a[href^="${feedRoute()}"] [data-count-badge]`)).toHaveCount(0);
   await expect(page.locator(`a[href^="${feedRoute(OTHER_FEED_WORLD)}"] [data-count-badge]`)).toHaveText("1");
   const after = await (await request.get(`${api}/fixture/evidence`)).json();
+  expect(after.requests.filter((r: {method: string; path: string}) => r.method === "POST" && r.path.endsWith("/notifications/read-all"))).toHaveLength(1);
+  expect(after.requests.filter((r: {method: string; path: string}) => r.method === "PATCH" && r.path.endsWith("/read"))).toHaveLength(0);
   expect(after.notifications.every((n: {handled: boolean}) => !n.handled)).toBe(true);
   expect(after.relationship_count).toBe(before.relationship_count); expect(after.foreign_key_violations).toEqual([]); expect(after.outbound).toEqual([]); expect(after.provider_calls).toBe(0);
   await request.post(`${api}/fixture/principal/outsider`);
   const denied = await request.get(`${api}/api/v1/worlds/${FEED_WORLD}/notifications`, { headers: { Origin: baseURL } });
   expect(denied.status()).toBe(404);
   await request.post(`${api}/fixture/principal/owner`);
-  await page.screenshot({ path: `../artifacts/world-user-notifications-20261015/${info.project.name}-actual-http-home.png` });
+  await page.screenshot({ path: `../artifacts/world-notifications-bulk-20261015/${info.project.name}-actual-http-home.png` });
 });

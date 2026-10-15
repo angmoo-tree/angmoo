@@ -1,5 +1,5 @@
 """One eligibility query for list/count/read/batch, using only Social storage."""
-from sqlalchemy import and_, exists, func, literal, or_, select, union_all, update
+from sqlalchemy import and_, exists, func, literal, or_, select, tuple_, union_all, update
 from datetime import UTC, datetime
 from sqlalchemy.orm import aliased
 from app.domains.social.contracts.world_notifications import NotificationScope
@@ -21,13 +21,20 @@ def eligible(scopes: list[NotificationScope], profile_ids: set[str]):
             (block.blocked_world_character_id == bindings.c.recipient_id) & (block.blocker_world_character_id == author_id))))
 
     visible = (p.visibility == "public", p.deleted_at.is_(None), p.report_hidden_at.is_(None), unblocked(p.author_world_character_id))
-    # Reachability preserves the thread's ancestor visibility, including blocks.
-    tree = select(p.id.label("post_id"), p.world_id).join(bindings, bindings.c.world_id == p.world_id).where(
-        p.reply_to_post_id.is_(None), *visible).cte("notification_visible_posts", recursive=True)
-    tree = tree.union(select(p.id, p.world_id).join(tree, (p.reply_to_post_id == tree.c.post_id) & (p.world_id == tree.c.world_id))
-        .join(bindings, bindings.c.world_id == p.world_id).where(*visible))
-    target_visible = exists(select(tree.c.post_id).where(tree.c.post_id == n.post_id, tree.c.world_id == n.world_id))
-    source_visible = exists(select(tree.c.post_id).where(tree.c.post_id == n.source_post_id, tree.c.world_id == n.world_id))
+    # Freeze the small visibility projection once. Recursing directly over Post
+    # can choose its World-only index and rescan every post per descendant.
+    readable_posts = select(p.id.label("post_id"), p.world_id, p.reply_to_post_id).join(
+        bindings, bindings.c.world_id == p.world_id).where(*visible).cte("notification_readable_posts").prefix_with("MATERIALIZED")
+    # Reachability still requires every ancestor to belong to that visible set.
+    tree = select(readable_posts.c.post_id, readable_posts.c.world_id).where(
+        readable_posts.c.reply_to_post_id.is_(None)).cte("notification_visible_posts", recursive=True)
+    tree = tree.union(select(readable_posts.c.post_id, readable_posts.c.world_id).join(tree,
+        (readable_posts.c.reply_to_post_id == tree.c.post_id) & (readable_posts.c.world_id == tree.c.world_id)))
+    # One scoped reachability set, rather than re-running a correlated recursive
+    # lookup per notification. The pair keeps cross-World references ineligible.
+    visible_posts = select(tree.c.post_id, tree.c.world_id)
+    target_visible = tuple_(n.post_id, n.world_id).in_(visible_posts)
+    source_visible = tuple_(n.source_post_id, n.world_id).in_(visible_posts)
     newer = aliased(Notification)
     newest_reaction = ~exists(select(newer.id).where(newer.world_id == n.world_id,
         newer.recipient_world_character_id == n.recipient_world_character_id,
@@ -80,6 +87,23 @@ def mark_read(db, row: Notification):
         db.execute(update(Notification).where(Notification.id == row.id, Notification.read_at.is_(None))
             .values(read_at=datetime.now(UTC)).execution_options(synchronize_session="fetch"))
         db.flush()
+
+
+def mark_all_read(db, scope: NotificationScope, profile_ids: set[str]):
+    """Caller owns the immediate UoW; never load or update rows one at a time."""
+    unread = eligible([scope], profile_ids).with_only_columns(Notification.id).where(Notification.read_at.is_(None))
+    targets = unread.subquery()
+    through_id = db.scalar(select(func.max(targets.c.id)))
+    if through_id is None:
+        return 0, None, None
+    read_at = datetime.now(UTC)
+    db.execute(update(Notification).where(Notification.read_at.is_(None),
+        Notification.id.in_(unread.where(Notification.id <= through_id)))
+        .values(read_at=read_at).execution_options(synchronize_session=False))
+    # sqlite3 reports -1 for a WITH/CTE UPDATE. changes() on this same connection
+    # counts only the direct update, excluding trigger side effects and old reads.
+    marked_count = db.scalar(select(func.changes()))
+    return marked_count, read_at if marked_count else None, through_id
 
 
 def previews(db, post_ids: set[str]) -> dict[str, str]:

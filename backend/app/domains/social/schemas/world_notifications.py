@@ -1,7 +1,7 @@
 """Closed, World-scoped notification HTTP values; no arbitrary navigation URLs."""
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from app.core.response_schemas import UtcInstantResponseModel
 
 
@@ -44,6 +44,17 @@ class WorldNotificationPage(WorldNotificationCountRead):
 class WorldNotificationReadResult(WorldNotificationCountRead):
     notification_id: int
     read_at: datetime
+
+
+class WorldNotificationReadAllRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    recipient_world_character_id: str = Field(min_length=1, max_length=64)
+
+
+class WorldNotificationReadAllResult(WorldNotificationCountRead):
+    marked_count: int = Field(ge=0)
+    read_at: datetime | None
+    through_notification_id: int | None = Field(ge=1)
 
 
 class WorldUnreadCountItem(BaseModel):

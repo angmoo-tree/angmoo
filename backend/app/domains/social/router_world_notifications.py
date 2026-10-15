@@ -7,6 +7,7 @@ from app.domains.social.dependencies import get_current_user, get_db, get_world_
 from app.domains.social.contracts.world_notifications import WorldNotificationError
 from app.domains.social.schemas.world_notifications import (
     WorldNotificationPage, WorldNotificationCountRead, WorldNotificationReadResult, WorldUnreadCountsRead,
+    WorldNotificationReadAllRequest, WorldNotificationReadAllResult,
 )
 
 def _local_frontend(request: Request):
@@ -48,3 +49,10 @@ def read_world_notification(world_id: str, notification_id: int,
         user=Depends(get_current_user), service=Depends(get_world_notification_service), db=Depends(get_db)):
     return _respond(lambda: run_sqlite_session_immediate(db,
         lambda: service.mark_read(world_id=world_id, user_id=user.id, notification_id=notification_id)))
+
+
+@router.post("/worlds/{world_id}/notifications/read-all", response_model=WorldNotificationReadAllResult)
+def read_all_world_notifications(world_id: str, body: WorldNotificationReadAllRequest,
+        user=Depends(get_current_user), service=Depends(get_world_notification_service), db=Depends(get_db)):
+    return _respond(lambda: run_sqlite_session_immediate(db, lambda: service.mark_all_read(
+        world_id=world_id, user_id=user.id, recipient_world_character_id=body.recipient_world_character_id)))

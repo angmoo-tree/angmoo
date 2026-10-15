@@ -236,7 +236,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/social/components/notification-list.tsx",
-      "sha256": "f46279c5b5090ad78c8086d953368ba7561fd48a9d45f91df53375b22d616206"
+      "sha256": "eb66a0ab833a8e4dc4a4233aa40a5b730b9b2fc12fac050c6049a4c1d3a44413"
     },
     {
       "classifications": [
@@ -257,7 +257,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/social/components/world-notifications.tsx",
-      "sha256": "d900ef74ec905215cbbe17dbdaab68f6a6483bff7a3e7a9dab16232f011d9846"
+      "sha256": "74a058c03901617890de97e3815c38de43a0fd6b98ea2d3b2704c1e4214a91bd"
     },
     {
       "classifications": [

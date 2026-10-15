@@ -1,5 +1,12 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-15 World bulk-read follow-up: **ADAPTED** existing individual Check size20,
+44px control, list anatomy and selected Feed brand-soft token; **LOCAL** explicit
+single-flight read-all with row Unread markers. Header order is Back/title then
+Check/Refresh. Global notifications retain their individual-read mode. Scope,
+unknown outcomes and new deliveries stay server-backed. No new assets or colors.
+Evidence: `docs/verification/world-notifications-bulk-20261015.md`.
+
 2026-10-15 World notifications: **LOCAL** reuse of the existing Social list,
 ProfileAvatar, type icons, individual check, FeedHeader, AppIcon and World shell.
 Semantic CountBadge is shared by the feed bell and home icon. The bell precedes

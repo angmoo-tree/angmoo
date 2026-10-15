@@ -14,5 +14,5 @@ export type WorldNotification = {
 };
 export type WorldNotificationCount = { scope: NotificationScope; unread_count: number };
 export type WorldNotificationPage = WorldNotificationCount & { items: WorldNotification[]; next_cursor: string | null };
-export type WorldNotificationReadResult = WorldNotificationCount & { notification_id: number; read_at: string };
+export type WorldNotificationReadAllResult = WorldNotificationCount & { marked_count: number; read_at: string | null; through_notification_id: number | null };
 export type WorldUnreadCount = { world_id: string; recipient_world_character_id: string | null; status: "available" | "unavailable"; unread_count: number | null };

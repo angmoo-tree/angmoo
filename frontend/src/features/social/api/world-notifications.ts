@@ -1,6 +1,6 @@
 import { requestSocialApi } from "@/lib/http/social-request";
 import { ApiRequestError } from "@/lib/http/error-contract";
-import type { NotificationScope, WorldNotificationCount, WorldNotificationPage, WorldNotificationReadResult, WorldUnreadCount } from "../types/world-notifications";
+import type { NotificationScope, WorldNotificationCount, WorldNotificationPage, WorldNotificationReadAllResult, WorldUnreadCount } from "../types/world-notifications";
 
 function validCount(value: unknown): value is number { return Number.isSafeInteger(value) && Number(value) >= 0; }
 function object(value: unknown): value is Record<string, unknown> { return !!value && typeof value === "object" && !Array.isArray(value); }
@@ -42,9 +42,14 @@ export async function getWorldNotifications(scope: NotificationScope, signal: Ab
   }
   return result;
 }
-export async function readWorldNotification(scope: NotificationScope, id: number, signal: AbortSignal) {
-  const result = assertScope(await requestSocialApi<WorldNotificationReadResult>(`${path(scope.world_id)}/${id}/read`, { method: "PATCH", signal, keepalive: true }), scope);
-  if (result.notification_id !== id || typeof result.read_at !== "string") throw invalid();
+export async function markAllWorldNotificationsRead(scope: NotificationScope, signal: AbortSignal) {
+  const result = assertScope(await requestSocialApi<WorldNotificationReadAllResult>(`${path(scope.world_id)}/read-all`, {
+    method: "POST", body: { recipient_world_character_id: scope.recipient_world_character_id }, signal, keepalive: true,
+  }), scope);
+  if (!validCount(result.marked_count) || !(result.read_at === null || typeof result.read_at === "string") ||
+      !(result.through_notification_id === null || Number.isSafeInteger(result.through_notification_id) && result.through_notification_id > 0) ||
+      (result.marked_count > 0 && (!result.read_at || result.through_notification_id === null)) ||
+      (result.marked_count === 0 && result.read_at !== null)) throw invalid();
   return result;
 }
 export async function getWorldUnreadCounts(ids: string[], signal: AbortSignal) {

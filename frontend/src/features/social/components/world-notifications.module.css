@@ -18,9 +18,12 @@
 .content strong { font-size: 17px; line-height: 1.6; color: var(--color-text-strong); }
 .meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; color: var(--color-text-secondary); font-size: 12px; }
 .type { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: var(--radius-pill); background: var(--color-brand-soft); color: var(--color-text-strong); font-weight: 700; }
+.unread { display: inline-flex; align-items: center; gap: 5px; color: var(--color-text-strong); font-weight: 700; }
+.unreadDot { width: 6px; height: 6px; flex: none; border-radius: var(--radius-pill); background: var(--color-brand-accent); }
 .actor { flex: none; border-radius: var(--radius-pill); }
 .target { display: block; text-decoration: none; }
 .handle { display: block; margin-top: 4px; color: var(--color-text-secondary); font-size: 14px; }
 .preview { display: block; margin: 12px 0 0; padding: 12px; border: 1px solid var(--color-border-default); border-radius: var(--radius-control); background: var(--color-surface-subtle); color: var(--color-text-default); font-size: 14px; line-height: 1.7; text-decoration: none; white-space: pre-wrap; }
 .more { display: flex; justify-content: center; padding: 20px; }
+@media (max-width: 435px) { .header { gap: 8px; padding: 12px; } .header h1 { min-width: 0; font-size: 22px; overflow-wrap: anywhere; } }
 @media (max-width: 359px) { .item { gap: 8px; padding: 16px 12px; } .item .actor > span { width: 40px; height: 40px; } .meta { gap: 5px; } }

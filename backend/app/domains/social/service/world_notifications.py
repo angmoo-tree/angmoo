@@ -8,6 +8,7 @@ from app.domains.social.repository import world_notifications as repository
 from app.domains.social.schemas.world_notifications import (
     NotificationScopeRead, NotificationTargetRead, WorldNotificationRead,
     WorldNotificationCountRead, WorldNotificationPage, WorldNotificationReadResult,
+    WorldNotificationReadAllResult,
     WorldUnreadCountItem, WorldUnreadCountsRead,
 )
 
@@ -81,4 +82,14 @@ class WorldNotificationService:
             raise WorldNotificationError("notification_not_found")
         repository.mark_read(self.db, row)
         return WorldNotificationReadResult(scope=scope_view(scope), notification_id=row.id, read_at=row.read_at,
+            unread_count=repository.unread_counts(self.db, [scope], profile_ids).get(world_id, 0))
+
+    def mark_all_read(self, *, world_id, user_id, recipient_world_character_id):
+        scope = self.references.require_scope(world_id=world_id, user_id=user_id)
+        if scope.recipient_world_character_id != recipient_world_character_id:
+            raise WorldNotificationError("notification_scope_changed", 409)
+        profile_ids = self.references.profile_target_ids([scope])
+        marked_count, read_at, through_id = repository.mark_all_read(self.db, scope, profile_ids)
+        return WorldNotificationReadAllResult(scope=scope_view(scope), marked_count=marked_count,
+            read_at=read_at, through_notification_id=through_id,
             unread_count=repository.unread_counts(self.db, [scope], profile_ids).get(world_id, 0))

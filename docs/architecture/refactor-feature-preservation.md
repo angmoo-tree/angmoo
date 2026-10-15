@@ -3,6 +3,11 @@
 ## 2026-10-15 World 내 프로필 알림
 
 현재 World 알림은 Social의 범위별 list/count/read와 홈 batch를 사용한다.
+후속 일괄 확인은 현재 내 프로필을 다시 검증한 read-all POST 한 번으로 모든
+페이지의 eligible 미읽음을 갱신한다. World 행의 개별 체크·원문 자동 읽음은
+상단의 기존 Check 버튼으로 대체하며 전역 알림의 개별 읽음은 보존한다.
+처리 뒤 새 도착·최초 읽음 시각·Inbox handled 상태는 유지한다. 근거는
+[일괄 읽음 검증](../verification/world-notifications-bulk-20261015.md)에 기록한다.
 수신 범위는 현재 사용자의 활성 owner-controlled 프로필이고 소유 자율 캐릭터는
 포함하지 않는다. 기존 전역 호환 API와 캐릭터 Inbox는 별도로 유지한다.
 같은 원본 UoW의 delivery key로 재전송을 구분하며 read_at과 handled_at을

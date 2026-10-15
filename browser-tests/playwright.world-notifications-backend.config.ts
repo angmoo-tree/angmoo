@@ -3,8 +3,8 @@ import { resolve } from "node:path";
 const offlinePython = resolve(__dirname, "../scripts/testing/offline-python");
 const backendPath = resolve(__dirname, "../backend");
 export default { ...config, testMatch: "world-notifications-backend.spec.ts",
-  outputDir: "../artifacts/world-user-notifications-20261015/browser-backend",
-  reporter: [["list"], ["json", { outputFile: "../artifacts/world-user-notifications-20261015/browser-backend.json" }]],
+  outputDir: "../artifacts/world-notifications-bulk-20261015/browser-backend",
+  reporter: [["list"], ["json", { outputFile: "../artifacts/world-notifications-bulk-20261015/browser-backend.json" }]],
   projects: [
     { name: "next-production", use: { baseURL: "http://127.0.0.1:3393" } },
     { name: "static-export", use: { baseURL: "http://127.0.0.1:3395" } },

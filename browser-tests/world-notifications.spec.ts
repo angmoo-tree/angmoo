@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { FEED_WORLD, OTHER_FEED_WORLD, feedRoute } from "./world-feed-fixture";
+import { FEED_WORLD, OTHER_FEED_WORLD, feedRoute, ownerId } from "./world-feed-fixture";
 import { installNotificationFixture, notificationItem } from "./world-notifications-fixture";
 
 const notices = `/worlds/${FEED_WORLD}/notifications`;
 const countPath = `/worlds/${FEED_WORLD}/notifications/unread-count`;
 
-for (const language of ["ko", "en"] as const) test(`one bell, exact accessible count, existing list and explicit read (${language})`, async ({ page }, info) => {
+for (const language of ["ko", "en"] as const) test(`one bell, unread markers and one explicit bulk command (${language})`, async ({ page }, info) => {
   const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
   await page.goto(feedRoute());
   const bell = page.locator(`a[href^="${notices}"]`);
@@ -14,11 +14,17 @@ for (const language of ["ko", "en"] as const) test(`one bell, exact accessible c
   await expect(page.locator("[data-device-scroll-owner=true]")).toHaveCount(1);
   await bell.click(); await expect(page.locator("[data-world-notifications]")).toBeVisible();
   await expect(page.locator("[data-world-notification]")).toHaveCount(2);
-  expect(state.writes).toEqual([]);
-  await page.getByRole("button", { name: language === "ko" ? "읽음으로 표시" : "Mark as read" }).first().click();
-  await expect(page.locator('[data-world-notification="2"]')).toContainText(language === "ko" ? "읽음" : "Read");
-  expect(state.count).toBe(100); expect(state.writes).toEqual([2]);
-  await page.reload(); await expect(page.locator('[data-world-notification="2"]')).toContainText(language === "ko" ? "읽음" : "Read");
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(2);
+  await expect(page.locator("[data-world-notification] button")).toHaveCount(0);
+  expect(state.writes).toEqual([]); expect(state.bulkWrites).toEqual([]);
+  const check = page.getByRole("button", { name: language === "ko" ? "모두 읽음으로 표시" : "Mark all as read", exact: true });
+  await expect(check).toHaveAttribute("title", language === "ko" ? "모두 읽음으로 표시" : "Mark all as read");
+  await check.click();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(0);
+  expect(state.count).toBe(0); expect(state.bulkWrites).toEqual([{ world_id: FEED_WORLD, recipient_world_character_id: ownerId(FEED_WORLD) }]);
+  await expect(check).toBeDisabled();
+  await page.reload(); await expect(page.locator("[data-world-notification]")).toHaveCount(2);
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(0); expect(state.bulkWrites).toHaveLength(1);
 });
 
 test("home performs one read-only batch, defaults to feed and preserves the World introduction", async ({ page }, info) => {
@@ -80,20 +86,18 @@ test("60-second visible polling shares a timer, stops off the feed and resumes i
   const stopped = state.reads.length; await page.clock.runFor(120_000); expect(state.reads).toHaveLength(stopped);
 });
 
-test("original navigation does not wait for a read; lost/failing reads remain retryable", async ({ page }, info) => {
+test("original navigation and leaving notifications never write individual or bulk reads", async ({ page }, info) => {
   const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
-  let release!: () => void; state.readGate = new Promise<void>(resolve => { release = resolve; }); state.readFailures = 1;
   await page.goto(notices); await expect(page.locator("[data-world-notification]")).toHaveCount(2);
   await page.locator('[data-world-notification="2"] a[href*="/posts/"]').first().click();
   await expect(page).toHaveURL(new RegExp(`/worlds/${FEED_WORLD}/posts/notified-reply-2/?$`));
   await expect(page.getByText("Synthetic thread title Synthetic thread body", { exact: true })).toBeVisible();
-  expect(state.count).toBe(101); await expect.poll(() => state.writes.length).toBe(1);
-  release(); state.readGate = null;
+  expect(state.count).toBe(101); expect(state.writes).toEqual([]); expect(state.bulkWrites).toEqual([]);
   await page.goto(notices); await expect(page.locator('[data-world-notification="2"]')).toBeVisible();
-  await expect(page.locator('[data-world-notification="2"]')).toContainText("읽음 상태를 저장하지 못했어요.");
-  await page.locator('[data-world-notification="2"]').getByRole("button", { name: "읽음으로 표시" }).click();
-  await expect(page.locator('[data-world-notification="2"]')).toContainText("읽음");
-  expect(state.writes).toEqual([2, 2]);
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(2);
+  await page.getByRole("link", { name: "피드로 돌아가기", exact: true }).click();
+  await expect(page.locator(`a[href^="${notices}"]`)).toHaveAccessibleName("알림, 읽지 않은 알림 101개");
+  expect(state.writes).toEqual([]); expect(state.bulkWrites).toEqual([]);
 });
 
 test("a rejected scope or failed lookup never becomes zero or an empty successful list", async ({ page }, info) => {
@@ -150,12 +154,12 @@ test("revoked home count permission clears the previous badge rather than retain
   await expect(icon.locator('[data-world-launchability="launchable"]')).toBeVisible();
 });
 
-test("an older pending read cannot restore a count after a newer scope rejection", async ({ page }, info) => {
+test("an older pending bulk command cannot restore a count after a newer scope rejection", async ({ page }, info) => {
   const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
   let release!: () => void; state.readGate = new Promise<void>(resolve => { release = resolve; });
   await page.goto(notices); await expect(page.locator("[data-world-notification]")).toHaveCount(2);
-  await page.locator('[data-world-notification="2"]').getByRole("button", { name: "읽음으로 표시" }).click();
-  await expect.poll(() => state.writes.length).toBe(1);
+  await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).click();
+  await expect.poll(() => state.bulkWrites.length).toBe(1);
   state.wrongScope = true;
   await page.getByRole("button", { name: "새로고침", exact: true }).click();
   await expect(page.locator("[data-world-notification]")).toHaveCount(0);
@@ -163,7 +167,7 @@ test("an older pending read cannot restore a count after a newer scope rejection
   const bell = page.locator(`a[href^="${notices}"]`);
   await expect(bell).toHaveAccessibleName("알림 수를 확인하지 못했어요.");
   release(); state.readGate = null;
-  await expect.poll(() => state.completedReads.includes(2)).toBe(true);
+  await expect.poll(() => state.completedBulk).toBe(1);
   await expect(bell).toHaveAccessibleName("알림 수를 확인하지 못했어요.");
   await expect(bell.locator("[data-count-badge]")).toHaveCount(0);
 });
@@ -253,7 +257,90 @@ for (const language of ["ko", "en"] as const) for (const width of [320, 360, 390
     const a = lum(color.color), b = lum(color.backgroundColor); return (Math.max(a,b) + .05) / (Math.min(a,b) + .05);
   });
   expect(contrast).toBeGreaterThanOrEqual(4.5);
+  const backgrounds = await bell.locator("[data-count-badge]").evaluate(el => ({ badge: getComputedStyle(el).backgroundColor,
+    selectedFeed: getComputedStyle(document.querySelector('footer a[aria-current="page"],nav a[aria-current="page"]')!).backgroundColor }));
+  expect(backgrounds.badge).toBe(backgrounds.selectedFeed);
   await bell.focus(); await expect(bell).toBeFocused(); await page.keyboard.press("Enter"); await expect(page.locator("[data-world-notifications]")).toBeVisible();
+  const check = page.getByRole("button", { name: language === "ko" ? "모두 읽음으로 표시" : "Mark all as read", exact: true });
+  const refresh = page.getByRole("button", { name: language === "ko" ? "새로고침" : "Refresh", exact: true });
+  const checkBox = await check.boundingBox(), refreshBox = await refresh.boundingBox();
+  expect(checkBox!.width).toBe(44); expect(checkBox!.height).toBe(44); expect(checkBox!.x + checkBox!.width).toBeLessThan(refreshBox!.x);
+  expect(checkBox!.x).toBeGreaterThanOrEqual(0); expect(refreshBox!.x + refreshBox!.width).toBeLessThanOrEqual(width);
+  await expect(check.locator("svg")).toHaveAttribute("width", "20");
+  await check.focus(); await expect(check).toBeFocused(); await page.keyboard.press("Tab"); await expect(refresh).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: `../artifacts/world-user-notifications-20261015/${info.project.name}-${language}-${width}.png` });
+  await page.screenshot({ path: `../artifacts/world-notifications-bulk-20261015/${info.project.name}-${language}-${width}.png` });
+});
+
+test("rapid clicks share one command, include older pages and preserve a later arrival", async ({ page }, info) => {
+  const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
+  let release!: () => void; state.readGate = new Promise<void>(resolve => { release = resolve; }); state.arriveAfterBulk = true;
+  state.nextCursor = "page-2";
+  await page.goto(notices); await expect(page.locator("[data-world-notification]")).toHaveCount(2);
+  await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).evaluate(button => {
+    for (let index = 0; index < 20; index++) (button as HTMLButtonElement).click();
+  });
+  await expect.poll(() => state.bulkWrites.length).toBe(1);
+  await expect(page.getByRole("button", { name: "모두 읽음으로 표시", exact: true })).toBeDisabled();
+  await expect(page.locator('[data-read-all-status="pending"]')).toBeVisible();
+  release(); state.readGate = null;
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(1);
+  await page.getByRole("button", { name: "더 보기", exact: true }).click();
+  await expect(page.locator('[data-world-notification="3"] [data-notification-unread]')).toHaveCount(0);
+  await page.getByRole("link", { name: "피드로 돌아가기", exact: true }).click();
+  await expect(page.locator(`a[href^="${notices}"]`)).toHaveAccessibleName("알림, 읽지 않은 알림 1개");
+  expect(state.bulkWrites).toHaveLength(1); expect(state.writes).toEqual([]);
+});
+
+test("busy bulk failure keeps unread state and only an explicit second click retries", async ({ page }, info) => {
+  const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
+  state.readFailures = 1;
+  await page.goto(notices); const check = page.getByRole("button", { name: "모두 읽음으로 표시", exact: true });
+  await check.click(); await expect(page.locator('[data-read-all-status="failed"]')).toBeVisible();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(2); expect(state.count).toBe(101);
+  await page.getByRole("button", { name: "새로고침", exact: true }).click(); expect(state.bulkWrites).toHaveLength(1);
+  await check.click(); await expect(page.locator("[data-notification-unread]")).toHaveCount(0);
+  expect(state.bulkWrites).toHaveLength(2); expect(state.writes).toEqual([]);
+});
+
+test("a lost committed response reconciles by GET without reading the later arrival", async ({ page }, info) => {
+  const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
+  state.loseBulkResponse = true; state.arriveAfterBulk = true;
+  await page.goto(notices); await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).click();
+  await expect(page.locator('[data-read-all-status="uncertain"]')).toBeVisible();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(1); expect(state.count).toBe(1);
+  await page.getByRole("button", { name: "다시 확인", exact: true }).click();
+  await page.reload(); await expect(page.locator('[data-read-all-status="uncertain"]')).toBeVisible();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(1);
+  expect(state.bulkWrites).toHaveLength(1); expect(state.writes).toEqual([]);
+});
+
+test("leaving during a pending bulk command stays navigable and reconciles on return", async ({ page }, info) => {
+  const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
+  let release!: () => void; state.readGate = new Promise<void>(resolve => { release = resolve; });
+  await page.goto(notices); await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).click();
+  await expect.poll(() => state.bulkWrites.length).toBe(1);
+  await page.getByRole("link", { name: "피드로 돌아가기", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${feedRoute()}/?$`));
+  release(); state.readGate = null;
+  await expect(page.locator(`a[href^="${notices}"]`)).toHaveAccessibleName("알림, 읽지 않은 알림 0개");
+  await page.locator(`a[href^="${notices}"]`).click(); await expect(page.locator("[data-notification-unread]")).toHaveCount(0);
+  expect(state.bulkWrites).toHaveLength(1);
+});
+
+test("a bounded client timeout stays uncertain and reconciles a late commit without replay", async ({ page }, info) => {
+  const { state } = await installNotificationFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
+  let release!: () => void; state.readGate = new Promise<void>(resolve => { release = resolve; });
+  await page.clock.install(); await page.goto(notices);
+  await page.getByRole("button", { name: "모두 읽음으로 표시", exact: true }).click();
+  await expect.poll(() => state.bulkWrites.length).toBe(1);
+  await page.clock.runFor(15_000);
+  await expect(page.locator('[data-read-all-status="uncertain"]')).toBeVisible();
+  await expect(page.getByRole("button", { name: "모두 읽음으로 표시", exact: true })).toBeEnabled();
+  expect(state.count).toBe(101); expect(state.bulkWrites).toHaveLength(1);
+  release(); state.readGate = null; await expect.poll(() => state.completedBulk).toBe(1);
+  await page.getByRole("button", { name: "다시 확인", exact: true }).click();
+  await expect(page.locator("[data-notification-unread]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "모두 읽음으로 표시", exact: true })).toBeDisabled();
+  expect(state.bulkWrites).toHaveLength(1);
 });

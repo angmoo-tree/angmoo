@@ -3,7 +3,10 @@
 ## World owner-profile notifications (2026-10-15 LOCAL)
 
 Social owns World notification API values, polling controllers and list/bell UI.
-Existing global and new World controllers share NotificationList presentation.
+Existing global and World controllers share NotificationList presentation with
+explicit individual/global and bulk/World modes. World rows show an unread marker;
+only the header's reused Check control calls the scoped read-all POST. Source
+navigation, entry, scrolling, focus and polling never issue World read writes.
 Composition connects Social to DeviceHome through visible-ID callbacks and
 badge/description slots; no feature imports another feature's hook or DTO.
 Common CountBadge/AppIcon contain no business authorization or polling rules.
@@ -11,10 +14,15 @@ Common CountBadge/AppIcon contain no business authorization or polling rules.
 The auth/runtime-scoped provider shares one selected World controller between
 feed/list. Visible home uses one batch and feed/list one controller, both at
 60_000ms with focus/visibility refresh and abort/generation fences. Paired return
-events are coalesced for 250ms. Explicit reads outlive view deactivation and never
-gate admitted source navigation. A transient session journal contains only
-user/session/scope and pending/failed IDs for uncertain static-reload reads; it
-stores no content/credentials and never substitutes for server read truth.
+events are coalesced for 250ms. One bulk command per scope outlives view
+deactivation without gating source navigation. It has a 15-second client wait
+bound; timeout/response loss triggers a read-only reconciliation, never automatic
+command replay. The transient version-2 session journal contains only
+user/session/scope and an unconfirmed flag; it stores no notification IDs,
+content/credentials and never substitutes for server read truth.
+Provider ownership releases at the next microtask, allowing React development
+setup/cleanup/setup to retain its memoized controller. Scope deactivation still
+stops queries/timers immediately; actual owner removal disposes pending work.
 Home retains its visible World set during focus refresh and resets on auth/runtime
 identity changes, avoiding duplicate batches caused by a temporary empty list.
 Permission/scope rejection clears cached notification content/counts; only
@@ -25,6 +33,7 @@ The exact `/worlds/{id}/notifications` auxiliary route shares WorldApp's five ta
 in Next/static and the Phone native allowlist. Home/Studio generic open uses
 worldFeedRoute; neutral worldAppRoute and explicit World introduction remain.
 Evidence: [focused verification](../docs/verification/world-user-notifications-20261015.md).
+Bulk-read follow-up: [scoped verification](../docs/verification/world-notifications-bulk-20261015.md).
 
 SNS image status remains owned by Media. Its KO/EN saving/unknown messages and
 recovery buttons reflect backend state/flags. The neutral auth/runtime identity

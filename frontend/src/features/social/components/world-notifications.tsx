@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, Bell, RefreshCw } from "lucide-react";
+import { ArrowLeft, Bell, Check, RefreshCw } from "lucide-react";
 import { useUiText } from "@/hooks/use-ui-text";
 import { LocalProductLink } from "@/components/navigation/local-product-link";
 import { Button } from "@/components/ui/button";
@@ -36,12 +36,21 @@ export function WorldNotifications({ worldId }: { worldId: string }) {
   });
   return <section className={styles.page} data-world-notifications>
     <header className={styles.header}><LocalProductLink className={styles.control} href={worldFeedRoute(worldId)} ariaLabel={text("피드로 돌아가기")}><ArrowLeft size={21} aria-hidden="true" /></LocalProductLink>
-      <h1>{text("알림")}</h1><button type="button" className={styles.control} aria-label={text("새로고침")} disabled={state.loading} onClick={() => void controller?.refresh()}><RefreshCw size={20} aria-hidden="true" /></button></header>
+      <h1>{text("알림")}</h1><button type="button" className={styles.control} aria-label={text("모두 읽음으로 표시")} title={text("모두 읽음으로 표시")}
+        aria-busy={state.readAllPending} disabled={!scope || state.unreadCount === null || state.unreadCount === 0 || state.readAllPending}
+        onClick={() => void controller?.markAllRead()}><Check size={20} aria-hidden="true" /></button>
+      <button type="button" className={styles.control} aria-label={text("새로고침")} disabled={state.loading} onClick={() => void controller?.refresh()}><RefreshCw size={20} aria-hidden="true" /></button></header>
     {!scope ? <p className={styles.message}><LocalProductLink href={studioWorldRoute(worldId)}>{text("World 관리에서 내 프로필을 확인해 주세요.")}</LocalProductLink></p> : null}
     {state.error ? <div className={styles.errorPanel} role="status"><p className={styles.error}>{text("알림을 불러오지 못했어요. 다시 시도해 주세요.")}</p><Button compact variant="secondary" onClick={() => void controller?.refresh()}>{text("다시 시도")}</Button></div> : null}
+    {state.readAllPending || state.readAllStatus !== "idle" ? <div className={styles.message} role="status" data-read-all-status={state.readAllPending ? "pending" : state.readAllStatus}>
+      {state.readAllPending ? text("읽음 처리 중이에요.") : state.readAllStatus === "success" ? text("알림을 모두 읽음으로 표시했어요.")
+        : state.readAllStatus === "failed" ? text("알림을 읽음으로 표시하지 못했어요. 다시 시도해 주세요.")
+          : text("읽음 처리 결과를 확인하지 못했어요. 다시 확인해 주세요.")}
+      {state.readAllStatus === "uncertain" && !state.readAllPending ? <Button compact variant="secondary" onClick={() => void controller?.refresh()}>{text("다시 확인")}</Button> : null}
+    </div> : null}
     {scope && state.unreadCount === null && !state.error ? <p className={styles.message}>{text("알림을 불러오는 중")}</p> : null}
     {scope && state.unreadCount !== null && !state.loading && !state.items.length && !state.error ? <p className={styles.message}>{text("아직 받은 알림이 없어요.")}</p> : null}
-    <NotificationList items={items} reading={state.reading} errors={state.readErrors} onRead={id => void controller?.read(id)} scope={scope} />
+    <NotificationList items={items} readMode="bulk" />
     {state.nextCursor ? <div className={styles.more}><Button compact variant="secondary" disabled={state.loadingMore} onClick={() => void controller?.loadMore()}>{text("더 보기")}</Button></div> : null}
   </section>;
 }
