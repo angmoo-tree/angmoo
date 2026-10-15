@@ -444,7 +444,9 @@ def test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed(
         row = session.get(models.GraphProjectionOutbox, "outbox-concurrency")
         assert row is not None
         assert row.status == "succeeded"
-        assert row.attempt_count == 2
+        # Reclaim resumes an unfinalized attempt; only a persisted retryable
+        # graph failure followed by a pending claim spends the next attempt.
+        assert row.attempt_count == 1
     database.close()
 
 

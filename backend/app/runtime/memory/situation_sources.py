@@ -29,19 +29,6 @@ class SituationSources:
     def read_evidence(self, **values):
         return self.reader.read_evidence(**values)
 
-    def prepare_validation(self, context, *, validation):
-        from sqlalchemy import select
-        from app.domains.memory.repository.access_batch import prepare_access
-        from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
-        validation.check_context(self.session, validation.now)
-        prior_ids = {source.source_id for source in (*context.sources, *context.result_sources)
-            if source.source_type == "MEMORY_ITEM"}
-        priors = list(self.session.scalars(select(MemoryItem).where(MemoryItem.id.in_(prior_ids))
-            .execution_options(populate_existing=True))) if prior_ids else []
-        reader = RuntimeEpisodeDetailReader(self.session)
-        prepare_access(self.session, priors, validation.now, reader=reader, validation=validation)
-        reader.prepare_situation_sources((context,), validation=validation)
-
     def result_binding_basis(self, admission, *, now):
         if self.result_basis is None:
             raise ValueError("situation_result_basis_missing")

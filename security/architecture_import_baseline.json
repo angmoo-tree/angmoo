@@ -1,7 +1,7 @@
 {
-  "edge_count": 6599,
-  "external_import_count": 4474,
-  "module_count": 1527,
+  "edge_count": 6672,
+  "external_import_count": 4510,
+  "module_count": 1541,
   "modules": [
     {
       "external_imports": [],
@@ -736,6 +736,21 @@
     },
     {
       "external_imports": [
+        "contextlib",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re"
+      ],
+      "imports": [
+        "app.core.atomic_json"
+      ],
+      "module": "app.core.result_journal",
+      "path": "backend/app/core/result_journal.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "re",
         "unicodedata"
@@ -793,7 +808,9 @@
         "asyncio",
         "collections.abc",
         "concurrent.futures",
+        "contextlib",
         "dataclasses",
+        "logging",
         "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
@@ -3903,6 +3920,7 @@
         "app.core.calendar",
         "app.core.ids",
         "app.core.security",
+        "app.core.sqlite_concurrency",
         "app.domains.identity.models",
         "app.domains.identity.models_environment",
         "app.domains.identity.schemas_environment"
@@ -6280,6 +6298,7 @@
       ],
       "imports": [
         "app.core.calendar",
+        "app.domains.memory.contracts.access_validation",
         "app.domains.memory.contracts.activity_situation",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.situation_validation",
@@ -7940,6 +7959,7 @@
     },
     {
       "external_imports": [
+        "asyncio",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm",
@@ -7948,10 +7968,14 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.core.result_journal",
+        "app.core.sqlite_concurrency",
         "app.domains.relationships.contracts.daily_review",
         "app.domains.relationships.models.personalization",
         "app.domains.relationships.policies.daily_review",
         "app.domains.relationships.service.personalized_metrics",
+        "app.domains.relationships.service.review_delivery",
+        "app.domains.relationships.service.review_payloads",
         "app.domains.relationships.service.state"
       ],
       "module": "app.domains.relationships.service.daily_review",
@@ -8246,6 +8270,34 @@
       ],
       "module": "app.domains.relationships.service.replay",
       "path": "backend/app/domains/relationships/service/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.relationships.contracts.daily_review",
+        "app.domains.relationships.models.personalization",
+        "app.domains.relationships.service.review_payloads"
+      ],
+      "module": "app.domains.relationships.service.review_delivery",
+      "path": "backend/app/domains/relationships/service/review_delivery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.contracts.daily_review",
+        "app.domains.relationships.models.personalization",
+        "app.domains.relationships.policies.daily_review"
+      ],
+      "module": "app.domains.relationships.service.review_payloads",
+      "path": "backend/app/domains/relationships/service/review_payloads.py",
       "wildcard_imports": []
     },
     {
@@ -13226,6 +13278,7 @@
         "uuid"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.media.contracts",
         "app.domains.media.schemas",
         "app.domains.media.service.comfy_workflows",
@@ -16411,15 +16464,32 @@
         "base64",
         "httpx",
         "io",
+        "time",
         "urllib.parse"
       ],
       "imports": [
         "app.core.image_bytes",
         "app.domains.media.api_image_policy",
-        "app.domains.media.generation_contracts"
+        "app.domains.media.generation_contracts",
+        "app.integrations.image_http_diagnostics"
       ],
       "module": "app.integrations.image_api",
       "path": "backend/app/integrations/image_api.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "time"
+      ],
+      "imports": [
+        "app.domains.media.schemas"
+      ],
+      "module": "app.integrations.image_http_diagnostics",
+      "path": "backend/app/integrations/image_http_diagnostics.py",
       "wildcard_imports": []
     },
     {
@@ -16972,6 +17042,7 @@
         "__future__",
         "dataclasses",
         "datetime",
+        "json",
         "typing"
       ],
       "imports": [],
@@ -17023,10 +17094,26 @@
       "imports": [
         "app.core.redaction",
         "app.providers.contracts",
-        "app.providers.diagnostics"
+        "app.providers.diagnostics",
+        "app.providers.gemini_embedding_batch"
       ],
       "module": "app.providers.gemini",
       "path": "backend/app/providers/gemini.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "google",
+        "google.genai",
+        "math",
+        "time"
+      ],
+      "imports": [
+        "app.providers.contracts"
+      ],
+      "module": "app.providers.gemini_embedding_batch",
+      "path": "backend/app/providers/gemini_embedding_batch.py",
       "wildcard_imports": []
     },
     {
@@ -17068,6 +17155,7 @@
       "imports": [
         "app.providers.contracts",
         "app.providers.gemini",
+        "app.providers.gemini_embedding_batch",
         "app.providers.generation_profiles"
       ],
       "module": "app.providers.registry",
@@ -19132,6 +19220,7 @@
         "typing"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.relationships.contracts.outbox",
         "app.domains.relationships.contracts.projection",
         "app.domains.relationships.contracts.projection_commands",
@@ -19834,7 +19923,8 @@
         "app.runtime.memory.vector_projection",
         "app.runtime.memory.vector_resources",
         "app.runtime.memory.vector_worker",
-        "app.runtime.memory_embedding_provider"
+        "app.runtime.memory_embedding_provider",
+        "app.runtime.received_results"
       ],
       "module": "app.runtime.memory.hybrid_runtime",
       "path": "backend/app/runtime/memory/hybrid_runtime.py",
@@ -19948,6 +20038,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.models.items",
+        "app.domains.memory.repository.access_batch",
+        "app.runtime.memory.episode_details",
+        "app.runtime.memory.situation_sources"
+      ],
+      "module": "app.runtime.memory.situation_application_sources",
+      "path": "backend/app/runtime/memory/situation_application_sources.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.memory.contracts.inspector",
@@ -20033,8 +20137,8 @@
         "app.domains.memory.repository.situation_apply",
         "app.domains.memory.repository.situation_runs",
         "app.runtime.memory.composition",
-        "app.runtime.memory.situation_result_basis",
-        "app.runtime.memory.situation_sources"
+        "app.runtime.memory.situation_application_sources",
+        "app.runtime.memory.situation_result_basis"
       ],
       "module": "app.runtime.memory.situation_runtime",
       "path": "backend/app/runtime/memory/situation_runtime.py",
@@ -20224,6 +20328,44 @@
     },
     {
       "external_imports": [
+        "asyncio",
+        "collections"
+      ],
+      "imports": [
+        "app.core.result_journal",
+        "app.core.sqlite_concurrency",
+        "app.domains.memory.contracts.embedding",
+        "app.providers.contracts",
+        "app.providers.registry",
+        "app.runtime.memory.sqlite_vec1",
+        "app.runtime.memory.vector_delivery"
+      ],
+      "module": "app.runtime.memory.vector_batches",
+      "path": "backend/app/runtime/memory/vector_batches.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "hashlib"
+      ],
+      "imports": [
+        "app.core.result_journal",
+        "app.core.sqlite_concurrency",
+        "app.domains.memory.contracts.recall",
+        "app.domains.memory.contracts.vector_projection",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.repository.vector_work",
+        "app.runtime.memory.sqlite_vec1",
+        "app.runtime.memory_embedding_provider"
+      ],
+      "module": "app.runtime.memory.vector_delivery",
+      "path": "backend/app/runtime/memory/vector_delivery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "json",
         "os",
         "pathlib",
@@ -20239,27 +20381,36 @@
     },
     {
       "external_imports": [
-        "asyncio",
         "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "time"
+        "sqlalchemy"
       ],
       "imports": [
-        "app.domains.memory.contracts.embedding",
-        "app.domains.memory.contracts.recall",
+        "app.core.sqlite_concurrency",
         "app.domains.memory.contracts.scope",
-        "app.domains.memory.contracts.vector_projection",
+        "app.domains.memory.exceptions",
         "app.domains.memory.models.activity_configuration",
         "app.domains.memory.models.embedding",
         "app.domains.memory.models.items",
         "app.domains.memory.repository.index_preparation",
+        "app.runtime.memory_embedding_provider"
+      ],
+      "module": "app.runtime.memory.vector_preparation",
+      "path": "backend/app/runtime/memory/vector_preparation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "datetime",
+        "time"
+      ],
+      "imports": [
         "app.domains.memory.repository.vector_work",
-        "app.providers.contracts",
-        "app.providers.gemini",
         "app.runtime.memory.canonical_work",
         "app.runtime.memory.recall_composition",
-        "app.runtime.memory_embedding_provider"
+        "app.runtime.memory.vector_batches",
+        "app.runtime.memory.vector_preparation",
+        "app.runtime.received_results"
       ],
       "module": "app.runtime.memory.vector_projection",
       "path": "backend/app/runtime/memory/vector_projection.py",
@@ -20316,12 +20467,13 @@
         "time"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.identity.contracts",
         "app.domains.identity.service.world_credentials",
         "app.domains.memory.contracts.embedding",
         "app.domains.memory.exceptions",
         "app.providers.contracts",
-        "app.providers.gemini",
+        "app.providers.registry",
         "app.runtime.subject_scope"
       ],
       "module": "app.runtime.memory_embedding_provider",
@@ -21432,6 +21584,16 @@
     },
     {
       "external_imports": [],
+      "imports": [
+        "app.config",
+        "app.core.result_journal"
+      ],
+      "module": "app.runtime.received_results",
+      "path": "backend/app/runtime/received_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [],
       "module": "app.runtime.relationships",
       "path": "backend/app/runtime/relationships/__init__.py",
@@ -21511,6 +21673,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.core.ids",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.models.activity_configuration",
@@ -21595,6 +21758,7 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.memory.contracts.access_validation",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.models.activity_configuration",
@@ -21602,6 +21766,7 @@
         "app.domains.memory.models.batch",
         "app.domains.memory.models.episode",
         "app.domains.memory.models.items",
+        "app.domains.memory.repository.access_batch",
         "app.domains.memory.repository.episode_privacy",
         "app.domains.memory.repository.situation_reads",
         "app.domains.memory.service.items",
@@ -21616,6 +21781,32 @@
       ],
       "module": "app.runtime.relationships.review_memories",
       "path": "backend/app/runtime/relationships/review_memories.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "types",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.core.sqlite_concurrency",
+        "app.domains.identity.service.environment",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.models.activity_configuration",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
+        "app.domains.relationships.models.personalization",
+        "app.domains.relationships.service.daily_review",
+        "app.runtime.relationships.review_credentials",
+        "app.runtime.relationships.review_identity",
+        "app.runtime.relationships.review_memories",
+        "app.runtime.relationships.situation_ordering"
+      ],
+      "module": "app.runtime.relationships.review_preparation",
+      "path": "backend/app/runtime/relationships/review_preparation.py",
       "wildcard_imports": []
     },
     {
@@ -21644,28 +21835,39 @@
     {
       "external_imports": [
         "datetime",
-        "sqlalchemy",
-        "zoneinfo"
+        "sqlalchemy"
       ],
       "imports": [
-        "app.domains.identity.service.environment",
-        "app.domains.memory.contracts.scope",
-        "app.domains.memory.models.activity_configuration",
-        "app.domains.memory.models.batch",
-        "app.domains.memory.models.items",
+        "app.core.sqlite_concurrency",
         "app.domains.relationships.models.personalization",
         "app.domains.relationships.service.daily_review",
         "app.runtime.memory.foreground_priority",
+        "app.runtime.received_results",
         "app.runtime.relationships.experience_metrics",
         "app.runtime.relationships.manual_review_worker",
-        "app.runtime.relationships.review_credentials",
-        "app.runtime.relationships.review_identity",
         "app.runtime.relationships.review_memories",
-        "app.runtime.relationships.review_refresh",
+        "app.runtime.relationships.review_preparation",
+        "app.runtime.relationships.review_transitions",
         "app.runtime.relationships.situation_ordering"
       ],
       "module": "app.runtime.relationships.review_runtime",
       "path": "backend/app/runtime/relationships/review_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.relationships.models.personalization",
+        "app.domains.relationships.service.daily_review",
+        "app.runtime.relationships.review_memories",
+        "app.runtime.relationships.review_refresh",
+        "app.runtime.relationships.situation_ordering"
+      ],
+      "module": "app.runtime.relationships.review_transitions",
+      "path": "backend/app/runtime/relationships/review_transitions.py",
       "wildcard_imports": []
     },
     {
@@ -22700,6 +22902,7 @@
       ],
       "imports": [
         "app.config",
+        "app.core.sqlite_concurrency",
         "app.domains.runtime.constants",
         "app.domains.runtime.contracts.status",
         "app.domains.runtime.exceptions",
@@ -23994,17 +24197,35 @@
       "imports": [
         "app.core.ids",
         "app.domains.characters.service.import_snapshots",
-        "app.domains.characters.service.preserved_originals",
         "app.domains.chat.contracts.generation_lifecycle",
         "app.domains.routines.constants",
         "app.domains.routines.models",
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
         "app.domains.worlds.models_deletion",
-        "app.runtime.world_deletion.inventory"
+        "app.runtime.received_results",
+        "app.runtime.world_deletion.cleanup_effects",
+        "app.runtime.world_deletion.inventory",
+        "app.runtime.world_deletion.media_references"
       ],
       "module": "app.runtime.world_deletion.canonical_erasure",
       "path": "backend/app/runtime/world_deletion/canonical_erasure.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.core.calendar",
+        "app.core.sqlite_concurrency",
+        "app.domains.characters.service.preserved_originals",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models_deletion"
+      ],
+      "module": "app.runtime.world_deletion.cleanup_effects",
+      "path": "backend/app/runtime/world_deletion/cleanup_effects.py",
       "wildcard_imports": []
     },
     {
@@ -24049,13 +24270,25 @@
     },
     {
       "external_imports": [
+        "json",
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.runtime.world_deletion.media_references",
+      "path": "backend/app/runtime/world_deletion/media_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "asyncio",
         "datetime",
         "logging",
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.worlds.models_deletion"
+        "app.core.sqlite_concurrency",
+        "app.domains.worlds.models_deletion",
+        "app.runtime.world_deletion.cleanup_effects"
       ],
       "module": "app.runtime.world_deletion.worker",
       "path": "backend/app/runtime/world_deletion/worker.py",

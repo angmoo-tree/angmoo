@@ -12,6 +12,9 @@ temporary contention condition.
 - A graph effect whose acknowledgement contends remains lease-owned. Expired
   leases can replay idempotently without counting local contention as a poison
   payload attempt. Readiness only recovers after actual backlog health recovers.
+  A confirmed graph failure still records a pending retry and consumes the next
+  attempt when claimed; eight failed attempts, terminal errors and the existing
+  age limit retain their dead-letter policy. Reclaim alone is not such proof.
 - Situation receipts commit one at a time. Relationship target/period roots use
   complete read preparation followed by fresh source/consent validation. Work
   remains resumable; schedule-spacing advice does not replace these guarantees.

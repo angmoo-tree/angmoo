@@ -13,7 +13,7 @@ from app.domains.memory.repository.episode_privacy import currently_accessible
 from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePackets
 from app.domains.memory.repository.recall import SqlAlchemyMemoryRecallDocumentSource
 from app.domains.memory.models.items import MemoryItem
-from app.runtime.memory.situation_sources import SituationSources
+from app.runtime.memory.situation_application_sources import PreparedSituationSources
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from app.runtime.memory.source_composition import source_evidence_reader
 
@@ -28,7 +28,7 @@ def real_source(session, scope):
 
 def receipt(session, scope, post):
     manifest, draft, result = values(session, scope, target=post.id)
-    source = SituationSources(session).describe(scope, kind="POST", identifier=post.id, delivered=post.body,
+    source = PreparedSituationSources(session).describe(scope, kind="POST", identifier=post.id, delivered=post.body,
         path="/target/body", role="core", ordinal=0, target=post.id)
     manifest = replace(manifest, sources=(source,))
     return admit(session, manifest=manifest, draft=draft, result=result, now=NOW)
@@ -41,7 +41,7 @@ def apply(session, setting, memory):
     session.commit()
     from app.domains.memory.models.activity_situation import MemorySituationApplyRun
     while token:
-        apply_page(session, memory, SituationSources(session), run_id=request.run_id, token=token, now=NOW)
+        apply_page(session, memory, PreparedSituationSources(session), run_id=request.run_id, token=token, now=NOW)
         session.commit()
         if session.get(MemorySituationApplyRun, request.run_id).state == "completed":
             break

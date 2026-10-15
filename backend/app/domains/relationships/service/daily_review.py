@@ -11,6 +11,7 @@ from app.core.ids import uuid7_string
 from app.domains.relationships.contracts.daily_review import manifest_digest, validate_review_result, ReviewNeedsSplit
 from app.domains.relationships.models.personalization import RelationshipReviewWork, RelationshipReviewMemoryReceipt
 from app.domains.relationships.policies.daily_review import partition_review_inputs
+from app.domains.relationships.service.review_payloads import (review_children, new_work, verified_result, build_payload, root_work)
 from app.domains.relationships.service.state import _relationship_state
 from app.domains.relationships.service.personalized_metrics import enqueue_snapshot
 
@@ -21,23 +22,6 @@ class ReviewProvider(Protocol):
 
 class ReviewReferences(Protocol):
     def revalidate(self, work: RelationshipReviewWork) -> None: ...
-
-
-def _children(db, work_id):
-    return list(db.scalars(select(RelationshipReviewWork).where(
-        RelationshipReviewWork.parent_id == work_id).order_by(RelationshipReviewWork.part_key)))
-
-
-def _new_work(db, *, world_id, actor_id, target_id, period_key, part_key, phase,
-              manifest, view_version, parent_id=None):
-    row = RelationshipReviewWork(id=uuid7_string(), world_id=world_id,
-        actor_world_character_id=actor_id, target_world_character_id=target_id,
-        period_key=period_key, part_key=part_key, phase=phase, manifest=manifest,
-        manifest_digest=manifest_digest(manifest), expected_view_version=view_version,
-        parent_id=parent_id, status="pending", attempts=0)
-    db.add(row)
-    db.flush()
-    return row
 
 
 def plan_review(db: Session, *, world_id: str, actor_id: str, target_id: str,
@@ -60,11 +44,11 @@ def plan_review(db: Session, *, world_id: str, actor_id: str, target_id: str,
                 "familiarity": state.familiarity, "affinity": state.affinity, "trust": state.trust, "tension": state.tension}}
     parts = partition_review_inputs(base, memories)
     manifest = {"base": base, "memories": memories if len(parts) == 1 else [{k: v for k, v in m.items() if k != "summary"} for m in memories]}
-    root = _new_work(db, world_id=world_id, actor_id=actor_id, target_id=target_id, period_key=period_key,
+    root = new_work(db, world_id=world_id, actor_id=actor_id, target_id=target_id, period_key=period_key,
         part_key="root", phase="direct" if len(parts) == 1 else "final", manifest=manifest, view_version=state.view_version)
     if len(parts) > 1:
         for index, payload in enumerate(parts):
-            _new_work(db, world_id=world_id, actor_id=actor_id, target_id=target_id, period_key=period_key,
+            new_work(db, world_id=world_id, actor_id=actor_id, target_id=target_id, period_key=period_key,
                 part_key=f"partial-{index:08d}", phase="partial", manifest={"payload": payload},
                 view_version=state.view_version, parent_id=root.id)
     for memory in memories:
@@ -73,63 +57,6 @@ def plan_review(db: Session, *, world_id: str, actor_id: str, target_id: str,
             memory_id=memory["memory_id"], memory_digest=memory["digest"], work_id=root.id, status="pending"))
     db.flush()
     return root
-
-
-def _verified_result(work):
-    result = {key: value for key, value in (work.result or {}).items() if key != "_execution"}
-    expected = (work.result or {}).get("_execution", {}).get("result_digest")
-    if expected != manifest_digest(result):
-        raise ValueError("relationship_review_result_changed")
-    return result
-
-
-def _payload(db, work):
-    if manifest_digest(work.manifest) != work.manifest_digest:
-        raise ValueError("relationship_review_manifest_changed")
-    if work.phase == "direct":
-        return {**work.manifest["base"], "memories": work.manifest["memories"]}
-    if work.phase == "partial":
-        return work.manifest["payload"]
-    children = _children(db, work.id)
-    if not children or any(child.status != "ready" for child in children):
-        return None
-    base = work.manifest["base"]
-    source_map = {memory["memory_id"]: memory["source_refs"] for memory in _root(db, work).manifest["memories"]}
-    entries = []
-    for child in children:
-        result = _verified_result(child)
-        entries.append({"part_id": child.id, **result, "source_refs": sorted({
-            source for ref in result["memory_refs"] for source in source_map.get(ref, [])})})
-    parts = partition_review_inputs(base, entries, key="partial_results")
-    if len(parts) == 1:
-        return parts[0]
-    # Replace an oversized fan-in with bounded intermediate reductions. The
-    # completed children keep their saved results and are never re-requested.
-    if len(parts) >= len(children):
-        raise ValueError("relationship_review_reduction_not_shrinking")
-    for index, payload in enumerate(parts):
-        group_ids = {entry["part_id"] for entry in payload["partial_results"]}
-        reducer = _new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
-            target_id=work.target_world_character_id, period_key=work.period_key,
-            part_key=f"reduce-{uuid7_string()}", phase="reduce", manifest={"base": base},
-            view_version=work.expected_view_version, parent_id=work.id)
-        for child in children:
-            if child.id in group_ids:
-                child.parent_id = reducer.id
-    db.flush()
-    return None
-
-
-def _root(db, work):
-    seen = set()
-    while work.parent_id is not None:
-        if work.id in seen:
-            raise ValueError("relationship_review_work_cycle")
-        seen.add(work.id)
-        work = db.get(RelationshipReviewWork, work.parent_id)
-        if work is None:
-            raise ValueError("relationship_review_parent_missing")
-    return work
 
 
 async def run_review_step(session_factory, *, work_id: str, references_factory,
@@ -202,9 +129,9 @@ async def run_review_step(session_factory, *, work_id: str, references_factory,
                     if until > current:
                         return "leased"
                 try:
-                    root = _root(db, work)
+                    root = root_work(db, work)
                     references_factory(db).revalidate(root)
-                    payload = _payload(db, work)
+                    payload = build_payload(db, work)
                 except ValueError as exc:
                     work.status, work.error_code = "failed", str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed"
                     work.next_attempt_at = current + timedelta(minutes=5)
@@ -303,7 +230,7 @@ def apply_review(db: Session, *, work_id: str, references: ReviewReferences, now
     if root.status != "ready":
         return root.status
     references.revalidate(root)
-    if root.phase == "final" and any(part.status != "ready" for part in _children(db, root.id)):
+    if root.phase == "final" and any(part.status != "ready" for part in review_children(db, root.id)):
         return "not_ready"
     state = _relationship_state(db, world_id=root.world_id, actor_world_character_id=root.actor_world_character_id,
                                 target_world_character_id=root.target_world_character_id)
@@ -313,7 +240,7 @@ def apply_review(db: Session, *, work_id: str, references: ReviewReferences, now
         # the former view, so only this pair is re-prepared; receipts stay pending.
         rebase_review(db, root, state)
         return "rebased"
-    result = validate_review_result(_verified_result(root), partial=False,
+    result = validate_review_result(verified_result(root), partial=False,
         allowed_refs={m["memory_id"] for m in root.manifest["memories"]})
     if result["decision"] == "update" and (state.relationship_label, state.perception) != (result["relationship_label"], result["perception"]):
         state.relationship_label = result["relationship_label"]
@@ -347,7 +274,7 @@ def rebase_review(db, root, state):
         elif row.parent_id:
             row.manifest = {"base": base}
         row.manifest_digest = manifest_digest(row.manifest)
-        for child in _children(db, row.id):
+        for child in review_children(db, row.id):
             reset(child)
     reset(root)
 
@@ -359,7 +286,7 @@ def split_incomplete_work(db, work, payload):
         return False
     base = {k: v for k, v in payload.items() if k != key}
     groups = [entries[:len(entries)//2], entries[len(entries)//2:]]
-    children = _children(db, work.id)
+    children = review_children(db, work.id)
     if key == "memories":
         if work.parent_id is None:
             work.phase = "final"
@@ -367,13 +294,13 @@ def split_incomplete_work(db, work, payload):
         else:
             work.phase, work.manifest = "reduce", {"base": base}
         for group in groups:
-            _new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
+            new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
                 target_id=work.target_world_character_id, period_key=work.period_key,
                 part_key=f"split-{uuid7_string()}", phase="partial", manifest={"payload": {**base, "memories": group}},
                 view_version=work.expected_view_version, parent_id=work.id)
     else:
         for group in groups:
-            part = _new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
+            part = new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
                 target_id=work.target_world_character_id, period_key=work.period_key,
                 part_key=f"reduce-{uuid7_string()}", phase="reduce", manifest={"base": base},
                 view_version=work.expected_view_version, parent_id=work.id)

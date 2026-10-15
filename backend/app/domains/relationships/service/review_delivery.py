@@ -6,7 +6,7 @@ from app.domains.relationships.models.personalization import RelationshipReviewW
 
 
 def persist_received(sessions, work_id, record, references_factory):
-    from app.domains.relationships.service.daily_review import _root, _payload
+    from app.domains.relationships.service.review_payloads import root_work, build_payload
     with sessions() as db:
         def apply():
             row = db.get(RelationshipReviewWork, work_id, populate_existing=True)
@@ -17,11 +17,11 @@ def persist_received(sessions, work_id, record, references_factory):
             if (row.status != "running" or (row.lease_token, row.attempts, row.manifest_digest) !=
                 (record["lease"], record["attempt"], record["manifest_digest"])):
                 return "lease_lost"
-            root = _root(db, row)
+            root = root_work(db, row)
             if root.manifest_digest != record["root_digest"]:
                 return "lease_lost"
             references_factory(db).revalidate(root)
-            payload = _payload(db, row)
+            payload = build_payload(db, row)
             if payload is None:
                 return "lease_lost"
             refs = ({m["memory_id"] for m in payload["memories"]} if "memories" in payload

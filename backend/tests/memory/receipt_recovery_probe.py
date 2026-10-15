@@ -28,6 +28,12 @@ def main():
     from app.runtime.persistence.model_registration import register_models
     from app.runtime.memory.composition import memory_repository
     from app.runtime.memory.situation_sources import SituationSources
+    # The probe intentionally loads either the historical or current checkout.
+    from importlib.util import find_spec
+    if find_spec("app.runtime.memory.situation_application_sources") is not None:
+        from app.runtime.memory.situation_application_sources import PreparedSituationSources
+    else:
+        PreparedSituationSources = SituationSources
     from app.domains.memory.repository.situation_admission import admit
     from app.domains.memory.repository.situation_runs import get_or_create_settings, request_run, claim_run
     from app.domains.memory.repository.situation_apply import prepare_page, apply_page
@@ -88,7 +94,7 @@ def main():
                         facts = []
                         with Session(engine) as db:
                             applied = run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db),
-                                SituationSources(db), run_id=run_id, token=token, now=NOW, page_size=page_size, prepared=prepared), observer=facts.append)
+                                PreparedSituationSources(db), run_id=run_id, token=token, now=NOW, page_size=page_size, prepared=prepared), observer=facts.append)
                             completed = db.get(MemorySituationApplyRun, run_id).state == "completed"
                         times.extend(f["transaction_ms"] for f in facts if f["result"] == "committed")
                         counts.append(applied)

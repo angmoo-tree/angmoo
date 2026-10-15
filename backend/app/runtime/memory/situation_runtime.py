@@ -15,7 +15,7 @@ from app.domains.memory.models.activity_situation import MemorySituationApplyRun
 from app.domains.memory.repository.situation_runs import claim_run, request_run, next_due
 from app.domains.memory.repository.situation_apply import apply_page, prepare_page, SituationPageStale
 from app.runtime.memory.composition import memory_repository
-from app.runtime.memory.situation_sources import SituationSources
+from app.runtime.memory.situation_application_sources import PreparedSituationSources
 
 
 class SituationRuntime:
@@ -107,7 +107,7 @@ class SituationRuntime:
                 prepared_at = monotonic()
                 try:
                     with self.session_factory() as db:
-                        run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db), SituationSources(db, result_basis=basis),
+                        run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db), PreparedSituationSources(db, result_basis=basis),
                             run_id=run_id, token=token, now=datetime.now(UTC), page_size=1, prepared=prepared), require_clean=True)
                     logging.getLogger(__name__).info("situation_page run=%s count=%s bytes=%s prepare_ms=%.3f apply_elapsed_ms=%.3f",
                         run_id, len(prepared.admissions), prepared.byte_size,

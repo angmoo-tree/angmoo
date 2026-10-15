@@ -135,6 +135,8 @@ def test_crud_modules_do_not_import_services():
 def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
     allowed = {
         "providers/gemini.py",
+        # Optional batch transport is part of the same provider adapter boundary.
+        "providers/gemini_embedding_batch.py",
         "integrations/google_identity.py",
     }
     violations: dict[str, list[str]] = {}
@@ -230,7 +232,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         # Authorized embedding transport boundaries: resolve owner/purpose before
         # revealing to the provider, never to a domain result or diagnostic.
         "runtime/memory_embedding_provider.py": {"query"},
-        "runtime/memory/vector_projection.py": {"sync_item"},
+        "runtime/memory/vector_batches.py": {"_submit"},
         "domains/chat/service/generation.py": {"stream_world_response"},
         # Authorized WORLD_CHARACTER_SETUP_LLM material is revealed only at transport.
         "domains/routines/client.py": {"generate_daily_preparation"},

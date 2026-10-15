@@ -103,8 +103,10 @@ never multiplied by its item count. Generation model lists, runtime dependencies
   changed-component ESLint passed. Next and static production builds passed.
   The isolated World browser build changed tsconfig automatically; only that
   generated change was restored. No product configuration change was required.
-- The design baseline refresh changes only the hash of the shared generation
-  status component; rules, exceptions and screenshots are unchanged. The current
+- The initial design baseline refresh changed only the hash of the shared generation
+  status component. PR visual checks also identified the expected relationship
+  schedule-advice layout change; its two graph snapshots are reviewed separately.
+  Rules and exceptions are unchanged. The current
   hybrid-memory inventory is refreshed after reviewed implementation changes;
   the frozen predecessor and schema manifests are not rewritten.
 - Selected World erasure regression: **53 PASS / 2 SKIP**, 697.38s. Both skips
@@ -121,6 +123,47 @@ never multiplied by its item count. Generation model lists, runtime dependencies
   delivery follow-up (**9 PASS**, 23.74s) also checks that a lost durable result stays outcome-unknown
   and never silently resubmits, even if its submission marker is later absent.
 - PR/main results remain pending below; starting a pipeline is not a PASS.
+
+## PR integration corrections
+
+PR #376 first ran on `348311f8e2e938382c93d0188565f9c4d15f5063`.
+The first governance failure exposed an omitted current import inventory refresh.
+The earlier local boundary PASS used the old graph and is not evidence for the
+new modules. Regeneration found three cycles; shared review payload operations,
+provider-owned error normalization and application-only situation preparation
+were separated to remove them. No cycle exception was added. The fresh graph has
+1,541 modules / 6,672 edges and passes; all 239 architecture subset tests pass.
+SDK import and credential reveal lists track the exact new adapter/transport
+location, retaining the prohibition everywhere else.
+
+Full Graph smoke also exposed the old reclaim-attempt expectation. Reclaim now
+resumes the same unfinalized attempt, while persisted graph failures still exhaust
+eight attempts. The updated contention/graph/runtime subset passes 31 tests,
+including that explicit exhaustion check. A newly added shutdown fixture published
+ready before setting its test event; the event now precedes ready, removing the
+test's scheduling race without changing production shutdown behavior. The broader
+boundary regression had 69 PASS / that one fixture failure before the correction.
+Current core/embedded/L4 inventories were regenerated from their existing rules;
+the focused inventory/governance set passes 31 tests. The situation validator
+fixture now accepts the shared validation context (13 contract tests pass).
+HTTP recovery tests assert each single-receipt turn's intermediate applied/blocked
+counts and final completion, keeping scope/CSRF/proof/cursor checks (3 PASS).
+Provider batch and review transport/delivery boundary regressions pass 31 tests.
+Situation access-cost, proof guards, parent bindings and result normalization
+regressions pass 65 tests (483.57s) after the adapter split.
+
+The two relationship snapshots were inspected in the pinned Linux Playwright
+environment. The ready diff reproduced the hosted 70,821 changed pixels exactly:
+the additional schedule-advice paragraph shifts the following card. Ready and
+degraded snapshots were updated and the static visual check passed again without
+snapshot updates. Next verification remains part of the corrected hosted run.
+
+The post-refactor receipt probe again verifies identical canonical results and
+one receipt per commit. Its 256-source fixture used 118 SQL statements, maximum
+writer 53.125 ms and competing writer wait 151.824 ms (2 receipts). The 1-source
+fixture used 1,874 statements and maximum writer 43.404 ms (32 receipts).
+These are synthetic local measurements; concurrent scheduling changes counts and
+timings and they are not production latency guarantees.
 
 ## Retained-result lifecycle and remaining boundaries
 

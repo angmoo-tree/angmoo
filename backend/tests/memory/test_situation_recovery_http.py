@@ -64,9 +64,15 @@ def test_recovery_api_rejects_foreign_scope_csrf_extra_proof_and_cursor_and_reso
     assert accepted.status_code == 200, accepted.text
     assert accepted.json()["operation"] == "blocked_recheck" and accepted.json()["resolved_request_key"] == body["idempotency_key"]
     runtime = SituationRuntime(sessionmaker(engine))
-    assert runtime.tick() == "situation_page_applied"
-    response = client.get(PATH + "/processing-settings", headers=FRONTEND_HEADERS, params={"request_key": body["idempotency_key"]})
-    assert response.json()["applied_count"] == 3 and response.json()["blocked_count"] == 0
+    # Each short writer applies one receipt and publishes accurate intermediate
+    # progress. The worker resubmits the next turn without holding the writer.
+    for applied_count in range(1, len(rows) + 1):
+        assert runtime.tick() == "situation_page_applied"
+        response = client.get(PATH + "/processing-settings", headers=FRONTEND_HEADERS,
+            params={"request_key": body["idempotency_key"]})
+        assert response.status_code == 200
+        assert response.json()["applied_count"] == applied_count
+        assert response.json()["blocked_count"] == len(rows) - applied_count
     unknown = client.get(PATH + "/processing-settings", headers=FRONTEND_HEADERS, params={"request_key": "unknown-request-001"})
     assert unknown.json()["run_id"] is None and unknown.json()["applied_count"] == 0
     assert client.post(PATH + "/save", headers=FRONTEND_HEADERS, json=body).status_code == 409

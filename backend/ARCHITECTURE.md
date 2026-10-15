@@ -18,6 +18,11 @@ creating a target/period root, then revalidates policy, environment, credentials
 every input in a short target writer. Existing root/partial/reduce receipts remain
 the restart ledger. No new canonical schema or validation staging ledger is needed
 for the measured high-fanout fixtures; future growth must be measured again.
+`SituationSources` remains a lower-level canonical source reader;
+`PreparedSituationSources` composes episode/access batching only at the application
+boundary. Relationship execution and result delivery depend on shared
+`review_payloads` operations, never on each other. Provider batch transport receives
+its provider-owned error normalizer rather than importing its caller.
 
 The existing vector worker uses model-declared optional embedding batch limits.
 Only eligible missing/changed vectors are grouped by scope, settings, credential

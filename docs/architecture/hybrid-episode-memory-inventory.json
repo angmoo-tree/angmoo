@@ -2001,6 +2001,10 @@
       "sha256": "868c3cc2f7ef7a0d779ebcbbc19167eeb75ecd0d967979a066763dc9fc374cc8"
     },
     {
+      "path": "backend/app/runtime/memory/situation_application_sources.py",
+      "sha256": "1e911341b8d0e378e6a53f4e9155246fe535fa96a16ad6e4af7bfb41a585cc9a"
+    },
+    {
       "path": "backend/app/runtime/memory/situation_detail.py",
       "sha256": "eefec236275b9baa44ed6339df9b92eb7f97141f12772f8ccfd2557ef8d79b49"
     },
@@ -2018,7 +2022,7 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_runtime.py",
-      "sha256": "be78fcda55e803a8ccb4f4cdc3e6dd8f6077068ef8647c6502eeba7e19df5090"
+      "sha256": "15db00d1f881f2ec2a50ad286dd4566a3c1abbd342e4d98531eb84e8e9de9ca7"
     },
     {
       "path": "backend/app/runtime/memory/situation_source_batch.py",
@@ -2026,7 +2030,7 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_sources.py",
-      "sha256": "4959a2b121ab77cb021fe890b981c7b7b50fdbd084b1ae48218465a4506c34cf"
+      "sha256": "69c45a19390b1d8f7116d703c114f1b5685f875e66b13c1f89554fdf8456b4b0"
     },
     {
       "path": "backend/app/runtime/memory/source_catalogs.py",
@@ -3014,7 +3018,7 @@
     },
     {
       "path": "backend/tests/memory/receipt_recovery_probe.py",
-      "sha256": "9c630daa09740d25578ea35d21987067923ed73f6d008f66a08dde3bbeddcdcf"
+      "sha256": "432b745adf9074815979a66776c9c486afb9158e21c016f405d01581d1a1786c"
     },
     {
       "path": "backend/tests/memory/test_activity32_integration.py",
@@ -3026,11 +3030,11 @@
     },
     {
       "path": "backend/tests/memory/test_activity_situation_application.py",
-      "sha256": "cc29ada42c1ac4c08f169e4f0f23fce0c2e07a5b2c498c85356ad8e2484a497a"
+      "sha256": "09892d89ccca3835f253375712d4e656b199d42d337d710add71e6e024427705"
     },
     {
       "path": "backend/tests/memory/test_activity_situation_contract.py",
-      "sha256": "a0cd0ff7cbd84a2de77842fdbfcc736cce2895c1c5f75724239d7c116fb706f5"
+      "sha256": "61676a0573a2541323fdf52570f34e836162110cdddf1d1c1d7070005eb80209"
     },
     {
       "path": "backend/tests/memory/test_activity_situation_recall.py",
@@ -3326,7 +3330,7 @@
     },
     {
       "path": "backend/tests/memory/test_situation_prepared_page.py",
-      "sha256": "bcd58890ce6a32f3a3566f5f9724dd2b902da87d0e35a997c6a59035e2ca7e3b"
+      "sha256": "bc7c5a941c4691ad00237f3a06e85723f3f62d0adaf4d3c16fed5783fe5d9b5e"
     },
     {
       "path": "backend/tests/memory/test_situation_proof_guards.py",
@@ -3338,7 +3342,7 @@
     },
     {
       "path": "backend/tests/memory/test_situation_recovery_http.py",
-      "sha256": "3e49b2d3182cb0ba43c85bdd7ccc08c6dbcf75f692232606715288d0bcb89ebe"
+      "sha256": "d2ea02750686f4f891bcd64a237fc7be08707228ead93900a9b402c61262ac2a"
     },
     {
       "path": "backend/tests/memory/test_situation_result_normalization.py",

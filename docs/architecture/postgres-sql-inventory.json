@@ -515,13 +515,13 @@
     {
       "markers": {
         "driver_or_url": [
-          33
+          34
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/service/environment.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "53706ba31e1f5da9a135d7f4a3de6ca7467dfca761c59ff07dc048ca7a21b032",
+      "source_sha256": "f5492e50bcd2c3bd84d203c362999b390dcfba86f4f6a3ad33dab8addcacbc07",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -673,16 +673,16 @@
     {
       "markers": {
         "row_lock": [
-          43
+          48
         ],
         "skip_locked": [
-          43
+          48
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/repository/projection_state.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a071a077783a8c3f7ee309dec8d270529ab2271f7576e24c4283372312f16143",
+      "source_sha256": "eb8f4715476a506f1621d6a42e98dc97dc780662f27f41e50f91e1f2d1b4c0af",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -724,13 +724,13 @@
     {
       "markers": {
         "row_lock": [
-          212
+          220
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/service/daily_review.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "91dc915438347b8a641d79c113fe37e86212bac950bcbcade0e0f9b59ac662f3",
+      "source_sha256": "49359eb1a716ffe05c676bb96e92f2ac6dcbd13b5f519aecf44eda0cf77f459b",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1496,13 +1496,13 @@
     {
       "markers": {
         "driver_or_url": [
-          24
+          26
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/relationships/manual_review_worker.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "67f19ddf25db168856911427fc166b8f522fac621fee76c9fe00f06f81bfa029",
+      "source_sha256": "2434fa46356d20bcc47a45a5f2938163dbb02703bb2a3bd25218fd9a5c2faf5d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

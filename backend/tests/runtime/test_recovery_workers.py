@@ -74,8 +74,8 @@ def test_cancelled_shutdown_still_owns_projector_until_its_future_finishes():
         listener("ready")
         await stop.wait()
     def projector(stop, listener):
-        listener("ready")
         started.set()
+        listener("ready")
         assert release.wait(5)
         listener("stopped")
     async def run():

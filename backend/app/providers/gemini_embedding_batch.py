@@ -17,7 +17,7 @@ def batch_fits(texts):
     return LIMITS.fits(texts)
 
 
-async def embed_batch(request, *, timeout_seconds):
+async def embed_batch(request, *, timeout_seconds, normalize_error):
     if request.model != "gemini-embedding-2" or request.output_dimension != 768:
         raise ValueError("embedding_batch_model_unsupported")
     if not batch_fits(request.texts) or not 0 < timeout_seconds <= 60:
@@ -48,8 +48,7 @@ async def embed_batch(request, *, timeout_seconds):
     except asyncio.CancelledError:
         raise
     except Exception as exc:
-        from app.providers.gemini import classify_generation_failure
-        error = exc if isinstance(exc, ProviderError) else classify_generation_failure(exc)
+        error = exc if isinstance(exc, ProviderError) else normalize_error(exc)
         error.physical_attempts = 1
         error.duration_ms = int((monotonic() - started) * 1000)
         raise error from None

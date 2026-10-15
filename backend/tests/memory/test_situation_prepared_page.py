@@ -8,7 +8,7 @@ from memory.test_p8_l_o_memory_consolidation import _stack
 from memory.test_activity_situation_application import real_source, receipt
 from memory.test_activity_situation_contract import NOW
 from app.runtime.persistence.model_registration import register_models
-from app.runtime.memory.situation_sources import SituationSources
+from app.runtime.memory.situation_application_sources import PreparedSituationSources
 from app.domains.memory.repository.situation_runs import get_or_create_settings, request_run, claim_run
 from app.domains.memory.repository.situation_apply import prepare_page, apply_page, SituationPageStale
 from app.domains.memory.models.activity_situation import MemorySituationReceipt, MemorySituationApplyRun, MemorySituationManifest
@@ -49,7 +49,7 @@ def test_prepared_material_change_rolls_back_cursor_and_memory(tmp_path, mutatio
     with Session(engine) as db:
         from app.runtime.memory.composition import memory_repository
         with pytest.raises(SituationPageStale):
-            apply_page(db, memory_repository(db), SituationSources(db), run_id=run_id, token=token, now=NOW, page_size=16, prepared=page)
+            apply_page(db, memory_repository(db), PreparedSituationSources(db), run_id=run_id, token=token, now=NOW, page_size=16, prepared=page)
         db.rollback()
         assert db.scalar(select(MemoryItem.id)) is None
         assert db.get(MemorySituationReceipt, sequence).state == "pending"
@@ -76,7 +76,7 @@ def test_prepare_hash_work_does_not_hold_writer_and_apply_skips_reparsing(tmp_pa
     monkeypatch.setattr(situation_validation, "restore_admission", lambda *_args, **_kwargs: pytest.fail("parsed under writer"))
     with Session(engine) as db:
         from app.runtime.memory.composition import memory_repository
-        assert apply_page(db, memory_repository(db), SituationSources(db), run_id=run_id, token=token, now=NOW, page_size=16, prepared=page) == 1
+        assert apply_page(db, memory_repository(db), PreparedSituationSources(db), run_id=run_id, token=token, now=NOW, page_size=16, prepared=page) == 1
         db.commit()
         assert db.get(MemorySituationReceipt, sequence).state == "applied"
         assert db.get(MemorySituationApplyRun, run_id).cursor == sequence

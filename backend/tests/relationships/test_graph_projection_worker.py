@@ -83,6 +83,33 @@ def test_transient_failure_retries_without_losing_row() -> None:
     assert recovery.graph_degraded is False
 
 
+def test_repeated_graph_failures_still_exhaust_eight_attempts() -> None:
+    engine = sqlite_engine()
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = seed_projection_fixture(db, suffix="exhausted")
+        outbox_id = fixture.outbox.id
+    store = RecordingStore(failure="ladybug_unavailable")
+    worker = GraphProjectionWorker(
+        session_factory=_session_factory(engine), store=store, worker_id="worker-a"
+    )
+    for attempt in range(1, 9):
+        result = worker.process_batch()
+        with Session(engine) as db:
+            row = db.get(models.GraphProjectionOutbox, outbox_id)
+            assert row.attempt_count == attempt
+            assert row.status == ("dead" if attempt == 8 else "pending")
+            assert row.last_error_class == "ladybug_unavailable"
+            if attempt < 8:
+                assert result.retried == 1
+                row.next_attempt_at = datetime.now(UTC) - timedelta(seconds=1)
+                db.commit()
+            else:
+                assert result.dead == 1
+    assert worker.process_batch().claimed == 0
+    assert len(store.commands) == 8
+    engine.dispose()
+
+
 def test_poison_payload_is_dead_without_store_call() -> None:
     engine = sqlite_engine()
     with Session(engine, expire_on_commit=False) as db:
