@@ -33,8 +33,20 @@ class RuntimeSourceWriteReferences:
         return get_character_entry_membership(self.db, membership_id)
 
     def record_source_event(self, *, world_id: str, actor_world_character_id: str, target_world_character_id: str | None, operation: str, post: Post, root_post: Post, target_post: Post | None, request_key: str, failure_injector: Callable[[str], None] | None) -> None:
-        record_source_post_event(self.db, world_id=world_id, actor_world_character_id=actor_world_character_id, target_world_character_id=target_world_character_id, operation=operation, post=post, root_post=root_post, target_post=target_post, request_key=request_key, failure_injector=failure_injector)
+        event_id = record_source_post_event(self.db, world_id=world_id, actor_world_character_id=actor_world_character_id, target_world_character_id=target_world_character_id, operation=operation, post=post, root_post=root_post, target_post=target_post, request_key=request_key, failure_injector=failure_injector)
+        if event_id is not None:
+            from app.domains.social.service.world_notification_delivery import bind_post_notifications
+            bind_post_notifications(self.db, world_id=world_id, actor_id=actor_world_character_id, source_post_id=post.id, event_id=event_id)
 
     def record_source_reaction_event(self, **kwargs):
         from app.domains.relationships.service.source_reactions import record_source_reaction_event
-        record_source_reaction_event(self.db, **kwargs)
+        event_id = record_source_reaction_event(self.db, **kwargs)
+        if kwargs["event_type"] == "like_added":
+            from app.domains.social.service.world_notification_delivery import deliver_world_notification
+            actor = self.get_world_character(kwargs["actor_world_character_id"])
+            target = self.get_world_character(kwargs["target_world_character_id"])
+            deliver_world_notification(self.db, world_id=kwargs["world_id"],
+                actor_world_character_id=actor.id, actor_character_id=actor.character_id,
+                recipient_world_character_id=target.id, recipient_character_id=target.character_id,
+                notification_type="like", source_kind="social_event", source_id=event_id,
+                post_id=kwargs["post"].id, social_event_id=event_id)

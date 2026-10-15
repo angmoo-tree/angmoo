@@ -262,6 +262,9 @@ function renderStaticRoute(location: BrowserLocation) {
   }
   if (segments[0] === "worlds" && segments.length >= 2 && segments.length <= 3) {
     const worldId = decodedWorldId(segments[1]);
+    if (worldId && segments[2] === "notifications") {
+      return <WorldAppRouteClient sectionId="feed" worldId={worldId} notifications />;
+    }
     const section = staticWorldSection(segments[2]);
     if (worldId && section) {
       return <WorldAppRouteClient sectionId={section} worldId={worldId} />;

@@ -15,6 +15,7 @@ import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, RuntimeFetchError } from "@/lib/r
 
 import { AuthContext, type AuthStatus } from "@/lib/auth/auth-context";
 import { UserEnvironmentProvider } from "@/composition/providers/user-environment-provider";
+import { WorldNotificationProvider } from "@/features/social/hooks/world-notification-context";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("checking");
@@ -95,6 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refresh, status, user, sessionRevision],
   );
 
-  return <AuthContext.Provider value={value}><UserEnvironmentProvider>{children}</UserEnvironmentProvider></AuthContext.Provider>;
+  return <AuthContext.Provider value={value}><UserEnvironmentProvider><WorldNotificationProvider>{children}</WorldNotificationProvider></UserEnvironmentProvider></AuthContext.Provider>;
 }
 

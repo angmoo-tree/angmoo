@@ -34,8 +34,8 @@ export function AppIcon({
     : undefined;
   const contents = (
     <>
-      <span className={styles.visual} aria-hidden="true" style={style}>
-        {visual}
+      <span className={styles.visualShell} aria-hidden="true">
+        <span className={styles.visual} style={style}>{visual}</span>
         {badge ? <span className={styles.badge}>{badge}</span> : null}
       </span>
       {label.trim() ? <span className={styles.label}>{label}</span> : null}

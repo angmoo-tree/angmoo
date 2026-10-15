@@ -8,7 +8,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
-import { PRODUCT_ROUTES, worldAppRoute } from "@/lib/navigation/product-routes";
+import { PRODUCT_ROUTES, worldFeedRoute } from "@/lib/navigation/product-routes";
 import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visual";
 import { AppIcon } from "@/components/ui/app-icon";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,9 @@ import styles from "./device-home.module.css";
 type DeviceHomeProps = {
   authStatus: DeviceHomeAuthStatus;
   ensureDefaultSpace?: () => Promise<unknown>;
+  onVisibleWorldIds?: (ids: string[]) => void;
+  renderWorldBadge?: (worldId: string) => ReactNode;
+  worldNotificationDescription?: (worldId: string, name: string) => string;
 };
 
 const FIXED_VISUALS = {
@@ -45,7 +48,7 @@ const WORLD_LAUNCH_TONE_CLASSES = {
   waiting: styles.worldLaunchBadgeWaiting,
 } as const;
 
-export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) {
+export function DeviceHome({ authStatus, ensureDefaultSpace, onVisibleWorldIds, renderWorldBadge, worldNotificationDescription }: DeviceHomeProps) {
   const uiText = useUiText("device-home");
   const [worldRequestRevision, setWorldRequestRevision] = useState(0);
   const [worldRead, setWorldRead] = useState<{
@@ -55,7 +58,12 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
   }>({ error: null, items: [], revision: -1 });
   const worldLoading = worldRead.revision !== worldRequestRevision;
   const worldError = worldLoading ? null : worldRead.error;
-  const worlds = worldLoading ? [] : worldRead.items;
+  // Keep the visible set stable while a focus refresh is in flight. Replacing
+  // it with [] would restart the composition's batch controller twice.
+  const worlds = worldRead.error ? [] : worldRead.items;
+  useEffect(() => {
+    onVisibleWorldIds?.(authStatus === "authenticated" && !worldRead.error ? worldRead.items.map(world => world.world_id) : []);
+  }, [authStatus, worldRead, worldRequestRevision, onVisibleWorldIds]);
   useEffect(()=>{
     if(authStatus!=="authenticated")return;
     const refresh=()=>{if(document.visibilityState!=="hidden")setWorldRequestRevision(value=>value+1);};
@@ -95,7 +103,7 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
 
 
   const worldEntries = worlds.map((world) => (
-    <WorldAppIcon key={world.world_id} world={world} />
+    <WorldAppIcon key={world.world_id} world={world} badge={renderWorldBadge?.(world.world_id)} notificationDescription={worldNotificationDescription?.(world.world_id, world.name)} />
   ));
 
   return (
@@ -155,7 +163,7 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
   );
 }
 
-function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
+function WorldAppIcon({ world, badge, notificationDescription }: { world: WorldSurfaceItem; badge?: ReactNode; notificationDescription?: string }) {
   const uiText = useUiText("device-home");
   const launch = presentWorldLaunchability(world);
   const description = launch.state === "launchable"
@@ -172,9 +180,10 @@ function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
   return (
     <AppIcon
       disabled={!world.launchable}
-      href={world.launchable ? worldAppRoute(world.world_id) : undefined}
+      href={world.launchable ? worldFeedRoute(world.world_id) : undefined}
       label={world.name}
-      description={description}
+      description={world.launchable && notificationDescription ? `${description} ${notificationDescription}` : description}
+      badge={badge}
       visual={
         <>
           <WorldVisual world={world} />

@@ -1,5 +1,14 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-15 World notifications: **LOCAL** reuse of the existing Social list,
+ProfileAvatar, type icons, individual check, FeedHeader, AppIcon and World shell.
+Semantic CountBadge is shared by the feed bell and home icon. The bell precedes
+own-profile, with a centered logo, unchanged five tabs and 44px controls. Home
+badge overflow is separate from image clipping/green launchability. KO/EN exact
+accessible counts, 0/99+ formatting and narrow layouts are covered in Next/static.
+No assets, dependencies, raw colors or canonical screenshot thresholds change.
+Evidence: `docs/verification/world-user-notifications-20261015.md`.
+
 2026-10-14 SNS image recovery: **LOCAL** reuse of GenerationStatus, shared Button
 and semantic tokens. KO/EN distinguish durable saving and unknown result without
 promising recovery when output is absent. Backend flags remain authoritative;

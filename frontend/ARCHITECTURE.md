@@ -1,5 +1,31 @@
 # Angmoo Frontend Architecture
 
+## World owner-profile notifications (2026-10-15 LOCAL)
+
+Social owns World notification API values, polling controllers and list/bell UI.
+Existing global and new World controllers share NotificationList presentation.
+Composition connects Social to DeviceHome through visible-ID callbacks and
+badge/description slots; no feature imports another feature's hook or DTO.
+Common CountBadge/AppIcon contain no business authorization or polling rules.
+
+The auth/runtime-scoped provider shares one selected World controller between
+feed/list. Visible home uses one batch and feed/list one controller, both at
+60_000ms with focus/visibility refresh and abort/generation fences. Paired return
+events are coalesced for 250ms. Explicit reads outlive view deactivation and never
+gate admitted source navigation. A transient session journal contains only
+user/session/scope and pending/failed IDs for uncertain static-reload reads; it
+stores no content/credentials and never substitutes for server read truth.
+Home retains its visible World set during focus refresh and resets on auth/runtime
+identity changes, avoiding duplicate batches caused by a temporary empty list.
+Permission/scope rejection clears cached notification content/counts; only
+transient failures retain a labeled stale value. A mutation epoch also prevents
+an older read response from restoring a count after a newer scope rejection.
+
+The exact `/worlds/{id}/notifications` auxiliary route shares WorldApp's five tabs
+in Next/static and the Phone native allowlist. Home/Studio generic open uses
+worldFeedRoute; neutral worldAppRoute and explicit World introduction remain.
+Evidence: [focused verification](../docs/verification/world-user-notifications-20261015.md).
+
 SNS image status remains owned by Media. Its KO/EN saving/unknown messages and
 recovery buttons reflect backend state/flags. The neutral auth/runtime identity
 hook scopes the existing component lifetime; it grants no permissions and adds

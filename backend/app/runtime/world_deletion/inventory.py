@@ -27,16 +27,12 @@ class ErasureInventory:
 
     @classmethod
     def for_connection(cls, connection):
-        """Use registered descriptors, or reflect the cold migration schema.
+        """Reflect the migration's actual generation, never current ORM columns.
 
-        Reflection supplies SQL descriptors only; reviewed owner rules still
-        determine every deletion predicate and never expand from new FKs.
+        Current application metadata is supplied explicitly by create_all.
+        A forward migration may still be on an older schema generation here.
+        Reviewed owner rules determine scope; reflection cannot expand policy.
         """
-        try:
-            return cls()
-        except ValueError as exc:
-            if str(exc) != "world_erasure_metadata_incomplete":
-                raise
         metadata = MetaData()
         metadata.reflect(bind=connection)
         return cls(metadata)

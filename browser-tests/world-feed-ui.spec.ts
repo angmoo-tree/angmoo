@@ -290,7 +290,10 @@ test("global and World header/composer anchors match and global controls remain 
     expect(global.postBody!.fontSize).toBe(world.postBody!.fontSize);
     if (width < 768) {
       expect(global.logo!.x).toBe(world.logo!.x); expect(global.right!.x + global.right!.width).toBe(world.right!.x + world.right!.width);
-    } else await expect(page.locator("[data-feed-header-right] a")).toBeVisible();
+    } else {
+      await expect(page.locator("[data-feed-header-right]").getByRole("link", { name: "내 프로필", exact: true })).toBeVisible();
+      await expect(page.locator(`[data-feed-header-right] a[href^="/worlds/${FEED_WORLD}/notifications"]`)).toBeVisible();
+    }
     measurements.push({ width, global, world });
   }
   writeFileSync(info.outputPath("anchor-geometry.json"), JSON.stringify(measurements, null, 2));

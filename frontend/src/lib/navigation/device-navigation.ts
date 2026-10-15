@@ -75,6 +75,14 @@ export const LOCAL_PRODUCT_ROUTE_CAPABILITIES = [
   },
   {
     exposure: "direct-only",
+    id: "world-notifications",
+    next: "supported",
+    routeFamily: "/worlds/{worldId}/notifications",
+    static: "supported",
+    window: "phone",
+  },
+  {
+    exposure: "direct-only",
     id: "world-post-detail",
     next: "supported",
     routeFamily: "/worlds/{worldId}/posts/{postId}",

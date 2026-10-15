@@ -84,7 +84,7 @@ from app.runtime.persistence.sqlite_schema import (
 SUPPORTED_SOURCE_VERSIONS = (
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -621,6 +621,15 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                if source_version < 38:
+                    for operation in ("insert", "update"):
+                        sql_connection.exec_driver_sql(f'DROP TRIGGER IF EXISTS "world_erasure_notifications_{operation}"')
+                    sql_connection.exec_driver_sql("DROP INDEX uq_notifications_delivery_key")
+                    sql_connection.exec_driver_sql("DROP INDEX ix_notifications_world_recipient_id")
+                    sql_connection.exec_driver_sql("ALTER TABLE notifications DROP COLUMN delivery_key")
+                    if source_version == 37:
+                        from app.runtime.world_deletion.fences import install_fences
+                        install_fences(sql_connection)
                 # This synthetic predecessor must not carry newer write fences
                 # or additive vault/binding tables. Shipped manifests/forward
                 # migrations and actual installed data are never modified here.

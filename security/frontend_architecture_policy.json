@@ -93,7 +93,7 @@
     "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
       "studioWorldRoute(world.world_id)",
-      "worldAppRoute(world.world_id)"
+      "worldFeedRoute(world.world_id)"
     ],
     "frontend/src/features/device-home/api/device-home-client.ts": [
       "getLocalWorldSurface"
@@ -178,9 +178,11 @@
       "maxWidthPx: 436"
     ],
     "frontend/src/composition/screens/device-home-screen.tsx": [
-      "<DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace} />",
+      "<DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace}",
       "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
-      "getProductRuntimeState"
+      "getProductRuntimeState",
+      "onVisibleWorldIds={onVisibleWorldIds}",
+      "useWorldUnreadCounts(worldIds)"
     ],
     "frontend/src/features/chat/config/models.ts": [
       "DEFAULT_MESSAGE_GOOGLE_MODEL",

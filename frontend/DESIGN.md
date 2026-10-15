@@ -14,6 +14,23 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## World feed notifications (2026-10-15 LOCAL)
+
+The feed header retains its centered logo and orders bell then own-profile on
+the right. Notifications are an auxiliary feed screen retaining five World tabs.
+The existing avatar/type/time/preview/individual-check list anatomy is shared;
+entry and scrolling never mark read. Back returns to the World's feed. Missing
+profile guidance links to World management without creating a profile.
+
+Coral count badges display 1–99/99+, hide zero and announce the exact KO/EN count.
+Unknown, unavailable and stale states remain explicit. Home badges sit outside
+the rounded image clipping while the green launchability badge stays inside.
+Controls retain 44px targets, keyboard focus and semantic colors. LOCAL evidence
+covers Next/static, 320/360/390/436/1280 CSSpx and badge contrast >=4.5:1.
+Native USER CHECK/hosted Windows validation remain separate. No external visual
+assets, libraries or raw-color allowances are added. See
+`docs/verification/world-user-notifications-20261015.md`.
+
 ## 2026-10-13 릴리스 준비 visual 증거 정렬 (LOCAL)
 
 기존 UI-B/UI-F의 canonical PNG 11장은 원본 그대로 보존한다. 이미 구현된

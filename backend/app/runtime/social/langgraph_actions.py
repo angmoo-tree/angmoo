@@ -78,6 +78,8 @@ def apply_successful_root_post(
         ),
     ).event
     public_action_executions.set_social_event_id(execution, social_event_id=event.id)
+    from app.domains.social.service.world_notification_delivery import bind_post_notifications
+    bind_post_notifications(db, world_id=actor.world_id, actor_id=actor.id, source_post_id=post.id, event_id=event.id)
     db.flush()
     return LangGraphSocialApplyResult(event, None)
 
@@ -252,6 +254,7 @@ def apply_successful_public_action(
     action_result["social_event_id"] = event.id
     action_notifications._link_notifications(
         db,
+        action_type=action_type,
         input_notification_id=notification_id,
         actor=actor,
         target=target,
@@ -271,6 +274,9 @@ def apply_successful_public_action(
             else None
         ),
     )
+    if source_post is not None:
+        from app.domains.social.service.world_notification_delivery import bind_post_notifications
+        bind_post_notifications(db, world_id=actor.world_id, actor_id=actor.id, source_post_id=source_post.id, event_id=event.id)
     db.flush()
     return LangGraphSocialApplyResult(event, proposal_result)
 

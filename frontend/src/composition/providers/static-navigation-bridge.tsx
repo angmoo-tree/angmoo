@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 import { isTauriDesktopRuntime } from "@/lib/desktop/product-window";
+import { confirmProductLeave } from "@/lib/desktop/navigation-guard";
+import { notifyProductLinkAdmission } from "@/lib/navigation/product-link-admission";
 
 export function StaticNavigationBridge() {
   useEffect(() => {
@@ -34,6 +36,8 @@ export function StaticNavigationBridge() {
       if (destination.origin !== window.location.origin) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (!confirmProductLeave()) return;
+      notifyProductLinkAdmission(anchor);
       // Static/Tauri navigation intentionally reloads through the route fallback.
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign(

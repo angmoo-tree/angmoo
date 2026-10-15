@@ -200,6 +200,7 @@ export async function navigateDesktopProductRoute(
   route: string,
   replace = false,
   leaveConfirmed = false,
+  onAdmitted?: () => void,
 ): Promise<DesktopProductNavigationResult> {
   if (!isTauriDesktopRuntime()) {
     return { handled: false, mode: "browser" };
@@ -211,6 +212,7 @@ export async function navigateDesktopProductRoute(
   if (targetKind === state.kind) {
     await window.__TAURI__?.core?.invoke?.("validate_product_navigation", { kind: targetKind, route: normalized });
     if (normalized !== state.route && !leaveConfirmed && !confirmProductLeave()) return { handled: true, mode: "same-window" };
+    onAdmitted?.();
     if (!navigateCurrentDesktopRoute(normalized, replace)) {
       throw new Error("desktop_same_window_navigation_failed");
     }

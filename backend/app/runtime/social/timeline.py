@@ -10,6 +10,20 @@ from app.runtime.social.post_authors import world_post_author_for_write
 
 
 class RuntimeSocialWriteWorkflows:
+    def notification_mentions(self, db, *, world_id, texts):
+        from sqlalchemy import select
+        from app.domains.social.constants import MENTION_HANDLE_RE
+        from app.domains.world_characters.models import WorldCharacter
+        from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+        from app.runtime.social.post_authors import batch_world_post_authors
+        handles = {match.group(1) for text in texts for match in MENTION_HANDLE_RE.finditer(text or "")}
+        if not handles:
+            return []
+        ids = set(db.scalars(select(WorldCharacter.id).join(WorldCharacterConfiguration,
+            WorldCharacterConfiguration.world_character_id == WorldCharacter.id).where(
+                WorldCharacter.world_id == world_id, WorldCharacter.status == "active",
+                WorldCharacterConfiguration.profile["handle"].as_string().in_(handles))))
+        return list(batch_world_post_authors(db, world_id=world_id, author_ids=ids).values())
     def world_post_author(self, db: Session, *, character_id: str, world_id: str, world_character_id: str):
         return world_post_author_for_write(db, character_id=character_id,
             world_id=world_id, world_character_id=world_character_id)

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { installDesktopHistory } from "@/lib/desktop/desktop-history";
+import { notifyProductLinkAdmission } from "@/lib/navigation/product-link-admission";
 import { consumeDesktopWindowBootstrapRoute, getDesktopWindowState, isTauriDesktopRuntime, navigateDesktopProductRoute, openExternalProductLink, publishDesktopRoute, reportDesktopNavigationError, DESKTOP_NAVIGATE_EVENT } from "@/lib/desktop/product-window";
 
 /** Own native integration only; ordinary browser navigation remains Next's. */
@@ -36,7 +37,7 @@ export function DesktopWindowBridge() {
       }
     };
     const click = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const anchor = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
       if (!anchor || anchor.hasAttribute("download")) return;
       let url: URL;
@@ -47,7 +48,7 @@ export function DesktopWindowBridge() {
         return;
       }
       event.preventDefault(); event.stopPropagation();
-      void navigateDesktopProductRoute(`${url.pathname}${url.search}${url.hash}`).catch(reportDesktopNavigationError);
+      void navigateDesktopProductRoute(`${url.pathname}${url.search}${url.hash}`, false, false, () => notifyProductLinkAdmission(anchor)).catch(reportDesktopNavigationError);
     };
     window.addEventListener(DESKTOP_NAVIGATE_EVENT, requested);
     document.addEventListener("click", click, true);

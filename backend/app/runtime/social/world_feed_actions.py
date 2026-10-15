@@ -120,6 +120,10 @@ def apply_successful_world_feed_action(
         proposal_id=proposal.id if proposal is not None else None,
     )
     action_result["social_event_id"] = event.id
+    if isinstance(source, Post):
+        from app.domains.social.service.world_notification_delivery import bind_post_notifications
+        bind_post_notifications(db, world_id=profile.world.id, actor_id=profile.world_character.id,
+            source_post_id=source.id, event_id=event.id)
     public_action_executions.set_social_event_id(execution, social_event_id=event.id)
     if proposal is not None:
         action_result["proposal_id"] = proposal.id

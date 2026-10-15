@@ -1,5 +1,14 @@
 # Next static product shell contract
 
+2026-10-15: `/worlds/{worldId}/notifications` is a direct-only auxiliary Phone
+screen composed by WorldAppRouteClient/WorldApp in Next and static. It uses the
+feed primary section, never a sixth tab. Global `/notifications` remains outside
+the static capability list. Home and Studio generic open enter explicit feed;
+neutral World prefixes and explicit introductions/detail routes stay intact.
+Admitted navigation is announced after leave/native validation so Social can
+attempt read independently; read failure never blocks an authorized destination.
+LOCAL verification: `docs/verification/world-user-notifications-20261015.md`.
+
 2026-10-09: World Relationships and the explicit Character/World graph deep URL
 resolve to the same WorldAppRouteClient/WorldApp composition in both profiles.
 The explicit ID is not replaced by the owner profile; query and login returnTo
