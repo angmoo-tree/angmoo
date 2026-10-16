@@ -1,5 +1,33 @@
 # Angmoo Backend Architecture
 
+## Situation embedding delivery groups (2026-10-16 LOCAL)
+
+The situation runtime prepares at most 32 receipts per turn, still committing
+one receipt per existing fenced UoW and yielding its canonical queue between
+receipts. Dirty-brief rebuilding runs once after that bounded turn. It never
+holds one write transaction across all receipts or an embedding request.
+
+Initial vector delivery coalesces applied receipts from the same admitted run.
+The existing run cutoff/state and atomic eligibility registration own recovery;
+no new table, timer or authorization cache is added. A full model-sized group,
+run completion or producer error releases already prepared work. No later
+unrequested receipt is awaited. Retry, expired-lease, changed and erased items
+retain their existing independent delivery paths. Bounded read pagination keeps
+waiting groups from hiding unrelated work. Committed eligible cohort members
+whose outbox fanout has not arrived yet may be enrolled in the same short claim
+transaction after a fresh registration/World-deletion check.
+
+Runtime uses each model's batch capability, adapter method and declared limits.
+Gemini embedding 2 retains the application limits of 20 independent inputs,
+8,192 UTF-8 bytes per input and a 65,536-byte conservative serialized request
+budget (JSON escaping plus per-item envelope); these are Angmoo
+budgets, not a claim about the provider's maximum. Larger/longer groups split;
+single-only providers remain single-input. Existing per-item source/credential
+proofs, response mapping, result journals and short canonical-to-Vec1 effects
+remain authoritative. Group readiness never substitutes for these validations.
+See the [scoped delivery verification](../docs/verification/situation-embedding-batches-20261016.md)
+for HTTP counts, contention recovery and deployment boundaries.
+
 ## SQLite recovery and private result delivery (2026-10-16 LOCAL)
 
 Domains retain authorization, source validation, persistence and state transitions;

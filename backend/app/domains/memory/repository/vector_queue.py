@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from time import time
 from uuid import uuid4
-from sqlalchemy import select, text
+from sqlalchemy import select, text, tuple_
 from app.domains.memory.models.vector_work import MemoryVectorWork, MemoryVectorMaintenance
 
 
@@ -27,13 +27,21 @@ def enqueue(session, generation, item_id, world_id, *, change=0, force=False):
 
 
 def due_ids(session, generation, *, now=None, limit=64):
+    return tuple(row.item_id for row in due_page(session, generation, now=now, limit=limit))
+
+
+def due_page(session, generation, *, now=None, limit=64, after=None):
     now = time() if now is None else now
     # Running leases use the same indexed due time; no scan of completed rows.
-    return tuple(session.scalars(select(MemoryVectorWork.item_id).where(
+    query = select(MemoryVectorWork.item_id, MemoryVectorWork.due_at,
+        MemoryVectorWork.state, MemoryVectorWork.applied_revision, MemoryVectorWork.last_code).where(
         MemoryVectorWork.generation == generation,
         MemoryVectorWork.state.in_(("pending", "retry", "running", "scheduled")),
         MemoryVectorWork.due_at <= now,
-    ).order_by(MemoryVectorWork.due_at, MemoryVectorWork.item_id).limit(limit)))
+    )
+    if after is not None:
+        query = query.where(tuple_(MemoryVectorWork.due_at, MemoryVectorWork.item_id) > after)
+    return tuple(session.execute(query.order_by(MemoryVectorWork.due_at, MemoryVectorWork.item_id).limit(limit)))
 
 
 def claim(session, generation, identifiers, *, now=None):

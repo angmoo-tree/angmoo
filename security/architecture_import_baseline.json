@@ -1,7 +1,7 @@
 {
-  "edge_count": 6718,
-  "external_import_count": 4540,
-  "module_count": 1552,
+  "edge_count": 6757,
+  "external_import_count": 4577,
+  "module_count": 1559,
   "modules": [
     {
       "external_imports": [],
@@ -809,6 +809,7 @@
         "collections.abc",
         "concurrent.futures",
         "contextlib",
+        "contextvars",
         "dataclasses",
         "logging",
         "sqlalchemy",
@@ -817,9 +818,11 @@
         "sqlite3",
         "threading",
         "time",
-        "typing"
+        "typing",
+        "uuid"
       ],
       "imports": [
+        "app.core.work_observation",
         "app.exceptions"
       ],
       "module": "app.core.sqlite_concurrency",
@@ -848,6 +851,23 @@
       "imports": [],
       "module": "app.core.unit_of_work",
       "path": "backend/app/core/unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "contextvars",
+        "datetime",
+        "functools",
+        "hashlib",
+        "inspect",
+        "os.path",
+        "time",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.core.work_observation",
+      "path": "backend/app/core/work_observation.py",
       "wildcard_imports": []
     },
     {
@@ -6310,6 +6330,7 @@
       ],
       "imports": [
         "app.core.calendar",
+        "app.core.work_observation",
         "app.domains.memory.contracts.access_validation",
         "app.domains.memory.contracts.activity_situation",
         "app.domains.memory.contracts.provenance",
@@ -6406,6 +6427,7 @@
       ],
       "imports": [
         "app.core.calendar",
+        "app.core.work_observation",
         "app.domains.memory.contracts.activity_situation",
         "app.domains.memory.contracts.items",
         "app.domains.memory.exceptions",
@@ -6469,6 +6491,20 @@
       ],
       "module": "app.domains.memory.repository.situation_validation",
       "path": "backend/app/domains/memory/repository/situation_validation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.models.activity_situation",
+        "app.domains.memory.models.embedding",
+        "app.domains.memory.models.items",
+        "app.domains.memory.models.vector_work"
+      ],
+      "module": "app.domains.memory.repository.situation_vector_delivery",
+      "path": "backend/app/domains/memory/repository/situation_vector_delivery.py",
       "wildcard_imports": []
     },
     {
@@ -6636,6 +6672,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.core.work_observation",
         "app.domains.memory.contracts.batch_preparation",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.scope",
@@ -17111,6 +17148,18 @@
     },
     {
       "external_imports": [
+        "importlib.util",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.work_observation"
+      ],
+      "module": "app.providers.embedding_observation",
+      "path": "backend/app/providers/embedding_observation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "json"
       ],
@@ -17141,6 +17190,7 @@
         "app.core.redaction",
         "app.providers.contracts",
         "app.providers.diagnostics",
+        "app.providers.embedding_observation",
         "app.providers.gemini_embedding_batch"
       ],
       "module": "app.providers.gemini",
@@ -17156,7 +17206,8 @@
         "time"
       ],
       "imports": [
-        "app.providers.contracts"
+        "app.providers.contracts",
+        "app.providers.embedding_observation"
       ],
       "module": "app.providers.gemini_embedding_batch",
       "path": "backend/app/providers/gemini_embedding_batch.py",
@@ -18909,6 +18960,63 @@
     {
       "external_imports": [
         "collections",
+        "datetime",
+        "hashlib",
+        "json",
+        "math",
+        "pathlib",
+        "queue",
+        "re",
+        "threading",
+        "time"
+      ],
+      "imports": [
+        "app.core.work_observation",
+        "app.runtime.diagnostics.sns_observation"
+      ],
+      "module": "app.runtime.diagnostics.memory_pipeline_observation",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_observation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections",
+        "datetime",
+        "json",
+        "math",
+        "pathlib"
+      ],
+      "imports": [
+        "app.runtime.diagnostics.memory_pipeline_observation",
+        "app.runtime.diagnostics.memory_pipeline_snapshot"
+      ],
+      "module": "app.runtime.diagnostics.memory_pipeline_report",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_report.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "datetime",
+        "json",
+        "pathlib",
+        "re",
+        "sqlite3",
+        "time"
+      ],
+      "imports": [
+        "app.config",
+        "app.runtime.memory.sqlite_fts5_recall",
+        "app.runtime.memory.vector_resources",
+        "app.runtime.persistence.runtime_data_path"
+      ],
+      "module": "app.runtime.diagnostics.memory_pipeline_snapshot",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_snapshot.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections",
         "datetime"
       ],
       "imports": [
@@ -18955,6 +19063,7 @@
         "uuid"
       ],
       "imports": [
+        "app.runtime.diagnostics.memory_pipeline_observation",
         "app.runtime.diagnostics.situation_observation"
       ],
       "module": "app.runtime.diagnostics.sns_observation",
@@ -18978,6 +19087,7 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.runtime.diagnostics.memory_pipeline_report",
         "app.runtime.diagnostics.situation_coverage",
         "app.runtime.diagnostics.situation_observation",
         "app.runtime.diagnostics.sns_observation"
@@ -19585,6 +19695,7 @@
         "uuid"
       ],
       "imports": [
+        "app.core.work_observation",
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.scope",
@@ -20028,6 +20139,7 @@
       ],
       "imports": [
         "app.core.atomic_json",
+        "app.core.work_observation",
         "app.domains.memory.models.items",
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.sqlite_fts5_recall"
@@ -20175,6 +20287,7 @@
       "imports": [
         "app.core.calendar",
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.identity.service.environment",
         "app.domains.memory.contracts.activity_situation",
         "app.domains.memory.contracts.scope",
@@ -20322,6 +20435,7 @@
       "imports": [
         "app.contracts.retrieval_observation",
         "app.core.search_text",
+        "app.core.work_observation",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.recall",
         "app.domains.memory.policies.grouped_fts",
@@ -20350,6 +20464,7 @@
       ],
       "imports": [
         "app.contracts.search_diagnostics",
+        "app.core.work_observation",
         "app.domains.memory.contracts.vector_projection",
         "app.runtime.memory.worker_diagnostics"
       ],
@@ -20401,6 +20516,7 @@
       "imports": [
         "app.core.result_journal",
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.memory.contracts.embedding",
         "app.domains.memory.exceptions",
         "app.providers.contracts",
@@ -20419,6 +20535,7 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.memory.models.embedding",
         "app.domains.memory.models.items",
         "app.domains.memory.models.vector_work",
@@ -20440,6 +20557,7 @@
       "imports": [
         "app.core.result_journal",
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.memory.contracts.recall",
         "app.domains.memory.contracts.vector_projection",
         "app.domains.memory.exceptions",
@@ -20486,6 +20604,7 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.models.activity_configuration",
@@ -20509,6 +20628,7 @@
         "time"
       ],
       "imports": [
+        "app.core.work_observation",
         "app.runtime.memory.canonical_work",
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.vector_attempts",
@@ -20531,6 +20651,7 @@
         "time"
       ],
       "imports": [
+        "app.core.work_observation",
         "app.domains.memory.exceptions",
         "app.domains.memory.models.items",
         "app.domains.memory.repository.vector_work",
@@ -20548,13 +20669,16 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.memory.models.embedding",
         "app.domains.memory.models.items",
         "app.domains.memory.models.vector_work",
         "app.domains.memory.repository.vector_erasure",
         "app.domains.memory.repository.vector_queue",
         "app.domains.memory.repository.vector_work",
-        "app.runtime.memory.vector_changes"
+        "app.domains.worlds.models_deletion",
+        "app.runtime.memory.vector_changes",
+        "app.runtime.memory.vector_situation_batches"
       ],
       "module": "app.runtime.memory.vector_queue_worker",
       "path": "backend/app/runtime/memory/vector_queue_worker.py",
@@ -20571,6 +20695,19 @@
       ],
       "module": "app.runtime.memory.vector_resources",
       "path": "backend/app/runtime/memory/vector_resources.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "time"
+      ],
+      "imports": [
+        "app.domains.memory.repository.situation_vector_delivery",
+        "app.domains.memory.repository.vector_queue",
+        "app.providers.registry"
+      ],
+      "module": "app.runtime.memory.vector_situation_batches",
+      "path": "backend/app/runtime/memory/vector_situation_batches.py",
       "wildcard_imports": []
     },
     {
@@ -20624,6 +20761,7 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.core.work_observation",
         "app.domains.identity.contracts",
         "app.domains.identity.service.world_credentials",
         "app.domains.memory.contracts.embedding",

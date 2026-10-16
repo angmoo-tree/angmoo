@@ -18,6 +18,7 @@ class MemoryVectorProjection:
         self.last_usage = None
         self.generation = index.generation
         self._claims, self._boundaries = {}, {}
+        self._claim_cursor = None
         self._attempt_keys = {}
         self._wake = asyncio.Event()
         self._wakeup = None

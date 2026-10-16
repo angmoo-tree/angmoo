@@ -12,8 +12,9 @@ from app.runtime.memory.vector_changes import bootstrap_page, expand_page
 
 @observation.observed("vector_claim")
 def take(projection):
+    from app.runtime.memory.vector_situation_batches import ready_page
     with projection._factory() as session:
-        ids = queue.due_ids(session, projection.generation)
+        ids, enrollment = ready_page(projection, session)
         # One bounded read outside the writer only while observation is enabled.
         # This covers carry-in claims with no outbox event in the current session.
         scopes = {row.id: (row.world_id, row.subject_world_character_id) for row in session.execute(
@@ -22,8 +23,19 @@ def take(projection):
     if not ids:
         return ()
     with projection._factory() as session:
+        def claim_page():
+            from app.domains.worlds.models_deletion import WorldDeletionRequest
+            live = set(session.scalars(select(MemoryVectorEligibility.memory_item_id)
+                .join(MemoryItem, MemoryItem.id == MemoryVectorEligibility.memory_item_id)
+                .where(MemoryItem.id.in_(enrollment), MemoryItem.deleted_at.is_(None),
+                    MemoryItem.status == "active", ~MemoryItem.world_id.in_(select(WorldDeletionRequest.world_id))))) if enrollment else set()
+            for item_id, world_id in enrollment.items():
+                if item_id in live:
+                    queue.enqueue(session, projection.generation, item_id, world_id)
+            return queue.claim(session, projection.generation,
+                tuple(item_id for item_id in ids if item_id not in enrollment or item_id in live))
         claims = run_sqlite_session_immediate(session,
-            lambda: queue.claim(session, projection.generation, ids), require_clean=True)
+            claim_page, require_clean=True)
     for claim in claims:
         world_id, actor_id = scopes.get(claim.item_id, (None, None))
         observation.emit("queue", boundary="claimed", item_id=claim.item_id, generation=claim.generation,
