@@ -34,7 +34,7 @@ def db_instant(value):
     return encode_utc_timestamp(utc_instant(datetime.fromisoformat(value.replace("Z", "+00:00")))) if value else None
 
 
-def collect(path, manifest):
+def collect(path, manifest, *, data_root=None):
     start, end, tail = (instant(manifest[key]) for key in ("started_at", "ends_at", "tail_ends_at"))
     actors = manifest["actor_ids"]
     if not actors or len(actors) > 100 or not all(isinstance(actor, str) and len(actor) <= 64 for actor in actors):
@@ -94,7 +94,9 @@ def collect(path, manifest):
                 "FROM memory_situation_runs r JOIN memory_scope_settings s ON s.id=r.scope_setting_id WHERE s.world_id=? "
                 "AND s.subject_world_character_id IN (" + ",".join("?" for _ in actors) + ") ORDER BY r.created_at DESC LIMIT 100",
                 (manifest["world_id"], *actors))]
-        return {"schema": "sns-media-memory-supplement.v1", "status": "ok", "started_utc": encode_utc_timestamp(start),
+        from app.runtime.diagnostics.memory_pipeline_snapshot import snapshot as memory_snapshot
+        memory = memory_snapshot(path, manifest, data_root=data_root)
+        return {"memory_pipeline": memory, "schema": "sns-media-memory-supplement.v1", "status": "ok", "started_utc": encode_utc_timestamp(start),
             "ends_utc": encode_utc_timestamp(end), "tail_ends_utc": encode_utc_timestamp(tail),
             "activity_count": len(selected), "effect_count": len(effect_ids), "posts": prepared, "receipts": receipts,
             "admission_blocked": sum(row["state"] == "blocked" for row in receipts),
@@ -109,7 +111,7 @@ def main():
     args = parser.parse_args()
     try:
         manifest = read_session(args.data_root, args.session)
-        print(json.dumps(collect(database_path(args.data_root), manifest), ensure_ascii=False))
+        print(json.dumps(collect(database_path(args.data_root), manifest, data_root=args.data_root), ensure_ascii=False))
     except (OSError, ValueError, KeyError, sqlite3.Error):
         print(json.dumps({"status": "error", "code": "collector_probe_failed"}))
         return 2

@@ -33,13 +33,13 @@ def transport(monkeypatch):
         return httpx.Response(200, content=json.dumps({"embeddings": embeddings}), headers={"content-type": "application/json"})
     def client(**kwargs):
         options = kwargs.pop("http_options")
-        options.async_client_args = {"transport": httpx.MockTransport(handler)}
+        options.async_client_args = {**(options.async_client_args or {}), "transport": httpx.MockTransport(handler)}
         return original(**kwargs, http_options=options)
     monkeypatch.setattr(genai, "Client", client)
     return calls, behavior
 
 
-@pytest.mark.parametrize("count", [1, 10, 20])
+@pytest.mark.parametrize("count", [1, 7, 10, 20])
 def test_actual_pinned_sdk_sends_one_http_and_independent_contents(transport, count):
     calls, _ = transport
     texts = tuple(f"title: Memory | text: independent {i}" for i in range(count))

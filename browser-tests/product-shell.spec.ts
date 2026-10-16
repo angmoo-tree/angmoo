@@ -2637,6 +2637,10 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   await expect(page.locator('section[role="alert"]')).toContainText(
     "Device Home을 열지 못했어요",
   );
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
+  expect(
+    audit.reads.filter((read) => read === "GET /api/backend/worlds/mine?surface=device_home"),
+  ).toHaveLength(1);
   await page.getByRole("button", { name: "World 목록 다시 시도" }).click();
 
   await expect(
@@ -2645,6 +2649,11 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   await expect(page.locator('[data-world-launchability="launchable"]')).toContainText(
     "실행 가능",
   );
+  // Retrying the list read must reuse successful preparation in this Home lifetime.
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
+  expect(
+    audit.reads.filter((read) => read === "GET /api/backend/worlds/mine?surface=device_home"),
+  ).toHaveLength(2);
 
   const unavailableWorlds = [
     {
@@ -2701,7 +2710,7 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   expect(
     audit.reads.filter((read) => read === "GET /api/backend/runtime/status"),
   ).toHaveLength(5);
-  expect(audit.writes).toEqual(Array(6).fill("POST /api/backend/worlds/default-space/ensure"));
+  expect(audit.writes).toEqual(Array(5).fill("POST /api/backend/worlds/default-space/ensure"));
   expect(audit.providerCalls).toEqual([]);
 });
 

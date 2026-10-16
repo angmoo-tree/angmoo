@@ -5,6 +5,7 @@ against canonical Memory before using it. This adapter never calls an AI API.
 """
 from __future__ import annotations
 
+from app.core import work_observation as observation
 from contextlib import contextmanager
 import hashlib
 import json
@@ -83,9 +84,24 @@ class SqliteMemoryVectorIndex:
                 or hashlib.sha256(self._extension.read_bytes()).hexdigest() != extension_sha256.lower()):
             raise MemoryVectorProjectionError("memory_vector_extension_integrity")
         self.generation = generation
+        from contextvars import ContextVar
+        self._effect = ContextVar(f"vector_effect_{id(self)}", default=None)
+
+    @contextmanager
+    def effect_connection(self):
+        """Load the extension before entering the canonical writer fence."""
+        with self._connect() as connection:
+            token = self._effect.set(connection)
+            try:
+                yield
+            finally:
+                self._effect.reset(token)
 
     @contextmanager
     def _connect(self, *, cancellation: VectorCancellation | None = None, read_only=False):
+        if self._effect.get() is not None:
+            yield self._effect.get()
+            return
         with phase("db_open"):
             connection = sqlite3.connect(self.database_path.as_uri()+"?mode=ro" if read_only else self.database_path,
                                          uri=read_only, timeout=1.0)
@@ -96,7 +112,8 @@ class SqliteMemoryVectorIndex:
                     connection.load_extension(str(self._extension))
                 finally:
                     connection.enable_load_extension(False)
-            connection.execute("PRAGMA busy_timeout=1000")
+            # Derived effects must not hold the canonical writer while waiting.
+            connection.execute("PRAGMA busy_timeout=25" if not read_only else "PRAGMA busy_timeout=1000")
             if cancellation is not None:
                 cancellation.attach(connection)
             yield connection
@@ -117,9 +134,12 @@ class SqliteMemoryVectorIndex:
 
     def open(self):
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as connection:
+        with self._connect() as connection, observation.span("vec1_writer",
+                database_id=observation.database_id(self.database_path), writer="vec1_open"):
             connection.execute("PRAGMA journal_mode=WAL")
+            observation.emit("sqlite", boundary="begin_started")
             connection.execute("BEGIN IMMEDIATE")
+            observation.emit("sqlite", boundary="acquired")
             exists = connection.execute("SELECT 1 FROM sqlite_master WHERE name='projection_profile'").fetchone()
             if not exists:
                 connection.execute("CREATE TABLE projection_profile(revision TEXT PRIMARY KEY, generation TEXT NOT NULL)")
@@ -129,7 +149,9 @@ class SqliteMemoryVectorIndex:
                 connection.execute("CREATE TABLE documents(rowid INTEGER PRIMARY KEY AUTOINCREMENT, document_id TEXT UNIQUE NOT NULL, memory_item_id TEXT NOT NULL, version INTEGER NOT NULL, content_hash TEXT NOT NULL)")
             if connection.execute("SELECT revision,generation FROM projection_profile").fetchall() != [(SCHEMA_REVISION, self.generation)]:
                 raise MemoryVectorProjectionError("memory_vector_profile_mismatch")
+            observation.emit("sqlite", boundary="commit_started")
             connection.commit()
+            observation.emit("sqlite", boundary="committed")
             # Inspect the extension's own catalog, not just our bookkeeping.
             connection.execute("SELECT count(*) FROM vectors").fetchone()
             model = connection.execute("SELECT model FROM vec1cat WHERE name='vectors'").fetchone()
@@ -142,8 +164,11 @@ class SqliteMemoryVectorIndex:
         if any(d.version < 1 or not d.profile or len(d.content_hash) != 64
                or not d.document_id or d.occurred_at.tzinfo is None for d, _ in prepared):
             raise ValueError("memory_vector_document_invalid")
-        with self._connect() as connection:
+        with self._connect() as connection, observation.span("vec1_writer",
+                database_id=observation.database_id(self.database_path), writer="vec1_upsert"):
+            observation.emit("sqlite", boundary="begin_started")
             connection.execute("BEGIN IMMEDIATE")
+            observation.emit("sqlite", boundary="acquired")
             for document, blob in prepared:
                 old = connection.execute("SELECT rowid,version FROM documents WHERE document_id=?", (document.document_id,)).fetchone()
                 if old is not None and old[1] > document.version:
@@ -152,19 +177,37 @@ class SqliteMemoryVectorIndex:
                 rowid = connection.execute("SELECT rowid FROM documents WHERE document_id=?", (document.document_id,)).fetchone()[0]
                 connection.execute("DELETE FROM vectors WHERE rowid=?", (rowid,))
                 connection.execute("INSERT INTO vectors(rowid,vector,owner_id,world_id,subject_id,profile,occurred_at,counterpart_id,thread_id) VALUES(?,?,?,?,?,?,?,?,?)", (rowid, blob, document.scope.owner_id, document.scope.world_id, document.scope.subject_world_character_id, document.profile, document.occurred_at.timestamp(), document.counterpart_world_character_id, document.thread_id))
+            observation.emit("sqlite", boundary="commit_started")
             connection.commit()
+            observation.emit("sqlite", boundary="committed")
+
+    def matches(self, document):
+        """Exact effect identity, including metadata, without rewriting vectors."""
+        with self._connect(read_only=True) as connection:
+            row = connection.execute("SELECT d.version,d.content_hash,v.profile,v.owner_id,v.world_id,v.subject_id,v.occurred_at,v.counterpart_id,v.thread_id FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=?", (document.document_id,)).fetchone()
+        return row == (document.version, document.content_hash, document.profile,
+            document.scope.owner_id, document.scope.world_id, document.scope.subject_world_character_id,
+            document.occurred_at.timestamp(), document.counterpart_world_character_id, document.thread_id)
 
     def delete(self, document_id: str):
-        with self._connect() as connection:
+        with self._connect() as connection, observation.span("vec1_writer",
+                database_id=observation.database_id(self.database_path), writer="vec1_delete"):
+            observation.emit("sqlite", boundary="begin_started")
             connection.execute("BEGIN IMMEDIATE")
+            observation.emit("sqlite", boundary="acquired")
             connection.execute("DELETE FROM vectors WHERE rowid IN (SELECT rowid FROM documents WHERE document_id=?)", (document_id,))
             connection.execute("DELETE FROM documents WHERE document_id=?", (document_id,))
+            observation.emit("sqlite", boundary="commit_started")
             connection.commit()
+            observation.emit("sqlite", boundary="committed")
 
     def erase_items(self, identifiers):
         identifiers = tuple(identifiers)
-        with self._connect() as connection:
+        with self._connect() as connection, observation.span("vec1_writer",
+                database_id=observation.database_id(self.database_path), writer="vec1_erase_items"):
+            observation.emit("sqlite", boundary="begin_started")
             connection.execute("BEGIN IMMEDIATE")
+            observation.emit("sqlite", boundary="acquired")
             for identifier in identifiers:
                 docs = {f"memory-item:{identifier}"} | {row[0] for row in connection.execute("SELECT document_id FROM documents WHERE memory_item_id=?", (identifier,))}
                 connection.execute("DELETE FROM vectors WHERE rowid IN (SELECT rowid FROM documents WHERE memory_item_id=?)", (identifier,))
@@ -172,7 +215,9 @@ class SqliteMemoryVectorIndex:
                 if connection.execute("SELECT 1 FROM sqlite_master WHERE name='embedding_attempts_v2'").fetchone():
                     for doc in docs:
                         connection.execute("DELETE FROM embedding_attempts_v2 WHERE document_id=?", (doc,))
+            observation.emit("sqlite", boundary="commit_started")
             connection.commit()
+            observation.emit("sqlite", boundary="committed")
 
     def identity(self, document_id):
         with self._connect(read_only=True) as connection:
@@ -182,8 +227,11 @@ class SqliteMemoryVectorIndex:
                         occurred_at=None, counterpart_world_character_id=None, thread_id=None):
         if scope is not None and (occurred_at is None or occurred_at.tzinfo is None):
             raise ValueError("memory_vector_metadata_invalid")
-        with self._connect() as connection:
+        with self._connect() as connection, observation.span("vec1_writer",
+                database_id=observation.database_id(self.database_path), writer="vec1_refresh_version"):
+            observation.emit("sqlite", boundary="begin_started")
             connection.execute("BEGIN IMMEDIATE")
+            observation.emit("sqlite", boundary="acquired")
             if scope is not None:
                 row = connection.execute("SELECT d.rowid,v.vector,v.owner_id,v.world_id,v.subject_id,v.profile,v.occurred_at,v.counterpart_id,v.thread_id FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=? AND d.content_hash=? AND d.version<=?",
                     (document_id, content_hash, version)).fetchone()
@@ -199,7 +247,13 @@ class SqliteMemoryVectorIndex:
                         (row[0], row[1], *expected))
             connection.execute("UPDATE documents SET version=? WHERE document_id=? AND content_hash=? AND version<=?",
                                (version, document_id, content_hash, version))
+            observation.emit("sqlite", boundary="commit_started")
             connection.commit()
+            observation.emit("sqlite", boundary="committed")
+
+    def document_upper_bound(self):
+        with self._connect(read_only=True) as connection:
+            return connection.execute("SELECT max(document_id) FROM documents").fetchone()[0] or ""
 
     def document_page(self, *, after="", limit=64):
         if not 1 <= limit <= 256:

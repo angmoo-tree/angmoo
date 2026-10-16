@@ -7,6 +7,8 @@ and every hit must be revalidated before it can become Character evidence.
 
 from __future__ import annotations
 
+from app.core import work_observation as observation
+
 from app.contracts.retrieval_observation import observe, detail
 
 from collections.abc import Iterable, Iterator
@@ -61,6 +63,15 @@ class MemoryRecallIndexSettings:
     generation: str = MEMORY_RECALL_GENERATION
     busy_timeout_ms: int = 5_000
     synchronous: str = "FULL"
+
+    @classmethod
+    def for_representation(cls, representation: str) -> MemoryRecallIndexSettings:
+        """Share the configured generation between the runtime and diagnostics."""
+        if representation == "episode_v1":
+            return cls(generation="memory-episode-v1")
+        if representation == "legacy":
+            return cls()
+        raise ValueError("unsupported_memory_recall_representation")
 
     def __post_init__(self) -> None:
         if not _GENERATION_PATTERN.fullmatch(self.generation):
@@ -673,17 +684,24 @@ class SqliteMemoryRecallIndex:
 
     @contextmanager
     def _write_transaction(self) -> Iterator[sqlite3.Connection]:
-        with self._lock, self._connect(self.database_path) as connection:
-            connection.execute("BEGIN IMMEDIATE")
-            try:
-                yield connection
-                connection.commit()
-            except sqlite3.DatabaseError as exc:
-                connection.rollback()
-                raise MemoryRecallIndexError("Memory recall write failed") from exc
-            except Exception:
-                connection.rollback()
-                raise
+        with observation.span("fts_writer", database_id=observation.database_id(self.database_path)):
+            with self._lock, self._connect(self.database_path) as connection:
+                observation.emit("sqlite", boundary="begin_started")
+                connection.execute("BEGIN IMMEDIATE")
+                observation.emit("sqlite", boundary="acquired")
+                try:
+                    yield connection
+                    observation.emit("sqlite", boundary="commit_started")
+                    connection.commit()
+                    observation.emit("sqlite", boundary="committed")
+                except sqlite3.DatabaseError as exc:
+                    connection.rollback()
+                    observation.emit("sqlite", boundary="rolled_back")
+                    raise MemoryRecallIndexError("Memory recall write failed") from exc
+                except Exception:
+                    connection.rollback()
+                    observation.emit("sqlite", boundary="rolled_back")
+                    raise
 
     def _upsert_document(
         self,

@@ -1,4 +1,4 @@
-"""Build the pinned public-domain official Vec1 source; never used at runtime."""
+"""Build pinned public-domain Vec1 source and verified SQLite headers."""
 from __future__ import annotations
 
 import argparse
@@ -28,6 +28,7 @@ ATTEMPTS = 3
 TRANSIENT_HTTP = frozenset((408, 429, 500, 502, 503, 504))
 SOURCE_URL = f"https://sqlite.org/vec1/raw/vec1.c?ci={SOURCE_REVISION}"
 SQLITE_URL = "https://sqlite.org/2026/sqlite-amalgamation-3530000.zip"
+BUNDLED_SOURCE = Path(__file__).resolve().parent / "vendor" / "vec1" / "vec1.c"
 
 
 def _verified(data: bytes, digest: str) -> bytes:
@@ -122,7 +123,14 @@ def download(url: str, digest: str, cache_dir: Path | None = None) -> bytes:
                 target.replace(quarantine)
             except FileNotFoundError:
                 pass  # Another writer already quarantined the same entry.
-    data = _fetch(url, digest)
+    if url == SOURCE_URL and digest == SOURCE_SHA256:
+        # The original Fossil endpoint now redirects to an HTML introduction.
+        # Preserve the exact reviewed bytes and digest rather than accepting a
+        # different revision or relying on an unreviewed mirror.
+        with BUNDLED_SOURCE.open("rb") as stream:
+            data = _verified(stream.read(MAX_BYTES + 1), digest)
+    else:
+        data = _fetch(url, digest)
     if target is not None:
         descriptor, name = tempfile.mkstemp(prefix=".vec1-", suffix=".tmp", dir=target.parent)
         pending = Path(name)

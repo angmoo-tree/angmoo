@@ -13,6 +13,7 @@ A = [1.0] + [0.0] * 767
 
 
 class DurableIndex:
+    generation = "v1"
     def __init__(self, path):
         self.path = path
         with self._connect() as db:
@@ -28,6 +29,8 @@ class DurableIndex:
     def identity(self, identifier):
         with self._connect() as db:
             return db.execute("SELECT version,digest,profile FROM test_documents WHERE id=?", (identifier,)).fetchone()
+    def matches(self, document):
+        return self.identity(document.document_id) == (document.version, document.content_hash, document.profile)
     def upsert(self, documents):
         with self._connect() as db:
             for doc in documents:
@@ -43,6 +46,9 @@ class DurableIndex:
     def delete(self, identifier):
         with self._connect() as db:
             db.execute("DELETE FROM test_documents WHERE id=?", (identifier,)); db.commit()
+    def document_upper_bound(self):
+        with self._connect() as db:
+            return db.execute("SELECT max(id) FROM test_documents").fetchone()[0] or ""
     def document_page(self, *, after="", limit=64):
         with self._connect() as db:
             return db.execute("SELECT id,item FROM test_documents WHERE id>? ORDER BY id LIMIT ?", (after, limit)).fetchall()

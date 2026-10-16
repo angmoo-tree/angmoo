@@ -1,5 +1,33 @@
 # Angmoo Backend Architecture
 
+## Situation embedding delivery groups (2026-10-16 LOCAL)
+
+The situation runtime prepares at most 32 receipts per turn, still committing
+one receipt per existing fenced UoW and yielding its canonical queue between
+receipts. Dirty-brief rebuilding runs once after that bounded turn. It never
+holds one write transaction across all receipts or an embedding request.
+
+Initial vector delivery coalesces applied receipts from the same admitted run.
+The existing run cutoff/state and atomic eligibility registration own recovery;
+no new table, timer or authorization cache is added. A full model-sized group,
+run completion or producer error releases already prepared work. No later
+unrequested receipt is awaited. Retry, expired-lease, changed and erased items
+retain their existing independent delivery paths. Bounded read pagination keeps
+waiting groups from hiding unrelated work. Committed eligible cohort members
+whose outbox fanout has not arrived yet may be enrolled in the same short claim
+transaction after a fresh registration/World-deletion check.
+
+Runtime uses each model's batch capability, adapter method and declared limits.
+Gemini embedding 2 retains the application limits of 20 independent inputs,
+8,192 UTF-8 bytes per input and a 65,536-byte conservative serialized request
+budget (JSON escaping plus per-item envelope); these are Angmoo
+budgets, not a claim about the provider's maximum. Larger/longer groups split;
+single-only providers remain single-input. Existing per-item source/credential
+proofs, response mapping, result journals and short canonical-to-Vec1 effects
+remain authoritative. Group readiness never substitutes for these validations.
+See the [scoped delivery verification](../docs/verification/situation-embedding-batches-20261016.md)
+for HTTP counts, contention recovery and deployment boundaries.
+
 ## SQLite recovery and private result delivery (2026-10-16 LOCAL)
 
 Domains retain authorization, source validation, persistence and state transitions;
@@ -1198,3 +1226,129 @@ fence helpers. Cold migration fence installation can reflect existing SQL
 descriptors; explicit domain erasure rules still determine scope and an
 incomplete descriptor set fails. It does not register models through a reverse
 dependency or infer deletion policy from newly discovered foreign keys.
+
+## Vector projection pending work and short SQLite fences (2026-10-16)
+
+Memory owns vector eligibility separately from durable work. SQLite v39 adds
+work revisions/claims, mutation frontiers, validation epochs, direct source/prior
+dependencies, finite maintenance cursors and generation-independent call budgets.
+Work contains identifiers and safe state only, never source text, keys or vectors.
+The v38 manifests and historical migrations remain immutable.
+
+Runtime owns the cross-domain mutation catalog (`runtime/memory/vector_mutations.json`).
+Its reviewed column-level SQLite triggers record identities and world/owner epochs
+in the source transaction, including bulk SQL, FK cascades and rollback. They do
+not traverse lineage, call providers or write derived indexes. New source/ACL
+dependencies require updating this catalog, the frozen migration and scoped tests.
+ORM after-commit notifications are hints; a five-second indexed pending/due read
+recovers missed hints. Idle ticks neither take the canonical writer nor scan
+completed registrations. World deletion and relationship manual-review polling
+retain their existing lifecycle and cadence.
+
+`vector_proof` performs existing source/privacy validation in an explicit SQLite
+read snapshot. Only immutable observations cross into the final transaction.
+Dependencies select affected work; they never cache an authorization decision.
+Prior edges stay direct and bounded frontier expansion visits each node once per
+causal root. Absence-sensitive access facts use world/owner revisions and explicit
+parent signals. Future validity/expiry boundaries become due work, including OFF
+scopes. Search still revalidates canonical version/hash/access independently.
+
+The final effect holds the canonical writer only for claim/revision/epoch/time
+comparison and a bounded Vec1 effect. Extension loading, source traversal,
+credential decoding, provider calls and receipt fsync stay outside this fence.
+Vec1 writer admission is 25ms; canonical admission remains the existing 250ms
+policy. The lock order is canonical then derived; the derived connection can be
+opened first but must hold no transaction. A valid identical vector is reused;
+identical metadata causes no Vec1 update. Paid-call admission rechecks ownership
+and the proof and renews only an owned active claim before the bounded request.
+
+Received vectors stay in the bounded ResultJournal until their effect is durable.
+Conditional receipt removal cannot unlink a newer receipt. Canonical attempt
+budgets survive generation loss; readable legacy budgets are imported before
+bootstrap. Missing pre-migration budget evidence blocks automatic paid recovery
+instead of silently resetting the budget. Recovery never enrolls historical
+unregistered memories. Explicit preparation uses the same claims and advances
+only after its page effects settle. Staging promotion is restartable after the SQL
+barrier; retired work is reclaimed in bounded pages without deleting retained files.
+
+The 24-hour safety audit compares identities in two finite 64-item passes. Normal
+entries trigger no deep validation, embedding or Vec1 write; mismatches become
+work. Only its maintenance checkpoint is written. Bootstrap/audit cursors have
+upper bounds. Ordinary mutations remain the primary freshness mechanism.
+
+World erasure closes result admission and removes all retained vector generations
+before `memory.repository.vector_erasure` clears exact item work/dependencies/budgets.
+These operational tables deliberately have no cascading source FK: deletion intent
+must survive long enough to erase derived effects. Global epoch fences and finite
+frontier identities contain no content; epochs are not reset, which avoids an ABA
+authorization race. Normal delivery stops on an accepted World deletion request.
+Individual deleted-item completion erases its operational rows after the retained
+effects are removed. Character originals and other Worlds remain outside this scope.
+
+Account and Character privacy scrubbing also removes selected items' work,
+dependencies and attempt budgets through this repository, in the same canonical
+transaction as their memories. The selection is the existing owner/Character
+subquery; another owner's or Character's item state is preserved. Mutation
+notifications survive to erase derived entries and invalidate other dependent
+memories, then the normal finite frontier drains them. Shared generation
+checkpoints and monotonic authorization fences survive scrubbing; they contain
+identifiers/revisions, not memory content, credentials or vectors. Rolling back
+the scrub restores both memories and their per-item operational state.
+
+Local evidence and boundaries: [vector pending-work verification](../docs/verification/vector-index-pending-work-20261016.md).
+
+## Opt-in memory pipeline observation (2026-10-16, LOCAL)
+
+Recorder paths and atomic JSON replacement belong to
+`runtime/diagnostics/observation_storage.py`. SNS, memory-pipeline recording and
+reporting import that lower-level owner directly; memory recording does not
+import the SNS lifecycle owner. Session-ID validation, file format and bounded
+Windows replacement retries are unchanged. This storage helper owns no worker,
+database transaction or observation-session lifetime.
+
+`core/work_observation.py` is a neutral process-local port, not a persistence or
+business owner. Domains and providers emit structural facts through it; only
+`runtime/diagnostics/memory_pipeline_observation.py` owns the opt-in SNS session,
+scope allowlist, bounded queue and diagnostic files. Business threads do no
+diagnostic file I/O or JSON serialization. A bounded carry-in claim scope read
+is performed outside the writer only while observation is enabled.
+
+The recorder attaches only to an unexpired, non-stopped session. At cutoff it
+closes memory-event admission and removes the process-local sink under a short
+in-memory lock, then drains accepted events and attempts the final health write
+once, outside that lock. Repeated flush/close and a server restart cannot reopen
+or rewrite a finished session. A failed final write remains incomplete evidence;
+it is not retried on every idle tick. Session-bound callbacks cannot put late
+events into a later session. SNS finalization drains that session's accepted work
+even when a following session has already replaced the active pointer.
+
+Historical manifests, active.json, events and exports are retained. An unfinished
+session can resume after restart, and a newly started session can attach in the
+same process. Idle discovery retains its one-second read-only manifest interval;
+expired heartbeat deadlines do not create a tight loop, scheduler sample or file
+write. Completed session files also remain unchanged during runtime shutdown.
+
+The existing SQLite helpers retain their admission/retry/cleanup contracts.
+Their spans distinguish checkout, BEGIN wait, acquired writer, commit, rollback
+and cleanup. Vec1/FTS spans use distinct database identities; nested holds are
+not additive. Common helpers expose safe operation names for competing writers;
+plain Session writes and other processes remain unobserved. Scheduler leases,
+World deletion checks and manual relationship checks are unchanged.
+
+The pinned Gemini async adapter observes actual HTTPX attempts via public hooks.
+It does not switch transport, add retries, alter credential ownership, or infer
+HTTP counts from stored vectors. aiohttp and other providers are explicitly
+unsupported for this ledger. Frozen prepared membership, admission, receipt
+preservation, current-vector reuse, final effects and acknowledgements correlate
+by safe IDs. Raw payloads, headers, secrets, SQL parameters and vectors are excluded.
+
+The read-only bounded probe uses canonical denominators plus derived identities;
+no cross-database atomic snapshot is claimed. Pre-enqueue counters, sequence gaps,
+loss and final watermarks determine evidence completeness independently of storage
+correctness or AI quality. An auxiliary export failure leaves the existing SNS
+export intact and marks memory evidence partial. Sources absent from a frozen
+package are reported unavailable, not treated as a recorder crash.
+
+Local evidence: [Home and memory observation verification](../docs/verification/device-home-memory-observation-20261016.md).
+
+Lifecycle follow-up: [session finalization verification](../docs/verification/observer-session-finalization-20261016.md).

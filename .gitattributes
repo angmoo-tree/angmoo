@@ -1,4 +1,6 @@
 .gitattributes text eol=lf
+# Preserve the hash-pinned upstream bytes, including upstream trailing blanks.
+scripts/vendor/vec1/vec1.c -text whitespace=-blank-at-eol,-blank-at-eof
 frontend/src/app/icon.svg text eol=lf
 *.toml text eol=lf
 *.sh text eol=lf

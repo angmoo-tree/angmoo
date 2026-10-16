@@ -42,6 +42,8 @@ def main(argv: list[str] | None = None) -> int:
     start.add_argument("--source-revision", help="Confirmed running source/image revision, if known")
     status = commands.add_parser("status", help="Inspect observation and recorder health")
     status.add_argument("--session", help="Defaults to active session")
+    memory = commands.add_parser("memory-preflight", help="실행본 기억 계측 확인 / Inspect running memory instrumentation")
+    memory.add_argument("--session", required=True)
     stop = commands.add_parser("stop", help="Stop admitting new diagnostic events")
     stop.add_argument("--session", help="Defaults to active session")
     export = commands.add_parser("export", help="Read-only SQLite and event export")
@@ -65,7 +67,9 @@ def main(argv: list[str] | None = None) -> int:
                 if active is None:
                     raise ValueError("sns_observation_no_active_session")
                 chosen = active["session_id"]
-            if args.command == "status":
+            if args.command == "memory-preflight":
+                result = session_status(root, chosen)["memory_pipeline"]
+            elif args.command == "status":
                 result = session_status(root, chosen)
             elif args.command == "stop":
                 result = stop_session(root, chosen)

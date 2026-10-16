@@ -5,6 +5,7 @@ param(
     [string]$DockerContainer,
     [string]$PythonExe,
     [switch]$ReadOnlySmoke,
+    [switch]$PreflightOnly,
     [ValidateRange(60,3600)][int]$IntervalSeconds = 60,
     [ValidateRange(0,300)][int]$MaxFlushSeconds = 300
 )
@@ -18,23 +19,40 @@ New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
 $taskOutput = (Get-Item -LiteralPath $OutputRoot).FullName
 $probeSource = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'sns_media_memory_probe.py') -Raw -Encoding UTF8
 $officialScript = if ($DockerContainer) { '/workspace/backend/scripts/sns_observation.py' } else { Join-Path $taskRepository 'backend/scripts/sns_observation.py' }
+# Use the container's configured, verified non-root application identity.
+$dockerIdentity=$null
+if ($DockerContainer) {
+    $uidValue = (& docker exec $DockerContainer id -u | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'collector_app_identity_unverified' }
+    $gidValue = (& docker exec $DockerContainer id -g | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or $uidValue -notmatch '^[1-9][0-9]*$' -or $gidValue -notmatch '^[0-9]+$') { throw 'collector_non_root_app_identity_required' }
+    $dockerIdentity="${uidValue}:${gidValue}"
+}
 function Read-JsonString([string]$Value) { return Read-CollectorJson $Value }
 function Get-UtcInstant($Value) { return Get-CollectorUtcInstant $Value }
 function Invoke-Official([string[]]$Arguments) {
     $callArgs = @($officialScript, '--data-root', $DataRoot) + $Arguments
-    $lines = if ($DockerContainer) { & docker exec $DockerContainer $PythonExe @callArgs } else { & $PythonExe @callArgs }
+    $lines = if ($DockerContainer) { & docker exec --user $dockerIdentity $DockerContainer $PythonExe @callArgs } else { & $PythonExe @callArgs }
     if ($LASTEXITCODE -ne 0) { throw 'collector_official_command_failed' }
     return Read-JsonString ($lines -join "`n")
 }
 function Invoke-Probe {
     $callArgs = @('--data-root', $DataRoot, '--session', $SessionId)
-    $lines = if ($DockerContainer) { $probeSource | & docker exec -i $DockerContainer $PythonExe - @callArgs } else { & $PythonExe (Join-Path $PSScriptRoot 'sns_media_memory_probe.py') @callArgs }
+    $lines = if ($DockerContainer) { $probeSource | & docker exec -i --user $dockerIdentity $DockerContainer $PythonExe - @callArgs } else { & $PythonExe (Join-Path $PSScriptRoot 'sns_media_memory_probe.py') @callArgs }
     if ($LASTEXITCODE -ne 0) { throw 'collector_probe_failed' }
     return Read-JsonString ($lines -join "`n")
 }
 $health = [ordered]@{ schema='sns-media-memory-collector.v1'; session_id=$SessionId; state='COLLECTING'; source_revision='unknown'; planned_snapshots=0; successful_snapshots=0; failed_snapshots=0; missing_snapshots=0; last_probe_success=$null; last_status_success=$null; last_flush_success=$null; last_export_success=$null; last_copy_success=$null; probe_error=$null; degraded=$false; flush_complete=$false; export_success=$false; copy_success=$false }
 function Save-Health { $health | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $taskOutput 'collector-health.json') -Encoding UTF8 }
 $failures = 0
+try {
+    $memory=Invoke-Official @('memory-preflight','--session',$SessionId)
+    $memory | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath (Join-Path $taskOutput 'memory-preflight.json') -Encoding UTF8
+    $health.memory_support=$memory.support
+    $health.memory_runtime_fresh=$memory.runtime_fresh
+    $health.memory_sample_observed=$memory.sample_observed
+} catch { $health.memory_support='unavailable'; $health.memory_error='collector_memory_preflight_failed' }
+if ($PreflightOnly) { $health.state='PREFLIGHT_COMPLETE'; Save-Health; exit 0 }
 if ($ReadOnlySmoke) {
     try { $snapshot=Invoke-Probe; $snapshot | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath (Join-Path $taskOutput 'smoke.json') -Encoding UTF8; $health.state='SMOKE_COMPLETE'; $health.successful_snapshots=1; $health.planned_snapshots=1; $health.last_probe_success=[DateTimeOffset]::UtcNow.ToString('o') }
     catch { $health.state='ERROR'; $health.probe_error='collector_probe_failed'; $health.failed_snapshots=1 }
@@ -45,11 +63,12 @@ if ($ReadOnlySmoke) {
 $status = Invoke-Official @('status','--session',$SessionId)
 $health.last_status_success=[DateTimeOffset]::UtcNow.ToString('o')
 $manifest = if ($DockerContainer) {
-    $lines = & docker exec $DockerContainer cat "$DataRoot/diagnostics/sns/$SessionId/manifest.json"
+    $lines = & docker exec --user $dockerIdentity $DockerContainer cat "$DataRoot/diagnostics/sns/$SessionId/manifest.json"
     if ($LASTEXITCODE -ne 0) { throw 'collector_manifest_failed' }; Read-JsonString ($lines -join "`n")
 } else { Read-JsonString (Get-Content -LiteralPath (Join-Path $DataRoot "diagnostics/sns/$SessionId/manifest.json") -Raw -Encoding UTF8) }
 $end = Get-UtcInstant $manifest.ends_at
 $tail = Get-UtcInstant $manifest.tail_ends_at
+if ($manifest.stopped_at) { $stopped=Get-UtcInstant $manifest.stopped_at; if ($stopped -lt $tail) { $tail=$stopped } }
 $health.source_revision=$manifest.source_revision
 $health.ends_utc=$end.ToString('o'); $health.tail_ends_utc=$tail.ToString('o')
 while ([DateTimeOffset]::UtcNow -lt $tail) {
@@ -77,9 +96,12 @@ do {
         $health.last_status_success=[DateTimeOffset]::UtcNow.ToString('o')
         $recorders=@($status.recorder_health)
         $health.flush_complete=$recorders.Count -gt 0 -and @($recorders | Where-Object { $_.flush_complete -ne $true }).Count -eq 0
+        $memoryRecorders=@($status.memory_pipeline.processes)
+        $health.memory_flush_complete=$memoryRecorders.Count -gt 0 -and @($memoryRecorders | Where-Object { $_.final -ne $true -or $_.queued -ne 0 }).Count -eq 0
         if ($health.flush_complete) { $health.last_flush_success=[DateTimeOffset]::UtcNow.ToString('o') }
     } catch { $health.status_error='collector_status_failed' }
-    if ($health.flush_complete -or [DateTimeOffset]::UtcNow -ge $flushDeadline) { break }
+    $requiredFlushComplete=$health.flush_complete -and ($health.memory_support -ne 'supported' -or $health.memory_flush_complete)
+    if ($requiredFlushComplete -or [DateTimeOffset]::UtcNow -ge $flushDeadline) { break }
     $remainingFlushMs=[Math]::Max(0,($flushDeadline-[DateTimeOffset]::UtcNow).TotalMilliseconds)
     Start-Sleep -Milliseconds ([int][Math]::Floor([Math]::Min(30000,$remainingFlushMs)))
 } while ([DateTimeOffset]::UtcNow -lt $flushDeadline)
@@ -89,6 +111,8 @@ try {
     $health.export_success=$true
     $health.last_export_success=[DateTimeOffset]::UtcNow.ToString('o')
     if ($DockerContainer) { & docker cp "${DockerContainer}:$destination" (Join-Path $taskOutput 'export'); if ($LASTEXITCODE -ne 0) { throw 'collector_copy_failed' } }
+    $memoryPath=Join-Path $taskOutput 'export/memory-pipeline/coverage.json'
+    $health.memory_evidence_status=if ([IO.File]::Exists($memoryPath)) { (Read-JsonString (Get-Content -LiteralPath $memoryPath -Raw -Encoding UTF8)).status } else { 'UNKNOWN' }
     $health.copy_success=$true
     $health.last_copy_success=[DateTimeOffset]::UtcNow.ToString('o')
     $evidencePath=Join-Path $taskOutput 'export/situation-evidence-coverage.json'

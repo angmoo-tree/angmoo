@@ -1,4 +1,5 @@
 """Subject-owned embedding bindings with exact admitted revision resolution."""
+from app.core import work_observation as observation
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service.world_credentials import resolve
 from app.domains.memory.exceptions import MemoryValidationError
@@ -53,8 +54,11 @@ class MemoryQueryEmbedder:
         remaining = min(30.0, deadline-monotonic())
         if remaining <= 0:
             raise TimeoutError("memory_embedding_deadline")
-        response = await get_embedding_adapter(config.provider, config.model).embed_measured(EmbeddingRequest(material.reveal(), config.model,
-            embedding_text(request.search_text, query=True), EMBEDDING_DIMENSIONS), timeout_seconds=remaining)
+        with observation.span("query_embedding", world_id=request.scope.world_id,
+                actor_id=request.scope.subject_world_character_id, purpose="query", profile=config.profile,
+                credential_revision=revision, credential_id=material.credential_id):
+            response = await get_embedding_adapter(config.provider, config.model).embed_measured(EmbeddingRequest(material.reveal(), config.model,
+                embedding_text(request.search_text, query=True), EMBEDDING_DIMENSIONS), timeout_seconds=remaining)
         try:
             with self._factory() as session:
                 current = self._repository_factory(session).read(request.scope)

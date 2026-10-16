@@ -87,7 +87,10 @@
       "memory_situation_transitions",
       "memory_source_deliveries",
       "memory_subject_profiles",
+      "memory_vector_attempts",
+      "memory_vector_dependencies",
       "memory_vector_eligibility",
+      "memory_vector_work",
       "message_attachments",
       "message_messages",
       "message_threads",
@@ -188,6 +191,11 @@
     ],
     "delete_unreferenced_shared_import_basis": [
       "character_import_snapshots"
+    ],
+    "retain_projection_recovery_control": [
+      "memory_vector_changes",
+      "memory_vector_maintenance",
+      "memory_vector_validation_revisions"
     ]
   },
   "character_deletion": {
@@ -271,7 +279,10 @@
       "memory_situation_transitions",
       "memory_source_deliveries",
       "memory_subject_profiles",
+      "memory_vector_attempts",
+      "memory_vector_dependencies",
       "memory_vector_eligibility",
+      "memory_vector_work",
       "message_attachments",
       "message_messages",
       "message_threads",
@@ -376,6 +387,11 @@
     ],
     "delete_unreferenced_shared_import_basis": [
       "character_import_snapshots"
+    ],
+    "retain_projection_recovery_control": [
+      "memory_vector_changes",
+      "memory_vector_maintenance",
+      "memory_vector_validation_revisions"
     ]
   }
 }

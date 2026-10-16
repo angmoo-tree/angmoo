@@ -84,7 +84,7 @@ from app.runtime.persistence.sqlite_schema import (
 SUPPORTED_SOURCE_VERSIONS = (
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -621,6 +621,19 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                if source_version < 39:
+                    # Only reconstruct this isolated predecessor. Source
+                    # signals reference the new ledgers, so remove them before
+                    # dropping those additive tables or older source columns.
+                    from app.runtime.migrations.sqlite_versions.vector_work_v39 import MUTABLE_IDENTITY_TABLES
+                    for (name,) in sql_connection.exec_driver_sql(
+                        "SELECT name FROM sqlite_master WHERE type='trigger' "
+                        "AND name LIKE 'memory_vector_%'"
+                    ).all():
+                        quoted = '"' + name.replace('"', '""') + '"'
+                        sql_connection.exec_driver_sql(f"DROP TRIGGER {quoted}")
+                    for name in sorted(MUTABLE_IDENTITY_TABLES):
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
                 if source_version < 38:
                     for operation in ("insert", "update"):
                         sql_connection.exec_driver_sql(f'DROP TRIGGER IF EXISTS "world_erasure_notifications_{operation}"')

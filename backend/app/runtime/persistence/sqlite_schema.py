@@ -11,10 +11,11 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text, event
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 38
-SOURCE_ALEMBIC_REVISION = "20261015_0115"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 114
-EXPECTED_CANONICAL_TABLE_COUNT = 174
+SQLITE_SCHEMA_VERSION = 39
+SOURCE_ALEMBIC_REVISION = "20261016_0116"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 115
+EXPECTED_CANONICAL_TABLE_COUNT = 180
+VECTOR_V39_TABLES = ("memory_vector_work", "memory_vector_changes", "memory_vector_validation_revisions", "memory_vector_dependencies", "memory_vector_maintenance", "memory_vector_attempts")
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 SITUATION_V31_TABLES = ("memory_situation_settings", "memory_situation_manifests", "memory_situation_runs", "memory_situation_requests", "memory_situation_receipts", "memory_situation_info", "memory_situation_sources", "memory_situation_transitions")
@@ -322,6 +323,9 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    for name in VECTOR_V39_TABLES:
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
     # These direct-copy builders predate v34/v36/v37. Their released table
     # inventories must not acquire additive current-model registrations.
     for name in (
@@ -795,8 +799,16 @@ def build_sqlite_v36_metadata() -> MetaData:
 
 def build_sqlite_v37_metadata() -> MetaData:
     """Frozen pre-notification-delivery schema, also used by older fixtures."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v38_metadata()
     _remove_notification_delivery_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v38_metadata() -> MetaData:
+    """Frozen pre-vector-work schema. Existing manifests are never rewritten."""
+    metadata = build_sqlite_baseline_metadata()
+    for name in VECTOR_V39_TABLES:
+        metadata.remove(metadata.tables[name])
     return metadata
 
 

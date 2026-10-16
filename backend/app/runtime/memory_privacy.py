@@ -51,6 +51,8 @@ def scrub_memory_data(session, *, owner_id: str, character_id: str | None = None
             MemoryItem.thread_id.in_(removed_threads),
         )
     item_ids = select(MemoryItem.id).where(owned_items)
+    from app.domains.memory.repository.vector_erasure import erase_selected
+    erase_selected(session, item_ids)
     brief_ids = select(MemoryHotBrief.id).where(
         MemoryHotBrief.scope_setting_id.in_(scopes)
     )

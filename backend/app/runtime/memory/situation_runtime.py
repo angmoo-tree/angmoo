@@ -1,4 +1,5 @@
 """One bounded canonical consumer; background projections own embedding I/O."""
+from app.core import work_observation as observation
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 import logging
@@ -25,6 +26,7 @@ class SituationRuntime:
         self.result_basis = CheckpointResultBasis(data_root / "runtime/activity/activity-checkpoints.sqlite" if data_root is not None else None)
         self.quit_identity = None
 
+    @observation.observed("situation_due_admission")
     def prepare(self, *, shutdown=False):
         now = datetime.now(UTC)
         if shutdown and self.quit_identity is None:
@@ -84,31 +86,40 @@ class SituationRuntime:
             # lease, if any, is the only recovery owner; never create a new run.
             return "situation_storage_busy"
 
+    @observation.observed("situation_claim")
     def _tick(self):
         now = datetime.now(UTC)
         with self.session_factory() as db:
-            run_id = db.scalar(select(MemorySituationApplyRun.id).where(
+            run_info = db.execute(select(MemorySituationApplyRun.id, MemoryScopeSettingModel.world_id, MemoryScopeSettingModel.subject_world_character_id).join(MemoryScopeSettingModel, MemoryScopeSettingModel.id == MemorySituationApplyRun.scope_setting_id).where(
                 MemorySituationApplyRun.state.in_(("pending", "running", "deferred")),
                 (MemorySituationApplyRun.lease_until.is_(None)) | (MemorySituationApplyRun.lease_until <= now),
-            ).order_by(MemorySituationApplyRun.attempts, MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1))
-            if run_id is None:
+            ).order_by(MemorySituationApplyRun.attempts, MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1)).first()
+            if run_info is None:
                 return "memory_batch_queue_empty"
+            run_id, world_id, actor_id = run_info
             db.rollback()
             token = run_sqlite_session_immediate(db,
                 lambda: claim_run(db, run_id, now=now), require_clean=True)
         if token is None:
             return "situation_claim_conflict"
+        with observation.scope(world_id=world_id, actor_id=actor_id, run_id=run_id):
+            return self._apply_claimed(run_id, token)
+
+    def _apply_claimed(self, run_id, token):
         try:
             for attempt in range(3):
                 started = monotonic()
                 with self.session_factory() as db:
                     prepared = prepare_page(db, run_id=run_id, token=token, now=datetime.now(UTC), page_size=1)
-                basis = self.result_basis.prepare(prepared)
+                observation.emit("page", boundary="prepared", run_id=run_id, receipt_ids=[str(row[0]) for row in prepared.admissions], byte_size=prepared.byte_size, cursor=prepared.cursor, cutoff=prepared.cutoff)
+                with observation.span("situation_result_basis"):
+                    basis = self.result_basis.prepare(prepared)
                 prepared_at = monotonic()
                 try:
                     with self.session_factory() as db:
                         run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db), PreparedSituationSources(db, result_basis=basis),
                             run_id=run_id, token=token, now=datetime.now(UTC), page_size=1, prepared=prepared), require_clean=True)
+                    observation.emit("page", boundary="committed", run_id=run_id, receipt_ids=[str(row[0]) for row in prepared.admissions])
                     logging.getLogger(__name__).info("situation_page run=%s count=%s bytes=%s prepare_ms=%.3f apply_elapsed_ms=%.3f",
                         run_id, len(prepared.admissions), prepared.byte_size,
                         (prepared_at - started) * 1000, (monotonic() - prepared_at) * 1000)

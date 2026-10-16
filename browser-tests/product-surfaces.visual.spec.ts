@@ -148,11 +148,16 @@ test("UI-F captures compact and centered Device Home parity", async ({ page }, t
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.reload();
   const device = page.locator('[data-product-shell="device"]');
+  // The shell can be replaced while auth/environment hydration settles after
+  // reload. Measure the loaded World surface, not that transient shell node.
+  await expect(page.locator('[data-runtime-state="healthy"]')).toBeVisible();
+  await expect(page.getByText("루멘 히어로 아카데미", { exact: true })).toBeVisible();
   await expect(device).toBeVisible();
-  const deviceBox = await device.boundingBox();
-  expect(deviceBox).not.toBeNull();
-  expect(Math.abs(deviceBox!.x + deviceBox!.width / 2 - 720)).toBeLessThanOrEqual(1);
   await settleVisualSurface(page);
+  await expect.poll(async () => {
+    const box = await device.boundingBox();
+    return box ? Math.abs(box.x + box.width / 2 - 720) : Number.POSITIVE_INFINITY;
+  }).toBeLessThanOrEqual(1);
   await expect(page).toHaveScreenshot(["ui-f", "release-readiness-20261013", "device-home-centered-1440x1000.png"]);
 
   expectReadOnlyFixture(audit, 2, testInfo.project.name === "static-export");

@@ -1,4 +1,5 @@
 """One opt-in worker: durable admission, daily/exit triggers and v2 selection."""
+from app.core import work_observation as observation
 
 import asyncio
 from app.domains.memory.service.batch_preparation import deliver_candidates, rebuild_briefs
@@ -60,6 +61,7 @@ from app.runtime.memory.source_composition import source_evidence_reader as SqlA
 
 
 logger = logging.getLogger(__name__)
+SITUATION_RECEIPTS_PER_TURN = 32
 
 
 
@@ -111,16 +113,10 @@ class MemoryBatchRuntime:
     async def _loop(self) -> None:
         while not self.stop_event.is_set():
             try:
-                # A receipt commits before each resubmission. The canonical
-                # queue is released between calls, and a bounded burst avoids
-                # adding five seconds of idle polling for every receipt.
-                for _ in range(16 if self.situations is not None else 1):
-                    if self.stop_event.is_set():
-                        break
-                    if await self.tick() != "situation_page_applied":
-                        break
+                await self.tick()
             except Exception:
                 logger.warning("memory_batch_runtime_deferred")
+            observation.emit("wait", boundary="idle", operation="memory_batch_loop", reason="bounded_idle", planned_wait_ms=5000)
             try:
                 await asyncio.wait_for(self.stop_event.wait(), timeout=5)
             except TimeoutError:
@@ -145,8 +141,19 @@ class MemoryBatchRuntime:
         async with self.lock:
             from app.runtime.memory.foreground_priority import chat_is_active
             if self.situations is not None:
-                result = await self._canonical.call(self._situation_tick, shutdown=shutdown)
+                applied = False
+                for _ in range(SITUATION_RECEIPTS_PER_TURN):
+                    # Each call still prepares/commits exactly one receipt and
+                    # releases its Session/lease before the next submission.
+                    result = await self._canonical.call(self._situation_tick, shutdown=shutdown)
+                    if result != "situation_page_applied":
+                        break
+                    applied = True
                 closing = shutdown or self.situations.quit_identity is not None
+                if not closing and result != "memory_foreground_deferred":
+                    await self._canonical.call(self._rebuild_situation_brief)
+                if applied and result == "memory_batch_queue_empty":
+                    return "situation_page_applied"
                 if result == "memory_batch_queue_empty" and self.idle_work is not None and not closing:
                     return await self.idle_work()
                 return result
@@ -157,6 +164,7 @@ class MemoryBatchRuntime:
                         db.execute(update(MemoryConsolidationRequest).where(
                             MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
                         db.commit()
+                        observation.emit("wait", boundary="deferred", reason="foreground_chat")
                         return "memory_foreground_deferred"
             self.prepare(shutdown=shutdown)
             with self.session_factory() as db:
@@ -192,23 +200,25 @@ class MemoryBatchRuntime:
                 )
             return result
 
+    @observation.observed("situation_tick")
     def _situation_tick(self, *, shutdown):
         from app.runtime.memory.foreground_priority import chat_is_active
         closing = shutdown or self.situations.quit_identity is not None
         if not closing:
             with self.session_factory() as db:
                 if chat_is_active(db, now=datetime.now(UTC)):
+                    observation.emit("wait", boundary="deferred", reason="foreground_chat")
                     return "memory_foreground_deferred"
         self.situations.prepare(shutdown=closing)
-        result = self.situations.tick()
-        if not closing:
-            from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
-            with self.session_factory() as db:
-                # One scope per transaction; the cursor includes invalid/dirty
-                # scopes so a poisoned brief cannot starve other characters.
-                self._brief_cursor = rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
-                    settings_type=MemorySituationProcessingSetting, limit=1, after=self._brief_cursor)
-        return result
+        return self.situations.tick()
+
+    def _rebuild_situation_brief(self):
+        from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting
+        with self.session_factory() as db:
+            # Rebuild once after the bounded application burst, rather than
+            # inserting a slow brief read between every two batch candidates.
+            self._brief_cursor = rebuild_briefs(db, now=datetime.now(UTC), dependencies=self.preparation,
+                settings_type=MemorySituationProcessingSetting, limit=1, after=self._brief_cursor)
 
     async def prepare_async(self, *, shutdown=False):
         if self._canonical is not None:

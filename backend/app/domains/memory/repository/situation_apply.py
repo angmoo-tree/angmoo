@@ -1,4 +1,5 @@
 """Canonical application in one short caller-owned transaction, with no AI I/O."""
+from app.core import work_observation as observation
 from dataclasses import asdict, dataclass, replace
 from copy import deepcopy
 import json
@@ -102,6 +103,7 @@ def _pending(run):
     return conditions
 
 
+@observation.observed("situation_page_prepare")
 def prepare_page(session, *, run_id, token, now, page_size=1):
     """Read/parse/hash a contiguous bounded page without acquiring a writer."""
     if not 1 <= page_size <= 16:
@@ -160,6 +162,7 @@ def prepare_page(session, *, run_id, token, now, page_size=1):
         tuple(contexts), tuple(collections), byte_size)
 
 
+@observation.observed("situation_page_apply")
 def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, token, now, page_size=1, prepared=None):
     if not 1 <= page_size <= 100:
         raise ValueError("situation_page_size_invalid")
@@ -194,6 +197,7 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
     available_slots = None
     changed_settings = set()
     def processed(receipt, before_version, previous):
+        observation.emit("receipt", boundary="applied_in_transaction", receipt_sequence=receipt.sequence, item_id=receipt.applied_item_id, outcome=receipt.state, run_id=run.id)
         receipt.state_version += 1
         receipt.run_id, run.cursor = run.id, receipt.sequence
         if run.work_kind == "blocked_recheck":

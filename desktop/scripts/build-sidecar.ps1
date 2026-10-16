@@ -38,6 +38,7 @@ $loggingConfigData = "$loggingConfig;."
 $novelResources = "$(Join-Path $backendRoot 'app\integrations\novelai_resources');app/integrations/novelai_resources"
 $imageCatalogData = "$(Join-Path $backendRoot 'app\integrations\image_catalog.json');app/integrations"
 $comfySampleData = "$(Join-Path $backendRoot 'app\domains\media\samples');app/domains/media/samples"
+$vectorMutationData = "$(Join-Path $backendRoot 'app\runtime\memory\vector_mutations.json');app/runtime/memory"
 # Runtime imports cannot collect adjacent non-Python deletion policies. Read the
 # authoritative owner tuple without importing or starting the application.
 $worldErasureJson = & $Python (Join-Path $PSScriptRoot 'sidecar-world-erasure-resources.py') --backend-root $backendRoot
@@ -77,6 +78,7 @@ $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
     --add-data $imageCatalogData `
     --add-data $comfySampleData `
     --add-data $vec1ResourceData `
+    --add-data $vectorMutationData `
     @worldErasureArguments `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `

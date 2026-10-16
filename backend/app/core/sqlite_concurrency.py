@@ -6,6 +6,9 @@ import sqlite3
 import time
 import asyncio
 import logging
+from contextvars import copy_context
+from uuid import uuid4
+from app.core import work_observation as observation
 from contextlib import contextmanager, nullcontext
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -33,6 +36,7 @@ class SqlitePostCommitError(RuntimeError):
 
 def _notify(observer: SqliteWriteObserver | None, **facts: object) -> None:
     logging.getLogger(__name__).debug("sqlite_writer_attempt %s", facts)
+    observation.emit("sqlite_attempt", **facts)
     if observer is not None:
         try:
             observer(facts)
@@ -66,6 +70,7 @@ class SqliteRetryPolicy:
             raise ValueError("maximum_elapsed_seconds must be positive")
 
 
+@observation.sqlite_observed
 def run_sqlite_immediate(
     engine: Engine,
     operation: Callable[[Connection], T],
@@ -94,18 +99,24 @@ def run_sqlite_immediate(
         acquired_at: float | None = None
         committed = False
         try:
+            observation.emit("sqlite", boundary="checkout_started", attempt=attempt)
             with engine.connect() as connection:
+                observation.emit("sqlite", boundary="checkout_complete", attempt=attempt)
                 driver = connection.connection.driver_connection
                 previous_timeout_ms = _get_busy_timeout(driver)
                 remaining = max(0.001, policy.maximum_elapsed_seconds - (monotonic() - started))
                 _set_busy_timeout(driver, max(1, min(50, int(remaining * 1000))))
                 try:
+                    observation.emit("sqlite", boundary="begin_started", attempt=attempt)
                     connection.exec_driver_sql("BEGIN IMMEDIATE")
                     acquired_at = monotonic()
+                    observation.emit("sqlite", boundary="acquired", attempt=attempt)
                     try:
                         result = operation(connection)
+                        observation.emit("sqlite", boundary="commit_started", attempt=attempt)
                         connection.commit()
                         committed = True
+                        observation.emit("sqlite", boundary="committed", attempt=attempt)
                         _notify(observer, result="committed", attempt=attempt,
                                 max_attempts=policy.max_attempts,
                                 acquire_ms=round((acquired_at - attempt_started) * 1000, 3),
@@ -115,6 +126,7 @@ def run_sqlite_immediate(
                         return result
                     except BaseException:
                         connection.rollback()
+                        observation.emit("sqlite", boundary="rolled_back", attempt=attempt)
                         raise
                 finally:
                     # BEGIN may fail after SQLAlchemy has opened its transaction.
@@ -171,6 +183,7 @@ def run_sqlite_immediate(
     raise exhausted from last_error
 
 
+@observation.sqlite_observed
 def run_sqlite_session_immediate(
     session: Session,
     operation: Callable[[], T],
@@ -214,8 +227,10 @@ def run_sqlite_session_immediate(
             # Pin the Connection until AFTER Session commit/rollback and timeout
             # restoration. A Session bound directly to an Engine otherwise returns
             # the DBAPI connection to the pool from commit(), before our finally.
+            observation.emit("sqlite", boundary="checkout_started", attempt=attempt)
             owner = bind.connect() if isinstance(bind, Engine) else nullcontext(bind)
             with owner as connection:
+                observation.emit("sqlite", boundary="checkout_complete", attempt=attempt)
                 original_bind = session.bind
                 driver_connection = connection.connection.driver_connection
                 previous_timeout_ms = _get_busy_timeout(driver_connection)
@@ -223,14 +238,21 @@ def run_sqlite_session_immediate(
                 try:
                     remaining = max(0.001, policy.maximum_elapsed_seconds - (monotonic() - started))
                     _set_busy_timeout(driver_connection, max(1, min(50, int(remaining * 1000))))
+                    observation.emit("sqlite", boundary="begin_started", attempt=attempt)
                     session.connection().exec_driver_sql("BEGIN IMMEDIATE")
                     acquired_at = monotonic()
+                    observation.emit("sqlite", boundary="acquired", attempt=attempt)
                     result = operation()
+                    observation.emit("sqlite", boundary="commit_started", attempt=attempt)
                     session.commit()
                     committed = True
+                    committed_at = monotonic()
+                    observation.emit("sqlite", boundary="committed", attempt=attempt)
                 finally:
                     try:
                         session.rollback()
+                        if not committed and acquired_at is not None:
+                            observation.emit("sqlite", boundary="rolled_back", attempt=attempt)
                     finally:
                         try:
                             _set_busy_timeout(driver_connection, previous_timeout_ms)
@@ -239,7 +261,7 @@ def run_sqlite_session_immediate(
             _notify(observer, result="committed", attempt=attempt,
                     max_attempts=policy.max_attempts,
                     acquire_ms=round((acquired_at - attempt_started) * 1000, 3),
-                    transaction_ms=round((monotonic() - acquired_at) * 1000, 3),
+                    transaction_ms=round((committed_at - acquired_at) * 1000, 3),
                     attempt_ms=round((monotonic() - attempt_started) * 1000, 3),
                     total_ms=round((monotonic() - started) * 1000, 3))
             return result
@@ -297,25 +319,36 @@ def sqlite_session_attempt(session: Session):
     bind = session.get_bind()
     if bind.dialect.name != "sqlite":
         raise SqliteConcurrencyError("SQLite writer received a non-SQLite session")
-    owner = bind.connect() if isinstance(bind, Engine) else nullcontext(bind)
-    with owner as connection:
-        original_bind = session.bind
-        driver = connection.connection.driver_connection
-        previous = _get_busy_timeout(driver)
-        session.bind = connection
-        try:
-            _set_busy_timeout(driver, 50)
-            session.connection().exec_driver_sql("BEGIN IMMEDIATE")
-            yield session
-            session.commit()
-        finally:
+    with observation.span("sqlite_writer", database_id=observation.database_id(bind.engine.url.database), writer="sqlite_session_attempt"):
+        observation.emit("sqlite", boundary="checkout_started")
+        owner = bind.connect() if isinstance(bind, Engine) else nullcontext(bind)
+        with owner as connection:
+            observation.emit("sqlite", boundary="checkout_complete")
+            original_bind = session.bind
+            driver = connection.connection.driver_connection
+            previous = _get_busy_timeout(driver)
+            session.bind = connection
             try:
-                session.rollback()
+                _set_busy_timeout(driver, 50)
+                observation.emit("sqlite", boundary="begin_started")
+                session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+                observation.emit("sqlite", boundary="acquired")
+                yield session
+                observation.emit("sqlite", boundary="commit_started")
+                session.commit()
+                observation.emit("sqlite", boundary="committed")
             finally:
                 try:
-                    _set_busy_timeout(driver, previous)
+                    was_active = session.in_transaction()
+                    session.rollback()
+                    if was_active:
+                        observation.emit("sqlite", boundary="rolled_back")
                 finally:
-                    session.bind = original_bind
+                    try:
+                        _set_busy_timeout(driver, previous)
+                    finally:
+                        session.bind = original_bind
+        observation.emit("sqlite", boundary="cleanup_complete")
 
 
 def _set_busy_timeout(driver_connection: object, timeout_ms: int) -> None:
@@ -354,6 +387,7 @@ class SqliteBoundedTaskQueue:
         )
         self._slots = BoundedSemaphore(capacity)
         self._closed = False
+        self._observation_id = uuid4().hex
 
     def submit(
         self,
@@ -365,9 +399,28 @@ class SqliteBoundedTaskQueue:
         if self._closed:
             raise RuntimeError("SQLite task queue is closed")
         if not self._slots.acquire(blocking=False):
+            observation.emit("queue", boundary="rejected", queue_id=self._observation_id, reason="capacity_exhausted")
             raise SqliteTaskQueueFull("SQLite task queue capacity is exhausted")
         try:
-            future = self._executor.submit(operation, *args, **kwargs)
+            if observation.enabled():
+                context = copy_context()
+                task_id = uuid4().hex
+                label = f"{getattr(operation, '__module__', 'unknown')}.{getattr(operation, '__qualname__', type(operation).__name__)}".replace("<", "").replace(">", "")
+                observation.emit("queue", boundary="submit", queue_id=self._observation_id, task_id=task_id, operation=label)
+                def invoke():
+                    with observation.scope(queue_id=self._observation_id, task_id=task_id):
+                        observation.emit("queue", boundary="start", operation=label)
+                        try:
+                            return operation(*args, **kwargs)
+                        finally:
+                            observation.emit("queue", boundary="end", operation=label)
+                future = self._executor.submit(context.run, invoke)
+                def cancelled(done):
+                    if done.cancelled():
+                        context.run(observation.emit, "queue", boundary="cancelled", queue_id=self._observation_id, task_id=task_id, operation=label)
+                future.add_done_callback(cancelled)
+            else:
+                future = self._executor.submit(operation, *args, **kwargs)
         except BaseException:
             self._slots.release()
             raise

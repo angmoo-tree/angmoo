@@ -40557,6 +40557,299 @@
       "test_suppressions": {
         "tests/test_windows_installer_upgrade_coverage.py": {}
       }
+    },
+    {
+      "commit": "29512aeaa37f8e964e3b2fd08cd2df2f57b4001f",
+      "feature_id": "AR-VECTOR-PENDING-WORK-V39",
+      "reason": "Scoped committed evidence for I00-I55 durable vector work and short SQLite fences; unrelated pre-existing history is unchanged.",
+      "tracked_files": {
+        "backend/alembic/versions/20261016_0116_memory_vector_work.py": "9fe278a688df732b7bf8c3364052de440ccee0fd",
+        "backend/app/domains/memory/models/vector_work.py": "1bcd59f1f9e26e2a0ca56fc4054119e52386f74d",
+        "backend/app/domains/memory/repository/vector_attempts.py": "b668ceea74541c28b57df9d65782754f8b2faddf",
+        "backend/app/domains/memory/repository/vector_erasure.py": "37455c0b8e0b30d6af0dc2c930c3cafe70e749c5",
+        "backend/app/domains/memory/repository/vector_queue.py": "fe3fd286ec163c8193e22420a634bdb246be28ee",
+        "backend/app/runtime/memory/vector_attempts.py": "a537cdab14ac07302eee4503355d837ddb3ab6eb",
+        "backend/app/runtime/memory/vector_changes.py": "6a7856b09287ed1f30df9d5b765133cbeb109fe2",
+        "backend/app/runtime/memory/vector_mutations.json": "132e136ccabb62484fca955e2d0b7f10f34e990d",
+        "backend/app/runtime/memory/vector_mutations.py": "b475eda26b2cd32782e094a806fa116c0349085b",
+        "backend/app/runtime/memory/vector_proof.py": "09c09d3f858138f3a40dd0876c668b259f394f91",
+        "backend/app/runtime/memory/vector_queue_worker.py": "ef41e1a094292ec89c0d0401136b8953c345228b",
+        "backend/app/runtime/memory/vector_wakeup.py": "8e097696b3b0acea886a226616e483811f290749",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v39.json": "fb38b72b507c39ef1ae7f909d81033ac7f282b83",
+        "backend/app/runtime/migrations/sqlite_versions/vector_work_v39.py": "40d8ad48fa50fd2dd5119ead01be59eed4605323",
+        "backend/app/runtime/migrations/sqlite_versions/vector_work_v39_ddl.json": "6e283172822ee4059a3bf3371b442eb30d35da40",
+        "backend/scripts/freeze_vector_work_schema.py": "62a139a011592faef05fa9a526f8e35aae8a643f",
+        "backend/tests/memory/test_vector_pending_work.py": "842ef5132b828f86848def28f0782693576f0611",
+        "backend/tests/memory/test_vector_work_contention.py": "6258b6ec1b3030027564fa056ea1f167ff31f224",
+        "backend/tests/memory/test_vector_work_recovery.py": "e04d14da349013f3af4bb56000245dac7e6b812b",
+        "backend/tests/migrations/test_vector_work_v39.py": "20f0c637d6928e1e5c21ad46cefe0d498fda2d36",
+        "backend/tests/runtime/test_vector_mutation_resources.py": "d29c6f5dd6523ac9fe707c9c4567d42a74b043a6",
+        "docs/verification/vector-index-pending-work-20261016.md": "881a6e7a11e86a17eb80c15bfbcb6b11479a89e4"
+      },
+      "test_nodes": [
+        "tests/memory/test_vector_pending_work.py::test_after_commit_hint_works_with_bound_connection_and_detaches",
+        "tests/memory/test_vector_pending_work.py::test_atomic_bulk_noop_rollback_and_epoch_without_self_events",
+        "tests/memory/test_vector_pending_work.py::test_claim_lease_reclaim_duplicate_and_stale_ack",
+        "tests/memory/test_vector_pending_work.py::test_expiry_reschedules_without_a_new_mutation",
+        "tests/memory/test_vector_pending_work.py::test_idle_2112_completed_rows_never_hydrates_or_writes",
+        "tests/memory/test_vector_pending_work.py::test_snapshot_preparation_allows_wal_writer_and_rejects_changed_proof",
+        "tests/memory/test_vector_pending_work.py::test_source_event_wakes_restart_and_frontier_cycle_terminates",
+        "tests/memory/test_vector_work_contention.py::test_large_shared_lineage_keeps_writer_free_and_final_effect_short",
+        "tests/memory/test_vector_work_contention.py::test_real_vec1_busy_preserves_receipt_and_releases_canonical_writer",
+        "tests/memory/test_vector_work_recovery.py::test_audit_is_finite_noop_and_enqueues_missing_vector",
+        "tests/memory/test_vector_work_recovery.py::test_bootstrap_checkpoint_does_not_enroll_history_or_lose_new_ids",
+        "tests/memory/test_vector_work_recovery.py::test_deleted_item_cleans_intent_dependencies_and_budget",
+        "tests/memory/test_vector_work_recovery.py::test_dependency_frontier_bounds_fanout_and_terminates_diamond_cycle",
+        "tests/memory/test_vector_work_recovery.py::test_legacy_budgets_from_retained_generation_remain_terminal",
+        "tests/memory/test_vector_work_recovery.py::test_off_still_removes_revoked_source_from_all_retained_generations",
+        "tests/memory/test_vector_work_recovery.py::test_promotion_resumes_after_sql_barrier_and_old_claim_is_retired",
+        "tests/memory/test_vector_work_recovery.py::test_vector_commit_before_budget_or_ack_failure_reuses_receipt",
+        "tests/memory/test_vector_work_recovery.py::test_world_erasure_admission_rejects_old_proof_and_new_paid_work",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[19]",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[1]",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[37]",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[38]",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[39]",
+        "tests/migrations/test_vector_work_v39.py::test_frozen_schema_manifests_and_current_trigger_parity[8]",
+        "tests/migrations/test_vector_work_v39.py::test_populated_memory_credentials_and_vector_hash_survive_v38_upgrade",
+        "tests/migrations/test_vector_work_v39.py::test_populated_v38_is_unchanged_and_upgrade_is_transactional",
+        "tests/runtime/test_vector_mutation_resources.py::test_catalog_protects_existing_columns_and_is_available_in_sidecar_layout",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[38]"
+      ],
+      "test_assertions": {
+        "tests/memory/test_vector_pending_work.py": {
+          "Provider::embed_measured": [],
+          "counts": [],
+          "test_atomic_bulk_noop_rollback_and_epoch_without_self_events": [
+            "assert counts(runtime_factory) == before",
+            "assert counts(runtime_factory) == before",
+            "assert counts(runtime_factory)[1] > before[1]",
+            "assert counts(runtime_factory) == before",
+            "assert session.scalar(select(MemoryVectorChange.sequence).order_by(MemoryVectorChange.sequence.desc()).limit(1)) > before[1]"
+          ],
+          "test_claim_lease_reclaim_duplicate_and_stale_ack": [
+            "assert not queue.claim(session, 'v1', ('test',))",
+            "assert queue.owns(session, first)",
+            "assert not queue.finish(session, first, 'indexed')",
+            "assert not queue.finish(session, second, 'indexed')",
+            "assert queue.finish(session, third, 'current')",
+            "assert queue.due_ids(session, 'v1') == ()",
+            "assert row.applied_revision == row.desired_revision == 2"
+          ],
+          "test_idle_2112_completed_rows_never_hydrates_or_writes": [
+            "assert asyncio.run(projection.sync_item(item_id)) == 'indexed'",
+            "assert not any((sql.lstrip().upper().startswith(('BEGIN', 'UPDATE', 'INSERT', 'DELETE')) for sql in calls))",
+            "assert not any(('FROM memory_vector_eligibility' in sql for sql in calls))",
+            "assert projection._provider.calls == 1"
+          ],
+          "test_snapshot_preparation_allows_wal_writer_and_rejects_changed_proof": [
+            "assert index.identity(f'memory-item:{item_id}') is None",
+            "assert projection._provider.calls == 0",
+            "assert release.wait(10)",
+            "assert entered.wait(10)",
+            "assert future.result() == 'changed'"
+          ],
+          "test_expiry_reschedules_without_a_new_mutation": [
+            "assert isinstance(prepared, PreparedVector)",
+            "assert queue.finish(session, claim, 'indexed', next_boundary=prepared.proof.next_boundary)",
+            "assert queue.due_ids(session, 'v1') == ()",
+            "assert queue.due_ids(session, 'v1', now=prepared.proof.next_boundary + 1) == (item_id,)"
+          ],
+          "test_source_event_wakes_restart_and_frontier_cycle_terminates": [
+            "assert asyncio.run(projection.sync_item(item_id)) == 'indexed'",
+            "assert restarted._provider.calls == 1",
+            "assert queue.due_ids(session, 'v1') == (item_id,)",
+            "assert row.state in {'done', 'scheduled'}",
+            "assert row.applied_revision == row.desired_revision"
+          ],
+          "test_after_commit_hint_works_with_bound_connection_and_detaches": [
+            "assert all((not event.contains(Session, name, callback) for name, callback in listener.listeners))",
+            "assert projection._wake.is_set()",
+            "assert not projection._wake.is_set()"
+          ]
+        },
+        "tests/memory/test_vector_work_contention.py": {
+          "test_large_shared_lineage_keeps_writer_free_and_final_effect_short": [
+            "assert isinstance(prepared, vector_delivery.PreparedVector)",
+            "assert asyncio.run(projection.sync_item(item)) == 'indexed'",
+            "assert projection._provider.calls == 1",
+            "assert release.wait(10)",
+            "assert entered.wait(10)",
+            "assert len(prior_edges) <= 2 * len(nodes)",
+            "assert sum((target.startswith('lineage-') for source, target in prior_edges if source == item)) == 2",
+            "assert scheduler.heartbeat(owner_id='fixture-scheduler', fencing_epoch=lease.fencing_epoch, ttl_seconds=30)",
+            "assert vector_delivery.refresh_current(projection, prepared) == 'current'",
+            "assert not any(('memory_episode_restrictions' in sql or 'FROM posts' in sql for sql in statements))",
+            "assert documents[item]"
+          ],
+          "test_real_vec1_busy_preserves_receipt_and_releases_canonical_writer": [
+            "assert asyncio.run(restarted.sync_item(item)) == 'indexed'",
+            "assert restarted._provider.calls == 0",
+            "assert vector_delivery.persist(projection, prepared, receipt) == 'local_result_pending'",
+            "assert run_sqlite_immediate(engine, lambda connection: connection.exec_driver_sql('SELECT 1').scalar_one()) == 1",
+            "assert projection.journal.read(prepared.work[0].world_id, item) == receipt"
+          ]
+        },
+        "tests/memory/test_vector_work_recovery.py": {
+          "ready": [],
+          "test_vector_commit_before_budget_or_ack_failure_reuses_receipt": [
+            "assert asyncio.run(projection.sync_item(item)) == 'local_result_pending'",
+            "assert index.identity(f'memory-item:{item}') is not None",
+            "assert asyncio.run(restarted.sync_item(item)) == 'indexed'",
+            "assert provider.calls == 1",
+            "assert not restarted.journal.remove(prepared.work[0].world_id, item, expected_payload=old)",
+            "assert restarted.journal.read(prepared.work[0].world_id, item) == new"
+          ],
+          "test_off_still_removes_revoked_source_from_all_retained_generations": [
+            "assert asyncio.run(projection.sync_item(item)) == 'disabled'",
+            "assert asyncio.run(projection.sync_item(item)) == 'source_unavailable'",
+            "assert all((target.identity(f'memory-item:{item}') is None for target in (index, second)))",
+            "assert provider.calls == 2",
+            "assert asyncio.run(MemoryVectorProjection(runtime_factory, target, provider=provider).sync_item(item)) == 'indexed'"
+          ],
+          "test_audit_is_finite_noop_and_enqueues_missing_vector": [
+            "assert asyncio.run(projection.sync_item(item)) == 'indexed'",
+            "assert audit_page(projection)",
+            "assert audit_page(projection)",
+            "assert not audit_page(projection)",
+            "assert audit_page(projection)",
+            "assert projection._provider.calls == 1",
+            "assert queue.due_ids(session, 'v1') == ()",
+            "assert queue.due_ids(session, 'v1') == (item,)"
+          ],
+          "test_promotion_resumes_after_sql_barrier_and_old_claim_is_retired": [
+            "assert asyncio.run(projection.sync_item(item)) == 'indexed'",
+            "assert promoted == ['v1']",
+            "assert not queue.owns(session, old)",
+            "assert session.get(MemoryVectorWork, ('old', item)) is None"
+          ],
+          "test_deleted_item_cleans_intent_dependencies_and_budget": [
+            "assert asyncio.run(projection.sync_item(item)) == 'indexed'",
+            "assert asyncio.run(projection.sync_item(item)) == 'ineligible'",
+            "assert acknowledge(projection, claim, 'ineligible')",
+            "assert index.identity(f'memory-item:{item}') is None",
+            "assert session.get(MemoryVectorWork, ('v1', item)) is None",
+            "assert session.scalar(select(MemoryVectorDependency).where(MemoryVectorDependency.item_id == item)) is None"
+          ],
+          "test_dependency_frontier_bounds_fanout_and_terminates_diamond_cycle": [
+            "assert expand_page(projection)",
+            "assert session.execute(text('SELECT count(*) FROM memory_vector_work')).scalar_one() == 64",
+            "assert session.execute(text('SELECT count(*) FROM memory_vector_work')).scalar_one() == 150",
+            "assert session.execute(text('SELECT max(desired_revision) FROM memory_vector_work')).scalar_one() == 1"
+          ],
+          "test_legacy_budgets_from_retained_generation_remain_terminal": [
+            "assert asyncio.run(projection.sync_item(item)) == 'attempts_exhausted'",
+            "assert asyncio.run(restarted.sync_item(item)) == 'attempts_exhausted'",
+            "assert provider.calls == 0"
+          ],
+          "test_world_erasure_admission_rejects_old_proof_and_new_paid_work": [
+            "assert persist(projection, prepared, receipt) == 'changed'",
+            "assert asyncio.run(projection.sync_item(item)) == 'world_closed'",
+            "assert index.identity(f'memory-item:{item}') is None",
+            "assert projection._provider.calls == 0",
+            "assert session.get(MemoryVectorWork, ('v1', item)) is None"
+          ],
+          "test_bootstrap_checkpoint_does_not_enroll_history_or_lose_new_ids": [
+            "assert bootstrap_page(projection)",
+            "assert projection._provider.calls == 0",
+            "assert cursor and session.execute(text('SELECT count(*) FROM memory_vector_work')).scalar_one() == 64",
+            "assert len(identifiers) == 133",
+            "assert 'old-unregistered' not in identifiers",
+            "assert {'000-new-before-cursor', 'zzz-new-after-cutoff'} <= identifiers",
+            "assert session.get(MemoryVectorMaintenance, 'v1').phase == 'settling'"
+          ]
+        },
+        "tests/migrations/test_vector_work_v39.py": {
+          "test_frozen_schema_manifests_and_current_trigger_parity": [
+            "assert schema.sqlite_schema_contract_digest(connection) == load_sqlite_manifest(version).schema_digest",
+            "assert bool(triggers) == (version == 39)"
+          ],
+          "test_populated_memory_credentials_and_vector_hash_survive_v38_upgrade": [
+            "assert asyncio.run(MemoryVectorProjection(runtime_factory, index, provider=Provider()).sync_item(item)) == 'indexed'",
+            "assert originals['memory_vector_eligibility'] and originals['world_credential_revisions']",
+            "assert hashlib.sha256(index.path.read_bytes()).hexdigest() == vector_hash",
+            "assert target.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert schema.sqlite_schema_contract_digest(target) == load_sqlite_manifest(39).schema_digest",
+            "assert sorted((tuple(row) for row in target.exec_driver_sql(f'SELECT {columns} FROM \"{name}\"')), key=repr) == originals[name]"
+          ],
+          "test_populated_v38_is_unchanged_and_upgrade_is_transactional": [
+            "assert schema.sqlite_schema_contract_digest(connection) == load_sqlite_manifest(38).schema_digest",
+            "assert schema.sqlite_schema_contract_digest(connection) == load_sqlite_manifest(38).schema_digest",
+            "assert tuple(connection.exec_driver_sql('SELECT * FROM users').all()) == before",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert schema.sqlite_schema_contract_digest(connection) == load_sqlite_manifest(39).schema_digest"
+          ]
+        },
+        "tests/runtime/test_vector_mutation_resources.py": {
+          "test_catalog_protects_existing_columns_and_is_available_in_sidecar_layout": [
+            "assert len(entries) == len({entry['table'] for entry in entries})",
+            "assert vector_mutations.catalog() == entries",
+            "assert '--add-data $vectorMutationData' in script",
+            "assert \"vector_mutations.json');app/runtime/memory\" in script",
+            "assert entry['columns']",
+            "assert set(entry['columns']) <= set(metadata.tables[entry['table']].c.keys())"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 39",
+            "assert fixture['target_table_count'] == 180",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_supported_fixture_migrates_authenticated_credentials_and_rejects_target_drift": [
+            "assert decrypt_local_secret(credential[4], scope=scope, app_secret=app_secret) == 'synthetic-supported-fixture-key'",
+            "pytest.raises(ValueError)",
+            "assert upgraded.canonical.source_version == source_version",
+            "assert upgraded.canonical.target_version == SQLITE_SCHEMA_VERSION",
+            "assert not upgraded.graph.degraded",
+            "assert [hashlib.sha256(path.read_bytes()).hexdigest() for path in (source, secret, media)] == originals",
+            "assert changed != credential[4]",
+            "pytest.raises(SystemExit, match='supported_upgrade_credential_changed')",
+            "assert settings.model_dump() == original_settings"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_vector_pending_work.py": {},
+        "tests/memory/test_vector_work_contention.py": {},
+        "tests/memory/test_vector_work_recovery.py": {},
+        "tests/migrations/test_vector_work_v39.py": {},
+        "tests/runtime/test_vector_mutation_resources.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
     }
   ]
 }

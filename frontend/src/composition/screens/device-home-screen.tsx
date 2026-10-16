@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserEnvironment } from "@/hooks/use-user-environment";
 import { DeviceHome } from "@/features/device-home/components/device-home";
@@ -14,11 +15,16 @@ import { CountBadge } from "@/components/ui/count-badge";
 import { useUiText } from "@/hooks/use-ui-text";
 
 export function DeviceHomeScreen() {
+  const identity = useAuthRuntimeIdentity("device-home");
+  return <ScopedDeviceHomeScreen key={identity} />;
+}
+
+function ScopedDeviceHomeScreen() {
   const text = useUiText("social");
   const [worldIds, setWorldIds] = useState<string[]>([]);
   const onVisibleWorldIds = useCallback((ids: string[]) => setWorldIds(previous => JSON.stringify(previous) === JSON.stringify(ids) ? previous : ids), []);
   const counts = useWorldUnreadCounts(worldIds);
-  const { status: authStatus, user, sessionRevision } = useAuth();
+  const { status: authStatus } = useAuth();
   const { ready } = useUserEnvironment();
   const status = authStatus === "authenticated" && !ready ? "checking" : authStatus;
   const [runtimeState, setRuntimeState] = useState<ProductRuntimeState>("stale_state");
@@ -26,8 +32,9 @@ export function DeviceHomeScreen() {
     if (status !== "authenticated") return;
     const controller = new AbortController();
     getProductRuntimeState({ signal: controller.signal })
-      .then(setRuntimeState)
+      .then(state => { if (!controller.signal.aborted) setRuntimeState(state); })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setRuntimeState("stale_state");
       });
@@ -35,7 +42,7 @@ export function DeviceHomeScreen() {
   }, [status]);
   return (
     <DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>
-      <DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace} key={`${user?.id ?? ""}:${sessionRevision ?? 0}`} onVisibleWorldIds={onVisibleWorldIds}
+      <DeviceHome authStatus={authStatus} initialPreparationReady={ready} ensureDefaultSpace={ensureDefaultSpace} onVisibleWorldIds={onVisibleWorldIds}
         renderWorldBadge={id => <CountBadge count={counts.records[id]?.unread_count ?? null} stale={counts.stale} />}
         worldNotificationDescription={(id, name) => {
           const count = counts.records[id]?.unread_count;

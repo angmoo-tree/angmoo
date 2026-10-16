@@ -246,8 +246,12 @@ def compose_runtime(
         session_factory = create_session_factory(engine)
         data_paths = StaticRuntimeDataPath(config.data_paths.root)
         episode_only = runtime_settings.MEMORY_RECALL_REPRESENTATION == "episode_v1"
-        memory_recall_index = SqliteMemoryRecallIndex(data_paths,
-            settings=MemoryRecallIndexSettings(generation="memory-episode-v1") if episode_only else None)
+        memory_recall_index = SqliteMemoryRecallIndex(
+            data_paths,
+            settings=MemoryRecallIndexSettings.for_representation(
+                runtime_settings.MEMORY_RECALL_REPRESENTATION
+            ),
+        )
         memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve(),
             fts_policy=runtime_settings.CHAT_HYBRID_FTS_POLICY, episode_only=episode_only)
         return RuntimeComposition(

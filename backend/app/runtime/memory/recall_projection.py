@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.core import work_observation as observation
+
 from enum import StrEnum
 from contextlib import contextmanager
 import logging
@@ -169,6 +171,7 @@ class EmbeddedMemoryRecallProjection:
                 self._pending_settings.clear()
         self._wake.set()
 
+    @observation.observed("fts_projection_apply")
     def _apply_pending(self):
         with self._pending_lock:
             item_ids, setting_ids, full_sync = self._pending_items, self._pending_settings, self._full_sync

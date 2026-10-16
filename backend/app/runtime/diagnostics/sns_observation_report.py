@@ -15,9 +15,9 @@ from typing import Any
 from uuid import uuid4
 
 from app.core.ids import length_prefixed_identity_key as identity_key
+from app.runtime.diagnostics.observation_storage import atomic_json, observation_root, session_path
 from app.runtime.diagnostics.sns_observation import (
-    SCHEMA_VERSION, _atomic_json, active_session, deadline, observation_root,
-    read_session, session_path, utc,
+    SCHEMA_VERSION, active_session, deadline, read_session, utc,
 )
 
 
@@ -122,8 +122,8 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
     if probe.read_bytes() != b"ready":
         raise OSError("sns_observation_write_preflight_failed")
     probe.unlink()
-    _atomic_json(directory / "manifest.json", manifest)
-    _atomic_json(observation_root(data_root) / "active.json", {"session_id": session_id})
+    atomic_json(directory / "manifest.json", manifest)
+    atomic_json(observation_root(data_root) / "active.json", {"session_id": session_id})
     return manifest
 
 
@@ -134,7 +134,7 @@ def stop_session(data_root: Path, session_id: str, *, now: datetime | None = Non
         raise ValueError("sns_observation_stop_before_start")
     if manifest.get("stopped_at") is None:
         manifest["stopped_at"] = ended.isoformat()
-        _atomic_json(session_path(data_root, session_id) / "manifest.json", manifest)
+        atomic_json(session_path(data_root, session_id) / "manifest.json", manifest)
     return manifest
 
 
@@ -157,7 +157,9 @@ def session_status(data_root: Path, session_id: str, *, now: datetime | None = N
     liveness = ("unknown" if latest is None else "fatal" if "fatal" in lifecycle
                 else "closed" if lifecycle <= {"closed", "finalized"}
                 else "fresh" if (now - latest).total_seconds() <= 150 else "stale")
-    return {"session_id": session_id, "state": state, "started_at": manifest["started_at"],
+    from app.runtime.diagnostics.memory_pipeline_report import capability
+    memory_pipeline = capability(directory)
+    return {"memory_pipeline": memory_pipeline, "session_id": session_id, "state": state, "started_at": manifest["started_at"],
             "ends_at": manifest["ends_at"], "tail_ends_at": manifest["tail_ends_at"],
             "world_id": manifest["world_id"], "actor_ids": manifest["actor_ids"],
             "recorder_health": health, "event_files": len(list(directory.glob("events-*.jsonl"))),
@@ -514,7 +516,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "unobserved_lanes": [lane for lane, statuses in lane_counts.items() if not statuses],
                 "database_extracted_at": datetime.now(UTC).isoformat(),
                 "database_path": str(db_path)}
-    _atomic_json(destination / "manifest.json", manifest)
+    atomic_json(destination / "manifest.json", manifest)
     _jsonl(destination / "runs.jsonl", runs)
     _jsonl(destination / "preparations.jsonl", preparations)
     _jsonl(destination / "scheduler.jsonl", scheduler_runs)
@@ -525,17 +527,17 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     _jsonl(destination / "sqlite-writes.jsonl", sqlite_events)
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
-    _atomic_json(destination / "coverage.json", coverage)
+    atomic_json(destination / "coverage.json", coverage)
     from app.runtime.diagnostics.situation_coverage import coverage as situation_coverage
     situation_events, situation_summary = situation_coverage(manifest, events, situation_receipts,
         damaged=damaged, dropped=dropped, canonical=situation_canonical)
     try:
         _jsonl(destination / "situation-evidence.jsonl", situation_events)
-        _atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
+        atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
     except OSError:
         situation_summary.update(situation_evidence_complete=False, export_error="situation_export_failed")
         try:
-            _atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
+            atomic_json(destination / "situation-evidence-coverage.json", situation_summary)
         except OSError:
             pass  # Missing auxiliary files mean UNKNOWN, never complete.
     events_dir = destination / "events"
@@ -592,4 +594,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         lines.extend(["", f"Open activities at extraction: {len(unclosed)}. See coverage.json for IDs."])
     lines.extend(["", "This report records execution evidence; output naturalness and memory causality need separate review."])
     (destination / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    from app.runtime.diagnostics.memory_pipeline_report import export_memory
+    try:
+        coverage["memory_pipeline"] = export_memory(directory, destination, db_path, manifest, data_root=data_root)
+    except Exception:
+        # Auxiliary evidence must not invalidate the existing SNS export.
+        # The missing auxiliary files and explicit failure can never mean PASS.
+        coverage["memory_pipeline"] = {"status": "PARTIAL", "memory_pipeline_evidence_complete": False,
+            "unknown_denominator": True, "export_error": "memory_pipeline_export_failed"}
+    atomic_json(destination / "coverage.json", coverage)
     return coverage
