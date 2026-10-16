@@ -1,4 +1,5 @@
 """Incremental, restartable projection from accepted summary registrations."""
+from app.core import work_observation as observation
 import asyncio
 from time import time
 
@@ -92,10 +93,12 @@ class MemoryVectorProjection:
             if more:
                 await asyncio.sleep(0)
                 continue
-            try:
-                await asyncio.wait_for(self._wake.wait(), timeout=5)
-            except TimeoutError:
-                pass
+            observation.emit("wait", boundary="idle", operation="vector_loop", reason="wake_or_timeout", planned_wait_ms=5000)
+            with observation.span("vector_idle_wait", reason="wake_or_timeout", planned_wait_ms=5000):
+                try:
+                    await asyncio.wait_for(self._wake.wait(), timeout=5)
+                except TimeoutError:
+                    pass
 
     def fence(self):
         self._closing = True

@@ -1,4 +1,5 @@
 """Snapshot preparation followed by a bounded canonical-to-Vec1 effect fence."""
+from app.core import work_observation as observation
 from dataclasses import dataclass, field
 from contextlib import nullcontext
 from datetime import UTC
@@ -127,6 +128,7 @@ def _document(prepared, vector):
         prepared.document.counterpart_world_character_id, prepared.document.thread_id)
 
 
+@observation.observed("vector_persist")
 def persist(projection, prepared, received, *, revalidate=True):
     scope, config, digest, version = prepared.work
     item_id, doc_id = prepared.item_id, f"memory-item:{prepared.item_id}"
@@ -161,6 +163,7 @@ def persist(projection, prepared, received, *, revalidate=True):
         projection._finish_attempt(doc_id, config.profile, digest, prepared.attempt_revision, terminal=False)
         projection.journal.remove(scope.world_id, item_id, expected_payload=received)
         projection._received.pop(item_id, None)
+        observation.emit("result", boundary="committed", receipt_id=received.get("receipt_id"), item_id=item_id, outcome=outcome)
         return outcome
     except ResultJournalError as exc:
         if str(exc) in {"result_journal_world_closed", "result_journal_item_closed"}:

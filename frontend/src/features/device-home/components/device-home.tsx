@@ -4,7 +4,7 @@ import { useUiText } from "@/hooks/use-ui-text";
 
 import Link from "next/link";
 import { BrainCircuit, Cog, Hammer, Plus } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
@@ -13,7 +13,7 @@ import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visua
 import { AppIcon } from "@/components/ui/app-icon";
 import { Button } from "@/components/ui/button";
 
-import { getLocalWorldSurface } from "@/features/device-home/api/device-home-client";
+import { useDeviceHomeWorlds } from "@/features/device-home/hooks/use-device-home-worlds";
 import type { DeviceHomeAuthStatus, WorldSurfaceItem } from "@/features/device-home/types/index";
 import { DEVICE_HOME_FIXED_APPS, presentWorldLaunchability } from "@/features/device-home/utils/device-home-presentation";
 import styles from "./device-home.module.css";
@@ -22,6 +22,7 @@ import styles from "./device-home.module.css";
 
 type DeviceHomeProps = {
   authStatus: DeviceHomeAuthStatus;
+  initialPreparationReady?: boolean;
   ensureDefaultSpace?: () => Promise<unknown>;
   onVisibleWorldIds?: (ids: string[]) => void;
   renderWorldBadge?: (worldId: string) => ReactNode;
@@ -48,59 +49,13 @@ const WORLD_LAUNCH_TONE_CLASSES = {
   waiting: styles.worldLaunchBadgeWaiting,
 } as const;
 
-export function DeviceHome({ authStatus, ensureDefaultSpace, onVisibleWorldIds, renderWorldBadge, worldNotificationDescription }: DeviceHomeProps) {
+export function DeviceHome({ authStatus, initialPreparationReady = true, ensureDefaultSpace, onVisibleWorldIds, renderWorldBadge, worldNotificationDescription }: DeviceHomeProps) {
   const uiText = useUiText("device-home");
-  const [worldRequestRevision, setWorldRequestRevision] = useState(0);
-  const [worldRead, setWorldRead] = useState<{
-    error: string | null;
-    items: WorldSurfaceItem[];
-    revision: number;
-  }>({ error: null, items: [], revision: -1 });
-  const worldLoading = worldRead.revision !== worldRequestRevision;
-  const worldError = worldLoading ? null : worldRead.error;
-  // Keep the visible set stable while a focus refresh is in flight. Replacing
-  // it with [] would restart the composition's batch controller twice.
-  const worlds = worldRead.error ? [] : worldRead.items;
+  const read = useDeviceHomeWorlds(authStatus === "authenticated", initialPreparationReady, ensureDefaultSpace);
+  const worlds = read.items;
   useEffect(() => {
-    onVisibleWorldIds?.(authStatus === "authenticated" && !worldRead.error ? worldRead.items.map(world => world.world_id) : []);
-  }, [authStatus, worldRead, worldRequestRevision, onVisibleWorldIds]);
-  useEffect(()=>{
-    if(authStatus!=="authenticated")return;
-    const refresh=()=>{if(document.visibilityState!=="hidden")setWorldRequestRevision(value=>value+1);};
-    window.addEventListener("focus",refresh);document.addEventListener("visibilitychange",refresh);
-    return()=>{window.removeEventListener("focus",refresh);document.removeEventListener("visibilitychange",refresh);};
-  },[authStatus]);
-
-  useEffect(() => {
-    if (authStatus !== "authenticated") {
-      return;
-    }
-    const controller = new AbortController();
-    (ensureDefaultSpace ? ensureDefaultSpace() : Promise.resolve())
-      .then(() => getLocalWorldSurface("device_home", { signal: controller.signal }))
-      .then((surface) => {
-        if(controller.signal.aborted)return;
-        setWorldRead({
-          error: null,
-          items: surface.items,
-          revision: worldRequestRevision,
-        });
-      })
-      .catch((reason: unknown) => {
-        if(controller.signal.aborted)return;
-        if (reason instanceof DOMException && reason.name === "AbortError") return;
-        setWorldRead({
-          error:
-            reason instanceof Error
-              ? reason.message
-              : "device_home_unavailable",
-          items: [],
-          revision: worldRequestRevision,
-        });
-      });
-    return () => controller.abort();
-  }, [authStatus, worldRequestRevision, ensureDefaultSpace]);
-
+    onVisibleWorldIds?.(authStatus === "authenticated" ? worlds.map(world => world.world_id) : []);
+  }, [authStatus, worlds, onVisibleWorldIds]);
 
   const worldEntries = worlds.map((world) => (
     <WorldAppIcon key={world.world_id} world={world} badge={renderWorldBadge?.(world.world_id)} notificationDescription={worldNotificationDescription?.(world.world_id, world.name)} />
@@ -132,20 +87,21 @@ export function DeviceHome({ authStatus, ensureDefaultSpace, onVisibleWorldIds, 
           href={`/login?returnTo=${encodeURIComponent(PRODUCT_ROUTES.deviceHome)}`}
           linkLabel={uiText("owner 연결")}
         />
-      ) : worldLoading ? (
+      ) : authStatus === "checking" || (!read.hasSnapshot && read.loading) ? (
         <HomeMessage
           title={uiText("World 앱을 불러오는 중")}
-          description={uiText("SQLite의 owner 범위 World 목록만 읽고 있어요.")}
+          description={uiText("사용할 수 있는 World를 확인하고 있어요.")}
         />
-      ) : worldError ? (
+      ) : !read.hasSnapshot && read.error ? (
         <HomeMessage
           title={uiText("Device Home을 열지 못했어요")}
-          description={uiText("World 목록을 읽지 못했습니다. 다시 시도해도 runtime 상태와 World 실행 가능성은 각각 따로 확인합니다.")}
+          description={uiText("World 목록을 확인할 수 없어요. 다시 시도해 주세요.")}
           role="alert"
           action={
             <Button
               compact
-              onClick={() => setWorldRequestRevision((revision) => revision + 1)}
+              onClick={read.retry}
+              disabled={read.loading}
               variant="secondary"
             >
               {uiText("World 목록 다시 시도")}</Button>
@@ -159,6 +115,14 @@ export function DeviceHome({ authStatus, ensureDefaultSpace, onVisibleWorldIds, 
       ) : (
         worldEntries
       )}
+      {authStatus === "authenticated" && read.hasSnapshot && read.error ? (
+        <section className={styles.message} role="status">
+          <p>{uiText("World 목록을 새로 불러오지 못했어요. 이전에 확인한 목록을 표시하고 있어요.")}</p>
+          <Button compact variant="secondary" onClick={read.retry} disabled={read.loading}>
+            {uiText("World 목록 다시 시도")}
+          </Button>
+        </section>
+      ) : null}
     </>
   );
 }

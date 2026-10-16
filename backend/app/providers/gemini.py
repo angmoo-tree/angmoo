@@ -520,8 +520,10 @@ class GeminiAdapter:
         if not 0 < timeout_seconds <= 60:
             raise ValueError("embedding_timeout_invalid")
         started = monotonic()
+        from app.providers.embedding_observation import EmbeddingTransportObservation
+        observation = EmbeddingTransportObservation(input_count=1, dimension=request.output_dimension)
         client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
-            timeout=max(1, int(timeout_seconds*1000)),
+            timeout=max(1, int(timeout_seconds*1000)), async_client_args=observation.client_args(),
             retry_options=types.HttpRetryOptions(attempts=1),
         ))
         try:
@@ -537,6 +539,7 @@ class GeminiAdapter:
                 raise ProviderError("Embedding vector invalid", failure_class="embedding_dimension_mismatch", retryable=False)
             # Developer API does not provide usage on this SDK response. Unknown
             # token usage is None; never estimate it from character count.
+            observation.validated(1)
             return MeasuredEmbeddingResponse(vector, ProviderUsage(call_type="embed_content",
                 duration_ms=int((monotonic()-started)*1000)), physical_attempts=1)
         except asyncio.CancelledError:
@@ -547,6 +550,7 @@ class GeminiAdapter:
             normalized.duration_ms = int((monotonic()-started)*1000)
             raise normalized from None
         finally:
+            observation.finish()
             client.close()
 
     def normalize_error(

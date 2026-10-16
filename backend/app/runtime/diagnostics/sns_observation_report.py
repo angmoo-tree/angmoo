@@ -157,7 +157,9 @@ def session_status(data_root: Path, session_id: str, *, now: datetime | None = N
     liveness = ("unknown" if latest is None else "fatal" if "fatal" in lifecycle
                 else "closed" if lifecycle <= {"closed", "finalized"}
                 else "fresh" if (now - latest).total_seconds() <= 150 else "stale")
-    return {"session_id": session_id, "state": state, "started_at": manifest["started_at"],
+    from app.runtime.diagnostics.memory_pipeline_report import capability
+    memory_pipeline = capability(directory)
+    return {"memory_pipeline": memory_pipeline, "session_id": session_id, "state": state, "started_at": manifest["started_at"],
             "ends_at": manifest["ends_at"], "tail_ends_at": manifest["tail_ends_at"],
             "world_id": manifest["world_id"], "actor_ids": manifest["actor_ids"],
             "recorder_health": health, "event_files": len(list(directory.glob("events-*.jsonl"))),
@@ -592,4 +594,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         lines.extend(["", f"Open activities at extraction: {len(unclosed)}. See coverage.json for IDs."])
     lines.extend(["", "This report records execution evidence; output naturalness and memory causality need separate review."])
     (destination / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    from app.runtime.diagnostics.memory_pipeline_report import export_memory
+    try:
+        coverage["memory_pipeline"] = export_memory(directory, destination, db_path, manifest, data_root=data_root)
+    except Exception:
+        # Auxiliary evidence must not invalidate the existing SNS export.
+        # The missing auxiliary files and explicit failure can never mean PASS.
+        coverage["memory_pipeline"] = {"status": "PARTIAL", "memory_pipeline_evidence_complete": False,
+            "unknown_denominator": True, "export_error": "memory_pipeline_export_failed"}
+    _atomic_json(destination / "coverage.json", coverage)
     return coverage

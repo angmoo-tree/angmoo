@@ -3,6 +3,7 @@
 Epochs are authorization fences; dependencies only select work. Neither is a
 replacement for canonical revalidation at search time.
 """
+from app.core import work_observation as observation
 from dataclasses import dataclass
 from datetime import UTC, datetime
 import json
@@ -152,30 +153,32 @@ def snapshot(projection, item_id, credential_revision):
         item = session.get(MemoryItem, item_id)
         if item is None:
             return None, (), None, None, False, VectorProof((), frozenset(readset.dependencies), None, observed)
-        keys = (f"world:{item.world_id}", f"owner:{item.owner_id}")
-        epochs = revisions(session, keys)
-        if session.execute(text("SELECT 1 FROM world_deletion_requests WHERE world_id=:world"), {"world": item.world_id}).first():
-            return None, (), None, None, False, VectorProof(epochs, frozenset(), None, observed, world_closed=True)
-        readset.graph[("memory", item_id)].update({("world", item.world_id), ("users", item.owner_id)})
-        work = read_work(session, item_id)
-        retained = retained_registration(session, item_id)
-        from app.domains.memory.exceptions import MemoryScopeError
-        try:
-            # OFF retains valid vectors, but is not permission to retain a
-            # revoked source or skip a future expiry boundary.
-            documents = projection._source.documents_for_item_ids((item_id,), session=session).get(item_id, ()) if retained else ()
-        except MemoryScopeError:
-            documents = ()
-        from app.domains.memory.exceptions import MemoryValidationError
-        revision, material = None, None
-        try:
-            if documents and work:
-                revision = validate_embedding_credential(session, work[0], revision=credential_revision)
-                material = embedding_material(session, work[0], revision=revision)
-        except MemoryValidationError as exc:
-            # Persist observed dependencies before blocking, so a credential
-            # correction can wake this item without a full rescan.
-            material = exc
-        boundary = min((value for value in readset.boundaries if value > observed), default=None)
-        proof = VectorProof(epochs, readset.dependencies, boundary, observed, readset.related())
-        return work, documents, material, revision, retained, proof
+        with observation.span("vector_source_proof", world_id=item.world_id,
+                actor_id=item.subject_world_character_id, item_id=item_id, version=item.version):
+            keys = (f"world:{item.world_id}", f"owner:{item.owner_id}")
+            epochs = revisions(session, keys)
+            if session.execute(text("SELECT 1 FROM world_deletion_requests WHERE world_id=:world"), {"world": item.world_id}).first():
+                return None, (), None, None, False, VectorProof(epochs, frozenset(), None, observed, world_closed=True)
+            readset.graph[("memory", item_id)].update({("world", item.world_id), ("users", item.owner_id)})
+            work = read_work(session, item_id)
+            retained = retained_registration(session, item_id)
+            from app.domains.memory.exceptions import MemoryScopeError
+            try:
+                # OFF retains valid vectors, but is not permission to retain a
+                # revoked source or skip a future expiry boundary.
+                documents = projection._source.documents_for_item_ids((item_id,), session=session).get(item_id, ()) if retained else ()
+            except MemoryScopeError:
+                documents = ()
+            from app.domains.memory.exceptions import MemoryValidationError
+            revision, material = None, None
+            try:
+                if documents and work:
+                    revision = validate_embedding_credential(session, work[0], revision=credential_revision)
+                    material = embedding_material(session, work[0], revision=revision)
+            except MemoryValidationError as exc:
+                # Persist observed dependencies before blocking, so a credential
+                # correction can wake this item without a full rescan.
+                material = exc
+            boundary = min((value for value in readset.boundaries if value > observed), default=None)
+            proof = VectorProof(epochs, readset.dependencies, boundary, observed, readset.related())
+            return work, documents, material, revision, retained, proof

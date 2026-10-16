@@ -1,4 +1,5 @@
 """One opt-in worker: durable admission, daily/exit triggers and v2 selection."""
+from app.core import work_observation as observation
 
 import asyncio
 from app.domains.memory.service.batch_preparation import deliver_candidates, rebuild_briefs
@@ -121,6 +122,7 @@ class MemoryBatchRuntime:
                         break
             except Exception:
                 logger.warning("memory_batch_runtime_deferred")
+            observation.emit("wait", boundary="idle", operation="memory_batch_loop", reason="bounded_idle", planned_wait_ms=5000)
             try:
                 await asyncio.wait_for(self.stop_event.wait(), timeout=5)
             except TimeoutError:
@@ -157,7 +159,8 @@ class MemoryBatchRuntime:
                         db.execute(update(MemoryConsolidationRequest).where(
                             MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
                         db.commit()
-                        return "memory_foreground_deferred"
+                        observation.emit("wait", boundary="deferred", reason="foreground_chat")
+                    return "memory_foreground_deferred"
             self.prepare(shutdown=shutdown)
             with self.session_factory() as db:
                 repository = SqlAlchemyMemoryBatchRepository(db)
@@ -192,12 +195,14 @@ class MemoryBatchRuntime:
                 )
             return result
 
+    @observation.observed("situation_tick")
     def _situation_tick(self, *, shutdown):
         from app.runtime.memory.foreground_priority import chat_is_active
         closing = shutdown or self.situations.quit_identity is not None
         if not closing:
             with self.session_factory() as db:
                 if chat_is_active(db, now=datetime.now(UTC)):
+                    observation.emit("wait", boundary="deferred", reason="foreground_chat")
                     return "memory_foreground_deferred"
         self.situations.prepare(shutdown=closing)
         result = self.situations.tick()

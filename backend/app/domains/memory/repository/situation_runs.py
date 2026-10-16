@@ -1,4 +1,5 @@
 """Bounded run identities shared by explicit save, due schedules and native quit."""
+from app.core import work_observation as observation
 from dataclasses import asdict
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -138,6 +139,7 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
     if trigger == "scheduled":
         config.next_due_at = next_due(now, config.local_time, config.timezone)
     session.flush()
+    observation.emit("admission", boundary="flushed_pending_commit", world_id=setting.scope.world_id, actor_id=setting.scope.subject_world_character_id, run_id=receipt.run_id, cutoff=cutoff, reason=trigger)
     return receipt
 
 

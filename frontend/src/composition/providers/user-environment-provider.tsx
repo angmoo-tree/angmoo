@@ -55,45 +55,58 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
     let lastStarted = -Infinity;
     let pending = false;
     let followup: ReturnType<typeof setTimeout> | undefined;
+    let round: AbortController | undefined;
     let lastDetected: ReturnType<typeof detectUserEnvironment> | null = null;
     const schedule = () => {
       if (followup === undefined && active) followup = setTimeout(() => {
         followup = undefined;
         void synchronize();
-      }, Math.max(0, 250 - (Date.now() - lastStarted)));
+      }, Math.max(0, 250 - (performance.now() - lastStarted)));
     };
     const synchronize = async () => {
       if (!active || document.visibilityState !== "visible") return;
       if (busy) { pending = true; return; }
-      if (Date.now() - lastStarted < 250) { schedule(); return; }
+      if (performance.now() - lastStarted < 250) { schedule(); return; }
       busy = true;
       pending = false;
       let succeeded = false;
-      lastStarted = Date.now();
+      lastStarted = performance.now();
+      const currentRound = new AbortController();
+      round = currentRound;
+      const abortRound = () => currentRound.abort();
+      controller.signal.addEventListener("abort", abortRound, { once: true });
       try {
         const current = await synchronizeEnvironment(lease, { read: getUserEnvironment,
           write: synchronizeUserEnvironment, detect: () => {
             lastDetected = detectUserEnvironment();
             return lastDetected;
-          } }, controller.signal);
+          } }, currentRound.signal);
         succeeded = true;
         if (active) { setEnvironment(current); setEnvironmentScope(`${userId}:${runtimeRevision}:${sessionRevision}`); setReady(true); setFailure(null); }
       } catch (error) {
-        if (active && !controller.signal.aborted) {
+        if (active && !currentRound.signal.aborted && !controller.signal.aborted) {
           setReady(false);
           setFailure({ scope: `${userId}:${runtimeRevision}:${sessionRevision}`,
             code: error instanceof ApiRequestError ? error.code ?? "environment_sync_failed" : "environment_sync_failed" });
         }
       } finally {
+        controller.signal.removeEventListener("abort", abortRound);
+        round = undefined;
         busy = false;
         // Merge events during a request, but never turn a failed bounded
         // round into an unbounded immediate retry loop.
-        if (active && succeeded && pending && JSON.stringify(lastDetected) !== JSON.stringify(detectUserEnvironment())) schedule();
+        if (active && pending && document.visibilityState === "visible" &&
+            (currentRound.signal.aborted || (succeeded && JSON.stringify(lastDetected) !== JSON.stringify(detectUserEnvironment())))) schedule();
         pending = false;
       }
     };
     void synchronize();
-    const refresh = () => { void synchronize(); };
+    const refresh = () => {
+      if (document.visibilityState === "hidden") {
+        round?.abort(); pending = false;
+        if (followup !== undefined) { clearTimeout(followup); followup = undefined; }
+      } else void synchronize();
+    };
     const timer = window.setInterval(refresh, 60_000);
     window.addEventListener("focus", refresh);
     window.addEventListener("languagechange", refresh);

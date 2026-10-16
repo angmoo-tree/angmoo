@@ -178,10 +178,12 @@
       "maxWidthPx: 436"
     ],
     "frontend/src/composition/screens/device-home-screen.tsx": [
-      "<DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace}",
+      "<DeviceHome authStatus={authStatus} initialPreparationReady={ready} ensureDefaultSpace={ensureDefaultSpace}",
       "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
+      "<ScopedDeviceHomeScreen key={identity} />",
       "getProductRuntimeState",
       "onVisibleWorldIds={onVisibleWorldIds}",
+      "useAuthRuntimeIdentity(\"device-home\")",
       "useWorldUnreadCounts(worldIds)"
     ],
     "frontend/src/features/chat/config/models.ts": [

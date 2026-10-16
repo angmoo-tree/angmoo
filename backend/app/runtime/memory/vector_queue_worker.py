@@ -1,4 +1,5 @@
 """Consume persisted changes/claims and perform finite bootstrap/audit sweeps."""
+from app.core import work_observation as observation
 from time import time
 from sqlalchemy import select, or_, text, func, case
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
@@ -9,16 +10,28 @@ from app.domains.memory.repository import vector_queue as queue
 from app.runtime.memory.vector_changes import bootstrap_page, expand_page
 
 
+@observation.observed("vector_claim")
 def take(projection):
     with projection._factory() as session:
         ids = queue.due_ids(session, projection.generation)
+        # One bounded read outside the writer only while observation is enabled.
+        # This covers carry-in claims with no outbox event in the current session.
+        scopes = {row.id: (row.world_id, row.subject_world_character_id) for row in session.execute(
+            select(MemoryItem.id, MemoryItem.world_id, MemoryItem.subject_world_character_id)
+            .where(MemoryItem.id.in_(ids)))} if ids and observation.enabled() else {}
     if not ids:
         return ()
     with projection._factory() as session:
-        return run_sqlite_session_immediate(session,
+        claims = run_sqlite_session_immediate(session,
             lambda: queue.claim(session, projection.generation, ids), require_clean=True)
+    for claim in claims:
+        world_id, actor_id = scopes.get(claim.item_id, (None, None))
+        observation.emit("queue", boundary="claimed", item_id=claim.item_id, generation=claim.generation,
+            desired_revision=claim.revision, world_id=world_id, actor_id=actor_id)
+    return claims
 
 
+@observation.observed("vector_ack")
 def acknowledge(projection, claim, outcome):
     with projection._factory() as session:
         key = projection._attempt_keys.get(claim.item_id)
@@ -36,7 +49,12 @@ def acknowledge(projection, claim, outcome):
                     from app.domains.memory.repository.vector_erasure import erase
                     erase(session, (claim.item_id,))
             return finished
-        return run_sqlite_session_immediate(session, complete, require_clean=True)
+        accepted = run_sqlite_session_immediate(session, complete, require_clean=True)
+        # Claim IDs are safe; claim tokens remain private. Scope is correlated
+        # by the independent canonical snapshot when an item was erased.
+        observation.emit("queue", boundary="ack", item_id=claim.item_id, generation=claim.generation,
+            desired_revision=claim.revision, outcome=outcome, acknowledged=accepted)
+        return accepted
 
 
 def state(projection):
@@ -70,6 +88,7 @@ def settle(projection):
         return run_sqlite_session_immediate(session, complete, require_clean=True)
 
 
+@observation.observed("vector_audit")
 def audit_page(projection):
     with projection._factory() as session:
         row = session.get(MemoryVectorMaintenance, projection.generation)

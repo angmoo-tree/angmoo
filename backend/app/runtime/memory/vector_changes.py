@@ -1,4 +1,5 @@
 """Bounded outbox fanout. No source hydration or provider calls under writer."""
+from app.core import work_observation as observation
 from time import time
 from sqlalchemy import select, text, func
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
@@ -9,6 +10,7 @@ from app.domains.memory.models.vector_work import MemoryVectorChange, MemoryVect
 from app.domains.memory.repository.vector_queue import enqueue
 
 
+@observation.observed("vector_bootstrap")
 def bootstrap_page(projection):
     generation = projection.generation
     with projection._factory() as session:
@@ -17,7 +19,7 @@ def bootstrap_page(projection):
             return False
         cursor = state.cursor if state else ""
         upper = state.upper_bound if state else session.scalar(select(func.max(MemoryVectorEligibility.memory_item_id))) or ""
-        rows = tuple(session.execute(select(MemoryVectorEligibility.memory_item_id, MemoryItem.world_id)
+        rows = tuple(session.execute(select(MemoryVectorEligibility.memory_item_id, MemoryItem.world_id, MemoryItem.subject_world_character_id)
             .join(MemoryItem, MemoryItem.id == MemoryVectorEligibility.memory_item_id)
             .where(MemoryVectorEligibility.memory_item_id > cursor, MemoryVectorEligibility.memory_item_id <= upper)
             .order_by(MemoryVectorEligibility.memory_item_id).limit(64)))
@@ -32,16 +34,21 @@ def bootstrap_page(projection):
                 session.add(state)
                 session.execute(text("UPDATE memory_vector_maintenance SET phase='retired' WHERE generation!=:generation"),
                     {"generation": generation})
-            for item_id, world_id in rows:
+            for item_id, world_id, _actor_id in rows:
                 if not session.scalar(select(WorldDeletionRequest.id).where(WorldDeletionRequest.world_id == world_id)):
                     enqueue(session, generation, item_id, world_id)
             state.cursor = rows[-1][0] if rows else cursor
             if len(rows) < 64:
                 state.phase, state.cursor, state.due_at = "settling", "", time() + 86400
-        run_sqlite_session_immediate(session, apply, require_clean=True)
+            return True
+        applied = run_sqlite_session_immediate(session, apply, require_clean=True)
+    for item_id, world_id, actor_id in rows if applied else ():
+        observation.emit("vector_change", boundary="bootstrap", item_id=item_id, world_id=world_id,
+            actor_id=actor_id, generation=generation)
     return True
 
 
+@observation.observed("vector_change_expand")
 def expand_page(projection):
     with projection._factory() as session:
         change = session.scalar(select(MemoryVectorChange).where(MemoryVectorChange.state == "pending")
@@ -56,7 +63,8 @@ def expand_page(projection):
         if kind == "memory" and key > cursor:
             identifiers.add(key)
         ids = tuple(sorted(identifiers)[:64])
-        rows = dict(session.execute(select(MemoryItem.id, MemoryItem.world_id).where(MemoryItem.id.in_(ids))).all())
+        scoped_rows = tuple(session.execute(select(MemoryItem.id, MemoryItem.world_id, MemoryItem.subject_world_character_id).where(MemoryItem.id.in_(ids))))
+        rows = {item_id: world_id for item_id, world_id, _actor_id in scoped_rows}
     with projection._factory() as session:
         def apply():
             change = session.get(MemoryVectorChange, seq)
@@ -84,5 +92,9 @@ def expand_page(projection):
                 MemoryVectorChange.state == "pending").limit(1))
             if pending is None:
                 session.execute(text("DELETE FROM memory_vector_changes WHERE sequence=:root OR root_sequence=:root"), {"root": root})
-        run_sqlite_session_immediate(session, apply, require_clean=True)
+            return True
+        applied = run_sqlite_session_immediate(session, apply, require_clean=True)
+    for item_id, world_id, actor_id in scoped_rows if applied else ():
+        observation.emit("vector_change", boundary="expanded", change_sequence=root, item_id=item_id,
+            world_id=world_id, actor_id=actor_id, generation=projection.generation)
     return True

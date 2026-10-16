@@ -4,6 +4,7 @@ import math
 from time import monotonic
 from google import genai
 from google.genai import types
+from app.providers.embedding_observation import EmbeddingTransportObservation
 from app.providers.contracts import EmbeddingBatchLimits, MeasuredEmbeddingBatchResponse, ProviderError, ProviderUsage
 
 MAX_ITEMS = 20
@@ -23,8 +24,9 @@ async def embed_batch(request, *, timeout_seconds, normalize_error):
     if not batch_fits(request.texts) or not 0 < timeout_seconds <= 60:
         raise ValueError("embedding_batch_limit_invalid")
     started = monotonic()
+    observation = EmbeddingTransportObservation(input_count=len(request.texts), dimension=request.output_dimension)
     client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
-        timeout=max(1, int(timeout_seconds * 1000)), retry_options=types.HttpRetryOptions(attempts=1)))
+        timeout=max(1, int(timeout_seconds * 1000)), async_client_args=observation.client_args(), retry_options=types.HttpRetryOptions(attempts=1)))
     try:
         # Explicit Content boundaries matter: a list of strings is aggregated
         # into ONE Content by SDK 2.17.0 for embedding-2.
@@ -43,6 +45,7 @@ async def embed_batch(request, *, timeout_seconds, normalize_error):
                 any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in values)):
                 raise ProviderError("Embedding batch vector invalid", failure_class="embedding_dimension_mismatch")
             vectors.append(tuple(float(v) for v in values))
+        observation.validated(len(vectors))
         return MeasuredEmbeddingBatchResponse(tuple(vectors), ProviderUsage(call_type="batch_embed_contents",
             duration_ms=int((monotonic() - started) * 1000)), physical_attempts=1)
     except asyncio.CancelledError:
@@ -53,4 +56,5 @@ async def embed_batch(request, *, timeout_seconds, normalize_error):
         error.duration_ms = int((monotonic() - started) * 1000)
         raise error from None
     finally:
+        observation.finish()
         client.close()

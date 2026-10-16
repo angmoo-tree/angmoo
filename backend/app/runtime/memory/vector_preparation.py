@@ -1,4 +1,5 @@
 """Explicit preparation enrolls and claims the same durable projection work."""
+from app.core import work_observation as observation
 from datetime import UTC, datetime
 from sqlalchemy import select
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
@@ -104,6 +105,7 @@ def finish(projection, setting_id, prepared, outcomes):
         run_sqlite_session_immediate(db, operation, require_clean=True)
 
 
+@observation.observed("vector_preparation")
 async def prepare_page(projection):
     from app.runtime.memory.vector_queue_worker import acknowledge
     for setting_id in await projection._canonical.call(pending, projection):
@@ -113,7 +115,8 @@ async def prepare_page(projection):
         claims = prepared[4]
         projection._claims = {claim.item_id: claim for claim in claims}
         try:
-            outcomes = await projection.sync_items(tuple(projection._claims), credential_revision=prepared[3])
+            with observation.scope(purpose="document_preparation"):
+                outcomes = await projection.sync_items(tuple(projection._claims), credential_revision=prepared[3])
             for claim in claims:
                 await projection._canonical.call(acknowledge, projection, claim, outcomes[claim.item_id])
             with projection._factory() as db:

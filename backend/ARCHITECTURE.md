@@ -1258,3 +1258,35 @@ Individual deleted-item completion erases its operational rows after the retaine
 effects are removed. Character originals and other Worlds remain outside this scope.
 
 Local evidence and boundaries: [vector pending-work verification](../docs/verification/vector-index-pending-work-20261016.md).
+
+## Opt-in memory pipeline observation (2026-10-16, LOCAL)
+
+`core/work_observation.py` is a neutral process-local port, not a persistence or
+business owner. Domains and providers emit structural facts through it; only
+`runtime/diagnostics/memory_pipeline_observation.py` owns the opt-in SNS session,
+scope allowlist, bounded queue and diagnostic files. Business threads do no
+diagnostic file I/O or JSON serialization. A bounded carry-in claim scope read
+is performed outside the writer only while observation is enabled.
+
+The existing SQLite helpers retain their admission/retry/cleanup contracts.
+Their spans distinguish checkout, BEGIN wait, acquired writer, commit, rollback
+and cleanup. Vec1/FTS spans use distinct database identities; nested holds are
+not additive. Common helpers expose safe operation names for competing writers;
+plain Session writes and other processes remain unobserved. Scheduler leases,
+World deletion checks and manual relationship checks are unchanged.
+
+The pinned Gemini async adapter observes actual HTTPX attempts via public hooks.
+It does not switch transport, add retries, alter credential ownership, or infer
+HTTP counts from stored vectors. aiohttp and other providers are explicitly
+unsupported for this ledger. Frozen prepared membership, admission, receipt
+preservation, current-vector reuse, final effects and acknowledgements correlate
+by safe IDs. Raw payloads, headers, secrets, SQL parameters and vectors are excluded.
+
+The read-only bounded probe uses canonical denominators plus derived identities;
+no cross-database atomic snapshot is claimed. Pre-enqueue counters, sequence gaps,
+loss and final watermarks determine evidence completeness independently of storage
+correctness or AI quality. An auxiliary export failure leaves the existing SNS
+export intact and marks memory evidence partial. Sources absent from a frozen
+package are reported unavailable, not treated as a recorder crash.
+
+Local evidence: [Home and memory observation verification](../docs/verification/device-home-memory-observation-20261016.md).

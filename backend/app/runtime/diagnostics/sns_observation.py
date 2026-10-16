@@ -588,6 +588,8 @@ class SNSObserver:
         self.last_error_stage: str | None = None
         self.lifecycle_state = "starting"
         self._active: dict | None = None
+        from app.runtime.diagnostics.memory_pipeline_observation import MemoryPipelineObserver
+        self.memory_pipeline = MemoryPipelineObserver(self.data_root, self.process_instance_id)
         self._thread = Thread(target=self._loop, name="sns-observation", daemon=True)
         with _writer_lock:
             prior = _writers.get(self.data_root)
@@ -754,6 +756,7 @@ class SNSObserver:
         if previous and previous["session_id"] != manifest["session_id"]:
             self._control(previous, "recorder_closed", reason="session_rebound")
         self._active = manifest
+        self.memory_pipeline.attach(manifest)
         # Health files are per session. A recovered write failure from the
         # previous session must not appear as this session's own failure.
         self.last_error_stage = None
@@ -823,6 +826,8 @@ class SNSObserver:
                 if manifest is not None and self.now() >= deadline(manifest):
                     with self._admission:
                         self._cutoff_sessions.add(manifest["session_id"])
+                self.memory_pipeline.refresh(manifest)
+                self.memory_pipeline.flush(final=bool(manifest and manifest["session_id"] in self._cutoff_sessions))
                 tick = self.monotonic_clock()
                 if (manifest is not None and manifest["session_id"] not in self._cutoff_sessions
                     and tick >= next_heartbeat):
@@ -862,6 +867,7 @@ class SNSObserver:
             if self._active is not None:
                 self._safe_health(self._active["session_id"])
         finally:
+            self.memory_pipeline.close()
             if self._active is not None:
                 self.lifecycle_state = "closed" if self.lifecycle_state != "fatal" else "fatal"
                 self._control(self._active, "recorder_closed",

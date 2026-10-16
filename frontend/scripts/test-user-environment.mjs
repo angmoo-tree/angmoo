@@ -19,7 +19,7 @@ const events = [];
 const browser = { sessionStorage: storage(), localStorage: storage(), dispatchEvent: event => events.push(event.type) };
 let runtimeFetch = async () => new Response("{}", {status: 200});
 const context = vm.createContext({ console, window: browser, Event, FormData, File, Headers, Response, URL,
-  Date, AbortController, DOMException, setTimeout, clearTimeout,
+  Date, performance, AbortController, DOMException, setTimeout, clearTimeout,
   navigator: { languages: ["ja-JP"], language: "ja-JP" }, Intl, process });
 const modules = new Map();
 function load(filename) {
@@ -138,7 +138,7 @@ for (const request of [apiRequest, auth.authRequest, authenticatedSocial]) {
 console.log("User environment contracts PASS: isolated i18next/SSR, interpolation escaping, detectors, UTC display, typed HTTP errors across shared transports and 12 late-response session transitions.");
 
 const {synchronizeEnvironment} = source("composition/providers/environment-synchronization.ts");
-const baseEnvironment = { environment_revision: 1, timezone: "UTC", preferred_language: "en" };
+const baseEnvironment = { synchronization: "awaiting_detector", environment_revision: 1, timezone: "UTC", preferred_language: "en" };
 const lease = () => ({clientId: "synthetic-client", token: null, sequence: 0});
 const busy = after => new ApiRequestError("safe", 503, "environment_temporarily_busy", {}, after);
 for (const failure of [busy("1"), new ApiRequestError("safe",503,"other_failure"), new Error("unknown outcome")]) {
@@ -186,3 +186,37 @@ for (const phase of ["wait","response"]) {
   assert.equal(writes,1); assert.equal(current.token,null);
 }
 console.log("Environment contention PASS: typed retries only, three attempts, fresh GET/detection/sequence, excessive Retry-After, conflicts, cancellation and late lease rejection.");
+
+for (const expiry of ["2020-01-01T00:00:00", "2099-01-01T00:00:00Z", null]) {
+  const current = lease(); let writes=0;
+  const result = await synchronizeEnvironment(current, {
+    read: async()=>({...baseEnvironment,synchronization:"active_owner",lease_expires_at:expiry}),
+    write:async()=>{writes++;throw new Error("must not write");},detect:()=>({preferred_language:"ko",timezone:"UTC"}),
+  },new AbortController().signal);
+  assert.equal(writes,0); assert.equal(current.sequence,0); assert.equal(result.synchronization,"active_owner");
+}
+{
+  const current=lease(); let time=0,writes=0, language="ko",owned=false;
+  const ports={read:async()=>({...baseEnvironment,synchronization:owned?"active_owner":"awaiting_detector"}),
+    write:async()=>{writes++;owned=true;return {...baseEnvironment,lease_token:"owned"};},
+    detect:()=>({preferred_language:language,timezone:"UTC"}),now:()=>time};
+  await synchronizeEnvironment(current,ports,new AbortController().signal);
+  await synchronizeEnvironment(current,ports,new AbortController().signal); assert.equal(writes,1);
+  time=60_000; await synchronizeEnvironment(current,ports,new AbortController().signal); assert.equal(writes,2);
+  language="en"; await synchronizeEnvironment(current,ports,new AbortController().signal); assert.equal(writes,3);
+  assert.equal(current.sequence,3); assert.equal(current.lastSuccessful.detected.preferred_language,"en");
+}
+for (const code of ["environment_revision_conflict","environment_sequence_stale","environment_detector_owned","unknown"]) {
+  const current={...lease(),token:"mine"}; let reads=0;
+  const promise=synchronizeEnvironment(current,{read:async()=>{reads++;return baseEnvironment;},
+    write:async()=>{throw new ApiRequestError("safe",409,code);},detect:()=>({preferred_language:"en",timezone:"UTC"})},new AbortController().signal);
+  if(code==="unknown") {await assert.rejects(promise);assert.equal(reads,1);}
+  else {await promise;assert.equal(reads,2);assert.equal(current.token,code==="environment_revision_conflict"?"mine":null);}
+}
+{
+  let reads=0,writes=0;
+  await synchronizeEnvironment(lease(),{read:async()=>({...baseEnvironment,synchronization:++reads===1?"awaiting_detector":"active_owner"}),
+    write:async()=>{writes++;throw busy("1");},detect:()=>({preferred_language:"en",timezone:"UTC"}),wait:async()=>{}},new AbortController().signal);
+  assert.equal(writes,1);assert.equal(reads,2);
+}
+console.log("Environment ownership PASS: server authority, tokenless GET-only, monotonic renewal, latest detection, typed conflicts and ownership transfer during retry.");

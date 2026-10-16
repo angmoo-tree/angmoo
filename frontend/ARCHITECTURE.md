@@ -871,3 +871,20 @@ Guide의 ko/en은 고정 literal 파일 읽기이며 frontend tracing/Docker/sta
 영어 Guide도 기존 외부 bot의 한국어 공개 출력, auth/route/payload 의미를 바꾸지 않는다.
 
 [LOCAL 검증·실행 원장](../docs/verification/comfy-security-20261012.md)을 참조한다.
+
+## Device Home 복귀와 환경 감지기 수명 (2026-10-16, LOCAL)
+
+`features/device-home/hooks`가 현재 Home 수명의 World snapshot·최초 준비·조회 취소를 소유한다.
+성공한 빈 목록도 snapshot이다. 같은 auth/runtime 범위의 복귀 GET은 기존 아이콘과 visible ID를
+유지하며, transient 오류만 stale 표시와 재시도를 제공한다. 권한·schema 거부는 snapshot을 지운다.
+Composition은 `useAuthRuntimeIdentity`로 Home을 다시 만들고, 인증 상태와 초기 환경 준비를
+별도 prop으로 넘긴다. 기본 SNS ensure는 최초 준비에서 수행하며 일반 복귀에는 GET만 실행한다.
+Social의 기존 batch unread-count hook·badge는 composition에서 연결한다. 새 cache/poller는 없다.
+
+환경 provider는 현재 수명의 token과 마지막 성공 보고만 기억한다. `active_owner`에서 token이
+없는 화면은 GET으로 준비를 완료하고 기다린다. 자신의 token은 값 변경 또는 기존 60초 확인에
+따라 갱신한다. 서버 synchronization 상태가 만료 판정의 기준이다. typed 409는 한 번 다시 읽고
+정리하며, typed busy 503의 기존 3회/8초 한도를 유지한다. UI 언어는 saved preference를 우선한다.
+
+표현 분류는 LOCAL이다. Next/static은 같은 component·KO/EN catalog·semantic token을 사용한다.
+검증: [Home·환경·기억 관찰 로컬 결과](../docs/verification/device-home-memory-observation-20261016.md).

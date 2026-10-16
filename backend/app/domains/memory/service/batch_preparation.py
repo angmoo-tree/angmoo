@@ -3,6 +3,7 @@
 Each function preserves the original transaction boundary. Runtime supplies
 canonical source readers against the same Session and schedules these services.
 """
+from app.core import work_observation as observation
 from collections import defaultdict
 from datetime import datetime
 from sqlalchemy import func, or_, select
@@ -179,6 +180,7 @@ def enqueue_scope(
 
 
 
+@observation.observed("brief_rebuild")
 def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now: datetime, source_reader=None,
                    settings_type=MemoryBatchSetting, limit=16, after="") -> str:
     repository = dependencies.consolidation_repository(session)
@@ -200,52 +202,53 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
     ).all()
     for config in configs:
         snapshot = repository.get_scope_setting_by_id(config.scope_setting_id)
-        try:
-            memory.validate_scope(snapshot.scope)
-        except MemoryDomainError:
-            continue
-        items = repository.hot_brief_source_items(setting=snapshot, now=now, limit=24)
-        valid = True
-        for item in items:
-            situation_evidence = memory.situation_correction_evidence(
-                scope=snapshot.scope, item_id=item.id, reader=reader, now=now)
-            if situation_evidence is not None:
+        with observation.span("brief_scope", world_id=snapshot.scope.world_id, actor_id=snapshot.scope.subject_world_character_id):
+            try:
+                memory.validate_scope(snapshot.scope)
+            except MemoryDomainError:
                 continue
-            evidence_rows = memory.list_item_evidence(
-                scope=snapshot.scope, item_id=item.id
-            )
-            if not evidence_rows:
-                valid = False
-            for evidence in evidence_rows:
-                fresh = reader.read_evidence(
-                    scope=snapshot.scope,
-                    source_type=evidence.source_type,
-                    source_id=evidence.source_id,
+            items = repository.hot_brief_source_items(setting=snapshot, now=now, limit=24)
+            valid = True
+            for item in items:
+                situation_evidence = memory.situation_correction_evidence(
+                    scope=snapshot.scope, item_id=item.id, reader=reader, now=now)
+                if situation_evidence is not None:
+                    continue
+                evidence_rows = memory.list_item_evidence(
+                    scope=snapshot.scope, item_id=item.id
                 )
-                if (
-                    fresh is None
-                    or fresh.source_digest != evidence.source_digest
-                    or memory_evidence_blocked_code(
+                if not evidence_rows:
+                    valid = False
+                for evidence in evidence_rows:
+                    fresh = reader.read_evidence(
                         scope=snapshot.scope,
                         source_type=evidence.source_type,
                         source_id=evidence.source_id,
-                        evidence=fresh,
                     )
-                ):
-                    valid = False
-        if not valid:
-            # Do not silently delete owner memories or compress stale evidence.
-            # The durable dirty flag retries this code-only step; read-side
-            # validation also excludes any stale previously generated brief.
-            continue
-        if items:
-            repository.replace_hot_brief(
-                setting=snapshot,
-                expected_source_items=items,
-                summary=deterministic_hot_brief(items),
-                contract_version=MEMORY_HOT_BRIEF_CONTRACT_VERSION,
-                now=now,
-            )
-        config.brief_dirty = False
+                    if (
+                        fresh is None
+                        or fresh.source_digest != evidence.source_digest
+                        or memory_evidence_blocked_code(
+                            scope=snapshot.scope,
+                            source_type=evidence.source_type,
+                            source_id=evidence.source_id,
+                            evidence=fresh,
+                        )
+                    ):
+                        valid = False
+            if not valid:
+                # Do not silently delete owner memories or compress stale evidence.
+                # The durable dirty flag retries this code-only step; read-side
+                # validation also excludes any stale previously generated brief.
+                continue
+            if items:
+                repository.replace_hot_brief(
+                    setting=snapshot,
+                    expected_source_items=items,
+                    summary=deterministic_hot_brief(items),
+                    contract_version=MEMORY_HOT_BRIEF_CONTRACT_VERSION,
+                    now=now,
+                )
+            config.brief_dirty = False
     session.commit()
     return configs[-1].scope_setting_id if configs else ""
