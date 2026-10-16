@@ -85,3 +85,26 @@ These checks do not replace hosted full backend, frontend or installer results.
 Raw isolated-fixture logs remain local under
 `artifacts/vector-memory-home-pr-20261017/`; no operational observation records
 are included in the contribution.
+
+## First hosted result and correction
+
+Draft [PR #382](https://github.com/angmoo-tree/angmoo/pull/382) initially used
+`67ad2633f95b2120708accb8b8fffae68c99cded` and main
+`117dd3f7ab0359860c88833711c1cdd21200aa50`.
+Core impact run `38924235126`, attempt 1, reports full backend/full Windows,
+checkout `e0f4a9812fd611267e16d93a5cd41b804c728715`. This is the PR merge checkout,
+not the source HEAD or a main merge result.
+
+Governance job `117051584728` in run `38924235148` failed one assertion with
+238 tests passed: the exact credential-reveal boundary list still named vector
+batch `_submit`. Instrumentation moved its existing adapter call into
+`_submit_batch`; `_submit` now only scopes observation and delegates. The source
+still resolves the admitted batch's credential immediately at the provider call.
+Update that one exact function name, retain the equality assertion and all other
+boundaries, and run the boundary tests plus batch transport/privacy regressions.
+This does not widen the credential API, add another allowed caller or disable
+secret scanning. The first failed SHA remains historical, never a final CI pass.
+
+Focused correction checks: credential ownership/boundaries plus observed embedding
+groups and transport, **26 PASS**, with external networking denied. No product
+credential handling or provider execution code changed in this correction.

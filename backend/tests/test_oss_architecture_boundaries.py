@@ -232,7 +232,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         # Authorized embedding transport boundaries: resolve owner/purpose before
         # revealing to the provider, never to a domain result or diagnostic.
         "runtime/memory_embedding_provider.py": {"query"},
-        "runtime/memory/vector_batches.py": {"_submit"},
+        "runtime/memory/vector_batches.py": {"_submit_batch"},
         "domains/chat/service/generation.py": {"stream_world_response"},
         # Authorized WORLD_CHARACTER_SETUP_LLM material is revealed only at transport.
         "domains/routines/client.py": {"generate_daily_preparation"},
