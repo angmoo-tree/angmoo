@@ -64,70 +64,77 @@ class MemoryPipelineObserver:
         self.registered = False
 
     def attach(self, manifest):
+        session_id = manifest["session_id"]
+        if self.closed or self.sessions.get(session_id, {}).get("final"):
+            return
         if self.source_digest is None:
             try:
                 self.source_digest = sha256(Path(__file__).read_bytes()).hexdigest()
             except OSError:
                 self.source_digest = "unavailable"  # Frozen package/source access is not assumed.
         previous = self.active
-        if previous and previous["session_id"] != manifest["session_id"]:
+        if previous and previous["session_id"] != session_id:
             self.flush(final=True)
-            self.remove()
-            self.registered = False
             self.aliases.clear()
             self.item_scopes.clear()
-        if not self.registered:
-            self.remove = work_observation.install(self.observe)
-            self.registered = True
         self.active = dict(manifest)
         self.active["database_id"] = work_observation.database_id(self.root / manifest["database_relative_path"])
-        self.sessions.setdefault(manifest["session_id"], {"expected": Counter(), "written": Counter(), "sequence": 0,
+        self.sessions.setdefault(session_id, {"expected": Counter(), "written": Counter(), "sequence": 0,
             "dropped": 0, "failed": 0, "truncated": 0, "bytes": 0, "final": False})
+        if not self.registered:
+            # An in-flight caller may still hold the previous callback at rebind.
+            self.remove = work_observation.install(lambda value: self.observe(value, session_id=session_id))
+            self.registered = True
+            self.last_flush = 0
         self.flush()
 
     def refresh(self, manifest):
         if manifest and self.active and manifest["session_id"] == self.active["session_id"]:
             self.active["stopped_at"] = manifest.get("stopped_at")
 
-    def observe(self, value):
+    def observe(self, value, *, session_id):
         manifest = self.active
-        if manifest is None or self.closed:
+        if manifest is None or self.closed or manifest["session_id"] != session_id:
             return
-        if value.get("event") == "diagnostic_loss":
-            self.sessions[manifest["session_id"]]["dropped"] += 1
+        state = self.sessions[session_id]
+        if state["final"]:
             return
         # No manifest/DB/file reads on the caller's thread.
         end = manifest.get("stopped_at") or manifest["tail_ends_at"]
         if datetime.now(UTC) >= datetime.fromisoformat(end.replace("Z", "+00:00")):
             return
-        actor, world = value.get("actor_id"), value.get("world_id")
-        if (world and world != manifest["world_id"]) or (actor and actor not in manifest["actor_ids"]):
-            return
-        if actor and world and value.get("item_id") and len(self.item_scopes) < 4096:
-            self.item_scopes[value["item_id"]] = (actor, world)
-        if not actor and value.get("item_id"):
-            known = self.item_scopes.get(value["item_id"])
-            if not known:
-                return
-            actor, world = known
-            value = {**value, "actor_id": actor, "world_id": world}
-        if (world and world != manifest["world_id"]) or (actor and actor not in manifest["actor_ids"]):
-            return
-        if actor is None:
-            # Competing writers/queues carry operation/timing only. Unscoped
-            # embeddings and memory items must never be attributed to this World.
-            if value.get("event") not in {"sqlite", "sqlite_attempt", "queue", "stage", "wait"}:
-                return
-            database = value.get("database_id")
-            if database and database != manifest["database_id"]:
-                return
-        state = self.sessions[manifest["session_id"]]
-        if state["final"]:
-            return
         if not self.lock.acquire(blocking=False):
-            state["dropped"] += 1
+            if not state["final"]:
+                state["dropped"] += 1
             return
         try:
+            # Finalization closes admission under the same short lock BEFORE
+            # draining. A caller captured before cutoff must not enqueue later.
+            if self.closed or self.active is not manifest or state["final"]:
+                return
+            if value.get("event") == "diagnostic_loss":
+                state["dropped"] += 1
+                return
+            actor, world = value.get("actor_id"), value.get("world_id")
+            if (world and world != manifest["world_id"]) or (actor and actor not in manifest["actor_ids"]):
+                return
+            if actor and world and value.get("item_id") and len(self.item_scopes) < 4096:
+                self.item_scopes[value["item_id"]] = (actor, world)
+            if not actor and value.get("item_id"):
+                known = self.item_scopes.get(value["item_id"])
+                if not known:
+                    return
+                actor, world = known
+                value = {**value, "actor_id": actor, "world_id": world}
+            if (world and world != manifest["world_id"]) or (actor and actor not in manifest["actor_ids"]):
+                return
+            if actor is None:
+                # Competing writers carry timing only; unscoped memory does not.
+                if value.get("event") not in {"sqlite", "sqlite_attempt", "queue", "stage", "wait"}:
+                    return
+                database = value.get("database_id")
+                if database and database != manifest["database_id"]:
+                    return
             state["sequence"] += 1
             key = f"{value.get('event')}:{value.get('boundary', '')}"
             state["expected"][key] += 1  # Independent denominator, BEFORE enqueue.
@@ -148,7 +155,20 @@ class MemoryPipelineObserver:
     def flush(self, *, final=False):
         # Called only by the recorder thread (or its closing owner after join).
         from app.runtime.diagnostics.sns_observation import session_path, _atomic_json
-        for _ in range(512):
+        manifest = self.active
+        if manifest is None:
+            return
+        state = self.sessions[manifest["session_id"]]
+        if state["final"]:
+            return
+        if final:
+            with self.lock:
+                state["final"] = True
+                self.remove()
+                self.registered = False
+            # No file I/O under the admission lock. Drain only accepted events;
+            # final health is attempted once, including when its write fails.
+        for _ in range(self.queue.qsize() if final else 512):
             try:
                 session, key, event = self.queue.get_nowait()
             except Empty:
@@ -173,15 +193,10 @@ class MemoryPipelineObserver:
                 state["failed"] += 1
             finally:
                 self.queue.task_done()
-        manifest = self.active
-        if manifest is None:
-            return
         if not final and monotonic() - self.last_flush < 1:
             return
         self.last_flush = monotonic()
         state = self.sessions[manifest["session_id"]]
-        if final:
-            state["final"] = True
         # Copy briefly; never hold the admission lock while writing a file.
         with self.lock:
             health = {key: dict(value) if isinstance(value, Counter) else value for key, value in state.items()}
@@ -196,6 +211,4 @@ class MemoryPipelineObserver:
 
     def close(self):
         self.closed = True
-        self.remove()
-        self.registered = False
         self.flush(final=True)

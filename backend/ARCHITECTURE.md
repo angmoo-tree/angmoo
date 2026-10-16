@@ -1268,6 +1268,21 @@ scope allowlist, bounded queue and diagnostic files. Business threads do no
 diagnostic file I/O or JSON serialization. A bounded carry-in claim scope read
 is performed outside the writer only while observation is enabled.
 
+The recorder attaches only to an unexpired, non-stopped session. At cutoff it
+closes memory-event admission and removes the process-local sink under a short
+in-memory lock, then drains accepted events and attempts the final health write
+once, outside that lock. Repeated flush/close and a server restart cannot reopen
+or rewrite a finished session. A failed final write remains incomplete evidence;
+it is not retried on every idle tick. Session-bound callbacks cannot put late
+events into a later session. SNS finalization drains that session's accepted work
+even when a following session has already replaced the active pointer.
+
+Historical manifests, active.json, events and exports are retained. An unfinished
+session can resume after restart, and a newly started session can attach in the
+same process. Idle discovery retains its one-second read-only manifest interval;
+expired heartbeat deadlines do not create a tight loop, scheduler sample or file
+write. Completed session files also remain unchanged during runtime shutdown.
+
 The existing SQLite helpers retain their admission/retry/cleanup contracts.
 Their spans distinguish checkout, BEGIN wait, acquired writer, commit, rollback
 and cleanup. Vec1/FTS spans use distinct database identities; nested holds are
@@ -1290,3 +1305,5 @@ export intact and marks memory evidence partial. Sources absent from a frozen
 package are reported unavailable, not treated as a recorder crash.
 
 Local evidence: [Home and memory observation verification](../docs/verification/device-home-memory-observation-20261016.md).
+
+Lifecycle follow-up: [session finalization verification](../docs/verification/observer-session-finalization-20261016.md).

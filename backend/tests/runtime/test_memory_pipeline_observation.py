@@ -104,3 +104,145 @@ def test_file_failure_and_oversize_are_explicit_loss(tmp_path,monkeypatch):
     finally: observer.close()
     health=capability(directory(tmp_path,value))["processes"][0]
     assert health["truncated"]==1 and health["failed"]==1 and sum(health["expected"].values())==2
+
+
+def recorded_files(root):
+    return {path.relative_to(root).as_posix(): (path.read_bytes(), path.stat().st_mtime_ns)
+            for path in root.rglob("*") if path.is_file()}
+
+
+def test_final_flush_disconnects_and_never_rewrites_finished_evidence(tmp_path):
+    observer = MemoryPipelineObserver(tmp_path, "process")
+    value = manifest()
+    observer.attach(value)
+    callback = observation._sink
+    try:
+        with observation.scope(world_id="w", actor_id="a"):
+            observation.emit("result", item_id="accepted", boundary="committed")
+        observer.flush(final=True)
+        assert not observation.enabled()
+        events, damaged = read_events(directory(tmp_path, value))
+        health = capability(directory(tmp_path, value))["processes"][0]
+        assert [event["item_id"] for event in events] == ["accepted"] and not damaged
+        assert health["final"] and health["queued"] == 0
+        before = recorded_files(tmp_path)
+        for _ in range(3):
+            callback({"event": "result", "world_id": "w", "actor_id": "a", "item_id": "late"})
+            callback({"event": "diagnostic_loss"})
+            observer.flush()
+            observer.flush(final=True)
+            observer.attach(value)  # A completed session cannot be reopened.
+        observer.close()
+        assert not observation.enabled() and recorded_files(tmp_path) == before
+    finally:
+        observer.close()
+
+
+def test_final_flush_drains_an_already_admitted_producer(tmp_path, monkeypatch):
+    from app.runtime.diagnostics import memory_pipeline_observation as module
+    observer = MemoryPipelineObserver(tmp_path, "process")
+    value = manifest()
+    observer.attach(value)
+    admitted, release, finishing = Event(), Event(), Event()
+    drained = Event()
+    original = module.safe_event
+    admission_lock = observer.lock
+
+    class AdmissionBarrier:
+        def acquire(self, blocking=True):
+            return admission_lock.acquire(blocking=blocking)
+
+        def release(self):
+            admission_lock.release()
+
+        def __enter__(self):
+            finishing.set()
+            admission_lock.acquire()
+
+        def __exit__(self, *_):
+            admission_lock.release()
+
+    observer.lock = AdmissionBarrier()
+    take = observer.queue.get_nowait
+
+    def drain():
+        drained.set()
+        return take()
+
+    monkeypatch.setattr(observer.queue, "get_nowait", drain)
+
+    def blocked(value):
+        admitted.set()
+        assert release.wait(5)
+        return original(value)
+
+    monkeypatch.setattr(module, "safe_event", blocked)
+    callback = observation._sink
+    producer = Thread(target=lambda: callback({"event": "result", "world_id": "w",
+        "actor_id": "a", "item_id": "accepted", "boundary": "committed"}))
+
+    def finish():
+        observer.flush(final=True)
+
+    finalizer = Thread(target=finish)
+    try:
+        producer.start()
+        assert admitted.wait(5)
+        finalizer.start()
+        assert finishing.wait(5)
+        assert not drained.is_set(), "final drain started before admission was closed"
+    finally:
+        release.set()
+        producer.join(5)
+        finalizer.join(5)
+        observer.close()
+    assert not producer.is_alive() and not finalizer.is_alive()
+    events, damaged = read_events(directory(tmp_path, value))
+    health = capability(directory(tmp_path, value))["processes"][0]
+    assert not damaged and [event["item_id"] for event in events] == ["accepted"]
+    assert health["final"] and health["queued"] == 0
+    assert sum(health["expected"].values()) == sum(health["written"].values()) == 1
+
+
+def test_finished_callback_cannot_deliver_to_a_new_session(tmp_path):
+    observer = MemoryPipelineObserver(tmp_path, "process")
+    first, second = manifest(), manifest("b")
+    observer.attach(first)
+    old_callback = observation._sink
+    try:
+        observer.flush(final=True)
+        before = recorded_files(directory(tmp_path, first))
+        observer.attach(second)
+        assert observation.enabled()
+        old_callback({"event": "result", "world_id": "w", "actor_id": "a", "item_id": "old"})
+        with observation.scope(world_id="w", actor_id="a"):
+            observation.emit("result", item_id="new", boundary="committed")
+        observer.close()
+        events, damaged = read_events(directory(tmp_path, second))
+        assert not damaged and [event["item_id"] for event in events] == ["new"]
+        assert recorded_files(directory(tmp_path, first)) == before
+    finally:
+        observer.close()
+
+
+def test_failed_final_health_does_not_retry_forever_or_claim_complete(tmp_path, monkeypatch):
+    from app.runtime.diagnostics import sns_observation
+    observer = MemoryPipelineObserver(tmp_path, "process")
+    value = manifest()
+    observer.attach(value)
+    calls = []
+
+    def failed(path, value):
+        calls.append(path)
+        raise OSError("synthetic file failure")
+
+    monkeypatch.setattr(sns_observation, "_atomic_json", failed)
+    try:
+        for _ in range(3):
+            observer.flush(final=True)
+        observer.close()
+        assert len(calls) == 1 and not observation.enabled()
+        assert observer.sessions[value["session_id"]]["failed"] == 1
+        assert not capability(directory(tmp_path, value))["processes"][0]["final"]
+    finally:
+        observer.close()

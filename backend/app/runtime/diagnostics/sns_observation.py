@@ -677,7 +677,7 @@ class SNSObserver:
             "heartbeat_at": self.now().isoformat(), "last_loop_at": self.last_loop_at,
             "last_saved_at": self.last_saved_at, "last_error_stage": self.last_error_stage,
             "lifecycle_state": self.lifecycle_state, "dropped_count": count["dropped"],
-            "queued_count": self.queue.qsize(), **count,
+            "queued_count": count["admitted"] - count["written"] - count["failed"], **count,
             "flush_complete": session_id in self._finalized and
                 count["admitted"] == count["written"] + count["failed"]})
 
@@ -753,7 +753,8 @@ class SNSObserver:
 
     def _attach(self, manifest: dict) -> None:
         previous = self._active
-        if previous and previous["session_id"] != manifest["session_id"]:
+        if (previous and previous["session_id"] != manifest["session_id"]
+                and previous["session_id"] not in self._finalized):
             self._control(previous, "recorder_closed", reason="session_rebound")
         self._active = manifest
         self.memory_pipeline.attach(manifest)
@@ -800,9 +801,11 @@ class SNSObserver:
 
     def _finalize(self, manifest: dict) -> None:
         session_id = manifest["session_id"]
-        if session_id in self._finalized or not self.queue.empty():
-            return
         count = self._counter(session_id)
+        # A following session can already have admitted work in the same queue.
+        # Cutoff prevents further admission to this session; wait for its own work.
+        if session_id in self._finalized or count["admitted"] != count["written"] + count["failed"]:
+            return
         flush = count["admitted"] == count["written"] + count["failed"]
         self.lifecycle_state = "finalized"
         self._control(manifest, "session_finalized", details={
@@ -820,27 +823,41 @@ class SNSObserver:
             while True:
                 self.last_loop_at = self.now().isoformat()
                 manifest = active_session(self.data_root)
-                if manifest is not None and (self._active is None
-                    or self._active["session_id"] != manifest["session_id"]):
+                if self._active is not None and self._active["session_id"] not in self._finalized:
+                    # stop + start can replace active.json between recorder ticks.
+                    # Finish the session we actually owned, even if the pointer moved.
+                    attached = (manifest if manifest and manifest["session_id"] == self._active["session_id"]
+                        else read_session(self.data_root, self._active["session_id"]))
+                    self._active = attached
+                    if self.now() >= deadline(attached):
+                        with self._admission:
+                            self._cutoff_sessions.add(attached["session_id"])
+                    cutoff = attached["session_id"] in self._cutoff_sessions
+                    self.memory_pipeline.refresh(attached)
+                    self.memory_pipeline.flush(final=cutoff)
+                    if cutoff:
+                        self._finalize(attached)
+                eligible = (manifest is not None and self.now() < deadline(manifest)
+                    and manifest["session_id"] not in self._cutoff_sessions)
+                if (eligible and not self.closed.is_set()
+                    and (self._active is None or self._active["session_id"] in self._finalized)):
                     self._attach(manifest)
-                if manifest is not None and self.now() >= deadline(manifest):
-                    with self._admission:
-                        self._cutoff_sessions.add(manifest["session_id"])
-                self.memory_pipeline.refresh(manifest)
-                self.memory_pipeline.flush(final=bool(manifest and manifest["session_id"] in self._cutoff_sessions))
+                    last_heartbeat = self.monotonic_clock()
+                    next_heartbeat = last_heartbeat + self.heartbeat_seconds
                 tick = self.monotonic_clock()
-                if (manifest is not None and manifest["session_id"] not in self._cutoff_sessions
-                    and tick >= next_heartbeat):
+                recording = (eligible and self._active is not None
+                    and self._active["session_id"] == manifest["session_id"])
+                if recording and tick >= next_heartbeat:
                     self._heartbeat(manifest, elapsed_seconds=tick - last_heartbeat)
                     last_heartbeat = tick
                     next_heartbeat = tick + self.heartbeat_seconds
-                if manifest is not None and manifest["session_id"] in self._cutoff_sessions:
-                    self._finalize(manifest)
                 if self.closed.is_set() and self.queue.empty():
                     break
                 try:
-                    item = self.queue.get(timeout=min(1.0,
-                        max(0.01, next_heartbeat - self.monotonic_clock())))
+                    # Ended/absent sessions retain only the existing lightweight
+                    # discovery interval, not a past heartbeat's 10 ms busy loop.
+                    timeout = min(1.0, max(0.01, next_heartbeat - self.monotonic_clock())) if recording else 1.0
+                    item = self.queue.get(timeout=timeout)
                 except Empty:
                     continue
                 try:
@@ -864,11 +881,14 @@ class SNSObserver:
             self.lifecycle_state = "fatal"
             self.last_error_stage = "writer_loop"
             logger.exception("sns_observation_writer_fatal")
-            if self._active is not None:
+            if self._active is not None and self._active["session_id"] not in self._finalized:
                 self._safe_health(self._active["session_id"])
         finally:
             self.memory_pipeline.close()
-            if self._active is not None:
+            if self._active is not None and self._active["session_id"] not in self._finalized:
+                if self.closed.is_set() and self.lifecycle_state != "fatal":
+                    self.lifecycle_state = "closing"
+                    self._control(self._active, "recorder_closing", reason="runtime_close")
                 self.lifecycle_state = "closed" if self.lifecycle_state != "fatal" else "fatal"
                 self._control(self._active, "recorder_closed",
                     reason="runtime_close" if self.closed.is_set() else "writer_fatal")
@@ -881,9 +901,6 @@ class SNSObserver:
         if not self.closed.is_set():
             with self._admission:
                 self.closed.set()
-            if self._active is not None:
-                self.lifecycle_state = "closing"
-                self._control(self._active, "recorder_closing", reason="runtime_close")
             try:
                 self.queue.put(None, timeout=max(0, min(0.5, until - self.monotonic_clock())))
             except Full:
@@ -892,7 +909,7 @@ class SNSObserver:
         if self._thread.is_alive():
             self.lifecycle_state = "close_timeout"
             self.last_error_stage = "close_timeout"
-            if self._active is not None:
+            if self._active is not None and self._active["session_id"] not in self._finalized:
                 self._safe_health(self._active["session_id"])
             return False
         return True
