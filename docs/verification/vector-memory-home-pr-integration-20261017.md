@@ -176,3 +176,28 @@ build plus real SQLite extension tests pass. No dependency version changed.
 Current backend boundary and frontend design gates pass. Generated inventories
 contain only reviewed current source facts. Hosted final-SHA results remain
 pending; superseded successes are not used as final evidence.
+
+## Visual readiness follow-up on 9c6be5d3
+
+Core run `38929348884`, frontend job `117069138684`, passed functional browser
+flows and 35 of 36 UI-F visual cases, then failed the centered Home measurement:
+`boundingBox()` returned null after a separate visibility assertion on reload.
+The shell is keyed by hydrated auth/runtime identity, so that early visible node
+can be replaced before the one-shot measurement. The desktop portion now waits
+for the same healthy runtime and actual World readiness as the compact portion,
+then polls the actual bounding-box centering (a missing box fails the predicate).
+Existing screenshot baselines, pixel tolerance and write/provider assertions are
+unchanged; no sleep, test retry or timeout extension was added.
+
+Local Windows readiness/geometry/request verification: both Next and static
+projects repeated three times, **6 PASS**, retries disabled. Pixel comparisons
+were explicitly omitted locally because the canonical snapshots belong to the
+pinned Linux browser; full unchanged visual comparisons remain required in CI.
+The generated design report changes only this spec's source hash.
+
+All four backend shards and their exact-attempt aggregate subsequently passed
+on `9c6be5d3`. Governance, Local Smoke, Windows Host, Windows Advisory and CodeQL
+also passed. Windows EXE creation passed and predecessor/Defender fixture builds
+continued. This source still fails the visual case above and is not a merge
+candidate. Publish the readiness correction and require fresh final-source
+checks, including completed Windows installation/upgrade verification.

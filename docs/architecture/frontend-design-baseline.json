@@ -338,7 +338,7 @@
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
-        "sha256": "92d38d19358c7cb0b0aa761430498d9b2889da1fa068239b9a430218af1490af"
+        "sha256": "18a0ecfbe871db41e0767077b51af510f270928956441835769e5b3d538b721a"
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
@@ -1662,7 +1662,7 @@
         {
           "path": "browser-tests/product-surfaces.visual.spec.ts",
           "present": true,
-          "sha256": "92d38d19358c7cb0b0aa761430498d9b2889da1fa068239b9a430218af1490af"
+          "sha256": "18a0ecfbe871db41e0767077b51af510f270928956441835769e5b3d538b721a"
         },
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",
