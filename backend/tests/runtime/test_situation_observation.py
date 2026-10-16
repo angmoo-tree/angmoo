@@ -122,7 +122,7 @@ def test_auxiliary_export_failure_preserves_the_core_export(observer_data_root,t
     manifest=reports.start_session(observer_data_root,world_id='world-1',actor_ids=['actor-1'],now=now)
     reports.stop_session(observer_data_root,manifest['session_id'],now=now+timedelta(seconds=1))
     reports.export_session(observer_data_root,manifest['session_id'],destination=tmp_path/'baseline',now=now+timedelta(seconds=2))
-    original_jsonl,original_json=reports._jsonl,reports._atomic_json
+    original_jsonl,original_json=reports._jsonl,reports.atomic_json
     def jsonl(path,values):
         if path.name==missing_file: raise OSError('synthetic auxiliary export failure')
         return original_jsonl(path,values)
@@ -130,7 +130,7 @@ def test_auxiliary_export_failure_preserves_the_core_export(observer_data_root,t
         if path.name==missing_file: raise OSError('synthetic auxiliary export failure')
         return original_json(path,values)
     monkeypatch.setattr(reports,'_jsonl',jsonl)
-    monkeypatch.setattr(reports,'_atomic_json',atomic_json)
+    monkeypatch.setattr(reports,'atomic_json',atomic_json)
     reports.export_session(observer_data_root,manifest['session_id'],destination=tmp_path/'partial',now=now+timedelta(seconds=2))
     actual=json.loads((tmp_path/'partial/coverage.json').read_text())
     baseline=json.loads((tmp_path/'baseline/coverage.json').read_text())

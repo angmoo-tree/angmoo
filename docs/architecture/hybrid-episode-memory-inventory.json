@@ -886,7 +886,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/situation_apply.py",
-      "sha256": "62addc44fa819dcee5278370440bff19af60fde1e75d99500bf73086462843a9"
+      "sha256": "a97171cbea8082c76c23ba8cdb2c046b80e948034b050a80e80f8cf8fde7461d"
     },
     {
       "path": "backend/app/domains/memory/repository/situation_packets.py",
@@ -906,7 +906,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/situation_runs.py",
-      "sha256": "18f5509d9a1f602a00779aa56cd02a0e695fbd7b7430b156c09a55709d9d976b"
+      "sha256": "17aa096107efc6b4f3346e872fe4142d793fa99e0201cc46900ec904535a654d"
     },
     {
       "path": "backend/app/domains/memory/repository/situation_source_bindings.py",
@@ -919,6 +919,10 @@
     {
       "path": "backend/app/domains/memory/repository/situation_validation.py",
       "sha256": "7e39a3030efe10aa657199bbaba0525fb8d202325733ce904de36c403d03fb6e"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/situation_vector_delivery.py",
+      "sha256": "60776fcead8585abac8a551be980c3065dc5a475dcd016c22473a733bdcfdd09"
     },
     {
       "path": "backend/app/domains/memory/repository/transaction.py",
@@ -938,7 +942,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/vector_queue.py",
-      "sha256": "b68a07daa72b92121a3df4ae564aecab7402bc98d4de9eec71e5b1206abb6e47"
+      "sha256": "6eb77bb6792108b9681af52412eb5dc92df138b496c4c859079aa293c58426d7"
     },
     {
       "path": "backend/app/domains/memory/repository/vector_work.py",
@@ -970,7 +974,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/batch_preparation.py",
-      "sha256": "fb700b12d838d8f69881dd30b9bf15cd83190a68b8b8391c8735839d2f7520ce"
+      "sha256": "93b2d3b8421fc62d650817f5eec040b01f88575af27b8019e8ed2c6336fbfa80"
     },
     {
       "path": "backend/app/domains/memory/service/batch_scheduling.py",
@@ -1918,7 +1922,7 @@
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "d8a4731034313f3309781a09de72098db46fc1eeab41d9fe0158de1bc0c9ebc6"
+      "sha256": "e7640dfe29b39bce04062b09d1490f5109df9621d8cb43de49aabe70d59cbd90"
     },
     {
       "path": "backend/app/runtime/memory/canonical_work.py",
@@ -2006,7 +2010,7 @@
     },
     {
       "path": "backend/app/runtime/memory/recall_projection.py",
-      "sha256": "aece7ca7db32aa2cc713ef93b576df8968716450f632fef4b5e648caff833998"
+      "sha256": "f747e975b7b155db6d2a26e964612855e4b33562215b06becabeeba1c2daac38"
     },
     {
       "path": "backend/app/runtime/memory/recall_queries.py",
@@ -2042,7 +2046,7 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_runtime.py",
-      "sha256": "15db00d1f881f2ec2a50ad286dd4566a3c1abbd342e4d98531eb84e8e9de9ca7"
+      "sha256": "637e0a1fa24d44d7a82a9c006efd5aa5224ed410680f3bf73e1b041dfcb2e0df"
     },
     {
       "path": "backend/app/runtime/memory/situation_source_batch.py",
@@ -2070,11 +2074,11 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
-      "sha256": "094b2ee29d1bd6628fd810ca6b621b1b410b43cdb2422e6406803d34965e1224"
+      "sha256": "4063e24cabc961006983e60474604d3cedb88c889f3c1e403292b9d7010d32b4"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_vec1.py",
-      "sha256": "2335336c19e0a02eb697af661af692dda1ea00f8db472def076c153ffd831b77"
+      "sha256": "f4bba18879153f71dd20fc6b932c45d67db1371328bf58d07c4fac2bdabaf6ec"
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
@@ -2086,15 +2090,15 @@
     },
     {
       "path": "backend/app/runtime/memory/vector_batches.py",
-      "sha256": "44b5737ca1bf64c18425b19089221ffee1a2515e3a25d63e8782a9477ad95423"
+      "sha256": "40a37fb563883d8ffa0e61280f14c85f1381ca2a62ff02d19432029936a99720"
     },
     {
       "path": "backend/app/runtime/memory/vector_changes.py",
-      "sha256": "ff5273a09a4bbc61e189b98fc7098d7d37d6c116c78885dca553e62ff43f82ae"
+      "sha256": "845544e1ecb897643508dd258d0b02539f7b5494a5727e50564890e6200c99b0"
     },
     {
       "path": "backend/app/runtime/memory/vector_delivery.py",
-      "sha256": "a738c05b78598948bdc17e8e35230c60a7c6cbca3ae4d6c18e1fb78a32051bc4"
+      "sha256": "983419c80076745aeb1bfd1a3eda7b2043ac91c8c81d0883cb5df575d97215d7"
     },
     {
       "path": "backend/app/runtime/memory/vector_generations.py",
@@ -2110,23 +2114,27 @@
     },
     {
       "path": "backend/app/runtime/memory/vector_preparation.py",
-      "sha256": "3b9ee3701a1e1520d811d67d115738bcd8fe2492a5af2f2437a8945777eec8da"
+      "sha256": "ba00a9b8a2ca393358bc2cc78ce3c8727886dc6c5d03e108be5040ae4be55d7a"
     },
     {
       "path": "backend/app/runtime/memory/vector_projection.py",
-      "sha256": "2f05ff46c80d567d4fa85a3970de6960558ef6052797632af21b542ea800635f"
+      "sha256": "d6c3eb1a1f7ced047d694ad5aa68fcb3f6f8b63c9e9f03584a3df5b7f7552bbe"
     },
     {
       "path": "backend/app/runtime/memory/vector_proof.py",
-      "sha256": "c49e2916a8125a546cd00cd5bd0525f88a5b77f378d39098e0b5d47b1746cb5b"
+      "sha256": "813ba26a3f9f77aeb3b07aa4995f8e02ee4e16f577ca1b6e9cec1f7a7192aaa1"
     },
     {
       "path": "backend/app/runtime/memory/vector_queue_worker.py",
-      "sha256": "3f9a05d28a2689dda99b6886bceb9d2712a3085c08f30d2ba082caf9fbb7e9e5"
+      "sha256": "cb47e9337fbec670d4e398e7b543356a7027d816d01af7f05336ba44cfb1a5cd"
     },
     {
       "path": "backend/app/runtime/memory/vector_resources.py",
       "sha256": "621e6101cfcd2d6ffae9a2eb300d9ee37f90c738a88a11eb5e53e50cd60a6b71"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_situation_batches.py",
+      "sha256": "00d55b4357fa5446883e642f3a364d21ed0f6a130f096b924dd98e6774f0e714"
     },
     {
       "path": "backend/app/runtime/memory/vector_wakeup.py",
@@ -3154,15 +3162,23 @@
     },
     {
       "path": "backend/tests/memory/test_embedding_batch_transport.py",
-      "sha256": "cd25fa0bbaacb20752c6145ce76bfc11afae4c3d35381efb275d14bf2fdd5cdf"
+      "sha256": "5953bcd9dbc2a0629b32fc9f3c73833187b13c998aab5929f1a6ea442d59c34d"
     },
     {
       "path": "backend/tests/memory/test_embedding_keyword_preservation.py",
       "sha256": "c5e9ef6831ee6178c6edd1b2b9584f52d4f8b1eb09e3d31eb5f7b420e58fc2d8"
     },
     {
+      "path": "backend/tests/memory/test_embedding_observed_groups.py",
+      "sha256": "c89ffa9efa155556cb20ca50364f6358476ab15060834fac702c0af35f030fa9"
+    },
+    {
       "path": "backend/tests/memory/test_embedding_settings.py",
       "sha256": "6506d53ef3e391a7feecf0b0cc5871058a01166d01ba730b7a4fa85a32932bc7"
+    },
+    {
+      "path": "backend/tests/memory/test_embedding_transport_observation.py",
+      "sha256": "c62c92958f1e1dee9ee107cbfd6f86b5838345ac52fb29cb52ea04a9993085de"
     },
     {
       "path": "backend/tests/memory/test_episode_apply.py",
@@ -3301,6 +3317,10 @@
       "sha256": "c9792cee99601e218d0cf357d88c76beb14d4e0d19452480f2e5387aea9aae00"
     },
     {
+      "path": "backend/tests/memory/test_memory_pipeline_timing.py",
+      "sha256": "e5ce3b6d15b3aed3b58a66e82253095ff3fd50379fa6b7ce924e858a36919040"
+    },
+    {
       "path": "backend/tests/memory/test_multilingual_projection_lifecycle.py",
       "sha256": "22666e766ae9faeb286e49897b92025e85f0ed39438964e370f3425ce6941822"
     },
@@ -3383,6 +3403,10 @@
     {
       "path": "backend/tests/memory/test_situation_detail_unified.py",
       "sha256": "3c9f34b5e7abafd38c3f2e17fe1e11b23d634685c83cc875cbac3acd26546f45"
+    },
+    {
+      "path": "backend/tests/memory/test_situation_embedding_delivery.py",
+      "sha256": "1fa440fb69e4ac7d017ad596bb2605236ca4a8f78cca911c2e94a90ab5d4461d"
     },
     {
       "path": "backend/tests/memory/test_situation_parent_binding_recovery.py",

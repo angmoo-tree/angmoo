@@ -1,7 +1,7 @@
 {
-  "edge_count": 6757,
-  "external_import_count": 4577,
-  "module_count": 1559,
+  "edge_count": 6759,
+  "external_import_count": 4583,
+  "module_count": 1560,
   "modules": [
     {
       "external_imports": [],
@@ -18972,7 +18972,7 @@
       ],
       "imports": [
         "app.core.work_observation",
-        "app.runtime.diagnostics.sns_observation"
+        "app.runtime.diagnostics.observation_storage"
       ],
       "module": "app.runtime.diagnostics.memory_pipeline_observation",
       "path": "backend/app/runtime/diagnostics/memory_pipeline_observation.py",
@@ -19012,6 +19012,20 @@
       ],
       "module": "app.runtime.diagnostics.memory_pipeline_snapshot",
       "path": "backend/app/runtime/diagnostics/memory_pipeline_snapshot.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "time",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.runtime.diagnostics.observation_storage",
+      "path": "backend/app/runtime/diagnostics/observation_storage.py",
       "wildcard_imports": []
     },
     {
@@ -19064,6 +19078,7 @@
       ],
       "imports": [
         "app.runtime.diagnostics.memory_pipeline_observation",
+        "app.runtime.diagnostics.observation_storage",
         "app.runtime.diagnostics.situation_observation"
       ],
       "module": "app.runtime.diagnostics.sns_observation",
@@ -19088,6 +19103,7 @@
       "imports": [
         "app.core.ids",
         "app.runtime.diagnostics.memory_pipeline_report",
+        "app.runtime.diagnostics.observation_storage",
         "app.runtime.diagnostics.situation_coverage",
         "app.runtime.diagnostics.situation_observation",
         "app.runtime.diagnostics.sns_observation"

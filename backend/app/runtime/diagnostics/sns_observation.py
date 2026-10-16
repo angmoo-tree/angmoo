@@ -18,9 +18,11 @@ from queue import Empty, Full, Queue
 import re
 import sqlite3
 from threading import Event, Lock, Thread
-from time import monotonic, sleep
+from time import monotonic
 from typing import Any
 from uuid import uuid4
+
+from app.runtime.diagnostics.observation_storage import atomic_json, observation_root, session_path
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,6 @@ _PLANNER_VALIDATION_CODES = frozenset({
     "name_binding_missing", "name_binding_invalid", "name_binding_scope_invalid", "name_binding_requester_mismatch",
     "name_macro_addressee_ambiguous", "name_macro_unsupported", "name_macro_rendered_limit", "name_macro_text_invalid",
 })
-_SESSION = re.compile(r"sns-[0-9a-f]{32}\Z")
 
 
 def utc(value: datetime | str | None) -> datetime | None:
@@ -93,35 +94,6 @@ def digest(value: Any) -> str | None:
     if not isinstance(value, str) or not value:
         return None
     return sha256(value.encode("utf-8")).hexdigest()
-
-
-def _atomic_json(path: Path, value: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + "." + uuid4().hex + ".tmp")
-    try:
-        temporary.write_text(json.dumps(value, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        for attempt in range(5):
-            try:
-                os.replace(temporary, path)
-                break
-            except PermissionError:
-                # Windows can temporarily deny replacement while a recorder
-                # thread has the old manifest open. Keep the operation atomic.
-                if os.name != "nt" or attempt == 4:
-                    raise
-                sleep(0.01 * (attempt + 1))
-    finally:
-        temporary.unlink(missing_ok=True)
-
-
-def observation_root(data_root: Path) -> Path:
-    return data_root.resolve() / "diagnostics" / "sns"
-
-
-def session_path(data_root: Path, session_id: str) -> Path:
-    if not _SESSION.fullmatch(session_id):
-        raise ValueError("sns_session_id_invalid")
-    return observation_root(data_root) / session_id
 
 
 def read_session(data_root: Path, session_id: str) -> dict:
@@ -671,7 +643,7 @@ class SNSObserver:
     def _health(self, session_id: str) -> None:
         directory = session_path(self.data_root, session_id)
         count = self._counter(session_id)
-        _atomic_json(directory / f"recorder-health-{self.process_instance_id}.json", {
+        atomic_json(directory / f"recorder-health-{self.process_instance_id}.json", {
             "schema_version": read_session(self.data_root, session_id)["schema_version"], "session_id": session_id,
             "process_instance_id": self.process_instance_id,
             "heartbeat_at": self.now().isoformat(), "last_loop_at": self.last_loop_at,

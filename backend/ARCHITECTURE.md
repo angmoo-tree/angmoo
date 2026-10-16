@@ -1289,6 +1289,13 @@ Local evidence and boundaries: [vector pending-work verification](../docs/verifi
 
 ## Opt-in memory pipeline observation (2026-10-16, LOCAL)
 
+Recorder paths and atomic JSON replacement belong to
+`runtime/diagnostics/observation_storage.py`. SNS, memory-pipeline recording and
+reporting import that lower-level owner directly; memory recording does not
+import the SNS lifecycle owner. Session-ID validation, file format and bounded
+Windows replacement retries are unchanged. This storage helper owns no worker,
+database transaction or observation-session lifetime.
+
 `core/work_observation.py` is a neutral process-local port, not a persistence or
 business owner. Domains and providers emit structural facts through it; only
 `runtime/diagnostics/memory_pipeline_observation.py` owns the opt-in SNS session,

@@ -48,13 +48,13 @@ def test_disabled_scope_and_bounded_loss_do_not_serialize_on_submit(tmp_path, mo
 
 
 def test_blocked_file_flush_does_not_hold_writer_or_admission_lock(tmp_path, monkeypatch):
-    from app.runtime.diagnostics import sns_observation
+    from app.runtime.diagnostics import memory_pipeline_observation as recorder
     observer=MemoryPipelineObserver(tmp_path,"process"); value=manifest();observer.attach(value)
     entered,release=Event(),Event()
-    original=sns_observation._atomic_json
+    original=recorder.atomic_json
     def blocked(*args,**kwargs):
         entered.set(); assert release.wait(5); return original(*args,**kwargs)
-    monkeypatch.setattr(sns_observation,"_atomic_json",blocked)
+    monkeypatch.setattr(recorder,"atomic_json",blocked)
     observer.last_flush=0
     thread=Thread(target=observer.flush);thread.start();assert entered.wait(5)
     engine=create_engine(f"sqlite:///{tmp_path/'canonical.sqlite3'}")
@@ -226,7 +226,7 @@ def test_finished_callback_cannot_deliver_to_a_new_session(tmp_path):
 
 
 def test_failed_final_health_does_not_retry_forever_or_claim_complete(tmp_path, monkeypatch):
-    from app.runtime.diagnostics import sns_observation
+    from app.runtime.diagnostics import memory_pipeline_observation as recorder
     observer = MemoryPipelineObserver(tmp_path, "process")
     value = manifest()
     observer.attach(value)
@@ -236,7 +236,7 @@ def test_failed_final_health_does_not_retry_forever_or_claim_complete(tmp_path, 
         calls.append(path)
         raise OSError("synthetic file failure")
 
-    monkeypatch.setattr(sns_observation, "_atomic_json", failed)
+    monkeypatch.setattr(recorder, "atomic_json", failed)
     try:
         for _ in range(3):
             observer.flush(final=True)

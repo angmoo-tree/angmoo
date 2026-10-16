@@ -14,6 +14,7 @@ import re
 from threading import Lock
 from time import monotonic
 from app.core import work_observation
+from app.runtime.diagnostics.observation_storage import atomic_json, session_path
 
 CAPABILITY = "memory-pipeline-observation.v1"
 EVENT_LIMIT = 16 * 1024
@@ -154,7 +155,6 @@ class MemoryPipelineObserver:
 
     def flush(self, *, final=False):
         # Called only by the recorder thread (or its closing owner after join).
-        from app.runtime.diagnostics.sns_observation import session_path, _atomic_json
         manifest = self.active
         if manifest is None:
             return
@@ -205,7 +205,7 @@ class MemoryPipelineObserver:
             transport_support=["google-genai-2.17-httpx-public-hooks"], unsupported_transports=["aiohttp", "other_providers"],
             writer_support="bounded_sqlite_helpers_vec1_fts", writer_coverage="partial_plain_session_and_external_processes_unobserved")
         try:
-            _atomic_json(session_path(self.root, manifest["session_id"]) / "memory-pipeline" / f"health-{self.process_id}.json", health)
+            atomic_json(session_path(self.root, manifest["session_id"]) / "memory-pipeline" / f"health-{self.process_id}.json", health)
         except OSError:
             state["failed"] += 1
 
