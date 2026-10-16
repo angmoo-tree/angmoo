@@ -2,14 +2,90 @@
 from datetime import UTC, datetime, timedelta
 import json
 import sqlite3
+import pytest
+from app.config import settings
 from app.core import work_observation as observation
+from app.domains.memory.contracts.recall import MemoryRecallDocument, RecallDocumentKind
 from app.runtime.diagnostics.memory_pipeline_observation import MemoryPipelineObserver
 from app.runtime.diagnostics.memory_pipeline_report import export_memory, capability, timing
 from app.runtime.diagnostics.memory_pipeline_snapshot import snapshot
+from app.runtime.memory.sqlite_fts5_recall import MemoryRecallIndexSettings, SqliteMemoryRecallIndex
+from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from runtime.test_memory_pipeline_observation import manifest, directory
 from memory.test_p8_l_h_canonical_recall import runtime_factory
 from memory.test_vector_batch_delivery import populate
 from runtime.test_situation_observation import observer_data_root
+
+
+def _seed_recall_generation(root, generation):
+    index = SqliteMemoryRecallIndex(
+        StaticRuntimeDataPath(root), settings=MemoryRecallIndexSettings(generation=generation)
+    )
+    index.open()
+    try:
+        for suffix, world, actor in (
+            ("expected", "recall-world", "recall-subject"),
+            ("other-world", "other-world", "recall-subject"),
+            ("other-actor", "recall-world", "other-actor"),
+        ):
+            identifier = f"{generation}-{suffix}"
+            document = MemoryRecallDocument(
+                document_id=identifier, memory_item_id=identifier, owner_id="owner",
+                world_id=world, subject_world_character_id=actor,
+                kind=RecallDocumentKind.MEMORY_ITEM, canonical_source_id=identifier,
+                text="PRIVATE-MEMORY-SENTINEL",
+            )
+            index.replace_memory_item(memory_item_id=identifier, documents=(document,))
+    finally:
+        index.close()
+    return index.database_path
+
+
+@pytest.mark.parametrize("representation,generation", [
+    ("episode_v1", "memory-episode-v1"), ("legacy", "unicode-boundary-v2"),
+])
+def test_fts_snapshot_reads_configured_generation_readonly_and_scoped(
+    runtime_factory, tmp_path, monkeypatch, representation, generation,
+):
+    paths = [_seed_recall_generation(tmp_path, name)
+             for name in ("memory-episode-v1", "unicode-boundary-v2")]
+    before = {path: path.read_bytes() for path in paths}
+    monkeypatch.setattr(settings, "MEMORY_RECALL_REPRESENTATION", representation)
+    monkeypatch.setattr(SqliteMemoryRecallIndex, "open", lambda *args: pytest.fail("observer opened index runtime"))
+    values = manifest()
+    values.update(world_id="recall-world", actor_ids=["recall-subject"])
+
+    result = snapshot(runtime_factory.kw["bind"].url.database, values, data_root=tmp_path)
+
+    assert result["status"] == result["fts_status"] == "ok"
+    assert result["fts_generation"] == generation
+    assert [row["memory_item_id"] for row in result["fts"]] == [f"{generation}-expected"]
+    assert "PRIVATE-MEMORY-SENTINEL" not in json.dumps(result)
+    assert before == {path: path.read_bytes() for path in paths}
+
+
+@pytest.mark.parametrize("representation,missing_generation,other_generation", [
+    ("episode_v1", "memory-episode-v1", "unicode-boundary-v2"),
+    ("legacy", "unicode-boundary-v2", "memory-episode-v1"),
+])
+def test_fts_snapshot_does_not_create_or_fall_back_to_another_generation(
+    runtime_factory, tmp_path, monkeypatch, representation, missing_generation, other_generation,
+):
+    other_path = _seed_recall_generation(tmp_path, other_generation)
+    before = other_path.read_bytes()
+    monkeypatch.setattr(settings, "MEMORY_RECALL_REPRESENTATION", representation)
+    monkeypatch.setattr(SqliteMemoryRecallIndex, "open", lambda *args: pytest.fail("observer created missing index"))
+    values = manifest()
+    values.update(world_id="recall-world", actor_ids=["recall-subject"])
+
+    result = snapshot(runtime_factory.kw["bind"].url.database, values, data_root=tmp_path)
+
+    assert result["status"] == "ok"
+    assert result["fts_status"] == "not_available"
+    assert result["fts_generation"] == missing_generation
+    assert not result.get("fts")
+    assert not (other_path.parent.parent / missing_generation).exists()
+    assert other_path.read_bytes() == before
 
 
 def test_independent_canonical_denominator_missing_event_and_readonly(runtime_factory,tmp_path,monkeypatch):

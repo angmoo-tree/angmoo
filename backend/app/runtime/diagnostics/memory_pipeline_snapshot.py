@@ -96,8 +96,17 @@ def _projection(root, result, until):
 
 
 def _fts(root, manifest, result, until):
-    from app.domains.memory.contracts.recall import MEMORY_RECALL_GENERATION
-    path = root / "search/memory-recall/generations" / MEMORY_RECALL_GENERATION / "angmoo-memory-recall.sqlite3"
+    from app.config import settings
+    from app.runtime.memory.sqlite_fts5_recall import MemoryRecallIndexSettings, SqliteMemoryRecallIndex
+    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+
+    # Construction only resolves paths. Never open or rebuild the index here.
+    index = SqliteMemoryRecallIndex(
+        StaticRuntimeDataPath(root),
+        settings=MemoryRecallIndexSettings.for_representation(settings.MEMORY_RECALL_REPRESENTATION),
+    )
+    path = index.database_path
+    result["fts_generation"] = index.settings.generation
     if not path.is_file():
         result["fts_status"] = "not_available"
         return
@@ -108,5 +117,4 @@ def _fts(root, manifest, result, until):
         result["fts"] = [dict(row) for row in rows[:1000]]
         result["truncated"] |= len(rows) > 1000
         result["changed_during_snapshot"] |= before != db.execute("PRAGMA data_version").fetchone()[0]
-        result["fts_generation"] = MEMORY_RECALL_GENERATION
         result["fts_status"] = "ok"

@@ -64,6 +64,15 @@ class MemoryRecallIndexSettings:
     busy_timeout_ms: int = 5_000
     synchronous: str = "FULL"
 
+    @classmethod
+    def for_representation(cls, representation: str) -> MemoryRecallIndexSettings:
+        """Share the configured generation between the runtime and diagnostics."""
+        if representation == "episode_v1":
+            return cls(generation="memory-episode-v1")
+        if representation == "legacy":
+            return cls()
+        raise ValueError("unsupported_memory_recall_representation")
+
     def __post_init__(self) -> None:
         if not _GENERATION_PATTERN.fullmatch(self.generation):
             raise ValueError("invalid Memory recall FTS5 generation")
