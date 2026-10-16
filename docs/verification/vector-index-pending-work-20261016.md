@@ -2,6 +2,7 @@
 
 - 실행일: 2026-10-16, Windows 로컬 개발 환경.
 - 기준 main: `117dd3f7ab0359860c88833711c1cdd21200aa50`.
+- 구현 로컬 커밋: `29512aeaa37f8e964e3b2fd08cd2df2f57b4001f` (`Signed-off-by` 포함).
 - 구현 브랜치: `feat/vector-index-pending-work`.
 - 적용 지침: workspace/repository AGENTS, `backend/ARCHITECTURE.md`, `frontend/ARCHITECTURE.md`, `frontend/DESIGN.md`, CONTRIBUTING의 DCO 지침.
 - 범위: 10-16 계획 I00–I55. 로컬 구현·범위 검증·서명된 로컬 커밋. push/PR/Actions/main 병합 없음.
@@ -121,6 +122,11 @@ SHA-256 `4bc0b513e9b6a630159212452ff3fc70b86d89c6ef63f6ea92ae075599e65303`.
 | 현재 L4/hybrid inventory | 4 PASS | `current-inventories.xml` |
 | schema mapper 수·typed datetime·v37 fixture 재검증 | 3 PASS | `final-schema-resource.xml` |
 | 격리 predecessor fixture v1/v37 및 새 v38 | 3 PASS | `fixture-predecessors.xml`, `fixture-v38.xml` |
+| 공유 result journal의 관계 검토 복구·거부 계약 | 9 PASS | `shared-journal.xml` |
+
+선택한 JUnit 결과에서 반복 node를 제거하면 **158개 node PASS, 실패·SKIP 0**이다.
+최종 node별 기록은 `selected-test-results.json`에 보존했다. 위 묶음에는 재실행이 포함되므로
+표의 PASS 숫자를 단순 합산하지 않는다.
 
 JUnit과 잠금 계측은 `artifacts/vector-pending-work-20261016/`에 보존한다. 기존 pytest의
 raw sqlite datetime adapter 경고는 시험 fixture를 ORM typed update로 고쳤고 해당 node를
@@ -133,6 +139,16 @@ raw sqlite datetime adapter 경고는 시험 fixture를 ORM typed update로 고�
 현재 architecture import inventory와 경계 검사, embedded migration 계약(`BASE_SHA=117dd3f7`),
 Windows supported predecessor 목록 검사, `compileall` 및 `git diff --check`를 통과했다.
 과거 frozen manifest/inventory는 유지하고 현재 L4/hybrid inventory만 갱신했다.
+
+이력 자료는 구현 커밋의 새 파일 22개·새 node 28개, 정확한 definition 변경 50개·assertion 변경
+6개·새 ORM 표 6개를 **append-only**로 추가했다. 이번 기록의 commit/blob/AST/assertion/ORM과
+기존 records prefix 보존을 범위 검사했다(`scoped-evidence.json`).
+
+전체 과거 refactor 보존 재생 검사는 이 변경보다 범위가 넓고 오래 걸려 중단했으며 PASS로
+기록하지 않는다. 이전 이력을 현재 ORM과 대조하면 기존 main의 `notifications` 표에 기록 차이가
+있다. 해당 모델 `backend/app/domains/social/models/posts.py`의 base/main과 구현 commit blob이
+같음을 확인했고, 이번 변경에서 알림 스키마나 그 과거 기록을 수정하지 않았다. 이는 현재
+architecture/migration 검사 통과 및 158개 관련 기능 시험 결과와 구분한다.
 
 전체 backend/frontend corpus, 원격 CI,
 실제 설치 파일 생성, Docker 재배포, 유료 AI 실행은 이 작업의 검증 범위가 아니다.
