@@ -49,8 +49,8 @@ class MemoryHybridRuntime:
         return await self.vector_axis.search(request, deadline=deadline)
 
     def read_status(self):
-        if self.status == "ready" and self.projection is not None and self.projection.status == "degraded":
-            return "degraded"
+        if self.status == "ready" and self.projection is not None:
+            return self.projection.status
         return self.status
 
     def erase_items(self, identifiers):
@@ -80,17 +80,32 @@ class MemoryHybridRuntime:
             index.erase_items(identifiers)
 
     async def start(self):
+        projection = None
         try:
             active, staging = self._generations.open()
             index = staging or active
+            if staging is not None and active is None:
+                previous = self._generations.state["active"]
+                try:
+                    (self._generations.root / "generations" / previous / "vectors.sqlite3").stat()
+                except FileNotFoundError:
+                    from app.domains.memory.models.vector_work import MemoryVectorMaintenance
+                    with self._factory() as session:
+                        if session.get(MemoryVectorMaintenance, previous) is None:
+                            # Pre-migration budgets were stored in that file.
+                            # Missing evidence cannot authorize another paid call.
+                            raise MemoryVectorProjectionError("memory_vector_legacy_budget_missing") from None
             if active is not None:
                 self._bind(active)
             projection = MemoryVectorProjection(self._factory, index,
-                on_clean_cycle=self._promote if staging is not None else None, episode_only=self._episode_only)
+                on_clean_cycle=self._promote if staging is not None else None, episode_only=self._episode_only,
+                retained_indexes=self._retained_indexes)
             await projection.start()
             self.projection = projection
             self.status = "recovering" if staging is not None else "ready"
         except (MemoryVectorProjectionError, OSError, ValueError):
+            if projection is not None:
+                await projection.stop()
             self.status = "vector_unavailable"
 
     def _bind(self, index):
@@ -98,6 +113,17 @@ class MemoryHybridRuntime:
             extension_path=index._extension, extension_sha256=hashlib.sha256(index._extension.read_bytes()).hexdigest(),
             generation=index.generation), MemoryQueryEmbedder(self._factory,
                 lambda session: MemoryEmbeddingRepository(session, memory_repository(session))))
+
+    def _retained_indexes(self):
+        root = self._generations.root / "generations"
+        for directory in root.iterdir():
+            if directory.is_symlink() or directory.is_junction():
+                raise ValueError("memory_vector_generation_link")
+            try:
+                (directory / "vectors.sqlite3").stat()
+            except FileNotFoundError:
+                continue
+            yield self._generations._index(directory.name)
 
     def _promote(self, index):
         self._generations.promote(index)

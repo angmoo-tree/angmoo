@@ -109,6 +109,10 @@
       "sha256": "f5516dbb0a297fdd57107e37ab79974f4c43ced7ebcb8a3acfccc138dbf3a990"
     },
     {
+      "path": "backend/alembic/versions/20261016_0116_memory_vector_work.py",
+      "sha256": "96e9f78288b900d33690e5b301ad594f7cadef4ef42837a9e80349484cb446d2"
+    },
+    {
       "path": "backend/app/config.py",
       "sha256": "11a0835d6785e7438015e7d700f3a81120142d973001d7738ba6cb4c80cb5ddc"
     },
@@ -669,6 +673,10 @@
       "sha256": "a274006583cc6a1bef423fc47fa2dcf5d48efc6456e8269b38d96f8fe1951d5c"
     },
     {
+      "path": "backend/app/domains/memory/models/vector_work.py",
+      "sha256": "c350cd6d8c74956e5516d48c2d0909135abbefd95f6d9ffa8728d362de6b33d9"
+    },
+    {
       "path": "backend/app/domains/memory/policies/activity_bundles.py",
       "sha256": "e8c3f6ff42a4f4416c63f2a30abda76d413e78ad1b9dac0f1ae4acefa98eefae"
     },
@@ -917,8 +925,20 @@
       "sha256": "d3509fa4d74bcb28568041615c274137c1119c76eeb92163d8ef8770a1219f5f"
     },
     {
+      "path": "backend/app/domains/memory/repository/vector_attempts.py",
+      "sha256": "aefd2d475793200c467c1478d1dc77de69e4a6eca626831a3d578685d26ec83b"
+    },
+    {
       "path": "backend/app/domains/memory/repository/vector_eligibility.py",
       "sha256": "cd8aa97632e57421809ba494a462ea2260ce2e1ece1c49d5573dd4ad91aa481c"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/vector_erasure.py",
+      "sha256": "16e4babe2917a4bdf7d4449de1bbd2424caa937003e385a797d52d8fd5725fe0"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/vector_queue.py",
+      "sha256": "b68a07daa72b92121a3df4ae564aecab7402bc98d4de9eec71e5b1206abb6e47"
     },
     {
       "path": "backend/app/domains/memory/repository/vector_work.py",
@@ -1974,7 +1994,7 @@
     },
     {
       "path": "backend/app/runtime/memory/hybrid_runtime.py",
-      "sha256": "b1eeb33910632017162364b9800b8e6d1d9001e9c864f21a9fdf473d3e5905a3"
+      "sha256": "c3e7753fa37ecc0e49c385a71893d9e7adbc9aec5e3ec6e6bb60cb7662903916"
     },
     {
       "path": "backend/app/runtime/memory/native_probe.py",
@@ -2054,35 +2074,63 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlite_vec1.py",
-      "sha256": "895a05c482fc57a51844d49310fedd9d895ef0e7c6a498177d2a5a3deb5a988d"
+      "sha256": "2335336c19e0a02eb697af661af692dda1ea00f8db472def076c153ffd831b77"
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
       "sha256": "3b240d4c1a46580fc0aa94566b55be5bcec170388f6d8403ff8de86b63299950"
     },
     {
+      "path": "backend/app/runtime/memory/vector_attempts.py",
+      "sha256": "ad1e1dff7cac4bf2ea541c9978f4ec731e59107165446912d32607ae5cce174b"
+    },
+    {
       "path": "backend/app/runtime/memory/vector_batches.py",
-      "sha256": "5cd65f743ae75f75c0b79f41d26e7adaa3fa1afea62744e11059fa951601da8f"
+      "sha256": "44b5737ca1bf64c18425b19089221ffee1a2515e3a25d63e8782a9477ad95423"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_changes.py",
+      "sha256": "ff5273a09a4bbc61e189b98fc7098d7d37d6c116c78885dca553e62ff43f82ae"
     },
     {
       "path": "backend/app/runtime/memory/vector_delivery.py",
-      "sha256": "92988c58ede008c852592748c93ebb78135a95b151f6f78eb021731569fc0129"
+      "sha256": "a738c05b78598948bdc17e8e35230c60a7c6cbca3ae4d6c18e1fb78a32051bc4"
     },
     {
       "path": "backend/app/runtime/memory/vector_generations.py",
       "sha256": "1444a8ceb6f0fcc6281e381b089cab777c2467d94d5bfeadbecf7107f011e0ae"
     },
     {
+      "path": "backend/app/runtime/memory/vector_mutations.json",
+      "sha256": "ed3d7b9b64d4361fc3542ac88ff635d3df87d26e749d96dbd3344263152b1ea8"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_mutations.py",
+      "sha256": "db090b4155a8d3f7836938b3c131d6cf0c9eefd0fb3920fa7b381c8e85846e49"
+    },
+    {
       "path": "backend/app/runtime/memory/vector_preparation.py",
-      "sha256": "76ca30e6a1835159273a3befeb8d3b0f184c2667cc48bfabd1e3d4e9ebe89ff5"
+      "sha256": "3b9ee3701a1e1520d811d67d115738bcd8fe2492a5af2f2437a8945777eec8da"
     },
     {
       "path": "backend/app/runtime/memory/vector_projection.py",
-      "sha256": "e6c3d4a4ba803cc303eb4d10b2938c3c2b2bd7481de5ef5c31616d93f9e02852"
+      "sha256": "2f05ff46c80d567d4fa85a3970de6960558ef6052797632af21b542ea800635f"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_proof.py",
+      "sha256": "c49e2916a8125a546cd00cd5bd0525f88a5b77f378d39098e0b5d47b1746cb5b"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_queue_worker.py",
+      "sha256": "3f9a05d28a2689dda99b6886bceb9d2712a3085c08f30d2ba082caf9fbb7e9e5"
     },
     {
       "path": "backend/app/runtime/memory/vector_resources.py",
       "sha256": "621e6101cfcd2d6ffae9a2eb300d9ee37f90c738a88a11eb5e53e50cd60a6b71"
+    },
+    {
+      "path": "backend/app/runtime/memory/vector_wakeup.py",
+      "sha256": "8e5c806f3eb22d240be1f472ae18a1a43e281787ade3428274c1b09e0e6860cd"
     },
     {
       "path": "backend/app/runtime/memory/vector_worker.py",
@@ -2265,6 +2313,10 @@
       "sha256": "2827878b667d8c0986e263068281011e492286bc5ddcca24135de222db64fc20"
     },
     {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v39.json",
+      "sha256": "7ddd795fbbeed0308f3a66a95829ca1cbbd5214efa84b6a7ce9293c0dba9be73"
+    },
+    {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v4.json",
       "sha256": "6d563122a802dd1b968febf9d18994b36959302354a4c476778a4b8ae43cd5a8"
     },
@@ -2294,7 +2346,7 @@
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-      "sha256": "6e2a2b9c7546233ffa36c8efe99f75e9c4ca168d7f6052c9256272d9e30150cc"
+      "sha256": "4fb5de992694d9af63c118a8d989b11e72f8d77db1a532cfb313eb744807249d"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/relationship_v17_ddl.py",
@@ -2393,6 +2445,14 @@
       "sha256": "2ac6bbcd6ba72626ff02e704b0a8e5e1169c765ecfff6261653df894ff34e590"
     },
     {
+      "path": "backend/app/runtime/migrations/sqlite_versions/vector_work_v39.py",
+      "sha256": "8fb38583237fc16eec517dcec1fb7dccc75a7fbd129ab32fd592899b993a8aae"
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/vector_work_v39_ddl.json",
+      "sha256": "1a338bc48e782fd0df3e9aa3f3393c0d833d16db70324b38297d8f6c0da112c1"
+    },
+    {
       "path": "backend/app/runtime/migrations/sqlite_versions/world_activity_v30.py",
       "sha256": "6d6bd497606aa2724e1a46b3bb9203ef80514464e15113e8c1e05a0657da7558"
     },
@@ -2418,7 +2478,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/model_registration.py",
-      "sha256": "f2c2d03d21dcdf5e53c81f79cfffc05072e9847a4acb4782bbc4ca6fcbe792e1"
+      "sha256": "c05ed68aec5f6f55686c651354e25a04dc6d8cf6a81f2485e0031a966e063f65"
     },
     {
       "path": "backend/app/runtime/persistence/runtime_data_path.py",
@@ -2466,7 +2526,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "sha256": "7025f38459f769bb52f6aff318388a3da5f1adeb6e49a414d02dc04fd9b27a99"
+      "sha256": "ee53e6af5d5918c95f77962c5da3536320fd463fbe9973654ca2150b3f85b4f1"
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_unit_of_work.py",
@@ -3014,7 +3074,7 @@
     },
     {
       "path": "backend/tests/memory/projection_fixture.py",
-      "sha256": "989b64caf1fb4e2fe495efd964fbcd2d3a9421e4d209eab2503fa40536cd95c9"
+      "sha256": "17485e06ab15189d2f9def3816836847634f5fd6011bec13a88ca4a66d539196"
     },
     {
       "path": "backend/tests/memory/receipt_recovery_probe.py",
@@ -3090,7 +3150,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "0f4f786d241e96b8069dc3c32ab27165348b141d34a25da480e56d16c188be5e"
+      "sha256": "4bb6dd6ec635e0d95156962c1e77f406198001929d32936ee334bd3b0736aab7"
     },
     {
       "path": "backend/tests/memory/test_embedding_batch_transport.py",
@@ -3365,8 +3425,20 @@
       "sha256": "7594111191864ad81c2f62ca809bebf1e0fc77bc79415bad396d63abf66bcf3d"
     },
     {
+      "path": "backend/tests/memory/test_vector_pending_work.py",
+      "sha256": "4bb9f0d6b6b2e395600890b32509aec7bc68156f972d781e1ecb5ebbba41ba20"
+    },
+    {
       "path": "backend/tests/memory/test_vector_projection_lifecycle.py",
       "sha256": "0e30efb8d837e6428ff027a143bad3aceaf3ef6cae88d2cacff50a2998f72d03"
+    },
+    {
+      "path": "backend/tests/memory/test_vector_work_contention.py",
+      "sha256": "303c3078765220aa5467a51bedcc315a5586236e96d1d638f38291ccc2984a0a"
+    },
+    {
+      "path": "backend/tests/memory/test_vector_work_recovery.py",
+      "sha256": "4024f4daf5b18da13ce4b952c42c4d452e87d52c2c2b408de54d7dc95ed36d29"
     },
     {
       "path": "backend/tests/memory/test_world_embedding_preparation.py",
@@ -3386,7 +3458,7 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "4ebe5844ec03880d4bf6abb61c8bb17174669a2687331f541b870bd192c57732"
+      "sha256": "73d5b31ce81c274a1f181eb6fff78e6a80ab1c1b2f33029bdafbe4e3af365568"
     },
     {
       "path": "backend/tests/migrations/test_canonical_retention.py",
@@ -3418,7 +3490,7 @@
     },
     {
       "path": "backend/tests/migrations/test_observation_outbox_v20.py",
-      "sha256": "414b9e440c8f02a593c339c035960ccdcb56b2f406b71cf812dfb1c361c62be3"
+      "sha256": "35b5e62337c00f77a6c0c2c08d983726720249aa6cd953195454e8a009babce1"
     },
     {
       "path": "backend/tests/migrations/test_populated_memory_upgrade.py",
@@ -3439,6 +3511,10 @@
     {
       "path": "backend/tests/migrations/test_topic_request_v25.py",
       "sha256": "5ee89d4d3e91c21a49ab5c674a6b79231e94ad0855e493895d56996189abfde6"
+    },
+    {
+      "path": "backend/tests/migrations/test_vector_work_v39.py",
+      "sha256": "bc2939adfc2e3acc55e401a09862316eec3568c59bc7bdce47f5523dcb748f61"
     },
     {
       "path": "backend/tests/migrations/test_world_activity_v30.py",
@@ -3654,7 +3730,7 @@
     },
     {
       "path": "scripts/ci/generate_hybrid_episode_memory_inventory.py",
-      "sha256": "8a582a4ba3badcc9ce4f7c7334b9554476660203d2f0ef82d61cfb0cf56edbd7"
+      "sha256": "e7389ef8a18546ba273dd877bad2e93b40a20cb476d96f8738ddfe5bb51d2725"
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
@@ -3667,10 +3743,10 @@
     "sha256": "3529d4d33a9d7fa75d556423f9a85a2749130259ed54f0b2cbe43ce06903b213"
   },
   "schema": {
-    "canonical_table_count": 174,
-    "embedded_schema_version": 38,
-    "schema_digest": "32301150b6b7ad37111fc9b7a9b325d90172a34ce53e32778e4a42d476d71fd7",
-    "source_revision": "20261015_0115"
+    "canonical_table_count": 180,
+    "embedded_schema_version": 39,
+    "schema_digest": "d61563fc5f2af61e545d3167fe3bc07146cf380882e12c4e516132e3ccd0e191",
+    "source_revision": "20261016_0116"
   },
   "schema_version": 1,
   "separate_gates": [

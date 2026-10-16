@@ -1198,3 +1198,63 @@ fence helpers. Cold migration fence installation can reflect existing SQL
 descriptors; explicit domain erasure rules still determine scope and an
 incomplete descriptor set fails. It does not register models through a reverse
 dependency or infer deletion policy from newly discovered foreign keys.
+
+## Vector projection pending work and short SQLite fences (2026-10-16)
+
+Memory owns vector eligibility separately from durable work. SQLite v39 adds
+work revisions/claims, mutation frontiers, validation epochs, direct source/prior
+dependencies, finite maintenance cursors and generation-independent call budgets.
+Work contains identifiers and safe state only, never source text, keys or vectors.
+The v38 manifests and historical migrations remain immutable.
+
+Runtime owns the cross-domain mutation catalog (`runtime/memory/vector_mutations.json`).
+Its reviewed column-level SQLite triggers record identities and world/owner epochs
+in the source transaction, including bulk SQL, FK cascades and rollback. They do
+not traverse lineage, call providers or write derived indexes. New source/ACL
+dependencies require updating this catalog, the frozen migration and scoped tests.
+ORM after-commit notifications are hints; a five-second indexed pending/due read
+recovers missed hints. Idle ticks neither take the canonical writer nor scan
+completed registrations. World deletion and relationship manual-review polling
+retain their existing lifecycle and cadence.
+
+`vector_proof` performs existing source/privacy validation in an explicit SQLite
+read snapshot. Only immutable observations cross into the final transaction.
+Dependencies select affected work; they never cache an authorization decision.
+Prior edges stay direct and bounded frontier expansion visits each node once per
+causal root. Absence-sensitive access facts use world/owner revisions and explicit
+parent signals. Future validity/expiry boundaries become due work, including OFF
+scopes. Search still revalidates canonical version/hash/access independently.
+
+The final effect holds the canonical writer only for claim/revision/epoch/time
+comparison and a bounded Vec1 effect. Extension loading, source traversal,
+credential decoding, provider calls and receipt fsync stay outside this fence.
+Vec1 writer admission is 25ms; canonical admission remains the existing 250ms
+policy. The lock order is canonical then derived; the derived connection can be
+opened first but must hold no transaction. A valid identical vector is reused;
+identical metadata causes no Vec1 update. Paid-call admission rechecks ownership
+and the proof and renews only an owned active claim before the bounded request.
+
+Received vectors stay in the bounded ResultJournal until their effect is durable.
+Conditional receipt removal cannot unlink a newer receipt. Canonical attempt
+budgets survive generation loss; readable legacy budgets are imported before
+bootstrap. Missing pre-migration budget evidence blocks automatic paid recovery
+instead of silently resetting the budget. Recovery never enrolls historical
+unregistered memories. Explicit preparation uses the same claims and advances
+only after its page effects settle. Staging promotion is restartable after the SQL
+barrier; retired work is reclaimed in bounded pages without deleting retained files.
+
+The 24-hour safety audit compares identities in two finite 64-item passes. Normal
+entries trigger no deep validation, embedding or Vec1 write; mismatches become
+work. Only its maintenance checkpoint is written. Bootstrap/audit cursors have
+upper bounds. Ordinary mutations remain the primary freshness mechanism.
+
+World erasure closes result admission and removes all retained vector generations
+before `memory.repository.vector_erasure` clears exact item work/dependencies/budgets.
+These operational tables deliberately have no cascading source FK: deletion intent
+must survive long enough to erase derived effects. Global epoch fences and finite
+frontier identities contain no content; epochs are not reset, which avoids an ABA
+authorization race. Normal delivery stops on an accepted World deletion request.
+Individual deleted-item completion erases its operational rows after the retained
+effects are removed. Character originals and other Worlds remain outside this scope.
+
+Local evidence and boundaries: [vector pending-work verification](../docs/verification/vector-index-pending-work-20261016.md).

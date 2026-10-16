@@ -1,5 +1,6 @@
 """Bounded pending-only batches. Single-item providers remain valid."""
 import asyncio
+from uuid import uuid4
 from collections import defaultdict
 from app.core.result_journal import ResultJournalError
 from app.core.sqlite_concurrency import is_sqlite_contention
@@ -18,10 +19,19 @@ async def sync_items(projection, item_ids, *, credential_revision=None):
         return {}
     if projection._closing:
         return dict.fromkeys(identifiers, "deferred")
-    documents = await projection._canonical.call(projection._source.documents_for_item_ids, identifiers)
     outcomes, groups = {}, defaultdict(list)
     for item_id in identifiers:
-        value = await projection._canonical.call(prepare, projection, item_id, documents.get(item_id, ()), credential_revision)
+        try:
+            value = await projection._canonical.call(prepare, projection, item_id, (), credential_revision)
+        except Exception as exc:
+            from app.domains.memory.exceptions import MemoryValidationError
+            if isinstance(exc, MemoryValidationError):
+                outcomes[item_id] = "configuration_invalid"
+            elif is_sqlite_contention(exc):
+                outcomes[item_id] = "deferred"
+            else:
+                raise
+            continue
         if isinstance(value, str):
             projection._received.pop(item_id, None)
             outcomes[item_id] = value
@@ -80,7 +90,8 @@ async def _submit(projection, provider, candidates, outcomes):
             eligible.append(p)
     try:
         claimed = await projection._canonical.call(projection._claim_attempts,
-            tuple((f"memory-item:{p.item_id}", p.work[1].profile, p.work[2], p.attempt_revision) for p in eligible)) if eligible else set()
+            tuple((f"memory-item:{p.item_id}", p.work[1].profile, p.work[2], p.attempt_revision) for p in eligible),
+            prepared=tuple(eligible)) if eligible else set()
     except Exception as exc:
         if not is_sqlite_contention(exc):
             raise
@@ -126,12 +137,12 @@ async def _submit(projection, provider, candidates, outcomes):
         projection.last_code = "memory_embedding_failed"
         return
     # Own all received values before any individual write can fail or cancel.
+    for p, vector in zip(admitted, vectors, strict=True):
+        projection._received[p.item_id] = {"binding": p.binding, "vector": list(vector), "receipt_id": uuid4().hex}
+    await projection._canonical.call(_preserve, projection, admitted)
     if projection._closing:
         outcomes.update((p.item_id, "deferred") for p in admitted)
         return
-    for p, vector in zip(admitted, vectors, strict=True):
-        projection._received[p.item_id] = {"binding": p.binding, "vector": list(vector)}
-    await projection._canonical.call(_preserve, projection, admitted)
     for p in admitted:
         outcomes[p.item_id] = await projection._canonical.call(persist, projection, p, projection._received[p.item_id])
         await asyncio.sleep(0)  # A short per-item UoW gives other writers a turn.

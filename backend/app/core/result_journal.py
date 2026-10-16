@@ -110,9 +110,20 @@ class ResultJournal:
                 raise ResultJournalError("result_journal_capacity")
             write_json(path, envelope)
 
-    def remove(self, world_id, item_id):
+    def remove(self, world_id, item_id, *, expected_payload=None):
         with self._world(world_id) as directory:
-            self._path(directory, item_id).unlink(missing_ok=True)
+            path = self._path(directory, item_id)
+            if expected_payload is not None and path.exists():
+                if path.stat().st_size > self.MAX_BYTES:
+                    raise ResultJournalError("result_journal_corrupt")
+                try:
+                    envelope = json.loads(path.read_text("utf-8"))
+                    if envelope["digest"] != self._digest(expected_payload) or envelope["payload"] != expected_payload:
+                        return False
+                except (ValueError, KeyError, TypeError, UnicodeError):
+                    raise ResultJournalError("result_journal_corrupt") from None
+            path.unlink(missing_ok=True)
+            return True
 
     def close_world(self, world_id):
         with self._world(world_id) as directory:

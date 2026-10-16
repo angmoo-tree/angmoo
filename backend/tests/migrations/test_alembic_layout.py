@@ -71,7 +71,7 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert actual_graph["20261005_0106"] == "20261003_0105"
     assert actual_graph["20261006_0107"] == "20261005_0106"
     assert actual_graph["20261008_0108"] == "20261006_0107"
-    assert len(actual_graph) == 114
+    assert len(actual_graph) == 115
     assert actual_graph["20261008_0109"] == "20261008_0108"
     assert actual_graph["20261009_0110"] == "20261008_0109"
     assert actual_graph["20261009_0111"] == "20261009_0110"
@@ -79,7 +79,8 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert actual_graph["20261010_0113"] == "20261010_0112"
     assert actual_graph["20261012_0114"] == "20261010_0113"
     assert actual_graph["20261015_0115"] == "20261012_0114"
-    assert script.get_heads() == ["20261015_0115"]
+    assert actual_graph["20261016_0116"] == "20261015_0115"
+    assert script.get_heads() == ["20261016_0116"]
     assert not list((BACKEND / "app/alembic").rglob("*.py"))
 
 
@@ -95,7 +96,7 @@ def test_alembic_heads_from_outside_backend(tmp_path):
         timeout=30,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip() == "20261015_0115 (head)"
+    assert result.stdout.strip() == "20261016_0116 (head)"
 
 
 def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_path):
@@ -145,6 +146,8 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
             "memory_situation_receipts", "memory_situation_info",
             "memory_situation_sources", "memory_situation_transitions",
             "memory_situation_recheck_attempts",
+            "memory_vector_work", "memory_vector_changes", "memory_vector_validation_revisions",
+            "memory_vector_dependencies", "memory_vector_maintenance", "memory_vector_attempts",
         }
         config = Config(str(backend / "alembic.ini"))
         script = ScriptDirectory.from_config(config)
@@ -183,7 +186,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     result_data = json.loads(result.stdout)
     expected_count = len(json.loads(CHECKPOINT.read_text(encoding="utf-8"))["contracts"]["orm_tables"])
-    assert result_data == {"registered_tables": expected_count + 72, "revision_bodies_run": 0}
+    assert result_data == {"registered_tables": expected_count + 78, "revision_bodies_run": 0}
     assert not list(tmp_path.rglob("*.sqlite3"))
 
 

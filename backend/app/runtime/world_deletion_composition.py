@@ -22,6 +22,10 @@ def configure_world_deletion(app, composition):
         # Canonical deletion is also observed by the existing hybrid owner. Its
         # scoped deletion API acknowledges vector removal before completion.
         hybrid.erase_items(identifiers)
+        from app.domains.memory.repository.vector_erasure import erase
+        from app.core.sqlite_concurrency import run_sqlite_session_immediate
+        with sessions() as db:
+            run_sqlite_session_immediate(db, lambda: erase(db, identifiers), require_clean=True)
 
     def graph_cleanup(world_id):
         if composition is None:

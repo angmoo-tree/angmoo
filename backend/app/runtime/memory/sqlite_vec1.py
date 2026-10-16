@@ -83,9 +83,24 @@ class SqliteMemoryVectorIndex:
                 or hashlib.sha256(self._extension.read_bytes()).hexdigest() != extension_sha256.lower()):
             raise MemoryVectorProjectionError("memory_vector_extension_integrity")
         self.generation = generation
+        from contextvars import ContextVar
+        self._effect = ContextVar(f"vector_effect_{id(self)}", default=None)
+
+    @contextmanager
+    def effect_connection(self):
+        """Load the extension before entering the canonical writer fence."""
+        with self._connect() as connection:
+            token = self._effect.set(connection)
+            try:
+                yield
+            finally:
+                self._effect.reset(token)
 
     @contextmanager
     def _connect(self, *, cancellation: VectorCancellation | None = None, read_only=False):
+        if self._effect.get() is not None:
+            yield self._effect.get()
+            return
         with phase("db_open"):
             connection = sqlite3.connect(self.database_path.as_uri()+"?mode=ro" if read_only else self.database_path,
                                          uri=read_only, timeout=1.0)
@@ -96,7 +111,8 @@ class SqliteMemoryVectorIndex:
                     connection.load_extension(str(self._extension))
                 finally:
                     connection.enable_load_extension(False)
-            connection.execute("PRAGMA busy_timeout=1000")
+            # Derived effects must not hold the canonical writer while waiting.
+            connection.execute("PRAGMA busy_timeout=25" if not read_only else "PRAGMA busy_timeout=1000")
             if cancellation is not None:
                 cancellation.attach(connection)
             yield connection
@@ -154,6 +170,14 @@ class SqliteMemoryVectorIndex:
                 connection.execute("INSERT INTO vectors(rowid,vector,owner_id,world_id,subject_id,profile,occurred_at,counterpart_id,thread_id) VALUES(?,?,?,?,?,?,?,?,?)", (rowid, blob, document.scope.owner_id, document.scope.world_id, document.scope.subject_world_character_id, document.profile, document.occurred_at.timestamp(), document.counterpart_world_character_id, document.thread_id))
             connection.commit()
 
+    def matches(self, document):
+        """Exact effect identity, including metadata, without rewriting vectors."""
+        with self._connect(read_only=True) as connection:
+            row = connection.execute("SELECT d.version,d.content_hash,v.profile,v.owner_id,v.world_id,v.subject_id,v.occurred_at,v.counterpart_id,v.thread_id FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=?", (document.document_id,)).fetchone()
+        return row == (document.version, document.content_hash, document.profile,
+            document.scope.owner_id, document.scope.world_id, document.scope.subject_world_character_id,
+            document.occurred_at.timestamp(), document.counterpart_world_character_id, document.thread_id)
+
     def delete(self, document_id: str):
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -200,6 +224,10 @@ class SqliteMemoryVectorIndex:
             connection.execute("UPDATE documents SET version=? WHERE document_id=? AND content_hash=? AND version<=?",
                                (version, document_id, content_hash, version))
             connection.commit()
+
+    def document_upper_bound(self):
+        with self._connect(read_only=True) as connection:
+            return connection.execute("SELECT max(document_id) FROM documents").fetchone()[0] or ""
 
     def document_page(self, *, after="", limit=64):
         if not 1 <= limit <= 256:

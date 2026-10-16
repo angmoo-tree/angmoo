@@ -46,7 +46,7 @@ from app.runtime.persistence.sqlite_schema import EXPECTED_CANONICAL_TABLE_COUNT
 metadata = register_models()
 configure_mappers()
 original = {mapper.class_.__tablename__: mapper.class_ for mapper in Base.registry.mappers}
-assert len(original) == len(metadata.tables) == EXPECTED_CANONICAL_TABLE_COUNT == 174
+assert len(original) == len(metadata.tables) == EXPECTED_CANONICAL_TABLE_COUNT == 180
 assert {'world_deletion_requests', 'world_deletion_cleanup_items'} <= set(original)
 from app.domains.memory.models.activity_situation import SITUATION_TABLES
 assert set(SITUATION_TABLES) <= set(original)
@@ -77,8 +77,8 @@ try:
     engine = database.engine
     second = database.open()
     assert database.engine is engine
-    assert first.schema_version == second.schema_version == 38
-    assert first.canonical_table_count == second.canonical_table_count == 174
+    assert first.schema_version == second.schema_version == 39
+    assert first.canonical_table_count == second.canonical_table_count == 180
     assert first.schema_digest_matches and second.schema_digest_matches
     assert first.foreign_keys and first.synchronous == 'FULL'
     assert 'app.main' not in sys.modules and 'app.public_main' not in sys.modules
