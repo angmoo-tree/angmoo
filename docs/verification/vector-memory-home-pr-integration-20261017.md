@@ -108,3 +108,71 @@ secret scanning. The first failed SHA remains historical, never a final CI pass.
 Focused correction checks: credential ownership/boundaries plus observed embedding
 groups and transport, **26 PASS**, with external networking denied. No product
 credential handling or provider execution code changed in this correction.
+
+## Follow-up CI findings on 8c76f62b
+
+- Core job `117053835529` expected six default-World preparation writes. The new
+  Home lifetime deliberately reuses successful preparation on a failed list GET
+  retry, so five writes are correct (initial entry plus four reloads). Preserve
+  exact six list reads/five runtime reads, and add intermediate assertions proving
+  that retry performs no second preparation write. Fresh production Next build and
+  the focused browser scenario passed without retry. Only the generated spec hash
+  changed in the design inventory; the design policy/counts are unchanged.
+- Core shard job `117054173834` found two consolidation failures before an
+  unrelated journal interruption. Local reproduction found seven failing cases:
+  instrumentation had accidentally moved the `episode_v1`/`activity32` foreground
+  return outside `if chat_is_active`. Restore the conditional return. This is a
+  runtime correction, not an expectation change; active-chat deferral remains.
+- The same shard's observer file-failure test patched every `.jsonl` open, also
+  rejecting the CI plugin's progress journal before fixture teardown. Limit the
+  injected failure to that session's exact event file and restore the patch when
+  the flush finishes. The real `ExecutionCoverage` plugin now records all three
+  phases of that test successfully; recorder loss assertions remain intact.
+- Windows build job `117053910368`, run `38924731651`, exhausted bounded Vec1
+  downloads with HTTP 500. No hash/TLS/version check was bypassed. A new source
+  run must build and validate the installer; this failed run is not reused.
+
+Focused backend validation: consolidation requests, activity batches and recorder
+failure/lifecycle tests **28 PASS**; episode batch/restart/schedule-shutdown tests
+**5 PASS**; the recorder case repeated with the actual CI journal plugin **1 PASS**
+(a duplicate test case, not an extra unique case). External networking was denied.
+Additional completed-shard findings and corrections:
+
+- Chat soft deletion now emits two atomic OLD/NEW invalidations and advances its
+  World fence. The preservation test compares every unrelated row and exact new
+  notifications/revision, including idempotent replay, instead of treating any
+  outbox write as data loss. The complete Chat deletion file passes **27 cases**.
+- Privacy inventory omitted six new vector tables. Account/Character scrubbing
+  now removes the selected memories' work, dependencies and attempt budgets in
+  its existing transaction. Shared monotonic fences and generation checkpoints
+  remain; source notifications survive until derived cleanup/fanout drains them.
+  Scope, other-owner/Character preservation, commit and rollback are tested.
+  Existing account/Character batch scrub cases also pass (**2 cases**).
+- The v36-to-v37 migration test now requests that exact target and verifies the
+  exact migration callable. Current v39-chain coverage remains in the migration
+  suite. The core-module inventory records the neutral observation port; ER0
+  inventories now reflect the actual SQLite source and Dockerfile. No historical
+  manifest, exception or import policy is loosened.
+- Static Home ownership is checked through its actual hook/controller, which
+  owns the list API. Additional consolidation and relationship follow-up tests
+  pass **28 cases**; privacy, migration and current-inventory tests pass **20**.
+  The separately selected native Vec1, static-export and privacy-table coverage
+  checks pass **24 cases**. Initial fixture failures in the new privacy test
+  (required confidence/salience and closed memory-kind vocabulary) were corrected
+  before its final four scoped cases passed; they are not product failures.
+
+The Vec1 original source endpoint subsequently redirected to an HTML introduction
+instead of C source. Keep revision `8fc7b115a4`, version 0.7 and its existing digest
+`8571bb4f77f9547d11ad11e2f72e0de7d3b2ab44e7930151998bce9377ed4b86`.
+The unchanged public-domain source was recovered from successful Core preflight
+artifact `vec1-sources-ecb42e4aee293a245b804e0aa93c047ccf224f7b-1`, run
+`38924731687`, and independently hash-verified. Track it under `scripts/vendor/vec1`
+with provenance and exact-byte Git attributes. Every build/cache read retains
+digest verification; missing/corrupt source fails closed. SQLite headers retain
+their pinned official URL/hash. Windows and Docker compile their own binary.
+Download/cache/bundled-source tests pass **19 cases**, and a fresh native Windows
+build plus real SQLite extension tests pass. No dependency version changed.
+
+Current backend boundary and frontend design gates pass. Generated inventories
+contain only reviewed current source facts. Hosted final-SHA results remain
+pending; superseded successes are not used as final evidence.

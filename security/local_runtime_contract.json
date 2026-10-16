@@ -196,6 +196,13 @@
       "module": "app.core.unit_of_work",
       "owner_stage": "L0",
       "removal_condition": null
+    },
+    {
+      "module": "app.core.work_observation",
+      "disposition": "keep",
+      "owner_stage": "MEMORY-OBSERVATION-20261016",
+      "removal_condition": null,
+      "reason": "Neutral process-local observation port; runtime owns opt-in recording and files. No database, provider or business-policy ownership."
     }
   ],
   "embedded_storage": {

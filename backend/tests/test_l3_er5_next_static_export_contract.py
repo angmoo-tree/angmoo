@@ -26,6 +26,7 @@ def test_next_and_static_home_share_one_screen_and_request_owner() -> None:
         "frontend/src/features/device-home/components/device-home.tsx"
     )
     public_entry = _read("frontend/src/features/device-home/api/device-home-client.ts")
+    worlds_hook = _read("frontend/src/features/device-home/hooks/use-device-home-worlds.ts")
 
     shared_screen = "@/composition/screens/device-home-screen"
     assert (
@@ -37,7 +38,11 @@ def test_next_and_static_home_share_one_screen_and_request_owner() -> None:
 
     assert "getProductRuntimeState" in screen
     assert "getLocalWorldSurface" not in screen
-    assert "getLocalWorldSurface" in home
+    assert "useDeviceHomeWorlds" in home
+    assert "getLocalWorldSurface" not in home
+    assert "getLocalWorldSurface" in worlds_hook
+    assert "createDeviceHomeWorldController" in worlds_hook
+    assert "getProductRuntimeState" not in worlds_hook
     assert "getProductRuntimeState" not in home
     assert "DeviceHomeScreen" not in public_entry
 

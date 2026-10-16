@@ -96,11 +96,13 @@ def test_file_failure_and_oversize_are_explicit_loss(tmp_path,monkeypatch):
         with observation.scope(world_id="w",actor_id="a"):
             observation.emit("result",item_id="two")
         original=module.Path.open
+        event_path=directory(tmp_path,value) / "memory-pipeline" / "events-process-0000.jsonl"
         def failed(path,*args,**kwargs):
-            if path.suffix==".jsonl": raise OSError("PRIVATE-SENTINEL")
+            if path == event_path: raise OSError("PRIVATE-SENTINEL")
             return original(path,*args,**kwargs)
-        monkeypatch.setattr(module.Path,"open",failed)
-        observer.flush()
+        with monkeypatch.context() as file_failure:
+            file_failure.setattr(module.Path,"open",failed)
+            observer.flush()
     finally: observer.close()
     health=capability(directory(tmp_path,value))["processes"][0]
     assert health["truncated"]==1 and health["failed"]==1 and sum(health["expected"].values())==2

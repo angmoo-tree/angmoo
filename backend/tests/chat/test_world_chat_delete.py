@@ -157,11 +157,11 @@ def test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity(c
                 source_created_at=datetime.now(UTC), source_digest="b" * 64),
         ])
         db.commit()
-        before_counts = {table.name: db.scalar(select(func.count()).select_from(table))
-                         for table in Base.metadata.tables.values()}
         thread = db.get(models.MessageThread, thread_id)
         thread.updated_at = datetime(2020, 1, 1, tzinfo=UTC)
         db.commit()
+        before_counts = {table.name: db.scalar(select(func.count()).select_from(table))
+                         for table in Base.metadata.tables.values()}
         before_rows = {table.name: deepcopy([dict(row) for row in db.execute(
             select(table).order_by(*table.primary_key.columns)).mappings()]) for table in Base.metadata.tables.values()}
     result = client.delete(_path(thread_id), headers=FRONTEND_HEADERS)
@@ -172,10 +172,23 @@ def test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity(c
         assert timestamp is not None
         assert db.get(models.ChatResponseRequest, request_id).state == "failed"
         assert db.scalar(select(func.count(models.MessageMessage.id))) == 1
+        # Soft deletion preserves canonical history, while the atomic OLD/NEW
+        # notifications make the changed thread visible to pending vector work.
+        expected_counts = {**before_counts, "memory_vector_changes": before_counts["memory_vector_changes"] + 2}
         assert {table.name: db.scalar(select(func.count()).select_from(table))
-                for table in Base.metadata.tables.values()} == before_counts
+                for table in Base.metadata.tables.values()} == expected_counts
         after_rows = {table.name: [dict(row) for row in db.execute(
             select(table).order_by(*table.primary_key.columns)).mappings()] for table in Base.metadata.tables.values()}
+        before_changes = before_rows["memory_vector_changes"]
+        assert after_rows["memory_vector_changes"][:-2] == before_changes
+        assert [{key: value for key, value in change.items() if key != "sequence"}
+                for change in after_rows["memory_vector_changes"][-2:]] == [
+                    {"root_sequence": None, "source_kind": "message_threads", "source_key": thread_id,
+                     "cursor": "", "state": "pending"}] * 2
+        before_rows["memory_vector_changes"] = after_rows["memory_vector_changes"]
+        for row in before_rows["memory_vector_validation_revisions"]:
+            if row["scope_key"] == "world:world-a":
+                row["revision"] += 2
         for rows in (before_rows[models.MessageThread.__tablename__], after_rows[models.MessageThread.__tablename__]):
             for row in rows:
                 row.pop("deleted_at")
@@ -192,6 +205,7 @@ def test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity(c
     assert replay.status_code == 200 and replay.json()["outcome"] == "already_deleted"
     with Session(engine) as db:
         assert db.get(models.MessageThread, thread_id).deleted_at == timestamp
+        assert db.scalar(select(func.count()).select_from(Base.metadata.tables["memory_vector_changes"])) == expected_counts["memory_vector_changes"]
     fresh = client.post("/api/v1/worlds/world-a/chat/threads", headers=FRONTEND_HEADERS,
                         json={"responding_world_character_id": "wc-responding"})
     assert fresh.status_code == 200 and fresh.json()["outcome"] == "created"

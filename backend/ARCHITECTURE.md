@@ -1285,6 +1285,16 @@ authorization race. Normal delivery stops on an accepted World deletion request.
 Individual deleted-item completion erases its operational rows after the retained
 effects are removed. Character originals and other Worlds remain outside this scope.
 
+Account and Character privacy scrubbing also removes selected items' work,
+dependencies and attempt budgets through this repository, in the same canonical
+transaction as their memories. The selection is the existing owner/Character
+subquery; another owner's or Character's item state is preserved. Mutation
+notifications survive to erase derived entries and invalidate other dependent
+memories, then the normal finite frontier drains them. Shared generation
+checkpoints and monotonic authorization fences survive scrubbing; they contain
+identifiers/revisions, not memory content, credentials or vectors. Rolling back
+the scrub restores both memories and their per-item operational state.
+
 Local evidence and boundaries: [vector pending-work verification](../docs/verification/vector-index-pending-work-20261016.md).
 
 ## Opt-in memory pipeline observation (2026-10-16, LOCAL)

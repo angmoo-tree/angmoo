@@ -114,3 +114,22 @@ def test_prepare_sources_rejects_invalid_archive_without_retry(tmp_path, monkeyp
     monkeypatch.setattr(build, "download", lambda url, digest, cache: b"not a zip")
     with pytest.raises(build.zipfile.BadZipFile):
         build.prepare_sources(tmp_path)
+
+
+def test_pinned_vec1_source_needs_no_network_and_keeps_existing_digest(tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "urlopen", lambda *args, **kwargs: pytest.fail("Vec1 source used network"))
+    data = build.download(build.SOURCE_URL, build.SOURCE_SHA256, tmp_path)
+    assert hashlib.sha256(data).hexdigest() == "8571bb4f77f9547d11ad11e2f72e0de7d3b2ab44e7930151998bce9377ed4b86"
+    assert data == build.BUNDLED_SOURCE.read_bytes()
+    assert build._cache_path(tmp_path, build.SOURCE_SHA256).read_bytes() == data
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_invalid_bundled_source_fails_without_network_fallback(tmp_path, monkeypatch, missing):
+    source = tmp_path / "vec1.c"
+    if not missing:
+        source.write_bytes(b"not the reviewed source")
+    monkeypatch.setattr(build, "BUNDLED_SOURCE", source)
+    monkeypatch.setattr(build, "urlopen", lambda *args, **kwargs: pytest.fail("unreviewed fallback"))
+    with pytest.raises(FileNotFoundError if missing else RuntimeError):
+        build.download(build.SOURCE_URL, build.SOURCE_SHA256)

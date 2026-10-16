@@ -938,7 +938,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/vector_erasure.py",
-      "sha256": "16e4babe2917a4bdf7d4449de1bbd2424caa937003e385a797d52d8fd5725fe0"
+      "sha256": "8b26b45985a37459a8b1efa1fef6c26557bcaa807865eb4d847c9c69778d777a"
     },
     {
       "path": "backend/app/domains/memory/repository/vector_queue.py",
@@ -1922,7 +1922,7 @@
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "e7640dfe29b39bce04062b09d1490f5109df9621d8cb43de49aabe70d59cbd90"
+      "sha256": "58c8ada54e163f86286eeb7c81c1032149cef004ef0b935f6b758bf8b5721e68"
     },
     {
       "path": "backend/app/runtime/memory/canonical_work.py",
@@ -3062,7 +3062,7 @@
     },
     {
       "path": "backend/tests/chat/test_world_chat_delete.py",
-      "sha256": "740f724b0bd9be4819a34d8a30383f94893be40a13a51747281b6f26484a81e6"
+      "sha256": "aa357c37672a55d5374528011badf4ca2cf828310f4a52949d72b537d7a4b7b5"
     },
     {
       "path": "backend/tests/chat/test_world_chat_unlimited.py",
@@ -3451,6 +3451,10 @@
     {
       "path": "backend/tests/memory/test_vector_pending_work.py",
       "sha256": "4bb9f0d6b6b2e395600890b32509aec7bc68156f972d781e1ecb5ebbba41ba20"
+    },
+    {
+      "path": "backend/tests/memory/test_vector_privacy.py",
+      "sha256": "a9a88b7381aa5624bd2e947cec318f85442e6f22aa578530f94c58db5bfa8db3"
     },
     {
       "path": "backend/tests/memory/test_vector_projection_lifecycle.py",

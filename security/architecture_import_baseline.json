@@ -1,5 +1,5 @@
 {
-  "edge_count": 6759,
+  "edge_count": 6760,
   "external_import_count": 4583,
   "module_count": 1560,
   "modules": [
@@ -20831,6 +20831,7 @@
         "app.domains.memory.models.activity_configuration",
         "app.domains.memory.models.batch",
         "app.domains.memory.models.items",
+        "app.domains.memory.repository.vector_erasure",
         "app.domains.world_characters.models",
         "app.models"
       ],

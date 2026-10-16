@@ -165,7 +165,7 @@ class MemoryBatchRuntime:
                             MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
                         db.commit()
                         observation.emit("wait", boundary="deferred", reason="foreground_chat")
-                    return "memory_foreground_deferred"
+                        return "memory_foreground_deferred"
             self.prepare(shutdown=shutdown)
             with self.session_factory() as db:
                 repository = SqlAlchemyMemoryBatchRepository(db)
