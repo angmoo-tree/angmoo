@@ -12,7 +12,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from launcher.termux.payload import digest_file, inspect_oci, validate_manifest, verify_archive
+from launcher.termux.payload import digest_file, inspect_oci, proot_archive, validate_manifest, verify_archive
 from scripts.release.github import GitHub
 from scripts.release.publish import synchronize
 from scripts.release.workflow_policy import validate as validate_workflow
@@ -22,7 +22,7 @@ from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors,
 SOURCE = "a" * 40
 
 
-def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target=None):
+def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target=None, nested=False):
     blobs = {}
     def blob(value):
         raw = value if isinstance(value, bytes) else json.dumps(value, separators=(",", ":")).encode()
@@ -36,7 +36,8 @@ def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target
     target = attestation_target or image["digest"]
     attestation = blob({"config": blob({}), "layers": [blob({"predicateType": kind, "subject": [{"digest": {"sha256": target[7:]}}]}) for kind in ("https://spdx.dev/Document", "https://slsa.dev/provenance/v1")]})
     attestation["annotations"] = {"vnd.docker.reference.type": "attestation-manifest", "vnd.docker.reference.digest": target}
-    blobs["index.json"] = json.dumps({"schemaVersion": 2, "manifests": [image, attestation]}).encode()
+    index = {"schemaVersion": 2, "manifests": [image, attestation]}
+    blobs["index.json"] = json.dumps({"schemaVersion": 2, "manifests": [blob(index)]} if nested else index).encode()
     blobs["oci-layout"] = b'{"imageLayoutVersion":"1.0.0"}'
     path = tmp_path / f"{service}-{architecture}.oci.tar"
     with tarfile.open(path, "w") as archive:
@@ -59,6 +60,27 @@ def test_oci_binds_actual_bytes_source_architecture_and_attestations(tmp_path):
         stream.write(b"corrupt")
     with pytest.raises(ValueError, match="archive_hash_mismatch"):
         verify_archive(path, item)
+
+
+def test_proot_transport_preserves_nested_execution_and_attestation_blobs(tmp_path):
+    path = oci(tmp_path, nested=True)
+    item = inspect_oci(path, service="backend", platform="linux/arm64", source=SOURCE, version="0.1.0")
+    before = path.read_bytes()
+    target = tmp_path / "transport.oci.tar"
+    proot_archive(path, target, item)
+    with tarfile.open(path) as original, tarfile.open(target) as flattened:
+        index = json.load(flattened.extractfile("index.json"))
+        assert index["manifests"][0]["digest"] == item["manifest_digest"]
+        for member in original:
+            if member.name.startswith("blobs/"):
+                assert original.extractfile(member).read() == flattened.extractfile(member.name).read()
+    assert path.read_bytes() == before
+    with pytest.raises(ValueError, match="archive_source_overwrite"):
+        proot_archive(path, path, item)
+    path.write_bytes(before + b"corrupt")
+    with pytest.raises(ValueError, match="archive_hash_mismatch"):
+        proot_archive(path, tmp_path / "must-not-exist.oci.tar", item)
+    assert not (tmp_path / "must-not-exist.oci.tar").exists()
 
 
 def test_candidate_requires_all_four_platforms_without_duplicate_or_swapped_sources(tmp_path):

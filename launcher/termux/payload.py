@@ -7,6 +7,7 @@ whiteouts and rootfs materialization to the pinned PRoot-Distro implementation.
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -69,6 +70,7 @@ def validate_manifest(value: dict, *, require_all: bool = True) -> None:
             require(valid_digest(item.get(field)), f"manifest_{field}_invalid")
         require(isinstance(item.get("layers"), list) and item["layers"] and all(valid_digest(d) for d in item["layers"]), "manifest_layers_invalid")
         require(isinstance(item.get("diff_ids"), list) and len(item["diff_ids"]) == len(item["layers"]) and all(valid_digest(d) for d in item["diff_ids"]), "manifest_diff_ids_invalid")
+        require(isinstance(item.get("attestation_manifests"), list) and item["attestation_manifests"] and all(valid_digest(d) for d in item["attestation_manifests"]), "manifest_attestations_invalid")
         name = item.get("archive", "")
         require(isinstance(name, str) and re.fullmatch(r"[a-zA-Z0-9_.-]+\.oci\.tar", name), "manifest_archive_path_invalid")
         require(type(item.get("archive_size")) is int and item["archive_size"] > 0, "manifest_archive_size_invalid")
@@ -170,3 +172,43 @@ def verify_archive(path: Path, item: dict) -> dict:
     for key in ("manifest_digest", "config_digest", "diff_ids", "layers"):
         require(actual[key] == item[key], "archive_identity_mismatch")
     return actual
+
+
+def proot_archive(source: Path, target: Path, item: dict) -> None:
+    """Flatten only the OCI index for PRoot-Distro's single-level importer.
+
+    Every original blob (including SBOM/provenance) is copied unchanged. The
+    execution manifest, config and compressed layers remain the same image;
+    this temporary transport envelope is never used as a release artifact.
+    """
+    verify_archive(source, item)
+    require(source.resolve() != target.resolve(), "archive_source_overwrite")
+    with tarfile.open(source, "r:*") as original:
+        members = {m.name.removeprefix("./").rstrip("/"): m for m in original}
+        def document(name):
+            with original.extractfile(members[name]) as stream:
+                return json.load(stream)
+        index = document("index.json")
+        leaves = []
+        def flatten(desc):
+            doc = document("blobs/sha256/" + desc["digest"][7:])
+            if "manifests" in doc:
+                for child in doc["manifests"]:
+                    flatten(child)
+            else:
+                leaves.append(desc)
+        for desc in index["manifests"]:
+            flatten(desc)
+        raw = json.dumps({**index, "manifests": leaves}, separators=(",", ":")).encode()
+        with target.open("xb") as stream, tarfile.open(fileobj=stream, mode="w") as output:
+            for name, member in members.items():
+                if name == "index.json":
+                    replacement = tarfile.TarInfo("index.json")
+                    replacement.size = len(raw)
+                    output.addfile(replacement, io.BytesIO(raw))
+                else:
+                    with original.extractfile(member) if member.isfile() else io.BytesIO() as blob:
+                        output.addfile(member, blob if member.isfile() else None)
+    actual = inspect_oci(target, service=item["service"], platform=item["platform"], source=item["source_sha"], version=item["version"])
+    for key in ("manifest_digest", "config_digest", "layers", "diff_ids", "attestation_manifests"):
+        require(actual[key] == item[key], "proot_transport_identity_mismatch")

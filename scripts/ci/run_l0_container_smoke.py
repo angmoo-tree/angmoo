@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -202,6 +203,16 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
         digest_before = _secret_digest(harness)
         report = {"cold_start_seconds": round(cold_start, 3)}
         if report_path:
+            health_times = {}
+            for service in sorted(EXPECTED_SERVICES):
+                identifier = harness.run("ps", "-q", service).stdout.strip()
+                state = json.loads(subprocess.check_output(["docker", "inspect", identifier]))[0]["State"]
+                successes = [entry for entry in state["Health"]["Log"] if entry["ExitCode"] == 0]
+                if successes:
+                    parse = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
+                    health_times[service] = round((parse(successes[0]["End"]) - parse(state["StartedAt"])).total_seconds(), 3)
+            report["service_health_upper_bound_seconds"] = health_times
+            report["measurement_notes"] = "Health probe interval is included; memory is a single sample, not peak RSS."
             # Exercise the existing keyless onboarding and canonical SNS writes
             # in this disposable volume, using the exact candidate app.
             harness.run("cp", str(ROOT / "scripts/quickstart_smoke.py"), "backend:/tmp/quickstart_smoke.py")
@@ -209,7 +220,11 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
             report["quickstart"] = json.loads(result.stdout)
             with urlopen(f"http://127.0.0.1:{port}/", timeout=20) as response:
                 assert response.status == 200
-            report["memory_sample"] = json.loads(harness.run("stats", "--no-stream", "--format", "json").stdout)
+            stats = harness.run("stats", "--no-stream", "--format", "json").stdout
+            try:
+                report["memory_sample"] = json.loads(stats)
+            except json.JSONDecodeError:
+                report["memory_sample"] = [json.loads(line) for line in stats.splitlines() if line.strip()]
             harness.run("exec", "-T", "backend", "python", "-c", "from pathlib import Path; Path('/var/lib/angmoo/media/release-fixture').write_bytes(b'synthetic-media')")
         marker = f"browser-run-{uuid.uuid4().hex}"
         _write_sqlite_marker(harness, marker)

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 import angmoo
 import processes
@@ -75,6 +76,62 @@ class HostTests(unittest.TestCase):
                 return None
         with self.assertRaisesRegex(ValueError, "start_cancelled"):
             processes.await_ready(Child(), "http://127.0.0.1:1", "a" * 40, "b" * 32, backend=True, cancelled=lambda: True)
+
+    def test_exited_parent_does_not_leave_child_running(self):
+        program = "import subprocess,sys,time; p=subprocess.Popen([sys.executable,'-c','import signal,time; signal.signal(signal.SIGTERM,signal.SIG_IGN); time.sleep(60)']); print(p.pid,flush=True); time.sleep(.2)"
+        parent = subprocess.Popen([sys.executable, "-c", program], stdout=subprocess.PIPE, start_new_session=True)
+        record = processes.identity(parent.pid)
+        child = int(parent.stdout.readline())
+        child_record = processes.identity(child)
+        parent.wait(timeout=5)
+        try:
+            self.assertTrue(processes.alive(child_record))
+            processes.stop_child(parent, record, .1)
+            self.assertFalse(processes.alive(child_record))
+            self.assertEqual(processes.session_members(record), [])
+        finally:
+            if processes.alive(child_record):
+                os.kill(child, signal.SIGKILL)
+            parent.stdout.close()
+
+    def test_frontend_failure_stops_only_owned_backend(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = angmoo.private_home(Path(directory) / "profile")
+            unrelated = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"], start_new_session=True)
+            previous_handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
+            def command(_exe, _config, service, _nonce):
+                return [sys.executable, "-c", "import time;time.sleep(60)" if service == "backend" else "raise SystemExit(7)"]
+            def readiness(process, _url, _source, _nonce, *, backend, **_):
+                if not backend:
+                    process.wait(timeout=5)
+                    raise ValueError("service_exited_before_ready")
+            try:
+                with angmoo.lock(home) as owned, patch.object(angmoo, "installation", return_value={"manifest": {"source_sha": "a"*40, "version": "0.1.0"}}), patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "free_port"), patch.object(angmoo, "command", side_effect=command), patch.object(angmoo, "await_ready", side_effect=readiness):
+                    angmoo.supervise(home, os.dup(owned.fileno()), "b" * 32)
+                state = angmoo.read_state(home)
+                self.assertEqual(state["state"], "failed")
+                self.assertEqual(state["error"], "service_exited_before_ready")
+                self.assertFalse(any(processes.session_members(r) for r in state["children"].values()))
+                self.assertIsNone(unrelated.poll())
+            finally:
+                for sig, handler in previous_handlers.items():
+                    signal.signal(sig, handler)
+                processes.stop_child(unrelated, processes.identity(unrelated.pid), 1)
+
+    def test_wrong_manifest_and_low_space_preserve_previous_install(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = angmoo.private_home(Path(directory) / "profile")
+            sentinel = home / "installation.json"
+            sentinel.write_text("previous")
+            with patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "read_manifest", side_effect=ValueError("manifest_source_invalid")):
+                with self.assertRaisesRegex(ValueError, "manifest_source_invalid"):
+                    angmoo.install(home, None, home / "candidate.json")
+            pair = [{"platform": "linux/arm64", "archive_size": 100}] * 2
+            with patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "read_manifest", return_value={"images": pair}), patch.object(angmoo.shutil, "disk_usage", return_value=type("Disk", (), {"free": 0})()), patch.object(angmoo.subprocess, "run") as run:
+                with self.assertRaisesRegex(ValueError, "disk_space_low"):
+                    angmoo.install(home, None, home / "candidate.json")
+                run.assert_not_called()
+            self.assertEqual(sentinel.read_text(), "previous")
 
     def test_two_services_preserve_image_entrypoints_and_isolate_data(self):
         install = {"containers": {"backend": "angmoo-backend-test", "frontend": "angmoo-frontend-test"}, "data_root": "/private/data"}

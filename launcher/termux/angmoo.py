@@ -18,12 +18,13 @@ import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 import uuid
 
-from payload import REPOSITORY, VERSION, read_manifest, require, validate_manifest, verify_archive
-from processes import alive, atomic_json, await_ready, free_port, identity, stop_child
+from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, validate_manifest, verify_archive
+from processes import alive, atomic_json, await_ready, free_port, identity, session_members, stop_child
 
 PROOT_VERSION = "5.10.0"
 DEFAULT_HOME = Path.home() / ".local/share/angmoo"
@@ -81,7 +82,7 @@ def read_state(home: Path) -> dict:
 
 def reject_survivors(home: Path):
     state = read_state(home)
-    require(not any(alive(p) for p in state.get("children", {}).values()), "stale_processes")
+    require(not any(alive(p) or session_members(p) for p in state.get("children", {}).values()), "stale_processes")
 
 
 def install(home: Path, release: str | None, manifest_path: Path | None) -> None:
@@ -115,8 +116,13 @@ def install(home: Path, release: str | None, manifest_path: Path | None) -> None
         nonce = uuid.uuid4().hex[:12]
         for item in pair:
             name = f"angmoo-{item['service']}-{manifest['source_sha'][:12]}-{nonce}"
-            source = str(manifest_path.parent / item["archive"]) if manifest_path else f"{item['repository']}@{item['manifest_digest']}"
-            subprocess.run([executable, "install", source, "--name", name, "--architecture", "linux/arm64"], check=True)
+            with tempfile.TemporaryDirectory(prefix="import-", dir=home) as staging:
+                source = f"{item['repository']}@{item['manifest_digest']}"
+                if manifest_path:
+                    transport = Path(staging) / item["archive"]
+                    proot_archive(manifest_path.parent / item["archive"], transport, item)
+                    source = str(transport)
+                subprocess.run([executable, "install", source, "--name", name, "--architecture", "linux/arm64"], check=True)
             # Read the tool's actual installed OCI metadata, never infer an
             # import from a successful command or merely from a directory name.
             from proot_distro.paths import read_container_manifest
@@ -143,7 +149,12 @@ def command(executable: str, install: dict, service: str, nonce: str) -> list[st
         env.update(ANGMOO_BIND_HOST="127.0.0.1", ANGMOO_BACKEND_PORT="8080", ANGMOO_CONTRIBUTOR_DATA_ROOT="/var/lib/angmoo", ANGMOO_FRONTEND_ORIGIN="http://127.0.0.1:3000")
     else:
         env.update(HOSTNAME="127.0.0.1", PORT="3000", ANGMOO_API_BASE_URL="http://127.0.0.1:8080")
-    result = [executable, "run", install["containers"][service], "--user", "10001:10001" if backend else "1000:1000", "--isolated", "--work-dir", "/app"]
+    from proot_distro.constants import IS_TERMUX
+    result = [executable, "run", install["containers"][service], "--user", "10001:10001" if backend else "1000:1000", "--work-dir", "/app"]
+    # This flag exists only on Termux; Linux already omits the Termux host
+    # mounts. Use the pinned tool's host detection, not a guessed PREFIX.
+    if IS_TERMUX:
+        result.append("--isolated")
     if backend:
         result += ["--bind", install["data_root"] + ":/var/lib/angmoo"]
     for key, value in env.items():

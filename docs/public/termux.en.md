@@ -61,3 +61,15 @@ start/stop times, app readiness, restart data preservation, and stale/port/failu
 tests. Physical Android T01–T05/T11 additionally records setup command count,
 permission/storage behavior, foreground SNS/Chat, device sleep and recovery.
 Do not mark these physical checks passed from a Linux container rehearsal.
+
+Local OCI import flattens only the index into a temporary transport archive for
+PRoot-Distro 5.10.0. Image manifests, compressed layers, configuration and
+SBOM/provenance blobs keep their original hashes; the original candidate stays
+unchanged. Registry installation already selects the exact execution digest.
+
+The initial Linux rehearsal imported both ARM64 payloads, but Debian's PRoot
+5.1.0 with QEMU could create a file through the bind while `statx`/write-access
+checks reported that path unavailable. App start correctly refused the data
+root. This is not an Android PASS: startup, browser use and restart still require
+P4 on a real supported Termux device. Do not bypass the write-access check or
+change user-data permissions to force this rehearsal to pass.

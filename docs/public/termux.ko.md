@@ -59,3 +59,15 @@ PRoot 버전, 호스트·QEMU/native 구분, 기동·종료 시간, readiness, �
 보존, 오래된 PID·포트 충돌·부분 실패 검증을 기록합니다. 실제 Android의
 T01–T05/T11은 최초 준비 명령 수·권한·저장소·SNS/Chat 전경 실행·절전·복구를
 추가 확인합니다. Linux 컨테이너 리허설로 실제 기기 항목을 통과 처리하지 않습니다.
+# Linux 리허설에서 확인한 제한
+
+로컬 OCI 가져오기는 PRoot-Distro 5.10.0이 읽을 수 있도록 임시 archive의
+index만 평탄화합니다. 실행 manifest·압축 layer·config·SBOM/provenance의
+원래 hash와 원본 후보는 유지합니다. registry 설치는 실행 digest를 직접 선택합니다.
+
+최초 Linux 리허설에서는 ARM64 두 배포물 가져오기를 통과했습니다. 다만 Debian의
+PRoot 5.1.0과 QEMU 조합은 bind 경로에 파일을 생성할 수 있어도 statx·쓰기권한
+검사가 해당 경로를 사용할 수 없다고 판정했습니다. 앱은 데이터 경로를 거부하고
+시작을 중단했습니다. Android 통과 결과가 아니며, 실제 Termux 기동·브라우저·재시작은
+P4 실기기 검증이 필요합니다. 이 리허설을 통과시키려고 쓰기권한 검사를 우회하거나
+사용자 데이터 권한을 완화하지 않습니다.
