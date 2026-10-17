@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
       - name: Verify exact official tag
         run: python scripts/ci/check_release_tag.py --tag "$GITHUB_REF_NAME"
-      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
         with:
           registry: ghcr.io
@@ -51,7 +51,7 @@ jobs:
           push-to-registry: true
       - name: Preserve publication receipt
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: image-publication-${{ github.sha }}-${{ github.run_attempt }}
           path: artifacts/image-publication/image-publication.json
