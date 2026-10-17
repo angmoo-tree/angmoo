@@ -114,13 +114,6 @@
   "metadata_overrides": [
     {
       "ecosystem": "python",
-      "name": "python-dateutil",
-      "reported_expression": "Dual License",
-      "normalized_expression": "Apache-2.0 OR BSD-3-Clause",
-      "reason": "Upstream offers Apache-2.0 or BSD-3-Clause; both branches are compatible with this distribution."
-    },
-    {
-      "ecosystem": "python",
       "name": "sqlite-vec",
       "reported_expression": "MIT License, Apache License, Version 2.0",
       "normalized_expression": "MIT OR Apache-2.0",
@@ -177,19 +170,6 @@
         "Publish modifications to certifi-covered files under MPL-2.0 if such files are changed."
       ],
       "source": "https://github.com/certifi/python-certifi/blob/master/LICENSE"
-    },
-    {
-      "ecosystem": "python",
-      "name": "crc32c",
-      "version": "2.8",
-      "reported_expression": "LGPL-2.1-or-later",
-      "normalized_expression": "LGPL-2.1-or-later",
-      "distribution_boundary": "Separately imported Python library.",
-      "obligations": [
-        "Preserve the LGPL notice and license when redistributing the library.",
-        "Keep replacement and relinking rights available for redistributed library binaries."
-      ],
-      "source": "https://github.com/ICRAR/crc32c"
     },
     {
       "ecosystem": "python",

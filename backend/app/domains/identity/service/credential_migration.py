@@ -40,7 +40,8 @@ def migrate_local_credential_envelope(
                 scope=scope,
             )
             return CredentialEnvelopeMigration(envelope=migrated, migrated=1)
-        if envelope.startswith(f"{security.OCI_KMS_SECRET_PREFIX}:"):
+        if envelope.startswith(f"{security.RETIRED_KMS_SECRET_PREFIX}:"):
+            # Preserve historical bytes; this is not a usable local credential.
             return CredentialEnvelopeMigration(envelope=envelope, external=1)
         raise ValueError("unsupported credential envelope")
     except ValueError as exc:

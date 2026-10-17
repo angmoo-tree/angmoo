@@ -1,6 +1,6 @@
 {
-  "edge_count": 6803,
-  "external_import_count": 4609,
+  "edge_count": 6802,
+  "external_import_count": 4601,
   "module_count": 1568,
   "modules": [
     {
@@ -788,12 +788,7 @@
         "hashlib",
         "hmac",
         "json",
-        "oci",
-        "oci.auth.signers",
-        "oci.key_management",
-        "oci.key_management.models",
-        "secrets",
-        "typing"
+        "secrets"
       ],
       "imports": [
         "app.config"
@@ -24301,14 +24296,10 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "collections.abc",
-        "secrets",
-        "urllib.parse"
+        "__future__"
       ],
       "imports": [
         "app.config",
-        "app.core.security",
         "app.domains.identity.browser_session",
         "app.domains.identity.exceptions"
       ],

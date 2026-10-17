@@ -136,8 +136,8 @@ def migrate_local_credential_envelopes(db: Session) -> CredentialMigrationResult
 
 def main() -> int:
     if settings.credential_encryption_provider not in {"local", "dev", "local-v2"}:
-        print("credential_migration_skipped provider=external")
-        return 0
+        print("credential_migration_failed code=unsafe_credential_provider", file=sys.stderr)
+        return 78
     with SessionLocal() as db:
         try:
             result = migrate_local_credential_envelopes(db)
@@ -148,12 +148,13 @@ def main() -> int:
                 file=sys.stderr,
             )
             return 78
+    status = "credential_migration_incomplete" if result.external else "credential_migration_complete"
     print(
-        "credential_migration_complete "
+        f"{status} "
         f"inspected={result.inspected} migrated={result.migrated} "
         f"current={result.current} external={result.external}"
     )
-    return 0
+    return 78 if result.external else 0
 
 
 if __name__ == "__main__":

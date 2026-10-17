@@ -20,7 +20,6 @@ OFFICIAL_GPL_V3_SHA256_LF = (
 EXPECTED_SCOPE_KEYS = {"application", "world_packages", "runtime_data", "third_party"}
 EXPECTED_CONDITIONAL_REVIEWS = {
     ("python", "certifi"),
-    ("python", "crc32c"),
     ("python", "orjson"),
     ("node", "caniuse-lite"),
     ("node", "libheif-js"),

@@ -1,5 +1,33 @@
 # Angmoo Backend Architecture
 
+## Local credentials after hosted KMS retirement (2026-10-17 LOCAL)
+
+`core/security.py` retains the existing `local-v2` AES-GCM/HKDF envelope, nonce,
+scope AAD and explicit root-secret API. Existing `dev-v1` read/migration support
+remains; new writes continue to use `local-v2`. Identity owns credential
+resolution, owner/purpose restrictions and migration. No caller may interpret a
+failed encrypted credential as a plaintext key.
+
+Oracle Cloud SDK, remote KMS clients/signers/probes and their settings are
+retired. The `oci-kms-v1:` prefix remains only to reject use and preserve external
+records without loading an SDK or making a network request. General local
+envelope migration leaves those records unchanged and counts them as external;
+its CLI returns exit 78 with `credential_migration_incomplete` if any remain.
+Embedded upgrades still authenticate each credential with the selected root's
+secret and fail atomically before promotion when authentication is unavailable.
+Existing database, media, secret files and markers are preserved on failure.
+
+Official local/contributor/test `RuntimeConfig` composition selects local
+encryption independently of parent process settings. Raw hosted
+`APP_ENV=production` startup is unsupported, and directly selected nonlocal
+providers fail before database seeding or worker startup. Browser session,
+Origin, cookie, desktop launch-token and local-store protections remain.
+Unknown old `OCI_*` variables are ignored by the existing Settings policy; they
+do not restore KMS support. Do not regenerate a local secret to repair a retired
+KMS credential: register the API key again through the existing settings flow.
+
+See [scoped verification and operator guidance](../docs/verification/oci-kms-retirement-20261017.md).
+
 ## Situation embedding delivery groups (2026-10-16 LOCAL)
 
 The situation runtime prepares at most 32 receipts per turn, still committing

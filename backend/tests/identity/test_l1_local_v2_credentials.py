@@ -298,6 +298,36 @@ def test_settings_reads_app_secret_from_file_without_environment_value(
     assert config.app_secret == "synthetic-file-secret"
 
 
+def test_local_migration_preserves_external_rows_and_reports_them_separately(
+    monkeypatch, migration_db: Session, deny_external_network,
+) -> None:
+    monkeypatch.setattr(security.settings, "APP_SECRET_FILE", None)
+    monkeypatch.setattr(security.settings, "APP_SECRET", type(security.settings.APP_SECRET)("synthetic-mixed-root"))
+    owner = models.User(id="mixed-owner", display_name="Owner")
+    external_envelope = "oci-kms-v1:synthetic-key-id:synthetic-ciphertext"
+    migration_db.add(owner)
+    for record_id, envelope in (
+        ("local-record", _legacy("synthetic-local-key")),
+        ("external-record", external_envelope),
+    ):
+        migration_db.add(models.LlmCredential(
+            id=record_id, owner_id=owner.id, character_id=None, provider="google",
+            purpose="message", model="gemini-3.1-flash-lite", auth_profile_id=record_id,
+            label="synthetic", encrypted_api_key=envelope, enabled=True,
+        ))
+    migration_db.commit()
+    result = migrate_local_credential_envelopes(migration_db)
+    assert (result.inspected, result.migrated, result.current, result.external) == (2, 1, 0, 1)
+    migration_db.expire_all()
+    assert migration_db.get(models.LlmCredential, "external-record").encrypted_api_key == external_envelope
+    scope = security.SecretScope(owner_id=owner.id, provider="google", purpose="message")
+    stored = migration_db.get(models.LlmCredential, "local-record").encrypted_api_key
+    assert security.decrypt_secret(stored, scope=scope) == "synthetic-local-key"
+    again = migrate_local_credential_envelopes(migration_db)
+    assert (again.migrated, again.current, again.external) == (0, 1, 1)
+    assert migration_db.get(models.LlmCredential, "external-record").encrypted_api_key == external_envelope
+
+
 def test_settings_rejects_a_missing_app_secret_file(tmp_path) -> None:
     config = Settings(
         APP_SECRET_FILE=str(tmp_path / "missing"),

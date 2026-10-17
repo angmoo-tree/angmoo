@@ -1,0 +1,13 @@
+{
+  "source_sha": "caf75878372c3e4b8070849e4fa66ed536203a81",
+  "app_secret": "synthetic-pre-retirement-root-key",
+  "plaintext": "synthetic-pre-retirement-api-key",
+  "scope": {
+    "character_id": "synthetic-character",
+    "owner_id": "synthetic-owner",
+    "provider": "google",
+    "purpose": "agent"
+  },
+  "local_v2": "local-v2:NaK6KB2yS-3Cr6hR:eyJjaGFyYWN0ZXJfaWQiOiJzeW50aGV0aWMtY2hhcmFjdGVyIiwib3duZXJfaWQiOiJzeW50aGV0aWMtb3duZXIiLCJwcm92aWRlciI6Imdvb2dsZSIsInB1cnBvc2UiOiJhZ2VudCJ9:OQt9FR70lBh-hwcBDv8JE_uJI6Kwkz9YC7M44cch27ged1DtwGzkWvk9dUrxA7P9",
+  "dev_v1": "dev-v1:3sbj5ZLruitUjP-PMcGcuw:Gw6Cet9ogrTt7TQI4jKr0gPkMTYM5W6omcmys8X5CHw:TKtNXFoJ6HTInHL12zi9ABOtgJvRt_lEm1NKSIeEhCE"
+}
