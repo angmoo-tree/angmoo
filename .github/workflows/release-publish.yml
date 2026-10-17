@@ -1,0 +1,129 @@
+name: Release Publish
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "P6 only; verify performs no remote writes"
+        type: choice
+        options: [verify, draft, publish]
+        default: verify
+        required: true
+      source:
+        description: "Exact full candidate source SHA"
+        type: string
+        required: true
+      tag:
+        description: "Existing official release tag"
+        type: string
+        required: true
+      windows_run:
+        description: "Windows full validation run ID"
+        type: string
+        required: true
+      windows_attempt:
+        description: "Windows run attempt"
+        type: string
+        required: true
+      windows_artifact:
+        description: "Windows installer artifact ID"
+        type: string
+        required: true
+      candidate_run:
+        description: "Container Candidate run ID"
+        type: string
+        required: true
+      candidate_attempt:
+        description: "Container Candidate attempt"
+        type: string
+        required: true
+      candidate_artifact:
+        description: "Complete candidate artifact ID"
+        type: string
+        required: true
+      review_ref:
+        description: "Main commit containing reviewed P5 report and KO/EN notes; optional for verify"
+        type: string
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: release-publish-${{ inputs.tag }}
+  cancel-in-progress: false
+env:
+  GH_TOKEN: ${{ github.token }}
+  RELEASE_SOURCE: ${{ inputs.source }}
+  RELEASE_TAG: ${{ inputs.tag }}
+  RELEASE_WINDOWS_RUN: ${{ inputs.windows_run }}
+  RELEASE_WINDOWS_ATTEMPT: ${{ inputs.windows_attempt }}
+  RELEASE_WINDOWS_ARTIFACT: ${{ inputs.windows_artifact }}
+  RELEASE_CANDIDATE_RUN: ${{ inputs.candidate_run }}
+  RELEASE_CANDIDATE_ATTEMPT: ${{ inputs.candidate_attempt }}
+  RELEASE_CANDIDATE_ARTIFACT: ${{ inputs.candidate_artifact }}
+  RELEASE_REVIEW_REF: ${{ inputs.review_ref }}
+  RELEASE_OUTPUT: artifacts/release-publication
+jobs:
+  verify:
+    if: github.repository == 'angmoo-tree/angmoo' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      attestations: read
+    env:
+      RELEASE_OPERATION: verify
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify input source belongs to main history before checkout
+        run: python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ['RELEASE_SOURCE'])"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.source }}
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - name: Verify evidence
+        run: python -m scripts.release.dispatch
+      - name: Preserve safe verify receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-verify-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/release-publication/prepared.json
+            artifacts/release-publication/release-publication.json
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    if: github.repository == 'angmoo-tree/angmoo' && github.ref == 'refs/heads/main' && inputs.operation != 'verify'
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
+      attestations: read
+    env:
+      RELEASE_OPERATION: ${{ inputs.operation }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify input source belongs to main history before checkout
+        run: python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ['RELEASE_SOURCE'])"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.source }}
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - name: Verify evidence and perform requested P6 operation
+        run: python -m scripts.release.dispatch
+      - name: Preserve safe publish receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/release-publication/prepared.json
+            artifacts/release-publication/release-publication.json
+          if-no-files-found: error
+          retention-days: 30

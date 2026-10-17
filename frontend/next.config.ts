@@ -18,11 +18,6 @@ for (const route of hostedFrontendRoutes) {
   }
 }
 
-const backendBaseUrl = (process.env.ANGMOO_API_BASE_URL ?? "http://127.0.0.1:8080").replace(
-  /\/$/,
-  "",
-);
-
 const nextConfig: NextConfig = {
   // Isolate contributor previews/builds from an existing local server.
   distDir: process.env.ANGMOO_NEXT_DIST_DIR ?? ".next",
@@ -66,14 +61,6 @@ const nextConfig: NextConfig = {
         source: "/security.txt",
         destination: "/.well-known/security.txt",
         permanent: true,
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/media/:path*",
-        destination: `${backendBaseUrl}/media/:path*`,
       },
     ];
   },

@@ -311,6 +311,7 @@ async function proxy(request: Request, context: RouteContext) {
 
   return proxyBackend(`/api/v1/${path.map(encodeURIComponent).join("/")}${query}`, {
     method: request.method,
+    signal: request.signal,
     body,
     headers: {
       ...(cookie ? { Cookie: cookie } : {}),

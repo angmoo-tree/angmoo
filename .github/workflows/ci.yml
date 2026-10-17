@@ -387,6 +387,9 @@ jobs:
       - name: Verify character card proxy request limits
         run: pnpm test:character-card-proxy
         working-directory: frontend
+      - name: Verify runtime media transport
+        working-directory: frontend
+        run: pnpm test:media-proxy
       - name: Verify Identity request and session parity
         run: node scripts/test-identity-session.mjs
         working-directory: frontend

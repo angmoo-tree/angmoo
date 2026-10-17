@@ -43,6 +43,7 @@ def validate_image_document(
     image: str,
     expected_revision: str,
     expected_version: str,
+    expected_architecture: str = "amd64",
 ) -> list[str]:
     errors: list[str] = []
     if not isinstance(document, dict):
@@ -86,7 +87,7 @@ def validate_image_document(
         errors.append(f"runtime image healthcheck is missing: {image}")
     if document.get("Os") != "linux":
         errors.append(f"runtime image OS must be linux: {image}")
-    if document.get("Architecture") != "amd64":
+    if expected_architecture not in {"amd64", "arm64"} or document.get("Architecture") != expected_architecture:
         errors.append(f"unverified runtime architecture: {image}")
     return errors
 
@@ -136,6 +137,7 @@ def main() -> int:
     parser.add_argument("--image", action="append", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--version", required=True)
+    parser.add_argument("--architecture", choices=("amd64", "arm64"), default="amd64")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
 
@@ -150,6 +152,7 @@ def main() -> int:
                     image=image,
                     expected_revision=args.revision,
                     expected_version=args.version,
+                    expected_architecture=args.architecture,
                 )
             )
             errors.extend(validate_history(image, _history(image)))

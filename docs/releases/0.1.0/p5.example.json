@@ -1,0 +1,40 @@
+{
+  "schema": "angmoo-p5.v1",
+  "source_sha": "REPLACE_WITH_FULL_PRODUCT_SHA",
+  "windows": {
+    "sha256": "sha256:REPLACE_WITH_TESTED_EXE_HASH",
+    "run_id": "REPLACE",
+    "attempt": "REPLACE"
+  },
+  "images": {
+    "backend/linux/amd64": "sha256:REPLACE",
+    "backend/linux/arm64": "sha256:REPLACE",
+    "frontend/linux/amd64": "sha256:REPLACE",
+    "frontend/linux/arm64": "sha256:REPLACE"
+  },
+  "checks": [
+    {
+      "workflow": "ci.yml",
+      "run_id": "REPLACE",
+      "attempt": "REPLACE"
+    },
+    {
+      "workflow": "local-smoke.yml",
+      "run_id": "REPLACE",
+      "attempt": "REPLACE"
+    },
+    {
+      "workflow": "security.yml",
+      "run_id": "REPLACE",
+      "attempt": "REPLACE"
+    }
+  ],
+  "windows_user_check": {
+    "result": "NOT_RUN",
+    "reviewer": "jingujeon",
+    "exe_sha256": "sha256:REPLACE",
+    "evidence": "REPLACE_WITH_ACTUAL_TEST_RECORD",
+    "checked_at": null
+  },
+  "android_support": "experimental-not-certified"
+}

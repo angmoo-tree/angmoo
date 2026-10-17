@@ -107,4 +107,4 @@ jobs:
 
     errors, _ = checker.check_workflow(workflow)
 
-    assert any("triggered only by push" in error for error in errors)
+    assert any("release-v tags only" in error for error in errors)

@@ -12,6 +12,8 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+from scripts.release import workflow_policy
 WORKFLOW_DIR = Path(".github/workflows")
 EXPECTED_WORKFLOWS = {
     "ci.yml",
@@ -22,6 +24,8 @@ EXPECTED_WORKFLOWS = {
     "windows-installer.yml",
     "windows-smoke.yml",
     "release-images.yml",
+    "container-candidate.yml",
+    "release-publish.yml",
 }
 REQUIRED_JOBS = {
     "backend",
@@ -81,6 +85,8 @@ CORE_TEST_REPORT_NAMES = {
 
 
 def check_report_uploads(document: object, workflow_name: str, text: str) -> list[str]:
+    if workflow_name in workflow_policy.WORKFLOWS and isinstance(document, dict):
+        return workflow_policy.uploads(document, workflow_name)
     if workflow_name == "windows-installer.yml":
         return []  # Its existing private-artifact rejection is checked below.
     jobs = document.get("jobs", {}) if isinstance(document, dict) else {}
@@ -189,8 +195,8 @@ def _check_triggers(document: object, *, release: bool, weekly: bool = False) ->
         if names != {"push"}:
             return ["release workflow must be triggered only by push"]
         push = events.get("push")
-        if not isinstance(push, dict) or push.get("tags") != ["v*.*.*"]:
-            return ["release workflow must be limited to semantic v*.*.* tags"]
+        if not isinstance(push, dict) or push.get("tags") != ["release-v*.*.*"]:
+            return ["release workflow must be limited to semantic release-v*.*.* tags"]
         if "branches" in push:
             return ["release workflow must not publish from a branch push"]
         return []
@@ -344,7 +350,10 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
         document = yaml.load(text, Loader=_UniqueKeyLoader)
     except yaml.YAMLError as exc:
         return [f"workflow YAML is invalid: {exc}"], []
-    errors.extend(_check_triggers(document, release=path.name == "release-images.yml", weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
+    if path.name in workflow_policy.WORKFLOWS and isinstance(document, dict):
+        errors.extend(workflow_policy.validate(document, path.name))
+    else:
+        errors.extend(_check_triggers(document, release=False, weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
     errors.extend(
         f"forbidden workflow feature: {label}"
         for marker, label in FORBIDDEN_TEXT.items()

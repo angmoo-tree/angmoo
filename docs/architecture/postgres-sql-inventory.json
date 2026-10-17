@@ -1562,7 +1562,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/pyproject.toml",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "89ea64bb0cc4ab5f671539cb546e732d14844540866442bad846f6c29b8a50a1",
+      "source_sha256": "46e07064dce7cdb64e3d713ead7c3d01c2d464d04ce4a73e8d061d741431ba99",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1591,7 +1591,7 @@
       "owner": "ER7",
       "path": "compose.yml",
       "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "a4496c22026abf2fdc81983749d27c177d6fcc0fb8eecf9c8e5162e08617dcbb",
+      "source_sha256": "044d4adcdc052f0d10b969cbc3a471d6065946974468413e7f4cbc1279877924",
       "transition_pr": "ER7 PR P"
     },
     {

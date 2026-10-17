@@ -10,11 +10,12 @@ const FORWARDED_SET_COOKIE_NAMES = [
 
 class UpstreamResponseTooLargeError extends Error {}
 
-function getBackendBaseUrl() {
-  return (process.env.ANGMOO_API_BASE_URL ?? DEFAULT_BACKEND_URL).replace(
-    /\/$/,
-    "",
-  );
+export function getBackendBaseUrl() {
+  const url = new URL(process.env.ANGMOO_API_BASE_URL ?? DEFAULT_BACKEND_URL);
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.search || url.hash || url.pathname !== "/") {
+    throw new Error("backend_upstream_invalid");
+  }
+  return url.origin;
 }
 
 export async function proxyBackend(path: string, init?: RequestInit) {

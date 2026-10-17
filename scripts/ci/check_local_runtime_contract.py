@@ -36,20 +36,20 @@ EXPECTED_COMMANDS = {
 }
 EXPECTED_RELEASE_IMAGES = {
     "backend": {
-        "default_tag": "v0.3.0",
+        "default_tag": "release-v0.1.0",
         "repository": "ghcr.io/angmoo-tree/angmoo-backend",
     },
     "frontend": {
-        "default_tag": "v0.3.0",
+        "default_tag": "release-v0.1.0",
         "repository": "ghcr.io/angmoo-tree/angmoo-frontend",
     },
 }
 EXPECTED_SUPPLY_CHAIN = {
-    "platform": "linux/amd64",
+    "platforms": ["linux/amd64", "linux/arm64"],
     "provenance": "github-artifact-attestation",
-    "release_trigger": "v*.*.*",
+    "release_trigger": "release-v*.*.*",
     "sbom_format": "spdx-json",
-    "secret_allowlist": "security/trivy-secret.yaml",
+    "secret_allowlist": None,
     "syft_image": (
         "anchore/syft:v1.51.0@sha256:"
         "678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0"

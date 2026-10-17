@@ -124,7 +124,7 @@ $cleanupError = $null
 
 try {
     $env:ANGMOO_PORT = '3000'
-    $env:ANGMOO_VERSION = "0.4.0-dev-$shortCommit"
+    $env:ANGMOO_VERSION = "0.1.0-dev-$shortCommit"
     $env:ANGMOO_VCS_REF = $commit
     Assert-NoHostSidecar
 

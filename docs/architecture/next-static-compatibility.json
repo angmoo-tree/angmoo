@@ -4,7 +4,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "headers",
-      "line": 33,
+      "line": 28,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -13,16 +13,7 @@
     {
       "compatibility": "requires-static-or-sidecar-adapter",
       "hook": "redirects",
-      "line": 63,
-      "owner": "ER5",
-      "path": "frontend/next.config.ts",
-      "removal_condition": "static export and Tauri API/media routing parity PASS",
-      "transition_pr": "ER5 PR K"
-    },
-    {
-      "compatibility": "requires-static-or-sidecar-adapter",
-      "hook": "rewrites",
-      "line": 72,
+      "line": 58,
       "owner": "ER5",
       "path": "frontend/next.config.ts",
       "removal_condition": "static export and Tauri API/media routing parity PASS",
@@ -31,7 +22,7 @@
   ],
   "current_output_mode": "standalone",
   "purpose": "L3-ER0 Next.js static-export compatibility inventory",
-  "route_count": 45,
+  "route_count": 47,
   "routes": [
     {
       "blockers": [],
@@ -90,7 +81,7 @@
       "path": "frontend/src/app/api/backend/[...path]/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/api/backend/[...path]",
-      "source_sha256": "962d42340aba095c2a877652fff4ce72f7efc828873d1b0dec1973a3c9efa4c2",
+      "source_sha256": "b82f9ff37e031c2b23f22db4cad76289cceb567db5218048f145a0d077729161",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -131,6 +122,16 @@
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/api/community/posts",
       "source_sha256": "3bb8db1fe84df77d46baaaab1ce5586fd579e0c95dd9a9f82cc45982ef4036e6",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/api/runtime-identity/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/api/runtime-identity",
+      "source_sha256": "e9b94d635b74af09eebc4f1c0e6b0162db5de646ee1fb5d703f716bd5a154139",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -181,6 +182,16 @@
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/login",
       "source_sha256": "6580c791818549e53e038291ed188d3f5c5c093e09c84df84a920ea08d37bafb",
+      "transition_pr": "ER5 PR K"
+    },
+    {
+      "blockers": [],
+      "kind": "route-handler",
+      "owner": "ER5",
+      "path": "frontend/src/app/media/[...path]/route.ts",
+      "removal_condition": "same frontend source passes browser dev and Tauri static release",
+      "route": "/media/[...path]",
+      "source_sha256": "d882a9f3063cb6b06de03127ed7a0ec7a0fca66715ee225827c114e50164ce87",
       "transition_pr": "ER5 PR K"
     },
     {
