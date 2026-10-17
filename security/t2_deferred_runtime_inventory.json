@@ -134,6 +134,24 @@
     },
     {
       "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "docs/public/architecture.md"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "docs/verification/oci-kms-retirement-20261017.md"
+    },
+    {
+      "markers": [
         "private-admin-flag"
       ],
       "owner_phases": [

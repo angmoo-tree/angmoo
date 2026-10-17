@@ -1,5 +1,23 @@
 # OCI SDK·이전 hosted KMS 제거와 로컬 암호화 보존 검증
 
+## PR integration follow-up (2026-10-17)
+
+PR #384 publishes the two local commits documented below. A fresh scoped run
+passed 128 tests with the same one hosted-extension skip. DCO, architecture,
+runtime, license/notice, frozen lock and tracked-tree secret checks passed.
+
+The first hosted attempt exposed two stale current inventories before backend
+test execution: deferred runtime strings and L4 architecture totals. Checking
+the next preflight step locally also found the changed `config.py` hash in the
+current hybrid/episode successor inventory. The existing generators refresh
+only these current records. Frozen predecessor bytes, behavior counters,
+security policy, required checks and product code are unchanged. Final hosted
+PR/main results remain tracked separately in the integration execution record.
+The existing L4 source/parity and hybrid predecessor regressions passed all
+13 cases after regeneration; no test or policy was weakened.
+
+## Original local implementation verification
+
 - 실행일: 2026-10-17 / Asia/Seoul
 - 범위: 관련 구현·로컬 검증·로컬 커밋. Publish, PR, Actions CI, main 병합 및 배포는 제외.
 - 브랜치: `refactor/remove-legacy-oci-kms`
