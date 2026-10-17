@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (85)
+## Python packages (77)
 
 - `aiosqlite 0.22.1` — OSI Approved :: MIT License
 - `alembic 1.19.0` — MIT
@@ -14,10 +14,8 @@ Package authors retain all rights granted by their respective licenses.
 - `certifi 2026.4.22` — MPL-2.0
 - `cffi 2.0.0` — MIT
 - `charset-normalizer 3.4.7` — MIT
-- `circuitbreaker 2.1.3` — BSD-3-Clause
 - `click 8.3.3` — BSD-3-Clause
 - `colorama 0.4.6` — OSI Approved :: BSD License
-- `crc32c 2.8` — LGPL-2.1-or-later
 - `cryptography 50.0.0` — Apache-2.0 OR BSD-3-Clause
 - `distro 1.9.0` — Apache License, Version 2.0
 - `fastapi 0.141.1` — MIT
@@ -46,7 +44,6 @@ Package authors retain all rights granted by their respective licenses.
 - `lxml 6.1.1` — BSD-3-Clause
 - `mako 1.4.2` — MIT
 - `markupsafe 3.0.3` — BSD-3-Clause
-- `oci 2.184.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
@@ -60,22 +57,17 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-core 2.46.4` — MIT
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
-- `pyjwt 2.15.0` — MIT
-- `pyopenssl 26.4.0` — Apache License, Version 2.0
 - `pypdf 6.19.0` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
-- `python-dateutil 2.9.0.post0` — Dual License
 - `python-docx 1.2.0` — MIT
 - `python-dotenv 1.2.2` — BSD-3-Clause
 - `python-multipart 0.0.32` — Apache-2.0
-- `pytz 2026.2` — MIT
 - `pyyaml 6.0.3` — MIT
 - `referencing 0.37.0` — MIT
 - `requests 2.34.2` — Apache-2.0
 - `requests-toolbelt 1.0.0` — Apache 2.0
 - `rpds-py 2026.6.3` — MIT
 - `sentencepiece 0.2.2` — Apache-2.0
-- `six 1.17.0` — MIT
 - `sniffio 1.3.1` — MIT OR Apache-2.0
 - `sqlalchemy 2.0.51` — MIT
 - `sqlite-vec 0.1.9` — MIT License, Apache License, Version 2.0
@@ -193,16 +185,6 @@ Package authors retain all rights granted by their respective licenses.
 - Recorded obligations:
   - Preserve certifi copyright and MPL-2.0 notice with redistributed package files.
   - Publish modifications to certifi-covered files under MPL-2.0 if such files are changed.
-
-### `python/crc32c 2.8`
-
-- Reported license: `LGPL-2.1-or-later`
-- Normalized license: `LGPL-2.1-or-later`
-- Distribution boundary: Separately imported Python library.
-- Upstream license source: <https://github.com/ICRAR/crc32c>
-- Recorded obligations:
-  - Preserve the LGPL notice and license when redistributing the library.
-  - Keep replacement and relinking rights available for redistributed library binaries.
 
 ### `python/orjson 3.11.9`
 

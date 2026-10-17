@@ -112,3 +112,21 @@ def test_wrong_owned_secret_aborts_without_promoting_or_modifying_original_data(
     assert controller.current()["data_version"] == 29
     assert not list(controller.generations.glob(".*.tmp-*"))
     assert settings.model_dump() == original_settings
+
+
+def test_retired_kms_credential_aborts_upgrade_and_preserves_original_data(
+    tmp_path, monkeypatch, deny_external_network,
+):
+    database, secret, media, controller = _seed_root(tmp_path / "data", monkeypatch, "owned-root-secret")
+    with sqlite3.connect(database) as connection:
+        cursor = connection.execute(
+            "UPDATE llm_credentials SET encrypted_api_key=? WHERE id='own-legacy-sns'",
+            ("oci-kms-v1:synthetic-key-id:synthetic-ciphertext",),
+        )
+        assert cursor.rowcount == 1
+    original = [_digest(p) for p in (database, secret, media, controller.current_marker)]
+    with pytest.raises(SqliteCanonicalUpgradeError, match="world_activity_secret_authentication_failed"):
+        _prepare_contributor_data_root(secret.parents[1])
+    assert [_digest(p) for p in (database, secret, media, controller.current_marker)] == original
+    assert controller.current()["data_version"] == 29
+    assert not list(controller.generations.glob(".*.tmp-*"))

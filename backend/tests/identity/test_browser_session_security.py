@@ -316,17 +316,13 @@ def test_production_browser_origin_configuration_fails_closed() -> None:
     config = Settings(
         _env_file=None,
         APP_ENV="production",
-        CREDENTIAL_ENCRYPTION_PROVIDER="oci_kms",
-        OCI_KMS_KEY_ID="ocid1.key.synthetic",
-        OCI_KMS_CRYPTO_ENDPOINT="https://synthetic.crypto.example.test",
-        OCI_REGION="ap-chuncheon-1",
-        OCI_AUTH_MODE="instance_principal",
+        CREDENTIAL_ENCRYPTION_PROVIDER="local",
         BROWSER_SESSION_ALLOWED_ORIGINS="http://angmoo.com",
         **{"APP" + "_SECRET": "synthetic-production-secret"},
     )
 
     with pytest.raises(StartupSecurityError, match="invalid_browser_session_origin"):
-        validate_startup_security(config, kms_round_trip=lambda value: value)
+        validate_startup_security(config)
 
 
 def test_production_cookie_is_secure() -> None:

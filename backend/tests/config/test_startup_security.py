@@ -17,10 +17,6 @@ def _production_settings(**overrides: object) -> Settings:
         "APP_SECRET": SecretStr("synthetic-production-secret-for-tests"),
         "BROWSER_SESSION_ALLOWED_ORIGINS": "https://angmoo.com",
         "CREDENTIAL_ENCRYPTION_PROVIDER": "oci_kms",
-        "OCI_KMS_KEY_ID": "synthetic-key-id",
-        "OCI_KMS_CRYPTO_ENDPOINT": "https://synthetic.crypto.us-test-1.oraclecloud.com",
-        "OCI_REGION": "us-test-1",
-        "OCI_AUTH_MODE": "instance_principal",
     }
     values.update(overrides)
     return Settings(_env_file=None, **values)
@@ -42,51 +38,17 @@ def _local_settings(**overrides: object) -> Settings:
     return Settings(_env_file=None, **values)
 
 
-@pytest.mark.parametrize(
-    ("overrides", "expected_code"),
-    [
-        ({"APP_SECRET": SecretStr(DEFAULT_APP_SECRET)}, "unsafe_app_secret"),
-        ({"CREDENTIAL_ENCRYPTION_PROVIDER": "local"}, "unsafe_credential_provider"),
-        ({"CREDENTIAL_ENCRYPTION_PROVIDER": "dev"}, "unsafe_credential_provider"),
-        ({"CREDENTIAL_ENCRYPTION_PROVIDER": "dev-v1"}, "unsafe_credential_provider"),
-        ({"OCI_KMS_KEY_ID": None}, "missing_kms_config"),
-        ({"OCI_KMS_CRYPTO_ENDPOINT": None}, "missing_kms_config"),
-        ({"OCI_REGION": None}, "missing_kms_config"),
-        (
-            {"OCI_KMS_CRYPTO_ENDPOINT": "http://synthetic.invalid"},
-            "invalid_kms_endpoint",
-        ),
-        (
-            {"OCI_KMS_CRYPTO_ENDPOINT": "https://user:pass@synthetic.invalid"},
-            "invalid_kms_endpoint",
-        ),
-        ({"OCI_AUTH_MODE": "config_file"}, "invalid_oci_auth_mode"),
-    ],
-)
-def test_production_startup_rejects_unsafe_security_configuration(
-    overrides: dict[str, object], expected_code: str
+@pytest.mark.parametrize("provider", ["oci_kms", "oci-kms", "local", "dev"])
+def test_retired_hosted_startup_is_not_reenabled_by_removing_kms(
+    provider: str, deny_external_network,
 ) -> None:
     with pytest.raises(StartupSecurityError) as exc_info:
         validate_startup_security(
-            _production_settings(**overrides),
-            kms_round_trip=lambda plaintext: plaintext,
+            _production_settings(CREDENTIAL_ENCRYPTION_PROVIDER=provider),
         )
 
-    assert exc_info.value.code == expected_code
-    assert str(exc_info.value) == expected_code
-
-
-def test_production_startup_accepts_matching_fake_kms_round_trip() -> None:
-    observed: list[str] = []
-
-    def round_trip(plaintext: str) -> str:
-        observed.append(plaintext)
-        return plaintext
-
-    validate_startup_security(_production_settings(), kms_round_trip=round_trip)
-
-    assert len(observed) == 1
-    assert len(observed[0]) >= 32
+    assert exc_info.value.code == "unsupported_runtime_profile"
+    assert str(exc_info.value) == "unsupported_runtime_profile"
 
 
 def test_local_desktop_startup_accepts_embedded_security_contract() -> None:
@@ -114,41 +76,27 @@ def test_local_desktop_startup_rejects_drifted_security_configuration(
     assert exc_info.value.code == expected_code
 
 
-@pytest.mark.parametrize("failure_mode", ["exception", "mismatch"])
-def test_kms_preflight_fails_closed_without_exposing_probe_material(
-    failure_mode: str,
+@pytest.mark.parametrize("app_env", ["development", "test"])
+@pytest.mark.parametrize("provider", ["local", "dev", "local-v2"])
+def test_supported_startup_keeps_local_aliases_without_external_calls(
+    app_env: str, provider: str, deny_external_network,
 ) -> None:
-    captured: list[str] = []
-
-    def round_trip(plaintext: str) -> str:
-        captured.append(plaintext)
-        if failure_mode == "exception":
-            raise RuntimeError(f"provider failed with {plaintext}")
-        return "different-plaintext"
-
-    with pytest.raises(StartupSecurityError) as exc_info:
-        validate_startup_security(_production_settings(), kms_round_trip=round_trip)
-
-    assert exc_info.value.code == "kms_preflight_failed"
-    assert captured[0] not in str(exc_info.value)
-    assert "synthetic-key-id" not in str(exc_info.value)
+    validate_startup_security(
+        Settings(_env_file=None, APP_ENV=app_env, CREDENTIAL_ENCRYPTION_PROVIDER=provider),
+    )
 
 
 @pytest.mark.parametrize("app_env", ["development", "test"])
-def test_nonproduction_startup_does_not_probe_kms(app_env: str) -> None:
-    called = False
-
-    def probe(_: str) -> str:
-        nonlocal called
-        called = True
-        raise AssertionError("KMS probe must not run outside production")
-
-    validate_startup_security(
-        Settings(_env_file=None, APP_ENV=app_env),
-        kms_round_trip=probe,
-    )
-
-    assert called is False
+@pytest.mark.parametrize("provider", ["oci_kms", "oci-kms", "dev-v1", "synthetic-unsupported-value"])
+def test_direct_startup_rejects_unsupported_provider_without_leaking_value(
+    app_env: str, provider: str, deny_external_network,
+) -> None:
+    with pytest.raises(StartupSecurityError) as exc_info:
+        validate_startup_security(
+            Settings(_env_file=None, APP_ENV=app_env, CREDENTIAL_ENCRYPTION_PROVIDER=provider),
+        )
+    assert exc_info.value.code == "unsafe_credential_provider"
+    assert str(exc_info.value) == "unsafe_credential_provider"
 
 
 def test_lifespan_security_failure_happens_before_database_seed_or_workers() -> None:
@@ -157,7 +105,7 @@ def test_lifespan_security_failure_happens_before_database_seed_or_workers() -> 
 
     def fail_validation() -> None:
         calls.append("security")
-        raise StartupSecurityError("kms_preflight_failed")
+        validate_startup_security(_production_settings())
 
     def fail_database_session():
         calls.append("database")
@@ -173,7 +121,7 @@ def test_lifespan_security_failure_happens_before_database_seed_or_workers() -> 
         async with lifespan(main_module.app):
             raise AssertionError("lifespan must not yield")
 
-    with pytest.raises(StartupSecurityError, match="kms_preflight_failed"):
+    with pytest.raises(StartupSecurityError, match="unsupported_runtime_profile"):
         asyncio.run(run())
 
     assert calls == ["security"]

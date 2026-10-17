@@ -54,7 +54,6 @@
         "langgraph-checkpoint-sqlite>=3.0,<4",
         "langgraph-prebuilt>=1.0.4",
         "langgraph>=1.0.4",
-        "oci>=2.175.0",
         "pillow>=12.0.0",
         "pydantic-settings>=2.12.0",
         "pypdf>=6.19.0",

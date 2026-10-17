@@ -214,35 +214,28 @@ def test_service_image_key_helper_accepts_raw_key(monkeypatch) -> None:
 
 def test_service_image_key_helper_decrypts_envelope(monkeypatch) -> None:
     service_image_key._SERVICE_KEY_CACHE.clear()
+    monkeypatch.setattr(settings, "APP_SECRET_FILE", None)
+    monkeypatch.setattr(settings, "APP_SECRET", SecretStr("synthetic-service-image-root"))
     monkeypatch.setattr(settings, "POLLINATIONS_SERVICE_IMAGE_ENABLED", True)
     monkeypatch.setattr(
         settings,
         "POLLINATIONS_SERVICE_IMAGE_API_KEY",
-        SecretStr("oci-kms-v1:encrypted"),
-    )
-    monkeypatch.setattr(
-        service_image_key.security,
-        "decrypt_secret",
-        lambda value, **_kwargs: "decrypted-service-key",
+        SecretStr(security.encrypt_local_secret("decrypted-service-key", scope=security.SecretScope())),
     )
 
     assert service_image_key.get_service_image_api_key() == "decrypted-service-key"
     assert service_image_key.is_service_image_available()
 
 
-def test_service_image_key_helper_hides_invalid_envelope(monkeypatch) -> None:
+@pytest.mark.parametrize("envelope", ["oci-kms-v1:invalid", "oci-kms-v1:synthetic-key:synthetic-cipher", "local-v2:invalid"])
+def test_service_image_key_helper_hides_invalid_envelope(monkeypatch, envelope, deny_external_network) -> None:
     service_image_key._SERVICE_KEY_CACHE.clear()
     monkeypatch.setattr(settings, "POLLINATIONS_SERVICE_IMAGE_ENABLED", True)
     monkeypatch.setattr(
         settings,
         "POLLINATIONS_SERVICE_IMAGE_API_KEY",
-        SecretStr("oci-kms-v1:invalid"),
+        SecretStr(envelope),
     )
-
-    def fail_decrypt(_value: str, **_kwargs: object) -> str:
-        raise ValueError("bad envelope")
-
-    monkeypatch.setattr(service_image_key.security, "decrypt_secret", fail_decrypt)
 
     assert service_image_key.get_service_image_api_key() is None
     assert not service_image_key.is_service_image_available()

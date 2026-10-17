@@ -85,10 +85,18 @@ The shared Gemini adapter lives in `app/providers/gemini.py`; other transport
 adapters live in `app/integrations`. Domain `client` files supply the relevant
 business request context and interpret their supported results.
 
-`app/credentials/resolver.py` is the application boundary allowed to decrypt a
-stored credential envelope. Raw credential material is revealed only at the
+`app/domains/identity/service/credential_resolution.py` owns credential
+resolution; `app/credentials/resolver.py` remains its shared compatibility
+export. Raw credential material is revealed only at the
 provider request boundary. Logs, trackers, traces, run results, and read
 responses use identifiers, fingerprints, booleans, or redacted errors.
+
+Supported profiles use local authenticated encryption. Existing `local-v2` keys
+and `dev-v1` read/migration remain supported with the original root secret.
+The former angmoo.com Oracle KMS provider and SDK are retired: `oci-kms-v1:`
+records are preserved but cannot be used as keys, and raw hosted production
+startup is rejected. Existing browser and desktop security checks still apply.
+See [credential retirement and recovery boundaries](../verification/oci-kms-retirement-20261017.md).
 
 ## Preserved contracts
 

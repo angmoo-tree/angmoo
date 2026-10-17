@@ -1556,13 +1556,13 @@
     {
       "markers": {
         "pgvector": [
-          38
+          37
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/pyproject.toml",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "67985c4b543a9f9e7e361fa2f2ad503230e166d2cdb675f493dba8492e5314af",
+      "source_sha256": "89ea64bb0cc4ab5f671539cb546e732d14844540866442bad846f6c29b8a50a1",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1579,7 +1579,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/scripts/migrate_local_credentials.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "196c251487b70ac5cd28a3b86f21c7dfd80e60d27f4097575f45a63be59922b9",
+      "source_sha256": "44635b296bddea03e61a3f88525b5bec0e1e0f4a9d430ef5108b0440828f33bf",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

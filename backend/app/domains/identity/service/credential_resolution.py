@@ -178,7 +178,7 @@ class CredentialResolver:
             return None
         if raw_value.startswith(
             (
-                f"{security.OCI_KMS_SECRET_PREFIX}:",
+                f"{security.RETIRED_KMS_SECRET_PREFIX}:",
                 f"{security.LOCAL_SECRET_PREFIX}:",
                 f"{security.LEGACY_LOCAL_SECRET_PREFIX}:",
             )

@@ -159,10 +159,6 @@ class Settings(BaseSettings):
     GRAPH_PROJECTOR_COMMAND_TIMEOUT_SECONDS: float = 5.0
     GRAPH_PROJECTOR_SHUTDOWN_DRAIN_SECONDS: float = 20.0
     GRAPH_PROJECTOR_READY_PATH: str = "/tmp/angmoo-worker-ready"
-    OCI_KMS_KEY_ID: str | None = None
-    OCI_KMS_CRYPTO_ENDPOINT: str | None = None
-    OCI_REGION: str | None = None
-    OCI_AUTH_MODE: str = "instance_principal"
 
     @field_validator("OPENCLAW_GATEWAY_URL", mode="before")
     @classmethod
@@ -737,25 +733,6 @@ class Settings(BaseSettings):
     @property
     def graph_projector_shutdown_drain_seconds(self) -> float:
         return max(0.1, min(self.GRAPH_PROJECTOR_SHUTDOWN_DRAIN_SECONDS, 30.0))
-
-    @property
-    def oci_kms_key_id(self) -> str | None:
-        value = self.OCI_KMS_KEY_ID
-        return value.strip() if value else None
-
-    @property
-    def oci_kms_crypto_endpoint(self) -> str | None:
-        value = self.OCI_KMS_CRYPTO_ENDPOINT
-        return value.strip() if value else None
-
-    @property
-    def oci_region(self) -> str | None:
-        value = self.OCI_REGION
-        return value.strip() if value else None
-
-    @property
-    def oci_auth_mode(self) -> str:
-        return self.OCI_AUTH_MODE.strip().lower() or "instance_principal"
 
 
 settings = Settings()
