@@ -1,15 +1,18 @@
 """Run selected existing feature contracts against an unmodified candidate.
 
-Only pure Python test tooling from the shared lock is mounted alongside tests.
+Only pure Python test tooling from the shared lock is staged alongside tests.
 The image's app and production dependencies are never replaced.
 """
 import hashlib
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
+import tempfile
 import tomllib
 import urllib.request
+import uuid
 import zipfile
 
 from launcher.termux.payload import require
@@ -46,16 +49,31 @@ def test_tools(output):
 
 def run(image, platform, output):
     tooling = test_tools(output)
-    args = ["docker", "run", "--rm", "--network", "none", "--platform", platform,
-            "--mount", f"type=bind,source={ROOT / 'backend/tests'},target=/validation/tests,readonly",
-            "--mount", f"type=bind,source={tooling.resolve()},target=/test-tools,readonly",
-            "--env", "PYTHONPATH=/app:/validation/tests:/test-tools",
+    name = "angmoo-feature-" + uuid.uuid4().hex[:12]
+    args = ["docker", "create", "--name", name, "--network", "none", "--platform", platform,
+            "--no-healthcheck",
+            "--env", "PYTHONPATH=/app:/validation/tests:/validation/test-tools",
             "--env", "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1",
             "--env", "ANGMOO_DENY_EXTERNAL_NETWORK=1",
             "--env", "ANGMOO_TEST_VEC1_EXTENSION=/app/app/runtime/resources/vec1/vec1.so",
             "--entrypoint", "python", image, "-m", "pytest", "-q", "-p", "no:cacheprovider",
             *("/validation/tests/" + test for test in TESTS)]
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8")
+    # Host bind mounts and foreign .pyc files add cross-VM import overhead to
+    # spawned workers. Stage only test inputs on the container's filesystem;
+    # leave /app and its installed production dependencies untouched. This
+    # command runs pytest, so the API-server healthcheck has no server to probe.
+    with tempfile.TemporaryDirectory(prefix="angmoo-feature-") as directory:
+        stage = Path(directory)
+        ignore = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
+        shutil.copytree(ROOT / "backend/tests", stage / "tests", ignore=ignore)
+        shutil.copytree(tooling, stage / "test-tools", ignore=ignore)
+        subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
+        try:
+            subprocess.run(["docker", "cp", str(stage), name + ":/validation"], check=True)
+            result = subprocess.run(["docker", "start", "-a", name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8")
+            status = subprocess.check_output(["docker", "inspect", "--format", "{{.State.ExitCode}}", name], text=True).strip()
+        finally:
+            subprocess.run(["docker", "rm", "-f", name], check=True, stdout=subprocess.DEVNULL)
     (output / "features.txt").write_text(result.stdout, encoding="utf-8")
-    require(result.returncode == 0 and " skipped" not in result.stdout, "candidate_feature_smoke_failed: " + result.stdout[-4000:])
+    require(result.returncode == 0 and status == "0" and " skipped" not in result.stdout, "candidate_feature_smoke_failed: " + result.stdout[-4000:])
     (output / "features.json").write_text(json.dumps({"status": "PASS", "platform": platform, "tests": TESTS, "external_network": "disabled", "summary": result.stdout.strip().splitlines()[-1]}) + "\n")

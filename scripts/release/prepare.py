@@ -17,6 +17,20 @@ from scripts.release.windows_receipt import tested_installer
 WINDOWS_FILES = ("SHA256SUMS", "angmoo-installer.spdx.json", "angmoo-installer.provenance.json", "THIRD_PARTY_NOTICES.md", "LICENSE")
 
 
+def package_termux_tools(target: Path, root: Path = ROOT) -> None:
+    """Stable bytes across reruns/checkouts, so draft recovery can compare hashes."""
+    tools = ("angmoo.py", "payload.py", "processes.py", "requirements.txt", "setup.sh")
+    files = [(name, root / "launcher/termux" / name) for name in tools]
+    files.append(("LICENSE", root / "LICENSE"))
+    with zipfile.ZipFile(target, "w") as archive:
+        for name, path in files:
+            entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            entry.create_system = 3
+            entry.external_attr = (0o100755 if name == "setup.sh" else 0o100644) << 16
+            entry.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(entry, path.read_bytes(), compresslevel=9)
+
+
 def unique(root: Path, name: str) -> Path:
     files = list(root.rglob(name))
     require(len(files) == 1 and not files[0].is_symlink(), "release_file_missing_or_ambiguous: " + name)
@@ -92,11 +106,7 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
         shutil.copyfile(unique(windows_dir, name), stage / name)
     shutil.copyfile(bundle_files[0], stage / "windows-installer.attestation.jsonl")
     # Package only the reviewed adapter, not arbitrary artifact scripts or data.
-    tools = ("angmoo.py", "payload.py", "processes.py", "requirements.txt", "setup.sh")
-    with zipfile.ZipFile(stage / "angmoo-termux-tools.zip", "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for name in tools:
-            archive.write(ROOT / "launcher/termux" / name, name)
-        archive.write(ROOT / "LICENSE", "LICENSE")
+    package_termux_tools(stage / "angmoo-termux-tools.zip")
     for locale in ("en", "ko"):
         shutil.copyfile(ROOT / f"docs/public/termux.{locale}.md", stage / f"termux.{locale}.md")
     publication = {"candidate_validation": "PASS", "p5": "NOT_RUN", "tag": "NOT_READY", "images": "NOT_READY"}

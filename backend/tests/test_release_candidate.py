@@ -22,6 +22,29 @@ from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors,
 SOURCE = "a" * 40
 
 
+def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_path):
+    import os
+    import zipfile
+    from scripts.release.prepare import package_termux_tools
+    root = tmp_path / "source"
+    tools = root / "launcher/termux"
+    tools.mkdir(parents=True)
+    names = ("angmoo.py", "payload.py", "processes.py", "requirements.txt", "setup.sh")
+    for name in names:
+        (tools / name).write_bytes(("synthetic " + name).encode())
+    (root / "LICENSE").write_text("synthetic license")
+    first, second = tmp_path / "first.zip", tmp_path / "second.zip"
+    package_termux_tools(first, root)
+    for path in root.rglob("*"):
+        if path.is_file():
+            os.utime(path, (1_600_000_000, 1_600_000_000))
+    package_termux_tools(second, root)
+    assert first.read_bytes() == second.read_bytes()
+    with zipfile.ZipFile(first) as archive:
+        assert set(archive.namelist()) == {*names, "LICENSE"}
+        assert archive.read("setup.sh") == b"synthetic setup.sh"
+
+
 def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target=None, nested=False):
     blobs = {}
     def blob(value):
@@ -233,3 +256,86 @@ def test_candidate_workflow_cannot_gain_write_permissions_or_drop_arm64():
     assert validate_workflow(document, "container-candidate.yml") == []
     document["jobs"]["build-validate"]["permissions"] = {"packages": "write"}
     assert validate_workflow(document, "container-candidate.yml")
+
+
+def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tmp_path, monkeypatch):
+    import shutil
+    import subprocess
+    import scripts.release.prepare as preparation
+    from scripts.release.windows_receipt import tested_installer
+
+    directories = {kind: tmp_path / kind for kind in ("candidate", "windows", "validation", "signed")}
+    for directory in directories.values():
+        directory.mkdir()
+    candidate = directories["candidate"]
+    images = []
+    for service in ("backend", "frontend"):
+        for architecture in ("amd64", "arm64"):
+            item = inspect_oci(oci(candidate, service=service, architecture=architecture),
+                service=service, platform="linux/" + architecture, source=SOURCE, version="0.1.0")
+            item["validation"] = dict(runtime="PASS", native="PASS", security="PASS")
+            for field in ("sbom", "security_report"):
+                report = candidate / f"{service}-{architecture}-{field}.json"
+                report.write_text('{"status":"PASS"}')
+                item[field] = {"name": report.name, "sha256": digest_file(report)}
+            images.append(item)
+    (candidate / "candidate.json").write_text(json.dumps({"schema": "angmoo-release-candidate.v1",
+        "repository": "angmoo-tree/angmoo", "source_sha": SOURCE, "source_tree": "b" * 40,
+        "clean": True, "version": "0.1.0", "tag": "release-v0.1.0", "images": images}))
+    windows = directories["windows"]
+    installer = windows / "Angmoo_0.1.0_x64-setup.exe"
+    installer.write_bytes(b"synthetic installer, never executable")
+    (windows / "SHA256SUMS").write_text(f"{digest_file(installer)[7:]}  {installer.name}\n")
+    exe = tested_installer(windows)
+    for name in ("LICENSE", "THIRD_PARTY_NOTICES.md", "private.sqlite"):
+        (windows / name).write_text("synthetic artifact extra")
+    provenance = {"predicate": {"buildDefinition": {"externalParameters": {"version": "0.1.0", "commit": SOURCE},
+        "internalParameters": {"sourceWorktreeDirty": False}}},
+        "subject": [{"name": exe["name"], "digest": {"sha256": exe["sha256"][7:]}}]}
+    (windows / "angmoo-installer.provenance.json").write_text(json.dumps(provenance))
+    (windows / "angmoo-installer.spdx.json").write_text(json.dumps({"files": [
+        {"fileName": exe["name"], "checksums": [{"algorithm": "SHA256", "checksumValue": exe["sha256"][7:]}]}]}))
+    (directories["validation"] / "windows-release-validation.json").write_text(json.dumps({
+        "schema": "angmoo-windows-release-validation.v1", "status": "PASS", "profile": "full",
+        "exe": exe, "source_sha": SOURCE, "run_id": "10", "attempt": "2", "artifact_id": "20"}))
+    (directories["signed"] / "bundle.jsonl").write_text("synthetic signed bundle fixture")
+
+    class Evidence:
+        def main_source(self, source):
+            assert source == SOURCE
+        def run(self, run_id, attempt, **kwargs):
+            assert kwargs["source"] == SOURCE
+            return {"id": run_id}
+        def artifact(self, artifact_id, run, **kwargs):
+            return {"kind": "windows" if artifact_id == "20" else "candidate"}
+        def named_artifact(self, run, name):
+            return {"kind": "validation" if name.startswith("windows-release-validation-") else "signed"}
+        def download(self, artifact, destination):
+            shutil.copytree(directories[artifact["kind"]], destination)
+            return destination
+        def read(self, path):
+            assert path == "commits/release-v0.1.0"
+            return {"sha": SOURCE}
+
+    attestation_calls = []
+    def attest(command, **kwargs):
+        assert command[:3] == ["gh", "attestation", "verify"] and kwargs == {"check": True}
+        attestation_calls.append(command)
+        return subprocess.CompletedProcess(command, 0)
+    monkeypatch.setattr(preparation.subprocess, "run", attest)
+    monkeypatch.setattr(preparation, "registry_document", lambda _: None)
+    arguments = dict(source=SOURCE, tag="release-v0.1.0", windows_run="10", windows_attempt="2",
+        windows_artifact="20", candidate_run="11", candidate_attempt="1", candidate_artifact="21",
+        review_ref=None, github=Evidence())
+    output = tmp_path / "prepared"
+    expected = preparation.prepare(**arguments, output=output)
+    assert len(attestation_calls) == 1 and "--source-digest" in attestation_calls[0]
+    assert expected["publication_ready"] is False  # P5 and published images are absent.
+    assert "private.sqlite" not in {item["name"] for item in expected["assets"]}
+    api = Release()
+    assert synchronize(expected, output / "assets", "verify", api, lambda: pytest.fail("no write"))["remote_writes"] == 0
+    assert api.calls == []
+    provenance["predicate"]["buildDefinition"]["externalParameters"]["commit"] = "c" * 40
+    (windows / "angmoo-installer.provenance.json").write_text(json.dumps(provenance))
+    with pytest.raises(ValueError, match="windows_provenance_mismatch"):
+        preparation.prepare(**arguments, output=tmp_path / "rejected")
