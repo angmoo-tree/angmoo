@@ -1,4 +1,4 @@
-"""Start, inspect and export a bounded local SNS V2 observation session.
+"""Start, inspect and export a bounded local SNS V2 or memory observation session.
 
 Run this against the same resolved data root as the embedded backend. The
 command never starts autonomous activity or calls an AI provider. New sessions
@@ -32,9 +32,13 @@ def main(argv: list[str] | None = None) -> int:
     worlds = commands.add_parser("worlds", help="List local World IDs for a session")
     worlds.add_argument("--database", type=Path)
     start = commands.add_parser("start", help="Start one observation window")
+    start.add_argument("--mode", choices=("sns", "memory"), default="sns",
+                       help="관찰 대상: SNS / 수동 기억 처리. 설정·활동을 변경하지 않음 / "
+                       "Observe SNS or manual memory work without changing settings or starting work")
     start.add_argument("--world", required=True, help="World ID")
     start.add_argument("--actor", action="append", default=None,
-                       help="Autonomous WorldCharacter ID; repeat or omit for all active autonomous characters")
+                       help="WorldCharacter ID. 기억 모드에서는 필수 / Required in memory mode; "
+                       "SNS defaults to all enabled autonomous characters")
     start.add_argument("--minutes", type=int, default=120)
     start.add_argument("--tail-minutes", type=int, default=10)
     start.add_argument("--database", type=Path,
@@ -59,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "start":
             result = start_session(root, world_id=args.world, actor_ids=args.actor,
                 minutes=args.minutes, tail_minutes=args.tail_minutes,
-                explicit_db=args.database, source_revision=args.source_revision)
+                explicit_db=args.database, source_revision=args.source_revision, mode=args.mode)
         else:
             chosen = args.session
             if not chosen:

@@ -50,7 +50,7 @@ def safe_event(value):
 
 
 class MemoryPipelineObserver:
-    def __init__(self, data_root, process_id, *, capacity=512):
+    def __init__(self, data_root, process_id, *, capacity=512, wake=None):
         self.root, self.process_id = Path(data_root), process_id
         self.queue = Queue(maxsize=capacity)
         self.lock = Lock()
@@ -63,6 +63,8 @@ class MemoryPipelineObserver:
         self.source_digest = None
         self.remove = lambda: None
         self.registered = False
+        self.wake = wake
+        self.wake_pending = False
 
     def attach(self, manifest):
         session_id = manifest["session_id"]
@@ -81,7 +83,8 @@ class MemoryPipelineObserver:
         self.active = dict(manifest)
         self.active["database_id"] = work_observation.database_id(self.root / manifest["database_relative_path"])
         self.sessions.setdefault(session_id, {"expected": Counter(), "written": Counter(), "sequence": 0,
-            "dropped": 0, "failed": 0, "truncated": 0, "bytes": 0, "final": False})
+            "dropped": 0, "dropped_lock_busy": 0, "dropped_queue_full": 0,
+            "failed": 0, "truncated": 0, "bytes": 0, "final": False})
         if not self.registered:
             # An in-flight caller may still hold the previous callback at rebind.
             self.remove = work_observation.install(lambda value: self.observe(value, session_id=session_id))
@@ -107,7 +110,9 @@ class MemoryPipelineObserver:
         if not self.lock.acquire(blocking=False):
             if not state["final"]:
                 state["dropped"] += 1
+                state["dropped_lock_busy"] += 1
             return
+        notify = False
         try:
             # Finalization closes admission under the same short lock BEFORE
             # draining. A caller captured before cutoff must not enqueue later.
@@ -148,10 +153,19 @@ class MemoryPipelineObserver:
                 state["truncated"] += 1
             try:
                 self.queue.put_nowait((manifest["session_id"], key, event))
+                if self.wake is not None and not self.wake_pending:
+                    self.wake_pending = True
+                    notify = True
             except Full:
                 state["dropped"] += 1
+                state["dropped_queue_full"] += 1
         finally:
             self.lock.release()
+        if notify:
+            try:
+                self.wake()  # Coalesced non-blocking signal; no caller-side disk I/O.
+            except Exception:
+                pass  # The existing discovery tick remains the fallback.
 
     def flush(self, *, final=False):
         # Called only by the recorder thread (or its closing owner after join).
@@ -161,6 +175,8 @@ class MemoryPipelineObserver:
         state = self.sessions[manifest["session_id"]]
         if state["final"]:
             return
+        with self.lock:
+            self.wake_pending = False
         if final:
             with self.lock:
                 state["final"] = True

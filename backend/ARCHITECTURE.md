@@ -1328,6 +1328,16 @@ Local evidence and boundaries: [vector pending-work verification](../docs/verifi
 
 ## Opt-in memory pipeline observation (2026-10-16, LOCAL)
 
+The observation CLI also admits explicit `start --mode memory --actor ...`
+sessions for active WorldCharacters whose existing memory scope is enabled,
+independently of the autonomous-activity switch or SNS engine. The default SNS
+mode retains its enabled-autonomy/V2 admission. Both modes use the same bounded
+recorder, transport hooks, writer spans and stop/deadline lifecycle; mode is
+recorded in the manifest/status/export. Admission reads canonical state only
+and never enables activity, saves memory or invokes a provider. Runtime recorder
+compatibility does not prove deployment: verify fresh health, supported transport
+and actual writer samples before the user triggers manual work.
+
 Recorder paths and atomic JSON replacement belong to
 `runtime/diagnostics/observation_storage.py`. SNS, memory-pipeline recording and
 reporting import that lower-level owner directly; memory recording does not
@@ -1341,6 +1351,12 @@ business owner. Domains and providers emit structural facts through it; only
 scope allowlist, bounded queue and diagnostic files. Business threads do no
 diagnostic file I/O or JSON serialization. A bounded carry-in claim scope read
 is performed outside the writer only while observation is enabled.
+
+Memory-event arrival sends one coalesced, non-blocking wake signal to the
+existing SNS recorder thread per pending flush. It does not wait for the idle
+manifest discovery interval, add a writer thread, enlarge the bounded event
+queue or block product writers on diagnostic files. Health distinguishes queue
+overflow from admission-lock contention; either remains incomplete evidence.
 
 The recorder attaches only to an unexpired, non-stopped session. At cutoff it
 closes memory-event admission and removes the process-local sink under a short
