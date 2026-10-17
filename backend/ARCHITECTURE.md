@@ -1382,6 +1382,19 @@ The actual CRG input distinguishes bounded related evidence from complete histor
 and forbids moving old events to the requested day. Existing source currentness,
 World fences, atomic response/situation receipt and final commit remain owners.
 
+The private `evidence-inspector.v1` persistence contract accepts the original
+six item fields plus optional `time_provenance`. Chat's evidence contract owns
+the exact four-field time shape, bounded ISO timestamps with explicit timezone,
+and event/interval/recorded/unknown combinations. Binding, final persistence and
+inspector reads share this validator; it never coerces dates or rewrites hash
+inputs. Unknown event time may retain a known recording time. Missing temporal
+metadata remains valid for historical responses. Malformed metadata is rejected
+before assistant insertion; read-side malformed historical data is shown as
+unknown only after current source authorization. Source revision checks and
+atomic response/situation delivery are unchanged. The regression crosses real
+admission, source assembly, final commit, authorized read and idempotent replay
+with isolated SQLite source rows and fake provider transport.
+
 `core.work_observation` has an optional request-local ContextVar listener alongside
 the existing process observer. Chat's existing DiagnosticCapture supplies scoped
 generation/TTL admission; no table, file, timer, worker or global sink replacement

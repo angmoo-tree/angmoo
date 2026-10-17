@@ -1,6 +1,6 @@
 {
-  "edge_count": 6783,
-  "external_import_count": 4601,
+  "edge_count": 6785,
+  "external_import_count": 4602,
   "module_count": 1564,
   "modules": [
     {
@@ -2045,7 +2045,8 @@
         "datetime",
         "enum",
         "hashlib",
-        "json"
+        "json",
+        "re"
       ],
       "imports": [
         "app.contracts.search_diagnostics",
@@ -2720,6 +2721,7 @@
       ],
       "imports": [
         "app.domains.chat.contracts.chat_identity_context",
+        "app.domains.chat.contracts.evidence_bundle",
         "app.domains.chat.contracts.generation_lifecycle",
         "app.domains.chat.contracts.graph_failure",
         "app.domains.chat.contracts.relationship_evidence",
@@ -3049,6 +3051,7 @@
       "imports": [
         "app.domains.chat.contracts",
         "app.domains.chat.contracts.context",
+        "app.domains.chat.contracts.evidence_bundle",
         "app.domains.chat.contracts.evidence_reads",
         "app.domains.chat.contracts.relationship_evidence",
         "app.domains.chat.contracts.response_request",

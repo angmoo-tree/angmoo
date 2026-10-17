@@ -10,6 +10,10 @@ from sqlalchemy import or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.domains.chat.contracts.evidence_bundle import (
+    EvidenceBundleContractError,
+    validate_evidence_time_provenance,
+)
 from app.domains.chat.contracts.generation_lifecycle import (
     GenerationContractError,
     GenerationEvent,
@@ -728,11 +732,17 @@ def _validate_evidence_inspector_snapshot(
     items = value.get("items")
     if not isinstance(items, list) or len(items) != public_evidence_count or len(items) > 12:
         raise GenerationContractError("response_evidence_inspector_invalid")
+    required_keys = {"ref", "kind", "text", "occurred_at", "axes", "locator"}
     for item in items:
-        if not isinstance(item, dict) or set(item) != {
-            "ref", "kind", "text", "occurred_at", "axes", "locator"
-        }:
+        if not isinstance(item, dict) or set(item) not in (
+            required_keys, required_keys | {"time_provenance"},
+        ):
             raise GenerationContractError("response_evidence_inspector_invalid")
+        if "time_provenance" in item:
+            try:
+                validate_evidence_time_provenance(item["time_provenance"])
+            except EvidenceBundleContractError as exc:
+                raise GenerationContractError("response_evidence_inspector_invalid") from exc
         if (
             not isinstance(item.get("ref"), str)
             or not isinstance(item.get("text"), str)

@@ -109,3 +109,61 @@ node node_modules/typescript/bin/tsc --noEmit
 I00–I06 기준/재현, I07–I13 시간 계약, I14–I20 모델 입력/해석, I21–I27 fallback/권한/hash, I28–I34 evidence/응답/후속 기억, I35–I41 진단/UI/지침, I42–I49 DB 계측, I50–I60 관련 검증/검토를 구현·확인했다. I61–I63은 이 문서를 포함한 signed local commit, workspace 계획 갱신, 최종 Git 상태 인계로 완료한다.
 
 V00–V33은 계획의 로컬 fake-provider/격리 SQLite/화면 fixture 기준으로 판정한다. V05와 V14는 provider에 전달되는 입력과 deterministic 계산의 검증이며 실제 AI 의미 해석 성공률이 아니다. V21은 기존 feature의 component/browser fixture, V31은 위 합성 표본, V32는 병렬 요청과 기존 process sink 공존 시험이다. 실제 자연 활동이나 실사용 서버의 품질 PASS로 확대하지 않는다.
+
+## 7. 후속 수정: 비어 있지 않은 시간 근거의 최종 저장
+
+사용자 진단에서 검색·CRG는 완료됐지만 최종 저장이 rollback되고
+`generation_conflict`로 끝난 요청을 확인했다. 원인은 v4에서 추가한
+`time_provenance`를 `evidence-inspector.v1` 저장 검사가 허용하지 않은 계약
+불일치였다. AI가 이 필드를 작성한 오류가 아니다. 최초 구현의 실제 workflow
+회귀는 검색 결과가 빈 fixture였고, 비어 있지 않은 근거는 별도 payload/hash
+시험으로 확인했으므로 이 연결 구간을 놓쳤다. 위 최초 결과가 이 경로까지
+검증했다는 뜻으로 해석되지 않도록 후속 결과를 별도로 기록한다.
+
+수정은 기존 item 필수 6개 필드에 `time_provenance` 하나만 선택적으로
+추가한다. 내부는 `kind`, `event_from`, `event_to`, `recorded_at` 네 필드를
+정확히 요구한다. timezone을 명시한 실제 ISO 날짜, 문자열 길이, 구간 순서와
+종류별 조합을 Chat 계약 코드가 검사한다. 사건 시각을 모르는 `unknown`에도
+별도로 확인한 저장 시각은 남길 수 있지만 사건 시각으로 승격하지 않는다.
+생성 시 binding·최종 저장·근거 조회가 같은 검증을 사용한다. 기존 형식과 hash,
+출처·권한·locator 검사, 트랜잭션·재시도·모델 호출 수는 유지한다. 새 migration,
+AI 지침 수정, 필드 제거, 추가 모델 호출이나 오류 무시는 없다.
+
+추가 회귀는 다음 경로를 보호한다.
+
+- 격리 SQLite에 실제 게시글 4개를 저장하고, 검색 경계의 결정적 대역이 그중
+  1개의 canonical 근거를 반환한다. 실제 Today SNS reader·admission·routing·
+  CRG adapter·최종 저장·근거 조회를 사용한다. 외부 AI·벡터 API는 차단한다.
+- 정상 날짜 경로와 시간 오류 보정 실패 후 관련 검색 경로 모두 최종 CRG에
+  canonical 근거 1개와 Today SNS 근거 4개를 전달한다. 수정 전 두 경우 모두
+  최종 `committed` 검사가 실패했다. 수정 후 답변 1개와 상황기억 receipt 1개가
+  저장되고, 실제 근거 조회 5개 모두 available이며 재접속은 추가 호출·저장 없이
+  완료 결과를 재생한다. 이후 원본을 수정하면 해당 근거의 본문·시간을 숨긴다.
+- 실제 lifecycle repository에서 episode memory 1개와 Today SNS 4개를 포함한
+  snapshot을 저장한다. legacy 필드 부재, event, 동일 시작·끝 시각, interval,
+  recorded, unknown 및 unknown+recorded를 보존한다. 수정 전 legacy만 통과하고
+  새 시간 payload의 정상 6개 경우는 `response_evidence_inspector_invalid`로 실패했다.
+- 잘못된 날짜·시간대 부재·숫자/boolean 날짜·추가/누락 필드·역전 구간·종류별
+  모순은 assistant를 추가하기 전에 거부한다. 같은 검사를 공유하는 social-context
+  snapshot도 확인한다. 손상된 조회 자료를 임의 날짜로 변환하지 않는다.
+
+최종 관련 실행은 **210 PASS / 실패·skip 0 / 116.29초**다. 이 수에는 새 회귀
+**65개**와 기존 시간 해석·응답 수명주기·관계 근거·상황기억·권한 회귀가 포함된다.
+초기 수정 확인 58개는 이 최종 실행에 포함되는 항목이므로 중복 합산하지 않는다.
+CONTRIBUTING의 architecture checker 회귀는 별도 **18 PASS**였고, import inventory
+갱신(1,564 modules / 6,785 internal edges / 4,602 external imports), backend/frontend
+경계 검사와 `git diff --check`도 통과했다. legacy 예외는 양쪽 모두 0이며 완화하지
+않았다. 전체 backend/frontend suite·빌드와 UI 검증은 이번 변경 범위에 포함하지 않았다.
+재현 스크립트와 수정 전 결과, 최종 JUnit은
+`artifacts/chat-temporal-finalize-diagnosis-20261017`에 보존하고, 수정 전 재현의
+실패 기대값을 성공으로 덮어쓰지 않는다.
+
+재실행 명령(제품 저장소 backend):
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q tests/chat/test_temporal_evidence_persistence.py tests/chat/test_temporal_evidence_storage_contract.py tests/chat/test_temporal_recall_fallback.py tests/chat/test_temporal_recall_response.py tests/chat/test_p8_l_j_response_generation_lifecycle.py tests/chat/test_p8_l_p_evidence_response_streaming.py tests/chat/test_response_lifecycle_owner.py tests/chat/test_evidence_ownership.py tests/chat/test_activity_situation_receipt.py tests/chat/test_social_context_workflow.py tests/chat/test_chat_identity_delivery.py
+```
+
+이번 수정도 현재 브랜치의 관련 검증·signed local commit 범위다. 실제 사용자
+Docker 재빌드·재시작, 설치본 변경, 실제 AI 응답 품질 확인, PR/CI/main 병합은
+수행하지 않는다. 사용자가 제공한 진단 원본과 운영 DB는 변경하지 않는다.
