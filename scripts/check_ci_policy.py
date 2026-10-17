@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import json
 from pathlib import Path
 import re
 import sys
@@ -403,6 +404,26 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
     return errors, [str(name) for name in jobs]
 
 
+def check_dependency_review_policy(document: dict, policy: dict) -> list[str]:
+    steps = document.get("jobs", {}).get("dependency-license", {}).get("steps", [])
+    reviews = [step for step in steps if str(step.get("uses", "")).startswith("actions/dependency-review-action@")]
+    if len(reviews) != 1:
+        return ["dependency review must have exactly one Action"]
+    options = reviews[0].get("with", {})
+    allowed = {item.strip() for item in str(options.get("allow-licenses", "")).split(",") if item.strip()}
+    errors = []
+    if allowed != set(policy.get("allowed_license_ids", [])) or not allowed:
+        errors.append("dependency review allow-licenses must match the project license policy")
+    if any(key in options for key in ("deny-licenses", "allow-dependencies-licenses", "config-file")):
+        errors.append("dependency review must use the shared license policy without package exclusions")
+    if options.get("fail-on-severity") != "high" or any(options.get(key) in (False, "false") for key in ("license-check", "vulnerability-check")) or options.get("warn-only") in (True, "true"):
+        errors.append("dependency review must enforce license and high-severity vulnerability checks")
+    exact = [step for step in steps if step.get("run") == "python scripts/check_dependency_licenses.py --review-changes-env DEPENDENCY_CHANGES"]
+    if len(exact) != 1 or exact[0].get("env", {}).get("DEPENDENCY_CHANGES") != "${{ steps.dependency_review.outputs.dependency-changes }}" or reviews[0].get("id") != "dependency_review":
+        errors.append("dependency review must also enforce exact forbidden license identifiers")
+    return errors
+
+
 def check_repo(root: Path = REPO_ROOT) -> list[str]:
     workflow_root = root / WORKFLOW_DIR
     actual = {path.name for path in workflow_root.glob("*.yml")}
@@ -414,6 +435,9 @@ def check_repo(root: Path = REPO_ROOT) -> list[str]:
         workflow_errors, jobs = check_workflow(workflow_root / name, root=root)
         errors.extend(f"{name}: {error}" for error in workflow_errors)
         all_jobs.extend(jobs)
+    document = yaml.load((workflow_root / "security.yml").read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+    policy = json.loads((root / "security/license_policy.json").read_text(encoding="utf-8"))
+    errors.extend(check_dependency_review_policy(document, policy))
     counts = Counter(all_jobs)
     for job in sorted(REQUIRED_JOBS | ADVISORY_JOBS):
         if counts[job] != 1:

@@ -74,11 +74,20 @@ jobs:
         with:
           persist-credentials: false
       - name: Review pull request dependency changes
+        id: dependency_review
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: high
-          deny-licenses: AGPL-1.0-only, AGPL-1.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, GPL-2.0-only, GPL-2.0-or-later, SSPL-1.0
+          # Match security/license_policy.json; a GPL-2.0-or-later deny rule
+          # also matches GPL-3.0-only in this Action's SPDX range comparison.
+          # Package/version review and exact forbidden IDs remain checked below.
+          allow-licenses: 0BSD, Apache-2.0, BSD-2-Clause, BSD-3-Clause, CC-BY-4.0, CC0-1.0, GPL-3.0-only, GPL-3.0-or-later, ISC, LGPL-2.1-or-later, LGPL-3.0-only, MIT, MIT-CMU, MPL-2.0, PSF-2.0, Python-2.0, UPL-1.0, Zlib
+      - name: Enforce exact forbidden license identifiers
+        if: github.event_name == 'pull_request'
+        env:
+          DEPENDENCY_CHANGES: ${{ steps.dependency_review.outputs.dependency-changes }}
+        run: python scripts/check_dependency_licenses.py --review-changes-env DEPENDENCY_CHANGES
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "0.12.5"

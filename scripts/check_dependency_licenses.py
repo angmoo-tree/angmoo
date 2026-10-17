@@ -430,18 +430,51 @@ def render_notice(
     return "\n".join(lines)
 
 
+def validate_review_changes(changes: object, policy: dict[str, Any]) -> int:
+    """Keep exact forbidden IDs on PR metadata, independent of SPDX ranges."""
+    if not isinstance(changes, list):
+        raise LicenseAuditError("dependency review changes must be an array")
+    checked = 0
+    for change in changes:
+        if not isinstance(change, dict):
+            raise LicenseAuditError("dependency review change must be an object")
+        if change.get("change_type") == "removed":
+            continue
+        expression = change.get("license")
+        # Missing upstream metadata remains reported by the Action; the locked
+        # Python/Node inventory still requires concrete licenses and reviews.
+        if not expression or expression == "NOASSERTION":
+            continue
+        normalized = normalize_expression(str(change.get("ecosystem", "")), str(change.get("name", "")), str(expression), policy)
+        licenses, _ = parse_expression(normalized)
+        forbidden = licenses & set(policy["forbidden_license_ids"])
+        if forbidden:
+            raise LicenseAuditError(f"dependency review forbidden license ids: {','.join(sorted(forbidden))}")
+        checked += 1
+    return checked
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--policy", type=Path)
     parser.add_argument("--write-notice", type=Path)
     parser.add_argument("--check-notice", type=Path)
+    parser.add_argument("--review-changes-env", help="Read dependency-review Action JSON from this environment variable")
     args = parser.parse_args()
 
     repo_root = args.repo_root.resolve()
     policy_path = (args.policy or (repo_root / DEFAULT_POLICY_PATH)).resolve()
     try:
         policy = load_policy(policy_path)
+        if args.review_changes_env:
+            try:
+                changes = json.loads(os.environ[args.review_changes_env])
+            except (KeyError, json.JSONDecodeError) as exc:
+                raise LicenseAuditError("dependency review changes are missing or invalid") from exc
+            checked = validate_review_changes(changes, policy)
+            print(f"Dependency review exact license policy passed: checked={checked}")
+            return 0
         python_packages = python_inventory(repo_root)
         node_packages = node_inventory(repo_root)
         used_reviews = validate_inventory(

@@ -1,4 +1,4 @@
-Set-StrictMode -Version Latest
+﻿Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:LauncherRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
