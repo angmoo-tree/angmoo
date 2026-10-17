@@ -197,12 +197,10 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
         cold_start = time.monotonic() - started
         if _service_names(harness) != EXPECTED_SERVICES:
             raise RuntimeError("runtime_state_stale: two-service topology mismatch")
-        _runtime_health(harness)
-        if _provider_call_count(harness) != 0:
-            raise RuntimeError("provider_call_regression: fresh Browser Run called a provider")
-        digest_before = _secret_digest(harness)
         report = {"cold_start_seconds": round(cold_start, 3)}
         if report_path:
+            # Capture before launching diagnostics: Docker retains only a short
+            # health log, and emulated diagnostic imports can evict startup rows.
             health_times = {}
             for service in sorted(EXPECTED_SERVICES):
                 identifier = harness.run("ps", "-q", service).stdout.strip()
@@ -212,7 +210,12 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
                     parse = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
                     health_times[service] = round((parse(successes[0]["End"]) - parse(state["StartedAt"])).total_seconds(), 3)
             report["service_health_upper_bound_seconds"] = health_times
-            report["measurement_notes"] = "Health probe interval is included; memory is a single sample, not peak RSS."
+            report["measurement_notes"] = "Health timestamps are upper bounds from Docker's rolling log, including probe intervals; memory is a single sample, not peak RSS."
+        _runtime_health(harness)
+        if _provider_call_count(harness) != 0:
+            raise RuntimeError("provider_call_regression: fresh Browser Run called a provider")
+        digest_before = _secret_digest(harness)
+        if report_path:
             # Exercise the existing keyless onboarding and canonical SNS writes
             # in this disposable volume, using the exact candidate app.
             harness.run("cp", str(ROOT / "scripts/quickstart_smoke.py"), "backend:/tmp/quickstart_smoke.py")
