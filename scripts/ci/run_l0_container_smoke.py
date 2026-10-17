@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import json
 import os
 from pathlib import Path
 import socket
 import subprocess
 import sys
+import time
 from typing import Any
+from urllib.request import urlopen
 import uuid
 
 
@@ -176,7 +179,7 @@ def _delete_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
     harness.run("exec", "-T", "backend", "python", "-c", command)
 
 
-def run_smoke(*, tag: str, project: str, port: int, development: bool) -> None:
+def run_smoke(*, tag: str, project: str, port: int, development: bool, report_path: Path | None = None) -> None:
     harness = ComposeHarness(
         project=project,
         tag=tag,
@@ -189,21 +192,55 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool) -> None:
         if development:
             up_arguments.append("--build")
         up_arguments.extend(["--wait", "--wait-timeout", "300"])
+        started = time.monotonic()
         harness.run(*up_arguments)
+        cold_start = time.monotonic() - started
         if _service_names(harness) != EXPECTED_SERVICES:
             raise RuntimeError("runtime_state_stale: two-service topology mismatch")
+        report = {"cold_start_seconds": round(cold_start, 3)}
+        if report_path:
+            # Capture before launching diagnostics: Docker retains only a short
+            # health log, and emulated diagnostic imports can evict startup rows.
+            health_times = {}
+            for service in sorted(EXPECTED_SERVICES):
+                identifier = harness.run("ps", "-q", service).stdout.strip()
+                state = json.loads(subprocess.check_output(["docker", "inspect", identifier]))[0]["State"]
+                successes = [entry for entry in state["Health"]["Log"] if entry["ExitCode"] == 0]
+                if successes:
+                    parse = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
+                    health_times[service] = round((parse(successes[0]["End"]) - parse(state["StartedAt"])).total_seconds(), 3)
+            report["service_health_upper_bound_seconds"] = health_times
+            report["measurement_notes"] = "Health timestamps are upper bounds from Docker's rolling log, including probe intervals; memory is a single sample, not peak RSS."
         _runtime_health(harness)
         if _provider_call_count(harness) != 0:
             raise RuntimeError("provider_call_regression: fresh Browser Run called a provider")
         digest_before = _secret_digest(harness)
+        if report_path:
+            # Exercise the existing keyless onboarding and canonical SNS writes
+            # in this disposable volume, using the exact candidate app.
+            harness.run("cp", str(ROOT / "scripts/quickstart_smoke.py"), "backend:/tmp/quickstart_smoke.py")
+            result = harness.run("exec", "-T", "-e", "PYTHONPATH=/app", "backend", "python", "/tmp/quickstart_smoke.py", "--bootstrap-local-session", "--bootstrap-data-root", "/var/lib/angmoo")
+            report["quickstart"] = json.loads(result.stdout)
+            with urlopen(f"http://127.0.0.1:{port}/", timeout=20) as response:
+                assert response.status == 200
+            stats = harness.run("stats", "--no-stream", "--format", "json").stdout
+            try:
+                report["memory_sample"] = json.loads(stats)
+            except json.JSONDecodeError:
+                report["memory_sample"] = [json.loads(line) for line in stats.splitlines() if line.strip()]
+            harness.run("exec", "-T", "backend", "python", "-c", "from pathlib import Path; Path('/var/lib/angmoo/media/release-fixture').write_bytes(b'synthetic-media')")
         marker = f"browser-run-{uuid.uuid4().hex}"
         _write_sqlite_marker(harness, marker)
         volumes = harness.run("config", "--volumes").stdout.splitlines()
         if EMBEDDED_VOLUME not in volumes:
             raise RuntimeError("runtime_state_stale: embedded volume missing")
 
-        harness.run("stop", "--timeout", "30")
+        stopped = time.monotonic()
+        harness.run("stop", "--timeout", "200" if report_path else "30")
+        report["stop_seconds"] = round(time.monotonic() - stopped, 3)
+        restarted = time.monotonic()
         harness.run("up", "-d", "--wait", "--wait-timeout", "300")
+        report["restart_seconds"] = round(time.monotonic() - restarted, 3)
         _runtime_health(harness)
         if not _sqlite_marker_exists(harness, marker):
             raise RuntimeError("sqlite_write_lost: canonical marker did not survive restart")
@@ -213,6 +250,11 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool) -> None:
         digest_after = _secret_digest(harness)
         if digest_after != digest_before:
             raise RuntimeError("secret_mismatch: APP_SECRET changed after restart")
+        if report_path:
+            harness.run("exec", "-T", "backend", "python", "-c", "from pathlib import Path; assert Path('/var/lib/angmoo/media/release-fixture').read_bytes()==b'synthetic-media'")
+            report.update(status="PASS", provider_calls=0, sqlite_restart=True, media_restart=True, secret_restart=True)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         mode = "contributor-development" if development else "browser-production"
         print(
             f"Embedded container smoke passed: mode={mode} "
@@ -237,6 +279,7 @@ def main() -> int:
     parser.add_argument("--project", required=True)
     parser.add_argument("--port", type=int, default=0)
     parser.add_argument("--development", action="store_true")
+    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     try:
         run_smoke(
@@ -244,6 +287,7 @@ def main() -> int:
             project=args.project,
             port=args.port or _free_port(),
             development=args.development,
+            report_path=args.report,
         )
     except (AssertionError, json.JSONDecodeError, OSError, RuntimeError) as exc:
         print(f"container smoke failed: {exc}", file=sys.stderr)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import copy
+import json
 from pathlib import Path
 import sys
 
@@ -17,6 +18,17 @@ SPEC.loader.exec_module(checker)
 
 def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
+
+
+def test_dependency_review_rejects_policy_drift_and_package_bypasses() -> None:
+    document = checker.yaml.load((REPO_ROOT / ".github/workflows/security.yml").read_text(encoding="utf-8"), Loader=checker._UniqueKeyLoader)
+    policy = json.loads((REPO_ROOT / "security/license_policy.json").read_text(encoding="utf-8"))
+    assert checker.check_dependency_review_policy(document, policy) == []
+    for key, value in (("allow-licenses", "MIT"), ("deny-licenses", "GPL-2.0-or-later"), ("allow-dependencies-licenses", "pkg:pypi/proot-distro@5.10.0"), ("warn-only", True), ("license-check", False), ("vulnerability-check", False)):
+        changed = copy.deepcopy(document)
+        step = next(s for s in changed["jobs"]["dependency-license"]["steps"] if str(s.get("uses", "")).startswith("actions/dependency-review-action@"))
+        step["with"][key] = value
+        assert checker.check_dependency_review_policy(changed, policy), key
 
 
 def test_actions_event_key_is_not_a_yaml_boolean(tmp_path):
@@ -107,4 +119,4 @@ jobs:
 
     errors, _ = checker.check_workflow(workflow)
 
-    assert any("triggered only by push" in error for error in errors)
+    assert any("release-v tags only" in error for error in errors)

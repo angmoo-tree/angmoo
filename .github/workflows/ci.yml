@@ -114,6 +114,11 @@ jobs:
           Path(".ci").mkdir(exist_ok=True)
           Path(".ci/backend-test-identity.json").write_text(json.dumps(result, indent=2) + "\n")
           PY
+      - name: Verify Termux host lifecycle with owned Linux processes
+        run: |
+          python -m venv "$RUNNER_TEMP/angmoo-host-tools"
+          "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m pip install --require-hashes --only-binary=:all: --no-deps -r launcher/termux/requirements.txt
+          "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m unittest discover -s launcher/termux -p test_host.py
       - name: Compile and materialize the embedded baseline
         run: |
           uv run python -m compileall -q app
@@ -387,6 +392,9 @@ jobs:
       - name: Verify character card proxy request limits
         run: pnpm test:character-card-proxy
         working-directory: frontend
+      - name: Verify runtime media transport
+        working-directory: frontend
+        run: pnpm test:media-proxy
       - name: Verify Identity request and session parity
         run: node scripts/test-identity-session.mjs
         working-directory: frontend

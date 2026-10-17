@@ -1,4 +1,4 @@
-Set-StrictMode -Version Latest
+﻿Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $script:LauncherRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -271,7 +271,7 @@ function Get-AngmooVolumeInventory {
 }
 
 function Test-AngmooReleaseImagesPresent {
-    $backend = if ($env:ANGMOO_VERSION) { $env:ANGMOO_VERSION } else { 'v0.3.0' }
+    $backend = if ($env:ANGMOO_IMAGE_TAG) { $env:ANGMOO_IMAGE_TAG } else { 'release-v0.1.0' }
     $images = @(
         "ghcr.io/angmoo-tree/angmoo-backend:$backend",
         "ghcr.io/angmoo-tree/angmoo-frontend:$backend"
@@ -304,9 +304,18 @@ function Invoke-AngmooPreflight {
     }
     $checks.Add([pscustomobject]@{ name = 'architecture'; state = 'ready'; detail = $architecture })
 
-    $config = Invoke-AngmooCompose -Project $Project -Contributor $Contributor -Arguments @('config', '--quiet')
+    $config = Invoke-AngmooCompose -Project $Project -Contributor $Contributor -Arguments @('config', '--format', 'json')
     if ($config.exit_code -ne 0) {
         return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'compose_config_invalid'; message = 'Canonical Compose configuration is invalid.'; checks = @($checks); command_output = @($config.output) }
+    }
+    try {
+        $renderedConfig = ($config.output -join "`n") | ConvertFrom-Json
+        $productVersion = [string]$renderedConfig.services.backend.environment.ANGMOO_VERSION
+        if ($productVersion -notmatch '^0\.1\.0(-dev(-[0-9a-f]{7,40})?)?$') {
+            throw 'product_version_mismatch'
+        }
+    } catch {
+        return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'product_version_mismatch'; message = 'Set ANGMOO_VERSION=0.1.0 and ANGMOO_IMAGE_TAG=release-v0.1.0 before starting. / 시작 전에 제품 버전은 ANGMOO_VERSION=0.1.0, 이미지 선택은 ANGMOO_IMAGE_TAG=release-v0.1.0으로 설정하세요.'; checks = @($checks) }
     }
     $checks.Add([pscustomobject]@{ name = 'compose_config'; state = 'ready'; detail = 'valid' })
 

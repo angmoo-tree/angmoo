@@ -29,6 +29,49 @@ TRANSIENT_HTTP = frozenset((408, 429, 500, 502, 503, 504))
 SOURCE_URL = f"https://sqlite.org/vec1/raw/vec1.c?ci={SOURCE_REVISION}"
 SQLITE_URL = "https://sqlite.org/2026/sqlite-amalgamation-3530000.zip"
 BUNDLED_SOURCE = Path(__file__).resolve().parent / "vendor" / "vec1" / "vec1.c"
+ARM64_PATCH = "angmoo-neon-signed-mask-v1"
+
+
+def compiler_source(source: bytes, machine: str) -> tuple[bytes, str | None]:
+    """Keep the upstream input intact; correct its four NEON type errors only.
+
+    Signed values use signed comparisons; comparison masks use unsigned OR.
+    No lax-vector-conversions flag, algorithm change or disabled SIMD path.
+    """
+    _verified(source, SOURCE_SHA256)
+    if machine.lower() not in {"aarch64", "arm64"}:
+        return source, None
+    replacements = (
+        (b"uint32x4_t rhs2 = vdupq_n_s32(aRval[ii]);", b"int32x4_t rhs2 = vdupq_n_s32(aRval[ii]);", 1),
+        (b"cmp = vorrq_s32(cmp, vceqq_u32(lhs, rhs2));", b"cmp = vorrq_u32(cmp, vceqq_s32(lhs, rhs2));", 1),
+        (b"cmp = vbicq_u32(cmp, vceqq_u32(lhs, null));", b"cmp = vbicq_u32(cmp, vceqq_s32(lhs, null));", 2),
+    )
+    for old, new, count in replacements:
+        if source.count(old) != count:
+            raise RuntimeError("vec1_arm64_patch_context_mismatch")
+        source = source.replace(old, new)
+    return source, ARM64_PATCH
+
+
+NEON_CONTRACT = r'''
+#include "vec1.c"
+int main(void) {
+  int values[] = {-2147483647, -80000, -2, -1, 0, 1, 7, 80000, 2147483646, VEC1_META_4BYTENULL, -7};
+  int rhs[] = {-2, 7, 80000};
+  int encoded[11];
+  const u8 ops[] = {VEC1_OP_EQ, VEC1_OP_GT, VEC1_OP_LT, VEC1_OP_GE, VEC1_OP_LE, VEC1_OP_IN};
+  int i, op, n;
+  for(i=0; i<11; i++) vec1PutU32((u8*)&encoded[i], (u32)values[i]);
+  for(n=1; n<=11; n++) for(op=0; op<6; op++) {
+    u8 expected[2] = {0}, actual[2] = {0};
+    int rval = ops[op]==VEC1_OP_IN ? 3 : -1;
+    vec1MetaFilterIntTail((u8*)encoded, 0, expected, n, 4, rval, rhs, ops[op]);
+    vec1MetaFilterScan4ByteArray(encoded, actual, n, rval, rhs, ops[op]);
+    if(memcmp(expected, actual, sizeof(expected))) return 1;
+  }
+  return 0;
+}
+'''
 
 
 def _verified(data: bytes, digest: str) -> bytes:
@@ -167,7 +210,8 @@ def build(output: Path, cache_dir: Path | None = None):
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="angmoo-vec1-build-") as directory:
         root = Path(directory)
-        (root / "vec1.c").write_bytes(download(SOURCE_URL, SOURCE_SHA256, cache_dir))
+        source, patch = compiler_source(download(SOURCE_URL, SOURCE_SHA256, cache_dir), platform.machine())
+        (root / "vec1.c").write_bytes(source)
         archive = download(SQLITE_URL, SQLITE_SHA256, cache_dir)
         with zipfile.ZipFile(io.BytesIO(archive)) as packed:
             for name in ("sqlite3.h", "sqlite3ext.h"):
@@ -189,13 +233,18 @@ def build(output: Path, cache_dir: Path | None = None):
             artifact = "vec1.so"
             command = ["cc", "-O3", "-DNDEBUG", "vec1.c", "-shared", "-fPIC", "-lm", "-o", artifact]
         subprocess.run(command, cwd=root, check=True)
+        if patch:
+            (root / "neon-contract.c").write_text(NEON_CONTRACT, encoding="utf-8")
+            subprocess.run(["cc", "-O2", "-DNDEBUG", "neon-contract.c", "-lm", "-o", "neon-contract"], cwd=root, check=True)
+            subprocess.run([str(root / "neon-contract")], cwd=root, check=True)
         data = (root / artifact).read_bytes()
         (output / artifact).write_bytes(data)
         receipt = {
             "schema_revision": 1, "version": "0.7", "source_revision": SOURCE_REVISION,
             "source_sha256": SOURCE_SHA256, "sqlite_headers_sha256": SQLITE_SHA256,
             "filename": artifact, "sha256": hashlib.sha256(data).hexdigest(),
-            "platform": platform.system(), "machine": platform.machine(), "simd": "scalar",
+            "compiled_source_sha256": hashlib.sha256(source).hexdigest(), "source_patch": patch,
+            "platform": platform.system(), "machine": platform.machine(), "simd": "neon" if patch else "scalar",
         }
         (output / "manifest.json").write_text(json.dumps(receipt, indent=2)+"\n", encoding="utf-8")
         print(json.dumps(receipt))

@@ -27,15 +27,13 @@ EXPOSE 3000
 CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
 
 FROM dependencies AS build
-ARG ANGMOO_API_BASE_URL=http://backend:8080
-ENV ANGMOO_API_BASE_URL=${ANGMOO_API_BASE_URL}
 COPY --chown=node:node frontend ./
 COPY --chown=node:node docs/agent_guide.md docs/agent_guide.en.md /docs/
 RUN pnpm build
 
 FROM ${NODE_IMAGE} AS runtime
 ARG VCS_REF=unknown
-ARG VERSION=0.3.0
+ARG VERSION=0.1.0
 ARG PCRE2_MIN_VERSION=10.42-1+deb12u1
 ARG PERL_MIN_VERSION=5.36.0-7+deb12u4
 
@@ -51,6 +49,8 @@ LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.licenses="GPL-3.0-only"
 
 ENV NODE_ENV=production \
+    ANGMOO_VERSION=${VERSION} \
+    ANGMOO_SOURCE_SHA=${VCS_REF} \
     HOSTNAME=0.0.0.0 \
     PORT=3000 \
     ANGMOO_API_BASE_URL=http://backend:8080

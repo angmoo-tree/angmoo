@@ -217,7 +217,10 @@ assert db._default_session_factory is None
 
 def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
     tmp_path: Path,
+    monkeypatch,
 ) -> None:
+    monkeypatch.setenv("ANGMOO_SOURCE_SHA", "a" * 40)
+    monkeypatch.setenv("ANGMOO_LAUNCH_ID", "b" * 32)
     contributor_root = tmp_path / "checkout-a" / ".angmoo-dev"
     app = create_contributor_runtime_app(data_root=contributor_root)
     with TestClient(app) as client:
@@ -225,6 +228,9 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json() == {
+            "version": "0.1.0",
+            "source_sha": "a" * 40,
+            "launch_id": "b" * 32,
             "status": "ok",
             "profile": "CONTRIBUTOR_EMBEDDED",
             "persistence": "sqlite",

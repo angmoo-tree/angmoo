@@ -26,6 +26,14 @@ foreach ($launcherFile in @(
     (Join-Path $repoRoot 'angmoo.ps1'),
     (Join-Path $repoRoot 'launcher\windows\Angmoo.Launcher.psm1')
 )) {
+    # Windows PowerShell 5.1 otherwise decodes non-ASCII source using the host
+    # ANSI code page, which can turn Korean text into PowerShell punctuation.
+    $sourceBytes = [IO.File]::ReadAllBytes($launcherFile)
+    $hasNonAscii = @($sourceBytes | Where-Object { $_ -gt 127 }).Count -gt 0
+    $hasUtf8Bom = $sourceBytes.Length -ge 3 -and $sourceBytes[0] -eq 239 -and $sourceBytes[1] -eq 187 -and $sourceBytes[2] -eq 191
+    if ($hasNonAscii -and -not $hasUtf8Bom) {
+        throw "powershell_utf8_bom_required:$launcherFile"
+    }
     $tokens = $null
     $errors = $null
     [void][System.Management.Automation.Language.Parser]::ParseFile(
@@ -63,6 +71,10 @@ if "%1"=="stats" echo {"Name":"synthetic-backend","CPUPerc":"0.10%%","MemUsage":
 if "%1"=="inspect" echo {"Name":"/synthetic-backend","RestartCount":0,"Image":"sha256:1234567890abcdef1234567890abcdef"}& exit /b 0
 echo %* | findstr /C:"compose version --short" >nul && (echo 5.3.1& exit /b 0)
 echo %* | findstr /C:" config --quiet" >nul && exit /b 0
+echo %* | findstr /C:" config --format json" >nul && (
+  echo {"services":{"backend":{"environment":{"ANGMOO_VERSION":"%ANGMOO_FAKE_VERSION%"}}}}
+  exit /b 0
+)
 echo %* | findstr /C:" port frontend 3000" >nul && (
   if "%ANGMOO_FAKE_RUNNING%"=="1" (echo 127.0.0.1:45999& exit /b 0) else (exit /b 1)
 )
@@ -88,10 +100,12 @@ Set-Content -LiteralPath (Join-Path $fakeRoot 'docker.cmd') -Value $fakeDocker -
 $previousPath = $env:PATH
 $previousFakeLog = $env:ANGMOO_FAKE_DOCKER_LOG
 $previousFakeRunning = $env:ANGMOO_FAKE_RUNNING
+$previousFakeVersion = $env:ANGMOO_FAKE_VERSION
 try {
     $env:PATH = "$fakeRoot;$previousPath"
     $env:ANGMOO_FAKE_DOCKER_LOG = $fakeLog
     $env:ANGMOO_FAKE_RUNNING = '0'
+    $env:ANGMOO_FAKE_VERSION = '0.1.0'
     Push-Location $fakeRoot
     try {
         $statusPayload = & $launcher status --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
@@ -109,6 +123,15 @@ try {
     }
 
     $env:ANGMOO_FAKE_RUNNING = '1'
+    $env:ANGMOO_FAKE_VERSION = '0.3.0'
+    $mismatchPayload = & $launcher start --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 11 -or $mismatchPayload.error_code -ne 'product_version_mismatch') {
+        throw 'launcher_product_version_mismatch_was_not_blocked'
+    }
+    if ((Get-Content -LiteralPath $fakeLog -Raw).Contains(' up -d')) {
+        throw 'launcher_product_version_mismatch_started_containers'
+    }
+    $env:ANGMOO_FAKE_VERSION = '0.1.0'
     $startPayload = & $launcher start --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $startPayload.details.idempotent_no_op) {
         throw 'launcher_fake_repeated_start_was_not_idempotent'
@@ -215,6 +238,7 @@ try {
     $env:PATH = $previousPath
     $env:ANGMOO_FAKE_DOCKER_LOG = $previousFakeLog
     $env:ANGMOO_FAKE_RUNNING = $previousFakeRunning
+    $env:ANGMOO_FAKE_VERSION = $previousFakeVersion
     Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 

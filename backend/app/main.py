@@ -544,7 +544,10 @@ def runtime_health(request: Request) -> dict[str, object]:
             detail="embedded_runtime_not_ready",
         ) from exc
 
+    from app.runtime.product_identity import runtime_identity
+
     return {
+        **runtime_identity(),
         "status": "ok",
         "profile": runtime_config.profile.value,
         "persistence": "sqlite",

@@ -1,7 +1,7 @@
 {
-  "edge_count": 6802,
-  "external_import_count": 4601,
-  "module_count": 1568,
+  "edge_count": 6804,
+  "external_import_count": 4603,
+  "module_count": 1569,
   "modules": [
     {
       "external_imports": [],
@@ -17155,6 +17155,7 @@
         "app.runtime.memory_http",
         "app.runtime.memory_selection_provider",
         "app.runtime.persistence.model_registration",
+        "app.runtime.product_identity",
         "app.runtime.relationships.policy_activation",
         "app.runtime.relationships.review_runtime",
         "app.runtime.resident.scheduler",
@@ -18933,7 +18934,8 @@
         "app.runtime.logging_config",
         "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_data",
-        "app.runtime.persistence.runtime_data_path"
+        "app.runtime.persistence.runtime_data_path",
+        "app.runtime.product_identity"
       ],
       "module": "app.runtime.contributor_backend",
       "path": "backend/app/runtime/contributor_backend.py",
@@ -22037,6 +22039,16 @@
       ],
       "module": "app.runtime.preparation_names",
       "path": "backend/app/runtime/preparation_names.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "os",
+        "re"
+      ],
+      "imports": [],
+      "module": "app.runtime.product_identity",
+      "path": "backend/app/runtime/product_identity.py",
       "wildcard_imports": []
     },
     {

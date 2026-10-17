@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@11.22.0",
   "license": "GPL-3.0-only",
@@ -13,6 +13,7 @@
     "lint": "eslint",
     "test:world-package-proxy": "node ./scripts/test-world-package-proxy.mjs",
     "test:character-card-proxy": "node ./scripts/test-character-card-proxy.mjs",
+    "test:media-proxy": "node ./scripts/test-media-proxy.mjs",
     "test:ui-catalog": "node ./scripts/check-ui-catalog.mjs",
     "test:next-root-glob": "node ./scripts/test-next-root-glob.mjs",
     "test:user-environment": "node ./scripts/test-user-environment.mjs",

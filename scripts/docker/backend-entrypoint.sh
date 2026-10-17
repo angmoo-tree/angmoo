@@ -26,6 +26,7 @@ prepare_embedded_data_root() {
 mode="${1:-contributor-api}"
 case "$mode" in
   contributor-api|contributor-api-dev)
+    python -m app.runtime.product_identity
     prepare_embedded_data_root
     reload_argument=""
     if [ "$mode" = "contributor-api-dev" ]; then
@@ -34,12 +35,13 @@ case "$mode" in
     # shellcheck disable=SC2086
     run_as_angmoo python -m app.runtime.contributor_backend \
       --data-root "$embedded_data_root" \
-      --host 0.0.0.0 \
-      --port 8080 \
+      --host "${ANGMOO_BIND_HOST:-0.0.0.0}" \
+      --port "${ANGMOO_BACKEND_PORT:-8080}" \
       --frontend-origin "$embedded_frontend_origin" \
       $reload_argument
     ;;
   contributor-diagnostics)
+    python -m app.runtime.product_identity
     prepare_embedded_data_root
     run_as_angmoo python -m app.runtime.contributor_backend \
       --data-root "$embedded_data_root" \

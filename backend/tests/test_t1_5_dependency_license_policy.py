@@ -118,3 +118,17 @@ def test_project_style_gpl_dependency_is_not_confused_with_lgpl() -> None:
     )
 
     assert used == {("python", "reviewed-package", "1.0")}
+
+
+def test_review_metadata_preserves_exact_gpl_range_restriction() -> None:
+    policy = _policy()
+    policy["forbidden_license_ids"].append("GPL-2.0-or-later")
+    def change(license_id):
+        return [{"change_type": "added", "ecosystem": "pip", "name": "host-tool", "license": license_id}]
+    assert checker.validate_review_changes(change("GPL-3.0-only"), policy) == 1
+    for license_id in ("GPL-2.0-only", "GPL-2.0-or-later", "MIT OR GPL-2.0-or-later", "AGPL-3.0-only", "SSPL-1.0"):
+        with pytest.raises(checker.LicenseAuditError, match="forbidden license ids"):
+            checker.validate_review_changes(change(license_id), policy)
+    assert checker.validate_review_changes([{"change_type": "removed", "license": "GPL-2.0-only"}], policy) == 0
+    with pytest.raises(checker.LicenseAuditError, match="must be an array"):
+        checker.validate_review_changes({}, policy)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import json
 from pathlib import Path
 import re
 import sys
@@ -12,6 +13,8 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+from scripts.release import workflow_policy
 WORKFLOW_DIR = Path(".github/workflows")
 EXPECTED_WORKFLOWS = {
     "ci.yml",
@@ -22,6 +25,8 @@ EXPECTED_WORKFLOWS = {
     "windows-installer.yml",
     "windows-smoke.yml",
     "release-images.yml",
+    "container-candidate.yml",
+    "release-publish.yml",
 }
 REQUIRED_JOBS = {
     "backend",
@@ -81,6 +86,8 @@ CORE_TEST_REPORT_NAMES = {
 
 
 def check_report_uploads(document: object, workflow_name: str, text: str) -> list[str]:
+    if workflow_name in workflow_policy.WORKFLOWS and isinstance(document, dict):
+        return workflow_policy.uploads(document, workflow_name)
     if workflow_name == "windows-installer.yml":
         return []  # Its existing private-artifact rejection is checked below.
     jobs = document.get("jobs", {}) if isinstance(document, dict) else {}
@@ -189,8 +196,8 @@ def _check_triggers(document: object, *, release: bool, weekly: bool = False) ->
         if names != {"push"}:
             return ["release workflow must be triggered only by push"]
         push = events.get("push")
-        if not isinstance(push, dict) or push.get("tags") != ["v*.*.*"]:
-            return ["release workflow must be limited to semantic v*.*.* tags"]
+        if not isinstance(push, dict) or push.get("tags") != ["release-v*.*.*"]:
+            return ["release workflow must be limited to semantic release-v*.*.* tags"]
         if "branches" in push:
             return ["release workflow must not publish from a branch push"]
         return []
@@ -344,7 +351,10 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
         document = yaml.load(text, Loader=_UniqueKeyLoader)
     except yaml.YAMLError as exc:
         return [f"workflow YAML is invalid: {exc}"], []
-    errors.extend(_check_triggers(document, release=path.name == "release-images.yml", weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
+    if path.name in workflow_policy.WORKFLOWS and isinstance(document, dict):
+        errors.extend(workflow_policy.validate(document, path.name))
+    else:
+        errors.extend(_check_triggers(document, release=False, weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
     errors.extend(
         f"forbidden workflow feature: {label}"
         for marker, label in FORBIDDEN_TEXT.items()
@@ -394,6 +404,26 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
     return errors, [str(name) for name in jobs]
 
 
+def check_dependency_review_policy(document: dict, policy: dict) -> list[str]:
+    steps = document.get("jobs", {}).get("dependency-license", {}).get("steps", [])
+    reviews = [step for step in steps if str(step.get("uses", "")).startswith("actions/dependency-review-action@")]
+    if len(reviews) != 1:
+        return ["dependency review must have exactly one Action"]
+    options = reviews[0].get("with", {})
+    allowed = {item.strip() for item in str(options.get("allow-licenses", "")).split(",") if item.strip()}
+    errors = []
+    if allowed != set(policy.get("allowed_license_ids", [])) or not allowed:
+        errors.append("dependency review allow-licenses must match the project license policy")
+    if any(key in options for key in ("deny-licenses", "allow-dependencies-licenses", "config-file")):
+        errors.append("dependency review must use the shared license policy without package exclusions")
+    if options.get("fail-on-severity") != "high" or any(options.get(key) in (False, "false") for key in ("license-check", "vulnerability-check")) or options.get("warn-only") in (True, "true"):
+        errors.append("dependency review must enforce license and high-severity vulnerability checks")
+    exact = [step for step in steps if step.get("run") == "python scripts/check_dependency_licenses.py --review-changes-env DEPENDENCY_CHANGES"]
+    if len(exact) != 1 or exact[0].get("env", {}).get("DEPENDENCY_CHANGES") != "${{ steps.dependency_review.outputs.dependency-changes }}" or reviews[0].get("id") != "dependency_review":
+        errors.append("dependency review must also enforce exact forbidden license identifiers")
+    return errors
+
+
 def check_repo(root: Path = REPO_ROOT) -> list[str]:
     workflow_root = root / WORKFLOW_DIR
     actual = {path.name for path in workflow_root.glob("*.yml")}
@@ -405,6 +435,9 @@ def check_repo(root: Path = REPO_ROOT) -> list[str]:
         workflow_errors, jobs = check_workflow(workflow_root / name, root=root)
         errors.extend(f"{name}: {error}" for error in workflow_errors)
         all_jobs.extend(jobs)
+    document = yaml.load((workflow_root / "security.yml").read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+    policy = json.loads((root / "security/license_policy.json").read_text(encoding="utf-8"))
+    errors.extend(check_dependency_review_policy(document, policy))
     counts = Counter(all_jobs)
     for job in sorted(REQUIRED_JOBS | ADVISORY_JOBS):
         if counts[job] != 1:

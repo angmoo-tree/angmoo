@@ -54,6 +54,8 @@ jobs:
         name: Classify actual changed paths
         run: python scripts/ci/impact.py
   release-candidate:
+    outputs:
+      artifact_id: ${{ steps.installer-upload.outputs.artifact-id }}
     name: windows-installer-build
     runs-on: windows-latest
     timeout-minutes: 90
@@ -208,6 +210,7 @@ jobs:
             --version $productVersion `
             --commit $env:SOURCE_SHA
       - name: Upload release-candidate evidence
+        id: installer-upload
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
@@ -222,11 +225,20 @@ jobs:
             .codex-temp/er6-release-metadata/LICENSE
             .codex-temp/er6-supply-chain-audit.json
       - name: Attest Windows NSIS installer
+        id: installer-attestation
         if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             desktop/src-tauri/target/release/bundle/nsis/*.exe
+      - name: Preserve signed EXE attestation
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-attestation-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: ${{ steps.installer-attestation.outputs.bundle-path }}
+          if-no-files-found: error
+          retention-days: 14
       - name: Preserve installer-legacy-fixture
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -343,6 +355,18 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/angmoo-supported-upgrade-${{ matrix.partition }}.json
+      - name: Bind successful test to actual installer bytes
+        if: success() && needs.impact.outputs.windows == 'full'
+        shell: pwsh
+        run: python -m scripts.release.windows_receipt job --root "$env:RUNNER_TEMP/angmoo-installer" --kind "upgrade-${{ matrix.partition }}" --artifact-id "${{ needs.release-candidate.outputs.artifact_id }}" --output "$env:RUNNER_TEMP/installer-receipt-upgrade-${{ matrix.partition }}.json"
+      - name: Preserve successful installer receipt
+        if: success() && needs.impact.outputs.windows == 'full'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-tested-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-upgrade-${{ matrix.partition }}
+          path: ${{ runner.temp }}/installer-receipt-upgrade-${{ matrix.partition }}.json
+          if-no-files-found: error
+          retention-days: 14
     if: needs.impact.outputs.windows == 'full'
   windows-installer-failure-recovery:
     name: windows-installer-failure-recovery
@@ -387,6 +411,18 @@ jobs:
             -RunSentinel $sentinel `
             -UpgradePartition all `
             -Mode Recovery
+      - name: Bind successful test to actual installer bytes
+        if: success() && needs.impact.outputs.windows == 'full'
+        shell: pwsh
+        run: python -m scripts.release.windows_receipt job --root "$env:RUNNER_TEMP/angmoo-installer" --kind "failure-recovery" --artifact-id "${{ needs.release-candidate.outputs.artifact_id }}" --output "$env:RUNNER_TEMP/installer-receipt-failure-recovery.json"
+      - name: Preserve successful installer receipt
+        if: success() && needs.impact.outputs.windows == 'full'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-tested-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-failure-recovery
+          path: ${{ runner.temp }}/installer-receipt-failure-recovery.json
+          if-no-files-found: error
+          retention-days: 14
     if: needs.impact.outputs.windows == 'full'
   installed-runtime-smoke:
     name: windows-installer-clean-install
@@ -396,6 +432,11 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_SHA }}
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: angmoo-windows-installer-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
@@ -1104,6 +1145,18 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: ${{ runner.temp }}/angmoo-defender-evidence
+      - name: Bind successful test to actual installer bytes
+        if: success() && needs.impact.outputs.windows == 'full'
+        shell: pwsh
+        run: python -m scripts.release.windows_receipt job --root "$env:RUNNER_TEMP/angmoo-installer" --kind "clean-install" --artifact-id "${{ needs.release-candidate.outputs.artifact_id }}" --output "$env:RUNNER_TEMP/installer-receipt-clean-install.json"
+      - name: Preserve successful installer receipt
+        if: success() && needs.impact.outputs.windows == 'full'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-tested-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-clean-install
+          path: ${{ runner.temp }}/installer-receipt-clean-install.json
+          if-no-files-found: error
+          retention-days: 14
     if: needs.impact.outputs.windows_installer == 'true'
   windows-installer:
     if: always()
@@ -1142,6 +1195,24 @@ jobs:
         if: needs.impact.outputs.windows_installer == 'true'
         run: python scripts/ci/windows_installer_upgrade_coverage.py --directory .ci/windows-upgrade-reports --source-sha "$SOURCE_SHA"
           --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" --profile "${{ needs.impact.outputs.windows }}"
+      - name: Collect exact successful installer receipts
+        if: needs.impact.outputs.windows == 'full'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          pattern: windows-tested-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}-*
+          merge-multiple: true
+          path: .ci/windows-tested
+      - name: Bind full release validation to the tested EXE
+        if: needs.impact.outputs.windows == 'full'
+        run: python -m scripts.release.windows_receipt aggregate --receipts .ci/windows-tested --coverage .ci/windows-upgrade-reports --output .ci/windows-release-validation.json
+      - name: Preserve full release validation receipt
+        if: needs.impact.outputs.windows == 'full'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: windows-release-validation-${{ env.SOURCE_SHA }}-${{ github.run_attempt }}
+          path: .ci/windows-release-validation.json
+          if-no-files-found: error
+          retention-days: 14
   windows-installer-representative-upgrade:
     name: windows-installer-representative-upgrade
     needs:

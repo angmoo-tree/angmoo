@@ -88,6 +88,9 @@ def create_contributor_runtime_app(
     data_root: Path,
     frontend_origin: str = "http://127.0.0.1:3000",
 ):
+    from app.runtime.product_identity import validate_product_version
+
+    validate_product_version()
     # Import the composition root before materializing the SQLite baseline so
     # every canonical SQLAlchemy model is registered in Base.metadata. This is
     # the same fail-closed ordering used by the packaged desktop sidecar.
@@ -160,6 +163,9 @@ def contributor_runtime_status_payload(
     persistence, graph, or worker providers.
     """
 
+    from app.runtime.product_identity import validate_product_version
+
+    validate_product_version()
     _register_canonical_models()
 
     from app.core.redaction import sanitize_support_bundle_metadata

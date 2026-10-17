@@ -11,7 +11,7 @@ ARG PCRE2_MIN_VERSION=10.46-1~deb13u2
 ARG SQLITE_MIN_VERSION=3.46.1-7+deb13u2
 ARG PERL_MIN_VERSION=5.40.1-6+deb13u1
 ARG VCS_REF=unknown
-ARG VERSION=0.3.0
+ARG VERSION=0.1.0
 
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.revision="${VCS_REF}" \
@@ -19,6 +19,8 @@ LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.licenses="GPL-3.0-only"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
+    ANGMOO_VERSION=${VERSION} \
+    ANGMOO_SOURCE_SHA=${VCS_REF} \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \

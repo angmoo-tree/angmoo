@@ -1,0 +1,2 @@
+# Host packaging adapter only; never installed into the application images.
+proot-distro==5.10.0 --hash=sha256:f914db9ed4d610a8c2198b906ab8093b6155afa036bdb16b8f971d3101ba0d52

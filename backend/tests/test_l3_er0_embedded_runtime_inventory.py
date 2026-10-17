@@ -99,7 +99,11 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     assert "historical schema evidence" in postgres["purpose"]
     assert "reintroduction guards" in postgres["purpose"]
     assert graph["query_count"] == 24
-    assert frontend["route_count"] == 45
+    assert frontend["route_count"] == 47
+    for route in ("/api/runtime-identity", "/media/[...path]"):
+        server_route = next(item for item in frontend["routes"] if item["route"] == route)
+        assert server_route["kind"] == "route-handler"
+        assert server_route["blockers"] == []
     notification_route = next(
         item for item in frontend["routes"]
         if item["route"] == "/worlds/[worldId]/notifications"

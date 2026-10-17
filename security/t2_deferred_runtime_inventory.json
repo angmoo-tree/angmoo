@@ -215,6 +215,15 @@
     },
     {
       "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "launcher/termux/test_host.py"
+    },
+    {
+      "markers": [
         "hosted-extension-type"
       ],
       "owner_phases": [

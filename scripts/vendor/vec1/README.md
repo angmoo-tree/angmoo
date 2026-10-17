@@ -28,3 +28,21 @@ remain active.
 
 Any future Vec1 update must review source provenance, native compatibility and
 the new digest together. Do not replace the checksum to accept an error page.
+
+## ARM64 compiler compatibility (2026-10-18)
+
+The original source above remains byte-for-byte unchanged. GCC 14 on ARM64
+rejects four signed/unsigned NEON type mismatches in the 32-bit metadata filter.
+`compiler_source` in `scripts/build_vec1.py` verifies the original SHA first,
+then applies `angmoo-neon-signed-mask-v1` with exact occurrence checks: signed
+operands use `vceqq_s32`, and unsigned comparison masks use `vorrq_u32`.
+The ARM64 build compiles and executes a scalar-versus-NEON comparison for all
+six filter operators, negative/null values, complete SIMD blocks and tails.
+The receipt records both original and compiled source hashes and the patch ID.
+Windows/amd64 source bytes and compilation flags are unchanged.
+
+Reference: https://arm-software.github.io/acle/neon_intrinsics/advsimd.html
+
+ARM64 GCC의 네 줄 타입 불일치만 빌드 임시 복사본에서 교정한다. 원본·해시
+검증을 보존하고 필터 결과를 scalar 구현과 비교한다. SIMD 비활성화나
+타입 검사를 완화하는 컴파일 옵션은 사용하지 않는다.

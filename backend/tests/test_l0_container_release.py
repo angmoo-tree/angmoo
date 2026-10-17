@@ -59,8 +59,8 @@ def test_repository_container_release_contract_passes() -> None:
 
 
 def test_release_tag_matches_both_application_versions() -> None:
-    assert RELEASE_TAG.expected_release_tag(ROOT) == "v0.3.0"
-    assert RELEASE_TAG.validate_release_tag("v0.3.0", ROOT) == []
+    assert RELEASE_TAG.expected_release_tag(ROOT) == "release-v0.1.0"
+    assert RELEASE_TAG.validate_release_tag("release-v0.1.0", ROOT) == []
     assert "release tag mismatch" in RELEASE_TAG.validate_release_tag(
         "v0.2.1", ROOT
     )[0]
