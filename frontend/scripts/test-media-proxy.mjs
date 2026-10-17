@@ -32,7 +32,7 @@ const servers = await Promise.all([1, 2].map(async id => {
       response.writeHead(302, {location:"https://example.invalid/private"}); response.end(); return;
     }
     response.writeHead(request.url.includes("missing") ? 404 : request.headers.range ? 206 : 200,
-      {"content-type":"image/png", "content-range":"bytes 0-2/6", "accept-ranges":"bytes", "cache-control":"private, no-store", "x-private-info":"hidden", "set-cookie":"secret=hidden"});
+      {"content-type":"image/png", "content-range":"bytes 0-2/6", "accept-ranges":"bytes", "cache-control":"private, no-store", "x-private-info":"hidden", "set-cookie":"secret=hidden; HttpOnly; Secure; SameSite=Strict"});
     response.end(`id${id}`);
   });
   server.listen(0, "127.0.0.1"); await once(server,"listening"); return server;

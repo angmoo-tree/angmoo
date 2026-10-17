@@ -181,3 +181,11 @@ The expectation now includes the two new server handlers explicitly
 comparison and notification/static parity assertions remain. All eight scoped
 embedded inventory tests passed locally. This changes only the inventory test
 and this report; application/image inputs and test deadlines are unchanged.
+
+PR CodeQL alerts 22/23 identified missing HttpOnly/Secure flags on the synthetic
+upstream cookie in `frontend/scripts/test-media-proxy.mjs`. That test-only cookie
+now carries HttpOnly, Secure and SameSite=Strict. The test still requires the
+proxy response to omit Set-Cookie entirely; cookie forwarding, two upstreams,
+Range/HEAD, error/path refusal and stream abort checks all passed. No application
+authentication or runtime module changed. The test script enters the build
+context but is not a runtime image payload; P3 still builds the final main source.
