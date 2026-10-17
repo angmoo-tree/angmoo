@@ -10,6 +10,7 @@ import pytest
 from sqlalchemy import select
 
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.exceptions import SqliteBusyRetryExhausted
 from app.domains.routines.models import AgentPublicActionExecution, AgentRun, AgentSlot
 from app.domains.social.models.posts import PostLike
 from app.domains.world_characters.activity_models import ActivityGraphRun
@@ -221,13 +222,15 @@ def test_start_budget_finishes_active_delete_and_defers_next_target(tmp_path, mo
     asyncio.run(scenario())
 
 
-async def _overlap_workload(root, *, cleanup):
+async def _overlap_workload(root, *, cleanup, hold_canonical_writer=False):
     from langgraph.graph import StateGraph, START, END
     from app.domains.identity.models import User
     from social.test_feed_reaction_intent import _character
     engine, factory, ids = database(root)
     lanes = []
     progress, provider_calls, intervals, waits = {}, {}, {}, {}
+    previous_progress = {}
+    holder = None
     try:
         with factory() as db:
             owner = db.get(User, ids[0])
@@ -264,12 +267,14 @@ async def _overlap_workload(root, *, cleanup):
                 progress[name], provider_calls[name], intervals[name], waits[name] = [], 0, [], []
             async def activity(lane):
                 name, character_id, actor_id, activity_id = lane
-                previous = monotonic()
+                previous_progress.setdefault(name, monotonic())
+                async def prepare(state):
+                    # A completed provider node has its own checkpoint, as in
+                    # the product graph. Resuming a busy write must not call it.
+                    provider_calls[name] += 1
+                    return {"step": 0}
                 async def tick(state):
-                    nonlocal previous
                     step = state.get("step", 0) + 1
-                    if step == 1:
-                        provider_calls[name] += 1  # a deterministic fake model invocation
                     await asyncio.sleep(.01)
                     begin = monotonic()
                     def write():
@@ -294,24 +299,61 @@ async def _overlap_workload(root, *, cleanup):
                                     row.result = {**row.result, **result(count=1), RETENTION_KEY: CheckpointRetention(graph_complete=True).model_dump()}
                                     db.get(AgentRun, activity_id).status = "completed"
                             run_sqlite_session_immediate(db, transaction, require_clean=True)
-                    await asyncio.to_thread(write)
-                    ended = monotonic()
-                    waits[name].append(ended - begin); intervals[name].append(ended - previous)
-                    previous = ended; progress[name].append(step)
+                    try:
+                        await asyncio.to_thread(write)
+                    finally:
+                        ended = monotonic()
+                        waits[name].append(ended - begin)
+                    intervals[name].append(ended - previous_progress[name])
+                    previous_progress[name] = ended
+                    progress[name].append(step)
                     return {"step": step}
                 builder = StateGraph(dict)
+                builder.add_node("provider", prepare)
+                builder.add_edge(START, "provider")
                 for index in range(8):
                     builder.add_node(str(index), tick)
-                    builder.add_edge(START if index == 0 else str(index - 1), str(index))
+                    builder.add_edge("provider" if index == 0 else str(index - 1), str(index))
                 builder.add_edge("7", END)
                 graph = builder.compile(checkpointer=saver)
-                value = await graph.ainvoke({"step": 0}, {"configurable": {"thread_id": "activity:" + activity_id}})
+                config = {"configurable": {"thread_id": "activity:" + activity_id}}
+                saved = await graph.aget_state(config)
+                value = await graph.ainvoke(None if saved.values else {"step": 0}, config)
                 assert value["step"] == 8
             task = CheckpointMaintenance(data_root=root, session_factory=factory,
                 clock=lambda: NOW, limits=MaintenanceLimits(start_budget_seconds=30))
             started = monotonic()
-            results = await asyncio.gather(*(activity(lane) for lane in lanes), task.cycle() if cleanup else asyncio.sleep(0))
-            duration = monotonic() - started
+            if hold_canonical_writer:
+                holder = sqlite3.connect(engine.url.database)
+                holder.execute("BEGIN IMMEDIATE")
+            try:
+                results = await asyncio.gather(
+                    *(activity(lane) for lane in lanes),
+                    task.cycle() if cleanup else asyncio.sleep(0),
+                    return_exceptions=True,
+                )
+            finally:
+                if holder is not None:
+                    holder.rollback()
+                    holder.close()
+                    holder = None
+            initial_progress = {name: list(values) for name, values in progress.items()}
+            with factory() as db:
+                initial_public_effects = len(db.scalars(select(AgentPublicActionExecution)).all())
+            deferred_activities = {}
+            # A bounded writer can reject admission. Drain the initial owners,
+            # then redeliver each busy activity once from its saved checkpoint.
+            # Other failures and a failed recovery still fail this test.
+            for lane, outcome in zip(lanes, results[:-1]):
+                if isinstance(outcome, SqliteBusyRetryExhausted):
+                    assert outcome.reason_code == "sqlite_busy_retry_exhausted"
+                    assert outcome.sqlite_errorcode & 0xFF == sqlite3.SQLITE_BUSY
+                    deferred_activities[lane[0]] = 1
+                    await activity(lane)
+                elif isinstance(outcome, BaseException):
+                    raise outcome
+            if isinstance(results[-1], BaseException):
+                raise results[-1]
             assert all(value == list(range(1, 9)) for value in progress.values())
             assert provider_calls == {"A": 1, "B": 1, "C": 1}
             initial_cleanup = dict(task.last_cycle)
@@ -341,8 +383,13 @@ async def _overlap_workload(root, *, cleanup):
             "p95_write_seconds": flat[int((len(flat)-1)*.95)],
             "max_tick_gap_seconds": max(gap for values in intervals.values() for gap in values),
             "progress": progress, "provider_calls": provider_calls, "cleanup": initial_cleanup,
+            "deferred_activities": deferred_activities, "initial_progress": initial_progress,
+            "initial_public_effects": initial_public_effects,
             "followup_cleanup": followup_cleanup}
     finally:
+        if holder is not None:
+            holder.rollback()
+            holder.close()
         engine.dispose()
 
 
@@ -357,6 +404,23 @@ def test_three_characters_progress_with_normal_and_large_cleanup(tmp_path):
         assert enabled["p95_write_seconds"] < baseline["p95_write_seconds"] * 3 + .05
         assert enabled["max_tick_gap_seconds"] < max(1, baseline["max_tick_gap_seconds"] * 3)
         assert enabled["duration_seconds"] < baseline["duration_seconds"] * 3 + 1.5
+    asyncio.run(scenario())
+
+
+def test_three_characters_canonical_busy_resume_without_reexecution(tmp_path):
+    async def scenario():
+        enabled = await _overlap_workload(
+            tmp_path / "held", cleanup=True, hold_canonical_writer=True,
+        )
+        (tmp_path / "canonical-busy-workload-metrics.json").write_text(json.dumps(enabled, indent=2))
+        assert enabled["deferred_activities"] == {"A": 1, "B": 1, "C": 1}
+        assert enabled["initial_progress"] == {"A": [], "B": [], "C": []}
+        assert enabled["provider_calls"] == {"A": 1, "B": 1, "C": 1}
+        assert enabled["initial_public_effects"] == 0
+        assert enabled["cleanup"].get("pruned", 0) == 0
+        assert enabled["cleanup"]["deferred"] == 21
+        assert enabled["followup_cleanup"]["pruned"] == 21
+        assert all(values == list(range(1, 9)) for values in enabled["progress"].values())
     asyncio.run(scenario())
 
 
