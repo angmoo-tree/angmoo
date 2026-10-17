@@ -64,7 +64,8 @@ def session_members(record: dict) -> list[dict]:
     if record.get("boot_id") != Path("/proc/sys/kernel/random/boot_id").read_text().strip():
         return []  # no process from the old boot can survive
     try:
-        require(identity(record["pid"]) == record, "process_ownership_changed")
+        if identity(record["pid"]) != record:
+            return []  # PID reuse proves this is not the old private session
     except FileNotFoundError:
         pass  # the original session leader may already have exited
     members = []

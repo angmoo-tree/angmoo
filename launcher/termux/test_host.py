@@ -49,6 +49,7 @@ class HostTests(unittest.TestCase):
         process = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"], start_new_session=True)
         record = processes.identity(process.pid)
         try:
+            self.assertEqual(processes.session_members({**record, "start_ticks": "wrong"}), [])
             with self.assertRaisesRegex(ValueError, "process_ownership_changed"):
                 processes.stop_child(process, {**record, "start_ticks": "wrong"}, .1)
             self.assertIsNone(process.poll())
