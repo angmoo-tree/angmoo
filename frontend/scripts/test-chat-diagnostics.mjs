@@ -121,11 +121,11 @@ test("actual diagnostic component renders bilingual nulls and honest search stat
   const { I18nextProvider } = require("react-i18next");
   const i18next = require("i18next");
   function compile(path, imports) {
-    const module = {exports:{}};
+    const compiledModule = {exports:{}};
     const text = ts.transpileModule(readFileSync(new URL(path,import.meta.url),"utf8"),
       {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
-    new Function("require","module","exports",text)(name=>imports[name]??require(name),module,module.exports);
-    return module.exports;
+    new Function("require","module","exports",text)(name=>imports[name]??require(name),compiledModule,compiledModule.exports);
+    return compiledModule.exports;
   }
   const hook=compile("../src/hooks/use-ui-text.ts",{});
   const component=compile("../src/features/chat/components/temporal-db-diagnostics.tsx",{
@@ -180,11 +180,11 @@ test("shared Next/static search diagnostics render resolve, partial and legacy i
   const React = require("react"), {renderToStaticMarkup} = require("react-dom/server");
   const {I18nextProvider} = require("react-i18next"), i18next = require("i18next");
   function compile(path, imports) {
-    const module = {exports:{}};
+    const compiledModule = {exports:{}};
     const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"),
       {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
-    new Function("require", "module", "exports", js)(name => imports[name] ?? require(name), module, module.exports);
-    return module.exports;
+    new Function("require", "module", "exports", js)(name => imports[name] ?? require(name), compiledModule, compiledModule.exports);
+    return compiledModule.exports;
   }
   const hook = compile("../src/hooks/use-ui-text.ts", {});
   const Component = compile("../src/features/chat/components/search-trace-details.tsx", {
