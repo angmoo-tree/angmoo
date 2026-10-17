@@ -41,7 +41,10 @@ def _candidate_record(
             counterpart_world_character_id=item.counterpart_world_character_id,
             thread_id=item.thread_id,
             evidence_references=evidence_references,
-            metadata={"memory_kind": item.memory_kind, "item_version": str(item.version)},
+            metadata={"memory_kind": item.memory_kind, "item_version": str(item.version),
+                "event_time_from": min(_as_utc(value.source_created_at) for _row, value in current).isoformat(),
+                "event_time_to": max(_as_utc(value.source_created_at) for _row, value in current).isoformat(),
+                "recorded_at": _as_utc(item.created_at).isoformat()},
         )
 
     evidence_id = candidate.metadata.get("evidence_id")

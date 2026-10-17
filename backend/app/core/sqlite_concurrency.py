@@ -125,6 +125,7 @@ def run_sqlite_immediate(
                                 total_ms=round((monotonic() - started) * 1000, 3))
                         return result
                     except BaseException:
+                        observation.emit("sqlite", boundary="rollback_started", attempt=attempt)
                         connection.rollback()
                         observation.emit("sqlite", boundary="rolled_back", attempt=attempt)
                         raise
@@ -168,7 +169,9 @@ def run_sqlite_immediate(
             break
         _notify(observer, result="retry_wait", attempt=attempt,
                 retry_delay_ms=round(sleep_for * 1000, 3))
+        observation.emit("sqlite", boundary="retry_wait_started", attempt=attempt)
         sleep(sleep_for)
+        observation.emit("sqlite", boundary="retry_wait_complete", attempt=attempt)
         delay = min(
             max(delay * 2, policy.initial_delay_seconds), policy.maximum_delay_seconds
         )
@@ -250,6 +253,8 @@ def run_sqlite_session_immediate(
                     observation.emit("sqlite", boundary="committed", attempt=attempt)
                 finally:
                     try:
+                        if not committed and acquired_at is not None:
+                            observation.emit("sqlite", boundary="rollback_started", attempt=attempt)
                         session.rollback()
                         if not committed and acquired_at is not None:
                             observation.emit("sqlite", boundary="rolled_back", attempt=attempt)
@@ -291,7 +296,9 @@ def run_sqlite_session_immediate(
             break
         _notify(observer, result="retry_wait", attempt=attempt,
                 retry_delay_ms=round(sleep_for * 1000, 3))
+        observation.emit("sqlite", boundary="retry_wait_started", attempt=attempt)
         sleep(sleep_for)
+        observation.emit("sqlite", boundary="retry_wait_complete", attempt=attempt)
         delay = min(
             max(delay * 2, policy.initial_delay_seconds), policy.maximum_delay_seconds
         )

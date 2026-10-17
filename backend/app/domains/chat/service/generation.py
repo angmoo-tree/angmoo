@@ -8,6 +8,9 @@ import asyncio
 import json
 
 from app.domains.chat.service.diagnostic_capture import capture
+from app.domains.chat.service.db_observation import observe_admission, observe_generation
+from app.core.session_write_observation import finish_session
+from app.core.work_observation import contextual
 
 import logging
 from collections.abc import AsyncIterator
@@ -63,6 +66,7 @@ from app.domains.chat.contracts.supervisor_selection import (
     NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, read_selection_protocol,
 )
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
+from app.domains.chat.contracts.temporal_recall import ChatTimeContext, TIME_CONTEXT_KEY, TEMPORAL_SELECTION_PROTOCOL
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
 RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
@@ -86,6 +90,7 @@ class GenerationService:
         self.images = images
         self.memory_policy = memory_policy
 
+    @observe_admission
     def accept_world_message(
         self,
         db: Session,
@@ -122,8 +127,11 @@ class GenerationService:
         request_metadata = self._request_names(db, user, thread)
         selected_model = self.thread_service.resolve_world_thread_response_model(db, user, thread)
         now = datetime.now(UTC)
+        if request_metadata.get(SELECTION_PROTOCOL_KEY) == TEMPORAL_SELECTION_PROTOCOL:
+            request_metadata[TIME_CONTEXT_KEY] = ChatTimeContext.create(now,
+                EnvironmentSnapshot.from_dict(request_metadata["_environment"]).timezone).payload()
         message = models.MessageMessage(
-            thread_id=thread.id, role="user", content=content, model=None, status="ok"
+            thread_id=thread.id, role="user", content=content, model=None, status="ok", created_at=now
         )
         db.add(message)
         db.flush()
@@ -160,7 +168,7 @@ class GenerationService:
                 request_metadata=request_metadata,
             )
         )
-        db.commit()
+        finish_session(db)
         db.refresh(message)
         capture.admit((user.id, world_id, thread_id), record.request_id)
         return schemas.WorldChatMessageAcceptRead(
@@ -169,6 +177,7 @@ class GenerationService:
             response_request=self._record_read(db, record),
         )
 
+    @observe_admission
     def retry_world_response(
         self,
         db: Session,
@@ -233,10 +242,21 @@ class GenerationService:
         # World edits must not replace a saved name or introduce a new snapshot.
         retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy")
             if key in prior_metadata}
-        if settings.CHAT_RECALL_MODE == "social_hybrid" and "chat_identity_context.v1" in prior_metadata:
-            retry_metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
-        elif prior_protocol is not None:
+        if prior_protocol is not None:
             retry_metadata[SELECTION_PROTOCOL_KEY] = prior_protocol
+        if prior_protocol == TEMPORAL_SELECTION_PROTOCOL:
+            context = ChatTimeContext.read(prior_metadata.get(TIME_CONTEXT_KEY))
+            original_time = message.created_at.replace(tzinfo=UTC) if message.created_at.tzinfo is None else message.created_at
+            if (context.instant != original_time or context.timezone !=
+                EnvironmentSnapshot.from_dict(prior_metadata["_environment"]).timezone):
+                raise MessageValidationError("chat_time_context_binding_invalid")
+            retry_metadata[TIME_CONTEXT_KEY] = context.payload()
+        elif (settings.CHAT_RECALL_MODE == "social_hybrid" and "chat_identity_context.v1" in prior_metadata
+              and "_environment" in prior_metadata and message.created_at is not None):
+            # An explicit retry can adopt v4 only from the admitted original input.
+            original_time = message.created_at.replace(tzinfo=UTC) if message.created_at.tzinfo is None else message.created_at
+            context = ChatTimeContext.create(original_time, EnvironmentSnapshot.from_dict(prior_metadata["_environment"]).timezone)
+            retry_metadata.update({SELECTION_PROTOCOL_KEY: TEMPORAL_SELECTION_PROTOCOL, TIME_CONTEXT_KEY: context.payload()})
         if "_world_configuration" in prior_metadata:
             self._request_configuration(thread, prior_metadata)
             retry_metadata["_world_configuration"] = prior_metadata["_world_configuration"]
@@ -270,7 +290,7 @@ class GenerationService:
                     "_image_excluded": exclude_image},
             )
         )
-        db.commit()
+        finish_session(db)
         capture.admit((user.id, world_id, thread_id), record.request_id)
         return schemas.WorldChatMessageAcceptRead(
             outcome="accepted",
@@ -343,7 +363,7 @@ class GenerationService:
             world_id=thread.world_id, actor_id=thread.responding_world_character_id,
             environment=EnvironmentSnapshot.from_dict(metadata["_environment"])) if self.memory_policy else None
         if settings.CHAT_RECALL_MODE == "social_hybrid":
-            metadata[SELECTION_PROTOCOL_KEY] = ADVISORY_SELECTION_PROTOCOL
+            metadata[SELECTION_PROTOCOL_KEY] = TEMPORAL_SELECTION_PROTOCOL
         return metadata
 
     def _request_configuration(self, thread, metadata):
@@ -361,13 +381,14 @@ class GenerationService:
         except (ValueError, TypeError, KeyError, AttributeError) as exc:
             raise MessageValidationError("world_configuration_snapshot_invalid") from exc
 
+    @contextual(chat_stage="cancel_or_failure")
     def _recover_if_expired(self, db: Session, record):
         now = datetime.now(UTC)
         if record.state in TERMINAL_STATES or record.deadline_at > now:
             return record
         repository = SqlAlchemyResponseLifecycleRepository(db)
         repository.recover_expired_requests(now=now, limit=100)
-        db.commit()
+        finish_session(db)
         return repository.get_request(record.request_id)
 
     def _request_read(
@@ -416,6 +437,7 @@ class GenerationService:
             },
         )
 
+    @contextual(chat_stage="cancel_or_failure")
     async def _fail_before_workflow(
         self,
         db: Session,
@@ -437,11 +459,11 @@ class GenerationService:
             now=now,
             lease_expires_at=min(record.deadline_at, now + timedelta(seconds=30)),
         )
-        db.commit()
+        finish_session(db)
         fence = self._fence(record)
         accepted = self._event(record, GenerationEventType.ACCEPTED, 0)
         lifecycle.accept_event(fence, accepted, now=datetime.now(UTC))
-        db.commit()
+        finish_session(db)
         yield accepted
         record = SqlAlchemyResponseLifecycleRepository(db).get_request(
             record.request_id
@@ -467,7 +489,7 @@ class GenerationService:
             failure_class=failure_class,
             now=datetime.now(UTC),
         )
-        db.commit()
+        finish_session(db)
         yield failed
 
     def _terminal_event(self, record) -> GenerationEvent:
@@ -519,6 +541,7 @@ class GenerationService:
             protocol_version=CHAT_GENERATION_STREAM_VERSION,
         )
 
+    @observe_generation
     async def stream_world_response(
         self,
         db: Session,
@@ -557,9 +580,18 @@ class GenerationService:
             self._validate_request_names(db, user, thread, record)
             configuration = self._request_configuration(thread, record.node_state)
             protocol = read_selection_protocol(record.node_state)
+            if protocol == TEMPORAL_SELECTION_PROTOCOL:
+                try:
+                    fixed_time = ChatTimeContext.read(record.node_state.get(TIME_CONTEXT_KEY))
+                    original_time = message.created_at.replace(tzinfo=UTC) if message.created_at.tzinfo is None else message.created_at
+                    if (fixed_time.instant != original_time or fixed_time.timezone !=
+                        EnvironmentSnapshot.from_dict(record.node_state["_environment"]).timezone):
+                        raise ValueError("chat_time_context_binding_invalid")
+                except (ValueError, TypeError, KeyError):
+                    raise RetrievalContractError("chat_time_context_invalid") from None
             if protocol is not None and runtime_settings.CHAT_RECALL_MODE != "social_hybrid":
                 raise RetrievalContractError("selection_protocol_mode_mismatch")
-            if protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and "chat_identity_context.v1" not in record.node_state:
+            if protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL} and "chat_identity_context.v1" not in record.node_state:
                 raise RetrievalContractError("selection_protocol_identity_required")
         except RetrievalContractError:
             async for event in self._fail_before_workflow(db, record,
@@ -669,7 +701,7 @@ class GenerationService:
                     timezone=environment.timezone,
                     character_labels=character_labels,
                     label_reader=lambda ids: self.workflows.character_names(db, world_id, ids),
-                    now=datetime.now(UTC),
+                    now=fixed_time.instant if protocol == TEMPORAL_SELECTION_PROTOCOL else datetime.now(UTC),
                 )
             except Exception as exc:
                 logger.warning(

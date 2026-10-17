@@ -169,6 +169,11 @@ class SqlAlchemyEpisodeHybridReader:
                     "followup_truncated": str(updates.truncated).lower()}
                 # Only source refs actually retained after packet budgeting.
                 retained = {source.get("reference", source.get("ref")) for unit in value["units"] for source in unit["sources"]}
+                times = [_aware(source.occurred_at) for unit in packet.units for source in unit.sources
+                    if source.status == "verified" and source.occurred_at is not None
+                    and episode_provider_reference("source", source.reference) in retained]
+                metadata.update(event_time_from=min(times).isoformat() if times else "",
+                    event_time_to=max(times).isoformat() if times else "", recorded_at=_aware(item.created_at).isoformat())
                 metadata["source_authors"] = json.dumps([
                     [episode_provider_reference("source", source.reference), source.author_id]
                     for unit in packet.units for source in unit.sources

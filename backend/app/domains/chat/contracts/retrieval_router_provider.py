@@ -10,6 +10,7 @@ import json
 from typing import Protocol
 from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
+from app.domains.chat.contracts.temporal_recall import ChatTimeContext, TEMPORAL_SELECTION_PROTOCOL
 
 from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
@@ -71,11 +72,14 @@ class RetrievalRouterRequest:
     image_context: str | None = None
     chat_identity: ChatIdentityContext | None = None
     selection_protocol: str | None = None
+    time_context: ChatTimeContext | None = None
 
     def __post_init__(self) -> None:
-        if self.selection_protocol not in (None, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL):
+        if self.selection_protocol not in (None, NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL):
             raise RetrievalContractError("selection_protocol_invalid")
-        if self.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and self.chat_identity is None:
+        if self.selection_protocol == TEMPORAL_SELECTION_PROTOCOL and not isinstance(self.time_context, ChatTimeContext):
+            raise RetrievalContractError("chat_time_context_required")
+        if self.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL} and self.chat_identity is None:
             raise RetrievalContractError("selection_protocol_identity_required")
         if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):
             raise RetrievalContractError("retrieval_image_context_invalid")

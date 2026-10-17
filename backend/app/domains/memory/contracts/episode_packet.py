@@ -1,6 +1,7 @@
 """Scoped, revalidated episode detail passed to one response or SNS writer."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Literal
 from collections.abc import Mapping
 from typing import Protocol
@@ -37,6 +38,7 @@ class EpisodePacketSource:
     start_offset: int = 0
     end_offset: int | None = None
     author_id: str | None = None
+    occurred_at: datetime | None = None
 
     def __post_init__(self):
         if not self.reference or self.status not in {"verified", "missing", "changed", "unavailable"}:

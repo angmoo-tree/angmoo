@@ -19,6 +19,7 @@ from app.contracts.environment import EnvironmentSnapshot
 from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext, IDENTITY_KEY
 from app.domains.chat.contracts.generation_lifecycle import GenerationEventType
 from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, SELECTION_PROTOCOL_KEY, LEGACY_HYBRID_PROTOCOL
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_SELECTION_PROTOCOL, TIME_CONTEXT_KEY
 from app.domains.chat.schemas import WorldChatMessageCreate, WorldChatRetryCreate
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.activity_situation import MemorySituationReceipt, MemorySituationManifest
@@ -95,7 +96,8 @@ def test_protocol_replay_and_explicit_retry_preserve_the_original_admission(resp
     retry = generation_service.retry_world_response(db, owner, "p-world", "p-thread", retry_data)
     repeated = generation_service.retry_world_response(db, owner, "p-world", "p-thread", retry_data)
     new = metadata(db, retry.response_request.request_id)
-    assert new[SELECTION_PROTOCOL_KEY] == ADVISORY_SELECTION_PROTOCOL
+    assert new[SELECTION_PROTOCOL_KEY] == TEMPORAL_SELECTION_PROTOCOL
+    assert new[TIME_CONTEXT_KEY] == old[TIME_CONTEXT_KEY]
     for key in ("name_binding_policy", "name_binding", "_world_credential", IDENTITY_KEY,
                 "_world_configuration", "_environment", "_situation_policy"):
         assert new[key] == old[key]

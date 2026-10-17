@@ -109,6 +109,7 @@ export type WorldChatEvidenceItemRead = {
   excerpt: string | null;
   occurred_at: string | null;
   availability: MemoryEvidenceAvailability;
+  time_provenance?: { kind: "event" | "interval" | "recorded" | "unknown"; event_from: string | null; event_to: string | null; recorded_at: string | null } | null;
   related_character: string | null;
   direction: "incoming" | "outgoing" | "contextual" | null;
   canonical_href: string | null;

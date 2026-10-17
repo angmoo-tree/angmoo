@@ -9,9 +9,10 @@ unbounded semantic values before any canonical lookup runs.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 from typing import Any
+from app.domains.chat.contracts.temporal_recall import TemporalRecall
 from app.domains.chat.contracts.reference_observation import reference_entity, reference_value, reference_failure
 
 from app.domains.chat.contracts.retrieval_intent import (
@@ -116,6 +117,9 @@ ROUTER_SECURITY_VALIDATION_CODES = frozenset(
 )
 
 _ROUTER_VALIDATION_CODE_MAP = {
+    "retrieval_intent_time_meaning_invalid": "time_scope_invalid",
+    "retrieval_search_text_invalid": "top_level_keys_invalid",
+    "retrieval_router_payload_limit_exceeded": "top_level_keys_invalid",
     "retrieval_workflow_intent_not_registered": "coordination_intent_unsupported",
     "retrieval_router_native_output_incomplete": "native_output_incomplete",
     "JSONDecodeError": "json_decode_failed",
@@ -435,7 +439,8 @@ def parse_retrieval_intent_payload(
     *,
     validation_step: Callable[[str, str], None] | None = None,
     exact_mentions: bool = False,
-) -> RetrievalIntentEnvelope:
+    temporal_candidate: bool = False,
+) -> RetrievalIntentEnvelope | tuple[RetrievalIntentEnvelope, TemporalRecall]:
     """Parse one untrusted Router payload with exact-key validation."""
 
     if not isinstance(payload, Mapping):
@@ -487,7 +492,9 @@ def parse_retrieval_intent_payload(
     relationship = _parse_relationship(payload.get("relationship"))
     step("relationship", "pass")
     step("meaning", "running")
-    time_scope = _parse_time_scope(payload.get("time_scope"))
+    # v4 validates every non-time invariant before interpreting invalid time.
+    # Older protocols keep their validation order and semantic hashes.
+    time_scope = None if temporal_candidate else _parse_time_scope(payload.get("time_scope"))
     aggregation = _parse_aggregation(payload.get("aggregation"))
     step("meaning", "pass")
     step("coordination", "running")
@@ -525,7 +532,50 @@ def parse_retrieval_intent_payload(
     # and aggregation meaning while requiring no additional database plan.
     if route is not RetrievalRoute.CLARIFICATION and clarification_slot is not None:
         raise RetrievalContractError("retrieval_router_clarification_route_mismatch")
+    if temporal_candidate:
+        value = payload.get("time_scope")
+        try:
+            meaning = _parse_time_scope(value)
+        except RetrievalContractError as exc:
+            if router_validation_code_from_exception(exc) != "time_scope_invalid":
+                raise
+            raw = value if isinstance(value, dict) else {}
+            kind = raw.get("kind")
+            expression = raw.get("expression")
+            temporal = TemporalRecall("invalid",
+                requested_kind=kind if isinstance(kind, str) and kind in {v.value for v in RetrievalTimeKind} else None,
+                expression=expression if isinstance(expression, str) and len(expression) <= 96 else None,
+                validation_code="time_scope_invalid", field_path=_time_error_path(raw), resolution="invalid")
+        else:
+            temporal = TemporalRecall("not_requested" if meaning is None else "valid",
+                requested_kind=None if meaning is None else meaning.kind.value,
+                expression=None if meaning is None else meaning.expression)
+            envelope = replace(envelope, time_scope=meaning)
+        return envelope, temporal
     return envelope
+
+
+def validate_selection_material(value):
+    """Inspect the complete v4 wire, including fields later normalized away."""
+    if len(json.dumps(value, ensure_ascii=False).encode("utf-8")) > 16_384:
+        raise RetrievalContractError("retrieval_router_payload_limit_exceeded")
+    _reject_forbidden_material(value)
+
+
+def validated_recall_query(value):
+    if type(value) is not str or not value.strip() or len(value) > 4000:
+        raise RetrievalContractError("retrieval_search_text_invalid")
+    validate_selection_material(value)
+    return value.strip()
+
+
+def _time_error_path(raw):
+    if not isinstance(raw.get("kind"), str) or raw["kind"] not in {v.value for v in RetrievalTimeKind}:
+        return "time_scope.kind"
+    for key, expected in (("expression", str), ("unit", str), ("offset", int), ("period", str), ("timezone", str)):
+        if raw.get(key) is not None and type(raw[key]) is not expected:
+            return "time_scope." + key
+    return "time_scope"
 
 
 def _parse_relationship(value: Any) -> RetrievalRelationshipMeaning | None:

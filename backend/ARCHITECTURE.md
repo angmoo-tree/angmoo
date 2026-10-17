@@ -1332,7 +1332,7 @@ The existing SQLite helpers retain their admission/retry/cleanup contracts.
 Their spans distinguish checkout, BEGIN wait, acquired writer, commit, rollback
 and cleanup. Vec1/FTS spans use distinct database identities; nested holds are
 not additive. Common helpers expose safe operation names for competing writers;
-plain Session writes and other processes remain unobserved. Scheduler leases,
+plain Session writes outside the opt-in Chat capture and other processes remain unobserved. Scheduler leases,
 World deletion checks and manual relationship checks are unchanged.
 
 The pinned Gemini async adapter observes actual HTTPX attempts via public hooks.
@@ -1352,3 +1352,52 @@ package are reported unavailable, not treated as a recorder crash.
 Local evidence: [Home and memory observation verification](../docs/verification/device-home-memory-observation-20261016.md).
 
 Lifecycle follow-up: [session finalization verification](../docs/verification/observer-session-finalization-20261016.md).
+
+
+## Chat temporal recall v4 and opt-in DB timing (2026-10-17)
+
+New social-hybrid admission uses `selection-args.hybrid.v4` and `hybrid-admission.v4`.
+Chat owns the immutable `chat-time-context.v1` derived from the original message
+acceptance and admitted timezone. Initial selection, one repair, the resolver and
+Today SNS assembly use that reference; authorization, deletion and execution
+budgets continue to use current state/time. Replay never rewrites v1-v3 metadata
+or hashes. An explicit retry upgrades only when original message time, environment
+and identity are verified; it does not use the retry date as the question date.
+
+The selection boundary validates the entire non-time contract and forbidden
+material before retaining a closed invalid-time candidate. Valid time meanings
+remain strict. Only time-invalid/time-ambiguous requests may perform one bounded
+related recall without dates. USE_CONTEXT and time-only clarification may use the
+validated original question with code-owned query provenance and tool tracking.
+Bad CANONICAL queries, permissions, transport failure and cancellation do not gain
+this path. A valid date-filtered empty result stays empty. No extra planner, model
+repair loop, unbounded retrieval or permission relaxation is introduced.
+
+Temporal state, query origin, reference digest and applied bounds join intent,
+resolved, interpretation and evidence bindings. v4 evidence carries verified
+source event time, source interval, recording time or unknown. Private prepared
+timestamps do not change v1-v3 evidence hashes. Episode timestamps come only from
+verified sources retained by packet budgeting, never dates inferred from prose.
+The actual CRG input distinguishes bounded related evidence from complete history
+and forbids moving old events to the requested day. Existing source currentness,
+World fences, atomic response/situation receipt and final commit remain owners.
+
+`core.work_observation` has an optional request-local ContextVar listener alongside
+the existing process observer. Chat's existing DiagnosticCapture supplies scoped
+generation/TTL admission; no table, file, timer, worker or global sink replacement
+is added. Admission is measured before its ID exists and bound after acceptance.
+Existing Session commit/rollback calls are wrapped through return, without new
+SQL, changed isolation, flush, commit or retry policy. General Session writes are
+`write_span_only`; only observed BEGIN IMMEDIATE acquisition through commit or
+rollback is a known writer hold. Nested diagnostic SAVEPOINT time is a subset,
+not another hold. Post-commit writes and failure/cancel cleanup are separately
+labelled. Final timing is held in memory and read without another persistence step.
+
+Collectors cap detail at 64 attempts, preserve constant-size completed summaries,
+share the 64 KiB export and existing 20 result/1 MiB limits, and expose unknown as
+null. Capture OFF/generation replacement/TTL stops callbacks, restart is OFF,
+and completed snapshots may remain within the existing retention period until
+explicit clearing. Collector failure never retries or fails business work.
+Plain Session intervals cannot identify another worker's wait cause.
+
+Local evidence and limits: [Chat temporal recall verification](../docs/verification/chat-temporal-recall-20261017.md).

@@ -1,6 +1,7 @@
 """Code-owned deterministic Evidence Bundle assembly."""
 
 from __future__ import annotations
+from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.contracts.search_diagnostics import collector, lineage, record_identity, evidence_identities
 
 from app.contracts.retrieval_observation import observe
@@ -316,7 +317,8 @@ class EvidenceBundleAssembler:
                 kind=EvidenceKind.EPISODE_MEMORY if record.metadata.get("episode_packet") == "v1" else EvidenceKind.CANONICAL_SOURCE,
                 text=record.text if record.metadata.get("episode_packet") == "v1" else EvidenceBundleAssembler._bounded_text(record.text),
                 occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
-                locator=_record_locator(record), author_identities=_record_authors(record))
+                locator=_record_locator(record), author_identities=_record_authors(record),
+                prepared_times=_record_times(record))
                 for record in result.recall.records if record.text.strip())
             if collector() is not None:
                 for record, item in zip((r for r in result.recall.records if r.text.strip()), items):
@@ -530,6 +532,7 @@ class EvidenceBundleAssembler:
                 kind=existing.kind,
                 text=existing.text,
                 occurred_at=occurred_at,
+                prepared_times=existing.prepared_times if existing.prepared_times == item.prepared_times else ("unknown", None, None, None),
                 axes=axes,
                 locator=existing.locator or item.locator,
                 author_identities=tuple(dict.fromkeys((*existing.author_identities, *item.author_identities))),
@@ -708,3 +711,17 @@ def _record_authors(record):
         return tuple(tuple(pair) for pair in values)
     identifier = record.metadata.get("source_author")
     return (("source", identifier),) if identifier else ()
+
+
+def _record_times(record):
+    """Use only canonical record metadata; never infer dates from summary prose."""
+    if record.kind is RecallDocumentKind.MEMORY_ITEM:
+        start = record.metadata.get("event_time_from") or None
+        end = record.metadata.get("event_time_to") or None
+        recorded = record.metadata.get("recorded_at") or None
+        kind = ("interval" if start and end and start != end else "event" if start else
+            "recorded" if recorded and record.metadata.get("episode_packet") != "v1" else "unknown")
+        return (kind, start, end, recorded)
+    occurred = EvidenceBundleAssembler._aware(record.occurred_at)
+    timestamp = None if occurred is None else occurred.isoformat()
+    return ("event" if timestamp else "unknown", timestamp, None, None)

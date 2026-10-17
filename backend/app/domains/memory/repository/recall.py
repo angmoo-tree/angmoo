@@ -336,7 +336,8 @@ class SqlAlchemyCanonicalRecallRepository:
                     records.append(CanonicalRecallRecord(candidate.document_id, RecallDocumentKind.MEMORY_ITEM,
                         item.id, item.summary, _as_utc(item.valid_from), memory_item_id=item.id,
                         counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
-                        metadata={"item_version": str(item.version), "memory_kind": item.memory_kind, "representation": "activity_situation_v1"}))
+                        metadata={"item_version": str(item.version), "memory_kind": item.memory_kind,
+                            "representation": "activity_situation_v1", "recorded_at": _as_utc(item.created_at).isoformat()}))
                     seen.add(candidate.document_id)
                     continue
                 statement = select(MemoryItemEvidence).where(

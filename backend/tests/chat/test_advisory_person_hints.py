@@ -75,7 +75,7 @@ def test_bounds_duplicate_roles_and_fingerprint():
 def test_real_admission_provider_commit_without_hint_repair(response_session, monkeypatch, hints, control):
     from app.integrations import direct_llm
     db = response_session
-    owner, accepted, _ = admission(db, monkeypatch, memory=True, protocol=None)
+    owner, accepted, _ = admission(db, monkeypatch, memory=True, protocol=ADVISORY_SELECTION_PROTOCOL)
     calls = []
     async def provider(**kwargs):
         assert not db.in_transaction()

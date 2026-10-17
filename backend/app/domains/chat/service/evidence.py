@@ -373,7 +373,18 @@ class EvidenceService:
             episode=episode,
             relationship_change=relationship_change,
             relationship_projection=relationship_projection,
+            time_provenance=_time_provenance(raw) if availability == "available" else None,
         )
+
+
+def _time_provenance(raw):
+    value = raw.get("time_provenance")
+    if value is None:
+        return None  # Historical evidence has no verified time semantics.
+    try:
+        return schemas.EvidenceTimeRead.model_validate(value)
+    except (ValueError, TypeError):
+        return schemas.EvidenceTimeRead(kind="unknown")
 
 
 def _optional_datetime(value: Any) -> datetime | None:

@@ -6,7 +6,7 @@ import ts from "typescript";
 const source = readFileSync("src/features/memory/utils/chat-evidence-presentation.ts", "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 }, reportDiagnostics: true });
 assert.equal(compiled.diagnostics.length, 0);
-const { relationshipFieldsMatch, evidenceLimitationsMatch, evidenceWarnings, relationshipStatus } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputText).toString("base64")}`);
+const { evidenceTimes, evidenceTimeMatches, relationshipFieldsMatch, evidenceLimitationsMatch, evidenceWarnings, relationshipStatus } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputText).toString("base64")}`);
 const item = () => ({ kind: "graph_relationship", availability: "available", excerpt: "Original perception", related_character: "Original name", direction: "outgoing", canonical_href: null,
   relationship_change: "changed", relationship_projection: { familiarity: 22, affinity: -3, trust: 10, tension: 4, interactions: 5, relationship_label: null, perception: "Original perception" } });
 const read = () => ({ capability: "available", retrieval_limitations: { partial_axes: [], degraded_reason: null }, read_limitations: [] });
@@ -55,5 +55,23 @@ test("all new visible copy exists in both feature catalogs", () => {
     const catalog = JSON.parse(readFileSync(`src/features/memory/locales/${language}.json`, "utf8"));
     for (const key of keys) assert.ok(typeof catalog[key] === "string" && catalog[key].length, `${language}: ${key}`);
     assert.equal((catalog[keys.at(-1)].match(/{{\w+}}/g) ?? []).length, 5);
+  }
+});
+
+
+test("evidence timestamps distinguish events, source intervals and later recording",()=>{
+  const base={kind:"episode_memory",availability:"available",occurred_at:"2026-10-17T00:00:00Z"};
+  assert.equal(evidenceTimes(base)[0].label,"기록된 시각·사건 시각 여부 미확인");
+  const time={kind:"interval",event_from:"2026-10-15T00:00:00Z",event_to:"2026-10-16T00:00:00Z",recorded_at:"2026-10-17T00:00:00Z"};
+  assert.equal(evidenceTimeMatches({...base,time_provenance:time}),true);
+  const rows=evidenceTimes({...base,time_provenance:time});
+  assert.deepEqual(rows.map(row=>row.value),[time.event_from,time.event_to,time.recorded_at]);
+  assert.equal(rows[2].label,"기억 기록 시각·사건 시각 아님");
+  assert.deepEqual(evidenceTimes({...base,time_provenance:{kind:"unknown",event_from:null,event_to:null,recorded_at:null}}),[{label:"사건 시각 미확인",value:null}]);
+  assert.equal(evidenceTimeMatches({...base,time_provenance:{...time,event_from:"not-a-date"}}),false);
+  assert.equal(evidenceTimeMatches({...base,availability:"unavailable",time_provenance:time}),false);
+  for(const language of ["ko","en"]){
+    const catalog=JSON.parse(readFileSync(`src/features/memory/locales/${language}.json`,"utf8"));
+    for(const row of rows)assert.ok(catalog[row.label]);
   }
 });

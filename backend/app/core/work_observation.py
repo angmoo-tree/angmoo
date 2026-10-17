@@ -8,7 +8,7 @@ from contextvars import ContextVar
 from datetime import UTC, datetime
 from functools import wraps
 from hashlib import sha256
-from inspect import iscoroutinefunction
+from inspect import iscoroutinefunction, isasyncgenfunction
 from os.path import abspath, normcase
 from time import monotonic_ns
 from uuid import uuid4
@@ -16,6 +16,27 @@ from uuid import uuid4
 _sink = None
 _generation = None
 _context = ContextVar("work_observation", default={})
+_local = ContextVar("work_observation_local", default=None)
+
+
+def _local_active():
+    entry = _local.get()
+    if entry is not None:
+        try:
+            return entry if entry[1]() else None
+        except Exception:
+            pass
+    return None
+
+
+@contextmanager
+def local_observer(sink, active):
+    """Request-owned listener; never replace a process-wide observer."""
+    token = _local.set((sink, active))
+    try:
+        yield
+    finally:
+        _local.reset(token)
 
 
 def install(sink):
@@ -30,7 +51,7 @@ def install(sink):
 
 
 def enabled():
-    return _sink is not None
+    return _sink is not None or _local_active() is not None
 
 
 def facts():
@@ -39,7 +60,7 @@ def facts():
 
 @contextmanager
 def scope(**values):
-    if _sink is None:
+    if not enabled():
         yield
         return
     token = _context.set({"_observation_generation": _generation, **_context.get(), **values})
@@ -51,20 +72,32 @@ def scope(**values):
 
 def emit(event, **values):
     sink = _sink
+    local = _local_active()
+    if sink is None and local is None:
+        return
+    try:
+        stamp = monotonic_ns()
+    except Exception:
+        return
     if sink is not None:
         try:
             if _context.get().get("_observation_generation", _generation) != _generation:
                 sink({"event": "diagnostic_loss", "reason": "previous_observer_generation"})
-                return
-            sink({**_context.get(), **values, "event": event,
-                  "monotonic_ns": monotonic_ns(), "occurred_at": datetime.now(UTC).isoformat()})
+            else:
+                sink({**_context.get(), **values, "event": event,
+                      "monotonic_ns": stamp, "occurred_at": datetime.now(UTC).isoformat()})
         except Exception:
             pass  # Diagnostic failure never replays or fails business work.
+    if local is not None:
+        try:
+            local[0]({**_context.get(), **values, "event": event, "monotonic_ns": stamp})
+        except Exception:
+            pass
 
 
 @contextmanager
 def span(operation, **values):
-    if _sink is None:
+    if not enabled():
         yield
         return
     with scope(**{**values, "operation": operation, "span_id": uuid4().hex,
@@ -99,10 +132,28 @@ def database_id(path):
     return sha256(normcase(abspath(str(path))).encode()).hexdigest() if path and path != ":memory:" else "in_memory"
 
 
+def contextual(**values):
+    """Label existing work without a new transaction, task, timer or sink."""
+    def decorate(function):
+        if isasyncgenfunction(function):
+            @wraps(function)
+            async def stream(*args, **kwargs):
+                with scope(**values):
+                    async for item in function(*args, **kwargs):
+                        yield item
+            return stream
+        @wraps(function)
+        def invoke(*args, **kwargs):
+            with scope(**values):
+                return function(*args, **kwargs)
+        return invoke
+    return decorate
+
+
 def sqlite_observed(function):
     @wraps(function)
     def wrapped(owner, operation, *args, **kwargs):
-        if _sink is None:
+        if not enabled():
             return function(owner, operation, *args, **kwargs)
         bind = owner.get_bind() if hasattr(owner, "get_bind") else owner
         identity = database_id(bind.engine.url.database)

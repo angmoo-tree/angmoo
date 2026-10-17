@@ -6,6 +6,7 @@ import json
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.contracts.person_roles import PERSON_ROLES
 from app.domains.chat.contracts.person_hints import PersonHints
+from app.domains.chat.contracts.temporal_recall import TemporalRecall, TEMPORAL_ADMISSION_REVISION
 
 HYBRID_ADMISSION_REVISION = "hybrid-admission.v1"
 NAMED_ADMISSION_REVISION = "hybrid-admission.v2"
@@ -35,17 +36,21 @@ class RecallInterpretationContext:
     person_roles: tuple[str, ...] = ()
     person_hints: PersonHints | None = None
     identity_digest: str | None = None
+    temporal: TemporalRecall | None = None
+    retrieval_executed: bool = False
 
     def __post_init__(self):
         if (not isinstance(self.mentions, tuple) or any(not isinstance(row, tuple) or len(row) != 3 for row in self.mentions)
             or any(value is not None and not isinstance(value, tuple) for value in (self.direction, self.time_bounds))):
             raise RetrievalContractError("recall_interpretation_mutable_input")
+        if (self.revision == TEMPORAL_ADMISSION_REVISION) != isinstance(self.temporal, TemporalRecall):
+            raise RetrievalContractError("recall_interpretation_temporal_invalid")
         hashes = (self.intent_hash, self.resolved_hash, self.user_message_hash)
-        if (not self.request_id or self.revision not in {HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION}
+        if (not self.request_id or self.revision not in {HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}
             or any(len(x) != 64 or any(c not in "0123456789abcdef" for c in x) for x in hashes)
             or (self.request_scope_hash is None) != (self.evidence_hash is None)):
             raise RetrievalContractError("recall_interpretation_binding_invalid")
-        if self.revision == ADVISORY_ADMISSION_REVISION:
+        if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}:
             if (not isinstance(self.person_hints, PersonHints) or self.mentions or self.person_roles
                 or self.direction is not None or self.identity_digest is None or len(self.identity_digest) != 64
                 or any(c not in "0123456789abcdef" for c in self.identity_digest)):
@@ -68,7 +73,7 @@ class RecallInterpretationContext:
             for ref, name, status in self.mentions
         ):
             raise RetrievalContractError("recall_interpretation_mentions_invalid")
-        if (self.time_status not in {"resolved", "ambiguous", "not_requested"}
+        if (self.time_status not in ({"resolved", "ambiguous", "not_requested", "invalid"} if self.temporal else {"resolved", "ambiguous", "not_requested"})
             or self.direction_status not in {"resolved", "ambiguous", "not_requested"}
             or (self.time_expression is not None and len(self.time_expression) > 96)
             or (self.direction is not None and (len(self.direction) != 2 or any(len(x) > 64 for x in self.direction)))
@@ -87,7 +92,10 @@ class RecallInterpretationContext:
         return replace(self, request_scope_hash=evidence.request_scope_hash, evidence_hash=evidence.evidence_hash)
 
     def assert_routing(self, intent, resolved):
-        if self.revision == ADVISORY_ADMISSION_REVISION:
+        if self.temporal is not None and (self.temporal != intent.temporal or self.temporal.context is None
+            or self.temporal.resolution != self.time_status or self.temporal.applied_bounds != self.time_bounds):
+            raise RetrievalContractError("recall_interpretation_temporal_mismatch")
+        if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}:
             if (intent.person_hints is None or
                 (self.person_hints.input_digest, self.person_hints.revision, self.person_hints.state,
                  self.person_hints.reviewed, self.person_hints.excluded) !=
@@ -100,7 +108,7 @@ class RecallInterpretationContext:
             or self.resolved_hash != resolved.envelope_hash or self.search_text != intent.search_text
             or tuple((ref, name) for ref, name, _ in self.mentions) != tuple((e.ref, e.mention) for e in intent.entities)
             or self.direction != (None if intent.relationship is None else (intent.relationship.from_ref, intent.relationship.to_ref))
-            or self.time_expression != (None if intent.time_scope is None else intent.time_scope.expression)
+            or self.time_expression != (intent.temporal.expression if intent.temporal else None if intent.time_scope is None else intent.time_scope.expression)
             or self.time_bounds != (None if resolved.absolute_time_from is None else (resolved.absolute_time_from, resolved.absolute_time_to))):
             raise RetrievalContractError("recall_interpretation_routing_mismatch")
         if self.revision == NAMED_ADMISSION_REVISION:
@@ -127,7 +135,7 @@ class RecallInterpretationContext:
             "time_expression": self.time_expression, "time_resolution": self.time_status,
             "applied_time_filter": self.time_bounds,
         }
-        if self.revision == ADVISORY_ADMISSION_REVISION:
+        if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}:
             del payload["requested_direction"]
             del payload["direction_resolution"]
             payload["mentions"] = [row.payload() for row in self.person_hints.hints]
@@ -140,6 +148,10 @@ class RecallInterpretationContext:
                 for (_, name, status), role in zip(self.mentions, self.person_roles, strict=True)]
             payload["requested_direction"] = None if self.direction is None else {
                 "from_name": names[self.direction[0]], "to_name": names[self.direction[1]]}
+        if self.temporal is not None:
+            payload["temporal"] = self.temporal.payload()
+            payload["retrieval_executed"] = self.retrieval_executed
+            payload["coverage"] = "bounded_related_evidence_not_complete_history"
         return payload
 
     @property
@@ -147,15 +159,16 @@ class RecallInterpretationContext:
         return text_hash(json.dumps({"binding": [self.request_id, self.intent_hash, self.resolved_hash,
             self.user_message_hash, self.request_scope_hash, self.evidence_hash],
             **({"hints_binding": [self.person_hints.payload(), self.identity_digest]}
-                if self.revision == ADVISORY_ADMISSION_REVISION else {}),
+                if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION} else {}),
             "data": self.provider_payload()}, ensure_ascii=True, sort_keys=True))
 
     def manifest(self):
         return {"revision": self.revision, "content_hash": self.content_hash,
+            **({"temporal": {**self.temporal.diagnostic(), "retrieval_executed": self.retrieval_executed}} if self.temporal else {}),
             **({"hint_state": self.person_hints.state, "reviewed": self.person_hints.reviewed,
                 "excluded": self.person_hints.excluded, "relationship_applicable": False}
-                if self.revision == ADVISORY_ADMISSION_REVISION else {}),
+                if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION} else {}),
             "unresolved_mentions": (sum(row.status != "confirmed" for row in self.person_hints.hints)
-                if self.revision == ADVISORY_ADMISSION_REVISION else sum(status != "resolved" for _, _, status in self.mentions)),
+                if self.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION} else sum(status != "resolved" for _, _, status in self.mentions)),
             "time_resolution": self.time_status, "direction_resolution": self.direction_status,
             "time_filter_applied": self.time_bounds is not None}

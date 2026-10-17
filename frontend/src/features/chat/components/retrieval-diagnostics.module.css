@@ -10,3 +10,7 @@
 .events dl { margin: 0.25rem 0; }
 .events dl div { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .events dd { margin: 0; }
+.timing { min-width: 0; }
+.timing dl { display: grid; gap: 0.35rem; }
+.timing dd { margin: 0 0 0.5rem; overflow-wrap: anywhere; }
+.timing summary { min-height: 2.75rem; display: flex; align-items: center; }

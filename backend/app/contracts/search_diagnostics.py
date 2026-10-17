@@ -240,10 +240,10 @@ def evidence_lineage(stage, items):
             lineage(stage, "returned", rank=rank, identities=evidence_identities(item))
 
 
-def bounded_capture(details, trace):
+def bounded_capture(details, trace, *, reserved=None):
     """Reserve terminal data and clip in batches, avoiding quadratic JSON work."""
     trace = None if trace is None else SearchDiagnosticTrace.model_validate(trace).model_dump(mode="json")
-    result = {"details": list(details[:24]), "search_trace": trace}
+    result = {**(reserved or {}), "details": list(details[:24]), "search_trace": trace}
     def size(value):
         return len(json.dumps(value, ensure_ascii=True).encode())
     total = size(result)

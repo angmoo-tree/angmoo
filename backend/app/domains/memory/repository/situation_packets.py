@@ -67,7 +67,8 @@ def read_situation_packet(session, reader, scope, item, info, now, *, validation
             valid = 0 <= start <= end <= len(original.text)
             sources.append(EpisodePacketSource(f"{entry.source_type}:{entry.source_id}", entry.role,
                 original.text[start:end] if valid else None, "verified" if valid else "changed", start, end,
-                original.author_id if valid else None))
+                original.author_id if valid else None,
+                original.evidence.source_created_at if valid else None))
     thought = ActivityThought()
     if info.thought_reference and any(source.status == "verified" and source.role == "committed_result" for source in sources):
         thought = reader.read_thoughts(scope=scope, references=(info.thought_reference,)).get(info.thought_reference, thought)

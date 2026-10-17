@@ -1625,3 +1625,15 @@ API 안내는 UI 언어와 같은 Guide 원문/미리보기를 제공하고 JSON
 Comfy 연속 시험의 LOCAL 진단 capture 1개를 추가해 screenshot call inventory는 60개다.
 기존 canonical PNG 11개, pinned Linux 환경, raw color 기준, 25-pixel/0.1 diff 기준은 바꾸지 않는다.
 [관련 검증](../docs/verification/comfy-security-20261012.md)은 설치 앱/실모델/USER CHECK와 구분한다.
+
+
+## Chat 시간 해석·쓰기 계측 표시 (2026-10-17, LOCAL)
+
+기존 검색 진단 내부의 설명과 disclosure만 추가한다. 날짜 해석 결과, 실제 필터와 실제 검색
+여부를 구분하며 날짜 없는 관련 검색은 질문한 날짜의 사건을 보장한다고 표시하지 않는다.
+DB 수집이 없으면 미측정, 일반 Session은 쓰기 처리 구간, BEGIN IMMEDIATE 경계가 있으면
+관측한 보유 구간으로 표시한다. 합계를 연속 잠금처럼 표시하거나 미측정을 0ms로 만들지 않는다.
+commit과 nested 진단 저장은 바깥 구간에 포함되며 다른 작업 지연의 인과관계는 미확정이다.
+근거 화면은 사건 시각/출처 범위/기억 기록 시각/unknown을 구분한다. KO/EN은 동일한 의미를
+갖고, 좁은 화면에서 긴 시각 문자열을 줄바꿈하며 details 키보드 접근과 44px 조작 영역을 유지한다.
+검증: [Chat 시간·계측 로컬 결과](../docs/verification/chat-temporal-recall-20261017.md).

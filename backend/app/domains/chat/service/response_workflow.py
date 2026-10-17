@@ -1,6 +1,7 @@
 """End-to-end P8-L-P response generation orchestration."""
 
 from __future__ import annotations
+from app.core.work_observation import scope as observation_scope, contextual
 
 import asyncio
 import logging
@@ -309,67 +310,70 @@ class ResponseGenerationWorkflowService:
                     command.today_sns_snapshot
                 )
             record = self._transition(record, ResponseRequestState.COMMITTING)
-            if command.name_binding_validator:
-                command.name_binding_validator()
-            if command.social_snapshot is not None:
-                self._social_context_provider.assert_current(command.social_snapshot)
-            sequence = record.last_emitted_sequence + 1
-            completed = self._event(
-                record,
-                GenerationEventType.COMPLETED,
-                sequence=sequence,
-            )
-            self._lifecycle.accept_event(
-                self._fence(record),
-                completed,
-                now=datetime.now(UTC),
-            )
-            record = _with_sequence(record, sequence)
-            metadata = ResponseMetadata(
-                request_id=record.request_id,
-                request_scope_hash=record.request_scope_hash,
-                generation_id=record.generation_id,
-                attempt_number=record.attempt_number,
-                route=route,
-                retrieval_outcome=bundle.retrieval_outcome,
-                last_accepted_sequence=sequence,
-                workflow_recipe=workflow_recipe,
-                short_circuited=bundle.retrieval_outcome.value
-                in {
-                    "memory_off",
-                    "no_evidence",
-                },
-                partial_axes=bundle.partial_axes,
-                public_evidence_count=bundle.public_evidence_count,
-                evidence_bundle_version=bundle.version,
-                evidence_hash=bundle.evidence_hash,
-                evidence_capability=bundle.evidence_capability,
-                clarification_slot=bundle.clarification_slot,
-                degraded_reason=bundle.degraded_reason,
-                retry_of_request_id=record.retry_of_request_id,
-            )
-            committed = self._lifecycle.finalize(
-                self._fence(record),
-                ResponseCommitPayload(
-                    content=response.text,
-                    activity_thought=response.activity_thought,
-                    relationship_metrics=response.relationship_metrics,
-                    model=response.model,
-                    metadata=metadata,
-                    evidence_inspector_snapshot=bundle.inspector_snapshot(),
-                    social_context_inspector_snapshot=_social_context_inspector(command.social_snapshot),
-                    relationship_delivery=response.relationship_delivery,
-                ),
-                now=datetime.now(UTC),
-            )
-            if self._situation_memory is not None:
-                self._situation_memory.admit(command, committed, response)
-            self._unit_of_work.checkpoint()
+            with observation_scope(chat_stage="response_finalize"):
+                if command.name_binding_validator:
+                    command.name_binding_validator()
+                if command.social_snapshot is not None:
+                    self._social_context_provider.assert_current(command.social_snapshot)
+                sequence = record.last_emitted_sequence + 1
+                completed = self._event(
+                    record,
+                    GenerationEventType.COMPLETED,
+                    sequence=sequence,
+                )
+                self._lifecycle.accept_event(
+                    self._fence(record),
+                    completed,
+                    now=datetime.now(UTC),
+                )
+                record = _with_sequence(record, sequence)
+                metadata = ResponseMetadata(
+                    request_id=record.request_id,
+                    request_scope_hash=record.request_scope_hash,
+                    generation_id=record.generation_id,
+                    attempt_number=record.attempt_number,
+                    route=route,
+                    retrieval_outcome=bundle.retrieval_outcome,
+                    last_accepted_sequence=sequence,
+                    workflow_recipe=workflow_recipe,
+                    short_circuited=bundle.retrieval_outcome.value
+                    in {
+                        "memory_off",
+                        "no_evidence",
+                    },
+                    partial_axes=bundle.partial_axes,
+                    public_evidence_count=bundle.public_evidence_count,
+                    evidence_bundle_version=bundle.version,
+                    evidence_hash=bundle.evidence_hash,
+                    evidence_capability=bundle.evidence_capability,
+                    clarification_slot=bundle.clarification_slot,
+                    degraded_reason=bundle.degraded_reason,
+                    retry_of_request_id=record.retry_of_request_id,
+                )
+                committed = self._lifecycle.finalize(
+                    self._fence(record),
+                    ResponseCommitPayload(
+                        content=response.text,
+                        activity_thought=response.activity_thought,
+                        relationship_metrics=response.relationship_metrics,
+                        model=response.model,
+                        metadata=metadata,
+                        evidence_inspector_snapshot=bundle.inspector_snapshot(),
+                        social_context_inspector_snapshot=_social_context_inspector(command.social_snapshot),
+                        relationship_delivery=response.relationship_delivery,
+                    ),
+                    now=datetime.now(UTC),
+                )
+                if self._situation_memory is not None:
+                    self._situation_memory.admit(command, committed, response)
+                self._unit_of_work.checkpoint()
             if command.request.node_state.get("_situation_policy") is None:
-                self._propose_memory_after_commit(command, committed)
+                with observation_scope(chat_stage="post_commit"):
+                    self._propose_memory_after_commit(command, committed)
             yield completed
         except asyncio.CancelledError as exc:
-            self._unit_of_work.rollback()
+            with observation_scope(chat_stage="cancel_or_failure"):
+                self._unit_of_work.rollback()
             record = self._after_rollback(record)
             self._cancel_if_active(
                 record, tracker=getattr(exc, "call_tracker", None) or (None if progress is None else progress.call_tracker),
@@ -377,7 +381,8 @@ class ResponseGenerationWorkflowService:
             )
             raise
         except Exception as exc:
-            self._unit_of_work.rollback()
+            with observation_scope(chat_stage="cancel_or_failure"):
+                self._unit_of_work.rollback()
             observe("workflow_failed", status="failed")
             record = self._after_rollback(record)
             async for event in self._fail(
@@ -464,6 +469,7 @@ class ResponseGenerationWorkflowService:
         self._unit_of_work.checkpoint()
         return updated
 
+    @contextual(chat_stage="cancel_or_failure")
     async def _fail(
         self,
         record: ResponseRequestRecord,
@@ -528,6 +534,7 @@ class ResponseGenerationWorkflowService:
             raise exc
         yield event
 
+    @contextual(chat_stage="cancel_or_failure")
     def _cancel_if_active(
         self, record: ResponseRequestRecord, *, tracker: dict | None = None, graph_diagnostic=None
     ) -> None:

@@ -88,7 +88,8 @@ class SqlAlchemyEpisodePackets:
                 else:
                     status, text = "verified", current.text[start:end]
             return EpisodePacketSource(f"{row.source_type}:{row.source_id}", role, text, status, start, end,
-                current.author_id if status == "verified" else None)
+                current.author_id if status == "verified" else None,
+                current.evidence.source_created_at if status == "verified" else None)
 
         packet_units = {item_id: [] for item_id in items}
         for unit in units:

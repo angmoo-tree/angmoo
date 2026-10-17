@@ -110,3 +110,23 @@ def test_receipt_and_empty_manual_request_do_not_rebuild_or_prepare_existing_sea
         assert not db.info.get("angmoo_memory_recall_pending_full_sync")
     finally:
         event.remove(db, "do_orm_execute", EmbeddedMemoryRecallProjection._do_orm_execute)
+
+
+def test_hydrated_packet_uses_verified_source_event_time_not_summary_creation(stack):
+    db,scope,setting,memory=stack
+    post=real_source(db,scope)
+    post.created_at=NOW-timedelta(days=2)
+    db.commit()
+    admitted=receipt(db,scope,post)
+    apply(db,setting,memory)
+    item=db.get(MemoryItem,admitted.applied_item_id)
+    reader,request,ranked,_=readers(db,scope,item)
+    selected=reader.revalidate(request,(ranked,))
+    row=reader.hydrate(request,selected).records[0]
+    assert row.metadata["event_time_from"]==(NOW-timedelta(days=2)).isoformat()
+    assert row.metadata["event_time_to"]==row.metadata["event_time_from"]
+    assert row.metadata["recorded_at"]!=row.metadata["event_time_from"]
+    post.deleted_at=NOW;db.commit()
+    row=reader.hydrate(request,reader.revalidate(request,(ranked,))).records[0]
+    assert row.metadata["event_time_from"]==row.metadata["event_time_to"]==""
+    assert row.metadata["recorded_at"]

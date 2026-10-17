@@ -15,6 +15,7 @@ from app.domains.chat.contracts.recall_interpretation import (
     HYBRID_ADMISSION_REVISION, NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
 )
 from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_SELECTION_PROTOCOL, TEMPORAL_ADMISSION_REVISION
 
 from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
 from app.domains.chat.contracts.resolved_envelope import (
@@ -90,6 +91,7 @@ class RetrievalRoutingService:
         social_snapshot=None,
         chat_identity=None,
         selection_protocol=None,
+        time_context=None,
         now: datetime,
         deadline_at: datetime,
     ) -> RetrievalRoutingResult:
@@ -116,6 +118,7 @@ class RetrievalRoutingService:
             social_snapshot=social_snapshot,
             chat_identity=chat_identity,
             selection_protocol=selection_protocol,
+            time_context=time_context,
         )
 
         first_physical = 0
@@ -128,8 +131,13 @@ class RetrievalRoutingService:
                 router_request, timeout_seconds=remaining_seconds
             )
             first_physical = provider_result.physical_attempt_count
+            if (selection_protocol == TEMPORAL_SELECTION_PROTOCOL and provider_result.intent.temporal is not None
+                and provider_result.intent.temporal.validation == "invalid"):
+                raise RetrievalRouterOutputError("time_scope_invalid", physical_attempt_count=first_physical)
         except RetrievalRouterOutputError as exc:
             first_physical = exc.physical_attempt_count
+            if selection_protocol == TEMPORAL_SELECTION_PROTOCOL and not router_validation_is_retryable(exc.validation_code):
+                raise
             repair_used = True
             remaining_seconds -= monotonic() - started
             if remaining_seconds <= 0:
@@ -160,14 +168,39 @@ class RetrievalRoutingService:
         if selection_protocol is not None and provider_result.argument_protocol != selection_protocol:
             raise RetrievalContractError("selection_protocol_result_mismatch")
         original_intent = provider_result.intent
-        intent, sufficiency_guard_reason = _apply_today_sns_sufficiency_guard(
+        temporal = selection_protocol == TEMPORAL_SELECTION_PROTOCOL
+        if temporal:
+            if original_intent.temporal is None:
+                raise RetrievalContractError("retrieval_temporal_candidate_required")
+            # The admitted timezone and reference instant, not repair wall time,
+            # own date interpretation. Actual wall time still owns all deadlines.
+            fixed_scope = replace(scope, world_timezone=time_context.timezone)
+            time_from, time_to, time_outcome = ((None, None, "invalid")
+                if original_intent.temporal.validation == "invalid" else self._resolve_time(
+                    intent=original_intent, scope=fixed_scope, now=time_context.instant))
+        intent, sufficiency_guard_reason = (original_intent, None) if temporal and time_outcome in {"invalid", "ambiguous"} else _apply_today_sns_sufficiency_guard(
             original_intent,
             user_message=command.user_message,
             today_sns_context=today_sns_context,
         )
         mentions_to_resolve = tuple((entity.ref, entity.mention) for entity in intent.entities)
         named = selection_protocol == NAME_SELECTION_PROTOCOL
-        advisory = selection_protocol == ADVISORY_SELECTION_PROTOCOL
+        advisory = selection_protocol in {ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL}
+        temporal_route_reason = None
+        query_origin = "model_search_text" if intent.search_text else "none"
+        if temporal and sufficiency_guard_reason and intent.route is RetrievalRoute.CANONICAL and not intent.search_text:
+            from app.domains.chat.contracts.retrieval_router import validated_recall_query
+            intent = replace(intent, search_text=validated_recall_query(command.user_message))
+            query_origin = "original_user_message"
+        if temporal and time_outcome in {"invalid", "ambiguous"} and (
+            intent.route is RetrievalRoute.CURRENT_CONTEXT or
+            intent.route is RetrievalRoute.CLARIFICATION and intent.clarification_slot == "time_scope"):
+            from app.domains.chat.contracts.retrieval_router import validated_recall_query
+            temporal_route_reason = "time_scope_" + time_outcome
+            intent = replace(intent, route=RetrievalRoute.CANONICAL, decision=RetrievalDecision.RETRIEVAL,
+                intent="historical_recall" if intent.intent in {"current_context", "clarification_required"} else intent.intent,
+                search_text=validated_recall_query(command.user_message), clarification_slot=None, coordination_hint=None)
+            query_origin = "original_user_message"
         if advisory:
             if intent.person_hints is None or chat_identity is None:
                 raise RetrievalContractError("recall_interpretation_hints_invalid")
@@ -189,11 +222,8 @@ class RetrievalRoutingService:
         bindings = self._unique_safe_bindings(resolutions)
         binding_map = {binding.ref: binding.world_character_id for binding in bindings}
 
-        time_from, time_to, time_outcome = self._resolve_time(
-            intent=intent,
-            scope=scope,
-            now=now,
-        )
+        if not temporal:
+            time_from, time_to, time_outcome = self._resolve_time(intent=intent, scope=scope, now=now)
         if time_outcome == "ambiguous" and clarification is None:
             clarification = ClarificationResolution(slot="time_scope")
 
@@ -222,7 +252,7 @@ class RetrievalRoutingService:
             direction_to = None
             time_from = None
             time_to = None
-            if named:
+            if named or temporal:
                 # A clarification keeps the requested meaning, but applies no
                 # relationship/time filter. The new interpretation must agree
                 # with the final resolved envelope, rather than the pre-guard IDs.
@@ -244,6 +274,10 @@ class RetrievalRoutingService:
                 if intent.route is RetrievalRoute.BOTH else None
             ))
         canonical_allowlist, graph_allowlist = self._operation_allowlists(intent.route)
+        if temporal:
+            intent = replace(intent, temporal=replace(intent.temporal, context=time_context,
+                resolution=time_outcome, query_origin=query_origin, route_change_reason=temporal_route_reason,
+                applied_bounds=None if time_from is None else (time_from, time_to)))
         resolved = ResolvedRetrievalEnvelope.bind_intent(
             intent,
             request_id=scope.request_id,
@@ -298,9 +332,9 @@ class RetrievalRoutingService:
             thinking_level=provider_result.thinking_level,
             max_output_tokens=provider_result.max_output_tokens,
             finish_reason=provider_result.finish_reason,
-            admission_policy=((ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION)
+            admission_policy=((TEMPORAL_ADMISSION_REVISION if temporal else ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION)
                 if self._recall_mode is ChatRecallMode.SOCIAL_HYBRID else "legacy"),
-            route_change_reason=(clarification.slot if clarification is not None
+            route_change_reason=temporal_route_reason or (clarification.slot if clarification is not None
                 and intent.route != original_intent.route else sufficiency_guard_reason),
         )
         interpretation = None
@@ -318,13 +352,14 @@ class RetrievalRoutingService:
                 search_text=intent.search_text, mentions=tuple(mentions),
                 direction=None if intent.relationship is None else (
                     intent.relationship.from_ref, intent.relationship.to_ref),
-                time_expression=None if intent.time_scope is None else intent.time_scope.expression,
+                time_expression=intent.temporal.expression if temporal else None if intent.time_scope is None else intent.time_scope.expression,
                 time_status=time_outcome, direction_status=direction_outcome,
                 time_bounds=None if time_from is None else (time_from, time_to),
-                revision=ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION,
+                revision=TEMPORAL_ADMISSION_REVISION if temporal else ADVISORY_ADMISSION_REVISION if advisory else NAMED_ADMISSION_REVISION if named else HYBRID_ADMISSION_REVISION,
                 person_roles=tuple(entity.role for entity in intent.entities) if named else (),
                 person_hints=intent.person_hints.confirm_participants(chat_identity) if advisory else None,
                 identity_digest=chat_identity.to_dict()["digest"] if advisory else None,
+                temporal=intent.temporal,
             )
         return RetrievalRoutingResult(
             intent=intent,
@@ -343,7 +378,7 @@ class RetrievalRoutingService:
         *,
         timeout_seconds: float,
     ):
-        if request.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL} and self._before_named_provider is not None:
+        if request.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL} and self._before_named_provider is not None:
             # The existing transaction owner closes canonical admission reads;
             # no Session or commit policy belongs in the provider adapter.
             self._before_named_provider()
@@ -499,7 +534,10 @@ class RetrievalRoutingService:
             if end_day < start_day or (end_day - start_day).days > 366:
                 return None, None, "ambiguous"
             start = datetime.combine(start_day, time.min, tzinfo=zone)
-            end = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=zone)
+            try:
+                end = datetime.combine(end_day + timedelta(days=1), time.min, tzinfo=zone)
+            except OverflowError:
+                return None, None, "ambiguous"
         else:  # pragma: no cover
             return None, None, "ambiguous"
         return _utc_iso(start), _utc_iso(end), "resolved"
@@ -509,14 +547,24 @@ class RetrievalRoutingService:
         intent: RetrievalIntentEnvelope,
         slot: str,
     ) -> RetrievalIntentEnvelope:
-        return RetrievalIntentEnvelope(
+        if intent.temporal is None:
+            # Historical requests retain their original clarification envelope/hash.
+            return RetrievalIntentEnvelope(
+                decision=RetrievalDecision.CLARIFICATION,
+                route=RetrievalRoute.CLARIFICATION,
+                intent="clarification_required",
+                entities=intent.entities,
+                relationship=intent.relationship,
+                time_scope=intent.time_scope,
+                aggregation=intent.aggregation,
+                coordination_hint=None,
+                clarification_slot=slot,
+            )
+        return replace(intent,
             decision=RetrievalDecision.CLARIFICATION,
             route=RetrievalRoute.CLARIFICATION,
             intent="clarification_required",
-            entities=intent.entities,
-            relationship=intent.relationship,
-            time_scope=intent.time_scope,
-            aggregation=intent.aggregation,
+            search_text=None,
             coordination_hint=None,
             clarification_slot=slot,
         )
@@ -739,6 +787,7 @@ def _intent_with_route(
         return intent
     return replace(
         intent,
+        **({"search_text": None} if intent.temporal is not None and route is RetrievalRoute.CURRENT_CONTEXT else {}),
         decision=(
             RetrievalDecision.CURRENT_CONTEXT
             if route is RetrievalRoute.CURRENT_CONTEXT

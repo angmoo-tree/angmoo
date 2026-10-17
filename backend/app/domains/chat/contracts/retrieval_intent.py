@@ -15,6 +15,7 @@ from typing import Any
 from app.domains.chat.contracts.reference_observation import reference_failure
 from app.domains.relationships.contracts.graph_requirements import GraphQueryRequirement, validate_graph_queries
 from app.domains.chat.contracts.person_hints import PersonHints
+from app.domains.chat.contracts.temporal_recall import TemporalRecall
 
 
 RETRIEVAL_INTENT_VERSION = "retrieval-intent.v1"
@@ -110,6 +111,9 @@ class RetrievalTimeMeaning:
     timezone: str | None = None
 
     def __post_init__(self) -> None:
+        if (not isinstance(self.kind, RetrievalTimeKind)
+            or any(value is not None and type(value) is not str for value in (self.unit, self.period, self.timezone, self.expression))):
+            raise RetrievalContractError("retrieval_intent_time_meaning_invalid")
         if self.unit is not None:
             if self.unit not in {"day", "week", "month"} or type(self.offset) is not int or not -366 <= self.offset <= 0:
                 raise RetrievalContractError("retrieval_intent_time_meaning_invalid")
@@ -171,6 +175,7 @@ class RetrievalIntentEnvelope:
     search_text: str | None = None
     activity_kinds: tuple[str, ...] = ()
     person_hints: PersonHints | None = None
+    temporal: "TemporalRecall | None" = None
 
     def __post_init__(self) -> None:
         if (not isinstance(self.activity_kinds, tuple) or len(self.activity_kinds) > 8
@@ -182,9 +187,11 @@ class RetrievalIntentEnvelope:
             raise RetrievalContractError("retrieval_search_text_invalid")
         if self.coordination_source not in {"model", "code"}:
             raise RetrievalContractError("retrieval_intent_coordination_source_invalid")
-        if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2", "retrieval-intent.v3"}:
+        if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2", "retrieval-intent.v3", "retrieval-intent.v4"}:
             raise RetrievalContractError("retrieval_intent_version_mismatch")
-        if (self.version == "retrieval-intent.v3") != (self.person_hints is not None):
+        if (self.version == "retrieval-intent.v4") != isinstance(self.temporal, TemporalRecall):
+            raise RetrievalContractError("retrieval_intent_temporal_revision_invalid")
+        if (self.version in {"retrieval-intent.v3", "retrieval-intent.v4"}) != (self.person_hints is not None):
             raise RetrievalContractError("retrieval_intent_hints_revision_invalid")
         if self.person_hints is not None and (not isinstance(self.person_hints, PersonHints)
             or self.entities or self.relationship is not None or self.graph_queries):
@@ -221,6 +228,7 @@ class RetrievalIntentEnvelope:
 
     def payload(self) -> dict[str, Any]:
         return {
+            **({"temporal": self.temporal.payload()} if self.temporal is not None else {}),
             **({"person_hints": self.person_hints.payload()} if self.person_hints is not None else {}),
             **({"activity_kinds": list(self.activity_kinds)} if self.activity_kinds else {}),
             **({"search_text": self.search_text} if self.search_text is not None else {}),

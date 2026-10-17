@@ -4,6 +4,7 @@ const readCodes = ["historical_unverified", "current_unavailable", "read_unavail
 const degradedReasons = ["canonical_unavailable", "graph_unavailable", "retrieval_timeout", "no_accepted_evidence"];
 
 export function relationshipFieldsMatch(item: WorldChatEvidenceItemRead) {
+  if (!evidenceTimeMatches(item)) return false;
   const change = item.relationship_change;
   const projection = item.relationship_projection;
   if (change !== undefined && change !== null && !["same", "changed", "not_checked"].includes(change)) return false;
@@ -21,6 +22,26 @@ export function relationshipFieldsMatch(item: WorldChatEvidenceItemRead) {
     if ([projection.relationship_label, projection.perception].some((value) => value !== null && (typeof value !== "string" || value.length > 2000))) return false;
   }
   return true;
+}
+
+export function evidenceTimeMatches(item: WorldChatEvidenceItemRead) {
+  const time = item.time_provenance;
+  if (time == null) return true;
+  if (item.availability !== "available" || typeof time !== "object" || Array.isArray(time) ||
+    Object.keys(time).length !== 4 || !["event", "interval", "recorded", "unknown"].includes(time.kind)) return false;
+  return [time.event_from, time.event_to, time.recorded_at].every(value => value === null ||
+    typeof value === "string" && value.length <= 40 && Number.isFinite(Date.parse(value)));
+}
+
+export function evidenceTimes(item: WorldChatEvidenceItemRead) {
+  const time = item.time_provenance;
+  if (!evidenceTimeMatches(item) || time?.kind === "unknown") return [{ label: "사건 시각 미확인", value: null }];
+  if (!time) return item.occurred_at ? [{ label: "기록된 시각·사건 시각 여부 미확인", value: item.occurred_at }] : [];
+  const rows = [];
+  if (time.event_from) rows.push({ label: time.kind === "interval" ? "근거 출처의 시작 시각" : "사건 시각", value: time.event_from });
+  if (time.kind === "interval" && time.event_to) rows.push({ label: "근거 출처의 종료 시각", value: time.event_to });
+  if (time.recorded_at) rows.push({ label: "기억 기록 시각·사건 시각 아님", value: time.recorded_at });
+  return rows;
 }
 
 export function evidenceLimitationsMatch(read: WorldChatEvidenceRead) {
