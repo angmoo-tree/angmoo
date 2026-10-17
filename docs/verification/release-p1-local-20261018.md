@@ -172,3 +172,12 @@ the exact-ID addition (overlapping counts, not 52 distinct tests). Actual Window
 PowerShell 5.1 launcher smoke passed. Current inventory/design/CI/license policy
 checks passed. Image input paths still match the verified `aa4a9e9b...` candidate.
 These results are local; final-head hosted CI and platform review remain pending.
+
+The next full Core CI run (`39063560043`, source `adbe71c7...`) passed three
+backend partitions; partition 0 exposed one remaining stale assertion: the
+current frontend inventory contains 47 routes while its test still expected 45.
+The expectation now includes the two new server handlers explicitly
+(`/api/runtime-identity` and `/media/[...path]`). The existing generated-source
+comparison and notification/static parity assertions remain. All eight scoped
+embedded inventory tests passed locally. This changes only the inventory test
+and this report; application/image inputs and test deadlines are unchanged.
