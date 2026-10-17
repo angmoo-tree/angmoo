@@ -179,6 +179,13 @@
       "removal_condition": null
     },
     {
+      "module": "app.core.session_write_observation",
+      "disposition": "keep",
+      "owner_stage": "CHAT-OBSERVATION-20261017",
+      "removal_condition": null,
+      "reason": "Optional content-free Session write timing through the neutral observation port; domains retain transaction, authorization and retry ownership. No additional SQL, provider calls or recorder file I/O."
+    },
+    {
       "disposition": "keep",
       "module": "app.core.sqlite_concurrency",
       "owner_stage": "L0",

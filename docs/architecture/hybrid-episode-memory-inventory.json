@@ -3366,7 +3366,7 @@
     },
     {
       "path": "backend/tests/memory/test_integrated_memory_runtime.py",
-      "sha256": "b409b16f3af6e8b4fa13a361f5871197ac4d1fda0dd4ef0eda1498118ffc0679"
+      "sha256": "6e4e39384c9d8f5e6b0d9d57b11be4be9b34687b9d7efe3111841ad00a2e3bb6"
     },
     {
       "path": "backend/tests/memory/test_korean_memory_recall.py",

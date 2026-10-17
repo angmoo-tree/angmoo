@@ -48,10 +48,14 @@ def test_actual_runtime_uses_async_canonical_fresh_hydration_and_owned_cleanup(t
         result = await runtime.service.execute(request, deadline=monotonic()+30)
         assert result.status is RecallAxisStatus.PARTIAL  # vector unavailable, real FTS ready
         assert len(result.records) == 1 and result.validation_snapshot is not None
-        rows = trace_payload()["canonical_reads"]
-        assert [row["stage"] for row in rows] == ["revalidate", "hydrate"]
-        assert all(row["cleaned"] and row["sql_count"] > 0 and row["unique_nodes"] == 1 for row in rows)
-        assert all(row["memo_hits"] == 0 for row in rows)
+        row, = trace_payload()["canonical_reads"]
+        assert row["stage"] == "resolve" and row["status"] == "completed"
+        assert row["cleaned"] and row["metrics_complete"] and row["sql_count"] > 0
+        # Hydration reuses the source proof within this single read snapshot.
+        assert row["unique_nodes"] == 1 and row["memo_hits"] == 1
+        assert [phase["stage"] for phase in row["phases"]] == ["revalidate", "hydrate"]
+        assert all(phase["completed"] and phase["elapsed_ms"] >= 0 for phase in row["phases"])
+        assert sum(phase["sql_count"] for phase in row["phases"]) <= row["sql_count"]
         with Session(engine) as db:
             from app.domains.social.models.posts import Post
             db.get(Post, post_id).report_hidden_at = NOW

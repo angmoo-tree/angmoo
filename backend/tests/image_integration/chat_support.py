@@ -53,6 +53,7 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
             # The current request protocol is forwarded by the real workflow;
             # this legacy deterministic fake has no native tool contract.
             self.selection_protocol = kwargs.pop("selection_protocol", None)
+            self.time_context = kwargs.pop("time_context", None)
             return await super().route(command, **kwargs)
     class Generator(_Generator):
         async def generate(self, request):

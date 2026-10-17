@@ -77,6 +77,7 @@ def test_image_only_and_text_image_reach_real_workflow_after_analysis(tmp_path, 
         assert result[-1].event_type == GenerationEventType.COMPLETED, (result[-1].payload, chat.events)
         assert fake.calls == 1 and chat.events == ["workflow_build", "router", "crg"]
         assert "파란색 직사각형" in chat.commands[0].preflight.image_context
+        assert chat.router.time_context.payload() == chat.commands[0].request.node_state["_chat_time_context"]
         assert chat.db.get(MessageMessage, accepted.user_message.id).content == body
         assert chat.db.get(ChatResponseRequest, accepted.response_request.request_id).state == "committed"
         attachment = chat.db.get(MessageAttachment, accepted.user_message.id)
