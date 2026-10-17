@@ -13,6 +13,9 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import tarfile
+import tempfile
+import time
 
 from launcher.termux.payload import (
     PLATFORMS, REPOSITORY, SERVICES, digest_file, inspect_oci, read_manifest,
@@ -53,8 +56,15 @@ def build(output: Path, service: str, platform: str, builder: str | None) -> Pat
              "--tag", f"angmoo-{service}-candidate:{source}-{arch}",
              "--provenance=mode=max", "--sbom=true", "--metadata-file", str(metadata),
              "--output", f"type=oci,dest={archive},compression=gzip,force-compression=true", "."]
+    started = time.monotonic()
     run(*args)
+    build_seconds = time.monotonic() - started
     image = inspect_oci(archive, service=service, platform=platform, source=source, version=version)
+    image["build_seconds"] = round(build_seconds, 3)
+    base = re.search(r"ARG (?:PYTHON|NODE)_IMAGE=(.+)", (ROOT / f"Dockerfile.{service}").read_text())[1]
+    base_index = json.loads(run("docker", "buildx", "imagetools", "inspect", "--raw", base, capture=True))
+    base_child = next(d for d in base_index["manifests"] if d.get("platform", {}).get("os") == "linux" and d.get("platform", {}).get("architecture") == arch)
+    image["base_manifest_digest"] = base_child["digest"]
     image["validation"] = {"runtime": "NOT_RUN", "native": "NOT_RUN", "security": "NOT_RUN"}
     record = {
         "schema": "angmoo-release-candidate.v1", "repository": REPOSITORY,
@@ -73,23 +83,49 @@ def build(output: Path, service: str, platform: str, builder: str | None) -> Pat
     return result
 
 
+def loaded_image(item: dict, ref: str) -> dict:
+    config = json.loads(run("docker", "image", "inspect", "--platform", item["platform"], ref, capture=True))[0]
+    require(config["RootFS"]["Layers"] == item["diff_ids"], "loaded_rootfs_mismatch")
+    require(f"{config['Os']}/{config['Architecture']}" == item["platform"], "loaded_platform_mismatch")
+    # Classic Docker uses config digest as Id; containerd uses manifest digest.
+    # A format conversion may change the manifest while preserving config.
+    if config["Id"] != item["config_digest"] and config.get("Descriptor", {}).get("digest") != item["manifest_digest"]:
+        with tempfile.TemporaryDirectory(prefix="angmoo-image-proof-") as directory:
+            saved = Path(directory) / "loaded.tar"
+            run("docker", "image", "save", "--platform", item["platform"], "--output", str(saved), ref)
+            with tarfile.open(saved) as archive:
+                from launcher.termux.payload import digest_stream
+                records = json.load(archive.extractfile("manifest.json"))
+                require(len(records) == 1, "loaded_config_ambiguous")
+                with archive.extractfile(records[0]["Config"]) as stream:
+                    require(digest_stream(stream) == item["config_digest"], "loaded_config_mismatch")
+    return config
+
+
+def candidate_ref(item: dict) -> str:
+    return f"angmoo-{item['service']}-candidate:{item['source_sha']}-{item['platform'].split('/')[1]}"
+
+
 def load(path: Path) -> None:
     manifest = read_manifest(path, require_all=False)
     for item in manifest["images"]:
         archive = path.parent / item["archive"]
         verify_archive(archive, item)
-        # Docker Desktop/containerd accepts OCI including attestation manifests.
-        # Engines without OCI import must use the documented skopeo conversion;
-        # the comparison below still applies. Never rebuild for an import error.
-        run("docker", "load", "--input", str(archive))
-        config = json.loads(run("docker", "image", "inspect", item["config_digest"], capture=True))[0]
-        require(config["Id"] == item["config_digest"] and config["RootFS"]["Layers"] == item["diff_ids"], "loaded_rootfs_mismatch")
-        require(f"{config['Os']}/{config['Architecture']}" == item["platform"], "loaded_platform_mismatch")
-        ref = f"angmoo-{item['service']}-candidate:{manifest['source_sha']}-{item['platform'].split('/')[1]}"
-        run("docker", "tag", item["config_digest"], ref)
+        ref = candidate_ref(item)
+        result = subprocess.run(["docker", "load", "--input", str(archive)], capture_output=True, text=True)
+        conversion = False
+        if result.returncode:
+            # Classic graphdriver engines cannot import an OCI index. Convert
+            # only its transport envelope, then prove the actual loaded config.
+            require(any(s in result.stderr.lower() for s in ("manifest.json", "unsupported", "invalid tar header")), "oci_import_failed")
+            from scripts.release.promote import SKOPEO
+            run("docker", "run", "--rm", "--volume", "/var/run/docker.sock:/var/run/docker.sock", "--mount", f"type=bind,source={archive.parent},target=/candidate,readonly", SKOPEO,
+                "--override-os", "linux", "--override-arch", item["platform"].split("/")[1], "copy", f"oci-archive:/candidate/{archive.name}", f"docker-daemon:{ref}")
+            conversion = True
+        config = loaded_image(item, ref)
         write_json(path.parent / f"{item['service']}-{item['platform'].split('/')[1]}.loaded.json", {
             "source_sha": manifest["source_sha"], "archive_digest": item["archive_digest"],
-            "config_digest": config["Id"], "diff_ids": config["RootFS"]["Layers"],
+            "config_digest": item["config_digest"], "runtime_image_id": config["Id"], "diff_ids": config["RootFS"]["Layers"], "transport_conversion": conversion,
             "platform": item["platform"], "ref": ref,
         })
 

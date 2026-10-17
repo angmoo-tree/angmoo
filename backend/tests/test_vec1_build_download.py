@@ -133,3 +133,14 @@ def test_invalid_bundled_source_fails_without_network_fallback(tmp_path, monkeyp
     monkeypatch.setattr(build, "urlopen", lambda *args, **kwargs: pytest.fail("unreviewed fallback"))
     with pytest.raises(FileNotFoundError if missing else RuntimeError):
         build.download(build.SOURCE_URL, build.SOURCE_SHA256)
+
+
+def test_arm64_compiler_patch_preserves_upstream_and_other_platform_bytes():
+    original = build.BUNDLED_SOURCE.read_bytes()
+    assert build.compiler_source(original, "x86_64") == (original, None)
+    changed, patch = build.compiler_source(original, "aarch64")
+    assert patch == build.ARM64_PATCH and changed != original
+    assert b"vorrq_u32(cmp, vceqq_s32(lhs, rhs2))" in changed
+    assert build.BUNDLED_SOURCE.read_bytes() == original
+    with pytest.raises(RuntimeError, match="integrity"):
+        build.compiler_source(original + b"changed", "aarch64")
