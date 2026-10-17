@@ -5,6 +5,7 @@ from app.domains.chat.contracts.retrieval_router import (
     ROUTER_RELATIONSHIP_DIMENSIONS, ROUTER_RELATIONSHIP_POLARITIES,
     ROUTER_AGGREGATION_TARGETS,
 )
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_SELECTION_PROTOCOL
 from app.domains.chat.contracts.supervisor_selection import NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL
 
 _FIELDS = {"intent", "entities", "relationship", "time_scope", "aggregation", "coordination_hint", "clarification_slot", "graph_queries", "search_text"}
@@ -15,7 +16,7 @@ FINISH_REASONS = {"STOP", "MAX_TOKENS", "SAFETY", "RECITATION", "LANGUAGE", "OTH
     "PROHIBITED_CONTENT", "SPII", "MALFORMED_FUNCTION_CALL", "UNEXPECTED_TOOL_CALL", "TOO_MANY_TOOL_CALLS",
     "MISSING_THOUGHT_SIGNATURE", "MALFORMED_RESPONSE", "FINISH_REASON_UNSPECIFIED",
     "stop", "length", "tool_calls", "content_filter", "end_turn", "tool_use", "max_tokens", "stop_sequence", "pause_turn", "refusal"}
-_PATHS = {"retrieval_router_perspective_invalid": "relationship.perspective",
+_PATHS = {"retrieval_intent_time_meaning_invalid": "time_scope", "time_scope_invalid": "time_scope","retrieval_router_perspective_invalid": "relationship.perspective",
     "retrieval_router_relationship_from_invalid": "relationship.from",
     "retrieval_router_relationship_to_invalid": "relationship.to",
     "retrieval_router_relationship_dimension_invalid": "relationship.dimension",
@@ -54,8 +55,8 @@ def _endpoint(value, refs):
 def selection_attempt(request, response, *, error=None, physical_attempts=0,
                       model="unknown", provider="unknown", thinking_level="unknown", max_output_tokens=0, validation_trace=None):
     phase = "repair" if request.repair_diagnostic is not None else "first"
-    protocol = closed(request.selection_protocol, {NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL}, absent="legacy")
-    named = protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL}
+    protocol = closed(request.selection_protocol, {NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL}, absent="legacy")
+    named = protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL}
     code = _code(error) if error is not None else "valid"
     normalized = normalize_router_validation_code(code) if error is not None else "valid"
     calls = getattr(response, "tool_calls", ()) if response is not None else ()
@@ -72,7 +73,7 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
     if validation_trace is not None:
         for key in ("wire", "entities", "relationship", "meaning", "coordination", "agreement"):
             stages[key + "_stage"] = closed(validation_trace.stages.get(key), {"running", "pass", "fail", "not_evaluated"})
-    if protocol == ADVISORY_SELECTION_PROTOCOL:
+    if protocol in {ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL}:
         stages["relationship_stage"] = "not_applicable"
     basic = {"status": "rejected" if error is not None else "validated", "validation_code": code,
              "field_path": _PATHS.get(code, "not_identified"), "finish_reason": reason,
@@ -99,13 +100,13 @@ def selection_attempt(request, response, *, error=None, physical_attempts=0,
                "field_path": _PATHS.get(code, "not_identified"), "validation_code": code,
                "intent": closed(args.get("intent"), ROUTER_INTENTS),
                "entities_state": shape(entities, present="entities" in args),
-               "relationship_state": ("not_applicable" if protocol == ADVISORY_SELECTION_PROTOCOL else
+               "relationship_state": ("not_applicable" if protocol in {ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL} else
                    shape(args.get("relationship"), present="relationship" in args)),
                "aggregation_state": shape(args.get("aggregation"), present="aggregation" in args),
                "time_scope_state": shape(args.get("time_scope"), present="time_scope" in args),
                "coordination_state": shape(args.get("coordination_hint"), present="coordination_hint" in args),
                "extra_keys": len(set(args) - _FIELDS)}
-        if protocol == ADVISORY_SELECTION_PROTOCOL:
+        if protocol in {ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL}:
             from app.domains.chat.contracts.person_hints import normalize_person_hints
             hints = normalize_person_hints(entities)
             row.update(hint_state=hints.state, hints_reviewed=hints.reviewed,

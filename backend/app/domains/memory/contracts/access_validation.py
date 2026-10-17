@@ -35,6 +35,10 @@ class MemoryAccessValidation:
     restored: dict[int, object] = field(default_factory=dict)
     origins: dict[str, object | None] = field(default_factory=dict)
     runtime_sources: object | None = None
+    runtime_queries: object | None = None
+    prepared_items: set[str] = field(default_factory=set)
+    prepared_manifests: set[int] = field(default_factory=set)
+    thoughts: dict[tuple[MemoryScope, str], object | None] = field(default_factory=dict)
     memo_hits: int = 0
 
     def metrics(self):

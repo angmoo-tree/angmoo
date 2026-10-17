@@ -72,7 +72,8 @@ def test_capture_expiry_admission_and_late_store_after_disable(monkeypatch):
     now[0] += timedelta(minutes=31)
     assert not capture.status(scope)["enabled"]
     capture.store(scope, "new", [], trace)
-    assert capture.read_full(scope, "new") is not None
+    # Expiry now ends collection, including callbacks from admitted requests.
+    assert capture.read_full(scope, "new") is None
     now[0] += timedelta(minutes=61)
     assert capture.read_full(scope, "new") is None
     assert DiagnosticCapture().read_full(scope, "new") is None

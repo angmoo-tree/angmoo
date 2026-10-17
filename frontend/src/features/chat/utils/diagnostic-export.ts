@@ -6,12 +6,15 @@ function selectFields(row: object, keys: readonly string[]) {
 function exportSearchTrace(trace: NonNullable<RetrievalDiagnosticsRead["search_trace"]>) {
   return {
     ...selectFields(trace, ["version", "coverage", "stage_events_dropped", "lineage_edges_dropped", "aliases_dropped", "detail_rows_dropped"]),
-    ...(trace.canonical_reads ? { canonical_reads: trace.canonical_reads.slice(0, 2).map(row => selectFields(row, ["stage", "status", "wait_ms", "elapsed_ms", "sql_count", "unique_nodes", "memo_hits", "cleaned"])) } : {}),
+    ...(trace.canonical_reads ? { canonical_reads: trace.canonical_reads.slice(0, 2).map(row => ({
+      ...selectFields(row, ["stage", "status", "wait_ms", "elapsed_ms", "sql_count", "unique_nodes", "memo_hits", "cleaned", "metrics_complete"]),
+      ...(row.phases ? { phases: row.phases.slice(0, 2).map(phase => selectFields(phase, ["stage", "elapsed_ms", "sql_count", "completed"])) } : {}),
+    })) } : {}),
     stages: trace.stages.slice(0, 48).map(row => selectFields(row, [
       "axis", "stage", "clock_domain", "state", "start_ms", "end_ms", "elapsed_ms",
       "budget_at_start_ms", "remaining_at_end_ms", "deadline_exceeded"])),
     terminals: trace.terminals.slice(0, 2).map(row => ({
-      ...selectFields(row, ["axis", "axis_status", "terminal_state", "last_observed_stage", "cause_certainty", "worker_started",
+      ...selectFields(row, ["axis", "axis_status", "axis_reason", "terminal_state", "last_observed_stage", "cause_certainty", "worker_started",
         "nn_query_started", "result_received", "terminal_observed", "terminate_sent", "kill_sent", "joined",
         "worker_exit_code", "termination_reason", "cleanup_error_code", "eligible_vector_count", "requested_generation",
         "observed_generation", "requested_profile", "observed_schema_revision", "generation_match", "metadata_status", "stage_events_dropped"]),
@@ -44,6 +47,16 @@ export function diagnosticExport(data: RetrievalDiagnosticsRead, worldId: string
     details_status: data.details === null && !data.search_trace ? "not_available" : "available",
     details: data.details,
     search_trace: data.search_trace ? exportSearchTrace(data.search_trace) : null,
+    temporal_recall: data.temporal_recall ? selectFields(data.temporal_recall, ["time_resolution", "requested_kind",
+      "validation_code", "field_path", "reference_utc", "timezone", "local_date", "context_digest", "query_origin",
+      "route_change_reason", "time_filter_applied", "applied_from", "applied_to", "retrieval_executed"]) : null,
+    db_write: data.db_write?.request_id === request.request_id && data.db_write.attempt_number === request.attempt_number ? {
+      ...selectFields(data.db_write, ["version", "request_id", "attempt_number", "coverage", "omitted_attempts",
+        "completed_attempts", "longest_hold_ms", "total_hold_ms", "total_write_span_ms", "retry_count", "retry_wait_ms"]),
+      attempts: data.db_write.attempts.slice(0, 64).map(row => selectFields(row, ["sequence", "stage", "database_id", "attempt",
+        "basis", "outcome", "start_offset_ms", "end_offset_ms", "checkout_ms", "acquire_ms", "hold_ms", "commit_ms", "rollback_ms", "write_span_ms",
+        "retry_wait_ms", "diagnostic_persist_ms"])),
+    } : null,
     detail_availability: data.detail_availability ?? "unknown",
     capture_at_export: { enabled: data.capture.enabled, remaining: data.capture.remaining, expires_at: data.capture.expires_at },
     completeness: { omitted_events: data.record?.omitted_events ?? null,

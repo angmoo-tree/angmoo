@@ -216,6 +216,20 @@ class HybridRecallResult:
 
 
 @dataclass(frozen=True, slots=True)
+class HybridCanonicalResult:
+    validated_count: int
+    hydration: HybridHydrationResult
+    selection: tuple[tuple[CanonicalRecallRecord, bool], ...] = ()
+
+    def __post_init__(self):
+        if (not _count(self.validated_count) or self.validated_count > 50 or not isinstance(self.hydration, HybridHydrationResult)
+                or not isinstance(self.selection, tuple) or len(self.selection) > self.validated_count
+                or any(not isinstance(row, tuple) or len(row) != 2 or not isinstance(row[0], CanonicalRecallRecord)
+                       or not isinstance(row[1], bool) for row in self.selection)):
+            raise ValueError("hybrid_canonical_result_invalid")
+
+
+@dataclass(frozen=True, slots=True)
 class HybridAxisResult:
     candidates: tuple[RankedMemoryCandidate, ...]
     receipt: RecallAxisReceipt
@@ -234,11 +248,14 @@ class HybridSearchAxis(Protocol):
 
 
 class HybridCanonicalReader(Protocol):
+    def resolve(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...]) -> HybridCanonicalResult: ...
     def revalidate(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...]) -> tuple[CanonicalRecallRecord, ...]: ...
     def hydrate(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...]) -> HybridHydrationResult: ...
 
 
 class AsyncHybridCanonicalReader(Protocol):
+    async def assert_current_async(self, result: HybridRecallResult, delivered_ids: tuple[str, ...], *, deadline: float) -> None: ...
+    async def resolve_async(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...], *, deadline: float) -> HybridCanonicalResult: ...
     async def revalidate_async(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...], *, deadline: float) -> tuple[CanonicalRecallRecord, ...]: ...
     async def hydrate_async(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...], *, deadline: float) -> HybridHydrationResult: ...
 
@@ -251,8 +268,22 @@ class SyncCanonicalAdapter:
     def axis_request(self, request):
         return getattr(self.reader, "axis_request", lambda value: value)(request)
 
+    async def resolve_async(self, request, candidates, *, deadline):
+        from app.domains.memory.policies.hybrid_selection import select_records, selection_steps
+        if hasattr(self.reader, "resolve"):
+            return self.reader.resolve(request, candidates)
+        records = self.reader.revalidate(request, candidates)
+        return HybridCanonicalResult(len(records), self.reader.hydrate(request, select_records(request, records)), selection_steps(request, records))
+
     async def revalidate_async(self, request, candidates, *, deadline):
         return self.reader.revalidate(request, candidates)
 
     async def hydrate_async(self, request, records, *, deadline):
         return self.reader.hydrate(request, records)
+
+    async def assert_current_async(self, result, delivered_ids, *, deadline):
+        return self.reader.assert_current(result, delivered_ids)
+
+
+class RecallCurrentnessError(ValueError):
+    """Delivered memory dependencies changed after their read snapshot ended."""

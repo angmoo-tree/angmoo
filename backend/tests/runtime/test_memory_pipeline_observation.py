@@ -113,6 +113,28 @@ def recorded_files(root):
             for path in root.rglob("*") if path.is_file()}
 
 
+def test_memory_arrivals_wake_existing_writer_once_per_pending_flush(tmp_path):
+    wakes = []
+    observer = MemoryPipelineObserver(tmp_path, "process", wake=lambda: wakes.append(True))
+    observer.attach(manifest())
+    try:
+        with observation.scope(world_id="w", actor_id="a"):
+            for i in range(8):
+                observation.emit("result", item_id=str(i), boundary="current")
+        assert len(wakes) == 1
+        assert not list((directory(tmp_path, manifest()) / "memory-pipeline").glob("events-*"))
+        observer.flush()
+        with observation.scope(world_id="w", actor_id="a"):
+            observation.emit("result", item_id="next", boundary="current")
+        assert len(wakes) == 2
+    finally:
+        observer.close()
+    events, damaged = read_events(directory(tmp_path, manifest()))
+    assert len(events) == 9 and not damaged
+    health = capability(directory(tmp_path, manifest()))["processes"][0]
+    assert health["dropped"] == health["dropped_queue_full"] == health["dropped_lock_busy"] == 0
+
+
 def test_final_flush_disconnects_and_never_rewrites_finished_evidence(tmp_path):
     observer = MemoryPipelineObserver(tmp_path, "process")
     value = manifest()

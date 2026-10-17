@@ -8,6 +8,7 @@ export type SearchFailure = {
   failure_code: string; failure_stage: string | null; exception_kind: string; sqlite_error_code: number | null;
 };
 export type SearchTerminal = {
+  axis_reason?: string | null;
   axis_status?: "ready" | "partial" | "disabled" | "unavailable" | "cancelled" | null;
   axis: "fts" | "vector"; terminal_state: string; failure: SearchFailure | null;
   last_observed_stage: string | null; cause_certainty: string;
@@ -29,5 +30,8 @@ export type SearchDiagnosticTrace = {
   stages: SearchStage[]; terminals: SearchTerminal[]; lineage: SearchLineage[];
   stage_events_dropped: number; lineage_edges_dropped: number; aliases_dropped: number;
   detail_rows_dropped?: number;
-  canonical_reads?: { stage: "revalidate" | "hydrate"; status: string; wait_ms: number | null; elapsed_ms: number | null; sql_count: number | null; unique_nodes?: number | null; memo_hits?: number | null; cleaned: boolean | null }[];
+  canonical_reads?: { stage: "resolve" | "revalidate" | "hydrate"; status: string; wait_ms: number | null; elapsed_ms: number | null; sql_count: number | null; unique_nodes?: number | null; memo_hits?: number | null; cleaned: boolean | null;
+    metrics_complete?: boolean | null;
+    phases?: { stage: "revalidate" | "hydrate"; elapsed_ms: number; sql_count: number; completed: boolean }[];
+  }[];
 };

@@ -3,11 +3,12 @@
 from __future__ import annotations
 from app.contracts.search_diagnostics import evidence_lineage
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from enum import StrEnum
 import hashlib
 import json
+import re
 
 from app.domains.chat.contracts.response_request import (
     DegradedReason,
@@ -77,6 +78,42 @@ class EvidenceBundleContractError(ValueError):
     """Stable fail-closed error for unsafe or malformed evidence."""
 
 
+_EVIDENCE_TIMESTAMP = re.compile(
+    r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})"
+)
+
+
+def validate_evidence_time_provenance(value: object) -> None:
+    """Validate code-owned time facts without coercing or changing their hash input."""
+    if not isinstance(value, dict) or set(value) != {"kind", "event_from", "event_to", "recorded_at"}:
+        raise EvidenceBundleContractError("evidence_time_provenance_invalid")
+    kind = value["kind"]
+    if type(kind) is not str or kind not in {"event", "interval", "recorded", "unknown"}:
+        raise EvidenceBundleContractError("evidence_time_provenance_invalid")
+    parsed: dict[str, datetime | None] = {}
+    for key in ("event_from", "event_to", "recorded_at"):
+        timestamp = value[key]
+        if timestamp is None:
+            parsed[key] = None
+            continue
+        if type(timestamp) is not str or len(timestamp) > 40 or not _EVIDENCE_TIMESTAMP.fullmatch(timestamp):
+            raise EvidenceBundleContractError("evidence_time_provenance_invalid")
+        try:
+            parsed[key] = datetime.fromisoformat(timestamp)
+        except ValueError as exc:
+            raise EvidenceBundleContractError("evidence_time_provenance_invalid") from exc
+    start, end, recorded = (parsed[key] for key in ("event_from", "event_to", "recorded_at"))
+    if (
+        (kind == "event" and (start is None or (end is not None and end != start)))
+        or (kind == "interval" and (start is None or end is None or end < start))
+        or (kind in {"recorded", "unknown"} and (start is not None or end is not None))
+        or (kind == "recorded" and recorded is None)
+    ):
+        raise EvidenceBundleContractError("evidence_time_provenance_invalid")
+    # Unknown event time can still retain a known recording timestamp. It must
+    # never turn that recording timestamp into the event's time.
+
+
 @dataclass(frozen=True, slots=True)
 class EvidenceItem:
     opaque_reference: str
@@ -90,6 +127,9 @@ class EvidenceItem:
     # Optional, server-verified authors. Not part of v1 text/hash/serialization.
     author_identities: tuple[tuple[str, str], ...] = ()
     relationship_projection: dict | None = None
+    # Prepared canonical times are private until a v4 bundle binds them.
+    prepared_times: tuple[str, str | None, str | None, str | None] | None = None
+    time_provenance: tuple[str, str | None, str | None, str | None] | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -105,6 +145,13 @@ class EvidenceItem:
             raise EvidenceBundleContractError("evidence_item_axes_invalid")
         if self.occurred_at is not None and self.occurred_at.tzinfo is None:
             raise EvidenceBundleContractError("evidence_item_timezone_required")
+        for times in (self.prepared_times, self.time_provenance):
+            if times is not None and (not isinstance(times, tuple) or len(times) != 4
+                or type(times[0]) is not str or times[0] not in {"event", "interval", "recorded", "unknown"}
+                or any(value is not None and (type(value) is not str or len(value) > 40) for value in times[1:])):
+                raise EvidenceBundleContractError("evidence_time_provenance_invalid")
+        if self.time_provenance is not None:
+            validate_evidence_time_provenance(_time_payload(self.time_provenance))
 
     @property
     def normalized_text(self) -> str:
@@ -188,6 +235,7 @@ class EvidenceBundle:
                     "ref": item.opaque_reference,
                     "kind": item.kind.value,
                     "text": item.text,
+                    **({"time_provenance": _time_payload(item.time_provenance)} if item.time_provenance else {}),
                     "occurred_at": (
                         None
                         if item.occurred_at is None
@@ -217,6 +265,7 @@ class EvidenceBundle:
                     "ref": item.opaque_reference,
                     "kind": item.kind.value,
                     "text": item.normalized_text,
+                    **({"time_provenance": _time_payload(item.time_provenance)} if item.time_provenance else {}),
                     "occurred_at": (
                         None
                         if item.occurred_at is None
@@ -245,6 +294,20 @@ class EvidenceBundle:
         }
 
 
+    def with_temporal_evidence(self):
+        items = tuple(replace(item, time_provenance=item.prepared_times or (
+            ("unknown", None, None, None) if item.occurred_at is None or item.kind is EvidenceKind.EPISODE_MEMORY else
+            ("event", item.occurred_at.astimezone(UTC).isoformat(), None, None))) for item in self.items)
+        digest = compute_evidence_hash(request_id=self.request_id, request_scope_hash=self.request_scope_hash,
+            route=self.route, retrieval_outcome=self.retrieval_outcome, items=items,
+            partial_axes=self.partial_axes, degraded_reason=self.degraded_reason, clarification_slot=self.clarification_slot)
+        return replace(self, items=items, evidence_hash=digest)
+
+
+def _time_payload(value):
+    return dict(zip(("kind", "event_from", "event_to", "recorded_at"), value, strict=True))
+
+
 def compute_evidence_hash(
     *,
     request_id: str,
@@ -267,6 +330,7 @@ def compute_evidence_hash(
                 "opaque_reference": item.opaque_reference,
                 "kind": item.kind.value,
                 "text": item.normalized_text,
+                **({"time_provenance": _time_payload(item.time_provenance)} if item.time_provenance else {}),
                 "occurred_at": (
                     None
                     if item.occurred_at is None
@@ -307,4 +371,5 @@ __all__ = [
     "EvidenceLocatorKind",
     "compute_evidence_hash",
     "opaque_evidence_reference",
+    "validate_evidence_time_provenance",
 ]

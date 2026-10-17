@@ -189,7 +189,9 @@ Memory owns `MemoryAccessValidation` and batched Memory rows/bindings/unique pri
 nodes, scoped to one read Session and one timestamp. Runtime owns foreign current
 Post/Reply/Chat/routine/image facts through injected read ports. Cycles are checked
 before completed-node memoization; each receipt/manifest/ordinal/range is validated.
-Candidate, hydration and final provider/application guards each open fresh contexts.
+Candidate validation, selection, follow-ups and hydration share one `resolve`
+read Session/time/context. Each later provider/application guard opens a fresh
+context; no memo survives an await, mutation or new read operation.
 Owner detail and Chat inspection share exact situation entry resolution, including
 nullable evidence and corrections. A damaged situation origin cannot become legacy
 Feed authorization. Memory OFF permits owner inspection, without source ACL bypass.
@@ -203,6 +205,33 @@ cancelled running futures remain owned, and shutdown drains before engine dispos
 Only immutable results and bounded diagnostics cross back to the parent. SQL,
 completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
 when not observed. No request collector or Session crosses the thread boundary.
+
+`resolve` explicitly pins a DEFERRED SQLite read snapshot (including sqlite3's
+legacy transaction mode) and never reserves the writer. Representation/date
+screening precedes foreign proof expansion. Runtime batches SocialEvent evidence,
+feed observations, bounded subjective records/executions and thought reads; Memory
+retains source ACL, version/digest, correction/prior and cycle policy. Missing
+facts are memoized only inside the same operation. The subjective eight-row limit
+remains per source and precedes event-kind filtering.
+
+Episode Chat results retain their immutable follow-up snapshot. Fresh bounded
+worker guards run before provider delivery, after provider return before deltas,
+and after streaming awaits before final persistence. They compare the delivered
+records plus the existing bounded seed/follow-up dependencies; they never repeat
+FTS, vector search or embedding. Changed evidence is `source_context_changed`;
+the existing World/lease/final commit fences and situation admission remain.
+The guards have a maximum four-second read budget capped by the request deadline,
+and do not overwrite the original search diagnostics. The canonical result and
+snapshot contain no Session or surviving read cache. Final application still uses
+the existing short write UoW; no long source check is placed under a write lock.
+
+Search receipts distinguish one resolve's validation/hydration phases and retain
+observed partial cost on deadline/cancel. Unobserved cleanup/cost stays unknown;
+axis readiness/reason is separate from worker transport success. Detailed OFF
+does not allocate phase-progress tracking or add SQL/files. A retrieval-boundary
+TimeoutError maps to retrieval timeout without reclassifying provider/ACL/BUSY
+errors or adding calls. Related local evidence:
+[recall validation optimization](../docs/verification/recall-validation-optimization-20261017.md).
 
 Evidence: [integrated implementation and scoped verification](../docs/verification/chat-memory-world-integrated-20261011.md).
 
@@ -1299,6 +1328,16 @@ Local evidence and boundaries: [vector pending-work verification](../docs/verifi
 
 ## Opt-in memory pipeline observation (2026-10-16, LOCAL)
 
+The observation CLI also admits explicit `start --mode memory --actor ...`
+sessions for active WorldCharacters whose existing memory scope is enabled,
+independently of the autonomous-activity switch or SNS engine. The default SNS
+mode retains its enabled-autonomy/V2 admission. Both modes use the same bounded
+recorder, transport hooks, writer spans and stop/deadline lifecycle; mode is
+recorded in the manifest/status/export. Admission reads canonical state only
+and never enables activity, saves memory or invokes a provider. Runtime recorder
+compatibility does not prove deployment: verify fresh health, supported transport
+and actual writer samples before the user triggers manual work.
+
 Recorder paths and atomic JSON replacement belong to
 `runtime/diagnostics/observation_storage.py`. SNS, memory-pipeline recording and
 reporting import that lower-level owner directly; memory recording does not
@@ -1312,6 +1351,12 @@ business owner. Domains and providers emit structural facts through it; only
 scope allowlist, bounded queue and diagnostic files. Business threads do no
 diagnostic file I/O or JSON serialization. A bounded carry-in claim scope read
 is performed outside the writer only while observation is enabled.
+
+Memory-event arrival sends one coalesced, non-blocking wake signal to the
+existing SNS recorder thread per pending flush. It does not wait for the idle
+manifest discovery interval, add a writer thread, enlarge the bounded event
+queue or block product writers on diagnostic files. Health distinguishes queue
+overflow from admission-lock contention; either remains incomplete evidence.
 
 The recorder attaches only to an unexpired, non-stopped session. At cutoff it
 closes memory-event admission and removes the process-local sink under a short
@@ -1332,7 +1377,7 @@ The existing SQLite helpers retain their admission/retry/cleanup contracts.
 Their spans distinguish checkout, BEGIN wait, acquired writer, commit, rollback
 and cleanup. Vec1/FTS spans use distinct database identities; nested holds are
 not additive. Common helpers expose safe operation names for competing writers;
-plain Session writes and other processes remain unobserved. Scheduler leases,
+plain Session writes outside the opt-in Chat capture and other processes remain unobserved. Scheduler leases,
 World deletion checks and manual relationship checks are unchanged.
 
 The pinned Gemini async adapter observes actual HTTPX attempts via public hooks.
@@ -1352,3 +1397,65 @@ package are reported unavailable, not treated as a recorder crash.
 Local evidence: [Home and memory observation verification](../docs/verification/device-home-memory-observation-20261016.md).
 
 Lifecycle follow-up: [session finalization verification](../docs/verification/observer-session-finalization-20261016.md).
+
+
+## Chat temporal recall v4 and opt-in DB timing (2026-10-17)
+
+New social-hybrid admission uses `selection-args.hybrid.v4` and `hybrid-admission.v4`.
+Chat owns the immutable `chat-time-context.v1` derived from the original message
+acceptance and admitted timezone. Initial selection, one repair, the resolver and
+Today SNS assembly use that reference; authorization, deletion and execution
+budgets continue to use current state/time. Replay never rewrites v1-v3 metadata
+or hashes. An explicit retry upgrades only when original message time, environment
+and identity are verified; it does not use the retry date as the question date.
+
+The selection boundary validates the entire non-time contract and forbidden
+material before retaining a closed invalid-time candidate. Valid time meanings
+remain strict. Only time-invalid/time-ambiguous requests may perform one bounded
+related recall without dates. USE_CONTEXT and time-only clarification may use the
+validated original question with code-owned query provenance and tool tracking.
+Bad CANONICAL queries, permissions, transport failure and cancellation do not gain
+this path. A valid date-filtered empty result stays empty. No extra planner, model
+repair loop, unbounded retrieval or permission relaxation is introduced.
+
+Temporal state, query origin, reference digest and applied bounds join intent,
+resolved, interpretation and evidence bindings. v4 evidence carries verified
+source event time, source interval, recording time or unknown. Private prepared
+timestamps do not change v1-v3 evidence hashes. Episode timestamps come only from
+verified sources retained by packet budgeting, never dates inferred from prose.
+The actual CRG input distinguishes bounded related evidence from complete history
+and forbids moving old events to the requested day. Existing source currentness,
+World fences, atomic response/situation receipt and final commit remain owners.
+
+The private `evidence-inspector.v1` persistence contract accepts the original
+six item fields plus optional `time_provenance`. Chat's evidence contract owns
+the exact four-field time shape, bounded ISO timestamps with explicit timezone,
+and event/interval/recorded/unknown combinations. Binding, final persistence and
+inspector reads share this validator; it never coerces dates or rewrites hash
+inputs. Unknown event time may retain a known recording time. Missing temporal
+metadata remains valid for historical responses. Malformed metadata is rejected
+before assistant insertion; read-side malformed historical data is shown as
+unknown only after current source authorization. Source revision checks and
+atomic response/situation delivery are unchanged. The regression crosses real
+admission, source assembly, final commit, authorized read and idempotent replay
+with isolated SQLite source rows and fake provider transport.
+
+`core.work_observation` has an optional request-local ContextVar listener alongside
+the existing process observer. Chat's existing DiagnosticCapture supplies scoped
+generation/TTL admission; no table, file, timer, worker or global sink replacement
+is added. Admission is measured before its ID exists and bound after acceptance.
+Existing Session commit/rollback calls are wrapped through return, without new
+SQL, changed isolation, flush, commit or retry policy. General Session writes are
+`write_span_only`; only observed BEGIN IMMEDIATE acquisition through commit or
+rollback is a known writer hold. Nested diagnostic SAVEPOINT time is a subset,
+not another hold. Post-commit writes and failure/cancel cleanup are separately
+labelled. Final timing is held in memory and read without another persistence step.
+
+Collectors cap detail at 64 attempts, preserve constant-size completed summaries,
+share the 64 KiB export and existing 20 result/1 MiB limits, and expose unknown as
+null. Capture OFF/generation replacement/TTL stops callbacks, restart is OFF,
+and completed snapshots may remain within the existing retention period until
+explicit clearing. Collector failure never retries or fails business work.
+Plain Session intervals cannot identify another worker's wait cause.
+
+Local evidence and limits: [Chat temporal recall verification](../docs/verification/chat-temporal-recall-20261017.md).

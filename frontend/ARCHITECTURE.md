@@ -888,3 +888,24 @@ Social의 기존 batch unread-count hook·badge는 composition에서 연결한�
 
 표현 분류는 LOCAL이다. Next/static은 같은 component·KO/EN catalog·semantic token을 사용한다.
 검증: [Home·환경·기억 관찰 로컬 결과](../docs/verification/device-home-memory-observation-20261016.md).
+
+
+## Chat 시간·DB 진단과 근거 날짜 의미 (2026-10-17, LOCAL)
+
+Chat feature가 선택적인 temporal_recall/db_write DTO, 요청·attempt 검증, bounded export와
+TemporalDbDiagnostics를 소유한다. 기존 진단 disclosure 내부에서만 표시하고 별도 route,
+전역 상태, polling 또는 진단 저장 API를 만들지 않는다. old/missing 자료는 unknown이다.
+Memory feature는 자기 evidence DTO와 presentation utility에서 사건/출처 구간/기록/unknown
+시각을 표시하며 Chat 내부 코드를 import하지 않는다. 서버가 접근을 재확인한 근거만 표시한다.
+공용 hook·semantic CSS·KO/EN catalog·native details를 Next/static에서 함께 사용한다.
+검증: [Chat 시간·계측 로컬 결과](../docs/verification/chat-temporal-recall-20261017.md).
+
+### SNS·Chat 검색 진단 보완 (2026-10-17, LOCAL)
+
+기존 `SearchTraceDetails`와 export allowlist가 선택적인 `resolve` 단계,
+최대 두 validation/hydration 하위 단계, `metrics_complete`, 축의 `axis_reason`을
+소유한다. 누락 값을 0/성공으로 바꾸지 않고 관측한 일부 비용과 연결 정리 상태만
+보여 준다. Next/static의 같은 WorldChat 진단 컴포넌트를 재사용한다. 한국어·영어
+catalog를 함께 유지하며 `retrieval_timeout`은 기억 검색 시간초과로 안내한다.
+새 조회/쓰기 API, polling 또는 전역 캐시는 추가하지 않는다.
+검증: [검색 최적화 관련 로컬 결과](../docs/verification/recall-validation-optimization-20261017.md).

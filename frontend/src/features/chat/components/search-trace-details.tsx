@@ -13,6 +13,7 @@ const labels: Record<string, string> = {
   success: "성공", error: "오류", deadline: "제한 시간 만료", cancelled: "취소", unexpected_exit: "예기치 않은 종료",
   disabled: "사용 안 함", completed: "완료", running: "진행 중 마지막 관측", failed: "실패", unknown: "확인되지 않음",
   ready: "검색 완료", partial: "일부만 사용 가능", unavailable: "검색 사용 불가",
+  resolve: "검증·원문 조립", revalidate: "후보 검증",
   axis: "검색 축", rrf: "순위 결합", canonical: "원본 검증", select: "기억 선택", hydrate: "원문 연결",
   evidence: "근거 변환", dedup: "중복 제거", limit: "근거 상한", freeze: "근거 동결",
   crg: "응답 생성에 전달", inspector: "근거 화면 snapshot", bundle: "근거 묶음",
@@ -28,18 +29,23 @@ export function SearchTraceDetails({ trace }: { trace: SearchDiagnosticTrace }) 
   const stages = [...trace.stages].sort((a, b) => a.axis.localeCompare(b.axis) ||
     (a.clock_domain === b.clock_domain ? a.start_ms - b.start_ms : a.clock_domain === "parent" ? -1 : 1));
   return <section aria-label={uiText("상세 검색 실행 진단")}>
-    <p>{uiText("실행 진단:")}{trace.coverage === "complete" ? uiText("수집한 기록에 생략 없음") : uiText("일부만 확인됨")} · {trace.version}</p>
-    <p>{uiText("단계 기록")}{trace.stage_events_dropped}{uiText("개, 연결 기록")}{trace.lineage_edges_dropped}{uiText("개, 별칭")}{trace.aliases_dropped}{uiText("개, 검색 조건")}{trace.detail_rows_dropped ?? 0}{uiText("개가 생략되었습니다. 기록이 완전해도 답변의 정확성을 보장하지 않습니다.")}</p>
+    <p>{uiText("실행 진단:")} {trace.coverage === "complete" ? uiText("수집한 기록에 생략 없음") : uiText("일부만 확인됨")} · {trace.version}</p>
+    <p>{uiText("단계 기록")} {trace.stage_events_dropped} {uiText("개, 연결 기록")} {trace.lineage_edges_dropped} {uiText("개, 별칭")} {trace.aliases_dropped} {uiText("개, 검색 조건")} {trace.detail_rows_dropped ?? 0} {uiText("개가 생략되었습니다. 기록이 완전해도 답변의 정확성을 보장하지 않습니다.")}</p>
     {(trace.canonical_reads ?? []).slice(0, 2).map(row => <div key={row.stage}>
-      <strong>{uiText("기억 원문 확인 작업")} · {row.stage} · {row.status}</strong>
+      <strong>{uiText("기억 원문 확인 작업")} · {name(row.stage)} · {name(row.status)}</strong>
       <dl><dt>{uiText("SQL 조회 횟수")}</dt><dd>{value(row.sql_count)}</dd>
         <dt>{uiText("소요 시간 / 대기 시간 / 연결 정리")}</dt><dd>{value(row.elapsed_ms)} ms / {value(row.wait_ms)} ms / {value(row.cleaned)}</dd></dl>
+      {row.metrics_complete === false && <p>{uiText("중단 시점까지 확인한 비용입니다. 이후 정리 완료 여부는 이 기록만으로 확인할 수 없습니다.")}</p>}
+      {(row.phases ?? []).slice(0, 2).map(phase => <p key={phase.stage}>
+        {name(phase.stage)} · {phase.elapsed_ms.toFixed(2)} ms · {uiText("SQL 조회 횟수")} {phase.sql_count} · {name(phase.completed ? "completed" : "partial")}
+      </p>)}
     </div>)}
     {trace.terminals.map(terminal => <div key={terminal.axis}>
       <strong>{terminal.axis === "vector" ? uiText("벡터") : "FTS"}: {name(terminal.axis_status ?? null)}</strong>
-      <p>{uiText("작업 종료 상태:")}{name(terminal.terminal_state)}</p>
-      <p>{uiText("마지막 확인 단계:")}{name(terminal.last_observed_stage)}</p>
-      {terminal.failure && <p>{uiText("오류:")}{terminal.failure.failure_code} {uiText("· 실패 단계:")}{name(terminal.failure.failure_stage)} · {terminal.failure.exception_kind}</p>}
+      <p>{uiText("작업 종료 상태:")} {name(terminal.terminal_state)}</p>
+      {terminal.axis_reason && <p>{uiText("검색 축 상태 사유:")} <span>{terminal.axis_reason}</span></p>}
+      <p>{uiText("마지막 확인 단계:")} {name(terminal.last_observed_stage)}</p>
+      {terminal.failure && <p>{uiText("오류:")} {terminal.failure.failure_code} {uiText("· 실패 단계:")} {name(terminal.failure.failure_stage)} · {terminal.failure.exception_kind}</p>}
       <dl>
         <dt>{uiText("프로세스 시작 / 결과 수신 / 정리 완료")}</dt><dd>{value(terminal.worker_started)} / {value(terminal.result_received)} / {value(terminal.joined)}</dd>
         <dt>{uiText("종료 사유 / 종료 코드")}</dt><dd>{terminal.termination_reason} / {value(terminal.worker_exit_code)}</dd>
@@ -53,8 +59,8 @@ export function SearchTraceDetails({ trace }: { trace: SearchDiagnosticTrace }) 
       <p>{uiText("부모 시간은 요청 관측 시작 기준, 자식 시간은 각 작업 프로세스 시작 기준입니다. 병렬·중첩 구간을 합산하지 않습니다.")}</p>
       <ol className={styles.events}>{stages.map(row => <li key={[row.axis, row.clock_domain, row.stage].join(":")}>
         <strong>{row.axis} · {name(row.stage)} · {name(row.state)}</strong>
-        <p>{row.clock_domain === "parent" ? uiText("부모") : uiText("자식")} {uiText("시작")}{row.start_ms.toFixed(2)}{uiText("ms · 소요")}{row.elapsed_ms === null ? uiText("확인되지 않음") : row.elapsed_ms.toFixed(2) + "ms"}</p>
-        <p>{uiText("시작 예산")}{row.budget_at_start_ms.toFixed(2)}{uiText("ms · 종료 시 남은 예산")}{row.remaining_at_end_ms === null ? uiText("확인되지 않음") : row.remaining_at_end_ms.toFixed(2) + "ms"}</p>
+        <p>{row.clock_domain === "parent" ? uiText("부모") : uiText("자식")} {uiText("시작")} {row.start_ms.toFixed(2)} {uiText("ms · 소요")} {row.elapsed_ms === null ? uiText("확인되지 않음") : row.elapsed_ms.toFixed(2) + "ms"}</p>
+        <p>{uiText("시작 예산")} {row.budget_at_start_ms.toFixed(2)} {uiText("ms · 종료 시 남은 예산")} {row.remaining_at_end_ms === null ? uiText("확인되지 않음") : row.remaining_at_end_ms.toFixed(2) + "ms"}</p>
       </li>)}</ol>
     </details>
     <details><summary>{uiText("후보와 근거 연결 보기")}</summary>
@@ -63,9 +69,9 @@ export function SearchTraceDetails({ trace }: { trace: SearchDiagnosticTrace }) 
         <strong>{name(row.stage)} · {name(row.action)}</strong>
         <p>{[row.document_ref, row.identity_ref, row.memory_ref, row.source_ref, row.record_ref, row.evidence_ref, row.key_ref].filter(Boolean).join(" · ")}
           {row.related_ref ? " ← " + row.related_ref : ""}</p>
-        {row.rank !== null && <span>{uiText("순위")}{row.rank} </span>}
-        {row.count !== null && <span>{uiText("개수")}{row.count} </span>}
-        {row.reason && <span>{uiText("기준:")}{row.reason}</span>}
+        {row.rank !== null && <span>{uiText("순위")} {row.rank} </span>}
+        {row.count !== null && <span>{uiText("개수")} {row.count} </span>}
+        {row.reason && <span>{uiText("기준:")} {row.reason}</span>}
       </li>)}</ol>
     </details>
   </section>;

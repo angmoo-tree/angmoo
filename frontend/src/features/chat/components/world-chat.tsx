@@ -1019,7 +1019,8 @@ function GenerationFailure({
   return (
     <div className={styles.failureBubble} role="alert">
       <strong>
-        {failureClass === "image_interpretation_unavailable" ? uiText("사진을 인식하지 못했어요.") : settingsRequired
+        {failureClass === "retrieval_timeout" ? uiText("기억 검색 시간이 초과됐어요. 다시 시도할 수 있어요.")
+          : failureClass === "image_interpretation_unavailable" ? uiText("사진을 인식하지 못했어요.") : settingsRequired
           ? uiText("채팅에 사용할 AI 설정이 필요해요.")
           : uiText("답장을 만들지 못했어요.")}
       </strong>

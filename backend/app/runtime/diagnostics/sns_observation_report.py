@@ -53,10 +53,23 @@ def list_worlds(data_root: Path, explicit_db: Path | None = None) -> list[dict]:
             "SELECT id, name, status FROM worlds ORDER BY name LIMIT 200")]
 
 
-def _select_actors(db, world_id: str, requested: list[str] | None) -> list[str]:
+def _select_actors(db, world_id: str, requested: list[str] | None, *, mode: str = "sns") -> list[str]:
     row = db.execute("SELECT id FROM worlds WHERE id=?", (world_id,)).fetchone()
     if row is None:
         raise ValueError("sns_observation_world_not_found")
+    if mode == "memory":
+        # Manual memory work does not require autonomous activity. Explicit
+        # actors and their existing enabled memory scopes still bound capture.
+        if not requested or len(set(requested)) > 100:
+            raise ValueError("sns_observation_memory_actor_required")
+        available = {row["id"] for row in db.execute(
+            "SELECT c.id FROM world_characters c WHERE c.world_id=? AND c.status='active' "
+            "AND EXISTS (SELECT 1 FROM memory_scope_settings s WHERE s.world_id=c.world_id "
+            "AND s.subject_world_character_id=c.id AND s.enabled=1)", (world_id,))}
+        chosen = set(requested)
+        if not chosen <= available:
+            raise ValueError("sns_observation_actor_scope_invalid")
+        return sorted(chosen)
     available = {row["id"] for row in db.execute(
         "SELECT id FROM world_characters WHERE world_id=? AND status='active' "
         "AND control_mode='autonomous' AND autonomous_enabled=1", (world_id,))}
@@ -78,7 +91,9 @@ def _select_actors(db, world_id: str, requested: list[str] | None) -> list[str]:
 def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None = None,
                   minutes: int = 120, tail_minutes: int = 10,
                   explicit_db: Path | None = None, source_revision: str | None = None,
-                  now: datetime | None = None) -> dict:
+                  now: datetime | None = None, mode: str = "sns") -> dict:
+    if mode not in {"sns", "memory"}:
+        raise ValueError("sns_observation_mode_invalid")
     if not 1 <= minutes <= 1440 or not 0 <= tail_minutes <= 60:
         raise ValueError("sns_observation_duration_invalid")
     now = utc(now) or datetime.now(UTC)
@@ -88,7 +103,7 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
     if prior is not None and now < deadline(prior):
         raise ValueError("sns_observation_session_already_active")
     with closing(_open_readonly(db_path)) as db:
-        chosen = _select_actors(db, world_id, actor_ids)
+        chosen = _select_actors(db, world_id, actor_ids, mode=mode)
         world_timezone = db.execute("SELECT timezone FROM worlds WHERE id=?", (world_id,)).fetchone()[0]
         placeholders = ",".join("?" for _ in chosen)
         carry_in = [row["activity_id"] for row in db.execute(
@@ -102,6 +117,7 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
     session_id = "sns-" + uuid4().hex
     from app.runtime.diagnostics.situation_observation import CAPABILITY
     manifest = {"schema_version": SCHEMA_VERSION, "session_id": session_id,
+                "observation_mode": mode,
                 "capabilities": [CAPABILITY], "situation_event_limit_bytes": 16 * 1024,
                 "situation_observation_available": True,
                 "world_id": world_id, "world_timezone": world_timezone, "actor_ids": chosen,
@@ -159,7 +175,8 @@ def session_status(data_root: Path, session_id: str, *, now: datetime | None = N
                 else "fresh" if (now - latest).total_seconds() <= 150 else "stale")
     from app.runtime.diagnostics.memory_pipeline_report import capability
     memory_pipeline = capability(directory)
-    return {"memory_pipeline": memory_pipeline, "session_id": session_id, "state": state, "started_at": manifest["started_at"],
+    return {"memory_pipeline": memory_pipeline, "session_id": session_id, "state": state,
+            "observation_mode": manifest.get("observation_mode", "sns"), "started_at": manifest["started_at"],
             "ends_at": manifest["ends_at"], "tail_ends_at": manifest["tail_ends_at"],
             "world_id": manifest["world_id"], "actor_ids": manifest["actor_ids"],
             "recorder_health": health, "event_files": len(list(directory.glob("events-*.jsonl"))),
@@ -467,6 +484,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     effect_statuses = {kind: dict(Counter(row.get("status") or "unknown" for row in effects
         if row.get("kind") == kind)) for kind in ("public_action", "state_receipt", "relationship_metric")}
     coverage = {"session_id": session_id, "exported_at": now.isoformat(),
+                "observation_mode": manifest.get("observation_mode", "sns"),
                 "model_profile_queries": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "models_get" for item in events),
                 "token_count_records": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "count_tokens" for item in events),
                 "token_count_physical_calls": sum(item.get("event_type") == "input_budget" and

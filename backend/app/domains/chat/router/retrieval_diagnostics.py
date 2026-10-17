@@ -13,6 +13,7 @@ from app.domains.chat.models import ChatResponseRequest
 from app.domains.chat.schemas import DiagnosticRequestListRead
 from app.domains.chat.contracts.generation_lifecycle import TERMINAL_STATES
 from app.domains.chat.repository.diagnostic_requests import list_requests, metadata
+import json
 
 router = APIRouter(prefix="/worlds/{world_id}/chat/threads/{thread_id}", tags=["world-chat"])
 
@@ -52,11 +53,22 @@ def diagnostics(response: Response, request_id: str | None = None,
         "not_captured" if summary and summary.get("captured_at_request") is False else
         "not_retained" if summary and summary.get("captured_at_request") is True else
         "unsupported" if result.get("record") and summary is None else "unknown")
+    temporal = None
+    if row is not None:
+        try:
+            from app.domains.chat.schemas import TemporalDiagnostic
+            value = json.loads(row.node_state_json).get("recall_interpretation", {}).get("temporal")
+            if value is not None:
+                temporal = TemporalDiagnostic.model_validate(value)
+        except (ValueError, TypeError, AttributeError):
+            pass  # Old or damaged diagnostics do not fabricate successful timing.
     return {"world_id": scope[1], "thread_id": scope[2], "request_id": None if row is None else row.request_id,
             "request_state": None if row is None else row.state,
             "request": None if row is None else metadata(row),
             "capture": capture.status(scope), "details": None if detail_result is None else detail_result["details"],
             "search_trace": None if detail_result is None else detail_result.get("search_trace"),
+            "db_write": None if detail_result is None else detail_result.get("db_write"),
+            "temporal_recall": temporal,
             "detail_availability": availability, **result}
 
 

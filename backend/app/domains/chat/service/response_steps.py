@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from app.contracts.search_diagnostics import evidence_lineage
+from app.domains.chat.contracts.temporal_recall import ChatTimeContext, TIME_CONTEXT_KEY, TEMPORAL_SELECTION_PROTOCOL
 
 import asyncio
 from collections.abc import Callable
@@ -49,12 +50,19 @@ from app.domains.chat.service.graph_retrieval import (
     GraphRetrievalPlanningService,
 )
 from app.domains.chat.service.retrieval_routing import RetrievalRoutingService
+from app.domains.chat.contracts.recall_currentness import RecallCurrentnessPort
+from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
 
 
 @dataclass(slots=True)
 class ResponseExecutionProgress:
     record: ResponseRequestRecord
     call_tracker: dict | None = None
+    memory_currentness: RecallCurrentnessPort | None = None
+
+    async def assert_memories_current(self, bundle):
+        if self.memory_currentness is not None:
+            await self.memory_currentness.assert_current(bundle, deadline_at=self.record.deadline_at)
 
 
 class ResponseWorkflowSteps:
@@ -196,6 +204,7 @@ class ResponseWorkflowSteps:
             **({"social_snapshot": command.social_snapshot} if command.social_snapshot is not None else {}),
             **({"chat_identity": command.chat_identity} if command.chat_identity is not None else {}),
             **({"selection_protocol": protocol} if protocol is not None else {}),
+            **({"time_context": ChatTimeContext.read(record.node_state.get(TIME_CONTEXT_KEY))} if protocol == TEMPORAL_SELECTION_PROTOCOL else {}),
             today_sns_context=(
                 None
                 if command.today_sns_snapshot is None
@@ -304,13 +313,17 @@ class ResponseWorkflowSteps:
         record = self._transition(
             record,
             ResponseRequestState.OPTIONAL_RETRIEVING,
-            node_state={"canonical_metrics": _safe_metrics(result.metrics)},
+            node_state={"canonical_metrics": _safe_metrics(result.metrics),
+                **({"canonical_retrieval_executed": any(axis.executed for axis in result.recall.axes)}
+                    if hasattr(result, "recall") else {})},
             call_tracker=result.call_tracker,
         )
         bundle = self._evidence.canonical(
             request_scope_hash=record.request_scope_hash,
             result=result,
         )
+        if isinstance(result, HybridCanonicalResult):
+            self.progress.memory_currentness = result.currentness
         tracker = result.call_tracker
         self.progress.call_tracker = tracker
         return {
@@ -412,6 +425,8 @@ class ResponseWorkflowSteps:
             result=result,
             character_labels=command.character_labels,
         )
+        if isinstance(result.canonical, HybridCanonicalResult):
+            self.progress.memory_currentness = result.canonical.currentness
         tracker = result.call_tracker
 
         self.progress.call_tracker = tracker
@@ -442,6 +457,8 @@ class ResponseWorkflowSteps:
             user_message=command.preflight.user_message,
         )
         bundle = self._evidence.with_image(bundle, command.image_evidence)
+        if state["routing"].intent.temporal is not None:
+            bundle = bundle.with_temporal_evidence()
         evidence_lineage("freeze", bundle.items)
         record = self._transition(
             record,
@@ -503,6 +520,9 @@ class ResponseWorkflowSteps:
             if routing.interpretation is None:
                 raise RetrievalContractError("hybrid_interpretation_missing")
             interpretation = routing.interpretation.freeze(bundle)
+            if interpretation.temporal is not None:
+                interpretation = replace(interpretation,
+                    retrieval_executed=record.node_state.get("canonical_retrieval_executed") is True)
             counts = tracker["logical_counts"]
             if (counts["canonical_planner"] or counts["graph_planner"]
                 or counts["character_response_generator"] != 1
@@ -534,6 +554,7 @@ class ResponseWorkflowSteps:
         situation = admitted_locale(command.request.node_state.get("_situation_policy"))
         if situation is not None and self._situation_memory is None:
             raise RetrievalContractError("situation_memory_runtime_missing")
+        await self.progress.assert_memories_current(bundle)
         response = await self._character_response.generate(
             CharacterResponseGeneratorRequest(
                 user_message=command.preflight.user_message,

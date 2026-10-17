@@ -1,6 +1,7 @@
 """One initial native tool selection; no automatic execution or result judging."""
 import asyncio
 import json
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_SELECTION_PROTOCOL
 from dataclasses import replace
 from uuid import uuid4
 
@@ -165,6 +166,7 @@ def selection_prompt(request):
         "user_message": request.user_message,
         **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
         "repair_validation_code": request.repair_diagnostic,
+        **({"time_context": request.time_context.payload()} if request.time_context else {}),
     }, request), ensure_ascii=False)
 
 
@@ -205,6 +207,20 @@ def _text_shape(text):
             "route": value.get("route") if isinstance(value.get("route"), str) and value["route"] in controls else "other"}
 
 
+TEMPORAL_POLICY = """
+Use time_context.reference_utc, timezone and local_date as the fixed question-time reference, including repairs.
+Time meanings are distinct from recall text: preserve the user's event and people in search_text.
+오늘/today: {"kind":"current_day","expression":"today"}.
+어제/yesterday: {"kind":"relative","expression":"yesterday","unit":"day","offset":-1}.
+지난주/last week: relative, unit week, offset -1. 지난달/last month: relative, unit month, offset -1.
+오늘 아침/this morning: relative, unit day, offset 0, period morning.
+Dates: absolute_range with expression YYYY-MM-DD..YYYY-MM-DD. Unknown dates: historical_unspecified.
+Use timezone only for an explicitly requested IANA region. current_day/recent/absolute_range never take unit, offset or period.
+시간이 불명확하면 임의로 오늘로 바꾸지 않는다. Do not invent today or a morning bound when uncertain.
+On time_scope_invalid repair, correct only the time meaning while retaining the original question and valid core fields.
+"""
+
+
 class DirectLlmSupervisorSelectionProvider:
     def __init__(self, material, *, native_controls=False, code_coordination=False, positional_entity_refs=False, graph_query_contract=False, social_context_mode=False, hybrid_recall=False):
         if material.purpose is not CredentialPurpose.MESSAGE_LLM:
@@ -224,7 +240,8 @@ class DirectLlmSupervisorSelectionProvider:
             if not self._native_controls or not options.hybrid_recall:
                 raise RetrievalContractError("selection_protocol_mode_mismatch")
             options = replace(options, named_entities=request.selection_protocol == NAME_SELECTION_PROTOCOL,
-                advisory_hints=request.selection_protocol == ADVISORY_SELECTION_PROTOCOL)
+                advisory_hints=request.selection_protocol in {ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL},
+                temporal_recall=request.selection_protocol == TEMPORAL_SELECTION_PROTOCOL)
         policy = resolve_world_chat_model_execution_policy(material.model, material.thinking_level)
         tracker = direct_llm.RunLlmTracker(max_calls=2)
         context = direct_llm.DirectLlmCallContext(
@@ -243,7 +260,7 @@ class DirectLlmSupervisorSelectionProvider:
                 api_key=material.reveal(), context=context, tracker=tracker,
                 system_prompt=with_current_image_instructions(
                     (control_selection_system_prompt(options) if self._native_controls else selection_system_prompt()) + _identity_instructions(request),
-                    present=bool(request.image_context)), user_prompt=selection_prompt(request),
+                    present=bool(request.image_context)) + (TEMPORAL_POLICY if options.temporal_recall else ""), user_prompt=selection_prompt(request),
                 tools=control_selection_tools(options) if self._native_controls else selection_tools(), require_tool_call=self._native_controls, max_output_tokens=policy.max_output_tokens,
                 timeout_seconds=30.0, thinking_level=policy.thinking_level,
             )
@@ -269,7 +286,7 @@ class DirectLlmSupervisorSelectionProvider:
                     intent = parse_selection(response.text, calls)
             except (ValueError, TypeError) as exc:
                 error = RetrievalRouterOutputError(router_validation_code_from_exception(exc),
-                                                 physical_attempt_count=max(1, tracker.call_order_in_run))
+                                                 physical_attempt_count=max(1, tracker.provider_call_order_in_run))
                 trace.fail(error.validation_code)
                 selection_attempt(request, response, error=exc, physical_attempts=tracker.provider_call_order_in_run,
                                   model=material.model, provider=material.provider, thinking_level=policy.thinking_level,
@@ -285,13 +302,16 @@ class DirectLlmSupervisorSelectionProvider:
                                        for call in response.tool_calls[:2]],
                 }
                 raise error from exc
-            selection_attempt(request, response, physical_attempts=tracker.provider_call_order_in_run,
+            temporal_error = RetrievalContractError("time_scope_invalid") if intent.temporal is not None and intent.temporal.validation == "invalid" else None
+            if temporal_error is not None:
+                trace.step("meaning", "fail")
+            selection_attempt(request, response, error=temporal_error, physical_attempts=tracker.provider_call_order_in_run,
                               model=material.model, provider=material.provider, thinking_level=policy.thinking_level,
                               max_output_tokens=policy.max_output_tokens, validation_trace=trace)
         summary = tracker.summary()
         return RetrievalRouterProviderResult(
             intent=intent, provider=material.provider, model=material.model,
-            physical_attempt_count=max(1, tracker.call_order_in_run), tool_calls=calls,
+            physical_attempt_count=max(1, tracker.provider_call_order_in_run), tool_calls=calls,
             selection_mode="native_control" if self._native_controls else "native",
             argument_protocol=options.version,
             selection_validation=trace.snapshot() if self._native_controls else None,

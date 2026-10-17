@@ -11,6 +11,7 @@ import type { DiagnosticRequestList, RetrievalDiagnosticsRead } from "@/features
 import { diagnosticExport, diagnosticFilename, diagnosticSnapshotMatches } from "@/features/chat/utils/diagnostic-export";
 import styles from "./retrieval-diagnostics.module.css";
 import { SearchTraceDetails } from "./search-trace-details";
+import { TemporalDbDiagnostics } from "./temporal-db-diagnostics";
 
 const labels: Record<string, string> = {
   request: "요청", router: "조회 경로 선택", step: "조회 단계", search: "실제 검색",
@@ -130,6 +131,7 @@ export function RetrievalDiagnostics({ worldId, threadId }: {
         </Button>
         <p>{uiText("상세 수집: {{state}}", {state: data.capture.enabled ? uiText("켜짐 · 남은 요청 {{value0}}개", {value0: data.capture.remaining}) : uiText("꺼짐")})}</p>
         {data.search_trace && <SearchTraceDetails trace={data.search_trace} />}
+        <TemporalDbDiagnostics data={data} />
         {data.details || data.search_trace ? <>
           <details><summary>{uiText("수집한 검색 조건 보기")}</summary><pre>{JSON.stringify(data.details, null, 2)}</pre></details>
           <p>{uiText("검색어에 개인 내용이 포함될 수 있습니다. 내려받은 복사본은 직접 관리해야 합니다.")}</p>

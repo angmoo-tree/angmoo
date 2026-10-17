@@ -11,6 +11,7 @@ from app.domains.chat import models, schemas
 from app.domains.chat.contracts import ResponseRequestState
 from app.domains.chat.contracts.context import ChatUser
 from app.domains.chat.contracts.evidence_reads import ChatEvidenceReads
+from app.domains.chat.contracts.evidence_bundle import validate_evidence_time_provenance
 from app.domains.chat.exceptions import MessageNotFoundError
 from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
@@ -373,7 +374,19 @@ class EvidenceService:
             episode=episode,
             relationship_change=relationship_change,
             relationship_projection=relationship_projection,
+            time_provenance=_time_provenance(raw) if availability == "available" else None,
         )
+
+
+def _time_provenance(raw):
+    value = raw.get("time_provenance")
+    if value is None:
+        return None  # Historical evidence has no verified time semantics.
+    try:
+        validate_evidence_time_provenance(value)
+        return schemas.EvidenceTimeRead.model_validate(value)
+    except (ValueError, TypeError):
+        return schemas.EvidenceTimeRead(kind="unknown")
 
 
 def _optional_datetime(value: Any) -> datetime | None:

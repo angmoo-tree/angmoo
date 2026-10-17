@@ -292,6 +292,13 @@ class ChatRetrievalLimitationsRead(BaseModel):
     degraded_reason: Literal["canonical_unavailable", "graph_unavailable", "retrieval_timeout", "no_accepted_evidence"] | None = None
 
 
+class EvidenceTimeRead(BaseModel):
+    kind: Literal["event", "interval", "recorded", "unknown"]
+    event_from: datetime | None = None
+    event_to: datetime | None = None
+    recorded_at: datetime | None = None
+
+
 class WorldChatEvidenceItemRead(BaseModel):
     reference: str
     kind: Literal[
@@ -305,6 +312,7 @@ class WorldChatEvidenceItemRead(BaseModel):
     label: str
     excerpt: str | None
     occurred_at: datetime | None
+    time_provenance: EvidenceTimeRead | None = None
     availability: Literal["available", "deleted", "unavailable"]
     related_character: str | None = None
     direction: Literal["incoming", "outgoing", "contextual"] | None = None
@@ -376,6 +384,25 @@ class DiagnosticRequestListRead(BaseModel):
 
 
 from app.contracts.search_diagnostics import SearchDiagnosticTrace
+from app.domains.chat.contracts.db_write_diagnostics import DbWriteDiagnostics
+
+
+class TemporalDiagnostic(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    time_resolution: Literal["resolved", "invalid", "ambiguous", "not_requested"]
+    requested_kind: Literal["current_day", "historical_unspecified", "recent", "relative", "absolute_range"] | None
+    validation_code: Literal["time_scope_invalid"] | None
+    field_path: str | None = Field(max_length=32)
+    reference_utc: str | None = Field(max_length=40)
+    timezone: str | None = Field(max_length=80)
+    local_date: str | None = Field(max_length=10)
+    context_digest: str | None = Field(max_length=64)
+    query_origin: Literal["model_search_text", "original_user_message", "none"]
+    route_change_reason: Literal["time_scope_invalid", "time_scope_ambiguous"] | None
+    time_filter_applied: bool
+    applied_from: str | None = Field(max_length=40)
+    applied_to: str | None = Field(max_length=40)
+    retrieval_executed: bool
 
 
 class DiagnosticRead(BaseModel):
@@ -390,4 +417,6 @@ class DiagnosticRead(BaseModel):
     capture: CaptureRead
     details: list[dict[str, str | int]] | None
     search_trace: SearchDiagnosticTrace | None = None
+    db_write: DbWriteDiagnostics | None = None
+    temporal_recall: TemporalDiagnostic | None = None
     detail_availability: Literal["available", "pending", "not_captured", "not_retained", "unsupported", "unknown"] = "unknown"

@@ -49,6 +49,7 @@ class SearchFailure(SafeModel):
 class SearchTerminal(SafeModel):
     axis: Axis
     axis_status: Literal["ready", "partial", "disabled", "unavailable", "cancelled"] | None = None
+    axis_reason: Code | None = None
     terminal_state: Literal["success", "error", "deadline", "cancelled", "unexpected_exit", "disabled"]
     failure: SearchFailure | None = None
     last_observed_stage: StageName | None = None
@@ -94,8 +95,15 @@ class SearchLineage(SafeModel):
         "character_budget", "available", "degraded", "other"] | None = None
 
 
-class CanonicalReadDiagnostic(SafeModel):
+class CanonicalPhaseDiagnostic(SafeModel):
     stage: Literal["revalidate", "hydrate"]
+    elapsed_ms: Duration
+    sql_count: Count
+    completed: bool
+
+
+class CanonicalReadDiagnostic(SafeModel):
+    stage: Literal["resolve", "revalidate", "hydrate"]
     wait_ms: Duration | None = None
     elapsed_ms: Duration | None = None
     sql_count: Count | None = None
@@ -103,6 +111,8 @@ class CanonicalReadDiagnostic(SafeModel):
     memo_hits: Count | None = None
     cleaned: bool | None = None
     status: Literal["completed", "deadline", "cancelled", "unavailable"] = "completed"
+    phases: tuple[CanonicalPhaseDiagnostic, ...] = Field(default=(), max_length=2)
+    metrics_complete: bool | None = None
 
 
 class SearchDiagnosticTrace(SafeModel):
@@ -167,7 +177,8 @@ class SearchTraceCollector:
     def payload(self):
         dropped = self.stage_dropped + sum(t.stage_events_dropped for t in self.terminals.values())
         partial = dropped or self.edge_dropped or self.alias_dropped or any(
-            t.terminal_state not in {"disabled"} and not t.terminal_observed for t in self.terminals.values())
+            t.terminal_state not in {"disabled"} and not t.terminal_observed for t in self.terminals.values()) or any(
+            row.status != "completed" or row.metrics_complete is False or row.cleaned is False for row in self.canonical_reads)
         return SearchDiagnosticTrace(coverage="partial" if partial else "complete",
             stages=tuple(self.stages.values()), terminals=tuple(self.terminals.values()),
             lineage=tuple(self.edges), canonical_reads=tuple(self.canonical_reads), stage_events_dropped=dropped,
@@ -213,13 +224,35 @@ def canonical_read(receipt=None, *, stage=None, status="completed"):
         return
     try:
         row = (CanonicalReadDiagnostic(stage=receipt.stage, wait_ms=receipt.wait_ms,
-            elapsed_ms=receipt.elapsed_ms, sql_count=min(receipt.sql_count, 1_000_000_000), cleaned=receipt.cleaned,
-            unique_nodes=receipt.unique_nodes, memo_hits=receipt.memo_hits)
+            elapsed_ms=receipt.elapsed_ms, sql_count=None if receipt.sql_count is None else min(receipt.sql_count, 1_000_000_000), cleaned=receipt.cleaned,
+            unique_nodes=receipt.unique_nodes, memo_hits=receipt.memo_hits, status=status,
+            phases=tuple(CanonicalPhaseDiagnostic(stage=row.stage, elapsed_ms=row.elapsed_ms,
+                sql_count=row.sql_count, completed=row.completed) for row in getattr(receipt, "phases", ())),
+            metrics_complete=getattr(receipt, "metrics_complete", None))
             if receipt is not None else CanonicalReadDiagnostic(stage=stage, status=status))
         if len(target.canonical_reads) < 2:
             target.canonical_reads.append(row)
     except (ValueError, TypeError):
         target.stage_dropped += 1
+
+
+def axis_receipts(receipts):
+    """Capture axis readiness before canonical work can fail; transport is separate."""
+    target = collector()
+    if target is None:
+        return
+    for receipt in receipts:
+        try:
+            prior = target.terminals.get(receipt.axis)
+            values = dict(axis_status=receipt.status.value, axis_reason=receipt.reason_code)
+            if prior is None:
+                # A missing worker terminal is not invented as a successful run.
+                target.terminals[receipt.axis] = SearchTerminal(axis=receipt.axis,
+                    terminal_state="disabled" if receipt.status.value == "disabled" else "error", **values)
+            else:
+                target.terminals[receipt.axis] = SearchTerminal.model_validate({**prior.model_dump(), **values})
+        except (ValueError, TypeError):
+            target.stage_dropped += 1
 
 
 def trace_payload():
@@ -240,10 +273,10 @@ def evidence_lineage(stage, items):
             lineage(stage, "returned", rank=rank, identities=evidence_identities(item))
 
 
-def bounded_capture(details, trace):
+def bounded_capture(details, trace, *, reserved=None):
     """Reserve terminal data and clip in batches, avoiding quadratic JSON work."""
     trace = None if trace is None else SearchDiagnosticTrace.model_validate(trace).model_dump(mode="json")
-    result = {"details": list(details[:24]), "search_trace": trace}
+    result = {**(reserved or {}), "details": list(details[:24]), "search_trace": trace}
     def size(value):
         return len(json.dumps(value, ensure_ascii=True).encode())
     total = size(result)

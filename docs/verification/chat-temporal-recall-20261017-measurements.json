@@ -1,0 +1,91 @@
+{
+  "environment": {
+    "os": "Windows",
+    "python": "3.13.12",
+    "sqlite": "3.50.4",
+    "db": "isolated synthetic WAL database"
+  },
+  "samples": {
+    "immediate": {
+      "off": {
+        "elapsed": {
+          "n": 60,
+          "median_ms": 4.1358,
+          "p95_ms": 4.7547,
+          "min_ms": 3.5246,
+          "max_ms": 5.9245
+        },
+        "independent_hold_probe": {
+          "n": 60,
+          "median_ms": 3.8524,
+          "p95_ms": 4.3418,
+          "min_ms": 3.3732,
+          "max_ms": 5.0108
+        },
+        "sql_counts": [
+          2
+        ],
+        "commit_counts": [
+          1
+        ]
+      },
+      "on": {
+        "elapsed": {
+          "n": 60,
+          "median_ms": 4.1136,
+          "p95_ms": 5.5014,
+          "min_ms": 3.6357,
+          "max_ms": 6.8602
+        },
+        "independent_hold_probe": {
+          "n": 60,
+          "median_ms": 3.6529,
+          "p95_ms": 4.4504,
+          "min_ms": 3.3531,
+          "max_ms": 6.4233
+        },
+        "sql_counts": [
+          2
+        ],
+        "commit_counts": [
+          1
+        ]
+      }
+    },
+    "session": {
+      "off": {
+        "elapsed": {
+          "n": 60,
+          "median_ms": 4.2653,
+          "p95_ms": 5.4198,
+          "min_ms": 3.5849,
+          "max_ms": 6.0834
+        },
+        "independent_hold_probe": null,
+        "sql_counts": [
+          1
+        ],
+        "commit_counts": [
+          1
+        ]
+      },
+      "on": {
+        "elapsed": {
+          "n": 60,
+          "median_ms": 4.8631,
+          "p95_ms": 6.2832,
+          "min_ms": 4.0142,
+          "max_ms": 8.5516
+        },
+        "independent_hold_probe": null,
+        "sql_counts": [
+          1
+        ],
+        "commit_counts": [
+          1
+        ]
+      }
+    }
+  },
+  "limit": "Local synthetic writes, not real Chat/SNS latency; 10 alternating warmups excluded; serialization excluded. Independent immediate hold probe includes the same probe cost in ON and OFF. Session lock hold remains unmeasured."
+}

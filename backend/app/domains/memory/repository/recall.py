@@ -250,6 +250,12 @@ class SqlAlchemyCanonicalRecallRepository:
         self._source_reader_factory = source_reader_factory
         self._character_rows = character_rows
 
+    def in_session(self, session):
+        """Bind an explicit canonical read unit without retaining its Session."""
+        from contextlib import nullcontext
+        return type(self)(lambda: nullcontext(session),
+            source_reader_factory=self._source_reader_factory, character_rows=self._character_rows)
+
     def memory_enabled(self, scope: MemoryScope) -> bool:
         with self._factory() as session:
             setting = _scope_setting(session, scope)
@@ -336,7 +342,8 @@ class SqlAlchemyCanonicalRecallRepository:
                     records.append(CanonicalRecallRecord(candidate.document_id, RecallDocumentKind.MEMORY_ITEM,
                         item.id, item.summary, _as_utc(item.valid_from), memory_item_id=item.id,
                         counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
-                        metadata={"item_version": str(item.version), "memory_kind": item.memory_kind, "representation": "activity_situation_v1"}))
+                        metadata={"item_version": str(item.version), "memory_kind": item.memory_kind,
+                            "representation": "activity_situation_v1", "recorded_at": _as_utc(item.created_at).isoformat()}))
                     seen.add(candidate.document_id)
                     continue
                 statement = select(MemoryItemEvidence).where(

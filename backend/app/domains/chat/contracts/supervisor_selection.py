@@ -11,6 +11,7 @@ from app.domains.chat.contracts.retrieval_router import (
 from app.domains.chat.contracts.workflow_recipe import workflow_recipe_for_intent
 from app.domains.chat.contracts.reference_observation import reference_call, reference_inputs, name_failure
 from app.domains.chat.contracts.person_roles import PERSON_ROLES, person_role_description
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_SELECTION_PROTOCOL
 
 NAME_SELECTION_PROTOCOL = "selection-args.hybrid.v2"
 ADVISORY_SELECTION_PROTOCOL = "selection-args.hybrid.v3"
@@ -23,7 +24,7 @@ def read_selection_protocol(metadata):
     if SELECTION_PROTOCOL_KEY not in metadata:
         return None
     value = metadata[SELECTION_PROTOCOL_KEY]
-    if value not in (NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL):
+    if value not in (NAME_SELECTION_PROTOCOL, LEGACY_HYBRID_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL):
         raise RetrievalContractError("selection_protocol_invalid")
     return value
 
@@ -48,8 +49,11 @@ class SelectionArgumentOptions:
     hybrid_recall: bool = False
     named_entities: bool = False
     advisory_hints: bool = False
+    temporal_recall: bool = False
 
     def __post_init__(self):
+        if type(self.temporal_recall) is not bool or (self.temporal_recall and not self.advisory_hints):
+            raise ValueError("selection_argument_options_invalid")
         if type(self.advisory_hints) is not bool or (self.advisory_hints and
             (not self.hybrid_recall or self.named_entities or self.positional_entity_refs or self.graph_query_contract)):
             raise ValueError("selection_argument_options_invalid")
@@ -71,6 +75,8 @@ class SelectionArgumentOptions:
 
     @property
     def version(self):
+        if self.temporal_recall:
+            return TEMPORAL_SELECTION_PROTOCOL
         if self.hybrid_recall:
             if self.advisory_hints:
                 return ADVISORY_SELECTION_PROTOCOL
@@ -358,6 +364,9 @@ def _parse_advisory_selection(text, calls, options, trace):
     if call.name not in {"CANONICAL", *CONTROL_NAMES}:
         raise RetrievalContractError("retrieval_router_route_unknown")
     raw = call.arguments()
+    if options.temporal_recall:
+        from app.domains.chat.contracts.retrieval_router import validate_selection_material
+        validate_selection_material(raw)
     required = {"intent", "time_scope", "aggregation"}
     if not options.code_coordination:
         required.add("coordination_hint")
@@ -380,10 +389,12 @@ def _parse_advisory_selection(text, calls, options, trace):
     query = payload.pop("search_text", None)
     if call.name == "CANONICAL" and (type(query) is not str or not query.strip() or len(query) > 4000):
         raise RetrievalContractError("retrieval_search_text_invalid")
-    intent = parse_retrieval_intent_payload(payload, validation_step=trace.step)
+    candidate = parse_retrieval_intent_payload(payload, validation_step=trace.step, temporal_candidate=options.temporal_recall)
+    intent, temporal = candidate if options.temporal_recall else (candidate, None)
     trace.step("wire", "pass")
     trace.step("agreement", "pass")
-    return replace(intent, version="retrieval-intent.v3", person_hints=hints, search_text=query,
+    return replace(intent, version="retrieval-intent.v4" if options.temporal_recall else "retrieval-intent.v3",
+        person_hints=hints, search_text=query, temporal=temporal,
         coordination_source="code" if options.code_coordination else "model")
 
 

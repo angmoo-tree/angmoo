@@ -29,6 +29,8 @@ def resolve_credential(db, metadata, *, owner_id, world_id, actor_id):
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from app.core.session_write_observation import finish_session, session_child
+from app.core.work_observation import scope as observation_scope
 
 from app.config import Settings
 from app.contracts.retrieval_observation import current
@@ -100,23 +102,24 @@ class SqlAlchemyResponseWorkflowUnitOfWork:
         snapshot = None if observation is None else observation.payload()
         if observation is not None and snapshot != self._diagnostic_snapshot:
             try:
-                with self._session.begin_nested():
+                with session_child(self._session), self._session.begin_nested():
                     retrieval_diagnostics.save(self._session, observation)
                 self._diagnostic_snapshot = snapshot
             except Exception:
                 # SAVEPOINT rolled back. Do not log exception/query parameters.
                 pass
-        self._session.commit()
+        finish_session(self._session)
         if self._relationship_world_id:
             try:
                 from app.runtime.relationships.experience_metrics import apply_pending_metrics
-                apply_pending_metrics(self._session, world_id=self._relationship_world_id, source_kind="chat_message")
+                with observation_scope(chat_stage="post_commit"):
+                    apply_pending_metrics(self._session, world_id=self._relationship_world_id, source_kind="chat_message")
             except Exception:
-                self._session.rollback()  # Durable pending receipts retry at the next safe checkpoint.
+                finish_session(self._session, rollback=True)  # Durable pending receipts retry at the next safe checkpoint.
 
     def rollback(self) -> None:
         self._diagnostic_snapshot = None
-        self._session.rollback()
+        finish_session(self._session, rollback=True)
 
 
 class SupervisorResponseWorkflowUnitOfWork(SqlAlchemyResponseWorkflowUnitOfWork):

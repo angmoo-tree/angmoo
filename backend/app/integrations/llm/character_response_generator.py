@@ -1,6 +1,7 @@
 """Direct-LLM adapter for the final Character Response Generator node."""
 
 from __future__ import annotations
+from app.domains.chat.contracts.temporal_recall import TEMPORAL_ADMISSION_REVISION
 
 import json
 from collections.abc import Callable
@@ -81,7 +82,7 @@ class DirectLlmCharacterResponseGenerator:
                     if source.delivery_payload_digest is not None else source for source in manifest.sources))
         metric_prompt = (METRIC_INSTRUCTIONS + "\nCurrent Chat counterpart target_ref=counterpart_1; current user message new_evidence_refs=[current_message]. recent_context is context, not a new event.") if self._relationship_enabled else ""
         from app.domains.chat.contracts.recall_interpretation import NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION
-        if (request.recall_interpretation is not None and request.recall_interpretation.revision in {NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION}
+        if (request.recall_interpretation is not None and request.recall_interpretation.revision in {NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}
             and self._before_named_provider is not None):
             # Final source capture may read SQLite. The runtime's existing UoW
             # closes those reads after capture, before the actual network await.
@@ -239,16 +240,24 @@ def _system_prompt(request: CharacterResponseGeneratorRequest) -> str:
             "A specific record that an event was cancelled or an action was not done supports that negative statement; missing records do not."
         )
         from app.domains.chat.contracts.recall_interpretation import NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION
-        if request.recall_interpretation is not None and request.recall_interpretation.revision in {NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION}:
+        if request.recall_interpretation is not None and request.recall_interpretation.revision in {NAMED_ADMISSION_REVISION, ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION}:
             from app.domains.chat.contracts.person_roles import person_role_description
             prompt += (
                 "\nFor questions about actual relationships or past activities and experiences, connect relevant evidence in the supplied context and materials to the people and direction requested by the original question. "
                 + person_role_description()
                 + " These roles are proposed interpretations: compare them with the original question, context and evidence, not verified facts or permissions. "
                 + ("If hints are absent or unusable, interpret the original question and supplied context directly."
-                   if request.recall_interpretation.revision == ADVISORY_ADMISSION_REVISION else
+                   if request.recall_interpretation.revision in {ADVISORY_ADMISSION_REVISION, TEMPORAL_ADMISSION_REVISION} else
                    "Use requested_direction for proposed relationship direction, not roles alone.")
             )
+    if request.recall_interpretation is not None and request.recall_interpretation.temporal is not None:
+        prompt += ("\nUse the fixed time_context in recall_interpretation.temporal to interpret the original question. "
+            "When time resolution is invalid or ambiguous, related evidence was not filtered to the requested date. "
+            "Respect each item's time_provenance: event is a source event, interval spans verified sources, "
+            "recorded_at is storage time, unknown has no verified event date. Never treat recording time or interval endpoints as the time of every episode event. "
+            "Use a supported partial answer and preserve date uncertainty; do not refuse solely because the time filter failed. "
+            "날짜 조건 실패는 답변 불가의 근거가 아니다. 실제 사건 시각과 기록 시각을 구분하고, "
+            "어제 근거를 오늘 일로 바꾸거나 일부 검색 결과를 하루 전체 기록으로 단정하지 않는다.")
     return with_current_image_instructions(
         prompt + ("\n" + CHAT_PARTICIPANT_INSTRUCTIONS + "\nWrite the next reply from the responding character's perspective. Write only the reply body in the text field. Do not add a speaker-name prefix or simulate the user's next message." if request.chat_identity is not None else ""),
         present=any(item.kind.value == "current_image_analysis" for item in request.evidence.items),

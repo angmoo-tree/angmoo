@@ -2,7 +2,7 @@
 from collections.abc import Sequence
 import asyncio
 from time import monotonic
-from app.contracts.search_diagnostics import collector, lineage, record_identity
+from app.contracts.search_diagnostics import axis_receipts, collector, lineage, record_identity
 
 from app.domains.memory.contracts.hybrid_recall import RankedMemoryCandidate
 from app.domains.memory.contracts.hybrid_recall import (
@@ -46,7 +46,11 @@ class HybridRecallService:
         self._fts = fts
         self._vector = vector
         from app.domains.memory.contracts.hybrid_recall import SyncCanonicalAdapter
-        self._canonical = canonical if hasattr(canonical, "revalidate_async") else SyncCanonicalAdapter(canonical)
+        self._canonical = canonical if hasattr(canonical, "resolve_async") else SyncCanonicalAdapter(canonical)
+
+    async def assert_current(self, result, delivered_ids, *, deadline):
+        """Recheck only delivered dependencies; never call either search axis."""
+        await self._canonical.assert_current_async(result, delivered_ids, deadline=deadline)
 
     async def execute(self, request: HybridRecallRequest, *, deadline: float) -> HybridRecallResult:
         started = monotonic()
@@ -69,6 +73,7 @@ class HybridRecallService:
             await asyncio.gather(*tasks, return_exceptions=True)
         if (fts.receipt.axis, vector.receipt.axis) != ("fts", "vector"):
             raise ValueError("hybrid_axis_identity_mismatch")
+        axis_receipts((fts.receipt, vector.receipt))
         if monotonic() >= deadline:
             raise TimeoutError("hybrid_recall_deadline")
         if any(r.receipt.status is RecallAxisStatus.CANCELLED for r in (fts, vector)):
@@ -77,34 +82,21 @@ class HybridRecallService:
         if not any(r.receipt.status in available for r in (fts, vector)):
             raise RuntimeError("hybrid_all_axes_unavailable")
         fused = reciprocal_rank_fusion(fts.candidates, vector.candidates)
-        records = await self._canonical.revalidate_async(request, fused, deadline=deadline)
-        if monotonic() >= deadline:
-            raise TimeoutError("hybrid_recall_deadline")
-        # Canonical validation preserves fusion order; memory IDs deduplicate only
-        # after document/version identity has received its own RRF contribution.
-        selected = []
-        seen = set()
-        for record in records:
-            key = record.memory_item_id or record.reference
-            if key not in seen:
-                selected.append(record)
-                seen.add(key)
-                lineage("select", "selected", identities=record_identity(record))
-            else:
-                lineage("select", "merged", reason="memory_identity", identities=record_identity(record))
-            if len(selected) >= request.result_limit:
-                break
-        hydration = await self._canonical.hydrate_async(request, tuple(selected), deadline=deadline)
+        resolved = await self._canonical.resolve_async(request, fused, deadline=deadline)
+        for record, selected in resolved.selection:
+            lineage("select", "selected" if selected else "merged", identities=record_identity(record),
+                reason=None if selected else "memory_identity")
+        hydration = resolved.hydration
         hydrated, sources = hydration.records, hydration.sources
         if monotonic() >= deadline:
             raise TimeoutError("hybrid_recall_deadline")
-        partial = (len(records) < len(fused)
+        partial = (resolved.validated_count < len(fused)
                    or any(r.receipt.status is not RecallAxisStatus.READY for r in (fts, vector))
                    or any(source.status is not RecallAxisStatus.READY for source in sources))
         return HybridRecallResult(
             request.request_id, request.call_id, request.envelope_hash, request.scope,
             RecallAxisStatus.PARTIAL if partial else RecallAxisStatus.READY,
             hydrated, (fts.receipt, vector.receipt), sources, vector.embedding_usage,
-            len(fused), len(fused)-len(records), (monotonic()-started)*1000,
+            len(fused), len(fused)-resolved.validated_count, (monotonic()-started)*1000,
             hydration.validation_snapshot,
         )

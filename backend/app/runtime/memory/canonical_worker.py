@@ -1,24 +1,13 @@
 """One bounded canonical read worker; Sessions never enter from the caller."""
 import asyncio
 from contextlib import contextmanager
-from dataclasses import dataclass
 from threading import Event, local
 from time import monotonic
 from sqlalchemy import event
 from sqlalchemy.exc import OperationalError, TimeoutError as CheckoutTimeout
 from app.core.sqlite_concurrency import SqliteAsyncTaskQueue
 from app.exceptions import SqliteTaskQueueFull
-
-
-@dataclass(frozen=True, slots=True)
-class CanonicalReadReceipt:
-    stage: str
-    wait_ms: float
-    elapsed_ms: float
-    sql_count: int
-    cleaned: bool
-    unique_nodes: int | None
-    memo_hits: int | None
+from app.runtime.memory.canonical_metrics import ReadProgress
 
 
 class DeadlineSessionFactory:
@@ -31,19 +20,36 @@ class DeadlineSessionFactory:
             counters = work[2]
             counters[2] = (counters[2] or 0) + metrics.unique_nodes
             counters[3] = (counters[3] or 0) + metrics.memo_hits
+            if work[3] is not None:
+                work[3].update(counters)
+
+    @contextmanager
+    def phase(self, name):
+        _, _, counters, progress = self.local.work
+        if progress is not None:
+            progress.phase_start(name, counters[0])
+        completed = False
+        try:
+            yield
+            completed = True
+        finally:
+            if progress is not None:
+                progress.phase_end(counters[0], completed)
 
     @contextmanager
     def __call__(self):
         work = getattr(self.local, "work", None)
         if work is None:
             raise RuntimeError("canonical_worker_context_missing")
-        deadline, cancelled, counters = work
+        deadline, cancelled, counters, progress = work
         if cancelled.is_set() or monotonic() >= deadline:
             raise TimeoutError("canonical_read_deadline")
         with self.factory() as session:
             driver, connection, timeout, listening = None, None, None, False
             def count(*_):
                 counters[0] += 1
+                if progress is not None:
+                    progress.update(counters)
                 if cancelled.is_set() or monotonic() >= deadline:
                     raise TimeoutError("canonical_read_deadline")
             try:
@@ -54,6 +60,10 @@ class DeadlineSessionFactory:
                 driver.set_progress_handler(lambda: int(cancelled.is_set() or monotonic() >= deadline), 1000)
                 event.listen(connection, "before_cursor_execute", count)
                 listening = True
+                # sqlite3 legacy transaction control does not BEGIN for SELECT.
+                # Pin one read snapshot without reserving the database writer.
+                if not driver.in_transaction:
+                    connection.exec_driver_sql("BEGIN DEFERRED")
                 yield session
             finally:
                 # Rollback while the worker still owns the connection. Reset
@@ -66,6 +76,8 @@ class DeadlineSessionFactory:
                         driver.execute(f"PRAGMA busy_timeout={timeout}")
                 session.rollback()
                 counters[1] = 1
+                if progress is not None:
+                    progress.update(counters)
 
 
 class CanonicalReadWorker:
@@ -77,41 +89,52 @@ class CanonicalReadWorker:
     def axis_request(self, request):
         return getattr(self.reader, "axis_request", lambda value: value)(request)
 
-    async def _call(self, stage, request, rows, deadline):
+    async def _call(self, stage, request, rows, deadline, *, diagnostics=True):
+        from app.contracts.search_diagnostics import canonical_read, collector
         submitted, signal = monotonic(), Event()
+        progress = ReadProgress(stage, submitted) if diagnostics and collector() is not None else None
+        def report(receipt, *, status="completed"):
+            if diagnostics:
+                canonical_read(receipt, stage=stage, status=status)
         self.signals.add(signal)
         def execute():
             started, counters = monotonic(), [0, 0, None, None]
-            self.sessions.local.work = deadline, signal, counters
+            self.sessions.local.work = deadline, signal, counters, progress
+            if progress is not None:
+                progress.start()
             try:
                 if signal.is_set() or started >= deadline:
                     raise TimeoutError("canonical_read_deadline")
                 result = getattr(self.reader, stage)(request, rows)
                 if signal.is_set() or monotonic() >= deadline:
                     raise TimeoutError("canonical_read_deadline")
-                return result, CanonicalReadReceipt(stage, (started-submitted)*1000,
-                    (monotonic()-started)*1000, counters[0], bool(counters[1]), counters[2], counters[3])
+                return result
             finally:
+                if progress is not None:
+                    progress.finish(counters)
                 del self.sessions.local.work
         try:
             async with asyncio.timeout(max(0, deadline-monotonic())):
-                result, receipt = await self.queue.call(execute)
+                result = await self.queue.call(execute)
             # Merge only immutable, bounded facts on the parent task. No request
             # collector/ContextVar or raw values are shared with this thread.
-            from app.contracts.search_diagnostics import canonical_read
-            canonical_read(receipt)
+            report(None if progress is None else progress.receipt())
             return result
         except (TimeoutError, asyncio.CancelledError) as exc:
-            from app.contracts.search_diagnostics import canonical_read
-            canonical_read(stage=stage, status="cancelled" if isinstance(exc, asyncio.CancelledError) else "deadline")
+            report(None if progress is None else progress.receipt(),
+                status="cancelled" if isinstance(exc, asyncio.CancelledError) else "deadline")
             raise
         except (SqliteTaskQueueFull, CheckoutTimeout) as exc:
-            from app.contracts.search_diagnostics import canonical_read
-            canonical_read(stage=stage, status="unavailable")
+            report(None if progress is None else progress.receipt(), status="unavailable")
             raise RuntimeError("canonical_read_unavailable") from exc
         except OperationalError as exc:
-            if signal.is_set() or monotonic() >= deadline:
+            expired = signal.is_set() or monotonic() >= deadline
+            report(None if progress is None else progress.receipt(), status="deadline" if expired else "unavailable")
+            if expired:
                 raise TimeoutError("canonical_read_deadline") from exc
+            raise
+        except Exception:
+            report(None if progress is None else progress.receipt(), status="unavailable")
             raise
         finally:
             signal.set()
@@ -120,8 +143,16 @@ class CanonicalReadWorker:
     async def revalidate_async(self, request, candidates, *, deadline):
         return await self._call("revalidate", request, candidates, deadline)
 
+    async def resolve_async(self, request, candidates, *, deadline):
+        return await self._call("resolve", request, candidates, deadline)
+
     async def hydrate_async(self, request, records, *, deadline):
         return await self._call("hydrate", request, records, deadline)
+
+    async def assert_current_async(self, result, delivered_ids, *, deadline):
+        # These are application-boundary guards, not another search. They use
+        # the same bounded worker/cleanup without overwriting search receipts.
+        return await self._call("assert_current", result, delivered_ids, deadline, diagnostics=False)
 
     async def stop(self):
         self.queue.close()

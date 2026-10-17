@@ -561,7 +561,8 @@ class SNSObserver:
         self.lifecycle_state = "starting"
         self._active: dict | None = None
         from app.runtime.diagnostics.memory_pipeline_observation import MemoryPipelineObserver
-        self.memory_pipeline = MemoryPipelineObserver(self.data_root, self.process_instance_id)
+        self.memory_pipeline = MemoryPipelineObserver(self.data_root, self.process_instance_id,
+                                                     wake=self._wake_memory)
         self._thread = Thread(target=self._loop, name="sns-observation", daemon=True)
         with _writer_lock:
             prior = _writers.get(self.data_root)
@@ -569,6 +570,12 @@ class SNSObserver:
                 raise RuntimeError("sns_observation_writer_still_running")
             _writers[self.data_root] = self
             self._thread.start()
+
+    def _wake_memory(self) -> None:
+        try:
+            self.queue.put_nowait(None)
+        except Full:
+            pass  # Queued SNS work already wakes the same recorder thread.
 
     def _counter(self, session_id: str) -> dict[str, int]:
         return self._counts.setdefault(session_id,
