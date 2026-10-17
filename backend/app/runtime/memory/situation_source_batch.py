@@ -13,7 +13,10 @@ from app.runtime.memory.situation_sources import SituationSources
 def prepare_sources(session, contexts, *, validation, queries_factory):
     entries = tuple(entry for context in contexts for entry in (*context.sources, *context.result_sources))
     identities = tuple(dict.fromkeys((entry.source_type, entry.source_id) for entry in entries))
-    queries = queries_factory(session, identities)
+    queries = validation.runtime_queries
+    if queries is None:
+        queries = validation.runtime_queries = queries_factory(session, ())
+    queries.prepare(session, identities, (context.snapshot.scope for context in contexts))
     for model, values in ((Post, queries.posts), (MessageMessage, queries.messages), (MessageThread, queries.threads)):
         validation.rows.update(((model, identifier), row) for identifier, row in values.items())
     mapping = {"RELATIONSHIP": RelationshipState, "ACTIVITY_PROPOSAL": ActivityProposal,

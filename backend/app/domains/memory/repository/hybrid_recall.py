@@ -16,7 +16,18 @@ class SqlAlchemyHybridCanonicalReader:
     def __init__(self, session_factory, *, source_reader_factory, canonical):
         self._factory, self._reader, self._canonical = session_factory, source_reader_factory, canonical
 
-    def revalidate(self, request, candidates):
+    def resolve(self, request, candidates):
+        from contextlib import nullcontext
+        from app.domains.memory.contracts.hybrid_recall import HybridCanonicalResult
+        from app.domains.memory.policies.hybrid_selection import select_records, selection_steps
+        now = datetime.now(UTC)
+        with self._factory() as session:
+            reader = type(self)(lambda: nullcontext(session), source_reader_factory=self._reader,
+                canonical=self._canonical.in_session(session))
+            records = reader.revalidate(request, candidates, now=now)
+            return HybridCanonicalResult(len(records), reader.hydrate(request, select_records(request, records), now=now), selection_steps(request, records))
+
+    def revalidate(self, request, candidates, *, now=None):
         if len(candidates) > 50:
             raise ValueError("hybrid_candidate_limit")
         accepted = []
@@ -26,7 +37,7 @@ class SqlAlchemyHybridCanonicalReader:
             reader = self._reader(session)
             documents = {}
             from app.domains.memory.repository.access_batch import prepare_access
-            now = datetime.now(UTC)
+            now = now or datetime.now(UTC)
             rows = {item.id: item for item in session.scalars(select(MemoryItem).where(MemoryItem.id.in_(
                 [row.candidate.memory_item_id for row in candidates])))}
             # Cheap exclusions do not erase their original diagnostic meaning.
@@ -95,7 +106,7 @@ class SqlAlchemyHybridCanonicalReader:
                 accepted.append(MemoryRecallCandidate(doc.document_id, doc.memory_item_id, doc.kind,
                     doc.canonical_source_id, ranked.candidate.score, "", doc.counterpart_world_character_id,
                     doc.thread_id, doc.source_type, doc.source_event_id, occurred, doc.metadata))
-        records = self._canonical.revalidate_candidates(scope=request.scope, candidates=tuple(accepted), now=datetime.now(UTC), evidence_limit=20)
+        records = self._canonical.revalidate_candidates(scope=request.scope, candidates=tuple(accepted), now=now, evidence_limit=20)
         if collector() is not None:
             by_document = {record.reference: record for record in records}
             for ranked in candidates:
@@ -107,12 +118,12 @@ class SqlAlchemyHybridCanonicalReader:
                     reason=None if record is not None else rejection_reasons.get(ranked.candidate.document_id, "validation"), identities=ids)
         return records
 
-    def hydrate(self, request, records):
+    def hydrate(self, request, records, *, now=None):
         # Original text is already validated by revalidate_candidates. Hydrate only
         # exact evidence references authorized by those records; no new search.
         all_refs = tuple(dict.fromkeys(ref for row in records for ref in row.evidence_references))
         refs = all_refs[:20]
-        sources = self._canonical.read_exact_sources(scope=request.scope, references=refs, now=datetime.now(UTC))
+        sources = self._canonical.read_exact_sources(scope=request.scope, references=refs, now=now or datetime.now(UTC))
         by_ref = {row.reference: row for row in sources}
         receipts = tuple(HybridSourceReceipt(ref, RecallAxisStatus.READY if ref in by_ref else RecallAxisStatus.UNAVAILABLE,
             1 if ref in by_ref else 0) for ref in all_refs)

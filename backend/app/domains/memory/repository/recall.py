@@ -250,6 +250,12 @@ class SqlAlchemyCanonicalRecallRepository:
         self._source_reader_factory = source_reader_factory
         self._character_rows = character_rows
 
+    def in_session(self, session):
+        """Bind an explicit canonical read unit without retaining its Session."""
+        from contextlib import nullcontext
+        return type(self)(lambda: nullcontext(session),
+            source_reader_factory=self._source_reader_factory, character_rows=self._character_rows)
+
     def memory_enabled(self, scope: MemoryScope) -> bool:
         with self._factory() as session:
             setting = _scope_setting(session, scope)

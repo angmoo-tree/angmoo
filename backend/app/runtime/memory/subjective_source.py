@@ -48,6 +48,11 @@ def read_subjective_source(session, scope, *, source_type, source_id):
         .order_by(SocialEvent.created_at.desc())
         .limit(8)
     ).all()
+    return validate_pairs(session, scope, source_type, pairs)
+
+
+def validate_pairs(session, scope, source_type, pairs, *, repository=None, executions=None):
+    """One policy for scalar and batch reads; the eight-row cap precedes filtering."""
     if source_type in {"POST", "REPLY"}:
         pairs = [
             (event, evidence)
@@ -68,7 +73,7 @@ def read_subjective_source(session, scope, *, source_type, source_id):
         for row in evidence.values()
         if row.public_action_execution_id
     ]
-    executions = {
+    executions = executions if executions is not None else {
         row.id: row
         for row in session.scalars(
             select(AgentPublicActionExecution).where(
@@ -77,7 +82,7 @@ def read_subjective_source(session, scope, *, source_type, source_id):
         )
     }
     validated = read_subjective_records(
-        TodayActivityRepository(session),
+        repository if repository is not None else TodayActivityRepository(session),
         scope.owner_id,
         scope.world_id,
         scope.subject_world_character_id,

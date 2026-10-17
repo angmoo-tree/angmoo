@@ -16,6 +16,12 @@ legacy_reference_dependency: none
 
 ## Recovery guidance and diagnostic details (2026-10-16 LOCAL)
 
+검색 진단의 resolve/validation/hydration 비용은 기존 disclosure 안에서 KO/EN으로
+표시한다. 완료되지 않은 계측에는 일부 관측값임을 설명하고 unknown을 성공으로
+표시하지 않는다. 검색 시간초과는 기존 오류 표면에서 안내하며 새 상시 배너나
+재시도 자동 호출은 만들지 않는다. 이번 좁은 화면 확인은 공유 컴포넌트의 로컬
+합성 렌더이며 앱 전체/운영 화면의 확인 또는 canonical visual 승인이 아니다.
+
 Keep the existing settings layout, controls, semantic text styles and native
 details disclosure. Schedule spacing is advice in Korean and English, never a
 new required interval or automatically changed value. Environment failures must

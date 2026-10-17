@@ -87,7 +87,7 @@ class SqlAlchemyEpisodeCandidates:
             add(self.session.scalars(base.order_by(MemoryItem.created_at.desc(), MemoryItem.id).limit(8)))
         return tuple(result.values())
 
-    def followups(self, *, scope, item_ids, now, limit=12, depth_limit=8):
+    def followups(self, *, scope, item_ids, now, limit=12, depth_limit=8, _facts=None):
         """Follow only owned, active edges; explicitly report bounded traversal.
 
         Keep original RRF order and append updates without overwriting the
@@ -97,7 +97,13 @@ class SqlAlchemyEpisodeCandidates:
         roots = tuple(dict.fromkeys(item_ids))
         if len(roots) > 50 or not 1 <= limit <= 50 or not 1 <= depth_limit <= 8:
             raise ValueError("episode_followup_limit")
-        if not roots or not self._enabled(scope):
+        def read(key, query):
+            if _facts is None:
+                return query()
+            if key not in _facts:
+                _facts[key] = query()
+            return _facts[key]
+        if not roots or not read("enabled", lambda: self._enabled(scope)):
             return EpisodeFollowups((), False)
         available = set(self.session.scalars(select(MemoryItem.id).where(
             MemoryItem.id.in_(roots), _owned(MemoryItem, scope), _available(MemoryItem, now))))
@@ -111,7 +117,7 @@ class SqlAlchemyEpisodeCandidates:
         for _ in range(depth_limit):
             if not frontier:
                 break
-            rows = self.session.execute(select(MemoryEpisodeLink.prior_item_id, MemoryItem.id,
+            rows = read(("edges", tuple(sorted(frontier))), lambda: self.session.execute(select(MemoryEpisodeLink.prior_item_id, MemoryItem.id,
                 MemoryEpisodeLink.created_at).join(
                 MemoryItem, MemoryItem.id == MemoryEpisodeLink.following_item_id,
             ).join(prior, prior.id == MemoryEpisodeLink.prior_item_id).where(
@@ -120,7 +126,7 @@ class SqlAlchemyEpisodeCandidates:
                 # A malformed edge cannot move a public episode into a private thread.
                 or_(MemoryItem.thread_id.is_(None), MemoryItem.thread_id == prior.thread_id),
             ).order_by(MemoryEpisodeLink.created_at.desc(), MemoryItem.id,
-                MemoryEpisodeLink.prior_item_id).limit(65)).all()
+                MemoryEpisodeLink.prior_item_id).limit(65)).all())
             if len(rows) > 64:
                 truncated = True
             next_ids = []
@@ -153,6 +159,7 @@ class SqlAlchemyEpisodeCandidates:
             raise ValueError("episode_followup_limit")
         ordered, probes, revisions = [], [], {}
         truncated = False
+        facts = {}  # Only this traversal, scope and timestamp; never a reader cache.
         for identifier in seeds:
             if identifier in ordered:
                 continue
@@ -160,7 +167,7 @@ class SqlAlchemyEpisodeCandidates:
                 truncated = True
                 break
             linked = self.followups(scope=scope, item_ids=(identifier,), now=now,
-                limit=limit - len(ordered), depth_limit=depth_limit)
+                limit=limit - len(ordered), depth_limit=depth_limit, _facts=facts)
             ordered.extend(value for value in linked.item_ids if value not in ordered)
             probes.extend(linked.link_probes)
             revisions.update((item_id, (version, digest))

@@ -50,12 +50,19 @@ from app.domains.chat.service.graph_retrieval import (
     GraphRetrievalPlanningService,
 )
 from app.domains.chat.service.retrieval_routing import RetrievalRoutingService
+from app.domains.chat.contracts.recall_currentness import RecallCurrentnessPort
+from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
 
 
 @dataclass(slots=True)
 class ResponseExecutionProgress:
     record: ResponseRequestRecord
     call_tracker: dict | None = None
+    memory_currentness: RecallCurrentnessPort | None = None
+
+    async def assert_memories_current(self, bundle):
+        if self.memory_currentness is not None:
+            await self.memory_currentness.assert_current(bundle, deadline_at=self.record.deadline_at)
 
 
 class ResponseWorkflowSteps:
@@ -315,6 +322,8 @@ class ResponseWorkflowSteps:
             request_scope_hash=record.request_scope_hash,
             result=result,
         )
+        if isinstance(result, HybridCanonicalResult):
+            self.progress.memory_currentness = result.currentness
         tracker = result.call_tracker
         self.progress.call_tracker = tracker
         return {
@@ -416,6 +425,8 @@ class ResponseWorkflowSteps:
             result=result,
             character_labels=command.character_labels,
         )
+        if isinstance(result.canonical, HybridCanonicalResult):
+            self.progress.memory_currentness = result.canonical.currentness
         tracker = result.call_tracker
 
         self.progress.call_tracker = tracker
@@ -543,6 +554,7 @@ class ResponseWorkflowSteps:
         situation = admitted_locale(command.request.node_state.get("_situation_policy"))
         if situation is not None and self._situation_memory is None:
             raise RetrievalContractError("situation_memory_runtime_missing")
+        await self.progress.assert_memories_current(bundle)
         response = await self._character_response.generate(
             CharacterResponseGeneratorRequest(
                 user_message=command.preflight.user_message,

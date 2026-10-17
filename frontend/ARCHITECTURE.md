@@ -899,3 +899,13 @@ Memory feature는 자기 evidence DTO와 presentation utility에서 사건/출�
 시각을 표시하며 Chat 내부 코드를 import하지 않는다. 서버가 접근을 재확인한 근거만 표시한다.
 공용 hook·semantic CSS·KO/EN catalog·native details를 Next/static에서 함께 사용한다.
 검증: [Chat 시간·계측 로컬 결과](../docs/verification/chat-temporal-recall-20261017.md).
+
+### SNS·Chat 검색 진단 보완 (2026-10-17, LOCAL)
+
+기존 `SearchTraceDetails`와 export allowlist가 선택적인 `resolve` 단계,
+최대 두 validation/hydration 하위 단계, `metrics_complete`, 축의 `axis_reason`을
+소유한다. 누락 값을 0/성공으로 바꾸지 않고 관측한 일부 비용과 연결 정리 상태만
+보여 준다. Next/static의 같은 WorldChat 진단 컴포넌트를 재사용한다. 한국어·영어
+catalog를 함께 유지하며 `retrieval_timeout`은 기억 검색 시간초과로 안내한다.
+새 조회/쓰기 API, polling 또는 전역 캐시는 추가하지 않는다.
+검증: [검색 최적화 관련 로컬 결과](../docs/verification/recall-validation-optimization-20261017.md).

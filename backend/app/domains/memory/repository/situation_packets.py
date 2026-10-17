@@ -71,7 +71,11 @@ def read_situation_packet(session, reader, scope, item, info, now, *, validation
                 original.evidence.source_created_at if valid else None))
     thought = ActivityThought()
     if info.thought_reference and any(source.status == "verified" and source.role == "committed_result" for source in sources):
-        thought = reader.read_thoughts(scope=scope, references=(info.thought_reference,)).get(info.thought_reference, thought)
+        key = scope, info.thought_reference
+        if validation is not None and key in validation.thoughts:
+            thought = validation.thoughts[key] or thought
+        else:
+            thought = reader.read_thoughts(scope=scope, references=(info.thought_reference,)).get(info.thought_reference, thought)
     unit = EpisodePacketUnit(f"situation:{info.receipt_sequence}", tuple(sources), thought,
         info.thought_reference if thought.status != "missing" else None,
         "partial" if truncated or any(entry.partial for entry in entries) else "complete")

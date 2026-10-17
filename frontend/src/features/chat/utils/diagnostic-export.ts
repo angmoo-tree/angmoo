@@ -6,12 +6,15 @@ function selectFields(row: object, keys: readonly string[]) {
 function exportSearchTrace(trace: NonNullable<RetrievalDiagnosticsRead["search_trace"]>) {
   return {
     ...selectFields(trace, ["version", "coverage", "stage_events_dropped", "lineage_edges_dropped", "aliases_dropped", "detail_rows_dropped"]),
-    ...(trace.canonical_reads ? { canonical_reads: trace.canonical_reads.slice(0, 2).map(row => selectFields(row, ["stage", "status", "wait_ms", "elapsed_ms", "sql_count", "unique_nodes", "memo_hits", "cleaned"])) } : {}),
+    ...(trace.canonical_reads ? { canonical_reads: trace.canonical_reads.slice(0, 2).map(row => ({
+      ...selectFields(row, ["stage", "status", "wait_ms", "elapsed_ms", "sql_count", "unique_nodes", "memo_hits", "cleaned", "metrics_complete"]),
+      ...(row.phases ? { phases: row.phases.slice(0, 2).map(phase => selectFields(phase, ["stage", "elapsed_ms", "sql_count", "completed"])) } : {}),
+    })) } : {}),
     stages: trace.stages.slice(0, 48).map(row => selectFields(row, [
       "axis", "stage", "clock_domain", "state", "start_ms", "end_ms", "elapsed_ms",
       "budget_at_start_ms", "remaining_at_end_ms", "deadline_exceeded"])),
     terminals: trace.terminals.slice(0, 2).map(row => ({
-      ...selectFields(row, ["axis", "axis_status", "terminal_state", "last_observed_stage", "cause_certainty", "worker_started",
+      ...selectFields(row, ["axis", "axis_status", "axis_reason", "terminal_state", "last_observed_stage", "cause_certainty", "worker_started",
         "nn_query_started", "result_received", "terminal_observed", "terminate_sent", "kill_sent", "joined",
         "worker_exit_code", "termination_reason", "cleanup_error_code", "eligible_vector_count", "requested_generation",
         "observed_generation", "requested_profile", "observed_schema_revision", "generation_match", "metadata_status", "stage_events_dropped"]),

@@ -37,7 +37,7 @@ class MemoryHybridRuntime:
             from app.domains.memory.repository.episode_hybrid_recall import SqlAlchemyEpisodeHybridReader
             from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
             reader = SqlAlchemyEpisodeHybridReader(canonical_sessions, detail_reader_factory=RuntimeEpisodeDetailReader,
-                access_observer=canonical_sessions.record_access)
+                access_observer=canonical_sessions.record_access, phase=canonical_sessions.phase)
         else:
             reader = SqlAlchemyHybridCanonicalReader(canonical_sessions, source_reader_factory=source_evidence_reader,
                 canonical=canonical_recall_repository(canonical_sessions))

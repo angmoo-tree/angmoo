@@ -1,7 +1,7 @@
 {
-  "edge_count": 6785,
-  "external_import_count": 4602,
-  "module_count": 1564,
+  "edge_count": 6803,
+  "external_import_count": 4609,
+  "module_count": 1568,
   "modules": [
     {
       "external_imports": [],
@@ -2184,6 +2184,19 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.evidence_bundle",
+        "app.domains.chat.contracts.retrieval_intent"
+      ],
+      "module": "app.domains.chat.contracts.recall_currentness",
+      "path": "backend/app/domains/chat/contracts/recall_currentness.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses",
         "hashlib",
         "json"
@@ -3186,6 +3199,8 @@
       ],
       "imports": [
         "app.contracts.retrieval_observation",
+        "app.domains.chat.contracts.evidence_bundle",
+        "app.domains.chat.contracts.recall_currentness",
         "app.domains.chat.contracts.retrieval_intent",
         "app.domains.chat.service.canonical_retrieval",
         "app.domains.memory.contracts.embedding",
@@ -3281,6 +3296,7 @@
         "app.domains.chat.contracts.chat_identity_context",
         "app.domains.chat.contracts.evidence_bundle",
         "app.domains.chat.contracts.generation_lifecycle",
+        "app.domains.chat.contracts.recall_currentness",
         "app.domains.chat.contracts.recall_mode",
         "app.domains.chat.contracts.relationship_evidence",
         "app.domains.chat.contracts.response_execution",
@@ -3297,6 +3313,7 @@
         "app.domains.chat.service.character_response",
         "app.domains.chat.service.evidence_assembly",
         "app.domains.chat.service.graph_retrieval",
+        "app.domains.chat.service.hybrid_canonical",
         "app.domains.chat.service.retrieval_routing",
         "app.domains.chat.service.social_context_inspector"
       ],
@@ -3326,6 +3343,7 @@
         "app.domains.chat.contracts.chat_identity_context",
         "app.domains.chat.contracts.generation_lifecycle",
         "app.domains.chat.contracts.graph_failure",
+        "app.domains.chat.contracts.recall_currentness",
         "app.domains.chat.contracts.recall_mode",
         "app.domains.chat.contracts.response_execution",
         "app.domains.chat.contracts.response_lifecycle",
@@ -5067,7 +5085,8 @@
       ],
       "imports": [
         "app.domains.memory.contracts.recall",
-        "app.domains.memory.contracts.scope"
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.policies.hybrid_selection"
       ],
       "module": "app.domains.memory.contracts.hybrid_recall",
       "path": "backend/app/domains/memory/contracts/hybrid_recall.py",
@@ -5714,6 +5733,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.memory.policies.hybrid_selection",
+      "path": "backend/app/domains/memory/policies/hybrid_selection.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "re"
       ],
@@ -6119,6 +6145,7 @@
     },
     {
       "external_imports": [
+        "contextlib",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -6134,6 +6161,7 @@
         "app.domains.memory.models.items",
         "app.domains.memory.policies.episode_packets",
         "app.domains.memory.policies.episode_provider_view",
+        "app.domains.memory.policies.hybrid_selection",
         "app.domains.memory.repository.access_batch",
         "app.domains.memory.repository.episode_candidates",
         "app.domains.memory.repository.episode_packets",
@@ -6210,6 +6238,7 @@
     },
     {
       "external_imports": [
+        "contextlib",
         "datetime",
         "hashlib",
         "sqlalchemy"
@@ -6219,6 +6248,7 @@
         "app.domains.memory.contracts.hybrid_recall",
         "app.domains.memory.contracts.recall",
         "app.domains.memory.models.items",
+        "app.domains.memory.policies.hybrid_selection",
         "app.domains.memory.policies.retrievability",
         "app.domains.memory.repository.access_batch",
         "app.domains.memory.repository.recall",
@@ -19821,6 +19851,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "dataclasses",
+        "threading",
+        "time"
+      ],
+      "imports": [],
+      "module": "app.runtime.memory.canonical_metrics",
+      "path": "backend/app/runtime/memory/canonical_metrics.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.core.sqlite_concurrency"
@@ -19833,7 +19874,6 @@
       "external_imports": [
         "asyncio",
         "contextlib",
-        "dataclasses",
         "sqlalchemy",
         "sqlalchemy.exc",
         "threading",
@@ -19842,7 +19882,8 @@
       "imports": [
         "app.contracts.search_diagnostics",
         "app.core.sqlite_concurrency",
-        "app.exceptions"
+        "app.exceptions",
+        "app.runtime.memory.canonical_metrics"
       ],
       "module": "app.runtime.memory.canonical_worker",
       "path": "backend/app/runtime/memory/canonical_worker.py",
@@ -19951,13 +19992,15 @@
         "app.domains.relationships.models.social",
         "app.domains.routines.models.resident",
         "app.domains.social.models.activity_thought",
+        "app.domains.social.models.feed",
         "app.domains.social.models.posts",
         "app.domains.social.service.today_activity_thoughts",
         "app.runtime.memory.composition",
         "app.runtime.memory.situation_source_batch",
         "app.runtime.memory.situation_sources",
         "app.runtime.memory.source_composition",
-        "app.runtime.memory.source_queries"
+        "app.runtime.memory.source_queries",
+        "app.runtime.memory.subjective_source_batch"
       ],
       "module": "app.runtime.memory.episode_details",
       "path": "backend/app/runtime/memory/episode_details.py",
@@ -20581,6 +20624,21 @@
       ],
       "module": "app.runtime.memory.subjective_source",
       "path": "backend/app/runtime/memory/subjective_source.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.relationships.models.social",
+        "app.domains.routines.models.resident",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.today_activity",
+        "app.runtime.memory.subjective_source"
+      ],
+      "module": "app.runtime.memory.subjective_source_batch",
+      "path": "backend/app/runtime/memory/subjective_source_batch.py",
       "wildcard_imports": []
     },
     {

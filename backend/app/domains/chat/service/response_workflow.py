@@ -254,6 +254,10 @@ class ResponseGenerationWorkflowService:
             route = routing.intent.route
             bundle = state["bundle"]
             response = state["response"]
+            # Provider waits end the earlier read snapshot. Reject stale memory
+            # dependencies before emitting response text, then recheck after the
+            # streaming awaits immediately before the final persistence UoW.
+            await progress.assert_memories_current(bundle)
             if name_binding is not None:
                 from app.domains.characters.service.prompt_persona import render_names
                 if command.name_binding_validator:
@@ -310,6 +314,7 @@ class ResponseGenerationWorkflowService:
                     command.today_sns_snapshot
                 )
             record = self._transition(record, ResponseRequestState.COMMITTING)
+            await progress.assert_memories_current(bundle)
             with observation_scope(chat_stage="response_finalize"):
                 if command.name_binding_validator:
                     command.name_binding_validator()
@@ -631,6 +636,9 @@ def _classify_failure(
     exc: Exception,
 ) -> tuple[str, bool, ResponseTerminalReason]:
     from app.contracts.name_binding import NameBindingError
+    from app.domains.chat.contracts.recall_currentness import RecallEvidenceChanged
+    if isinstance(exc, RecallEvidenceChanged):
+        return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, NameBindingError):
         return str(exc), True, ResponseTerminalReason.CONTRACT_INVALID
     if isinstance(exc, (TodaySnsSnapshotChangedError, SocialContextChangedError)):

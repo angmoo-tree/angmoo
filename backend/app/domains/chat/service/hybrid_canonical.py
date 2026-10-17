@@ -1,6 +1,6 @@
 """Canonical ToolNode execution without a specialist Planner or fabricated plan."""
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from time import monotonic
 from app.contracts.retrieval_observation import observe
 
@@ -10,6 +10,9 @@ from app.domains.memory.contracts.embedding import EMBEDDING_PROFILE
 from app.domains.memory.contracts.hybrid_recall import HybridRecallRequest, HybridRecallResult, RecallAxisReceipt, RecallAxisStatus, HybridEmbeddingUsage
 from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.hybrid_recall import RecallCurrentnessError
+from app.domains.chat.contracts.evidence_bundle import EvidenceLocatorKind
+from app.domains.chat.contracts.recall_currentness import RecallCurrentnessPort, RecallEvidenceChanged
 
 _SEARCH_KINDS = {
     "search_thread_messages": (RecallDocumentKind.THREAD_MESSAGE, RecallDocumentKind.OWNER_MEMORY_REQUEST),
@@ -27,6 +30,26 @@ class HybridCanonicalResult:
     recall: HybridRecallResult
     metrics: CanonicalPlanningMetrics
     call_tracker: dict
+    currentness: RecallCurrentnessPort | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _CurrentMemoryEvidence:
+    service: object
+    result: HybridRecallResult
+
+    async def assert_current(self, bundle, *, deadline_at):
+        ids = tuple(dict.fromkeys(item.locator.source_id for item in bundle.items
+            if item.locator is not None and item.locator.kind is EvidenceLocatorKind.MEMORY_ITEM))
+        if not ids:
+            return
+        remaining = (deadline_at - datetime.now(UTC)).total_seconds()
+        try:
+            await self.service.assert_current(self.result, ids, deadline=monotonic() + min(4.0, remaining))
+        except RecallCurrentnessError as exc:
+            raise RecallEvidenceChanged("memory_evidence_changed") from exc
+        except TimeoutError as exc:
+            raise RetrievalContractError("hybrid_retrieval_timeout") from exc
 
 
 class HybridCanonicalService:
@@ -67,7 +90,12 @@ class HybridCanonicalService:
                 None if resolved.absolute_time_to is None else datetime.fromisoformat(resolved.absolute_time_to),
                 result_limit=min(12 if self._episode_only else 20, resolved.caps.row_limit),
                 episode_source_kinds=kinds if self._episode_only and RecallDocumentKind.MEMORY_ITEM not in kinds else ())
-            result = await self._hybrid.execute(request, deadline=monotonic()+min(20.0, remaining, resolved.caps.timeout_ms / 1000))
+            try:
+                result = await self._hybrid.execute(request, deadline=monotonic()+min(20.0, remaining, resolved.caps.timeout_ms / 1000))
+            except TimeoutError as exc:
+                # Restrict classification to the retrieval boundary. Provider
+                # failures, cancellation, ACL and SQL BUSY retain their types.
+                raise RetrievalContractError("hybrid_retrieval_timeout") from exc
         for axis in result.axes:
             observe("hybrid_axis", axis=axis.axis, status=axis.status.value, executed=axis.executed,
                 returned=axis.candidate_count, elapsed_ms=axis.duration_ms, reason=axis.reason_code,
@@ -80,4 +108,5 @@ class HybridCanonicalService:
                 returned=len(result.records), status=result.status.value, elapsed_ms=result.duration_ms)
         return HybridCanonicalResult(resolved.request_id, result,
             CanonicalPlanningMetrics(True, False, bool(short_reason), short_reason, 0, 0, 0, 0,
-                len(result.records), None, None, latency_ms=int(result.duration_ms)), dict(command.call_tracker))
+                len(result.records), None, None, latency_ms=int(result.duration_ms)), dict(command.call_tracker),
+            _CurrentMemoryEvidence(self._hybrid, result) if result.validation_snapshot is not None else None)

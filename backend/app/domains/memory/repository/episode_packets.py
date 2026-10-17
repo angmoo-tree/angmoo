@@ -44,13 +44,22 @@ class SqlAlchemyEpisodePackets:
         from app.domains.memory.repository.situation_reads import situation_origin
         from app.domains.memory.repository.situation_packets import read_situation_packet
         situations = {}
+        origins = {identifier: situation_origin(self.session, item, validation=validation)
+            for identifier, item in items.items()}
+        thought_refs = {info.thought_reference for info in origins.values() if info is not None and info.thought_reference
+            and (scope, info.thought_reference) not in validation.thoughts}
+        if thought_refs:
+            thoughts = self.reader.read_thoughts(scope=scope, references=tuple(sorted(thought_refs)))
+            validation.thoughts.update(((scope, reference), thoughts.get(reference)) for reference in thought_refs)
         for identifier, item in tuple(items.items()):
-            situation = situation_origin(self.session, item, validation=validation)
+            situation = origins[identifier]
             if situation is not None:
                 packet = read_situation_packet(self.session, self.reader, scope, item, situation, now, validation=validation)
                 if packet is not None:
                     situations[identifier] = packet
                 del items[identifier]
+        if not items:
+            return tuple(situations[identifier] for identifier in ids if identifier in situations)
         evidence_rows = self.session.scalars(select(MemoryItemEvidence).where(
             MemoryItemEvidence.memory_item_id.in_(items)).order_by(MemoryItemEvidence.id)).all()
         evidence = {row.id: row for row in evidence_rows}

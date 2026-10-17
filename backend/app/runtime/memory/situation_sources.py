@@ -130,7 +130,11 @@ class SituationSources:
         from app.domains.memory.policies.situation_ranges import delivered_ranges
         ranges, transmitted_ranges = delivered_ranges(raw, delivered)
         return DeliveredSourceEntry(kind, identifier, version, digest, sha256(delivered.encode()).hexdigest(),
-            path, role, ordinal, scope.world_id, target_key=target, thread_id=thread or private_thread,
+            # A prior's thread is its canonical access identity. A public SNS
+            # memory stays public even when delivered inside a private Chat;
+            # the new manifest carries the Chat's private destination separately.
+            path, role, ordinal, scope.world_id, target_key=target,
+            thread_id=thread if kind == "MEMORY_ITEM" else thread or private_thread,
             actor_id=actor, counterpart_id=counterpart, ranges=ranges, partial=raw != delivered,
             transformation=None if raw == delivered else "bounded-context.v1", delivered_ranges=transmitted_ranges,
             relationship_basis=relationship_basis,

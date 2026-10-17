@@ -158,3 +158,58 @@ test("actual diagnostic component renders bilingual nulls and honest search stat
     assert.ok(missing.includes(catalog["이 요청의 DB 쓰기 시간은 수집되지 않았거나 보관이 끝났습니다."]));
   }
 });
+
+test("resolve export bounds phases, keeps failure costs and excludes private fields", () => {
+  const data = sample();
+  data.search_trace = { version: "search-diagnostic-trace.v1", coverage: "partial", stages: [], lineage: [],
+    terminals: [{ axis: "fts", axis_status: "unavailable", axis_reason: "memory_fts_preparing", failure: null }],
+    canonical_reads: [{ stage: "resolve", status: "deadline", wait_ms: 3, elapsed_ms: 120,
+      sql_count: 17, cleaned: false, metrics_complete: false, secret: "private-source",
+      phases: Array.from({length: 5}, () => ({stage: "revalidate", elapsed_ms: 120, sql_count: 16, completed: false, raw: "private-source"})) }] };
+  const exported = diagnosticExport(data, "world", "thread", "failed-request").search_trace;
+  assert.equal(exported.canonical_reads[0].phases.length, 2);
+  assert.equal(exported.canonical_reads[0].sql_count, 17);
+  assert.equal(exported.canonical_reads[0].metrics_complete, false);
+  assert.equal(exported.terminals[0].axis_reason, "memory_fts_preparing");
+  assert.ok(!JSON.stringify(exported).includes("private-source"));
+});
+
+test("shared Next/static search diagnostics render resolve, partial and legacy in both locales", async () => {
+  const {createRequire} = await import("node:module");
+  const require = createRequire(import.meta.url);
+  const React = require("react"), {renderToStaticMarkup} = require("react-dom/server");
+  const {I18nextProvider} = require("react-i18next"), i18next = require("i18next");
+  function compile(path, imports) {
+    const module = {exports:{}};
+    const js = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"),
+      {compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
+    new Function("require", "module", "exports", js)(name => imports[name] ?? require(name), module, module.exports);
+    return module.exports;
+  }
+  const hook = compile("../src/hooks/use-ui-text.ts", {});
+  const Component = compile("../src/features/chat/components/search-trace-details.tsx", {
+    "@/hooks/use-ui-text":hook, "./retrieval-diagnostics.module.css":{events:"events"}}).SearchTraceDetails;
+  const trace = {version:"search-diagnostic-trace.v1", coverage:"partial", stages:[], terminals:[], lineage:[],
+    stage_events_dropped:0, lineage_edges_dropped:0, aliases_dropped:0, canonical_reads:[{
+      stage:"resolve",status:"deadline",wait_ms:2,elapsed_ms:45,sql_count:11,cleaned:null,metrics_complete:false,
+      phases:[{stage:"revalidate",elapsed_ms:44,sql_count:10,completed:false}]}]};
+  for (const language of ["ko","en"]) {
+    const catalog = JSON.parse(readFileSync(new URL(`../src/features/chat/locales/${language}.json`, import.meta.url),"utf8"));
+    const i18n = i18next.createInstance();
+    await i18n.init({lng:language,resources:{[language]:{chat:catalog}},keySeparator:false,nsSeparator:false,interpolation:{escapeValue:false}});
+    const render = value => renderToStaticMarkup(React.createElement(I18nextProvider,{i18n},React.createElement(Component,{trace:value})));
+    const html = render(trace);
+    assert.ok(html.includes(catalog["검증·원문 조립"]));
+    assert.ok(html.includes(catalog["후보 검증"]));
+    assert.ok(html.includes(catalog["중단 시점까지 확인한 비용입니다. 이후 정리 완료 여부는 이 기록만으로 확인할 수 없습니다."]));
+    assert.ok(!html.includes("undefined"));
+    if (language === "en") assert.ok(!/[가-힣]/u.test(html));
+    assert.ok(!render({...trace,canonical_reads:undefined}).includes(catalog["검증·원문 조립"]));
+    if (process.env.CHAT_SEARCH_PREVIEW_DIR) {
+      const {mkdirSync,writeFileSync}=await import("node:fs");
+      mkdirSync(process.env.CHAT_SEARCH_PREVIEW_DIR,{recursive:true});
+      const css=readFileSync(new URL("../src/features/chat/components/retrieval-diagnostics.module.css",import.meta.url),"utf8");
+      writeFileSync(`${process.env.CHAT_SEARCH_PREVIEW_DIR}/${language}.html`, `<!doctype html><html lang="${language}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Search diagnostic fixture</title><style>body{font-family:system-ui;margin:0}main{max-width:560px;padding:16px;margin:auto}${css}</style><main class="panel"><div class="body">${html}</div></main></html>`);
+    }
+  }
+});

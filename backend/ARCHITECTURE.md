@@ -189,7 +189,9 @@ Memory owns `MemoryAccessValidation` and batched Memory rows/bindings/unique pri
 nodes, scoped to one read Session and one timestamp. Runtime owns foreign current
 Post/Reply/Chat/routine/image facts through injected read ports. Cycles are checked
 before completed-node memoization; each receipt/manifest/ordinal/range is validated.
-Candidate, hydration and final provider/application guards each open fresh contexts.
+Candidate validation, selection, follow-ups and hydration share one `resolve`
+read Session/time/context. Each later provider/application guard opens a fresh
+context; no memo survives an await, mutation or new read operation.
 Owner detail and Chat inspection share exact situation entry resolution, including
 nullable evidence and corrections. A damaged situation origin cannot become legacy
 Feed authorization. Memory OFF permits owner inspection, without source ACL bypass.
@@ -203,6 +205,33 @@ cancelled running futures remain owned, and shutdown drains before engine dispos
 Only immutable results and bounded diagnostics cross back to the parent. SQL,
 completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
 when not observed. No request collector or Session crosses the thread boundary.
+
+`resolve` explicitly pins a DEFERRED SQLite read snapshot (including sqlite3's
+legacy transaction mode) and never reserves the writer. Representation/date
+screening precedes foreign proof expansion. Runtime batches SocialEvent evidence,
+feed observations, bounded subjective records/executions and thought reads; Memory
+retains source ACL, version/digest, correction/prior and cycle policy. Missing
+facts are memoized only inside the same operation. The subjective eight-row limit
+remains per source and precedes event-kind filtering.
+
+Episode Chat results retain their immutable follow-up snapshot. Fresh bounded
+worker guards run before provider delivery, after provider return before deltas,
+and after streaming awaits before final persistence. They compare the delivered
+records plus the existing bounded seed/follow-up dependencies; they never repeat
+FTS, vector search or embedding. Changed evidence is `source_context_changed`;
+the existing World/lease/final commit fences and situation admission remain.
+The guards have a maximum four-second read budget capped by the request deadline,
+and do not overwrite the original search diagnostics. The canonical result and
+snapshot contain no Session or surviving read cache. Final application still uses
+the existing short write UoW; no long source check is placed under a write lock.
+
+Search receipts distinguish one resolve's validation/hydration phases and retain
+observed partial cost on deadline/cancel. Unobserved cleanup/cost stays unknown;
+axis readiness/reason is separate from worker transport success. Detailed OFF
+does not allocate phase-progress tracking or add SQL/files. A retrieval-boundary
+TimeoutError maps to retrieval timeout without reclassifying provider/ACL/BUSY
+errors or adding calls. Related local evidence:
+[recall validation optimization](../docs/verification/recall-validation-optimization-20261017.md).
 
 Evidence: [integrated implementation and scoped verification](../docs/verification/chat-memory-world-integrated-20261011.md).
 
