@@ -63,7 +63,12 @@ def run(image, platform, output):
     # leave /app and its installed production dependencies untouched. This
     # command runs pytest, so the API-server healthcheck has no server to probe.
     with tempfile.TemporaryDirectory(prefix="angmoo-feature-") as directory:
-        stage = Path(directory)
+        # Keep the host temporary parent private. docker cp creates root-owned
+        # entries, so the copied input directory must be traversable by the
+        # candidate's unchanged non-root user (TemporaryDirectory is 0700).
+        stage = Path(directory) / "validation"
+        stage.mkdir()
+        stage.chmod(0o755)
         ignore = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
         shutil.copytree(ROOT / "backend/tests", stage / "tests", ignore=ignore)
         shutil.copytree(tooling, stage / "test-tools", ignore=ignore)

@@ -22,6 +22,54 @@ from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors,
 SOURCE = "a" * 40
 
 
+@pytest.mark.parametrize("exit_code", [0, 1])
+def test_feature_staging_is_readable_after_root_owned_copy_and_keeps_nonroot_execution(tmp_path, monkeypatch, exit_code):
+    import stat
+    import subprocess
+    import scripts.release.feature_smoke as smoke
+    source = tmp_path / "source"
+    tests = source / "backend/tests"
+    tests.mkdir(parents=True)
+    (tests / "test_probe.py").write_text("def test_probe(): pass\n")
+    tooling = tmp_path / "tooling"
+    (tooling / "pytest").mkdir(parents=True)
+    (tooling / "pytest/__init__.py").write_text("# synthetic test tool\n")
+    output = tmp_path / "output"
+    output.mkdir()
+    commands = []
+    monkeypatch.setattr(smoke, "ROOT", source)
+    monkeypatch.setattr(smoke, "test_tools", lambda _: tooling)
+
+    def execute(args, **kwargs):
+        commands.append(args)
+        if args[:2] == ["docker", "create"]:
+            assert "--user" not in args and args[args.index("--network") + 1] == "none"
+            assert "PYTHONPATH=/app:/validation/tests:/validation/test-tools" in args
+            assert "unmodified-candidate" in args
+        if args[:2] == ["docker", "cp"]:
+            stage = Path(args[2])
+            # docker cp creates root-owned entries. The image's non-root user
+            # must be able to traverse this directory and read the test tools.
+            assert stat.S_IMODE(stage.stat().st_mode) & 0o005 == 0o005
+            for entry in stage.rglob("*"):
+                needed = 0o005 if entry.is_dir() else 0o004
+                assert stat.S_IMODE(entry.stat().st_mode) & needed == needed
+            assert (stage / "test-tools/pytest/__init__.py").is_file()
+            assert args[3].endswith(":/validation")
+        return subprocess.CompletedProcess(args, exit_code if args[:2] == ["docker", "start"] else 0, "1 passed\n" if not exit_code else "1 failed\n", "")
+
+    monkeypatch.setattr(smoke.subprocess, "run", execute)
+    monkeypatch.setattr(smoke.subprocess, "check_output", lambda *args, **kwargs: str(exit_code))
+    if exit_code:
+        with pytest.raises(ValueError, match="candidate_feature_smoke_failed"):
+            smoke.run("unmodified-candidate", "linux/amd64", output)
+        assert not (output / "features.json").exists()
+    else:
+        smoke.run("unmodified-candidate", "linux/amd64", output)
+        assert json.loads((output / "features.json").read_text())["status"] == "PASS"
+    assert commands[-1][:3] == ["docker", "rm", "-f"]
+
+
 @pytest.mark.parametrize("containerd,api", [(False, "1.48"), (True, "1.48"), (True, "1.56")])
 def test_candidate_import_uses_engine_transport_and_supported_platform_flags(tmp_path, monkeypatch, containerd, api):
     import subprocess
