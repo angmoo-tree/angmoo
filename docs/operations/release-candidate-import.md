@@ -61,3 +61,41 @@ Docker 28 also lacks `image inspect --platform` (API 1.49).
 실제 격리 Docker 28에서 이전 후보 파일을 사용한 호환성 검증이며, 이전 파일을
 새 출시 후보로 재표기하지 않는다. 수정이 병합된 main에서 두 플랫폼과 Windows EXE를
 같은 소스로 다시 준비한다. 공식 태그·이미지·Release 공개는 P6에 남긴다.
+
+## Non-root feature-test staging / 일반 사용자 기능 시험 준비
+
+The next [candidate run](https://github.com/angmoo-tree/angmoo/actions/runs/39092976719)
+at source `1003243b295d265fe11c40eecfca22cd95c90063` imported both platforms and
+passed their native checks and image scans, then could not import pytest. Linux
+`TemporaryDirectory` creates a private 0700 directory. Copying that directory
+with `docker cp` preserves its mode and creates root-owned entries, so the
+unchanged image user (UID 10001) cannot traverse `/validation`.
+
+The test runner now copies a dedicated 0755 input directory inside the private
+host temporary parent. The image still runs as its original non-root user, with
+external networking disabled. Only test inputs and hash-verified, lock-pinned
+pure Python test tools are staged; `/app`, production dependencies, user data and
+the original image archive remain unchanged. Tests must still pass without skips.
+
+다음 후보 실행은 두 CPU의 가져오기·native 검사·이미지 스캔을 통과한 뒤 pytest
+준비에서 실패했다. Linux 임시 폴더의 0700 권한과 docker cp의 root 소유권 때문에
+이미지의 기존 일반 사용자 UID 10001이 `/validation`에 접근할 수 없었다.
+호스트 임시 상위 폴더의 비공개 권한은 유지하고, 복사할 시험 입력 하위 폴더만
+0755로 준비한다. 앱·운영 의존성·데이터·원본 이미지는 변경하지 않으며 root 실행이나
+네트워크 허용으로 시험을 통과시키지 않는다. 기존 시험의 성공·생략 금지 조건을 유지한다.
+
+- Real unchanged-image reproduction: UID 10001 with a root-owned 0700 test
+  directory failed with `No module named pytest`; the same bytes under 0755
+  loaded the lock-pinned pytest 9.1.1 successfully.
+- Linux regression: two cases failed before the fix and both passed afterward
+  (8.66 seconds), including failed-test cleanup and rejection of success receipts.
+- The scoped release/container/policy corpus passed: 108 tests in 8.76 seconds.
+  This local tooling evidence does not replace a new same-source Actions candidate.
+- The unchanged existing amd64 image also passed all 19 selected feature tests
+  through the corrected staging path (153.53 seconds). Its older source remains
+  import/test-tool evidence only, not the new main release candidate.
+
+같은 이미지와 사용자로 권한만 바꾼 재현에서 실패→성공을 확인했고, Linux 회귀 2개와
+관련 release/container/policy 검사 108개가 통과했다. 이 로컬 검증을 새 main 후보의
+생산·전체 검증으로 대체하지 않는다. 수정 경로로 기존 amd64 이미지의 기능 시험
+19개도 모두 통과했으며, 이전 source 이미지를 새 출시 후보로 채택하지 않는다.
