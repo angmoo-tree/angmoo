@@ -74,3 +74,12 @@ authorization checks remain active. No production behavior was modified.
 Both related Chat modules passed: **26 passed in 41.70s**. The official current
 hybrid inventory was regenerated for the changed test hash; its frozen
 predecessor and all runtime settings are unchanged.
+
+The append-only product-change ledger records the exact committed before/after
+assertion delta. It changes one raw-code expectation to the language name, adds
+an explicit rejection of the old instruction, and preserves the other 29
+assertions. The ledger points to the test, language contract, situation contract
+and this verification note in implementation commit
+`a27e46cc95936c71a69c060f8baea6594fcd6f5c`. Its validator tests passed (**16 passed
+in 0.78s**); architecture inventory and boundaries also passed. No frozen
+checkpoint, generic exception, skip or policy threshold was changed.
