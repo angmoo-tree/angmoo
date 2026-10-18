@@ -1,6 +1,6 @@
 {
-  "edge_count": 6804,
-  "external_import_count": 4603,
+  "edge_count": 6810,
+  "external_import_count": 4604,
   "module_count": 1569,
   "modules": [
     {
@@ -415,8 +415,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
+      "external_imports": [
+        "collections.abc"
+      ],
+      "imports": [
+        "app.contracts.environment"
+      ],
       "module": "app.contracts.language",
       "path": "backend/app/contracts/language.py",
       "wildcard_imports": []
@@ -8921,6 +8925,7 @@
         "json"
       ],
       "imports": [
+        "app.contracts.language",
         "app.domains.routines.schemas.daily_generation",
         "app.domains.routines.service.daily_preparation",
         "app.integrations.direct_llm",
@@ -10283,6 +10288,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.contracts.language",
         "app.core.ids",
         "app.core.sqlite_concurrency",
         "app.domains.routines.constants",
@@ -18971,6 +18977,7 @@
       ],
       "imports": [
         "app.contracts.environment",
+        "app.contracts.language",
         "app.contracts.name_binding",
         "app.core.ids",
         "app.domains.characters.models",
@@ -24147,11 +24154,13 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.language",
         "app.contracts.name_binding",
         "app.domains.characters.models",
         "app.domains.characters.service.prompt_persona",
         "app.domains.identity.contracts",
         "app.domains.identity.service.credential_resolution",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.world_character_credentials",
         "app.domains.relationships.service.policy_activation",
         "app.domains.routines.service.daily_preparation",

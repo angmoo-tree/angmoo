@@ -103,12 +103,14 @@ def test_all_preserved_initial_uses_topics_only_and_keeps_plan_unchanged(prepara
     result = asyncio.run(runtime.ensure_preparation(db, character_id=ready.character.id, world_id=world.id,
         user=ready.user, request_id="topics-only-initial", now=now, generator=forbidden, topic_generator=topic_generator))
     assert result.topic_state == "ready" and result.plan_version == 1, result
-    assert len(seen) == 1 and set(seen[0]) == {"persona", "world"}
+    assert len(seen) == 1 and set(seen[0]) == {"persona", "world", "environment", "preparation_language_policy"}
     db.expire_all()
     assert store.plan_snapshot(db, db.get(type(plan), plan.id)) == before
     job = db.scalar(select(ActivityPreparationJob).where(ActivityPreparationJob.request_id == "topics-only-initial"))
     assert job.mode == "initial" and job.attempt_count == 1 and job.state == "ready"
     assert job.input_snapshot["generated_dayparts"] == []
+    assert seen[0]["environment"] == job.input_snapshot["environment"]
+    assert seen[0]["preparation_language_policy"] == job.input_snapshot["preparation_language_policy"]
 
 
 @pytest.mark.parametrize("field,value", [("activity_kind", "joint_activity"), ("social_mode", "joint")])

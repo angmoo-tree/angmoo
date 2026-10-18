@@ -1,5 +1,33 @@
 # Angmoo Backend Architecture
 
+## Daily preparation and topic output language (2026-10-18 LOCAL)
+
+New daily generation/regeneration and initial/explicit recommendation-topic
+requests freeze `preparation-output-language.v1` with the admitted Identity
+environment. `contracts/language.py` validates that versioned snapshot and names
+the output language: base `ko` is `Korean`, base `en` is `English`, and every other
+valid full BCP47 code is retained. The stored locale and existing persona, Chat,
+SNS, memory, relationship and image policies remain unchanged.
+
+Routines' client applies the instruction only to newly generated titles/seeds
+and, for initial preparation, topic names. Runtime passes the same snapshot to
+the topics-only branch. Explicit Social topic commands store environment/policy
+beside their content source, never inside `PreparationScope.digest`. A locale
+change therefore neither invalidates ready topics nor rewrites completed,
+pinned or reserved activities. New request IDs admit current environment;
+same-request recovery retains accepted input and the existing call budgets.
+
+Unmarked historical requests retain their original prompt contract. A marked
+but invalid language snapshot is rejected before provider dispatch, using the
+existing preparation failure surface; it is never silently replaced with the
+current locale. Claims and application retain the existing authorization,
+credential, source, name, lease and short transaction fences. No translation
+provider, periodic job, DB migration or platform-specific mapper is added.
+Browser and Tauri keep the shared detector/report path; actual native detection
+and real-AI fluency are separate from these scoped synthetic checks.
+
+See [local implementation and verification](../docs/verification/preparation-output-language-20261018.md).
+
 ## Local credentials after hosted KMS retirement (2026-10-17 LOCAL)
 
 `core/security.py` retains the existing `local-v2` AES-GCM/HKDF envelope, nonce,

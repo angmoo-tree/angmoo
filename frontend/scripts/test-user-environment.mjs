@@ -220,3 +220,30 @@ for (const code of ["environment_revision_conflict","environment_sequence_stale"
   assert.equal(writes,1);assert.equal(reads,2);
 }
 console.log("Environment ownership PASS: server authority, tokenless GET-only, monotonic renewal, latest detection, typed conflicts and ownership transfer during retry.");
+
+// Both shells use this detector/report path; transport is mocked, not a native WebView.
+const {synchronizeUserEnvironment} = source("features/identity/api/environment.ts");
+const preparationLocales = ["ko", "ko-KR", "en", "en-US", "en-GB", "en-AU", "ja-JP", "fr-FR", "zh-Hant-TW", "ar-AE"];
+for (const runtime of ["browser", "tauri"]) for (const locale of preparationLocales) {
+  browser.__ANGMOO_RUNTIME_CONFIG__ = runtime === "tauri"
+    ? {apiBaseUrl: "http://127.0.0.1:12345", launchToken: "synthetic-memory-only"} : undefined;
+  auth.storeAuth({user: {...user("language-owner"), ui_language: locale.startsWith("ko") ? "en" : "ko"}});
+  context.navigator = {languages: [locale, "en-US"], language: "en-US"};
+  const reports = [];
+  runtimeFetch = async (url, options) => {
+    assert.ok(String(url).endsWith("/auth/local/environment"));
+    assert.equal(options.method, "POST");
+    reports.push(JSON.parse(options.body));
+    return new Response(JSON.stringify({...baseEnvironment, preferred_language: locale, lease_token: "synthetic-lease"}), {status: 200});
+  };
+  await synchronizeEnvironment(lease(), {
+    read: async () => baseEnvironment, detect,
+    write: data => synchronizeUserEnvironment(data),
+  }, new AbortController().signal);
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].preferred_language, locale);
+  assert.equal(reports[0].expected_revision, baseEnvironment.environment_revision);
+  assert.equal(reports[0].sequence, 1);
+  assert.equal(resolveUiLanguage(auth.getStoredUser().ui_language, locale), locale.startsWith("ko") ? "en" : "ko");
+}
+console.log("Preparation locale transport PASS: 20 browser/native-config cases preserve detected BCP47 codes independently of UI language; backend owns language-name mapping.");

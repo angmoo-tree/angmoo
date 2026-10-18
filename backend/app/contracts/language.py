@@ -1,4 +1,9 @@
 """Role-specific language instructions, not translations of canonical content."""
+from collections.abc import Mapping
+
+from app.contracts.environment import EnvironmentSnapshot
+
+
 PERSONA_LANGUAGE_POLICY = (
     "Use the character's explicit language directives, formal speech examples and current context. "
     "The language used to describe a character alone is not a speech directive. "
@@ -24,3 +29,41 @@ RELATIONSHIP_LANGUAGE_POLICY = (
     "retain the existing description's language, or use the evidence's language for a new relationship. "
     "Choose keep whenever the meaning is unchanged; a UI or detector language change is not an update."
 )
+
+
+PREPARATION_LANGUAGE_POLICY = "preparation-output-language.v1"
+
+
+class PreparationLanguageError(ValueError):
+    """An admitted preparation language contract cannot be recovered safely."""
+
+
+def preparation_environment(snapshot: Mapping | None) -> EnvironmentSnapshot | None:
+    """Read new admitted inputs strictly; unmarked historical work keeps its policy."""
+    if snapshot is None or "preparation_language_policy" not in snapshot:
+        return None
+    environment = snapshot.get("environment")
+    if (snapshot["preparation_language_policy"] != PREPARATION_LANGUAGE_POLICY
+            or not isinstance(environment, dict)
+            or set(environment) != set(EnvironmentSnapshot.__dataclass_fields__)):
+        raise PreparationLanguageError("preparation_language_snapshot_invalid")
+    try:
+        return EnvironmentSnapshot.from_dict(environment)
+    except (TypeError, ValueError):
+        raise PreparationLanguageError("preparation_language_snapshot_invalid") from None
+
+
+def preparation_language_instruction(snapshot: Mapping, *, fields: tuple[str, ...]) -> str:
+    """Name the output language without translating stored locale or persona."""
+    environment = preparation_environment(snapshot)
+    if environment is None:
+        return ""  # Never retrofit the new policy onto an already accepted request.
+    locale = environment.memory_search_locale
+    language = {"ko": "Korean", "en": "English"}.get(locale.split("-")[0].lower(), locale)
+    return (
+        f"Write newly generated {', '.join(fields)} in {language}. "
+        "This is the language of the planning text, not text to use as a title or topic name. "
+        "It does not change the character's speaking language. "
+        "Keep JSON keys, enum values, IDs, dates, times, place keys, proper names and meaningful quotations unchanged. "
+        "Do not rewrite preserved activities or existing content."
+    )
