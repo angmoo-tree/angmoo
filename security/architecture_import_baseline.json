@@ -1,7 +1,7 @@
 {
-  "edge_count": 6833,
-  "external_import_count": 4619,
-  "module_count": 1573,
+  "edge_count": 6839,
+  "external_import_count": 4626,
+  "module_count": 1574,
   "modules": [
     {
       "external_imports": [],
@@ -12998,6 +12998,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.social.contracts.recommendation",
         "app.domains.social.schemas.feed_status"
       ],
       "module": "app.domains.social.schemas.recommendation",
@@ -13874,6 +13875,7 @@
       ],
       "imports": [
         "app.core.search_text",
+        "app.domains.social.contracts.recommendation",
         "app.domains.social.models.posts",
         "app.domains.social.models.topics"
       ],
@@ -18658,6 +18660,7 @@
         "app.domains.characters.models",
         "app.domains.chat.contracts.execution",
         "app.domains.chat.contracts.recall_mode",
+        "app.domains.chat.contracts.resolved_envelope",
         "app.domains.chat.contracts.response_lifecycle",
         "app.domains.chat.exceptions",
         "app.domains.chat.repository.retrieval_diagnostics",
@@ -24224,6 +24227,7 @@
         "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
+        "time",
         "uuid"
       ],
       "imports": [
@@ -24236,6 +24240,7 @@
         "app.domains.identity.service.credential_resolution",
         "app.domains.identity.service.environment",
         "app.domains.identity.service.world_character_credentials",
+        "app.domains.identity.service.world_credentials",
         "app.domains.relationships.service.policy_activation",
         "app.domains.routines.service.daily_preparation",
         "app.domains.social.contracts.recommendation",
@@ -24254,11 +24259,28 @@
         "app.runtime.preparation_names",
         "app.runtime.social.recommendation_history",
         "app.runtime.social.status_composition",
+        "app.runtime.social.topic_preparation_diagnostics",
         "app.runtime.world_configuration.persona",
         "app.runtime.world_credential_binding"
       ],
       "module": "app.runtime.social.topic_preparation",
       "path": "backend/app/runtime/social/topic_preparation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "logging",
+        "pydantic",
+        "re",
+        "time"
+      ],
+      "imports": [
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.runtime.social.topic_preparation_diagnostics",
+      "path": "backend/app/runtime/social/topic_preparation_diagnostics.py",
       "wildcard_imports": []
     },
     {

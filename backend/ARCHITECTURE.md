@@ -291,6 +291,16 @@ Only immutable results and bounded diagnostics cross back to the parent. SQL,
 completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
 when not observed. No request collector or Session crosses the thread boundary.
 
+Chat Runtime injects the Chat-owned `CHAT_HYBRID_SEARCH_TIMEOUT_MS` (10,000ms)
+only when composing `social_hybrid`. Shared `RetrievalHardCaps()` defaults and
+other Chat modes retain 4,000ms. The main search uses the minimum of that cap,
+the existing 20-second ceiling and the request's remaining time minus the
+15-second response reserve. Axes, queue wait and canonical resolution consume
+that same budget; a completed search returns immediately. Shorter explicit
+caller caps remain binding. This does not extend the 180-second request deadline,
+add retries or change AI call, candidate, token, queue or SQLite write policy.
+Evidence: [Chat search budget and protection checks](../docs/verification/chat-search-budget-20261018.md).
+
 `resolve` explicitly pins a DEFERRED SQLite read snapshot (including sqlite3's
 legacy transaction mode) and never reserves the writer. Representation/date
 screening precedes foreign proof expansion. Runtime batches SocialEvent evidence,
