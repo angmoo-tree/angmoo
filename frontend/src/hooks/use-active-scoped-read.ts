@@ -6,9 +6,11 @@ import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/b
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 
 /** A cancellable read lifetime. Callers own DTOs, scope validation and policy. */
-export function useActiveScopedRead<T>({ scopeKey, active, read, refreshAt }: {
+export function useActiveScopedRead<T>({ scopeKey, active, read, refreshAt, refreshKey }: {
   scopeKey: string; active: boolean; read: (signal: AbortSignal) => Promise<T>;
   refreshAt?: (value: T) => number | null;
+  /** A confirmed related write refreshes the read without discarding its value. */
+  refreshKey?: number;
 }) {
   const { status, user, sessionRevision } = useAuth();
   const [revision, setRevision] = useState(0);
@@ -37,7 +39,7 @@ export function useActiveScopedRead<T>({ scopeKey, active, read, refreshAt }: {
       setPhase({ key, loading: false, error: true });
     });
     return () => controller.abort();
-  }, [active, visible, status, key, revision, read]);
+  }, [active, visible, status, key, revision, read, refreshKey]);
   const data = status === "authenticated" && result?.key === key && isCurrentAuthRequestScope(result.scope) ? result.value : null;
   useEffect(() => {
     if (!active || !visible || !data || !refreshAt) return;

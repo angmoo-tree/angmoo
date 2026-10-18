@@ -3,7 +3,7 @@
 import { SettingsCard } from "@/components/ui/settings-card";
 import { Sparkles, Settings2 } from "lucide-react";
 import { WorldCredentialCard } from "./world-credential-card";
-import { useEffect, useEffectEvent, useState, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useState, type ReactNode, type Ref } from "react";
 import { Button } from "@/components/ui/button";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
@@ -81,16 +81,19 @@ function SettingsEditor({ initial, pending, onSave, kind }: {
   </form></SettingsCard>;
 }
 
-export function WorldCharacterSettingsForm(props: {
+export function WorldCharacterSettingsForm({ activityKeyRef, onActivityKeySaved, ...props }: {
   initial: WorldCharacterSettingsRead; pending: boolean;
   onSave: (revision: number, values: Partial<WorldCharacterSettingsValues>) => Promise<WorldCharacterSettingsRead | null>;
   imageCard?: ReactNode; visionControls?: ReactNode; interestCard?: ReactNode; modeCard?: ReactNode; dayCard?: ReactNode; deleteCard?: ReactNode;
+  activityKeyRef?: Ref<HTMLDivElement>; onActivityKeySaved?: () => void;
 }) {
  const { initial } = props;
  return <div className={styles.settingsForm} data-world-character-settings-form>
   <SettingsEditor {...props} kind="persona" />
   <SettingsEditor {...props} kind="activity" />
-  <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="sns" />
+  <div ref={activityKeyRef} tabIndex={-1}>
+    <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="sns" onSaved={onActivityKeySaved} />
+  </div>
   {props.imageCard}
   <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="chat" />
   <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="vision">{props.visionControls}</WorldCredentialCard>

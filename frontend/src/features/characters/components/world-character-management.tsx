@@ -22,7 +22,7 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
   onViewChange: (view: WorldCharacterManagementView) => void; onBack: () => void;
   renderProfile: (input: { read: WorldCharacterManagementRead; onEditProfile?: () => void }) => ReactNode;
   renderStatus?: (input: { read: WorldCharacterManagementRead; active: boolean; onSettings: () => void }) => ReactNode;
-  renderSettings?: (read: WorldCharacterManagementRead) => Pick<React.ComponentProps<typeof WorldCharacterSettingsForm>, "imageCard" | "visionControls" | "interestCard" | "modeCard" | "dayCard" | "deleteCard">;
+  renderSettings?: (read: WorldCharacterManagementRead) => Pick<React.ComponentProps<typeof WorldCharacterSettingsForm>, "imageCard" | "visionControls" | "interestCard" | "modeCard" | "dayCard" | "deleteCard" | "activityKeyRef" | "onActivityKeySaved">;
 }) {
   const uiText = useUiText("characters");
   const controller = useWorldCharacterManagement(worldId, worldCharacterId);

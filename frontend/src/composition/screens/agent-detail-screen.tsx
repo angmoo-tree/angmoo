@@ -10,7 +10,7 @@ import { generationProfileLabel } from "@/config/generation-profiles";
 import { ProfileStatistics } from "@/components/content/profile-statistics";
 import { CharacterManagementIdentity, CharacterManagementTabs } from "@/features/characters/components/character-management-navigation";
 import { LocalProductLink } from "@/components/navigation/local-product-link";
-import { relationshipGraphRoute } from "@/lib/navigation/product-routes";
+import { relationshipGraphRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import profileStyles from "@/features/characters/components/world-character-profile.module.css";
 import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 import { ExpandablePostText } from "@/components/content/expandable-post-text";
@@ -1181,6 +1181,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
                 key={agent.activity_profile_readiness.world_character_id}
                 worldId={agent.activity_profile_readiness.world_id}
                 characterId={agent.activity_profile_readiness.world_character_id}
+                onOpenActivityKey={() => router.push(`${worldCharacterProfileRoute(agent.activity_profile_readiness.world_id!, agent.activity_profile_readiness.world_character_id!)}?view=settings`)}
               />
             ) : null}
 
