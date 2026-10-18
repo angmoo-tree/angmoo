@@ -2966,7 +2966,7 @@
     },
     {
       "path": "backend/tests/chat/test_named_selection_lifecycle.py",
-      "sha256": "3e70845bbfcac83a30c18436f7c6f4ca70ab6e0917633b9b40e79a1e99882774"
+      "sha256": "dbca9b15e932d455c767b9de7019856ae7585e54f558d7a67fe45821ff5a1050"
     },
     {
       "path": "backend/tests/chat/test_named_supervisor_selection.py",

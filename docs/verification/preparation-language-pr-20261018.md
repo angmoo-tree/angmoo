@@ -45,3 +45,32 @@ The initial impact classifier selected full backend and full Windows validation.
 New hosted results must belong to the updated PR head. Merge/main CI, regenerated
 same-source P3 candidates, P4 user/Android/real-AI checks and P6 publication remain
 separate evidence stages.
+
+## Full backend corpus inventory repair
+
+Core CI run `39125053033`, attempt 1, backend partition 0 failed two checks in
+`test_l3_er0_embedded_runtime_inventory.py`; 1,743 tests passed in that partition.
+The generated `postgres-sql-inventory.json` still described the old
+`daily_preparation.py` hash/line and omitted the new row-lock marker in
+`routines/service/slot_leases.py` from the schedule change.
+
+`scripts/verify_embedded_runtime_inventory.py --write --check` regenerated the
+current scan. The only changed output is that inventory: one source hash/line,
+one live entry, and its derived totals. The immutable baseline, migration/query/
+route/parity corpora, scanner, assertions and runtime code remain unchanged.
+The complete related test module passed: **8 passed in 6.22s**, locked offline
+environment with external network denied. The new commit requires a fresh
+hosted run; results from different heads or attempts are not combined.
+
+The same run's backend partition 1 found two outdated expectations in the
+named-selection lifecycle integration test: it expected `Use ko-KR for this
+description` after new admission. The intended shared-language contract now
+requires `Use Korean for this description`. The assertion was aligned with that
+explicit contract and additionally rejects the old instruction; the existing
+assertion that the persisted manifest retains `ko-KR` is unchanged. Response
+commit, scoped memory receipt/application, provider count, replay, failure and
+authorization checks remain active. No production behavior was modified.
+
+Both related Chat modules passed: **26 passed in 41.70s**. The official current
+hybrid inventory was regenerated for the changed test hash; its frozen
+predecessor and all runtime settings are unchanged.

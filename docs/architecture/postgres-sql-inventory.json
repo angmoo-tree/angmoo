@@ -816,13 +816,13 @@
     {
       "markers": {
         "driver_or_url": [
-          98
+          99
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/service/daily_preparation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8f31fe78ce8e735b730af0fc331d53e021efe5f9e00b62b761f242482493fbe1",
+      "source_sha256": "0d5762ce5b114a2bd37fe1ad9215a6da188d7ac8e2a95729dd62bf8fa67402ba",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1040,6 +1040,18 @@
       "path": "backend/app/domains/routines/service/slot_claims.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "5248393c5da62d0d43a017bc988c5f461f14edcc067e37eb910e6fa712afe795",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          50
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/slot_leases.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "ce31a17e5ba304f8d955285c9afd46ce8c94302afb3175b78fac3f4ba1a7ec67",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1645,13 +1657,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 111,
+  "entry_count": 112,
   "marker_counts": {
     "advisory_lock": 11,
     "driver_or_url": 65,
     "jsonb": 13,
     "pgvector": 5,
-    "row_lock": 49,
+    "row_lock": 50,
     "skip_locked": 11
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

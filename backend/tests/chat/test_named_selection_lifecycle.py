@@ -227,7 +227,10 @@ def test_admission_to_real_composition_commit_and_receipt(response_session, monk
     receipt_rows = list(db.scalars(select(MemorySituationReceipt)))
     assert len(receipt_rows) == int(memory)
     if memory:
-        assert "Use ko-KR for this description" in calls[-1]["system_prompt"]
+        # Newly admitted situation instructions use the common language name;
+        # the manifest below must still preserve the original locale code.
+        assert "Use Korean for this description" in calls[-1]["system_prompt"]
+        assert "Use ko-KR for this description" not in calls[-1]["system_prompt"]
         receipt = receipt_rows[0]
         assert receipt.state == "pending" and receipt.description_status == "valid"
         manifest = DeliveredInputManifest.from_dict(db.get(MemorySituationManifest, receipt.manifest_id).payload)
