@@ -1380,12 +1380,17 @@ async def _run_resident_slot_once(
     engine = settings.agent_activity_engine
     use_langgraph_resident = engine == "langgraph" and enforce_activity_policy
     input_snapshot = deepcopy(slot.admission_metadata)
+    from app.runtime.routines.schedule_updates import automatic_completion_schedule
     if (
         slot.assigned_user_id is None
         or slot.assigned_character_id is None
         or (slot.assigned_credential_id is None and not (input_snapshot or {}).get("_world_credential"))
     ):
         raise AgentSlotUnavailableError(f"slot {slot.agent_id} has no assignment")
+
+    completion_schedule = automatic_completion_schedule(owner_id=slot.assigned_user_id,
+        character_id=slot.assigned_character_id, input_snapshot=input_snapshot,
+        automatic=enforce_activity_policy and not require_public_action)
 
     if is_owner_controlled_character(db, slot.assigned_character_id):
         session_key = (
@@ -1684,6 +1689,7 @@ async def _run_resident_slot_once(
                 run_id=run_id,
                 heartbeat_interval_seconds=heartbeat_interval_seconds,
                 next_tick_at=manual_next_tick_at or activity_policy.next_tick_at,
+                schedule_resolver=completion_schedule,
             )
             return schemas.OpenClawAgentRunRead(
                 run_id=run_id,
@@ -1885,6 +1891,7 @@ async def _run_resident_slot_once(
                     if manual_next_tick_at is not None
                     else activity_policy.next_tick_at
                 ),
+                schedule_resolver=completion_schedule if _is_success_status(status) else None,
             )
             return schemas.OpenClawAgentRunRead(
                 run_id=run_id,
@@ -2600,6 +2607,7 @@ async def _run_resident_slot_once(
             else None
         ),
         last_error=validation_last_error,
+        schedule_resolver=completion_schedule if _is_success_status(status) else None,
     )
 
     return schemas.OpenClawAgentRunRead(

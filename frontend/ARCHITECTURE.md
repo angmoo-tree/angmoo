@@ -1,5 +1,15 @@
 # Angmoo Frontend Architecture
 
+## World settings and next activity (2026-10-18 LOCAL)
+
+The shared WorldCharacter management hook re-reads management once after a
+successful settings mutation. Only the server supplies next activity time and
+waiting/running state; the client never calculates a schedule or toggles activity
+to repair it. Existing auth/runtime/World generation and mutation-revision guards
+reject older responses. Next and Tauri keep the same component/hook. No copy,
+style, translation, DTO, timer or platform-specific path is added. LOCAL evidence:
+[schedule update verification](../docs/verification/world-activity-schedule-updates-20261018.md).
+
 ## Environment recovery and provider diagnostics (2026-10-16 LOCAL)
 
 Composition's existing environment provider remains the only synchronization

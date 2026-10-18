@@ -1,7 +1,7 @@
 {
-  "edge_count": 6813,
-  "external_import_count": 4604,
-  "module_count": 1569,
+  "edge_count": 6833,
+  "external_import_count": 4619,
+  "module_count": 1573,
   "modules": [
     {
       "external_imports": [],
@@ -9326,6 +9326,21 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.contracts.scheduling",
+      "path": "backend/app/domains/routines/contracts/scheduling.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "collections.abc",
         "dataclasses",
         "sqlalchemy.orm"
@@ -11016,6 +11031,23 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.contracts.environment",
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.schedule_updates",
+      "path": "backend/app/domains/routines/service/schedule_updates.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime"
       ],
@@ -11087,10 +11119,12 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.domains.routines.constants",
+        "app.domains.routines.contracts.scheduling",
         "app.domains.routines.models"
       ],
       "module": "app.domains.routines.service.slot_leases",
@@ -14514,6 +14548,16 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.contracts.scheduling",
+      "path": "backend/app/domains/world_characters/contracts/scheduling.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses"
       ],
@@ -15109,6 +15153,7 @@
         "app.domains.identity.service.environment",
         "app.domains.identity.service.owner_context",
         "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.contracts.scheduling",
         "app.domains.world_characters.models",
         "app.domains.world_characters.schemas.basic_activity",
         "app.domains.world_characters.schemas.identity",
@@ -22616,6 +22661,7 @@
         "app.runtime.resident.slots",
         "app.runtime.routines.activity_policy",
         "app.runtime.routines.configuration_reads",
+        "app.runtime.routines.schedule_updates",
         "app.runtime.routines.world_autonomy",
         "app.runtime.search.binding",
         "app.runtime.social.feed_history",
@@ -23248,6 +23294,29 @@
       ],
       "module": "app.runtime.routines.plan_references",
       "path": "backend/app/runtime/routines/plan_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.service.import_configuration",
+        "app.domains.identity.service.environment",
+        "app.domains.routines.contracts.scheduling",
+        "app.domains.routines.service.schedule_updates",
+        "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.contracts.configuration",
+        "app.domains.world_characters.contracts.scheduling",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.routines.schedule_updates",
+      "path": "backend/app/runtime/routines/schedule_updates.py",
       "wildcard_imports": []
     },
     {
@@ -24541,6 +24610,7 @@
         "app.integrations.media.files",
         "app.providers.generation_profiles",
         "app.runtime.routines.configuration_reads",
+        "app.runtime.routines.schedule_updates",
         "app.runtime.world_characters.queries"
       ],
       "module": "app.runtime.world_characters.management",

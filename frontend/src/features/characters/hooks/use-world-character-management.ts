@@ -118,6 +118,9 @@ export function useWorldCharacterManagement(worldId: string, worldCharacterId: s
         activity_interval_minutes: result.settings.activity_interval_minutes, max_posts_per_day: result.settings.max_posts_per_day,
         max_comments_per_day: result.settings.max_comments_per_day,
       } : null } } : previous);
+    // The server owns next activity time and wait/running state. Re-read those
+    // after a successful save; the existing scope/revision fences reject late reads.
+    void load();
   }
 
   const currentScope = captureAuthRequestScope();

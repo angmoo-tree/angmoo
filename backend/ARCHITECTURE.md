@@ -1,5 +1,34 @@
 # Angmoo Backend Architecture
 
+## World activity schedule refresh (2026-10-18 LOCAL)
+
+WorldCharacter management compares normalized start/end/interval settings and
+actual OFF-to-ON intent. Its injected `ActivityScheduleUpdater` participates in
+the existing admission/revision transaction. Runtime checks the exact owner,
+World, active role/membership/binding and current configuration; Routines owns
+the conditional update of that character's idle slot. A collaborator never
+commits, allocates capacity, enables another role or starts an activity.
+
+General cadence is recalculated from max(now, last completion + effective
+interval), using the existing calendar/spread functions once. Running claims,
+all unresolved leases (even expired), manual claims and error/cooldown recovery
+times remain owned by their existing handlers. Identical and unrelated settings
+do not issue an extra slot write. OFF/unassigned roles retain configuration for
+the existing bounded allocator. A command failure rolls back configuration,
+role revision and schedule together.
+
+Normal automatic completion uses an optional typed resolver. Its conditional
+slot write checks run ID and owner/character assignment and acquires the actual
+SQLite writer before Runtime reads current settings and owner environment by
+fresh SQL. Only changed time policy/timezone changes the next cadence; accepted
+inputs, credential/model/locale, effects, receipts and run results remain intact.
+The completion owner retains its existing commit; a rejected run never commits
+caller work. Manual, failed/deferred/cancelled paths retain their explicit
+schedule and error contracts. No provider/await or new worker is inside this
+short final write. New timers, migrations and schedule ledgers are not added.
+
+Evidence: [World activity schedule verification](../docs/verification/world-activity-schedule-updates-20261018.md).
+
 ## Daily preparation and topic output language (2026-10-18 LOCAL)
 
 New daily generation/regeneration and initial/explicit recommendation-topic
