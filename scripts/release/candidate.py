@@ -83,8 +83,19 @@ def build(output: Path, service: str, platform: str, builder: str | None) -> Pat
     return result
 
 
+def platform_arguments(platform: str) -> list[str]:
+    # `image inspect --platform` needs API 1.49 in both the CLI and daemon.
+    # Older engines still expose the architecture and rootfs for the unique
+    # architecture-specific candidate tag, which we verify below.
+    version = json.loads(run("docker", "version", "--format", "{{json .}}", capture=True))
+    versions = [version[side]["ApiVersion"] for side in ("Client", "Server")]
+    require(all(re.fullmatch(r"\d+\.\d+", value) for value in versions), "docker_api_version_invalid")
+    return ["--platform", platform] if all(tuple(map(int, value.split("."))) >= (1, 49) for value in versions) else []
+
+
 def loaded_image(item: dict, ref: str) -> dict:
-    config = json.loads(run("docker", "image", "inspect", "--platform", item["platform"], ref, capture=True))[0]
+    platform_args = platform_arguments(item["platform"])
+    config = json.loads(run("docker", "image", "inspect", *platform_args, ref, capture=True))[0]
     require(config["RootFS"]["Layers"] == item["diff_ids"], "loaded_rootfs_mismatch")
     require(f"{config['Os']}/{config['Architecture']}" == item["platform"], "loaded_platform_mismatch")
     # Classic Docker uses config digest as Id; containerd uses manifest digest.
@@ -92,7 +103,7 @@ def loaded_image(item: dict, ref: str) -> dict:
     if config["Id"] != item["config_digest"] and config.get("Descriptor", {}).get("digest") != item["manifest_digest"]:
         with tempfile.TemporaryDirectory(prefix="angmoo-image-proof-") as directory:
             saved = Path(directory) / "loaded.tar"
-            run("docker", "image", "save", "--platform", item["platform"], "--output", str(saved), ref)
+            run("docker", "image", "save", *platform_args, "--output", str(saved), ref)
             with tarfile.open(saved) as archive:
                 from launcher.termux.payload import digest_stream
                 records = json.load(archive.extractfile("manifest.json"))
@@ -108,24 +119,36 @@ def candidate_ref(item: dict) -> str:
 
 def load(path: Path) -> None:
     manifest = read_manifest(path, require_all=False)
+    driver_status = json.loads(run("docker", "info", "--format", "{{json .DriverStatus}}", capture=True))
+    if driver_status is None:  # Classic vfs has no additional driver status.
+        driver_status = []
+    require(isinstance(driver_status, list) and all(isinstance(row, list) and len(row) == 2 for row in driver_status), "docker_image_store_unknown")
+    containerd = ["driver-type", "io.containerd.snapshotter.v1"] in driver_status
     for item in manifest["images"]:
         archive = path.parent / item["archive"]
         verify_archive(archive, item)
         ref = candidate_ref(item)
-        result = subprocess.run(["docker", "load", "--input", str(archive)], capture_output=True, text=True)
-        conversion = False
-        if result.returncode:
-            # Classic graphdriver engines cannot import an OCI index. Convert
-            # only its transport envelope, then prove the actual loaded config.
-            require(any(s in result.stderr.lower() for s in ("manifest.json", "unsupported", "invalid tar header")), "oci_import_failed")
+        if containerd:
+            run("docker", "load", "--input", str(archive))
+        else:
+            # Classic graphdriver engines cannot import an OCI index. Select
+            # their supported transport up front rather than interpreting a
+            # version-dependent load error. The original archive stays intact;
+            # verify the actual loaded platform, config and rootfs afterwards.
             from scripts.release.promote import SKOPEO
-            run("docker", "run", "--rm", "--volume", "/var/run/docker.sock:/var/run/docker.sock", "--mount", f"type=bind,source={archive.parent},target=/candidate,readonly", SKOPEO,
-                "--override-os", "linux", "--override-arch", item["platform"].split("/")[1], "copy", f"oci-archive:/candidate/{archive.name}", f"docker-daemon:{ref}")
-            conversion = True
+            # Use the host CLI for loading: Skopeo's embedded Docker client may
+            # require a newer daemon API. Conversion itself needs no network or
+            # Docker socket. Keep temporary bytes beside the large candidate.
+            with tempfile.TemporaryDirectory(prefix="angmoo-image-import-", dir=path.parent) as directory:
+                converted = Path(directory) / "image.tar"
+                run("docker", "run", "--rm", "--network", "none", "--mount", f"type=bind,source={archive.parent},target=/candidate,readonly",
+                    "--mount", f"type=bind,source={directory},target=/converted", SKOPEO,
+                    "--override-os", "linux", "--override-arch", item["platform"].split("/")[1], "copy", f"oci-archive:/candidate/{archive.name}", f"docker-archive:/converted/image.tar:{ref}")
+                run("docker", "load", "--input", str(converted))
         config = loaded_image(item, ref)
         write_json(path.parent / f"{item['service']}-{item['platform'].split('/')[1]}.loaded.json", {
             "source_sha": manifest["source_sha"], "archive_digest": item["archive_digest"],
-            "config_digest": item["config_digest"], "runtime_image_id": config["Id"], "diff_ids": config["RootFS"]["Layers"], "transport_conversion": conversion,
+            "config_digest": item["config_digest"], "runtime_image_id": config["Id"], "diff_ids": config["RootFS"]["Layers"], "transport_conversion": not containerd,
             "platform": item["platform"], "ref": ref,
         })
 

@@ -22,6 +22,98 @@ from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors,
 SOURCE = "a" * 40
 
 
+@pytest.mark.parametrize("containerd,api", [(False, "1.48"), (True, "1.48"), (True, "1.56")])
+def test_candidate_import_uses_engine_transport_and_supported_platform_flags(tmp_path, monkeypatch, containerd, api):
+    import subprocess
+    import scripts.release.candidate as candidate
+    path = oci(tmp_path)
+    item = inspect_oci(path, service="backend", platform="linux/arm64", source=SOURCE, version="0.1.0")
+    manifest = tmp_path / "candidate.json"
+    manifest.write_text(json.dumps({"schema": "angmoo-release-candidate.v1", "repository": "angmoo-tree/angmoo",
+        "source_sha": SOURCE, "source_tree": "c" * 40, "clean": True, "version": "0.1.0", "tag": "release-v0.1.0", "images": [item]}))
+    original = path.read_bytes()
+    commands = []
+    def execute(args, **kwargs):
+        args = list(args)
+        commands.append(args)
+        if args[:2] == ["docker", "info"]:
+            output = json.dumps([["driver-type", "io.containerd.snapshotter.v1"]] if containerd else [["Backing Filesystem", "extfs"]])
+        elif args[:2] == ["docker", "version"]:
+            output = json.dumps({"Client": {"ApiVersion": api}, "Server": {"ApiVersion": api}})
+        elif args[:2] == ["docker", "load"]:
+            if not containerd:
+                assert Path(args[args.index("--input") + 1]).name == "image.tar"
+            output = "Loaded image"
+        elif args[:2] == ["docker", "run"]:
+            assert not containerd
+            assert "--override-arch" in args and "arm64" in args
+            assert f"oci-archive:/candidate/{path.name}" in args
+            assert f"docker-archive:/converted/image.tar:{candidate.candidate_ref(item)}" in args
+            assert "none" in args and not any("docker.sock" in arg for arg in args)
+            output = ""
+        elif args[:3] == ["docker", "image", "inspect"]:
+            assert ("--platform" in args) == (api != "1.48")
+            output = json.dumps([{"Id": item["config_digest"], "RootFS": {"Layers": item["diff_ids"]}, "Os": "linux", "Architecture": "arm64"}])
+        else:
+            pytest.fail("Unexpected command: " + repr(args))
+        return subprocess.CompletedProcess(args, 0, output, "")
+    monkeypatch.setattr(candidate.subprocess, "run", execute)
+    candidate.load(manifest)
+    receipt = json.loads((tmp_path / "backend-arm64.loaded.json").read_text())
+    assert receipt["transport_conversion"] is (not containerd)
+    assert receipt["config_digest"] == item["config_digest"] and receipt["diff_ids"] == item["diff_ids"]
+    assert path.read_bytes() == original
+    assert sum(args[:2] == ["docker", "load"] for args in commands) == 1
+
+
+@pytest.mark.parametrize("containerd", [False, True])
+def test_candidate_import_failure_never_creates_success_receipt_or_retries_another_transport(tmp_path, monkeypatch, containerd):
+    import subprocess
+    import scripts.release.candidate as candidate
+    path = oci(tmp_path)
+    item = inspect_oci(path, service="backend", platform="linux/arm64", source=SOURCE, version="0.1.0")
+    manifest = tmp_path / "candidate.json"
+    manifest.write_text(json.dumps({"schema": "angmoo-release-candidate.v1", "repository": "angmoo-tree/angmoo",
+        "source_sha": SOURCE, "source_tree": "c" * 40, "clean": True, "version": "0.1.0", "tag": "release-v0.1.0", "images": [item]}))
+    imports = []
+    def command(*args, **kwargs):
+        if args[:2] == ("docker", "info"):
+            return json.dumps([["driver-type", "io.containerd.snapshotter.v1"]] if containerd else None)
+        imports.append(args)
+        raise subprocess.CalledProcessError(1, args, stderr="No space left on device")
+    monkeypatch.setattr(candidate, "run", command)
+    with pytest.raises(subprocess.CalledProcessError):
+        candidate.load(manifest)
+    assert len(imports) == 1
+    assert imports[0][:2] == ("docker", "load" if containerd else "run")
+    assert not (tmp_path / "backend-arm64.loaded.json").exists()
+
+
+@pytest.mark.parametrize("wrong", ["platform", "rootfs", "config"])
+def test_loaded_candidate_rejects_changed_payload_after_transport_conversion(tmp_path, monkeypatch, wrong):
+    import scripts.release.candidate as candidate
+    item = inspect_oci(oci(tmp_path), service="backend", platform="linux/arm64", source=SOURCE, version="0.1.0")
+    config = {"Id": item["config_digest"], "RootFS": {"Layers": item["diff_ids"]}, "Os": "linux", "Architecture": "arm64"}
+    if wrong == "platform": config["Architecture"] = "amd64"
+    if wrong == "rootfs": config["RootFS"] = {"Layers": ["sha256:" + "f" * 64]}
+    if wrong == "config": config["Id"] = "sha256:" + "f" * 64
+    def command(*args, **kwargs):
+        if args[:2] == ("docker", "version"):
+            return json.dumps({"Client": {"ApiVersion": "1.48"}, "Server": {"ApiVersion": "1.48"}})
+        if args[:3] == ("docker", "image", "inspect"):
+            return json.dumps([config])
+        assert args[:3] == ("docker", "image", "save") and "--platform" not in args
+        with tarfile.open(args[args.index("--output") + 1], "w") as archive:
+            for name, data in (("manifest.json", b'[{"Config":"config.json"}]'), ("config.json", b'{"changed":true}')):
+                member = tarfile.TarInfo(name)
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+        return ""
+    monkeypatch.setattr(candidate, "run", command)
+    with pytest.raises(ValueError, match="loaded_(platform|rootfs|config)_mismatch"):
+        candidate.loaded_image(item, "synthetic-candidate")
+
+
 def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_path):
     import os
     import zipfile
