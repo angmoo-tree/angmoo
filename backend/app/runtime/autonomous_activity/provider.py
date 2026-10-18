@@ -105,8 +105,14 @@ class ActivityProvider:
                    before_admitted_request: Callable[[], None] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None,
                    on_json_object=None, on_json_validated=None, on_submission=None):
-        from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
-        system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
+        from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY, sns_query_language_instruction
+        from app.contracts.environment import EnvironmentSnapshot
+        query_policy = QUERY_LANGUAGE_POLICY
+        if node in {"FeedTargetSelector", "InboxTargetSelector", "CombinedTargetSelector"}:
+            admitted_context = payload.get("context", payload)
+            environment = EnvironmentSnapshot.from_dict(admitted_context.get("environment"))
+            query_policy = sns_query_language_instruction(environment.memory_search_locale)
+        system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + query_policy
         # Remove optional whole units before rejecting an oversized required
         # input. Never cut a source sentence, original thought or correction.
         payload = deepcopy(payload)

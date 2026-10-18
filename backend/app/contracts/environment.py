@@ -5,6 +5,15 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import langcodes
 
 
+def validate_memory_search_locale(value: str) -> str:
+    """Validate admitted language data without normalizing or choosing a language."""
+    if (not isinstance(value, str) or not 1 <= len(value) <= 80
+        or "_" in value or not langcodes.tag_is_valid(value)
+        or value.lower().split("-")[0] in {"und", "x"}):
+        raise ValueError("environment_snapshot_invalid")
+    return value
+
+
 @dataclass(frozen=True)
 class EnvironmentSnapshot:
     memory_search_locale: str = "en"
@@ -14,10 +23,8 @@ class EnvironmentSnapshot:
     output_policy: str = "persona-language.v1"
 
     def __post_init__(self):
-        if (not isinstance(self.memory_search_locale, str) or not 1 <= len(self.memory_search_locale) <= 80
-            or not langcodes.tag_is_valid(self.memory_search_locale) or "_" in self.memory_search_locale
-            or self.memory_search_locale.lower().split("-")[0] in {"und", "x"}
-            or type(self.environment_revision) is not int or self.environment_revision < 0
+        validate_memory_search_locale(self.memory_search_locale)
+        if (type(self.environment_revision) is not int or self.environment_revision < 0
             or type(self.timezone_revision) is not int or self.timezone_revision < 0
             or self.output_policy != "persona-language.v1"):
             raise ValueError("environment_snapshot_invalid")

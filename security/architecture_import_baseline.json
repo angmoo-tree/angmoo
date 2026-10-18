@@ -1,5 +1,5 @@
 {
-  "edge_count": 6810,
+  "edge_count": 6813,
   "external_import_count": 4604,
   "module_count": 1569,
   "modules": [
@@ -330,7 +330,9 @@
         "dataclasses",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.contracts.environment"
+      ],
       "module": "app.contracts.activity_situation",
       "path": "backend/app/contracts/activity_situation.py",
       "wildcard_imports": []
@@ -5814,7 +5816,9 @@
       "external_imports": [
         "copy"
       ],
-      "imports": [],
+      "imports": [
+        "app.contracts.language"
+      ],
       "module": "app.domains.memory.policies.situation_generation",
       "path": "backend/app/domains/memory/policies/situation_generation.py",
       "wildcard_imports": []
@@ -17950,6 +17954,7 @@
       "imports": [
         "app.contracts.activity_thought",
         "app.contracts.authored_output",
+        "app.contracts.environment",
         "app.contracts.language",
         "app.contracts.sns_generation",
         "app.domains.relationships.policies.interpretation_prompt",

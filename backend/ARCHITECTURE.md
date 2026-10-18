@@ -1515,3 +1515,18 @@ explicit clearing. Collector failure never retries or fails business work.
 Plain Session intervals cannot identify another worker's wait cause.
 
 Local evidence and limits: [Chat temporal recall verification](../docs/verification/chat-temporal-recall-20261017.md).
+
+### Admitted generation language names
+
+`contracts.language.generation_language_name` validates the admitted locale using
+the same pure tag validator as `EnvironmentSnapshot`: ko variants become Korean,
+en variants become English, other valid tags retain their original spelling.
+Preparation, SNS/Chat situation descriptions and SNS Feed/Inbox selectors use
+this instruction-only mapping. Persisted locale, descriptions, receipts and
+hashes are never translated. Combined selection uses the same admitted context
+as separate selection; disabled situation generation stays disabled.
+Chat recall continues to follow the current question language, while persona
+speech follows the existing persona/conversation policy. Mapping performs no
+SQL, file, network or AI call. Tendency analysis is outside this change.
+
+Evidence: [situation/query language verification](../docs/verification/situation-query-language-20261018.md).

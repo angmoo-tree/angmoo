@@ -38,7 +38,8 @@ def test_combined_existing_call_preserves_base_with_bad_description(monkeypatch,
             assert result["decisions"][0]["action"] == "like"
             assert result["_situations"][post.id]["status"] == status
             assert len(calls) == 1 and calls[0]["max_output_tokens"] >= 8192
-            assert "ko-KR" in calls[0]["system_prompt"]
+            assert "Use Korean for this description" in calls[0]["system_prompt"]
+            assert lane.provider.situation_snapshot.memory_search_locale == "ko-KR"
             assert result["_situation_manifest"]["payload_digest"] == sha256(calls[0]["user_prompt"].encode()).hexdigest()
             assert [r["source_id"] for r in result["_situation_manifest"]["sources"]] == [post.id]
     asyncio.run(scenario())
