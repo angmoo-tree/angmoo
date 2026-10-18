@@ -188,6 +188,7 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
         assert next(source for source in race.sources if source.source_type == "RELATIONSHIP").relationship_basis.version == 6
     else:
         assert len(native_calls) == 1
+        assert "Use Korean for this description" in native_calls[0]["system_prompt"]
         prompt = native_calls[0]["user_prompt"]
         assert frozen.payload_digest == sha256(prompt.encode()).hexdigest()
         chat_source = next(entry for entry in frozen.sources if entry.source_id == str(record.user_message_id))

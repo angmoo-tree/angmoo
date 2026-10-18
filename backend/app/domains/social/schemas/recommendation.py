@@ -1,5 +1,6 @@
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
+from app.domains.social.contracts.recommendation import MIN_CHARACTER_TOPICS, MAX_CHARACTER_TOPICS
 
 
 class TopicDefinition(BaseModel):
@@ -10,7 +11,7 @@ class TopicDefinition(BaseModel):
 
 class TopicGenerationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    topics: list[TopicDefinition] = Field(max_length=64)
+    topics: list[TopicDefinition] = Field(min_length=MIN_CHARACTER_TOPICS, max_length=MAX_CHARACTER_TOPICS)
 
 
 class TopicRegenerateRequest(BaseModel):
@@ -72,8 +73,9 @@ class RecommendationTopicsRead(BaseModel):
     state: Literal["pending", "running", "ready", "failed", "stale"]
     topics: list[TopicRead]
     key_world_character_id: str | None
-    model: str
-    thinking_level: str
+    model: str | None
+    thinking_level: str | None
+    has_key: bool
     last_code: str | None
     approval_required: bool
     recent_deliveries: list[DeliveryHistoryRead] = Field(max_length=5)

@@ -14,6 +14,7 @@ from uuid import uuid4
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 from app.core.search_text import literal_boundary, normalize_search_text
+from app.domains.social.contracts.recommendation import MAX_CHARACTER_TOPICS
 
 from app.domains.social.models.posts import Post
 from app.domains.social.models.topics import (
@@ -23,7 +24,6 @@ from app.domains.social.models.topics import (
 )
 
 MAX_POST_TOPICS = 6
-MAX_CHARACTER_TOPICS = 24
 _subject_reader = None
 
 

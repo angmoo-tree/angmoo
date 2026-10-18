@@ -122,7 +122,7 @@
     },
     {
       "path": "backend/app/contracts/activity_situation.py",
-      "sha256": "68bd055d2d26f4a32bfde25f91b97c97de6fc23ba43adb7a9ef718a0fa61d872"
+      "sha256": "64dc36bcafc3ddbef72bf83fe3260700ae7295c9131000d78367fbd67bc7796c"
     },
     {
       "path": "backend/app/contracts/activity_thought.py",
@@ -226,7 +226,7 @@
     },
     {
       "path": "backend/app/domains/chat/contracts/resolved_envelope.py",
-      "sha256": "3f5fa4c8cb3c62284bf3368d6e38d0012776570532a4c5f6c6098d523a78dd1e"
+      "sha256": "5900fd5cd134552ce499eb3ee6044566acd8b58b8cd3f9fb6a754a926e53e3b4"
     },
     {
       "path": "backend/app/domains/chat/contracts/response_execution.py",
@@ -774,7 +774,7 @@
     },
     {
       "path": "backend/app/domains/memory/policies/situation_generation.py",
-      "sha256": "ab17779e4d5959db53928f0119fd23ace63c2a8a8fee12d3c6ec6516959454ca"
+      "sha256": "860a5fa7d24868d70638bb43cb962ed0ed510a9ccfba7e1f280c5c5a3a57b5af"
     },
     {
       "path": "backend/app/domains/memory/policies/situation_output.py",
@@ -1262,7 +1262,7 @@
     },
     {
       "path": "backend/app/domains/social/contracts/recommendation.py",
-      "sha256": "94424cc959ab4b488531e784b4093b5ff8d1c41538cf27bda4bdfd83bf8fe8f8"
+      "sha256": "99f3ffbb761a3f28361f4c38eeeed1b1c328482bbd3fbd06674df7533da255ec"
     },
     {
       "path": "backend/app/domains/social/contracts/search_index.py",
@@ -1510,7 +1510,7 @@
     },
     {
       "path": "backend/app/domains/social/schemas/recommendation.py",
-      "sha256": "e6bf2cb912d537190155b2a6b0c000f3940f4f982e04d1765635368910cf8ce0"
+      "sha256": "bdbaf4761f37b43992b7f59be04c79c19b422622e05ba030681f50ca5f297c5b"
     },
     {
       "path": "backend/app/domains/social/schemas/world_notifications.py",
@@ -1714,7 +1714,7 @@
     },
     {
       "path": "backend/app/domains/social/service/recommendation_topics.py",
-      "sha256": "fc064ff960dc82ea2db9a81dd2f83f470030cd5d93eaf785abb477eebbbe0114"
+      "sha256": "cd8fcee19c90fab171e7d71898bcfbc1a3ec68b042d25e2d696ffe11134871c2"
     },
     {
       "path": "backend/app/domains/social/service/resident_affordances.py",
@@ -1874,7 +1874,7 @@
     },
     {
       "path": "backend/app/runtime/chat/generation_workflows.py",
-      "sha256": "a24a23df4c83e1a1a9165db69d3b1e20c07daf843596a87af434435085568765"
+      "sha256": "d92b0dfea7b77662d5583184db9c6986ca1ac78a047bdc25244f23031718cbaf"
     },
     {
       "path": "backend/app/runtime/chat/image_attachments.py",
@@ -2598,7 +2598,7 @@
     },
     {
       "path": "backend/app/runtime/resident/execution.py",
-      "sha256": "ac0a80af51bc3a24f98d0346e9323083c5dca34d50f3111b3bf915d60a1cee62"
+      "sha256": "17cff852121a212e11a81587411c9988e881f5f166abae719f48f00d3bb8304b"
     },
     {
       "path": "backend/app/runtime/resident/feed_context_references.py",
@@ -2818,7 +2818,11 @@
     },
     {
       "path": "backend/app/runtime/social/topic_preparation.py",
-      "sha256": "6653e304a79d3692f2ee275705112a2af5525bb1ecdb8ef6ac01eb4a83a6631e"
+      "sha256": "9676a54ec8cfdf7a55ac6a0d43aa95392d7457a8102faf830c7de12ce3707be4"
+    },
+    {
+      "path": "backend/app/runtime/social/topic_preparation_diagnostics.py",
+      "sha256": "e44c08186f3d970f6032821d449fc2ee0ecdfa01c93e7ba2a57c591b1defc53b"
     },
     {
       "path": "backend/app/runtime/social/topic_scope.py",
@@ -2854,7 +2858,7 @@
     },
     {
       "path": "backend/tests/chat/test_activity_situation_receipt.py",
-      "sha256": "8495be73740b21b5751af9cbd415644670044c26e929568affcc664f82c8d705"
+      "sha256": "8154375b4e6a9820233c1b4b355b019c15ed12118b8e0f7f5311532df1085ee8"
     },
     {
       "path": "backend/tests/chat/test_advisory_person_hints.py",
@@ -2934,11 +2938,11 @@
     },
     {
       "path": "backend/tests/chat/test_hybrid_admission.py",
-      "sha256": "25b49adfed46e03f93dcebf99e14842847e6b3fd28bebf02d0f75de7bf9bf0b3"
+      "sha256": "9ec39eacc3e7cbd60bb0059f595642c1e39e8dc02294d42c2e5d0b9cd2480e34"
     },
     {
       "path": "backend/tests/chat/test_hybrid_canonical_guards.py",
-      "sha256": "b19651ecdf6fda56562fd48dd128755e973e2a494f7e62514500db536a7cded6"
+      "sha256": "371540a38070166b40eb56e5a24dd27ccbeabd2c990487db39d9b794b11304b9"
     },
     {
       "path": "backend/tests/chat/test_messages_service.py",
@@ -2962,7 +2966,7 @@
     },
     {
       "path": "backend/tests/chat/test_named_selection_lifecycle.py",
-      "sha256": "3e70845bbfcac83a30c18436f7c6f4ca70ab6e0917633b9b40e79a1e99882774"
+      "sha256": "dbca9b15e932d455c767b9de7019856ae7585e54f558d7a67fe45821ff5a1050"
     },
     {
       "path": "backend/tests/chat/test_named_supervisor_selection.py",
@@ -3030,7 +3034,7 @@
     },
     {
       "path": "backend/tests/chat/test_recall_timeout_classification.py",
-      "sha256": "afd5e4379fef482b05e518700afe1affaa04ed96a41f611cce8d4011bef65bdb"
+      "sha256": "5795acf6b099c3ec1d8ba791ba8ab11cbf2cdeff56fc4a0d33afd8fb16a50af1"
     },
     {
       "path": "backend/tests/chat/test_reference_trace.py",

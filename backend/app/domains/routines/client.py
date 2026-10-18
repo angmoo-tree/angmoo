@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 
+from app.contracts.language import preparation_language_instruction
 from app.domains.routines.schemas.daily_generation import GENERATION_CONTRACT, preparation_output_type
 from app.integrations import direct_llm
 from app.providers.gemini import build_gemini_developer_response_schema
@@ -89,6 +90,10 @@ async def generate_daily_preparation(*, material, character_id: str, source: dic
     source["omitted_recent_record_count"] = omitted
     output_type = preparation_output_type(source, initial=initial)
     tracker = PreparationTracker(reserve)
+    fields = ("daily_plan.items[].title", "daily_plan.items[].activity_seed")
+    if initial:
+        fields += ("recommendation_topics[].name",)
+    language_instruction = preparation_language_instruction(source, fields=fields)
 
     async def before_retry(_attempt):
         reserve_json_retry()
@@ -115,7 +120,8 @@ async def generate_daily_preparation(*, material, character_id: str, source: dic
             ),
             tracker=tracker,
             system_prompt=(ORDINARY_DAILY_PROMPT if source.get("generation_contract") == GENERATION_CONTRACT else DAILY_PROMPT)
-                + ("\n" + INITIAL_TOPIC_PROMPT if initial else ""),
+                + ("\n" + INITIAL_TOPIC_PROMPT if initial else "")
+                + ("\n" + language_instruction if language_instruction else ""),
             user_prompt=json.dumps(source, ensure_ascii=False),
             response_schema=preparation_response_schema(source, initial=initial),
             validator=validate,

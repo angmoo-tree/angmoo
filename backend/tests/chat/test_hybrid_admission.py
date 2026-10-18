@@ -155,10 +155,17 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
     scopes.update(scope, expected_version=setting.version, enabled=True, retention_days=180)
     record = _request(db, RetrievalRoute.CANONICAL)
     db.commit()
-    calls, searches = [], []
+    calls, searches, search_deadlines = [], [], []
+    clock = SimpleNamespace(now=1000.0)
+    monkeypatch.setattr("app.domains.chat.service.hybrid_canonical.monotonic", lambda: clock.now)
     class Hybrid:
         async def execute(self, request, *, deadline):
             searches.append(request)
+            search_deadlines.append(deadline)
+            # Model work beyond the former four-second budget without a long sleep.
+            clock.now += 5.5
+            if clock.now >= deadline:
+                raise TimeoutError("canonical_read_deadline")
             return HybridRecallResult(request.request_id, request.call_id, request.envelope_hash,
                 request.scope, RecallAxisStatus.READY, (), tuple(
                     RecallAxisReceipt(axis, RecallAxisStatus.READY, True, 0, 0) for axis in ("fts", "vector")),
@@ -181,6 +188,10 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
     execution = build(db, material, memory_recall_service=SimpleNamespace(hybrid_service=Hybrid()),
         runtime_settings=runtime_settings, lifecycle=SqlAlchemyResponseLifecycleRepository(db), world_id="p-world")
     workflow = execution.workflow
+    assert workflow._router._caps.payload() == {
+        "row_limit": 20, "max_hops": 3, "fanout_limit": 20, "token_budget": 4000,
+        "timeout_ms": 10000 if mode is ChatRecallMode.SOCIAL_HYBRID else 4000,
+    }
     workflow._social_context_provider = SnapshotProvider()
     observer = RecordingExecutor()
     workflow._graph_executor = observer
@@ -195,6 +206,7 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
     if mode is ChatRecallMode.SOCIAL_HYBRID:
         assert stored.route is RetrievalRoute.CANONICAL
         assert len(searches) == 1 and searches[0].search_text == query and searches[0].scope == scope
+        assert search_deadlines == [1010.0]
         assert searches[0].occurred_from is None
         assert payload["recall_interpretation"]["time_expression"] == "열이틀 날"
         assert payload["recall_interpretation"]["mentions"][0]["resolution"] == "unmatched"

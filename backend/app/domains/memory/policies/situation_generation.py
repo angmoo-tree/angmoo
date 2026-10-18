@@ -1,5 +1,6 @@
 """Auxiliary description schema and instructions shared by existing activity calls."""
 from copy import deepcopy
+from app.contracts.language import generation_language_name
 
 TARGET_OUTPUT_REVISION = "situation-target-output.v2"
 
@@ -13,7 +14,8 @@ def instructions(locale: str, node: str = "chat") -> str:
     }
     return (
         "\n" + fields[node] + " After completing every original output field, write the situation description last. "
-        f"Use {locale} for this description regardless of the language of the visible reply or post. "
+        f"Use {generation_language_name(locale)} for this description regardless of the language of the visible reply or post. "
+        "This names the language to write in, not text to use as the description. "
         "This is the admitted memory/search locale, not the UI language, persona language or these instructions. Preserve original names and meaningful quotations. "
         "Describe this target's concrete context and the exact action expressed by your final output, "
         "using only the input actually supplied in this call. Include ordinary everyday interactions; "

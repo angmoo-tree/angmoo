@@ -1,5 +1,62 @@
 # Angmoo Backend Architecture
 
+## World activity schedule refresh (2026-10-18 LOCAL)
+
+WorldCharacter management compares normalized start/end/interval settings and
+actual OFF-to-ON intent. Its injected `ActivityScheduleUpdater` participates in
+the existing admission/revision transaction. Runtime checks the exact owner,
+World, active role/membership/binding and current configuration; Routines owns
+the conditional update of that character's idle slot. A collaborator never
+commits, allocates capacity, enables another role or starts an activity.
+
+General cadence is recalculated from max(now, last completion + effective
+interval), using the existing calendar/spread functions once. Running claims,
+all unresolved leases (even expired), manual claims and error/cooldown recovery
+times remain owned by their existing handlers. Identical and unrelated settings
+do not issue an extra slot write. OFF/unassigned roles retain configuration for
+the existing bounded allocator. A command failure rolls back configuration,
+role revision and schedule together.
+
+Normal automatic completion uses an optional typed resolver. Its conditional
+slot write checks run ID and owner/character assignment and acquires the actual
+SQLite writer before Runtime reads current settings and owner environment by
+fresh SQL. Only changed time policy/timezone changes the next cadence; accepted
+inputs, credential/model/locale, effects, receipts and run results remain intact.
+The completion owner retains its existing commit; a rejected run never commits
+caller work. Manual, failed/deferred/cancelled paths retain their explicit
+schedule and error contracts. No provider/await or new worker is inside this
+short final write. New timers, migrations and schedule ledgers are not added.
+
+Evidence: [World activity schedule verification](../docs/verification/world-activity-schedule-updates-20261018.md).
+
+## Daily preparation and topic output language (2026-10-18 LOCAL)
+
+New daily generation/regeneration and initial/explicit recommendation-topic
+requests freeze `preparation-output-language.v1` with the admitted Identity
+environment. `contracts/language.py` validates that versioned snapshot and names
+the output language: base `ko` is `Korean`, base `en` is `English`, and every other
+valid full BCP47 code is retained. The stored locale and existing persona, Chat,
+SNS, memory, relationship and image policies remain unchanged.
+
+Routines' client applies the instruction only to newly generated titles/seeds
+and, for initial preparation, topic names. Runtime passes the same snapshot to
+the topics-only branch. Explicit Social topic commands store environment/policy
+beside their content source, never inside `PreparationScope.digest`. A locale
+change therefore neither invalidates ready topics nor rewrites completed,
+pinned or reserved activities. New request IDs admit current environment;
+same-request recovery retains accepted input and the existing call budgets.
+
+Unmarked historical requests retain their original prompt contract. A marked
+but invalid language snapshot is rejected before provider dispatch, using the
+existing preparation failure surface; it is never silently replaced with the
+current locale. Claims and application retain the existing authorization,
+credential, source, name, lease and short transaction fences. No translation
+provider, periodic job, DB migration or platform-specific mapper is added.
+Browser and Tauri keep the shared detector/report path; actual native detection
+and real-AI fluency are separate from these scoped synthetic checks.
+
+See [local implementation and verification](../docs/verification/preparation-output-language-20261018.md).
+
 ## Local credentials after hosted KMS retirement (2026-10-17 LOCAL)
 
 `core/security.py` retains the existing `local-v2` AES-GCM/HKDF envelope, nonce,
@@ -233,6 +290,16 @@ cancelled running futures remain owned, and shutdown drains before engine dispos
 Only immutable results and bounded diagnostics cross back to the parent. SQL,
 completed privacy nodes/memo hits, queue wait and cleanup counts remain unknown
 when not observed. No request collector or Session crosses the thread boundary.
+
+Chat Runtime injects the Chat-owned `CHAT_HYBRID_SEARCH_TIMEOUT_MS` (10,000ms)
+only when composing `social_hybrid`. Shared `RetrievalHardCaps()` defaults and
+other Chat modes retain 4,000ms. The main search uses the minimum of that cap,
+the existing 20-second ceiling and the request's remaining time minus the
+15-second response reserve. Axes, queue wait and canonical resolution consume
+that same budget; a completed search returns immediately. Shorter explicit
+caller caps remain binding. This does not extend the 180-second request deadline,
+add retries or change AI call, candidate, token, queue or SQLite write policy.
+Evidence: [Chat search budget and protection checks](../docs/verification/chat-search-budget-20261018.md).
 
 `resolve` explicitly pins a DEFERRED SQLite read snapshot (including sqlite3's
 legacy transaction mode) and never reserves the writer. Representation/date
@@ -1487,3 +1554,18 @@ explicit clearing. Collector failure never retries or fails business work.
 Plain Session intervals cannot identify another worker's wait cause.
 
 Local evidence and limits: [Chat temporal recall verification](../docs/verification/chat-temporal-recall-20261017.md).
+
+### Admitted generation language names
+
+`contracts.language.generation_language_name` validates the admitted locale using
+the same pure tag validator as `EnvironmentSnapshot`: ko variants become Korean,
+en variants become English, other valid tags retain their original spelling.
+Preparation, SNS/Chat situation descriptions and SNS Feed/Inbox selectors use
+this instruction-only mapping. Persisted locale, descriptions, receipts and
+hashes are never translated. Combined selection uses the same admitted context
+as separate selection; disabled situation generation stays disabled.
+Chat recall continues to follow the current question language, while persona
+speech follows the existing persona/conversation policy. Mapping performs no
+SQL, file, network or AI call. Tendency analysis is outside this change.
+
+Evidence: [situation/query language verification](../docs/verification/situation-query-language-20261018.md).

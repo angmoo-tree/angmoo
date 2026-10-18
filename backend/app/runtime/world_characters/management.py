@@ -184,4 +184,6 @@ class SqlAlchemyWorldManagementReferences:
 
 
 def management_service(db):
-    return WorldCharacterManagementService(db, queries=SqlAlchemyWorldCharacterQueries(), references=SqlAlchemyWorldManagementReferences())
+    from app.runtime.routines.schedule_updates import WorldActivityScheduleUpdater
+    return WorldCharacterManagementService(db, queries=SqlAlchemyWorldCharacterQueries(),
+        references=SqlAlchemyWorldManagementReferences(), schedule_updates=WorldActivityScheduleUpdater())

@@ -50262,6 +50262,88 @@
         "backend/app/runtime/migrations/sqlite_versions/vector_work_v39.py",
         "backend/app/runtime/migrations/sqlite_versions/vector_work_v39_ddl.json"
       ]
+    },
+    {
+      "id": "named-chat-situation-language-instruction-20261018",
+      "implementation_commit": "a27e46cc95936c71a69c060f8baea6594fcd6f5c",
+      "reason": "The user-authorized common generation language contract maps ko locales to Korean in situation-description instructions while retaining the original locale in the admitted and persisted manifest. Align the named-selection integration expectation with that contract and reject the former raw-code instruction; preserve every other assertion.",
+      "review": "PR #392 CI diagnosis and focused Chat integration validation, documented in docs/verification/preparation-language-pr-20261018.md; original frozen evidence remains unchanged.",
+      "source_blobs": {
+        "backend/tests/chat/test_named_selection_lifecycle.py": "98826ca3f07e4e6f3fb3411a1151d3e35f600f3c",
+        "backend/app/contracts/language.py": "13581ea289196c3ca0e8c80270ff4d8e809fc1fe",
+        "backend/app/domains/memory/contracts/activity_situation.py": "1b6cf03874c67a23a215273593a6b0ab041728ce",
+        "docs/verification/preparation-language-pr-20261018.md": "b0a0cc6f184c7684d90852e8551fa126817a739c"
+      },
+      "assertions": [
+        {
+          "node": "tests/chat/test_named_selection_lifecycle.py::test_admission_to_real_composition_commit_and_receipt",
+          "before": [
+            "assert not any(transactions), 'Name/config reads must checkpoint before awaiting a provider'",
+            "assert events[-1].event_type is GenerationEventType.COMPLETED, events[-1].payload",
+            "assert saved.state.value == 'committed' and len(calls) == 2 + invalid",
+            "assert saved.call_tracker['physical_total'] == 2 + invalid",
+            "assert payload['recall_interpretation']['revision'] == NAMED_ADMISSION_REVISION",
+            "assert payload['recall_interpretation']['mentions'][0] == {'mention': '진구', 'role': 'subject', 'resolution': 'resolved'}",
+            "assert payload['recall_interpretation']['requested_direction'] is None",
+            "assert payload['latest_user_message']['content'] == '진구: ' + question",
+            "assert 'entity-1' not in json.dumps(payload['recall_interpretation'])",
+            "assert calls[-1]['system_prompt'].count(person_role_description()) == 1",
+            "assert len(hybrid.requests) == int(memory and control == 'CANONICAL')",
+            "assert len(receipt_rows) == int(memory)",
+            "assert 'person_roles' not in dto and 'selection-args' not in dto",
+            "assert db.scalar(select(func.count()).select_from(f.models.MessageMessage).where(f.models.MessageMessage.role == 'assistant')) == 1",
+            "assert saved.state.value == 'failed' and len(calls) == 2",
+            "assert saved.node_state['failure_class'] == 'router_schema_rejected'",
+            "assert saved.node_state['router_diagnostic']['physical_attempts'] == 2",
+            "assert saved.node_state['router_diagnostic']['repair_exhausted'] is True",
+            "assert not list(db.scalars(select(MemorySituationReceipt)))",
+            "assert all((call.get('tools') for call in calls))",
+            "assert hybrid.requests[0].scope == MemoryScope('p-owner', 'p-world', 'p-responding')",
+            "assert 'Use ko-KR for this description' in calls[-1]['system_prompt']",
+            "assert receipt.state == 'pending' and receipt.description_status == 'valid'",
+            "assert manifest.payload_digest == saved.response_metadata[DELIVERY_KEY]['prompt_digest'] == prompt_digest",
+            "assert manifest.snapshot.memory_search_locale == 'ko-KR'",
+            "assert saved.response_metadata[DELIVERY_KEY]['payload_digest'] == sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()",
+            "assert all((source.delivery_payload_digest in {None, prompt_digest} for source in manifest.sources))",
+            "assert receipt.state == 'applied', receipt.error_code",
+            "assert db.get(MemoryItem, receipt.applied_item_id) is not None",
+            "assert db.get(f.models.MessageMessage, saved.user_message_id).content == question"
+          ],
+          "after": [
+            "assert not any(transactions), 'Name/config reads must checkpoint before awaiting a provider'",
+            "assert events[-1].event_type is GenerationEventType.COMPLETED, events[-1].payload",
+            "assert saved.state.value == 'committed' and len(calls) == 2 + invalid",
+            "assert saved.call_tracker['physical_total'] == 2 + invalid",
+            "assert payload['recall_interpretation']['revision'] == NAMED_ADMISSION_REVISION",
+            "assert payload['recall_interpretation']['mentions'][0] == {'mention': '진구', 'role': 'subject', 'resolution': 'resolved'}",
+            "assert payload['recall_interpretation']['requested_direction'] is None",
+            "assert payload['latest_user_message']['content'] == '진구: ' + question",
+            "assert 'entity-1' not in json.dumps(payload['recall_interpretation'])",
+            "assert calls[-1]['system_prompt'].count(person_role_description()) == 1",
+            "assert len(hybrid.requests) == int(memory and control == 'CANONICAL')",
+            "assert len(receipt_rows) == int(memory)",
+            "assert 'person_roles' not in dto and 'selection-args' not in dto",
+            "assert db.scalar(select(func.count()).select_from(f.models.MessageMessage).where(f.models.MessageMessage.role == 'assistant')) == 1",
+            "assert saved.state.value == 'failed' and len(calls) == 2",
+            "assert saved.node_state['failure_class'] == 'router_schema_rejected'",
+            "assert saved.node_state['router_diagnostic']['physical_attempts'] == 2",
+            "assert saved.node_state['router_diagnostic']['repair_exhausted'] is True",
+            "assert not list(db.scalars(select(MemorySituationReceipt)))",
+            "assert all((call.get('tools') for call in calls))",
+            "assert hybrid.requests[0].scope == MemoryScope('p-owner', 'p-world', 'p-responding')",
+            "assert 'Use Korean for this description' in calls[-1]['system_prompt']",
+            "assert 'Use ko-KR for this description' not in calls[-1]['system_prompt']",
+            "assert receipt.state == 'pending' and receipt.description_status == 'valid'",
+            "assert manifest.payload_digest == saved.response_metadata[DELIVERY_KEY]['prompt_digest'] == prompt_digest",
+            "assert manifest.snapshot.memory_search_locale == 'ko-KR'",
+            "assert saved.response_metadata[DELIVERY_KEY]['payload_digest'] == sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()",
+            "assert all((source.delivery_payload_digest in {None, prompt_digest} for source in manifest.sources))",
+            "assert receipt.state == 'applied', receipt.error_code",
+            "assert db.get(MemoryItem, receipt.applied_item_id) is not None",
+            "assert db.get(f.models.MessageMessage, saved.user_message_id).content == question"
+          ]
+        }
+      ]
     }
   ]
 }

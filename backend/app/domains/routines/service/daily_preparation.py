@@ -13,6 +13,7 @@ import json
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from app.contracts.language import PreparationLanguageError, preparation_environment
 from app.core.ids import uuid7_string
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.domains.routines.models.preparation import ActivityPreparationJob
@@ -163,6 +164,20 @@ def finish_failure(db: Session, job_id: str, token: str, code: str, *, retry_at=
         job.usage_snapshot = usage
     job.next_retry_at = retry_at if job.state == "waiting" else None
     job.lease_expires_at = None
+
+
+@_write
+def reject_invalid_language(db: Session, job_id: str) -> None:
+    """Retire only corrupt versioned input; retain the snapshot and prior outputs."""
+    job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
+    if job is None or job.state not in {"pending", "running", "waiting"}:
+        return
+    try:
+        preparation_environment(job.input_snapshot)
+    except PreparationLanguageError:
+        job.state, job.reason_code = "failed", "preparation_generation_failed"
+        job.lease_expires_at = job.next_retry_at = None
+        job.version += 1
 
 
 def validate_plan(output: GeneratedDailyPlan, *, allowed_places: dict[str, set[str]], fixed_items: list[dict]):

@@ -1,5 +1,12 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-18 World schedule refresh: **LOCAL** reuse of the existing management
+hook, server-backed next-activity display, KO/EN formatting and Next/static
+components. A successful settings save triggers one scoped management read.
+No visible copy, markup, colors, assets or hosted reference is changed; native
+WebView and real-activity quality remain separate from local hook contracts.
+Evidence: `docs/verification/world-activity-schedule-updates-20261018.md`.
+
 2026-10-15 PR #375 visual follow-up: **ADAPTED** World feed header adds the
 existing semantic bell. Pinned Linux/Chromium reproduces the same 57-pixel
 delta reported by hosted Next/static; direct image/diff review confines it to

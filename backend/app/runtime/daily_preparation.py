@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, replace
 from app.contracts.environment import EnvironmentSnapshot
+from app.contracts.language import PREPARATION_LANGUAGE_POLICY, PreparationLanguageError, preparation_environment
 import json
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -185,8 +186,10 @@ def _admitted_preparation_job(db, wc_id):
 
 
 def _preparation_snapshot_scope(scope, job):
-    frozen = job.input_snapshot.get("environment")
-    environment = EnvironmentSnapshot.from_dict(frozen) if frozen else replace(scope.environment, timezone=job.timezone_name)
+    environment = preparation_environment(job.input_snapshot)
+    if environment is None:
+        frozen = job.input_snapshot.get("environment")
+        environment = EnvironmentSnapshot.from_dict(frozen) if frozen else replace(scope.environment, timezone=job.timezone_name)
     return replace(scope, environment=environment)
 
 
@@ -194,8 +197,12 @@ def read_preparation(db, *, character_id, world_id, user, now=None):
     now = now or datetime.now(UTC)
     scope = _scope(db, character_id, world_id, user)
     admitted = _admitted_preparation_job(db, scope.world_character.id)
+    invalid_language = False
     if admitted is not None:
-        scope = _preparation_snapshot_scope(scope, admitted)
+        try:
+            scope = _preparation_snapshot_scope(scope, admitted)
+        except PreparationLanguageError:
+            invalid_language = True  # Read-only status; never dispatch using current environment.
     target = admitted.local_date if admitted is not None else local_activity_date(now, scope.environment.timezone)
     plan = store.current_plan(db, scope.world_character.id, target)
     _prep, topic_state = _topics(db, scope)
@@ -213,6 +220,8 @@ def read_preparation(db, *, character_id, world_id, user, now=None):
             state, reason = job.state, job.reason_code
     if job and state == "running" and job.lease_expires_at and job.lease_expires_at.replace(tzinfo=UTC) <= now:
         state, reason = "waiting", "preparation_claim_expired"
+    if invalid_language:
+        state, reason = "needs_user_action", "preparation_generation_failed"
     return DailyPreparationRead(world_character_id=scope.world_character.id, local_date=target.isoformat(),
         plan_state=state, topic_state=topic_state, request_id=job.request_id if job else None,
         attempt_count=job.attempt_count if job else 0, reason_code=reason,
@@ -231,7 +240,11 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     lock_environment_admission(db, user.id)
     admitted = _admitted_preparation_job(db, scope.world_character.id)
     if admitted is not None:
-        scope = _preparation_snapshot_scope(scope, admitted)
+        try:
+            scope = _preparation_snapshot_scope(scope, admitted)
+        except PreparationLanguageError:
+            store.reject_invalid_language(db, admitted.id)
+            return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
     status = read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
     manual = request_id is not None
     if not manual:
@@ -271,6 +284,8 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
     source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict(),
         "environment": scope.environment.to_dict(), "credential_binding": binding}
+    if prior_job is None:
+        source["preparation_language_policy"] = PREPARATION_LANGUAGE_POLICY
     job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
         timezone=scope.environment.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
         request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
@@ -280,14 +295,16 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     # The claim keeps its accepted raw source and names across retries/restarts.
     source = dict(job.input_snapshot)
     try:
+        preparation_environment(source)
         names = read_name_binding(source)
         request_source = dict(source)
         if names is not None:
             validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
             request_source["persona"] = render_persona(source["persona"], names)
-    except NameBindingError as exc:
+    except (NameBindingError, PreparationLanguageError) as exc:
         db.rollback()
-        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, str(exc)))
+        code = str(exc) if isinstance(exc, NameBindingError) else "preparation_generation_failed"
+        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, code))
         return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
     # Topic's own request generation also fences initial application. No Topic is
     # written until both outputs pass validation and this claim still belongs to us.
@@ -319,6 +336,9 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
             from app.runtime.social.topic_preparation import generate_topics
             tracker = PreparationTracker(reserve)
             topic_source = {key: request_source[key] for key in ("persona", "world")}
+            if "preparation_language_policy" in request_source:
+                topic_source.update(preparation_language_policy=request_source["preparation_language_policy"],
+                    environment=request_source["environment"])
             topics = await (topic_generator or generate_topics)(material, character_id, topic_source, tracker=tracker)
             output = InitialTopicsOnlyOutput(recommendation_topics=[row.model_dump() for row in topics.topics])
         else:

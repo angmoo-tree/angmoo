@@ -14,6 +14,7 @@ from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.worlds.service import require_world_read_access, require_creator_access
 from app.policies import name_policy
+from app.domains.world_characters.contracts.scheduling import ActivityScheduleUpdater, SCHEDULE_FIELDS
 
 
 class WorldManagementError(ValueError):
@@ -23,8 +24,9 @@ class WorldManagementError(ValueError):
 
 
 class WorldCharacterManagementService:
-    def __init__(self, db, *, queries, references):
+    def __init__(self, db, *, queries, references, schedule_updates: ActivityScheduleUpdater):
         self.db, self.queries, self.references = db, queries, references
+        self.schedule_updates = schedule_updates
 
     def dashboard(self, *, world_id, user):
         world = require_world_read_access(self.db, world_id=world_id, user=user)
@@ -213,11 +215,16 @@ class WorldCharacterManagementService:
                 if name in changes and changes[name] is None:
                     changes[name] = ""
             self.references.validate_settings(self.db, character_id=role.character_id, changes=changes)
+            previous = ImportSettings.model_validate(stored.settings)
             settings = ImportSettings.model_validate({**stored.settings, **changes})
             if {"active_hours_start", "active_hours_end"} & changes.keys():
                 self.references.validate_activity_settings(settings)
             self._claim(role, expected_revision, basic=basic)
             stored.settings = settings.model_dump(mode="json")
+            if (role.status == "active" and role.autonomous_enabled
+                and any(getattr(previous, key) != getattr(settings, key) for key in SCHEDULE_FIELDS)):
+                self.schedule_updates.refresh(self.db, owner_id=user.id, world_id=world_id,
+                    world_character_id=role.id, character_id=role.character_id)
             self.db.commit()
         except Exception:
             self.db.rollback()
@@ -231,8 +238,12 @@ class WorldCharacterManagementService:
                 raise WorldManagementError("owner_controlled_activity_not_available", 403)
             if enabled:
                 self.references.ensure_ready(self.db, character_id=role.character_id, world_id=world_id, user=user)
+            reactivated = enabled and not role.autonomous_enabled
             self._claim(role, data.expected_revision)
             role.autonomous_enabled = enabled
+            if reactivated:
+                self.schedule_updates.refresh(self.db, owner_id=user.id, world_id=world_id,
+                    world_character_id=role.id, character_id=role.character_id)
             # Saved World intent does not write global Agent settings/status or
             # cancel an already admitted run. Existing scheduler owns resources.
             self.db.commit()

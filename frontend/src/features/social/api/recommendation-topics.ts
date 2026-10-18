@@ -27,8 +27,9 @@ export type RecommendationTopics = {
   state: "pending" | "running" | "ready" | "failed" | "stale";
   topics: { id: string; name: string; scope: "common" | "world" }[];
   key_world_character_id: string | null;
-  model: string;
-  thinking_level: string;
+  model: string | null;
+  thinking_level: string | null;
+  has_key: boolean;
   last_code: string | null;
   approval_required: boolean;
   recent_deliveries?: RecommendationDelivery[];

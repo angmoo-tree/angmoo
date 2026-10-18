@@ -1,6 +1,7 @@
 """Provider-neutral auxiliary output and opaque delivery participation values."""
 from dataclasses import dataclass
 from typing import Literal, Protocol
+from app.contracts.environment import validate_memory_search_locale
 
 SITUATION_POLICY = "activity-situation.v1"
 
@@ -27,6 +28,7 @@ def admitted_locale(value):
     if snapshot is None:
         return None
     locale = snapshot.get("memory_search_locale") if isinstance(snapshot, dict) else None
-    if not isinstance(locale, str) or not locale or len(locale) > 80:
-        raise ValueError("situation_admission_locale_invalid")
-    return locale
+    try:
+        return validate_memory_search_locale(locale)
+    except (TypeError, ValueError):
+        raise ValueError("situation_admission_locale_invalid") from None
