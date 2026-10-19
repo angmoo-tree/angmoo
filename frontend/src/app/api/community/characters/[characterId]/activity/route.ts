@@ -6,8 +6,8 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { characterId } = await context.params;
 
-  return proxyBackend(`/api/v1/characters/${characterId}/activity`);
+  return proxyBackend(`/api/v1/characters/${characterId}/activity`, { signal: request.signal });
 }

@@ -6,8 +6,8 @@ type RouteContext = {
   }>;
 };
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { postId } = await context.params;
 
-  return proxyBackend(`/api/v1/posts/${postId}`);
+  return proxyBackend(`/api/v1/posts/${postId}`, { signal: request.signal });
 }

@@ -1,3 +1,5 @@
+import { cancelledResponse, failedProxyResponse, forwardResponseStream, isRequestCancellation, proxyLifecycle, type ProxyLifecycle, type ProxyPhase } from "./proxy-lifecycle";
+
 const DEFAULT_BACKEND_URL = "http://127.0.0.1:8080";
 const BODYLESS_STATUSES = new Set([204, 205, 304]);
 const MAX_PROXY_ERROR_BYTES = 64 * 1024;
@@ -18,46 +20,70 @@ export function getBackendBaseUrl() {
   return url.origin;
 }
 
-export async function proxyBackend(path: string, init?: RequestInit) {
-  const upstream = await fetch(`${getBackendBaseUrl()}${path}`, {
-    ...init,
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      ...(init?.headers ?? {}),
-    },
-  });
-  const responseHeaders = forwardedResponseHeaders(upstream);
-
-  if (BODYLESS_STATUSES.has(upstream.status)) {
-    return new Response(null, {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
-  }
-
-  if (upstream.ok) {
-    return new Response(upstream.body, {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
-  }
-
+export async function proxyBackend(path: string, init?: RequestInit, lifecycle: ProxyLifecycle = proxyLifecycle(init?.method ?? "GET", "community")) {
+  const downstream = init?.signal;
+  const controller = new AbortController();
+  const abort = () => controller.abort(downstream?.reason);
+  const detach = () => downstream?.removeEventListener("abort", abort);
+  downstream?.addEventListener("abort", abort, { once: true });
+  let phase: ProxyPhase = "upstream_headers";
   try {
-    const text = await readBoundedResponseText(upstream, MAX_PROXY_ERROR_BYTES);
-    return new Response(text, {
-      status: upstream.status,
-      headers: responseHeaders,
+    if (downstream?.aborted) throw downstream.reason;
+    const upstream = await fetch(`${getBackendBaseUrl()}${path}`, {
+      ...init,
+      signal: controller.signal,
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        ...(init?.headers ?? {}),
+      },
     });
-  } catch (error) {
-    if (!(error instanceof UpstreamResponseTooLargeError)) {
-      throw error;
+    const responseHeaders = forwardedResponseHeaders(upstream);
+
+    if (BODYLESS_STATUSES.has(upstream.status)) {
+      detach();
+      return new Response(null, {
+        status: upstream.status,
+        headers: responseHeaders,
+      });
     }
-    responseHeaders.set("content-type", "application/json");
-    return new Response(JSON.stringify({ detail: "Backend request failed." }), {
-      status: upstream.status,
-      headers: responseHeaders,
-    });
+
+    if (upstream.ok) {
+      if (!upstream.body) detach();
+      return new Response(upstream.body ? forwardResponseStream(upstream.body, controller, downstream, lifecycle, upstream.status, detach) : null, {
+        status: upstream.status,
+        headers: responseHeaders,
+      });
+    }
+
+    phase = "error_body";
+    try {
+      const text = await readBoundedResponseText(upstream, MAX_PROXY_ERROR_BYTES);
+      if (downstream?.aborted) throw downstream.reason;
+      return new Response(text, {
+        status: upstream.status,
+        headers: responseHeaders,
+      });
+    } catch (error) {
+      if (!(error instanceof UpstreamResponseTooLargeError)) {
+        throw error;
+      }
+      responseHeaders.set("content-type", "application/json");
+      return new Response(JSON.stringify({ detail: "Backend request failed." }), {
+        status: upstream.status,
+        headers: responseHeaders,
+      });
+    } finally {
+      detach();
+    }
+  } catch (error) {
+    detach();
+    if (isRequestCancellation(error, downstream)) {
+      lifecycle.finish(phase, "cancelled");
+      return cancelledResponse();
+    }
+    lifecycle.finish(phase, "failed");
+    return failedProxyResponse();
   }
 }
 

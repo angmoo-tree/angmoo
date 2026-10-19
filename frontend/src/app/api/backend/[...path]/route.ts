@@ -1,4 +1,5 @@
 import { proxyBackend } from "@/lib/server/backend";
+import { cancelledResponse, failedProxyResponse, isRequestCancellation, proxyLifecycle } from "@/lib/server/proxy-lifecycle";
 
 const DEFAULT_PROXY_MAX_BYTES = 1024 * 1024;
 const LORE_UPLOAD_PROXY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024;
@@ -228,13 +229,17 @@ function isWorldProfileMediaUpload(path: string[], method: string) {
 }
 
 async function readStreamedRequestBody(request: Request, maxBytes: number) {
+  request.signal.throwIfAborted();
   if (!request.body) return undefined;
   const reader = request.body.getReader();
+  const cancel = () => { void reader.cancel(request.signal.reason).catch(() => {}); };
+  request.signal.addEventListener("abort", cancel, { once: true });
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
   try {
     while (true) {
       const { done, value } = await reader.read();
+      request.signal.throwIfAborted();
       if (done) break;
       totalBytes += value.byteLength;
       if (totalBytes > maxBytes) {
@@ -244,6 +249,7 @@ async function readStreamedRequestBody(request: Request, maxBytes: number) {
       chunks.push(value);
     }
   } finally {
+    request.signal.removeEventListener("abort", cancel);
     reader.releaseLock();
   }
 
@@ -270,6 +276,7 @@ async function readBoundedRequestBody(request: Request, maxBytes: number) {
 
 async function proxy(request: Request, context: RouteContext) {
   const { path } = await context.params;
+  const lifecycle = proxyLifecycle(request.method);
   const unsafe = UNSAFE_METHODS.has(request.method);
   const frontendOrigin = requestFrontendOrigin(request);
   const origin = unsafe ? exactSameOrigin(request) : null;
@@ -291,7 +298,12 @@ async function proxy(request: Request, context: RouteContext) {
         { status: 413 },
       );
     }
-    throw error;
+    if (isRequestCancellation(error, request.signal)) {
+      lifecycle.finish("request_body", "cancelled");
+      return cancelledResponse();
+    }
+    lifecycle.finish("request_body", "failed");
+    return failedProxyResponse();
   }
   const query = new URL(request.url).search;
   const cookie = filterForwardedCookies(request.headers.get("cookie"));
@@ -323,7 +335,7 @@ async function proxy(request: Request, context: RouteContext) {
       ...capabilityHeaders,
       "Content-Type": request.headers.get("content-type") ?? "application/json",
     },
-  });
+  }, lifecycle);
 }
 
 export const GET = proxy;
