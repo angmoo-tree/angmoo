@@ -9,17 +9,17 @@ from memory.test_p8_l_h_canonical_recall import runtime_factory
 from memory.projection_fixture import index
 
 
-@pytest.mark.parametrize("version", (1, 8, 19, 37, 38, 39))
+@pytest.mark.parametrize("version", (1, 8, 19, 37, 38, 39, 40))
 def test_frozen_schema_manifests_and_current_trigger_parity(version):
     register_models()
-    metadata = schema.build_sqlite_baseline_metadata() if version == 39 else getattr(schema, f"build_sqlite_v{version}_metadata")()
+    metadata = schema.build_sqlite_baseline_metadata() if version == 40 else getattr(schema, f"build_sqlite_v{version}_metadata")()
     engine = create_engine("sqlite://")
     with engine.begin() as connection:
         metadata.create_all(connection)
         schema.create_schema_version_table(connection)
         assert schema.sqlite_schema_contract_digest(connection) == load_sqlite_manifest(version).schema_digest
         triggers = connection.exec_driver_sql("SELECT name FROM sqlite_master WHERE type='trigger' AND name LIKE 'memory_vector_%'").all()
-        assert bool(triggers) == (version == 39)
+        assert bool(triggers) == (version >= 39)
     engine.dispose()
 
 

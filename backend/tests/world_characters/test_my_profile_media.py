@@ -15,9 +15,17 @@ def test_my_profile_exact_payload_upload_and_get_preserve_validation(tmp_path, m
     monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
     client, engine, principal = _fixture()
     try:
-        _, outsider = _seed_world(engine, principal)
+        owner, outsider = _seed_world(engine, principal)
+        from datetime import UTC, datetime
+        from sqlalchemy.orm import Session
+        from environment_fixture_support import seed_environment
+        with Session(engine) as db:
+            seed_environment(db, owner.id).confirmed_at = datetime.now(UTC)
+            db.commit()
         mount_public_media(client.app)
-        context = client.post("/api/v1/worlds/world-a/my-profile/ensure", headers=FRONTEND_HEADERS).json()
+        response = client.post("/api/v1/worlds/world-a/my-profile/ensure", headers=FRONTEND_HEADERS)
+        assert response.status_code == 200, response.text
+        context = response.json()
         stream = BytesIO(); Image.new("RGB", size, (61, 88, 101)).save(stream, format="PNG")
         body = {"version": context["version"], "media_type": kind, "content_type": "image/png",
             "data_base64": base64.b64encode(stream.getvalue()).decode()}

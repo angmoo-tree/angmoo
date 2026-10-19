@@ -46,6 +46,7 @@ from app.runtime.characters import management as agent_service
 
 
 def _create_autonomy_capacity_tables(engine) -> None:
+    from app.domains.world_characters.activity_models import ActivityGraphRun
     from app.domains.identity.models import InstallationIdentity
     from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
     from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot
@@ -65,6 +66,7 @@ def _create_autonomy_capacity_tables(engine) -> None:
         models.WorldDeletionCleanupItem.__table__,
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
+        ActivityGraphRun.__table__,
         WorldCharacterConfiguration.__table__,
         WorldImagePolicy.__table__,
         WorldCredential.__table__,
@@ -1100,7 +1102,7 @@ def test_tick_resident_slots_staggers_claimed_runs(
     monkeypatch.setattr(
         agent_run_service.slot_recovery,
         "recover_expired_resident_slot_runs",
-        lambda db, *, now, next_tick_at_factory=None, autonomy_reader=None: 0,
+        lambda db, *, now, next_tick_at_factory=None, autonomy_reader=None, unfinished_recovery_reader=None: 0,
     )
     from app.runtime.routines import world_autonomy
     monkeypatch.setattr(world_autonomy, "reconcile_world_autonomy", lambda db, **kwargs: 0)
@@ -3138,6 +3140,8 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
     _create_autonomy_capacity_tables(engine)
     cancellation_calls: list[str] = []
 
+    from app.contracts.activity_cancellation import CancellationIntent, CancellationReason, cancellation_scope
+
     async def cancel_during_provider_setup(**_kwargs):
         cancellation_calls.append("provider_setup")
         raise asyncio.CancelledError
@@ -3210,7 +3214,7 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
         slot.lease_expires_at = datetime.now(UTC) + timedelta(minutes=5)
         db.commit()
 
-        with pytest.raises(asyncio.CancelledError):
+        with cancellation_scope(CancellationIntent(CancellationReason.SHUTDOWN)), pytest.raises(asyncio.CancelledError):
             asyncio.run(
                 agent_run_service._run_resident_slot_once(
                     db,

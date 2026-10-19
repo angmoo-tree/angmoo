@@ -4081,6 +4081,9 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
   await expect(page.locator("body")).not.toHaveAttribute("data-angmoo-window-drag", /.+/);
   await expect(page.locator("[data-tauri-drag-region]")).toHaveCount(0);
   await expect(page.locator('[data-desktop-navigation]')).toBeVisible();
+  // The navigation mounts before automatic local-session/environment readiness.
+  // Measure the usable product shell, not its temporarily hidden loading tree.
+  await expect(page.getByRole("link", { name: "Memory 열기" })).toBeVisible();
   const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
     const rect = node.getBoundingClientRect();
     const toolbar = document.querySelector('[data-desktop-navigation]')!.getBoundingClientRect();

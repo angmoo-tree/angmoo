@@ -2618,7 +2618,7 @@
     },
     {
       "path": "backend/app/runtime/resident/execution.py",
-      "sha256": "f9e6edbf4e5de916b34e96ecb6527f461a7e5c453628304653b98071b3f6baf5"
+      "sha256": "6f199f9a61cae19e01ac2afb5e50ee730d533c729c0adcb4dc0f7628ca25fcbd"
     },
     {
       "path": "backend/app/runtime/resident/feed_context_references.py",
@@ -3258,7 +3258,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "4bb6dd6ec635e0d95156962c1e77f406198001929d32936ee334bd3b0736aab7"
+      "sha256": "30e38d2a52476bd84130ccd1c8a9fca482c6171e0ffc633f00d0fa263c32288c"
     },
     {
       "path": "backend/tests/memory/test_embedding_batch_transport.py",
@@ -3606,7 +3606,7 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "73d5b31ce81c274a1f181eb6fff78e6a80ab1c1b2f33029bdafbe4e3af365568"
+      "sha256": "46d55233d1fbac553455d7bdef96d77e8e59dd61113237ee8f057ff2f2e114a2"
     },
     {
       "path": "backend/tests/migrations/test_canonical_retention.py",
@@ -3638,7 +3638,7 @@
     },
     {
       "path": "backend/tests/migrations/test_observation_outbox_v20.py",
-      "sha256": "35b5e62337c00f77a6c0c2c08d983726720249aa6cd953195454e8a009babce1"
+      "sha256": "ada819548ca08d31b2b6e95798b67ad263c5fe39362df510b4b118d7c973ed61"
     },
     {
       "path": "backend/tests/migrations/test_populated_memory_upgrade.py",
@@ -3662,7 +3662,7 @@
     },
     {
       "path": "backend/tests/migrations/test_vector_work_v39.py",
-      "sha256": "bc2939adfc2e3acc55e401a09862316eec3568c59bc7bdce47f5523dcb748f61"
+      "sha256": "4e6e9f736968989b56f9019edf9ae511e65b98f8413c14e1576b0a1099319c3e"
     },
     {
       "path": "backend/tests/migrations/test_world_activity_v30.py",

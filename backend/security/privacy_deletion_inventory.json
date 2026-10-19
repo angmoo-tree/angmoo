@@ -186,6 +186,7 @@
     "retain_local_installation": [
       "image_generation_policy",
       "installation_identities",
+      "local_client_connections",
       "local_owner_bootstrap_challenges",
       "runtime_scheduler_leases"
     ],
@@ -359,6 +360,7 @@
       "image_generation_policy",
       "image_interpretation_settings",
       "installation_identities",
+      "local_client_connections",
       "local_environments",
       "local_owner_bootstrap_challenges",
       "lore_parser_leases",

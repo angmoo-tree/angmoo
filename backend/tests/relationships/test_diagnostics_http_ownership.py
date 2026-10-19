@@ -105,6 +105,10 @@ def test_review_configuration_uses_exact_subject_purpose_model_and_current_timez
     from app.domains.identity.models_environment import LocalEnvironment
     db = world_session
     setting, batch, profile = review_setting(db)
+    environment = db.get(LocalEnvironment, setting.owner_id)
+    assert environment is not None
+    environment.timezone = "UTC"
+    db.flush()
     reader = diagnostic_references.SqlAlchemyDiagnosticReferences(db, Settings())
     scope = dict(owner_id=setting.owner_id, world_id=setting.world_id, world_character_id=setting.subject_world_character_id)
     statements = []
@@ -127,7 +131,7 @@ def test_review_configuration_uses_exact_subject_purpose_model_and_current_timez
     assert read()["status"] == "consolidation_configuration_required"
     world_credentials.save(db, **scope, purpose="consolidation", data=write())
     assert read() == {"status": "scheduled", "manual_available": True, "local_time": "05:20", "timezone": "UTC"}
-    db.add(LocalEnvironment(owner_id=setting.owner_id, installation_id="configuration-fixture", preferred_language="en", timezone="Asia/Seoul"))
+    environment.preferred_language, environment.timezone = "en", "Asia/Seoul"
     assert read()["timezone"] == "Asia/Seoul"
     assert batch.timezone == "Pacific/Honolulu"
     world_credentials.save(db, **scope, purpose="consolidation", data=write(1, None, thinking="medium"))

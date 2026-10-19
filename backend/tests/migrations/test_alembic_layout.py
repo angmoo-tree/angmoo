@@ -71,7 +71,7 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert actual_graph["20261005_0106"] == "20261003_0105"
     assert actual_graph["20261006_0107"] == "20261005_0106"
     assert actual_graph["20261008_0108"] == "20261006_0107"
-    assert len(actual_graph) == 115
+    assert len(actual_graph) == 116
     assert actual_graph["20261008_0109"] == "20261008_0108"
     assert actual_graph["20261009_0110"] == "20261008_0109"
     assert actual_graph["20261009_0111"] == "20261009_0110"
@@ -80,7 +80,8 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert actual_graph["20261012_0114"] == "20261010_0113"
     assert actual_graph["20261015_0115"] == "20261012_0114"
     assert actual_graph["20261016_0116"] == "20261015_0115"
-    assert script.get_heads() == ["20261016_0116"]
+    assert actual_graph["20261019_0117"] == "20261016_0116"
+    assert script.get_heads() == ["20261019_0117"]
     assert not list((BACKEND / "app/alembic").rglob("*.py"))
 
 
@@ -96,7 +97,7 @@ def test_alembic_heads_from_outside_backend(tmp_path):
         timeout=30,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip() == "20261016_0116 (head)"
+    assert result.stdout.strip() == "20261019_0117 (head)"
 
 
 def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_path):
@@ -133,7 +134,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
             "media_credentials", "media_assets", "image_interpretation_settings",
             "image_interpretations", "image_interpretation_attempts", "message_attachments",
             "post_image_intents", "post_image_generation_attempts", "image_generation_policy",
-            "local_environments", "environment_timezone_changes",
+            "local_environments", "environment_timezone_changes", "local_client_connections",
             "character_import_snapshots", "character_import_origins",
             "character_draft_import_origins", "world_character_configurations",
             "world_credentials", "world_credential_revisions", "world_image_policies",
@@ -186,7 +187,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     result_data = json.loads(result.stdout)
     expected_count = len(json.loads(CHECKPOINT.read_text(encoding="utf-8"))["contracts"]["orm_tables"])
-    assert result_data == {"registered_tables": expected_count + 78, "revision_bodies_run": 0}
+    assert result_data == {"registered_tables": expected_count + 79, "revision_bodies_run": 0}
     assert not list(tmp_path.rglob("*.sqlite3"))
 
 

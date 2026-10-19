@@ -57,7 +57,10 @@ def test_browser_auth_provider_bootstraps_from_auth_me() -> None:
     layout = _read("app/layout.tsx")
 
     assert 'type AuthStatus = "checking" | "authenticated" | "unauthenticated"' in provider
-    assert "getCurrentUser" in provider
+    assert "createLocalEntryController" in provider
+    assert "createLocalEntryApi" in provider
+    entry_api = _read("features/identity/api/local-entry.ts")
+    assert 'currentUser: () => authRequest<UserRead>("/auth/me", options)' in entry_api
     assert 'authRequest<UserRead>("/auth/me", options)' in session
     assert "useAuth" in provider
     assert "<AuthProvider>" in layout

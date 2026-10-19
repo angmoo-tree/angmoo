@@ -90,9 +90,10 @@ def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() 
     assert "window.dispatchEvent" in runtime
     assert "DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT" in auth_provider
     assert (
-        "window.addEventListener(\n"
-        "      DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT" in auth_provider
+        "window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, runtimeChanged)" in auth_provider
     )
+    assert "window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, runtimeChanged)" in auth_provider
+    assert "controller.invalidate()" in auth_provider
 
 
 def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> None:

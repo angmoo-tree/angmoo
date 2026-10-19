@@ -234,7 +234,6 @@ def release_temporary_resident_slot(
         character_id=character_id,
         credential_id=credential_id,
         autonomy_reader=read_autonomy_enabled,
-        unfinished_recovery_reader=has_supported_recovery,
     )
 
 
