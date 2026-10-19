@@ -21,6 +21,14 @@ frontend architecture/design 검사 통과. canonical adapter·등록·smoke·se
 인증 mutation 수를 바로잡은 해당 2개 재실행은 모두 통과했다. 이 기록은 원격
 재실행 완료나 ARM64/설치판 사용자 확인을 대신하지 않는다.
 
+다음 원격 실행에서 smoke의 환경 확인 요청이 frontend Host/Origin 연결 정보 없이
+backend에 직접 도착하여 `csrf_origin_invalid`로 거절됐다. 브라우저 smoke는 실제
+Next proxy로 보내고, 컨테이너 내부 진단은 이미 설정된 `ANGMOO_FRONTEND_ORIGIN`을
+명시적으로 전달한다. 출처 검사를 완화하지 않으며 설정이 없으면 진단을 중단한다.
+관련 HTTP 오류/환경 확인 회귀 10개가 통과했다. 기존 media transport VM harness도
+새 proxy lifecycle 모듈을 실제로 읽도록 갱신했으며 두 upstream, cookie 보호,
+Range/HEAD/404/redirect 거절 및 stream 취소 검사와 해당 파일 lint가 통과했다.
+
 검증일: 2026-10-19 KST. 대상은 소스 checkout과 격리 fixture다. 제품 배포, 기존 ARM64 후보, 설치된 Tauri 및 실제 AI 품질의 완료 기록이 아니다.
 
 ## 범위와 최종 계약

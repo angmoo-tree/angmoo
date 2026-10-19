@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from datetime import UTC, datetime, timedelta
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -30,6 +31,7 @@ def _request(
     token: str | None = None,
     cookie: str | None = None,
     origin: str | None = None,
+    local_frontend_origin: str | None = None,
     expected_error_status: int | None = None,
 ) -> tuple[int, object]:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
@@ -42,6 +44,8 @@ def _request(
         headers["Cookie"] = cookie
     if origin:
         headers["Origin"] = origin
+    if local_frontend_origin:
+        headers["X-Angmoo-Frontend-Origin"] = local_frontend_origin
     request = Request(
         f"{base_url.rstrip('/')}{path}",
         data=data,
@@ -170,12 +174,24 @@ def _bootstrap_local_session(
     return token, post_id
 
 
-def _confirm_local_environment(backend_url: str, *, token: str, origin: str) -> None:
+def _confirm_local_environment(backend_url: str, *, token: str, frontend_url: str | None) -> None:
     # Match the client sequence: authenticated environment admission precedes
     # default SNS World/character preparation. Do not seed confirmation in SQL.
+    # Browser smoke uses the real proxy. An in-container diagnostic has no
+    # published frontend on its loopback and uses the configured proxy origin.
+    origin = frontend_url or os.environ.get("ANGMOO_FRONTEND_ORIGIN", "")
+    parsed = urlparse(origin)
+    if (parsed.scheme not in {"http", "https"} or not parsed.netloc
+            or parsed.path not in {"", "/"} or parsed.query or parsed.fragment
+            or parsed.username or parsed.password):
+        raise SmokeError("local environment confirmation requires a frontend origin")
+    origin = f"{parsed.scheme}://{parsed.netloc}"
     status, environment = _request(
-        backend_url, "/api/v1/auth/local/environment", method="POST",
+        frontend_url or backend_url,
+        "/api/backend/auth/local/environment" if frontend_url else "/api/v1/auth/local/environment",
+        method="POST",
         cookie=f"{SESSION_COOKIE_NAME}={token}", origin=origin,
+        local_frontend_origin=None if frontend_url else origin,
         payload={"client_id": f"quickstart-{uuid4().hex}", "expected_revision": 0,
                  "sequence": 1, "preferred_language": "en-US", "timezone": "UTC"},
     )
@@ -235,7 +251,7 @@ def run_smoke(
     if token is None:
         raise SmokeError("local session bootstrap did not issue a token")
     if bootstrap_local_session:
-        _confirm_local_environment(backend_url, token=token, origin=frontend_url or backend_url)
+        _confirm_local_environment(backend_url, token=token, frontend_url=frontend_url)
     status, draft = _request(
         backend_url,
         "/api/v1/agents/drafts",

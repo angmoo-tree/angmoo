@@ -13,7 +13,10 @@ function load(file, require = () => { throw new Error("unexpected import"); }) {
   vm.runInContext(`(function(module,exports,require){${code}\n})`, context)(loaded, loaded.exports, require);
   return loaded.exports;
 }
-const backend = load("../src/lib/server/backend.ts");
+const lifecycle = load("../src/lib/server/proxy-lifecycle.ts");
+const backend = load("../src/lib/server/backend.ts", name => {
+  assert.equal(name, "./proxy-lifecycle"); return lifecycle;
+});
 const {proxyMedia} = load("../src/lib/server/media.ts", name => {
   assert.equal(name, "./backend"); return backend;
 });
