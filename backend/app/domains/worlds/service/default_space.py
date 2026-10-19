@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
 from app.domains.identity.service.owner_context import is_claimed_local_owner
-from app.domains.identity.service.environment import snapshot
+from app.domains.identity.service.environment import environment_confirmed, lock_environment_admission, snapshot
 from app.domains.identity.service.local_owner import read_ui_language
 from app.domains.worlds.policies.default_content import default_content
 from app.domains.worlds.models import OwnerDefaultWorld, World, WorldMembership
@@ -21,9 +21,7 @@ def _active_owner_membership(db, *, world_id, user_id):
         WorldMembership.user_id == user_id, WorldMembership.status == "active", WorldMembership.role == "owner"))
 
 
-def ensure_default_space(db: Session, *, owner_id: str) -> World:
-    if not is_claimed_local_owner(db, owner_id):
-        raise WorldCreatorRoleRequiredError("local_owner_required")
+def _existing_space(db: Session, owner_id: str) -> World | None:
     binding = db.get(OwnerDefaultWorld, owner_id)
     if binding is not None:
         world = db.get(World, binding.world_id)
@@ -31,7 +29,21 @@ def ensure_default_space(db: Session, *, owner_id: str) -> World:
         if world is None or world.owner_user_id != owner_id or world.status == "archived" or member is None or member.role != "owner":
             raise WorldDefinitionValidationError("default_space_recovery_required")
         return world
+    return None
+
+
+def ensure_default_space(db: Session, *, owner_id: str) -> World:
+    if not is_claimed_local_owner(db, owner_id):
+        raise WorldCreatorRoleRequiredError("local_owner_required")
+    existing = _existing_space(db, owner_id)
+    if existing is not None:
+        return existing
     try:
+        lock_environment_admission(db, owner_id)
+        existing = _existing_space(db, owner_id)
+        if existing is not None:
+            db.commit()
+            return existing
         legacy = db.get(World, ANGMOO_GLOBAL_WORLD_ID)
         member = _active_owner_membership(db, world_id=legacy.id, user_id=owner_id) if legacy else None
         adopt = bool(legacy and legacy.owner_user_id == owner_id and legacy.status == "published"
@@ -40,6 +52,8 @@ def ensure_default_space(db: Session, *, owner_id: str) -> World:
         if adopt:
             world = legacy
         else:
+            if not environment_confirmed(db, owner_id):
+                raise WorldDefinitionValidationError("environment_not_ready")
             world = _new_global_world(owner_id)
             world.id = uuid7_string()
             world.slug = f"sns-{world.id}"
@@ -63,10 +77,10 @@ def ensure_default_space(db: Session, *, owner_id: str) -> World:
         return world
     except IntegrityError:
         db.rollback()
-        binding = db.get(OwnerDefaultWorld, owner_id)
-        if binding is None:
+        existing = _existing_space(db, owner_id)
+        if existing is None:
             raise
-        return ensure_default_space(db, owner_id=owner_id)
+        return existing
 
 
 def is_default_space(db: Session, world_id: str) -> bool:

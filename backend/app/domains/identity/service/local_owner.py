@@ -6,22 +6,16 @@ from datetime import datetime, timedelta, timezone
 from collections.abc import Callable
 from uuid import uuid4
 
-from sqlalchemy import func, select, text, update
+from sqlalchemy import select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import security
 from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.identity.exceptions import (
-    BootstrapChallengeInvalidError,
     BootstrapClosedError,
-    BootstrapRaceLostError,
     LocalOwnerCandidateInvalidError,
-    LocalOwnerPrivacyAcknowledgementRequiredError,
     LocalOwnerProfileInvalidError,
-    LocalOwnerUnclaimedError,
-    LocalSessionRateLimitedError,
-    LocalSessionUnavailableError,
 )
 from app.domains.identity.contracts import (
     IssuedBootstrapChallenge,
@@ -32,7 +26,6 @@ from app.domains.identity.contracts import (
 )
 from app.domains.identity.policies import (
     normalize_local_display_name,
-    normalize_local_label,
 )
 from app.domains.identity.models import (
     AuthSession,
@@ -134,127 +127,6 @@ class LocalIdentityService:
         )
         self._db.commit()
         return IssuedBootstrapChallenge(token=token, expires_at=expires_at)
-
-    def claim_local_owner(
-        self,
-        *,
-        challenge_token: str,
-        owner_user_id: str | None,
-        display_name: str | None,
-        local_label: str | None,
-        privacy_acknowledged: bool,
-        now: datetime | None = None,
-    ) -> IssuedLocalSession:
-        now = self._clock() if now is None else now
-        normalized_now = _as_utc(now)
-        identity = self._db.scalar(
-            select(InstallationIdentity)
-            .where(InstallationIdentity.singleton_key == LOCAL_INSTALLATION_KEY)
-            .with_for_update()
-        )
-        if identity is None:
-            self._db.rollback()
-            raise BootstrapChallengeInvalidError("installation identity is missing")
-        if identity.owner_user_id is not None or identity.bootstrap_state != "unclaimed":
-            self._db.rollback()
-            raise BootstrapRaceLostError("another local owner claim already succeeded")
-
-        challenge = self._db.scalar(
-            select(LocalOwnerBootstrapChallenge)
-            .where(
-                LocalOwnerBootstrapChallenge.challenge_hash
-                == _hash_challenge(challenge_token)
-            )
-            .with_for_update()
-        )
-        if (
-            challenge is None
-            or challenge.installation_key != LOCAL_INSTALLATION_KEY
-            or challenge.consumed_at is not None
-            or _as_utc(challenge.expires_at) <= normalized_now
-            or challenge.attempt_count >= 5
-        ):
-            self._db.rollback()
-            raise BootstrapChallengeInvalidError("invalid or expired bootstrap challenge")
-
-        challenge.attempt_count += 1
-        try:
-            if not privacy_acknowledged:
-                raise LocalOwnerPrivacyAcknowledgementRequiredError(
-                    "local data ownership must be acknowledged"
-                )
-            normalized_local_label = normalize_local_label(local_label)
-            user = self._select_or_create_owner(
-                owner_user_id=owner_user_id,
-                display_name=display_name,
-            )
-        except (
-            LocalOwnerCandidateInvalidError,
-            LocalOwnerPrivacyAcknowledgementRequiredError,
-            LocalOwnerProfileInvalidError,
-        ):
-            self._db.commit()
-            raise
-        identity.owner_user_id = user.id
-        identity.bootstrap_state = "claimed"
-        identity.local_label = normalized_local_label
-        identity.claimed_at = normalized_now
-        identity.updated_at = normalized_now
-        challenge.consumed_at = normalized_now
-        self._db.execute(
-            update(LocalOwnerBootstrapChallenge)
-            .where(
-                LocalOwnerBootstrapChallenge.installation_key
-                == LOCAL_INSTALLATION_KEY,
-                LocalOwnerBootstrapChallenge.consumed_at.is_(None),
-            )
-            .values(consumed_at=normalized_now)
-        )
-        issued = self._add_local_session(user, normalized_now)
-        try:
-            self._db.commit()
-        except IntegrityError as exc:
-            self._db.rollback()
-            raise BootstrapRaceLostError("another local owner claim won") from exc
-        return issued
-
-    def issue_local_session(
-        self,
-        *,
-        now: datetime | None = None,
-        secret_ready: bool,
-    ) -> IssuedLocalSession:
-        now = self._clock() if now is None else now
-        if not secret_ready:
-            raise LocalSessionUnavailableError("APP_SECRET is not ready")
-        normalized_now = _as_utc(now)
-        identity = self._db.scalar(
-            select(InstallationIdentity)
-            .where(InstallationIdentity.singleton_key == LOCAL_INSTALLATION_KEY)
-            .with_for_update()
-        )
-        if identity is None or identity.owner_user_id is None:
-            self._db.rollback()
-            raise LocalOwnerUnclaimedError("local owner is not claimed")
-        owner = self._db.get(User, identity.owner_user_id)
-        if owner is None or owner.deleted_at is not None:
-            self._db.rollback()
-            raise LocalSessionUnavailableError("local owner principal is unavailable")
-        recent_count = self._db.scalar(
-            select(func.count())
-            .select_from(AuthSession)
-            .where(
-                AuthSession.user_id == owner.id,
-                AuthSession.auth_method == "local_owner",
-                AuthSession.created_at >= normalized_now - LOCAL_SESSION_RATE_WINDOW,
-            )
-        )
-        if int(recent_count or 0) >= LOCAL_SESSION_RATE_LIMIT:
-            self._db.rollback()
-            raise LocalSessionRateLimitedError("local session issuance rate limited")
-        issued = self._add_local_session(owner, normalized_now)
-        self._db.commit()
-        return issued
 
     def _get_or_create_identity(self, now: datetime) -> InstallationIdentity:
         identity = self._db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)

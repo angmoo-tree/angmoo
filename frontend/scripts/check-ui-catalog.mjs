@@ -36,10 +36,26 @@ for (const file of files) {
   const source=fs.readFileSync(file,"utf8"), ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true);
   const nsMatch=source.match(/use(?:UiText|Translation)\("([^"]+)"\)/);
   const ns=nsMatch?.[1] ?? (file.includes(`${path.sep}features${path.sep}`) ? file.slice(file.indexOf(`${path.sep}features${path.sep}`)+10).split(path.sep)[0] : "shell");
-  const catalog=catalogs.get(ns);
-  function check(key) { checked++; if(!catalog?.en[key]&&!catalogs.get("shell")?.en[key])errors.push(`${path.relative(root,file)}: missing ${ns}:${key}`); }
+  const bindings=new Map();
+  function bind(node) {
+    if(ts.isVariableDeclaration(node)&&node.initializer&&ts.isCallExpression(node.initializer)) {
+      const call=node.initializer, name=call.expression.getText(ast), argument=call.arguments[0];
+      if(argument&&ts.isStringLiteralLike(argument)) {
+        if(name==="useUiText"&&ts.isIdentifier(node.name)) bindings.set(node.name.text,argument.text);
+        if(name==="useTranslation"&&ts.isObjectBindingPattern(node.name)) for(const item of node.name.elements) {
+          if((item.propertyName?.getText(ast)??item.name.getText(ast))==="t"&&ts.isIdentifier(item.name)) bindings.set(item.name.text,argument.text);
+        }
+      }
+    }
+    ts.forEachChild(node,bind);
+  }
+  bind(ast);
+  function check(key, owner=ns) { checked++; if(!catalogs.get(owner)?.en[key]&&!catalogs.get("shell")?.en[key])errors.push(`${path.relative(root,file)}: missing ${owner}:${key}`); }
   function visit(node) {
-    if(ts.isCallExpression(node)&&["uiText","t"].includes(node.expression.getText(ast))&&node.arguments[0]&&ts.isStringLiteralLike(node.arguments[0])) check(node.arguments[0].text);
+    if(ts.isCallExpression(node)&&node.arguments[0]&&ts.isStringLiteralLike(node.arguments[0])) {
+      const name=node.expression.getText(ast);
+      if(bindings.has(name)||["uiText","t"].includes(name)) check(node.arguments[0].text,bindings.get(name)??ns);
+    }
     // Validation messages and typed local errors are translated by their
     // consumers. Audit these authored values even though the call is dynamic.
     if (ts.isStringLiteralLike(node) && ts.isPropertyAssignment(node.parent) && node.parent.initializer === node) {

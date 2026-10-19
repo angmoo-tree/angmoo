@@ -51,6 +51,12 @@ def snapshot(db, owner_id: str) -> EnvironmentSnapshot:
         row.environment_revision, row.timezone_revision) if row else EnvironmentSnapshot()
 
 
+def environment_confirmed(db, owner_id: str) -> bool:
+    """Readiness for creating new locale-dependent defaults, not old data reads."""
+    row = db.get(LocalEnvironment, owner_id, populate_existing=True)
+    return bool(row and row.confirmed_at is not None)
+
+
 def installation_snapshot(db) -> EnvironmentSnapshot:
     """Supported read for installation-wide limits and background work."""
     owner = db.scalar(select(InstallationIdentity.owner_user_id).where(

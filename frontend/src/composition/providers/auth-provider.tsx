@@ -1,101 +1,50 @@
 "use client";
-
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-  type ReactNode,
-} from "react";
-
-import { AUTH_CHANGED_EVENT, cacheUser, clearLegacyAuthStorage, clearStoredUser, isAuthError, type UserRead } from "@/lib/auth/browser-session";
-import { getCurrentUser, issueLocalSession } from "@/features/identity/api/session";
-import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, RuntimeFetchError } from "@/lib/runtime/runtime-config";
-
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { AUTH_CHANGED_EVENT, cacheUser, clearLegacyAuthStorage, clearStoredUser } from "@/lib/auth/browser-session";
 import { AuthContext, type AuthStatus } from "@/lib/auth/auth-context";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
+import { detectPreferredLanguage } from "@/lib/i18n/detection";
+import { createLocalEntryController } from "@/features/identity/controllers/local-entry-controller";
+import { LocalEntryContext } from "@/features/identity/controllers/local-entry-context";
+import { connectionStore } from "@/features/identity/controllers/local-connection-store";
+import { createLocalEntryApi } from "@/features/identity/api/local-entry";
 import { UserEnvironmentProvider } from "@/composition/providers/user-environment-provider";
 import { WorldNotificationProvider } from "@/features/social/hooks/world-notification-context";
 
+const makeController = () => {
+  const requests = new AbortController();
+  return createLocalEntryController({ api: createLocalEntryApi(requests.signal), store: connectionStore,
+    language: detectPreferredLanguage, abort: () => requests.abort(),
+    onUser: user => { if (user) cacheUser(user); else clearStoredUser(); } });
+};
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>("checking");
-  const [user, setUser] = useState<UserRead | null>(null);
+  const [controller, setController] = useState(makeController);
+  const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const [sessionRevision, setSessionRevision] = useState(0);
-  const refreshSequence = useRef(0);
-
-  const refresh = useCallback(async () => {
-    const sequence = ++refreshSequence.current;
-    try {
-      const currentUser = await getCurrentUser({
-        suppressAuthFailureEvent: true,
-      });
-      if (sequence !== refreshSequence.current) return;
-      cacheUser(currentUser);
-      setUser(currentUser);
-      setStatus("authenticated");
-    } catch (error) {
-      if (sequence !== refreshSequence.current) return;
-      if (error instanceof RuntimeFetchError) {
-        setStatus("checking");
-        return;
-      }
-      if (!isAuthError(error)) {
-        setStatus((current) =>
-          current === "checking" ? "unauthenticated" : current,
-        );
-        return;
-      }
-      clearStoredUser();
-      try {
-        const auth = await issueLocalSession();
-        if (sequence !== refreshSequence.current) return;
-        setSessionRevision(value => value + 1);
-        cacheUser(auth.user);
-        setUser(auth.user);
-        setStatus("authenticated");
-      } catch {
-        if (sequence !== refreshSequence.current) return;
-        setUser(null);
-        setStatus("unauthenticated");
-      }
-    }
-  }, []);
-
+  const refresh = useCallback(() => controller.refresh(), [controller]);
+  const status: AuthStatus = snapshot.phase === "authenticated" ? "authenticated"
+    : ["checking", "preparing", "ending"].includes(snapshot.phase) ? "checking" : "unauthenticated";
   useEffect(() => {
     clearLegacyAuthStorage();
-    const refreshId = window.setTimeout(() => {
-      void refresh();
-    }, 0);
-    const handleAuthChanged = () => {
-      void refresh();
-    };
-    const handleRuntimeConfigChanged = () => {
-      setUser(null);
+    void refresh();
+    const changed = () => { void refresh(); };
+    const runtimeChanged = () => {
+      controller.invalidate();
+      clearStoredUser();
       setSessionRevision(value => value + 1);
-      setStatus("checking");
-      void refresh();
+      setController(makeController());
     };
-    window.addEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
-    window.addEventListener(
-      DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
-      handleRuntimeConfigChanged,
-    );
+    const unsubscribe = connectionStore.subscribe(changed);
+    window.addEventListener(AUTH_CHANGED_EVENT, changed);
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, runtimeChanged);
     return () => {
-      refreshSequence.current += 1;
-      window.clearTimeout(refreshId);
-      window.removeEventListener(AUTH_CHANGED_EVENT, handleAuthChanged);
-      window.removeEventListener(
-        DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
-        handleRuntimeConfigChanged,
-      );
+      unsubscribe();
+      window.removeEventListener(AUTH_CHANGED_EVENT, changed);
+      window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, runtimeChanged);
     };
-  }, [refresh]);
-
-  const value = useMemo(
-    () => ({ status, user, refresh, sessionRevision }),
-    [refresh, status, user, sessionRevision],
-  );
-
-  return <AuthContext.Provider value={value}><UserEnvironmentProvider><WorldNotificationProvider>{children}</WorldNotificationProvider></UserEnvironmentProvider></AuthContext.Provider>;
+  }, [controller, refresh]);
+  const revision = sessionRevision + snapshot.sessionRevision;
+  const value = useMemo(() => ({ status, user: snapshot.user, refresh, sessionRevision: revision }), [status, snapshot.user, refresh, revision]);
+  const entry = useMemo(() => ({ controller, snapshot }), [controller, snapshot]);
+  return <AuthContext.Provider value={value}><LocalEntryContext.Provider value={entry}><UserEnvironmentProvider><WorldNotificationProvider>{children}</WorldNotificationProvider></UserEnvironmentProvider></LocalEntryContext.Provider></AuthContext.Provider>;
 }
-

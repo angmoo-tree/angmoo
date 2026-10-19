@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text, event
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 39
-SOURCE_ALEMBIC_REVISION = "20261016_0116"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 115
-EXPECTED_CANONICAL_TABLE_COUNT = 180
+SQLITE_SCHEMA_VERSION = 40
+SOURCE_ALEMBIC_REVISION = "20261019_0117"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 116
+EXPECTED_CANONICAL_TABLE_COUNT = 181
 VECTOR_V39_TABLES = ("memory_vector_work", "memory_vector_changes", "memory_vector_validation_revisions", "memory_vector_dependencies", "memory_vector_maintenance", "memory_vector_attempts")
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
@@ -323,6 +323,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_local_client_schema(metadata)
     for name in VECTOR_V39_TABLES:
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -806,10 +807,37 @@ def build_sqlite_v37_metadata() -> MetaData:
 
 def build_sqlite_v38_metadata() -> MetaData:
     """Frozen pre-vector-work schema. Existing manifests are never rewritten."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v39_metadata()
     for name in VECTOR_V39_TABLES:
         metadata.remove(metadata.tables[name])
     return metadata
+
+
+def build_sqlite_v39_metadata() -> MetaData:
+    """Released pre-local-connection schema; no historical fixture rewrite."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_local_client_schema(metadata)
+    return metadata
+
+
+def _remove_local_client_schema(metadata: MetaData) -> None:
+    table = metadata.tables.get("auth_sessions")
+    if table is not None:
+        for index in tuple(table.indexes):
+            if index.name == "ix_auth_sessions_local_client_id":
+                table.indexes.remove(index)
+        for constraint in tuple(table.constraints):
+            if getattr(constraint, "name", None) == "ck_auth_sessions_local_generation" or any(
+                getattr(column, "name", None) == "local_client_id" for column in getattr(constraint, "columns", ())
+            ):
+                table.constraints.remove(constraint)
+        for name in ("local_client_id", "local_client_generation"):
+            if name in table.c:
+                column = table.c[name]
+                table.foreign_keys.difference_update(column.foreign_keys)
+                table._columns.remove(column)
+    if "local_client_connections" in metadata.tables:
+        metadata.remove(metadata.tables["local_client_connections"])
 
 
 def _remove_notification_delivery_schema(metadata: MetaData) -> None:

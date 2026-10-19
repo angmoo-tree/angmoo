@@ -13,6 +13,10 @@ import { DeviceHomeShell } from "@/composition/screens/device-home-shell";
 import { useWorldUnreadCounts } from "@/features/social/hooks/use-world-unread-counts";
 import { CountBadge } from "@/components/ui/count-badge";
 import { useUiText } from "@/hooks/use-ui-text";
+import { LocalOwnerClient } from "@/features/identity/components/local-owner-client";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { InlineError } from "@/components/ui/feedback";
 
 export function DeviceHomeScreen() {
   const identity = useAuthRuntimeIdentity("device-home");
@@ -21,11 +25,12 @@ export function DeviceHomeScreen() {
 
 function ScopedDeviceHomeScreen() {
   const text = useUiText("social");
+  const { t } = useTranslation("identity");
   const [worldIds, setWorldIds] = useState<string[]>([]);
   const onVisibleWorldIds = useCallback((ids: string[]) => setWorldIds(previous => JSON.stringify(previous) === JSON.stringify(ids) ? previous : ids), []);
   const counts = useWorldUnreadCounts(worldIds);
   const { status: authStatus } = useAuth();
-  const { ready } = useUserEnvironment();
+  const { ready, errorCode, retry } = useUserEnvironment();
   const status = authStatus === "authenticated" && !ready ? "checking" : authStatus;
   const [runtimeState, setRuntimeState] = useState<ProductRuntimeState>("stale_state");
   useEffect(() => {
@@ -42,7 +47,9 @@ function ScopedDeviceHomeScreen() {
   }, [status]);
   return (
     <DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>
+      {errorCode && <InlineError>{t("detectionFailed")}<Button onClick={retry} variant="secondary">{t("retry")}</Button></InlineError>}
       <DeviceHome authStatus={authStatus} initialPreparationReady={ready} ensureDefaultSpace={ensureDefaultSpace} onVisibleWorldIds={onVisibleWorldIds}
+        authenticationFallback={<LocalOwnerClient embedded />}
         renderWorldBadge={id => <CountBadge count={counts.records[id]?.unread_count ?? null} stale={counts.stale} />}
         worldNotificationDescription={(id, name) => {
           const count = counts.records[id]?.unread_count;

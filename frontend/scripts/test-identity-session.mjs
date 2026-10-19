@@ -52,8 +52,7 @@ const plain=value=>JSON.parse(JSON.stringify(value));
 const calls=[
   ["signup",{email:"fixture@example.test",password:"fixture",display_name:"owner",privacy_policy_agreed:true,terms_agreed:true}],
   ["getLocalBootstrapStatus"], ["createLocalBootstrapChallenge"],
-  ["claimLocalOwner",{owner_user_id:null,display_name:"owner",local_label:"device",privacy_acknowledged:true}],
-  ["issueLocalSession"], ["login",{email:"fixture@example.test",password:"fixture"}],
+  ["login",{email:"fixture@example.test",password:"fixture"}],
   ["logoutCurrentSession"], ["googleLogin",{credential:"fixture"}],
   ["completeGoogleSignup",{display_name:"owner",privacy_policy_agreed:true,terms_agreed:true}],
   ["linkGoogleAccount",{credential:"fixture"}], ["getMe",{suppressAuthFailureEvent:true}],
@@ -63,7 +62,30 @@ const calls=[
 for(const [name,arg] of calls){
   const before=harness(true),after=harness(false);
   assert.deepEqual(plain(await after.api[name](arg)),plain(await before.api[name](arg)),name);
-  assert.deepEqual(plain(after.requests),plain(before.requests),name+" request contract");
+  if (name === "getLocalBootstrapStatus") {
+    // Bootstrap now recovers a bound browser client from its existing cookie.
+    assert.equal(before.requests[0][1].credentials,"omit");
+    assert.equal(after.requests[0][1].credentials,"same-origin");
+    assert.deepEqual(plain(after.requests),plain(before.requests.map(([url, options])=>[url,{...options,credentials:"same-origin"}])));
+  } else assert.deepEqual(plain(after.requests),plain(before.requests),name+" request contract");
+}
+// Approved local-entry protocol transition: retain the historical fixture,
+// assert its old contract, and verify the new explicit generation-bound API.
+{
+  const before=harness(true),after=harness(false);
+  await before.api.claimLocalOwner({owner_user_id:"owner",privacy_acknowledged:true});
+  const api=after.load("frontend/src/features/identity/api/local-entry.ts").localEntryApi;
+  const data={protocol:2,installation_id:"installation",client_instance_id:"synthetic-client-01",expected_generation:0};
+  await api.claim(data,"owner");
+  assert.equal(after.requests[0][0],before.requests[0][0]);
+  assert.deepEqual(JSON.parse(after.requests[0][1].body),{...data,owner_user_id:"owner"});
+  assert.equal(JSON.parse(before.requests[0][1].body).privacy_acknowledged,true);
+  assert.equal(after.requests[0][1].credentials,"same-origin");
+  await api.issue(data);
+  assert.equal(after.requests[1][0],"/api/backend/auth/local/session");
+  assert.deepEqual(JSON.parse(after.requests[1][1].body),data);
+  assert.equal(after.api.claimLocalOwner,undefined);
+  assert.equal(after.api.issueLocalSession,undefined);
 }
 for(const response of [
   {status:401,text:'{"detail":"Not authenticated"}'},
@@ -93,4 +115,4 @@ for(const operation of ["storeAuth","clearAuth","storePendingGoogleSignup","clea
   assert.deepEqual(after.window.localStorage.dump(),before.window.localStorage.dump(),operation);
   assert.deepEqual(after.events,before.events,operation+" event order");
 }
-console.log("Identity parity passed: 14 request contracts, 5 failure paths, 4 storage/event transitions.");
+console.log("Identity parity passed: 11 unchanged request contracts, explicit bootstrap-cookie binding, 2 local protocol replacements, 5 failure paths, 4 storage/event transitions.");

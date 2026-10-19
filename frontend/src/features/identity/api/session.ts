@@ -1,6 +1,5 @@
 import {
   authRequest,
-  type AuthRead,
   type UserRead,
   type UserFeedContentFilter,
 } from "@/lib/auth/browser-session";
@@ -21,12 +20,6 @@ export function getCurrentUser(
   options: { suppressAuthFailureEvent?: boolean } = {},
 ) {
   return authRequest<UserRead>("/auth/me", options);
-}
-
-export function issueLocalSession() {
-  // AuthProvider owns bootstrap failure; another auth event would recursively
-  // start a refresh and prevent that failure from clearing the current owner.
-  return authRequest<AuthRead>("/auth/local/session", { method: "POST", suppressAuthFailureEvent: true });
 }
 
 export function updateUserFeedPreferences(data: {

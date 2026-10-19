@@ -469,6 +469,11 @@ def get_session_for_token(db: Session, token: str) -> models.AuthSession | None:
     if session is None:
         return None
 
+    if session.local_client_id is not None:
+        client = db.get(models.LocalClientConnection, session.local_client_id)
+        if client is None or client.state != "active" or client.generation != session.local_client_generation:
+            return None
+
     expires_at = session.expires_at
     if expires_at is None:
         expires_at = _as_utc(session.created_at) + AUTH_SESSION_TTL

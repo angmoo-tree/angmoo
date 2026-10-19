@@ -14,7 +14,7 @@ import type { UiLanguage } from "@/types/user-environment";
 export function LanguageSettings() {
   const { t, i18n } = useTranslation("identity");
   const { status, user: currentUser } = useAuth();
-  const { environment, ready, errorCode } = useUserEnvironment();
+  const { environment, ready, errorCode, retry } = useUserEnvironment();
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   async function select(language: UiLanguage) {
@@ -31,7 +31,7 @@ export function LanguageSettings() {
     </div>
     {saving ? <p role="status">{t("saving")}</p> : null}
     {failed ? <InlineError>{t("languageSaveFailed")}</InlineError> : null}
-    {errorCode ? <InlineError>{t(errorCode === "environment_temporarily_busy" ? "detectionDelayed" : "detectionFailed")}</InlineError> : null}
+    {errorCode ? <InlineError>{t(errorCode === "environment_temporarily_busy" ? "detectionDelayed" : "detectionFailed")}<Button onClick={retry} variant="secondary">{t("retry")}</Button></InlineError> : null}
     <details><summary>{t("detectionHelp")}</summary>
     {ready && environment ? <><p>{t("detectedLanguage", { language: environment.memory_search_locale })}</p><p>{t("detectedTimezone", { zone: environment.timezone })}</p></> : <p>{t("detectionPending")}</p>}
     </details>

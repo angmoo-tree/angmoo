@@ -149,7 +149,7 @@
       "worldAppSectionRoute"
     ],
     "frontend/src/composition/screens/world-app.tsx": [
-      "ensureMyProfile(worldId)",
+      "ensureMyProfile(worldId, { signal: controller.signal })",
       "내 프로필"
     ],
     "frontend/src/components/ui/device-frame.module.css": [

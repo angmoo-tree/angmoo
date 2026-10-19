@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
     text,
 )
@@ -87,6 +88,14 @@ class AuthSession(Base):
     expires_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    local_client_id: Mapped[str | None] = mapped_column(
+        ForeignKey("local_client_connections.id"), nullable=True, index=True
+    )
+    local_client_generation: Mapped[int | None] = mapped_column(Integer, CheckConstraint(
+        "(local_client_id IS NULL AND local_client_generation IS NULL) OR "
+        "(local_client_id IS NOT NULL AND local_client_generation IS NOT NULL AND local_client_generation >= 0)",
+        name="ck_auth_sessions_local_generation",
+    ), nullable=True)
 
     user: Mapped[User] = relationship()
 
@@ -129,6 +138,24 @@ class InstallationIdentity(Base):
     )
 
     owner: Mapped[User | None] = relationship(foreign_keys=[owner_user_id])
+
+
+class LocalClientConnection(Base):
+    """A browser partition's connection intent; its ID is not an auth token."""
+    __tablename__ = "local_client_connections"
+    __table_args__ = (
+        UniqueConstraint("installation_id", "client_instance_id", name="uq_local_client_installation"),
+        CheckConstraint("generation >= 0", name="ck_local_client_generation"),
+        CheckConstraint("state IN ('active','stopped')", name="ck_local_client_state"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    installation_id: Mapped[str] = mapped_column(ForeignKey("installation_identities.installation_id"), nullable=False)
+    client_instance_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    generation: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    state: Mapped[str] = mapped_column(String(16), nullable=False, default="active", server_default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class LocalOwnerBootstrapChallenge(Base):

@@ -2,6 +2,8 @@
 import { useUiText } from "@/hooks/use-ui-text";
 
 import { LanguageSettings } from "@/features/identity/components/language-settings";
+import { LocalProfileSettings } from "@/features/identity/components/local-profile-settings";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 
 import {
   AlertTriangle,
@@ -17,15 +19,21 @@ import { Card } from "@/components/ui/surfaces";
 import { InlineError } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/navigation";
 import { StatusChip } from "@/components/ui/status";
-import { clearAuth } from "@/lib/auth/browser-session";
-import { getLocalBootstrapStatus, logoutCurrentSession } from "@/features/identity/api/identity";
+import { useLocalEntry } from "@/features/identity/controllers/local-entry-context";
+import { getLocalBootstrapStatus } from "@/features/identity/api/identity";
 import { type LocalBootstrapRead } from "@/features/identity/types/identity";
 
 import styles from "./settings-client.module.css";
 
 export function SettingsClient() {
+  const scope = useAuthRuntimeIdentity("settings");
+  return <ScopedSettingsClient key={scope} />;
+}
+
+function ScopedSettingsClient() {
   const uiText = useUiText("shell");
   const router = useRouter();
+  const { controller: connection } = useLocalEntry();
   const { status: authStatus, user } = useAuth();
   const [installation, setInstallation] = useState<LocalBootstrapRead | null>(null);
   const [installationLoading, setInstallationLoading] = useState(true);
@@ -88,14 +96,11 @@ export function SettingsClient() {
   async function handleLogout() {
     if (logoutPending) return;
     setLogoutPending(true);
-    let serverRevoked = true;
     try {
-      await logoutCurrentSession();
-    } catch {
-      serverRevoked = false;
+      await connection.stop();
+      router.replace("/login");
     } finally {
-      clearAuth();
-      router.replace(serverRevoked ? "/login" : "/login?logout=local-only");
+      setLogoutPending(false);
     }
   }
 
@@ -105,6 +110,9 @@ export function SettingsClient() {
 
       <div className={styles.content}>
         <LanguageSettings />
+        {user && installation?.state === "claimed" && <LocalProfileSettings key={`${installation.installation_id}:${user.id}`}
+          user={user} installationLabel={installation.local_label}
+          onInstallationSaved={local_label => setInstallation(value => value ? { ...value, local_label } : value)} />}
         <Card as="section" elevated className={styles.sectionCard}>
           <div className={styles.sectionHeading}>
             <span className={styles.sectionIcon} aria-hidden="true">
@@ -167,7 +175,7 @@ export function SettingsClient() {
               <LogOut size={17} aria-hidden="true" />
               {uiText("로컬 세션 끝내기")}</Button>
             <p>
-              {uiText("owner 데이터는 지우지 않습니다. 현재 세션만 끝내고 이 설치의 owner를 다시 확인합니다.")}</p>
+              {uiText("사용자와 저장된 데이터는 유지됩니다. 다시 시작하기 전까지 자동 연결을 멈추며 캐릭터 자율활동은 계속될 수 있습니다.")}</p>
           </div>
         </Card>
 

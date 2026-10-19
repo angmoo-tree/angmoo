@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiRequestError } from "@/lib/http/api-request";
@@ -36,6 +36,8 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   const [failure, setFailure] = useState<{ scope: string; code: string } | null>(null);
   const [runtimeRevision, setRuntimeRevision] = useState(0);
   const [environmentScope, setEnvironmentScope] = useState("");
+  const [retryRevision, setRetryRevision] = useState(0);
+  const retry = useCallback(() => setRetryRevision(value => value + 1), []);
   const currentScope = `${userId ?? ""}:${runtimeRevision}:${sessionRevision}`;
   const detectedUiLanguage = useSyncExternalStore(subscribeToUiLanguage, detectPreferredLanguage, serverUiLanguage);
 
@@ -118,14 +120,14 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("languagechange", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [status, userId, runtimeRevision, sessionRevision]);
+  }, [status, userId, runtimeRevision, sessionRevision, retryRevision]);
 
   const scopedEnvironment = environmentScope === currentScope ? environment : null;
   const errorCode = status === "authenticated" && failure?.scope === currentScope ? failure.code : null;
   const language = resolveUiLanguage(user?.ui_language, scopedEnvironment?.preferred_language ?? detectedUiLanguage ?? undefined);
   useEffect(() => { void i18n.changeLanguage(language); document.documentElement.lang = language; }, [i18n, language]);
   const value = useMemo(() => ({ environment: status === "authenticated" ? scopedEnvironment : null,
-    ready: status === "authenticated" && ready && environmentScope === currentScope, errorCode }),
-    [scopedEnvironment, ready, errorCode, status, environmentScope, currentScope]);
+    ready: status === "authenticated" && ready && environmentScope === currentScope, errorCode, retry }),
+    [scopedEnvironment, ready, errorCode, status, environmentScope, currentScope, retry]);
   return <I18nextProvider i18n={i18n}><EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider></I18nextProvider>;
 }
