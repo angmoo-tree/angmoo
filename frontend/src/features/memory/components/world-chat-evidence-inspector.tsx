@@ -12,6 +12,7 @@ import { Dialog } from "@/components/ui/dialog";
 
 import { getWorldChatEvidence } from "@/features/memory/api/memory-client";
 import type { WorldChatEvidenceRead } from "@/features/memory/types/memory-contract";
+import { evidenceKindKeys } from "../utils/evidence-display";
 import styles from "./memory-workspace.module.css";
 import { EpisodeMemoryDetail } from "./episode-memory-detail";
 import { evidenceWarnings, relationshipStatus, evidenceTimes } from "../utils/chat-evidence-presentation";
@@ -64,7 +65,7 @@ function EvidenceInspectorContent({ open, requestId, threadId, worldId }: { open
             <ol>
               {read.items.map((item) => (
                 <li key={item.reference} data-availability={item.availability}>
-                  <div><ShieldCheck aria-hidden="true" size={17} /><strong>{item.kind === "graph_relationship" ? uiText("답변 당시 관계") : item.label}</strong><span>{item.kind === "graph_relationship" ? uiText(relationshipStatus(item, read)) : item.availability === "available" ? uiText("확인됨") : item.availability === "deleted" ? uiText("삭제됨") : uiText("확인 불가")}</span></div>
+                  <div><ShieldCheck aria-hidden="true" size={17} /><strong>{uiText(evidenceKindKeys[item.kind])}</strong><span>{item.kind === "graph_relationship" ? uiText(relationshipStatus(item, read)) : item.availability === "available" ? uiText("확인됨") : item.availability === "deleted" ? uiText("삭제됨") : uiText("확인 불가")}</span></div>
                   {evidenceTimes(item).map(row => <small key={row.label}>{uiText(row.label)}{row.value ? <> · <time dateTime={row.value}>{formatDate(row.value)}</time></> : null}</small>)}
                   <RelationshipText item={item} />
                   {item.episode && <EpisodeMemoryDetail episode={item.episode} />}
@@ -83,7 +84,10 @@ function EvidenceInspectorContent({ open, requestId, threadId, worldId }: { open
 function RelationshipText({ item }: { item: WorldChatEvidenceItemRead }) {
   const uiText = useUiText("memory");
   const value = item.relationship_projection;
-  if (!value) return item.excerpt ? <p>{item.excerpt}</p> : null;
+  if (!value) return item.excerpt ? <>
+    <p>{item.display_segments ? item.display_segments.map(segment => segment.key ? uiText(`evidenceLabel.${segment.key}`) : segment.text).join("") : item.excerpt}</p>
+    {item.kind === "today_sns_activity" && !item.display_segments ? <small>{uiText("evidenceLegacyText")}</small> : null}
+  </> : null;
   return <>
     <p>{uiText("친숙도 {{familiarity}} · 호감 {{affinity}} · 신뢰 {{trust}} · 긴장 {{tension}} · 상호작용 {{interactions}}회", {
       familiarity: value.familiarity, affinity: value.affinity, trust: value.trust, tension: value.tension, interactions: value.interactions,

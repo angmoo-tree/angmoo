@@ -18,6 +18,7 @@ def recover_expired_resident_slot_runs(
     now: datetime,
     next_tick_at_factory: Callable[[models.AgentSlot, datetime], datetime] | None = None,
     autonomy_reader=None,
+    unfinished_recovery_reader=None,
 ) -> int:
     now = agent_activity_schedule.aware_utc(now)
     slots = list(
@@ -74,7 +75,8 @@ def recover_expired_resident_slot_runs(
         slot.locked_by_run_id = None
         slot.lease_expires_at = None
         if (
-            slot.next_tick_at is None
+            (unfinished_recovery_reader is not None and unfinished_recovery_reader(db, slot))
+            or slot.next_tick_at is None
             or agent_activity_schedule.aware_utc(slot.next_tick_at) <= now
         ):
             slot.next_tick_at = (

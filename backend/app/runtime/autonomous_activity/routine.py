@@ -69,6 +69,13 @@ class RoutineLane:
             self.prepared.context = replace(self.prepared.context, name_binding=activity_name_binding(self.ctx))
         if self.prepared is not None and state.get("stage") not in {"Settle", "PathResult"}:
             beat = self.ctx.db.get(type(self.prepared.beat), self.prepared.beat.id, populate_existing=True)
+            frozen = state.get("lane_data", {}).get("prepared", {})
+            if beat.status == "pending" and frozen.get("beat_binding") is not None:
+                from app.domains.routines.service.execution.claims import reclaim_frozen_beat
+                beat_id = beat.id
+                self.ctx.db.rollback()
+                beat = reclaim_frozen_beat(self.ctx.db, beat_id=beat_id, binding=frozen["beat_binding"],
+                    claim_run_id=self.ctx.run_id, now=datetime.now(UTC), claim_expires_at=datetime.now(UTC)+timedelta(minutes=10))
             if beat.status == "claimed" and beat.claim_run_id == self.ctx.run_id:
                 beat.claim_expires_at = datetime.now(UTC) + timedelta(minutes=10)
                 self.ctx.db.commit()
@@ -151,10 +158,14 @@ class RoutineLane:
         prepared.context = replace(prepared.context, name_binding=activity_name_binding(self.ctx))
         prepared.common_state_managed = True
         self.prepared = prepared
+        from app.domains.world_characters.service.activity_interruption import remember_routine
+        from app.contracts.activity_cancellation import RECOVERY_POLICY_KEY, RECOVERY_REVISION
+        if state.get("identity", {}).get(RECOVERY_POLICY_KEY) == RECOVERY_REVISION:
+            remember_routine(self.ctx.db, activity_id=self.ctx.run_id, actor_id=self.actor.id, beat_id=prepared.beat.id)
         context = prepared.context
         candidate = Candidate(target_id=context.item.id, text=context.item.title + " " + context.item.activity_seed,
             source_ids=[], allowed_actions=["post"])
-        return {"candidates": [candidate.model_dump()], "lane_data": {"prepared": freeze_prepared(prepared)},
+        return {"candidates": [candidate.model_dump()], "lane_data": {"prepared": freeze_prepared(prepared, allow_reclaim=state.get("identity", {}).get(RECOVERY_POLICY_KEY) == RECOVERY_REVISION)},
             "selections": [{"target_id": candidate.target_id}]}
 
     async def query(self, state):

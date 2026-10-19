@@ -15,6 +15,7 @@ const reasons: Record<MemoryUnsavedExperience["reason"], string> = {
   access_unavailable: "현재 이 경험의 출처에 접근할 수 없어요.",
   proof_unavailable: "입력과 활동 결과의 연결을 확인할 수 없어요.",
   activation_closed: "이 경험을 접수한 기억 사용 기간이 종료되었어요.",
+  description_language_only: "상황 설명에 언어 표기만 있어 기억으로 저장하지 않았습니다.",
   description_invalid: "저장할 상황 설명을 확인할 수 없어요.",
   result_invalid: "성공한 활동 결과를 확인할 수 없어요.",
   validation_failed: "이 경험을 저장하는 데 필요한 확인을 마치지 못했어요.",

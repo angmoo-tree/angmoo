@@ -116,6 +116,7 @@ def claim_activity_beat(
     skipped_tick_count: int = 0,
     state_schema_version: int = 1,
     now: datetime | None = None,
+    commit: bool = True,
 ) -> RuntimeClaimResult:
     current = _aware_utc(now or datetime.now(UTC))
     scheduled = _aware_utc(scheduled_for)
@@ -174,7 +175,7 @@ def claim_activity_beat(
         existing.claim_expires_at = expiry
         existing.attempt_count += 1
         existing.started_at = current
-        db.commit()
+        db.commit() if commit else db.flush()
         return RuntimeClaimResult(existing, False)
 
     if episode.current_state_schema_version != state_schema_version:
@@ -218,7 +219,7 @@ def claim_activity_beat(
     )
     db.add(beat)
     try:
-        db.commit()
+        db.commit() if commit else db.flush()
     except IntegrityError as exc:
         db.rollback()
         replay = db.scalar(
@@ -603,3 +604,28 @@ def _close_open_beat_claims(
         beat.claim_run_id = None
         beat.claim_expires_at = None
         beat.completed_at = now
+
+
+def reclaim_frozen_beat(db, *, beat_id, binding, claim_run_id, now, claim_expires_at):
+    """Reacquire only the same still-current beat using its existing retry budget."""
+    from app.core.sqlite_concurrency import run_sqlite_session_immediate
+    if db.in_transaction():
+        raise ActivityRuntimeConflictError("routine_reclaim_requires_clean_session")
+    def operation():
+        beat, episode, item, plan = _lock_beat_with_episode_scope(db, beat_id=beat_id)
+        current = _aware_utc(now)
+        actual = {"episode_id":beat.episode_id, "idempotency_key":beat.idempotency_key,
+            "scheduled_for":_aware_utc(beat.scheduled_for).isoformat(), "source_event_ids":beat.source_event_ids,
+            "state_schema_version":beat.state_schema_version, "state_before":beat.state_before_snapshot,
+            "trigger_kind":beat.trigger_kind, "skipped_tick_count":beat.skipped_tick_count}
+        if actual != binding:
+            raise ActivityRuntimeConflictError("routine_resume_binding_changed")
+        if episode.current_state_snapshot != beat.state_before_snapshot or episode.next_sequence_no != beat.sequence_no:
+            raise ActivityRuntimeConflictError("routine_resume_state_changed")
+        if not _aware_utc(item.scheduled_start_at) <= current < _aware_utc(item.scheduled_end_at):
+            raise ActivityRuntimeConflictError("daypart_window_elapsed")
+        return claim_activity_beat(db, episode_id=episode.id, scheduled_for=beat.scheduled_for,
+            trigger_kind=beat.trigger_kind, idempotency_key=beat.idempotency_key, claim_run_id=claim_run_id,
+            claim_expires_at=claim_expires_at, source_event_ids=beat.source_event_ids,
+            skipped_tick_count=beat.skipped_tick_count, state_schema_version=beat.state_schema_version, now=now, commit=False).row
+    return run_sqlite_session_immediate(db, operation, require_clean=True)

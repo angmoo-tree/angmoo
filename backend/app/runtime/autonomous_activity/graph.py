@@ -79,6 +79,12 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
                     raise exc.original from exc
                 trace("node_failed", name, state=state, phase="callback", exc=exc,
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                from app.domains.relationships.contracts.social_context import SocialContextValidationError
+                if name == "Execute" and isinstance(exc, SocialContextValidationError) and ports.resume is not None:
+                    failure = {"stage":name, "reason":exc.reason}
+                    partial = await ports.resume({**state, "stage":name, "failure":failure})
+                    if partial and partial.get("executions"):
+                        return {**partial, "failure":failure}
                 from app.integrations.direct_llm import DirectLlmError, DirectLlmDeferred
                 if name not in {"Writer", "ValidateDraft"} or isinstance(exc, DirectLlmDeferred) or not isinstance(exc, (ValueError, DirectLlmError)):
                     raise

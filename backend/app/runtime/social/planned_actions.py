@@ -530,6 +530,8 @@ def _execute_planned_action(
                     )
                 if situation_admission is not None:
                     situation_admission(ctx.db, execution, {**payload, "social_event_id": social_result.event.id}, occurred_at)
+                if getattr(relationship_validator, "finish", None):
+                    relationship_validator.finish(execution, social_result.event)
             action_result["social_event_id"] = social_result.event.id
             if writer_validation is not None:
                 action_result["writer_validation"] = writer_validation

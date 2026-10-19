@@ -76,7 +76,8 @@ def execute(lane, state):
                 prior = committed(lane, state, raw)
                 if prior is not None:
                     return prior, "reused"
-                lane.effect_relationship_validator(state, raw["target_id"])()
+                validate = lane.effect_relationship_validator(state, raw["target_id"])
+                validate()
                 with deferred_commits():
                     row = workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
                         character_id=lane.ctx.character.id, signature=signature, scope="world_keyword_feed",
@@ -97,6 +98,8 @@ def execute(lane, state):
                     admission = participant(lane, state, raw["target_id"])
                     if admission is not None:
                         admission(db, row, {**result, "social_event_id": applied.event.id}, applied.event.occurred_at)
+                    if getattr(validate, "finish", None):
+                        validate.finish(row, applied.event)
                 return row, "succeeded"
             from app.core.sqlite_concurrency import run_sqlite_session_immediate
             if db.in_transaction():

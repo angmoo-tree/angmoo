@@ -20,7 +20,7 @@ export type MemoryProcessingUpdate = MemorySaveRequest & Pick<MemoryProcessingSe
 
 export type MemoryUnsavedExperience = {
   receipt_sequence: number; state_version: number; occurred_at: string; description: string | null;
-  reason: "source_changed" | "access_unavailable" | "proof_unavailable" | "activation_closed" | "description_invalid" | "result_invalid" | "validation_failed";
+  reason: "source_changed" | "access_unavailable" | "proof_unavailable" | "activation_closed" | "description_invalid" | "description_language_only" | "result_invalid" | "validation_failed";
   can_recheck: boolean; can_discard: boolean;
 };
 export type MemoryUnsavedExperiences = {

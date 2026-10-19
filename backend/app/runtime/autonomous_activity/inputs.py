@@ -47,10 +47,10 @@ def prepare_relationship(ctx, actor, *, binding):
     return prompt, receipt, snapshot
 
 
-def validate_relationship(ctx, actor, *, prompt, receipt, binding, policy):
+def validate_relationship(ctx, actor, *, prompt, receipt, binding, policy, effects=()):
     service = SocialContextValidationService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings))
     return service.validate(scope=GraphRecallScope(ctx.user_id, actor.world_id, actor.id),
-        binding=binding, prompt=prompt, receipt=receipt, policy=policy)
+        binding=binding, prompt=prompt, receipt=receipt, policy=policy, effects=effects)
 
 
 def validate_relationship_batch(ctx, actor, requests):

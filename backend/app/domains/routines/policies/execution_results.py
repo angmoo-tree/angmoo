@@ -198,3 +198,6 @@ def _inbox_lane_target_post_id(
             if source_post_id:
                 return source_post_id
     return None
+
+
+from app.contracts.public_activity_result import public_execution_result

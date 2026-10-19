@@ -100,6 +100,18 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     from app.domains.relationships.contracts.social_context import read_currentness_policy, CURRENTNESS_POLICY_KEY
     relationship_policy = read_currentness_policy(run.result)
     identity[CURRENTNESS_POLICY_KEY] = relationship_policy
+    from app.contracts.relationship_currentness import EFFECT_PROGRESS_KEY, EFFECT_PROGRESS_REVISION
+    from app.contracts.activity_cancellation import RECOVERY_POLICY_KEY, RECOVERY_REVISION
+    recovery_policy = (run.result or {}).get(RECOVERY_POLICY_KEY)
+    if recovery_policy not in {None, RECOVERY_REVISION}:
+        raise ActivityScopeChangedError("activity_recovery_policy_invalid")
+    if recovery_policy is not None:
+        identity[RECOVERY_POLICY_KEY] = recovery_policy
+    effect_policy = (run.result or {}).get(EFFECT_PROGRESS_KEY)
+    if effect_policy not in {None, EFFECT_PROGRESS_REVISION}:
+        raise ActivityScopeChangedError("relationship_effect_policy_invalid")
+    if effect_policy is not None:
+        identity[EFFECT_PROGRESS_KEY] = effect_policy
     from app.contracts.name_binding import read_name_binding
     from app.domains.world_characters.service.name_binding import validate_name_binding
     name_binding = read_name_binding(run.result)
@@ -145,6 +157,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("social_execution_policy_changed")
         if read_generation_policies(row.result).model_dump() != generation_policies:
             raise ActivityScopeChangedError("activity_generation_policy_changed")
+        if (row.result or {}).get(RECOVERY_POLICY_KEY) != recovery_policy:
+            raise ActivityScopeChangedError("activity_recovery_policy_changed")
+        if (row.result or {}).get(EFFECT_PROGRESS_KEY) != effect_policy:
+            raise ActivityScopeChangedError("relationship_effect_policy_changed")
         if read_currentness_policy(row.result) != relationship_policy:
             raise ActivityScopeChangedError("relationship_validation_policy_changed")
         if (row.result or {}).get("name_binding") != frozen_names:
@@ -176,6 +192,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("social_execution_policy_changed")
         if read_generation_policies(stored_identity).model_dump() != generation_policies:
             raise ActivityScopeChangedError("activity_generation_policy_changed")
+        if stored_identity.get(RECOVERY_POLICY_KEY) != recovery_policy:
+            raise ActivityScopeChangedError("activity_recovery_policy_changed")
+        if stored_identity.get(EFFECT_PROGRESS_KEY) != effect_policy:
+            raise ActivityScopeChangedError("relationship_effect_policy_changed")
         if read_currentness_policy(stored_identity) != relationship_policy:
             raise ActivityScopeChangedError("relationship_validation_policy_changed")
         ctx.db.expire_all()
@@ -346,6 +366,15 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             final = await graph.ainvoke(None if checkpoint.values else {"identity": identity}, config)
         except BaseException as exc:
             ctx.db.rollback()
+            import asyncio
+            if isinstance(exc, asyncio.CancelledError):
+                # Resident cancellation owns one atomic AgentRun/slot/graph cleanup.
+                # A failed cleanup is recovered from the expired canonical lease.
+                if attempt:
+                    from app.contracts.activity_cancellation import cancellation_reason
+                    attempt.emit("activity_interrupted", classification="interrupted",
+                        details={"reason":str(cancellation_reason())}, exc=exc)
+                raise
             status = "aborted" if isinstance(exc, ActivityScopeChangedError) else "interrupted" if not isinstance(exc, Exception) else "waiting"
             stage = None
             persisted = False

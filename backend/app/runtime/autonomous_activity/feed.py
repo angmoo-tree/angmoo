@@ -143,6 +143,7 @@ class FeedLane(SocialLane):
             self.validate_feed_claims(state)
             self.validate_feed_action(state, target_id)
             validate_relationship()
+        validate.finish = validate_relationship.finish
         return validate
 
     async def execute(self, state):

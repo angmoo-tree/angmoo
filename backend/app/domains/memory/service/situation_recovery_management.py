@@ -18,6 +18,8 @@ from app.domains.memory.service.situation_management import _ensure, read
 
 def _reason(code):
     code = code or ""
+    if code == "situation_description_language_only":
+        return "description_language_only"
     if "activation" in code:
         return "activation_closed"
     if "description" in code or "policy" in code:

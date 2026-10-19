@@ -73,7 +73,7 @@ class EvidenceService:
         ):
             raise MessageNotFoundError("확인할 근거를 찾을 수 없습니다.")
         raw_items = snapshot.get("items")
-        if snapshot.get("version") != "evidence-inspector.v1" or not isinstance(
+        if snapshot.get("version") not in {"evidence-inspector.v1", "evidence-inspector.v2"} or not isinstance(
             raw_items, list
         ):
             raise MessageNotFoundError("확인할 근거를 찾을 수 없습니다.")
@@ -361,10 +361,18 @@ class EvidenceService:
                 _, direction = _related_direction(scope.subject_world_character_id, actor, target, None)
                 # Private social JSON carries IDs. Expose only the verified safe projection.
                 text = (projection.get("perception") or "") if projection is not None else value.excerpt or ""
+        display_segments = None
+        if availability == "available" and kind == "today_sns_activity" and raw.get("display_projection") is not None:
+            from app.domains.chat.contracts.evidence_display import excerpt_segments
+            try:
+                display_segments = excerpt_segments(raw["display_projection"], reference, text)
+            except (ValueError, TypeError, AttributeError) as exc:
+                raise MessageNotFoundError("evidence_display_invalid") from exc
         return schemas.WorldChatEvidenceItemRead(
             reference=reference,
             kind=kind,
             label=label,
+            display_segments=display_segments,
             excerpt=text[:500] if availability == "available" else None,
             occurred_at=occurred_at,
             availability=availability,

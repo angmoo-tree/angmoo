@@ -1,3 +1,5 @@
+export const evidenceDisplayKeys = ["kind", "action", "actor", "counterpart", "truncated", "root_title", "root_body", "parent_title", "parent_body", "title", "body", "thought", "thought_truncated", "thought_status", "thought_unrecorded", "motivation", "emotion", "intensity"] as const;
+export type EvidenceDisplayKey = typeof evidenceDisplayKeys[number];
 export type MemoryLifecycle = "active" | "expired" | "superseded" | "deleted";
 export type MemoryEvidenceAvailability = "available" | "deleted" | "unavailable";
 
@@ -102,6 +104,7 @@ export type WorldChatEvidenceSummaryRead = {
 };
 
 export type WorldChatEvidenceItemRead = {
+  display_segments?: { key: EvidenceDisplayKey | null; text: string }[] | null;
   reference: string;
   kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity" | "episode_memory" | "current_image_analysis";
   episode?: EpisodeDetailRead | null;

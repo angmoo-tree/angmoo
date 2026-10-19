@@ -299,7 +299,13 @@ class EvidenceTimeRead(BaseModel):
     recorded_at: datetime | None = None
 
 
+class EvidenceDisplaySegmentRead(BaseModel):
+    key: str | None
+    text: str
+
+
 class WorldChatEvidenceItemRead(BaseModel):
+    display_segments: list[EvidenceDisplaySegmentRead] | None = None
     reference: str
     kind: Literal[
         "canonical_source",

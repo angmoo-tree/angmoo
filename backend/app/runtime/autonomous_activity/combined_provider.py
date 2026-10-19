@@ -81,15 +81,18 @@ class CombinedActivityProvider(ActivityProvider):
         from app.domains.memory.service.situation_policy import restore
         self.situation_snapshot = restore((policies or {}).get("_situation_policy"))
         self.situation_output_revision = ((policies or {}).get("_situation_policy") or {}).get("output_revision")
+        from app.domains.memory.policies.situation_generation import TARGET_OUTPUT_REVISION
+        self.situation_validation_locale = (self.situation_snapshot.memory_search_locale
+            if self.situation_snapshot is not None and self.situation_output_revision == TARGET_OUTPUT_REVISION else None)
         self.situation_state = None
         self.situation_output_active = False
         self.situation_writer_results = []
 
     def situation_targets(self, payload, lane, *, writing=False):
-        from app.domains.memory.policies.situation_generation import TARGET_OUTPUT_REVISION
+        from app.domains.memory.policies.situation_generation import SUPPORTED_OUTPUT_REVISIONS
         if self.situation_output_revision is None:
             return None  # Preserve schemas/digests of previously frozen requests.
-        if self.situation_output_revision != TARGET_OUTPUT_REVISION:
+        if self.situation_output_revision not in SUPPORTED_OUTPUT_REVISIONS:
             raise ValueError("situation_output_revision_unsupported")
         if lane == "routine":
             return ("routine-post",)
@@ -123,14 +126,15 @@ class CombinedActivityProvider(ActivityProvider):
                 from app.domains.memory.policies.situation_generation import with_social_situations, instructions
                 from app.domains.memory.policies.situation_output import parse_situations
                 from dataclasses import asdict
-                kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane))
+                kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane),
+                    locale=self.situation_snapshot.memory_search_locale, revision=self.situation_output_revision)
                 def validate_situations(value):
                     base = parse_envelope(value, original_validator)
                     targets = tuple(row["target_id"] for row in base.get("decisions", []) if row["action"] != "no_action") if lane != "routine" else ("routine-post",)
-                    return {**base, "_situations": {key: asdict(draft) for key, draft in parse_situations(value, targets).items()},
+                    return {**base, "_situations": {key: asdict(draft) for key, draft in parse_situations(value, targets, locale=self.situation_validation_locale).items()},
                         "_situation_draft_digest": sha256(json.dumps(value.get("draft"), ensure_ascii=False, sort_keys=True).encode()).hexdigest()}
                 kwargs["validator"] = validate_situations
-                kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane) + (
+                kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane, revision=self.situation_output_revision) + (
                     "\nReturn situations only for targets with actual actions; copy their target_id. "
                     "For Routine use target_id=\"routine-post\". Output decision, draft, then situations in that order.")
             else:
@@ -164,7 +168,8 @@ class CombinedActivityProvider(ActivityProvider):
             from app.domains.memory.policies.situation_output import parse_situations
             lane = node.removesuffix("ActionPlanner").removesuffix("Writer").lower()
             original_validator = kwargs["validator"]
-            kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane, writing=writing))
+            kwargs["schema"] = with_social_situations(kwargs["schema"], self.situation_targets(kwargs["payload"], lane, writing=writing),
+                locale=self.situation_snapshot.memory_search_locale, revision=self.situation_output_revision)
             def validate_separate(value):
                 base = original_validator({key: item for key, item in value.items() if key != "situations"})
                 if lane == "routine":
@@ -175,10 +180,10 @@ class CombinedActivityProvider(ActivityProvider):
                 else:
                     targets = tuple(row["target_id"] for row in base.get("decisions", []) if row["action"] == "like")
                 self.separate_situations = {key: asdict(draft) for key, draft in parse_situations(
-                    value, targets, base_fields=tuple(key for key in value if key != "situations")).items()}
+                    value, targets, base_fields=tuple(key for key in value if key != "situations"), locale=self.situation_validation_locale).items()}
                 return base
             kwargs["validator"] = validate_separate
-            kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane) + (
+            kwargs["system"] += instructions(self.situation_snapshot.memory_search_locale, lane, revision=self.situation_output_revision) + (
                 "\nThis is the existing separate Writer or Planner call. Complete its original fields first, then situations. "
                 "For replies use assignments[].source.target_id (the target ID mapped to task_id), with the final reply body. "
                 "For a separate Planner describe only like actions; a later Writer describes replies. "
@@ -253,7 +258,7 @@ class CombinedActivityProvider(ActivityProvider):
                 fields = ("decision", "draft") if self.mode == "combined" and planning else tuple(key for key in value if key != "situations")
                 current = {**attempt, "lane": lane, "node": kwargs["node"], "stage_attempt_id": stage_id,
                     "input_payload_hash": self.situation_manifest.payload_digest,
-                    "writer_replaced": writing and self.repairing, **output_shape(value, observed_targets(value), base_fields=fields)}
+                    "writer_replaced": writing and self.repairing, **output_shape(value, observed_targets(value), base_fields=fields, locale=self.situation_validation_locale)}
                 return safe_event(current)
             def before(value, attempt):
                 self.tracker._notify("situation_output_shape", facts(value, attempt))

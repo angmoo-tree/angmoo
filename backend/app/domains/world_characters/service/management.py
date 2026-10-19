@@ -163,6 +163,14 @@ class WorldCharacterManagementService:
         if claimed.rowcount != 1:
             raise WorldManagementError("world_character_revision_conflict")
 
+    def require_credential_configuration(self, role, expected_revision):
+        """Check the fresh authorized actor before encrypting or writing a key."""
+        self.db.refresh(role)
+        if self.db.get(WorldCharacterConfiguration, role.id) is None:
+            raise WorldManagementError("world_configuration_missing")
+        if role.version != expected_revision:
+            raise WorldManagementError("world_character_revision_conflict")
+
     def patch_profile(self, *, world_id, world_character_id, user, data):
         try:
             lock_environment_admission(self.db, user.id)

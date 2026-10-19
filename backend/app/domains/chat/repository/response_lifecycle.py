@@ -727,17 +727,24 @@ def _validate_evidence_inspector_snapshot(
     *,
     public_evidence_count: int,
 ) -> None:
-    if set(value) != {"version", "items"} or value.get("version") != "evidence-inspector.v1":
+    if set(value) != {"version", "items"} or value.get("version") not in {"evidence-inspector.v1", "evidence-inspector.v2"}:
         raise GenerationContractError("response_evidence_inspector_invalid")
     items = value.get("items")
     if not isinstance(items, list) or len(items) != public_evidence_count or len(items) > 12:
         raise GenerationContractError("response_evidence_inspector_invalid")
     required_keys = {"ref", "kind", "text", "occurred_at", "axes", "locator"}
     for item in items:
-        if not isinstance(item, dict) or set(item) not in (
-            required_keys, required_keys | {"time_provenance"},
-        ):
+        optional_keys = {"time_provenance"} | ({"display_projection"} if value["version"] == "evidence-inspector.v2" else set())
+        if not isinstance(item, dict) or not required_keys <= set(item) or set(item) - required_keys - optional_keys:
             raise GenerationContractError("response_evidence_inspector_invalid")
+        if "display_projection" in item:
+            from app.domains.chat.contracts.evidence_display import validate_projection
+            try:
+                if item.get("kind") != "today_sns_activity":
+                    raise ValueError("evidence_display_kind_invalid")
+                validate_projection(item["display_projection"], item.get("ref"), item.get("text"))
+            except (ValueError, TypeError, AttributeError) as exc:
+                raise GenerationContractError("response_evidence_inspector_invalid") from exc
         if "time_provenance" in item:
             try:
                 validate_evidence_time_provenance(item["time_provenance"])

@@ -60,7 +60,7 @@ class MemoryUnsavedExperienceRead(BaseModel):
     state_version: int
     occurred_at: datetime
     description: str | None
-    reason: Literal["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "result_invalid", "validation_failed"]
+    reason: Literal["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "description_language_only", "result_invalid", "validation_failed"]
     can_recheck: bool
     can_discard: bool
 
