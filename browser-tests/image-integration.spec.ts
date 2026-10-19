@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { test, expect, type Page } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed } from "./continuity-next-fixture";
@@ -47,6 +48,8 @@ async function fixtures(page:Page, staticShell:boolean, initial:{comfy?:Record<s
   let upload=0;
   await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
     const request=route.request();const path=new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: "local-owner", display_name: "Local Owner" }, {});
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if(path==="/auth/me")return json(route,{id:"local-owner",email:null,display_name:"Local Owner",profile_setup_completed:true,ui_language:initial.language??"ko",ui_preference_revision:1,feed_content_filter:"all",is_admin:true});
     if(path==="/auth/local/environment")return json(route,VISUAL_ENVIRONMENT);
     if(path===`/agents/${character}`)return json(route,continuityAgentDetail(character));

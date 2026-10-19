@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { expect, test, type Page } from "@playwright/test";
 import type { CharacterCardSourceRead } from "../frontend/src/features/characters/types/agents";
 import { staticDocumentFallback } from "./world-ui-improvements-fixture";
@@ -53,6 +54,8 @@ async function fixture(page: Page, language: "ko" | "en" = "ko") {
     const method = route.request().method();
     const body = route.request().postDataJSON();
     const reply = (json: unknown, status = 200) => route.fulfill({ status, contentType: "application/json", json });
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { ...owner, ui_language: language }, { environment: true });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (path === "/auth/me") return reply({ ...owner, ui_language: language });
     if (method === "GET" && path.endsWith("/activity-settings")) return reply({
       contract_version: "world-activity-settings-v1", world_id: draft.target_world_id, world_character_id: "registered-actor", character_id: "registered",

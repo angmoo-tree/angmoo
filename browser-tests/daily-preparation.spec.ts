@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { expect, test, type Route } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json } from "./continuity-next-fixture";
@@ -30,6 +31,8 @@ test("agent settings uses daily preparation without legacy analysis and preserve
   const writes: Record<string, unknown>[] = [];
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
     const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: "owner", display_name: "Owner" }, {});
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all", ui_language: "ko", ui_preference_revision: 0 });
     if (path === "/auth/local/environment") return environmentFixture(route);
     if (route.request().method() !== "GET") {

@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { expect, test, type Page } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
@@ -59,10 +60,12 @@ test.beforeEach(async ({ page }, info) => {
       await route.fulfill({status:200,contentType:"application/json",json:{
         installation_id:"synthetic-static",preferred_language:"ko-KR",
         memory_search_locale:"ko-KR",timezone:"Asia/Seoul",environment_revision:1,
-        timezone_revision:1,confirmed_at:null,synchronization:"active_owner",
+        timezone_revision:1,confirmed_at:"2026-10-19T00:00:00Z",synchronization:"active_owner",
         lease_expires_at:null,lease_token:"synthetic-only-static-lease"}});
       return;
     }
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: "owner-static-probe", display_name: "Static Owner" }, { installationId: "synthetic-static" });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (pathname === "/api/v1/auth/me") {
       await route.fulfill({
         contentType: "application/json",
@@ -3937,7 +3940,7 @@ test("wide-window route mismatch fails closed instead of rendering Device Home",
   await expect(page.getByText("LOCAL DEVICE")).toHaveCount(0);
 });
 
-test("Tauri Phone keeps the local owner bootstrap form scrollable above navigation", async ({
+test("Tauri Phone keeps legacy owner selection scrollable above navigation", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 433, height: 848 });
@@ -3976,30 +3979,33 @@ test("Tauri Phone keeps the local owner bootstrap form scrollable above navigati
       await route.fulfill({
         contentType: "application/json",
         json: {
+          protocol: 2, automatic_prepare_allowed: false, client_connection: null,
           state: "unclaimed",
           installation_id: "installation-static-owner-scroll",
           local_label: null,
           owner: null,
-          candidates: [
-            {
-              user_id: "owner-static-probe",
-              display_name: "Demo User",
-              character_count: 1,
-              world_count: 0,
-              credential_count: 1,
-              suggested: true,
-            },
-          ],
+          candidates: Array.from({ length: 30 }, (_, index) => ({
+            user_id: "legacy-owner-" + index, display_name: "Demo User " + index,
+            character_count: 1, world_count: 0, credential_count: 1, suggested: index === 0,
+          })),
         },
         status: 200,
       });
+      return;
+    }
+    if (pathname === "/api/v1/auth/local/client") {
+      const query = new URL(route.request().url()).searchParams;
+      expect(query.get("protocol")).toBe("2");
+      expect(query.get("installation_id")).toBe("installation-static-owner-scroll");
+      await route.fulfill({ json: { protocol: 2, installation_id: query.get("installation_id"),
+        client_instance_id: query.get("client_instance_id"), generation: 0, state: "active" } });
       return;
     }
     await route.fallback();
   });
 
   await page.goto("/login?returnTo=%2F");
-  await expect(page.getByRole("heading", { name: "이 장치의 owner 준비" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Choose an existing user." })).toBeVisible();
 
   const scrollSurface = page.locator('[data-device-scroll-owner="true"]');
   await expect(scrollSurface).toHaveCSS("overflow-y", "auto");
@@ -4018,8 +4024,8 @@ test("Tauri Phone keeps the local owner bootstrap form scrollable above navigati
   await scrollSurface.evaluate((node) => {
     node.scrollTop = node.scrollHeight;
   });
-  const submitButton = page.getByRole("button", { name: "이 owner로 Angmoo 시작" });
-  const mobileNavigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
+  const submitButton = page.getByRole("button", { name: "Demo User 29", exact: true });
+  const mobileNavigation = page.getByRole("navigation", { name: "Main mobile navigation" });
   await expect(submitButton).toBeVisible();
   const bottomGeometry = await Promise.all([
     submitButton.boundingBox(),
@@ -4282,7 +4288,7 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
     );
     const pathname = new URL(route.request().url()).pathname;
     apiRequests.push(pathname);
-    if (pathname === "/api/v1/auth/local/environment") {
+    if (pathname.startsWith("/api/v1/auth/local/")) {
       await route.fallback();
       return;
     }

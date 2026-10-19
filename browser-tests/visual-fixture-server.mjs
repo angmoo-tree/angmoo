@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -67,6 +68,11 @@ const server = createServer((request, response) => {
 
   if (url.pathname === "/health") {
     sendJson(response, { schema_version: fixture.schema_version, status: "ready" });
+    return;
+  }
+  const localSession = existingLocalSessionRead(url, request.method, fixture.owner);
+  if (localSession !== undefined) {
+    sendJson(response, localSession);
     return;
   }
   if (url.pathname === "/api/v1/auth/me") {

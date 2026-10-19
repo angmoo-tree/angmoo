@@ -29,6 +29,25 @@ Next proxy로 보내고, 컨테이너 내부 진단은 이미 설정된 `ANGMOO_
 새 proxy lifecycle 모듈을 실제로 읽도록 갱신했으며 두 upstream, cookie 보호,
 Range/HEAD/404/redirect 거절 및 stream 취소 검사와 해당 파일 lint가 통과했다.
 
+현재 Next 산출물을 다시 빌드하여 원격 browser smoke의 인증 준비 실패를 로컬에서
+재현했다. 기존 로그인 상태를 가정하던 UI fixture가 `/auth/me`만 응답하고 protocol 2
+bootstrap/client 조회를 제공하지 않은 것이 원인이었다. 해당 fixture에만 기존
+세션의 조회 응답을 추가하고 client 식별자·generation을 검사한다. 세션 생성·종료
+POST를 자동 성공 처리하지 않으며 제품 인증 검사를 변경하지 않았다. 설정 조회
+실패 검사는 인증 준비 이후의 설정 재조회에 503을 주어 본래 실패 검증을 유지한다.
+없어진 수동 등록 폼의 스크롤 검사는 보존된 legacy 사용자 선택 목록의 스크롤과
+하단 navigation 겹침 검사로 갱신했다. 실제 격리 카드 업로드는 challenge를 거쳐
+protocol 2 prepare HTTP를 사용하고 원본 byte/hash 보존을 계속 확인한다.
+
+이 fixture 수정의 로컬 검증: Next continuity 35통과/기존 opt-in 10skip, static
+continuity 78통과, Creator Next/static 각 14통과, Local Settings 2통과,
+daily Next/static 각 2통과, image integration 64통과, lifecycle 2통과,
+visual DOM/focus/reflow 6통과, 실제 격리 카드 업로드·cleanup 4통과/선택적 사용자
+카드 묶음 1skip. 기존 로컬 외부 원본 fixture가 있는 경우 읽기와 hash 보존만
+검증했으며 원본 파일은 변경하지 않았다. Linux 스크린샷 기준 비교는 원격의 고정
+Playwright 컨테이너 검사가 담당한다. 실제 ARM64 시험 스택이나 설치 앱을 기동한
+결과로 해석하지 않는다.
+
 검증일: 2026-10-19 KST. 대상은 소스 checkout과 격리 fixture다. 제품 배포, 기존 ARM64 후보, 설치된 Tauri 및 실제 AI 품질의 완료 기록이 아니다.
 
 ## 범위와 최종 계약

@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "../fixtures/existing-local-session.mjs";
 import { expect, test } from "@playwright/test";
 
 test("RT diagnostic history selects failures and exports matching snapshots", async ({ page }) => {
@@ -21,10 +22,13 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     const url = new URL(route.request().url());
     if (url.pathname.endsWith("/auth/local/environment")) {
       environmentReports.push(url.pathname);
-      return route.fulfill({ contentType: "application/json", body: JSON.stringify({ installation_id: "synthetic-diagnostic", preferred_language: "ko-KR", memory_search_locale: "ko-KR", timezone: "Asia/Seoul", environment_revision: 1, timezone_revision: 1, synchronization: "active_owner", confirmed_at: null, lease_token: "synthetic-diagnostic-only", lease_expires_at: "2099-01-01T00:00:00Z" }) });
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify({ installation_id: "synthetic-diagnostic", preferred_language: "ko-KR", memory_search_locale: "ko-KR", timezone: "Asia/Seoul", environment_revision: 1, timezone_revision: 1, synchronization: "active_owner", confirmed_at: "2026-10-19T00:00:00Z", lease_token: "synthetic-diagnostic-only", lease_expires_at: "2099-01-01T00:00:00Z" }) });
     }
     if (route.request().method() !== "GET") writes.push(url.pathname);
     const send = (value: unknown, status = 200) => route.fulfill({ contentType: "application/json", body: JSON.stringify(value), status });
+    const localSession = existingLocalSessionRead(url, route.request().method(),
+      { id: "local-owner", display_name: "Local Owner" }, { installationId: "synthetic-diagnostic" });
+    if (localSession !== undefined) return send(localSession);
     if (url.pathname.endsWith("/auth/me")) return send({ id: "local-owner", email: null, display_name: "Local Owner",
       display_name_updated_at: null, display_name_change_available_at: null, profile_setup_completed: true, ui_language: "ko", ui_preference_revision: 0, feed_content_filter: "all" });
     if (url.pathname.endsWith("/runtime/status")) return send({ schema_version: "local-runtime-status-v1", installation_state: "ready" });

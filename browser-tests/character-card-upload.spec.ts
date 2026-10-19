@@ -118,11 +118,17 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       data: {},
     });
     expect(challenge.status(), await challenge.text()).toBe(201);
-    const claim = await page.request.post(base + "/api/backend/auth/local/bootstrap/claim", {
+    const initialized = await page.request.get(base + "/api/backend/auth/local/bootstrap");
+    expect(initialized.status(), await initialized.text()).toBe(200);
+    const installation = await initialized.json();
+    expect(installation.protocol).toBe(2);
+    expect(installation.automatic_prepare_allowed).toBe(true);
+    const claim = await page.request.post(base + "/api/backend/auth/local/bootstrap/prepare", {
       headers: frontOrigin,
-      data: { display_name: "Card Test Owner", local_label: "Isolated Card Test", privacy_acknowledged: true },
+      data: { protocol: 2, installation_id: installation.installation_id,
+        client_instance_id: "card-upload-test-client-0001", expected_generation: 0, preferred_language: "ko-KR" },
     });
-    expect(claim.status(), await claim.text()).toBe(201);
+    expect(claim.status(), await claim.text()).toBe(200);
 
     const currentOwner = await page.request.get(base + "/api/backend/auth/me");
     expect(currentOwner.status(), await currentOwner.text()).toBe(200);

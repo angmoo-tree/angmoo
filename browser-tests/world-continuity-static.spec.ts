@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { continuityAgentDetail as staticAgentDetail } from "./continuity-fixture";
 import { verifyMemoryRecovery } from "./memory-recovery-fixture";
 import { json, uiDWorld, uiDManualThread } from "./continuity-next-fixture";
@@ -27,6 +28,9 @@ test.beforeEach(async ({ page }) => {
       "static-route-probe-token-000000000000",
     );
     const pathname = new URL(route.request().url()).pathname;
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(),
+      { id: "owner-static-probe", display_name: "Static Owner" }, { environment: true });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (pathname === "/api/v1/auth/me") {
       await route.fulfill({
         contentType: "application/json",

@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { existingLocalSessionRead } from "../fixtures/existing-local-session.mjs";
 import { uiDWorld } from "../continuity-next-fixture";
 
 type GraphPhase =
@@ -102,6 +103,8 @@ export async function installGraphFixture(
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
+    const localSession = existingLocalSessionRead(url, request.method(), OWNER, { environment: true });
+    if (localSession !== undefined) return json(route, localSession);
     if (url.pathname.endsWith("/auth/me")) {
       await json(route, OWNER);
       return;

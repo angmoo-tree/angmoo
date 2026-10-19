@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { expect, test } from "@playwright/test";
 import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
@@ -13,6 +14,8 @@ test.beforeEach(async ({page}, info) => {
     expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(token);
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith("/auth/local/environment")) return route.fulfill({json: VISUAL_ENVIRONMENT});
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: "lifecycle-owner", display_name: "Owner" }, {});
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     await route.fulfill({status: path.endsWith("/auth/me") ? 200 : 503, json: path.endsWith("/auth/me")
       ? {id: "lifecycle-owner", email: null, display_name: "Owner", profile_setup_completed: true, ui_language: "ko", ui_preference_revision: 1, feed_content_filter: "all", is_admin: false}
       : {detail: "fixture_unavailable"}});

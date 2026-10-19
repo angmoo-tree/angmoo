@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
@@ -143,6 +144,14 @@ async function openFoundation(page: Page, testInfo: TestInfo): Promise<void> {
       requestUrl.origin === STATIC_API_ORIGIN &&
       requestUrl.pathname === "/api/v1/auth/me";
 
+    if ((isNextProject && requestUrl.origin === productOrigin)
+        || (isStaticProject && requestUrl.origin === STATIC_API_ORIGIN)) {
+      const localSession = existingLocalSessionRead(requestUrl, route.request().method(), OWNER);
+      if (localSession !== undefined) {
+        await route.fulfill({ json: localSession });
+        return;
+      }
+    }
     if (isNextAuth || isStaticAuth) {
       await route.fulfill({ contentType: "application/json", json: OWNER, status: 200 });
       return;
