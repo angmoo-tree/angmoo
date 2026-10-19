@@ -14,6 +14,9 @@ from sqlalchemy.orm import Session
 
 from model_fixture_support import models
 from app.domains.identity.service.local_owner import LocalIdentityService as SqlAlchemyIdentityRepository
+from app.domains.identity.service.local_entry import LocalEntryService
+from app.domains.identity.schemas_local_entry import LocalPrepareRequest
+from app.domains.identity.models import LocalClientConnection
 from app.domains.runtime.contracts.transaction import UnitOfWorkPort
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.persistence.sqlite_codecs import (
@@ -258,17 +261,19 @@ def test_existing_identity_repository_roundtrips_without_sqlite_fork(
     now = datetime.now(timezone.utc)
     with database.session() as session:
         repository = SqlAlchemyIdentityRepository(session)
-        assert repository.get_bootstrap_status().state == "unclaimed"
+        repository.ensure_local_installation_identity(now=now)
+        bootstrap = repository.get_bootstrap_status()
+        assert bootstrap.state == "unclaimed"
         challenge = repository.create_bootstrap_challenge(now=now)
-        issued = repository.claim_local_owner(
+        issued = LocalEntryService(session, clock=lambda: now).prepare(
+            LocalPrepareRequest(protocol=2, installation_id=bootstrap.installation_id,
+                client_instance_id="canonical-adapter-test", expected_generation=0,
+                preferred_language="ko-KR"),
             challenge_token=challenge.token,
-            owner_user_id=None,
-            display_name="로컬 소유자",
             local_label="앵무 PC",
-            privacy_acknowledged=True,
-            now=now,
+            secret_ready=True,
         )
-        assert issued.user.display_name == "로컬 소유자"
+        assert issued.user.display_name == "사용자"
 
     database.close()
     database.open()
@@ -277,8 +282,9 @@ def test_existing_identity_repository_roundtrips_without_sqlite_fork(
         assert status.state == "claimed"
         assert status.local_label == "앵무 PC"
         assert status.owner is not None
-        assert status.owner.display_name == "로컬 소유자"
+        assert status.owner.display_name == "사용자"
         assert session.scalar(select(models.AuthSession.token_hash)) is not None
+        assert session.scalar(select(LocalClientConnection.generation)) == 0
     database.close()
 
 

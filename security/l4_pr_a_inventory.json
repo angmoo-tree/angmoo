@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4626,
-      "internal_edge_count": 6839,
+      "external_import_count": 4665,
+      "internal_edge_count": 6907,
       "legacy_import_exception_count": 0,
-      "module_count": 1574,
+      "module_count": 1587,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -271,6 +271,13 @@
             ],
             "module": "app.domains.relationships.policies.daily_review",
             "path": "backend/app/domains/relationships/policies/daily_review.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.social_context"
+            ],
+            "module": "app.domains.relationships.policies.effect_progress",
+            "path": "backend/app/domains/relationships/policies/effect_progress.py"
           },
           {
             "imports": [
@@ -745,6 +752,7 @@
               "app.core.sqlite_concurrency",
               "app.domains.relationships.contracts.graph_recall_gateway",
               "app.domains.relationships.contracts.social_context",
+              "app.domains.relationships.policies.effect_progress",
               "app.domains.relationships.policies.graph_recall",
               "app.domains.relationships.policies.social_context_validation"
             ],
@@ -1673,6 +1681,7 @@
           {
             "imports": [
               "app.contracts.activity_thought",
+              "app.contracts.public_activity_result",
               "app.core.unit_of_work",
               "app.domains.social.contracts.feed_execution",
               "app.domains.social.contracts.observations",
@@ -3291,7 +3300,7 @@
             "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
-          "sha256": "8eda69e3315d61119fc31c0e351126b4fd65566ec96b2aedbef116e94aba0f70"
+          "sha256": "49e13e23769b2bbd6fd5508f8d941ccc84499d1d9d93cc78e12b417c7fa63360"
         },
         {
           "exports": [
@@ -3309,7 +3318,7 @@
             "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/posts/[postId]/route.ts",
-          "sha256": "ac78631be6eb8d114f2ed6d5a313d627bf654c3fca59d6f081a39879a6516367"
+          "sha256": "25f8739ecb3cf2b3fd08ac8b0e3c9b63eee6b50f096e0141649409e3b376bf67"
         },
         {
           "exports": [
@@ -3319,7 +3328,7 @@
             "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/posts/route.ts",
-          "sha256": "3bb8db1fe84df77d46baaaab1ce5586fd579e0c95dd9a9f82cc45982ef4036e6"
+          "sha256": "91deab65c0adf8282f91d879fe9f766596d8bc0a4ec5a56b810107311d5484cf"
         },
         {
           "exports": [
@@ -3851,7 +3860,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "4fb5de992694d9af63c118a8d989b11e72f8d77db1a532cfb313eb744807249d"
+        "sha256": "757f8d0252febc75bbd7b532c3c4fa70af11ccb527dd4801414ccb177ada1ad5"
       },
       "steps": [
         {

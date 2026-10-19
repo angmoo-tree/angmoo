@@ -1,5 +1,26 @@
 # Local entry, memory and SNS stability — local implementation evidence
 
+## PR integration follow-up (2026-10-20)
+
+PR #393의 첫 원격 검사에서 committed import/ownership/current-memory inventory와
+새 Identity 경로의 route-security 분류 누락, proxy harness의 `module` 변수명,
+이전 수동 owner API를 호출하는 SQLite fixture, 환경 확인을 생략한 quickstart
+smoke가 발견됐다. 공식 생성기로 현재 사실 목록을 갱신하고 실제 route의 인증
+경계 및 pre-auth Origin/Host 보호를 분류했다. frozen predecessor와 정책 예외는
+확대하거나 수정하지 않았다.
+
+기본 World 준비의 도메인 오류가 캐릭터 target resolver의 기존 예외 변환 밖에
+있던 부분도 함께 수정했다. 환경이 준비되지 않은 요청은 draft validation으로
+거절되며, smoke는 보호된 환경 HTTP 확인을 먼저 수행한다. 환경 요구를 제거하거나
+확인된 것으로 SQL에 주입하지 않는다. 미사용 예전 진단 fixture도 protocol 2로
+연결하고 fixture의 명시적 이름은 유지한다.
+
+관련 inventory/architecture 회귀 30개 통과, proxy lint/회귀/typecheck 및
+frontend architecture/design 검사 통과. canonical adapter·등록·smoke·security
+회귀의 최초 실행은 30통과/fixture 2실패였고, 누락된 설치 identity 준비와 신규
+인증 mutation 수를 바로잡은 해당 2개 재실행은 모두 통과했다. 이 기록은 원격
+재실행 완료나 ARM64/설치판 사용자 확인을 대신하지 않는다.
+
 검증일: 2026-10-19 KST. 대상은 소스 checkout과 격리 fixture다. 제품 배포, 기존 ARM64 후보, 설치된 Tauri 및 실제 AI 품질의 완료 기록이 아니다.
 
 ## 범위와 최종 계약

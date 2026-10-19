@@ -19,12 +19,12 @@ const cache = new Map();
 function load(name) {
   const filename = path.resolve(root, name + ".ts");
   if (cache.has(filename)) return cache.get(filename).exports;
-  const module = { exports: {} }; cache.set(filename, module);
+  const loadedModule = { exports: {} }; cache.set(filename, loadedModule);
   const code = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInContext(`(function(module,exports,require){${code}\n})`, context, { filename })(module, module.exports, load);
-  return module.exports;
+  vm.runInContext(`(function(module,exports,require){${code}\n})`, context, { filename })(loadedModule, loadedModule.exports, load);
+  return loadedModule.exports;
 }
 const { proxyBackend } = load("backend");
 const { isRequestCancellation } = load("proxy-lifecycle");

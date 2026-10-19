@@ -170,6 +170,22 @@ def _bootstrap_local_session(
     return token, post_id
 
 
+def _confirm_local_environment(backend_url: str, *, token: str, origin: str) -> None:
+    # Match the client sequence: authenticated environment admission precedes
+    # default SNS World/character preparation. Do not seed confirmation in SQL.
+    status, environment = _request(
+        backend_url, "/api/v1/auth/local/environment", method="POST",
+        cookie=f"{SESSION_COOKIE_NAME}={token}", origin=origin,
+        payload={"client_id": f"quickstart-{uuid4().hex}", "expected_revision": 0,
+                 "sequence": 1, "preferred_language": "en-US", "timezone": "UTC"},
+    )
+    _expect(status, 200, "local environment confirmation")
+    if (not isinstance(environment, dict) or not environment.get("confirmed_at")
+            or environment.get("preferred_language") != "en-US"
+            or environment.get("timezone") != "UTC"):
+        raise SmokeError("local environment was not confirmed")
+
+
 def run_smoke(
     backend_url: str,
     frontend_url: str | None,
@@ -218,6 +234,8 @@ def run_smoke(
         token = str(auth["token"])
     if token is None:
         raise SmokeError("local session bootstrap did not issue a token")
+    if bootstrap_local_session:
+        _confirm_local_environment(backend_url, token=token, origin=frontend_url or backend_url)
     status, draft = _request(
         backend_url,
         "/api/v1/agents/drafts",
