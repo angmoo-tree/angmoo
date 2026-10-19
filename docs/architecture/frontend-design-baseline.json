@@ -334,7 +334,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "085ce2dbae223a0ed338e5b5800258b23f2578fded722b9b179ac1a4000d8f9c"
+        "sha256": "ad7ffc912eeb998e4cc152bb427108369126cd52025a41a3db461ec388f57fcc"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -342,19 +342,19 @@
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
-        "sha256": "ae141bd6cf61c1b57ada53a23c415d50d132ee36d2d377568059470612c218e5"
+        "sha256": "0a6e8d4faaf41844580582cb5617a7a9aea7793a428947c4f9d6428789936af4"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "sha256": "32b233993618b597ea01b6d7e8c004d09229f2f4d4a6303a5a03bf48c20be0b4"
+        "sha256": "bc48d3d52a329de26f8a2deee9d5028b167001139b7014ef97d686551deaa7e4"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "0272106c9ab857c159e72be510dcab534595e92fda5a0ebfbedff9ede390c5fd"
+        "sha256": "87cd5d52c8350958d0cf1f5b763e81df2467164dd6001ef6374a91b2af7bb296"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
-        "sha256": "8a400c5df851b9ec253380276cf8d6e7f3dcf2569c3eb98a6078dbc55e671014"
+        "sha256": "0f0cf7aa64cf446c15863cc6fe21e1f43adbcc280c3f0bec6320c3924db00fdc"
       }
     ],
     "static_direct_open_routes": [
@@ -1255,7 +1255,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 47,
-    "next_static_inventory_sha256": "4c9136fef1b96f5abcfd0485c2e4256f1ebf28f15b72f16daf4e40f1974b4d9f",
+    "next_static_inventory_sha256": "f8c69e13cd202fc54c0bba2efe2844bb3ee19945bc5d4a2b28d0b887503235f3",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1667,7 +1667,7 @@
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",
           "present": true,
-          "sha256": "32b233993618b597ea01b6d7e8c004d09229f2f4d4a6303a5a03bf48c20be0b4"
+          "sha256": "bc48d3d52a329de26f8a2deee9d5028b167001139b7014ef97d686551deaa7e4"
         }
       ]
     },

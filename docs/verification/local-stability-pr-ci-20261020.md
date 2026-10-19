@@ -36,6 +36,9 @@ separate gates. No existing Docker stack or installed Angmoo was started or chan
   unchanged; the previous failure measured a hidden loading subtree.
 - Current generated inventories were regenerated from reviewed source. Frozen
   predecessor inventories were not rewritten.
+- The frontend design evidence inventory now records the current browser fixture
+  and static-runtime hashes. Screenshot baselines, reviewed color counts, visual
+  thresholds, and required checks are unchanged.
 
 ## Focused validation
 
@@ -48,6 +51,16 @@ separate gates. No existing Docker stack or installed Angmoo was started or chan
   production static build.
 - Architecture inventory/boundaries, current L4 ownership, frozen Memory batch and
   current hybrid successor, embedded runtime inventory, and diff whitespace: passed.
+- The prior-failure replay reported 77 passed and 5 failed while it still used an
+  intermediate cleanup/fixture version. All five remaining failures were then
+  corrected and passed in the dedicated five-test run above. This is not recorded
+  as a single 82-test passing invocation.
+- After refreshing only the frontend design evidence hashes, the design and
+  frontend boundary checks passed, and 217 related architecture regressions passed.
+- On `caa53723`, the completed remote frontend log reports 78 static route tests,
+  64 image integration tests, and all 36 pinned Linux visual tests passing. These
+  log results are retained separately from GitHub's required-check status; the
+  latter must be confirmed for the final PR head before merge.
 
 Counts are overlapping test groups, not a combined coverage score. A targeted
 replay of prior remote failures is recorded separately. The latest PR SHA must
