@@ -36,9 +36,9 @@ def shape(value, *, identifier=False):
     return result
 
 
-def output_shape(payload, targets, *, base_fields=("decision", "draft")):
+def output_shape(payload, targets, *, base_fields=("decision", "draft"), locale=None):
     """Safe projection of Memory's structural detail; never a second parser."""
-    facts = inspect_situations(payload, targets, base_fields=base_fields)
+    facts = inspect_situations(payload, targets, base_fields=base_fields, locale=locale)
     raw = payload.get("situations")
     entries = []
     for row in facts["entries"]:

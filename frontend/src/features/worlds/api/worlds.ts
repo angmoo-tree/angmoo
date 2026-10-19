@@ -37,12 +37,12 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
-export function ensureDefaultSpace() {
-  return apiRequest<WorldRead>("/worlds/default-space/ensure", { method: "POST" });
+export function ensureDefaultSpace(options: { signal?: AbortSignal } = {}) {
+  return apiRequest<WorldRead>("/worlds/default-space/ensure", { method: "POST", ...options });
 }
 
-export function ensureMyProfile(worldId: string) {
-  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/ensure"), { method: "POST" });
+export function ensureMyProfile(worldId: string, options: { signal?: AbortSignal } = {}) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/ensure"), { method: "POST", ...options });
 }
 
 export function patchMyProfile(worldId: string, data: { version: number; display_name?: string; handle?: string; intro?: string; avatar_url?: string | null; banner_url?: string | null }) {

@@ -148,6 +148,9 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
         user = _add_user(db)
         db.add(InstallationIdentity(singleton_key="local-installation", installation_id="test", owner_user_id=user.id, bootstrap_state="claimed", local_label="Test", claimed_at=datetime.now(UTC)))
         db.commit()
+        from environment_fixture_support import seed_environment
+        seed_environment(db, user.id).confirmed_at = datetime.now(UTC)
+        db.commit()
         for index in range(3):
             _create_agent(db, user, execution_mode="llm", index=index)
 

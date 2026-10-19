@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json } from "./continuity-next-fixture";
@@ -18,6 +19,8 @@ test("description and optional background stay separate in character settings", 
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async (route) => {
     const url = new URL(route.request().url());
     const path = url.pathname.replace(/^\/api\/(backend|v1)/, "");
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: "owner", display_name: "Owner" }, { environment: true });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (staticShell && path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
       feed_content_filter: "all", ui_language: "ko", ui_preference_revision: 0, is_admin: false, display_name_updated_at: null, display_name_change_available_at: null });
     if (path === `/agents/${characterId}`) return json(route, agent);

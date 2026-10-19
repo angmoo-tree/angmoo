@@ -93,6 +93,9 @@ def test_description_only_draft_registers_keyless_off_and_preserves_background(t
         db.add(InstallationIdentity(singleton_key="local-installation", installation_id="fixture",
             owner_user_id=owner.id, bootstrap_state="claimed", claimed_at=datetime.now(UTC)))
         db.commit()
+        from environment_fixture_support import seed_environment
+        seed_environment(db, owner.id).confirmed_at = datetime.now(UTC)
+        db.commit()
         world = ensure_default_space(db, owner_id=owner.id)
         draft = models.AgentCreationDraft(id="draft", user_id=owner.id, contract_version=2,
             target_world_id=world.id, model="gemini-3.1-flash-lite", name="Book Bird",

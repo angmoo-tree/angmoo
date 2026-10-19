@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "../fixtures/existing-local-session.mjs";
 import { expect, test, type Route } from "@playwright/test";
 
 const OWNER = {
@@ -32,6 +33,11 @@ test("Local Settings exposes installation/session truth and no unsupported owner
       writes.push(`${request.method()} ${url.pathname}`);
     }
 
+    if (!url.pathname.endsWith("/auth/local/bootstrap")) {
+      const localSession = existingLocalSessionRead(url, request.method(), OWNER,
+        { installationId: "installation-ui-e-settings", environment: true });
+      if (localSession !== undefined) return json(route, localSession);
+    }
     if (url.pathname === "/api/backend/auth/me" && request.method() === "GET") {
       await json(route, OWNER);
       return;
@@ -40,13 +46,8 @@ test("Local Settings exposes installation/session truth and no unsupported owner
       url.pathname === "/api/backend/auth/local/bootstrap" &&
       request.method() === "GET"
     ) {
-      await json(route, {
-        state: "claimed",
-        installation_id: "installation-ui-e-settings",
-        local_label: "작업실 PC",
-        owner: OWNER,
-        candidates: [],
-      });
+      await json(route, existingLocalSessionRead(url, request.method(), OWNER,
+        { installationId: "installation-ui-e-settings", localLabel: "작업실 PC" }));
       return;
     }
     if (url.pathname === "/api/backend/messages/settings" && request.method() === "GET") {
@@ -81,6 +82,7 @@ test("Local Settings fails closed when installation status is unavailable", asyn
   page,
 }) => {
   const writes: string[] = [];
+  let bootstrapReads = 0;
   await page.route("**/api/backend/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -88,6 +90,11 @@ test("Local Settings fails closed when installation status is unavailable", asyn
       writes.push(`${request.method()} ${url.pathname}`);
     }
 
+    if (!url.pathname.endsWith("/auth/local/bootstrap")) {
+      const localSession = existingLocalSessionRead(url, request.method(), OWNER,
+        { installationId: "installation-ui-e-settings", environment: true });
+      if (localSession !== undefined) return json(route, localSession);
+    }
     if (url.pathname === "/api/backend/auth/me" && request.method() === "GET") {
       await json(route, OWNER);
       return;
@@ -96,7 +103,11 @@ test("Local Settings fails closed when installation status is unavailable", asyn
       url.pathname === "/api/backend/auth/local/bootstrap" &&
       request.method() === "GET"
     ) {
-      await json(route, { detail: "bootstrap_unavailable" }, 503);
+      // Authentication succeeds first; the settings-specific refresh then fails.
+      if (++bootstrapReads === 1) {
+        await json(route, existingLocalSessionRead(url, request.method(), OWNER,
+          { installationId: "installation-ui-e-settings" }));
+      } else await json(route, { detail: "bootstrap_unavailable" }, 503);
       return;
     }
     if (url.pathname === "/api/backend/messages/settings" && request.method() === "GET") {

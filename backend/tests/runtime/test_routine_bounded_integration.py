@@ -111,6 +111,9 @@ def test_new_combined_long_auxiliary_publish_and_reopen_are_one_physical_call(mo
                 bootstrap_state="claimed", local_label="synthetic", claimed_at=datetime.now(UTC)))
             db.get(models.WorldMembership,fixture.world_character.membership_id).role="owner"
             db.commit()
+            from environment_fixture_support import seed_environment
+            seed_environment(db, fixture.user.id).confirmed_at = datetime.now(UTC)
+            db.commit()
             owner=OwnerControlledIdentityService(db).ensure(world_id=fixture.world.id,current_user_id=fixture.user.id)
             liked=SqlAlchemySocialWriteUnitOfWork(db).set_owner_like(
                 OwnerLikeCommand(fixture.world.id,fixture.user.id,post.id,True))

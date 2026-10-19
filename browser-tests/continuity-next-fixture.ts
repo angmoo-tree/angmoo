@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import type { Page, Route } from "@playwright/test";
 import type { ManualSocialPostRead, ManualSocialThreadRead } from "../frontend/src/features/social/types/social-write-contract";
 import type { WorldCharacterManagementRead } from "../frontend/src/features/characters/types/world-character-management";
@@ -77,6 +78,8 @@ async function installBackendFixture(
       audit.providerCalls.push(`${method} ${url.pathname}`);
     }
 
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), OWNER, { environment: true });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (url.pathname === "/api/backend/auth/me" && method === "GET") {
       return json(route, OWNER);
     }

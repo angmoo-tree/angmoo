@@ -99,7 +99,8 @@ async def resume(adapter, state, lane):
     if state["stage"] == "Execute":
         if lane == "routine":
             receipt = effects[0]
-            result = {**receipt.result, "routine_outcome": "REUSED_SUCCESS", "status": "succeeded",
+            from app.domains.routines.policies.execution_results import public_execution_result
+            result = {**public_execution_result(receipt.result), "routine_outcome": "REUSED_SUCCESS", "status": "succeeded",
                 "publish_result": {"public_action_count": 1, "new_public_action_count": 0}}
             return {"executions": [result]}
         return {"executions": effects}

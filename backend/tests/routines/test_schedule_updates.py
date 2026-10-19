@@ -422,8 +422,10 @@ def test_concurrent_same_revision_only_one_schedule_save_commits(engine):
 
 def test_language_snapshot_effects_and_new_schedule_have_independent_ownership(engine):
     with Session(engine) as db:
-        db.add(LocalEnvironment(owner_id="fixture-owner", installation_id="synthetic",
-            preferred_language="ko-KR", timezone="UTC", environment_revision=1, timezone_revision=1))
+        env = db.get(LocalEnvironment, "fixture-owner")
+        assert env is not None
+        env.preferred_language, env.timezone = "ko-KR", "UTC"
+        env.environment_revision, env.timezone_revision = 1, 1
         db.commit()
         setup_idle(db)
         row = admit(db)

@@ -74,6 +74,7 @@ class CharacterResponseGeneratorRequest:
     recall_interpretation: RecallInterpretationContext | None = None
     thought_finalizer: Callable[[object], ActivityThought] | None = field(default=None, repr=False, compare=False)
     situation_locale: str | None = None
+    situation_output_revision: str | None = "situation-target-output.v3"
     situation_target: str | None = None
     situation_manifest_factory: Callable[[dict], SituationDelivery] | None = field(default=None, repr=False, compare=False)
     chat_identity: ChatIdentityContext | None = None

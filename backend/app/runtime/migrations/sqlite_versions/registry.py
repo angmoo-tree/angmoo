@@ -134,8 +134,10 @@ from app.runtime.migrations.sqlite_versions import situation_result_binding_v36
 from app.runtime.migrations.sqlite_versions import world_deletion_v37
 from app.runtime.migrations.sqlite_versions import world_notifications_v38
 from app.runtime.migrations.sqlite_versions import vector_work_v39
+from app.runtime.migrations.sqlite_versions import local_client_v40
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    39: local_client_v40.upgrade,
     38: vector_work_v39.upgrade,
     37: world_notifications_v38.upgrade,
     36: world_deletion_v37.upgrade,
@@ -177,6 +179,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    39: SqliteMigrationContract(source_version=39, target_version=40, name="local_client", mutable_identity_tables=local_client_v40.MUTABLE_IDENTITY_TABLES, capture=local_client_v40.capture_delta, verify=local_client_v40.verify_delta),
     38: SqliteMigrationContract(source_version=38, target_version=39, name="memory_vector_work", mutable_identity_tables=vector_work_v39.MUTABLE_IDENTITY_TABLES, capture=vector_work_v39.capture_delta, verify=vector_work_v39.verify_delta),
     37: SqliteMigrationContract(source_version=37, target_version=38, name="world_notifications", mutable_identity_tables=world_notifications_v38.MUTABLE_IDENTITY_TABLES, capture=world_notifications_v38.capture_delta, verify=world_notifications_v38.verify_delta),
     36: SqliteMigrationContract(source_version=36, target_version=37, name="world_deletion", mutable_identity_tables=world_deletion_v37.MUTABLE_IDENTITY_TABLES, capture=world_deletion_v37.capture_delta, verify=world_deletion_v37.verify_delta),

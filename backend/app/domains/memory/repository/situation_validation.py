@@ -9,7 +9,7 @@ from app.domains.memory.contracts.activity_situation import (
 )
 from app.domains.memory.models.activity_situation import MemorySituationManifest
 from app.domains.memory.models.items import MemoryScopeSettingModel
-from app.domains.memory.policies.situation_output import parse_description
+from app.domains.memory.policies.situation_output import language_only, parse_description
 
 
 @dataclass(frozen=True)
@@ -54,6 +54,13 @@ def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validat
             or draft.status != receipt.description_status
             or stable_digest({"manifest": stored.payload, "draft": asdict(draft), "result": result}) != receipt.content_digest):
         raise ValueError("situation_receipt_integrity_invalid")
+    # Authenticate the immutable original draft/hash before current eligibility.
+    # Never reinterpret a historical valid draft while reconstructing its hash.
+    if revision == "situation-validation.v5" and (
+        draft.error_code == "situation_description_language_only"
+        or language_only(receipt.description, snapshot.memory_search_locale)
+    ):
+        raise ValueError("situation_description_language_only")
     if (result.get("logical_activity_id") != receipt.logical_activity_id or result.get("lane") != receipt.lane
             or result.get("target_key") != receipt.target_key
             or not result.get("planned_effects") or not result.get("effects")

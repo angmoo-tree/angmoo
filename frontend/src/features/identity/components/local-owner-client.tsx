@@ -1,337 +1,45 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useUiText } from "@/hooks/use-ui-text";
-
-
-import { Bird, Database, LockKeyhole } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-
-import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
+import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/surfaces";
-import { DegradedPanel, InlineError, Toast } from "@/components/ui/feedback";
-import { Field, Input } from "@/components/ui/form-controls";
-import { PageHeader } from "@/components/ui/navigation";
-import { StatusChip } from "@/components/ui/status";
-import { claimLocalOwner, createLocalBootstrapChallenge, getLocalBootstrapStatus, issueLocalSession } from "@/features/identity/api/identity";
-import { storeAuth } from "@/lib/auth/browser-session";
-import { type LocalBootstrapRead } from "@/features/identity/types/identity";
-
+import { useLocalEntry } from "../controllers/local-entry-context";
+import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import styles from "./local-owner-client.module.css";
 
-type LocalOwnerClientProps = {
-  logoutLocallyOnly?: boolean;
-  returnTo?: string | null;
-};
-
-export function LocalOwnerClient({
-  logoutLocallyOnly = false,
-  returnTo = null,
-}: LocalOwnerClientProps) {
-  const uiText = useUiText("identity");
-  const router = useRouter();
-  const [bootstrap, setBootstrap] = useState<LocalBootstrapRead | null>(null);
-  const [selectedOwnerId, setSelectedOwnerId] = useState<string>("");
-  const [displayName, setDisplayName] = useState("");
-  const [localLabel, setLocalLabel] = useState("");
-  const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loadRevision, setLoadRevision] = useState(0);
-
+export function LocalOwnerClient({ returnTo = null, embedded = false }: { logoutLocallyOnly?: boolean; returnTo?: string | null; embedded?: boolean }) {
+  const text = useUiText("identity");
+  const router = useRuntimeRouter();
+  const { controller, snapshot } = useLocalEntry();
+  const [pending, setPending] = useState(false);
   useEffect(() => {
-    let cancelled = false;
-    getLocalBootstrapStatus()
-      .then(async (status) => {
-        if (cancelled) return;
-        if (status.state === "claimed") {
-          const auth = await issueLocalSession();
-          if (cancelled) return;
-          storeAuth(auth);
-          router.replace(returnTo ?? "/");
-          return;
-        }
-        setBootstrap(status);
-        setLocalLabel(status.local_label ?? "");
-        const suggested = status.candidates.find((candidate) => candidate.suggested);
-        setSelectedOwnerId(suggested?.user_id ?? "");
-      })
-      .catch((reason) => {
-        if (!cancelled) {
-          setBootstrap(null);
-          setError(
-            reason instanceof Error
-              ? uiText(reason.message)
-              : uiText("이 설치의 owner 준비 상태를 확인하지 못했습니다."),
-          );
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loadRevision, returnTo, router, uiText]);
-
-  const selectedCandidate = useMemo(
-    () =>
-      bootstrap?.candidates.find(
-        (candidate) => candidate.user_id === selectedOwnerId,
-      ) ?? null,
-    [bootstrap, selectedOwnerId],
-  );
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!bootstrap || bootstrap.state !== "unclaimed") return;
-    setSaving(true);
-    setError(null);
-    try {
-      await createLocalBootstrapChallenge();
-      const auth = await claimLocalOwner({
-        owner_user_id: selectedOwnerId || null,
-        display_name: selectedOwnerId ? null : displayName,
-        local_label: localLabel || null,
-        privacy_acknowledged: privacyAcknowledged,
-      });
-      storeAuth(auth);
-      router.replace(returnTo ?? "/");
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? uiText(reason.message)
-          : uiText("이 설치의 local owner를 준비하지 못했습니다."),
-      );
-      try {
-        setBootstrap(await getLocalBootstrapStatus());
-      } catch {
-        // Keep the original actionable error.
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function retryBootstrap() {
-    setError(null);
-    setLoadRevision((value) => value + 1);
-  }
-
-  if (!bootstrap && !error) {
-    return (
-      <LocalOwnerStateSurface>
-        <StatusChip label={uiText("설치 확인 중")} tone="waiting" />
-        <p>{uiText("이 설치에 연결된 Angmoo owner와 로컬 세션을 확인하고 있습니다.")}</p>
-      </LocalOwnerStateSurface>
-    );
-  }
-
-  if (bootstrap?.state === "recovery_required") {
-    return (
-      <LocalOwnerStateSurface>
-        <DegradedPanel
-          title={uiText("owner 복구가 필요합니다")}
-          description={uiText("기존 owner principal을 찾을 수 없습니다. 데이터는 변경하지 않았으며 새 owner를 만들지 않습니다.")}
-          action={
-            <Button variant="secondary" onClick={retryBootstrap}>
-              {uiText("다시 확인")}</Button>
-          }
-        />
-      </LocalOwnerStateSurface>
-    );
-  }
-
-  if (!bootstrap) {
-    return (
-      <LocalOwnerStateSurface>
-        <InlineError>
-          <div className={styles.feedbackStack}>
-            <span>{localErrorMessage(error ?? "owner_state_unavailable")}</span>
-            <Button variant="secondary" onClick={retryBootstrap}>
-              {uiText("다시 확인")}</Button>
-          </div>
-        </InlineError>
-      </LocalOwnerStateSurface>
-    );
-  }
-
-  return (
-    <section className={styles.page} data-local-owner-state={bootstrap.state}>
-      <PageHeader title={uiText("이 장치의 owner 준비")} subtitle={uiText("Local Angmoo · 한 설치 · 한 owner")} />
-
-      <div className={styles.content}>
-        <Card as="section" className={styles.introCard}>
-          <div className={styles.introHeading}>
-            <span className={styles.brandIcon} aria-hidden="true">
-              <Bird />
-            </span>
-            <div>
-              <h2>{uiText("이 설치의 데이터 owner를 연결합니다")}</h2>
-              <p>
-                {uiText("외부 계정 가입 없이 이 PC의 한 사용자를 Angmoo 데이터 owner로 연결합니다. owner는 한 번만 정해지며 다른 설치의 사용자와 자동으로 합쳐지지 않습니다.")}</p>
-            </div>
-          </div>
-          <dl className={styles.installationSummary}>
-            <div>
-              <dt>{uiText("설치 식별자")}</dt>
-              <dd>{bootstrap.installation_id ?? uiText("준비 중")}</dd>
-            </div>
-            <div>
-              <dt>{uiText("설치 이름")}</dt>
-              <dd>{bootstrap.local_label?.trim() || uiText("아직 정하지 않음")}</dd>
-            </div>
-          </dl>
-        </Card>
-
-        {logoutLocallyOnly ? (
-          <Toast>
-            {uiText("이전 로컬 세션은 이 설치에서 정리됐습니다. owner 데이터는 그대로이며 새 local session을 준비합니다.")}</Toast>
-        ) : null}
-        {error ? <InlineError>{localErrorMessage(error)}</InlineError> : null}
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {bootstrap.candidates.length ? (
-            <fieldset className={styles.ownerFieldset}>
-              <legend>{uiText("기존 데이터 owner 선택")}</legend>
-              <p>
-                {uiText("Character·World·credential이 이미 연결된 사용자를 확인하고 직접 선택하세요. 선택하지 않으면 새 owner를 만듭니다.")}</p>
-              <div className={styles.ownerChoices}>
-                {bootstrap.candidates.map((candidate) => {
-                  const selected = selectedOwnerId === candidate.user_id;
-                  return (
-                    <label
-                      key={candidate.user_id}
-                      className={styles.ownerChoice}
-                      data-selected={selected || undefined}
-                    >
-                      <input
-                        type="radio"
-                        name="owner"
-                        value={candidate.user_id}
-                        checked={selected}
-                        onChange={() => setSelectedOwnerId(candidate.user_id)}
-                      />
-                      <span>
-                        <strong>
-                          {candidate.display_name}
-                          {candidate.suggested ? uiText("· 기존 데이터 후보") : ""}
-                        </strong>
-                        <small>
-                          {uiText("앵무")}{candidate.character_count} · World {candidate.world_count} ·
-                          credential {candidate.credential_count}
-                        </small>
-                      </span>
-                    </label>
-                  );
-                })}
-                <label
-                  className={styles.ownerChoice}
-                  data-selected={!selectedOwnerId || undefined}
-                >
-                  <input
-                    type="radio"
-                    name="owner"
-                    value=""
-                    checked={!selectedOwnerId}
-                    onChange={() => setSelectedOwnerId("")}
-                  />
-                  <span>
-                    <strong>{uiText("새 local owner 만들기")}</strong>
-                    <small>{uiText("기존 후보와 합치지 않고 이 설치에 새 owner를 만듭니다.")}</small>
-                  </span>
-                </label>
-              </div>
-            </fieldset>
-          ) : null}
-
-          {!selectedCandidate ? (
-            <Field id="local-owner-display-name" label={uiText("owner 표시 이름")} required>
-              {(controlProps) => (
-                <Input
-                  {...controlProps}
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
-                  maxLength={80}
-                  autoComplete="name"
-                  placeholder={uiText("예: 내 Angmoo")}
-                />
-              )}
-            </Field>
-          ) : null}
-
-          <Field
-            id="local-installation-label"
-            label={uiText("이 설치의 이름")}
-            helperText={uiText("선택 사항이며 다른 설치를 구분하기 위한 로컬 표시 이름입니다.")}
-          >
-            {(controlProps) => (
-              <Input
-                {...controlProps}
-                value={localLabel}
-                onChange={(event) => setLocalLabel(event.target.value)}
-                maxLength={80}
-                placeholder={uiText("예: 작업실 PC")}
-              />
-            )}
-          </Field>
-
-          <label className={styles.privacyChoice}>
-            <input
-              type="checkbox"
-              checked={privacyAcknowledged}
-              onChange={(event) => setPrivacyAcknowledged(event.target.checked)}
-            />
-            <span>
-              {uiText("SQLite 데이터와 local secret은 이 장치에 보존되고, owner claim은 한 번만 가능하다는 점을 확인했습니다.")}</span>
-          </label>
-
-          <div className={styles.localFacts} aria-label={uiText("로컬 저장 계약")}>
-            <span>
-              <Database aria-hidden="true" />
-              {uiText("기존 row·FK 보존")}</span>
-            <span>
-              <LockKeyhole aria-hidden="true" />
-              opaque local session
-            </span>
-          </div>
-
-          <Button
-            type="submit"
-            fullWidth
-            loading={saving}
-            loadingLabel={uiText("owner를 연결하는 중")}
-            disabled={
-              !privacyAcknowledged ||
-              (!selectedOwnerId && !displayName.trim())
-            }
-          >
-            {uiText("이 owner로 Angmoo 시작")}</Button>
-        </form>
-      </div>
-    </section>
-  );
-}
-
-function LocalOwnerStateSurface({ children }: { children: React.ReactNode }) {
-  const uiText = useUiText("identity");
-  return (
-    <section className={styles.page} data-local-owner-state="checking">
-      <PageHeader title={uiText("이 장치의 owner 준비")} subtitle="Local Angmoo" />
-      <div className={styles.stateContent}>
-        <Card as="section" className={styles.stateCard}>
-          {children}
-        </Card>
-      </div>
-    </section>
-  );
-}
-
-function localErrorMessage(code: string) {
-  if (code.includes("bootstrap_race_lost") || code.includes("bootstrap_closed")) {
-    return "다른 owner claim이 먼저 완료되었습니다. local session을 다시 확인합니다.";
-  }
-  if (code.includes("bootstrap_challenge_invalid")) {
-    return "owner 확인 시간이 만료되었습니다. 다시 시도해 주세요.";
-  }
-  if (code.includes("local_owner_candidate_invalid")) {
-    return "선택한 기존 owner를 사용할 수 없습니다. 목록을 다시 확인해 주세요.";
-  }
-  return code;
+    if (snapshot.phase === "authenticated" && !embedded) router.replace(safeLoginReturnTo(returnTo) ?? "/");
+  }, [snapshot.phase, embedded, router, returnTo]);
+  const act = async (work: () => Promise<void>) => {
+    if (pending) return;
+    setPending(true);
+    try { await work(); } finally { setPending(false); }
+  };
+  if (snapshot.phase === "authenticated") return null;
+  const stopped = snapshot.phase === "stopped";
+  const unconfirmed = snapshot.phase === "end_unconfirmed";
+  const preparing = ["checking", "preparing", "ending"].includes(snapshot.phase);
+  const title = stopped ? text("세션을 종료했어요.") : unconfirmed ? text("세션 종료를 확인하지 못했어요.")
+    : snapshot.phase === "selection_required" ? text("기존 사용자를 선택해 주세요.")
+      : snapshot.phase === "recovery_required" ? text("기존 데이터 연결을 확인해야 해요.")
+        : preparing ? text("Angmoo를 준비하고 있어요.") : text("Angmoo를 준비하지 못했어요.");
+  return <section className={embedded ? undefined : styles.page} data-local-owner-state={snapshot.phase} aria-live="polite">
+    <Card as="section" className={styles.stateCard}>
+      <h2>{title}</h2>
+      {stopped || unconfirmed ? <p>{text("사용자와 저장된 데이터는 그대로 유지됩니다.")}</p> : null}
+      {snapshot.errorCode === "local_auth_contract_mismatch" ? <p>{text("앱과 서버의 버전이 맞지 않아요. 같은 버전으로 다시 실행해 주세요.")}</p> : null}
+      {snapshot.errorCode?.startsWith("local_connection_storage") ? <p>{text("이 브라우저의 연결 상태를 저장하지 못했어요. 저장소 사용을 허용한 뒤 다시 시도해 주세요.")}</p> : null}
+      {stopped ? <Button disabled={pending} onClick={() => void act(controller.resume)}>{text("다시 시작하기")}</Button> : null}
+      {unconfirmed ? <Button disabled={pending} onClick={() => void act(controller.stop)}>{text("세션 종료 다시 시도")}</Button> : null}
+      {snapshot.phase === "selection_required" ? snapshot.bootstrap?.candidates.map(candidate =>
+        <Button key={candidate.user_id} disabled={pending} onClick={() => void act(() => controller.selectOwner(candidate.user_id))}>{candidate.display_name}</Button>) : null}
+      {!preparing && !stopped ? <Button variant="secondary" disabled={pending} onClick={() => void act(controller.refresh)}>{text("다시 확인")}</Button> : null}
+    </Card>
+  </section>;
 }

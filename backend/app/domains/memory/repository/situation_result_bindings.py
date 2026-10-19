@@ -2,15 +2,16 @@
 from dataclasses import asdict
 from sqlalchemy import select
 from app.domains.memory.contracts.situation_result_binding import (
-    SituationResultBinding, SituationResultBasisResolver, RESULT_BINDING_REVISION,
+    SituationResultBinding, SituationResultBasisResolver, RESULT_BINDING_REVISION, RESULT_BINDING_RUN_REVISIONS,
 )
 from app.domains.memory.models.situation_result_binding import MemorySituationResultBinding
 from app.domains.memory.policies.situation_result_binding import approve, verify
 
 
 def stored_binding(session, admission, *, revision, validation=None):
-    if revision != RESULT_BINDING_REVISION:
+    if revision not in RESULT_BINDING_RUN_REVISIONS:
         return None
+    revision = RESULT_BINDING_REVISION
     rows = ([row for row in validation.collections[("result_bindings", admission.receipt.sequence)] if row.validation_revision == revision]
         if validation is not None and ("result_bindings", admission.receipt.sequence) in validation.collections
         else list(session.scalars(select(MemorySituationResultBinding).where(
@@ -32,10 +33,10 @@ def stored_binding(session, admission, *, revision, validation=None):
 def prepare_binding(session, admission, resolver, *, revision, run_id, now):
     if stored_binding(session, admission, revision=revision) is not None:
         return
-    if revision != RESULT_BINDING_REVISION or not isinstance(resolver, SituationResultBasisResolver):
+    if revision not in RESULT_BINDING_RUN_REVISIONS or not isinstance(resolver, SituationResultBasisResolver):
         raise ValueError("situation_result_basis_missing")
     proof = approve(admission, resolver.result_binding_basis(admission, now=now), run_id=run_id, now=now)
     session.add(MemorySituationResultBinding(receipt_sequence=proof.receipt_sequence,
         scope_setting_id=proof.scope_setting_id, recheck_run_id=run_id,
-        validation_revision=revision, rules_revision=proof.rules_revision, proof=asdict(proof)))
+        validation_revision=proof.validation_revision, rules_revision=proof.rules_revision, proof=asdict(proof)))
     session.flush()

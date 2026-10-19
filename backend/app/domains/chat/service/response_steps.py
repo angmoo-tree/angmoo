@@ -567,6 +567,7 @@ class ResponseWorkflowSteps:
                 recall_interpretation=interpretation,
                 thought_finalizer=self._thought_finalizer,
                 situation_locale=situation,
+                situation_output_revision=(command.request.node_state.get("_situation_policy") or {}).get("output_revision"),
                 chat_identity=command.chat_identity,
                 situation_target=command.request.response_slot_id if situation else None,
                 situation_manifest_factory=(lambda payload: self._situation_memory.freeze(command, bundle, payload)) if situation else None,

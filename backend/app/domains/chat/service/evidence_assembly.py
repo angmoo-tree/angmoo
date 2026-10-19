@@ -537,6 +537,7 @@ class EvidenceBundleAssembler:
                 locator=existing.locator or item.locator,
                 author_identities=tuple(dict.fromkeys((*existing.author_identities, *item.author_identities))),
                 relationship_projection=existing.relationship_projection,
+                display_projection=existing.display_projection if existing.opaque_reference <= item.opaque_reference else item.display_projection,
             )
         ordered = list(deduplicated.values()) if preserve_rank_order else sorted(
             deduplicated.values(),
@@ -572,48 +573,44 @@ class EvidenceBundleAssembler:
 
     @staticmethod
     def _today_item(entry: TodaySnsActivityEntry) -> EvidenceItem | None:
-        parts = [
-            f"오늘 SNS 활동 종류: {entry.kind}",
-            f"실제 행동: {entry.event_type}",
-            f"행동 주체: {entry.actor_label}",
-        ]
+        from app.domains.chat.contracts.evidence_display import LABELS, bounded_segments, projection
+        parts: list[tuple[str | None, str]] = []
+        def field(key, value=None):
+            if parts:
+                parts.append((None, " | "))
+            parts.append((key, LABELS[key]))
+            if value is not None:
+                parts.append((None, str(value)))
+        field("kind", entry.kind)
+        field("action", entry.event_type)
+        field("actor", entry.actor_label)
         if entry.counterpart_label is not None:
-            parts.append(f"상대: {entry.counterpart_label}")
+            field("counterpart", entry.counterpart_label)
         if entry.truncated:
-            parts.append("원문 일부만 포함됨: 전문이나 전체 대화로 주장하지 말 것")
-        if entry.root_title:
-            parts.append(f"대화 시작 글 제목: {entry.root_title}")
-        if entry.root_body:
-            parts.append(f"대화 시작 글 일부: {entry.root_body}")
-        if entry.parent_title:
-            parts.append(f"직접 연결된 이전 글 제목: {entry.parent_title}")
-        if entry.parent_body:
-            parts.append(f"직접 연결된 이전 글: {entry.parent_body}")
-        if entry.title:
-            parts.append(f"제목: {entry.title}")
-        if entry.body:
-            parts.append(f"내용: {entry.body}")
+            field("truncated")
+        for key in ("root_title", "root_body", "parent_title", "parent_body", "title", "body"):
+            if getattr(entry, key):
+                field(key, getattr(entry, key))
         subjective = entry.subjective_context
         if entry.thought is not None:
             if entry.thought.status == "recorded":
-                parts.append(f"이 활동에 연결된 생각(자기 관점·행동 이유): {entry.thought.text}")
+                field("thought", entry.thought.text)
                 if entry.thought.truncated:
-                    parts.append("생각은 앞 280자만 저장됨: 생략된 이유나 감정을 만들어내지 말 것")
+                    field("thought_truncated")
             else:
-                parts.append(f"생각 기록 상태: {entry.thought.status}; 행동 이유를 기록된 사실로 단정하지 말 것")
+                field("thought_status", entry.thought.status)
+                parts.append(("thought_unrecorded", LABELS["thought_unrecorded"]))
         elif subjective is not None:
-            parts.append(
-                "행동 결정 시 직접 선언한 동기: "
-                f"{subjective.motivation_text} ({subjective.motivation_kind})"
-            )
+            field("motivation", f"{subjective.motivation_text} ({subjective.motivation_kind})")
             if subjective.emotion_label != "unspecified":
-                emotion = subjective.emotion_label
+                field("emotion", subjective.emotion_label)
                 if subjective.emotion_text:
-                    emotion = f"{emotion}: {subjective.emotion_text}"
+                    parts.append((None, f": {subjective.emotion_text}"))
                 if subjective.emotion_intensity is not None:
-                    emotion = f"{emotion} (강도 {subjective.emotion_intensity}/100)"
-                parts.append(f"행동 결정 시 직접 선언한 감정: {emotion}")
-        text = EvidenceBundleAssembler._bounded_text(" | ".join(parts))
+                    parts.extend(((None, " ("), ("intensity", LABELS["intensity"]),
+                        (None, f"{subjective.emotion_intensity}/100)")))
+        segments = bounded_segments(parts, MAX_EVIDENCE_ITEM_CHARS)
+        text = "".join(segment["text"] for segment in segments)
         if not text:
             return None
         source_type = (
@@ -630,6 +627,7 @@ class EvidenceBundleAssembler:
         source_id = entry.source_id
         return EvidenceItem(
             opaque_reference=entry.opaque_reference,
+            display_projection=projection(entry.opaque_reference, segments),
             author_identities=tuple((role, identifier) for role, identifier in
                 (("actor", entry.actor_id), ("counterpart", entry.counterpart_id)) if identifier)
                 + tuple((field, identifier) for field, identifier in entry.source_authors

@@ -1,5 +1,17 @@
 # Frontend product-shell boundaries
 
+2026-10-19 LOCAL: automatic local preparation is not an entry-route change.
+Device Home remains the existing app list at `/`; it waits for user/session and
+confirmed environment before ensuring the default SNS World. The user explicitly
+opens SNS. Existing safe World/Chat deep links are preserved. There is no new
+`/apps`, first-run form, acknowledgement checkbox or initial information banner.
+The common Identity controller owns preparation and explicit stop/Continue for
+Next and static shells. Stopped intent persists per installation/client across
+reload; Continue reuses the existing user and opens the app list. Legacy data
+selection/recovery remain exceptional screens. Account and new World profile
+names share `사용자` / `User` defaults; language selection never renames saved data.
+See [local implementation evidence](../verification/local-entry-memory-sns-stability-20261019.md).
+
 2026-10-15: World notifications reuse the World Phone shell as an auxiliary feed
 screen with five primary tabs. FeedHeader right slot orders bell then own-profile.
 Composition supplies home-visible World IDs to Social's single batch hook and

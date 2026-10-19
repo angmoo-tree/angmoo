@@ -1,7 +1,7 @@
 import { apiRequest } from "@/features/identity/api/request";
 import type { AuthRead, UserRead, UserFeedContentFilter as FeedContentFilter } from "@/lib/auth/browser-session";
 import type { LocalBootstrapRead, GoogleLoginRead } from "@/features/identity/types/identity";
-import { getCurrentUser, issueLocalSession as issueSharedLocalSession, updateUserFeedPreferences } from "@/features/identity/api/session";
+import { getCurrentUser, updateUserFeedPreferences } from "@/features/identity/api/session";
 
 export function signup(data: {
   email: string;
@@ -19,7 +19,7 @@ export function signup(data: {
 
 export function getLocalBootstrapStatus() {
   return apiRequest<LocalBootstrapRead>("/auth/local/bootstrap", {
-    anonymous: true,
+    suppressAuthFailureEvent: true,
   });
 }
 
@@ -27,22 +27,6 @@ export function createLocalBootstrapChallenge() {
   return apiRequest<{ expires_at: string }>("/auth/local/bootstrap/challenge", {
     method: "POST",
   });
-}
-
-export function claimLocalOwner(data: {
-  owner_user_id: string | null;
-  display_name: string | null;
-  local_label: string | null;
-  privacy_acknowledged: boolean;
-}) {
-  return apiRequest<AuthRead>("/auth/local/bootstrap/claim", {
-    method: "POST",
-    body: data,
-  });
-}
-
-export function issueLocalSession() {
-  return issueSharedLocalSession();
 }
 
 export function login(data: { email: string; password: string }) {
@@ -97,6 +81,12 @@ export function updateMe(data: {
   return apiRequest<UserRead>("/auth/me", {
     method: "PATCH",
     body: data,
+  });
+}
+
+export function updateInstallationLabel(local_label: string) {
+  return apiRequest<{ local_label: string | null }>("/auth/local/installation", {
+    method: "PATCH", body: { local_label },
   });
 }
 

@@ -160,7 +160,7 @@ export function ProfileMediaUploader({
           ) : null}
         </div>
         <div className="relative px-6 pb-6 pt-[70px]">
-          <div className="absolute left-6 top-[-54px] rounded-full border-[5px] border-surface-base bg-surface-base shadow-[var(--shadow-summary)]">
+          <div className="absolute left-6 top-[-54px] flex rounded-full border-[5px] border-surface-base bg-surface-base shadow-[var(--shadow-summary)]">
             <ProfileAvatar
               name={name}
               avatarUrl={resolvedAvatarUrl}

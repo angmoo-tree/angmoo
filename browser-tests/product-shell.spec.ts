@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { uiDManualThread, uiDWorldCharacterManagement } from "./continuity-next-fixture";
@@ -205,7 +206,7 @@ async function installBackendFixture(
       audit.environmentReports.push(`${method} ${url.pathname}`);
       return json(route, {installation_id:"synthetic-shell",preferred_language:"ko-KR",
         memory_search_locale:"ko-KR",timezone:"Asia/Seoul",environment_revision:1,
-        timezone_revision:1,confirmed_at:null,synchronization:"active_owner",
+        timezone_revision:1,confirmed_at:"2026-10-19T00:00:00Z",synchronization:"active_owner",
         lease_expires_at:null,lease_token:"synthetic-only-shell-lease"});
     }
     if (!["GET", "HEAD"].includes(method)) audit.writes.push(`${method} ${url.pathname}`);
@@ -214,6 +215,8 @@ async function installBackendFixture(
       audit.providerCalls.push(`${method} ${url.pathname}`);
     }
 
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), OWNER, { installationId: "synthetic-shell" });
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (url.pathname === "/api/backend/auth/me" && method === "GET") {
       return json(route, OWNER);
     }

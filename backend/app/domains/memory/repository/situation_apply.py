@@ -23,6 +23,7 @@ from app.domains.memory.models.activity_situation import (
 )
 from app.domains.memory.repository.capacity import stored_count, STORAGE_LIMIT
 from app.domains.memory.repository.situation_runs import require_run_fence
+from app.domains.memory.contracts.situation_result_binding import RESULT_BINDING_RUN_REVISIONS
 from app.domains.memory.repository.vector_eligibility import register_content
 
 
@@ -143,7 +144,7 @@ def prepare_page(session, *, run_id, token, now, page_size=1):
                     raise ValueError("situation_source_binding_invalid")
                 reader.collections[(label, key)] = values
                 collections.append((model, column.key, key, values))
-            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck" and revision == "situation-validation.v4"):
+            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck" and revision in RESULT_BINDING_RUN_REVISIONS):
                 contexts.append((row.sequence, complete_context(session, admission, revision=revision, validation=reader)))
             admissions.append((row.sequence, admission, None))
         except MemoryConflictError:
@@ -230,7 +231,7 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
             # A formatting proof can only be approved in the fenced recheck
             # savepoint below. Ordinary pending work never resolves history.
             if not (admission.requires_result_binding and run.work_kind == "blocked_recheck"
-                    and revision == "situation-validation.v4"):
+                    and revision in RESULT_BINDING_RUN_REVISIONS):
                 if prepared is None:
                     complete_context(session, admission, revision=revision)
             result_sources = admission.result_sources

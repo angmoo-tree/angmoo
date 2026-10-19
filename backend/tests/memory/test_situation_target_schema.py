@@ -8,9 +8,9 @@ from app.runtime.autonomous_activity.combined_provider import CombinedActivityPr
 def test_targets_are_exact_and_empty_targets_allow_only_empty_array():
     schema = {"type": "object", "properties": {"decision": {}, "draft": {}}}
     original = deepcopy(schema)
-    result = with_social_situations(schema, ["routine-post"])
+    result = with_social_situations(schema, ["routine-post"], locale="en-US")
     assert result["properties"]["situations"]["items"]["properties"]["target_id"]["enum"] == ["routine-post"]
-    empty = with_social_situations(schema, [])
+    empty = with_social_situations(schema, [], locale="en-US")
     assert empty["properties"]["situations"]["maxItems"] == 0
     assert "enum" not in empty["properties"]["situations"]["items"]["properties"]["target_id"]
     assert schema == original

@@ -77,7 +77,8 @@ class SocialLane:
                 or identity.get("world_id", self.actor.world_id) != self.actor.world_id
                 or identity.get("actor_id", self.actor.id) != self.actor.id):
             raise ActivityRelationshipValidationError("receipt_invalid", lane=self.lane)
-        requests = [{"binding": RelationshipValidationBinding(self.ctx.run_id, self.lane, row["target_id"], row.get("counterpart_id")),
+        from app.runtime.autonomous_activity.relationship_progress import effects
+        requests = [{"effects": effects(self, state, row["target_id"]), "binding": RelationshipValidationBinding(self.ctx.run_id, self.lane, row["target_id"], row.get("counterpart_id")),
             "prompt": row.get("relationship", {}), "receipt": state.get("relationship_validation_receipts", {}).get(row["target_id"]),
             "policy": read_currentness_policy(identity)} for row in candidates]
         try:
@@ -95,7 +96,8 @@ class SocialLane:
                     or identity.get("world_id", self.actor.world_id) != self.actor.world_id
                     or identity.get("actor_id", self.actor.id) != self.actor.id):
                 raise SocialContextValidationError("receipt_invalid")
-            result = validate_relationship(self.ctx, self.actor, binding=binding,
+            from app.runtime.autonomous_activity.relationship_progress import effects
+            result = validate_relationship(self.ctx, self.actor, binding=binding, effects=effects(self, state, candidate["target_id"]),
                 prompt=candidate.get("relationship", {}),
                 receipt=state.get("relationship_validation_receipts", {}).get(candidate["target_id"]),
                 policy=read_currentness_policy(identity))
@@ -307,7 +309,10 @@ class SocialLane:
         return {"executions": plain(results)}
 
     def effect_relationship_validator(self, state, target_id):
+        from app.runtime.autonomous_activity.relationship_progress import capture, record
+        before = None
         def validate():
+            nonlocal before
             if self.claim_validator is not None:
                 self.claim_validator()
             candidate = next((c for c in state.get("candidates", []) if c["target_id"] == target_id), None)
@@ -321,6 +326,10 @@ class SocialLane:
                 post = self.ctx.db.get(Post, identifier, populate_existing=True)
                 if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
                     raise ValueError("activity_source_changed")
+            before = capture(self, state)
+        def finish(execution, event):
+            record(self, state, target_id, before, execution, event)
+        validate.finish = finish
         return validate
 
     async def settle(self, state):

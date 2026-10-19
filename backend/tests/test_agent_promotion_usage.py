@@ -118,6 +118,9 @@ def test_complete_draft_records_promotion_usage_consent() -> None:
         db.add(InstallationIdentity(singleton_key="local-installation", installation_id="fixture",
             owner_user_id=user.id, bootstrap_state="claimed", claimed_at=datetime.now(UTC)))
         db.commit()
+        from environment_fixture_support import seed_environment
+        seed_environment(db, user.id).confirmed_at = datetime.now(UTC)
+        db.commit()
         world = ensure_default_space(db, owner_id=user.id)
         draft = models.AgentCreationDraft(id="draft-consent", user_id=user.id, contract_version=2,
             target_world_id=world.id, provider="google", model="gemini-3.1-flash-lite",

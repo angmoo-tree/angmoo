@@ -1,5 +1,56 @@
 # Angmoo Frontend Architecture
 
+## Automatic local preparation and explicit session stop (2026-10-19 LOCAL)
+
+Composition's AuthProvider consumes the single controller owned by
+`features/identity/controllers`. Login/legacy/recovery screens do not independently
+issue sessions. The controller owns single-flight, bounded reconciliation,
+generation/epoch checks and stop/resume ordering. The shared transport keeps
+Origin/cookie/desktop verification and never replays a mutation after auth recovery.
+
+An installation-keyed IndexedDB transaction persists client identity and explicit
+stop intent; BroadcastChannel shares changes between tabs. Web Locks serialize
+where supported, but correctness also relies on atomic storage and server CAS.
+No session token or API secret is placed in this coordination store. Runtime or
+owner changes invalidate older controllers, reads and edit drafts. Storage errors
+are explicit and do not silently create replacement clients or resume stopped ones.
+
+The preparation order is user/session, confirmed environment, default SNS World.
+It is independent of navigation: `/` remains Device Home's app list. No `/apps`
+route or automatic feed redirect is added. Explicit SNS selection and safe deep
+links retain their destinations. Fresh preparation shows the existing loading
+state without a name form, checkbox or introductory data banner. Legacy owner
+selection, recovery and explicit stopped/unconfirmed states remain visible.
+Continue reconnects the same user and returns to the existing app list.
+
+New account and World profile defaults are `사용자` for Korean, `User` otherwise;
+existing names survive language changes. Identity settings expose account and
+installation labels separately. Session stop retains data and does not stop
+background autonomous activity. All added user-facing states have ko/en copy.
+
+CredentialFields separates saved credential facts, configuration metadata and
+write-only drafts. Activity mutation refreshes related SNS metadata without
+discarding a pending key/model. A real credential change requires review before
+overwrite. Read/save/delete/conflict/unknown-result errors have distinct copy;
+unknown results permit read-only recovery, never automatic mutation replay or a
+success claim based only on `has_key`. Auth/runtime/scope changes clear old drafts.
+
+Memory owns evidence projection decoding: bounded known labels must reconstruct
+the authorized frozen excerpt before system labels are translated. Literal/source
+text stays unchanged and is rendered as React text. Legacy unstructured excerpts
+remain explicit original text. The shared Profile uploader fixes only its avatar
+frame layout (flex), preserving shared Avatar, crop and media persistence behavior.
+
+Next's backend proxy propagates causal request cancellation, bounds error bodies
+and disposes stream readers/listeners once while preserving backpressure. An
+upstream failure with a live request is not classified as client cancellation;
+Failures after headers are sent remain failures. Diagnostics contain safe structural
+facts, not bodies/URLs/credentials. Static/Tauri uses the same feature lifecycle
+through direct transport; browser tests of that shell do not prove native WebView.
+
+See `docs/verification/local-entry-memory-sns-stability-20261019.md` for the scoped
+tests and explicit native/ARM64/real-AI verification limits.
+
 ## World settings and next activity (2026-10-18 LOCAL)
 
 The shared WorldCharacter management hook re-reads management once after a

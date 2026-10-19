@@ -52,8 +52,16 @@ class OwnerControlledIdentityService:
         if identities:
             raise OwnerProfileSelectionRequiredError(world_id)
         try:
+            from app.domains.identity.service.environment import environment_confirmed, lock_environment_admission, snapshot
+            from app.domains.identity.service.local_owner import read_ui_language
+            lock_environment_admission(self._db, current_user_id)
+            if not environment_confirmed(self._db, current_user_id):
+                raise OwnerControlledIdentityConflictError("environment_not_ready")
+            environment = snapshot(self._db, current_user_id)
+            language = read_ui_language(self._db, current_user_id) or environment.memory_search_locale
+            display_name = "사용자" if language.lower().split("-")[0] == "ko" else "User"
             return self.create(world_id=world_id, current_user_id=current_user_id,
-                               profile=OwnerControlledProfile("사용자", None, "", None, "", (), ""))
+                               profile=OwnerControlledProfile(display_name, None, "", None, "", (), ""))
         except OwnerControlledIdentityConflictError:
             if self._find_identity(world_id, current_user_id) is None:
                 raise

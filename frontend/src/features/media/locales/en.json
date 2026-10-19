@@ -199,7 +199,7 @@
   "먼저 키와 모델을 저장한 뒤 이미지 설정을 저장해주세요.": "Save the key and model before saving image settings.",
   "상한을 설정해야 사용할 수 있어요.": "Set a daily limit to enable this feature.",
   "이미지 설정": "Image settings",
-  "최신 값을 확인했어요. 내 입력 유지": "I reviewed the latest values. Keep my input",
+  "최신 값을 확인했어요. 내 입력 유지": "Reviewed latest settings. Keep my inputs",
   "최신 설정 확인": "Review latest settings",
   "이미지 생성 대기": "Image generation pending",
   "이미지 생성 중": "Generating image",
@@ -339,5 +339,12 @@
   "제공자 오류 코드": "Provider error code",
   "요청 식별자": "Request ID",
   "진단 수집 상태": "Diagnostic completeness",
-  "이 정보만으로 제공자의 처리 완료 여부를 확인할 수는 없어요.": "These details alone cannot confirm whether the provider completed the request."
+  "이 정보만으로 제공자의 처리 완료 여부를 확인할 수는 없어요.": "These details alone cannot confirm whether the provider completed the request.",
+  "설정을 불러오지 못했어요.": "Could not load settings.",
+  "키 상태를 불러오지 못했어요.": "Could not load the saved key status.",
+  "설정을 저장하지 못했어요. 입력을 확인해 주세요.": "Could not save settings. Check your inputs.",
+  "키를 삭제하지 못했어요.": "Could not delete the saved key.",
+  "설정이 변경됐어요. 최신 내용을 확인해 주세요.": "Settings have changed. Review the latest settings.",
+  "요청 결과를 확인하지 못했어요. 다시 저장하기 전에 현재 상태를 확인해 주세요.": "The request result could not be confirmed. Check the current settings before submitting again.",
+  "다시 불러오기": "Reload settings"
 }

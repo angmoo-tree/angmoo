@@ -31,6 +31,8 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
         from app.domains.identity.service.environment import lock_environment_admission
         lock_environment_admission(service.db, user.id)
         role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True, basic=purpose in {"sns", "image"})
+        if purpose == "sns" and not remove:
+            service.require_credential_configuration(role, data.expected_configuration_revision)
         scope = dict(owner_id=user.id, world_id=world_id, world_character_id=world_character_id, purpose=purpose)
         if purpose == "image":
             from app.domains.media.models_world_policy import WorldImagePolicy
@@ -61,14 +63,8 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
         else:
             result = world_credentials.delete(service.db, **scope, expected_revision=data.expected_revision) if remove else world_credentials.save(service.db, **scope, data=data)
         if purpose == "sns" and not remove:
-            from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
-            configuration = service.db.get(WorldCharacterConfiguration, role.id)
-            if configuration is None:
-                raise ValueError("world_configuration_missing")
             # The purpose binding owns the execution model. Key/model rotation
             # must not mutate the actor configuration captured by an admitted job.
-            if role.version != data.expected_configuration_revision:
-                raise ValueError("world_character_version_conflict")
             result = result.model_copy(update={"configuration_revision": role.version})
         if purpose == "consolidation" and not remove:
             from app.domains.memory.service.subject_profiles import save as save_profile

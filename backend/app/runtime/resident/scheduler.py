@@ -177,8 +177,10 @@ async def _run_fenced_tick_with_heartbeat(
     drain_timeout_seconds: float | None = None,
     config: Settings = settings,
 ) -> schemas.ResidentSlotTickRead:
+    from app.contracts.activity_cancellation import CancellationIntent, CancellationReason, cancellation_scope
+    cancellation = CancellationIntent()
     async def run_tick() -> schemas.ResidentSlotTickRead:
-        with scheduler_fence(owner_id=owner_id, fencing_epoch=fencing_epoch):
+        with cancellation_scope(cancellation), scheduler_fence(owner_id=owner_id, fencing_epoch=fencing_epoch):
             return await tick_runner()
 
     async def heartbeat() -> None:
@@ -213,6 +215,13 @@ async def _run_fenced_tick_with_heartbeat(
         primary_error = exc
         raise
     finally:
+        if heartbeat_task.done() and not heartbeat_task.cancelled() and heartbeat_task.exception() is not None:
+            failure = heartbeat_task.exception()
+            cancellation.reason = (CancellationReason.LEASE_LOST if isinstance(failure, SchedulerLeaseLostError)
+                else CancellationReason.HEARTBEAT if isinstance(failure, (SqliteBusyRetryExhausted, SqliteTaskQueueFull))
+                else CancellationReason.UNKNOWN)
+        elif stop_event is not None and stop_event.is_set():
+            cancellation.reason = CancellationReason.SHUTDOWN
         for task in tasks:
             if not task.done(): task.cancel()
         _, pending = await asyncio.wait(tasks, timeout=timeout)

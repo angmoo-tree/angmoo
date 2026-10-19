@@ -17,6 +17,21 @@ from app.domains.worlds.service.creator import create_world
 from app.domains.worlds.schemas import WorldDraftCreate
 
 
+def test_default_target_not_ready_is_a_draft_validation_error(db):
+    from sqlalchemy import delete
+    from app.domains.identity.models_environment import LocalEnvironment
+    from app.domains.worlds.models import OwnerDefaultWorld
+    from app.runtime.characters.registration import resolve_target
+
+    session, owner = db
+    session.execute(delete(LocalEnvironment))
+    session.commit()
+    with pytest.raises(AgentCreationDraftValidationError, match="world_definition_incomplete") as error:
+        resolve_target(session, owner, None)
+    assert str(error.value.__cause__) == "environment_not_ready"
+    assert session.get(OwnerDefaultWorld, owner.id) is None
+
+
 def card_bytes():
     return json.dumps({"spec": "chara_card_v2", "spec_version": "2.0", "data": {
         "name": "Original", "description": "{{char}} studies stars.", "personality": "Curious",

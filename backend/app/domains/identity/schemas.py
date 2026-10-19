@@ -99,6 +99,9 @@ class LocalOwnerCandidateRead(BaseModel):
 
 
 class LocalBootstrapRead(BaseModel):
+    protocol: int = 2
+    automatic_prepare_allowed: bool = False
+    client_connection: dict | None = None
     state: Literal["unclaimed", "claimed", "recovery_required"]
     installation_id: str | None = None
     local_label: str | None = None
@@ -114,7 +117,6 @@ class LocalOwnerClaimCreate(BaseModel):
     owner_user_id: str | None = Field(default=None, max_length=64)
     display_name: str | None = Field(default=None, max_length=80)
     local_label: str | None = Field(default=None, max_length=80)
-    privacy_acknowledged: bool = False
 
 
 def bootstrap_read(status: LocalBootstrapStatus) -> LocalBootstrapRead:

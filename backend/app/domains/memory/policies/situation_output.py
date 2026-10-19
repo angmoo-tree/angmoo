@@ -1,8 +1,19 @@
 """Parse the auxiliary output independently from the original activity result."""
 from app.domains.memory.contracts.activity_situation import DESCRIPTION_LIMIT, SituationDraft
+from app.contracts.language import generation_language_name
+from app.contracts.environment import validate_memory_search_locale
 
 
-def parse_description(raw: object, *, target_key: str, ordered: bool = True) -> SituationDraft:
+def language_only(raw: object, locale: str) -> bool:
+    """Only exact admitted-language markers, never word/length heuristics."""
+    locale = validate_memory_search_locale(locale)
+    return isinstance(raw, str) and raw.strip().casefold() in {
+        locale.casefold(), locale.split("-")[0].casefold(), generation_language_name(locale).casefold()}
+
+
+def parse_description(raw: object, *, target_key: str, ordered: bool = True, locale: str | None = None) -> SituationDraft:
+    # None retains structural-only parsing for historical admission restoration.
+    # Current generation adapters always provide the frozen locale explicitly.
     if not ordered:
         return SituationDraft(target_key, None, "output_order_invalid", "situation_output_order_invalid")
     if raw is None:
@@ -13,10 +24,12 @@ def parse_description(raw: object, *, target_key: str, ordered: bool = True) -> 
         raw.encode("utf-8")
     except UnicodeError:
         return SituationDraft(target_key, None, "invalid", "situation_description_invalid")
+    if locale is not None and language_only(raw, locale):
+        return SituationDraft(target_key, None, "invalid", "situation_description_language_only")
     return SituationDraft(target_key, raw, "valid")
 
 
-def parse_situations(payload: dict, targets: tuple[str, ...], *, base_fields=("decision", "draft")) -> dict[str, SituationDraft]:
+def parse_situations(payload: dict, targets: tuple[str, ...], *, base_fields=("decision", "draft"), locale: str | None = None) -> dict[str, SituationDraft]:
     """A duplicate/invalid target cannot discard another target's valid base."""
     keys = list(payload)
     ordered = ("situations" not in payload or
@@ -30,11 +43,11 @@ def parse_situations(payload: dict, targets: tuple[str, ...], *, base_fields=("d
     for target in targets:
         matches = [row for row in raw if isinstance(row, dict) and row.get("target_id") == target]
         value = matches[0].get("description") if len(matches) == 1 else (False if matches else None)
-        result[target] = parse_description(value, target_key=target, ordered=ordered)
+        result[target] = parse_description(value, target_key=target, ordered=ordered, locale=locale)
     return result
 
 
-def inspect_situations(payload: dict, targets: tuple[str, ...], *, base_fields=("decision", "draft"), limit=16) -> dict:
+def inspect_situations(payload: dict, targets: tuple[str, ...], *, base_fields=("decision", "draft"), limit=16, locale: str | None = None) -> dict:
     """Bounded structural detail, with canonical status still owned by the parser.
 
     Description indices identify existing values for an observer to hash. This
@@ -48,7 +61,7 @@ def inspect_situations(payload: dict, targets: tuple[str, ...], *, base_fields=(
         key in keys and keys.index(key) < keys.index("situations") for key in base_fields)
     rows = raw[:limit] if isinstance(raw, list) else []
     bounded = {**payload, "situations": rows} if isinstance(raw, list) else payload
-    drafts = parse_situations(bounded, targets[:limit], base_fields=base_fields)
+    drafts = parse_situations(bounded, targets[:limit], base_fields=base_fields, locale=locale)
     entries = []
     for target in targets[:limit]:
         matches = [index for index, row in enumerate(rows) if isinstance(row, dict) and row.get("target_id") == target]
@@ -67,6 +80,8 @@ def inspect_situations(payload: dict, targets: tuple[str, ...], *, base_fields=(
                     description.encode("utf-8")
                 except UnicodeError:
                     why = "description_unicode_invalid"
+            if why == "valid" and locale is not None and language_only(description, locale):
+                why = "description_language_only"
         entries.append({"target_key": target, "description_index": index, "match_count": len(matches),
             "reason": why, "status": drafts[target].status})
     return {"field_present": "situations" in payload, "field_reason": reason, "order_valid": ordered,

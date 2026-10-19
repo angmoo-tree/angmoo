@@ -26,6 +26,7 @@ type DeviceHomeProps = {
   ensureDefaultSpace?: () => Promise<unknown>;
   onVisibleWorldIds?: (ids: string[]) => void;
   renderWorldBadge?: (worldId: string) => ReactNode;
+  authenticationFallback?: ReactNode;
   worldNotificationDescription?: (worldId: string, name: string) => string;
 };
 
@@ -49,7 +50,7 @@ const WORLD_LAUNCH_TONE_CLASSES = {
   waiting: styles.worldLaunchBadgeWaiting,
 } as const;
 
-export function DeviceHome({ authStatus, initialPreparationReady = true, ensureDefaultSpace, onVisibleWorldIds, renderWorldBadge, worldNotificationDescription }: DeviceHomeProps) {
+export function DeviceHome({ authStatus, initialPreparationReady = true, ensureDefaultSpace, onVisibleWorldIds, renderWorldBadge, worldNotificationDescription, authenticationFallback }: DeviceHomeProps) {
   const uiText = useUiText("device-home");
   const read = useDeviceHomeWorlds(authStatus === "authenticated", initialPreparationReady, ensureDefaultSpace);
   const worlds = read.items;
@@ -81,7 +82,7 @@ export function DeviceHome({ authStatus, initialPreparationReady = true, ensureD
       ))}
 
       {authStatus === "unauthenticated" ? (
-        <HomeMessage
+        authenticationFallback ?? <HomeMessage
           title={uiText("로컬 owner 연결이 필요해요")}
           description={uiText("이 설치의 owner session을 확인한 뒤 World 앱을 불러옵니다.")}
           href={`/login?returnTo=${encodeURIComponent(PRODUCT_ROUTES.deviceHome)}`}

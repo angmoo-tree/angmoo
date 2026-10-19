@@ -74,6 +74,12 @@ def _request(
     return asyncio.run(call())
 
 
+def _client_contract(app):
+    state = _request(app, "GET", "/api/v1/auth/local/bootstrap", headers=FRONTEND_HEADERS).json()
+    return {"protocol": 2, "installation_id": state["installation_id"],
+            "client_instance_id": "synthetic-legacy-test", "expected_generation": 0}
+
+
 def _challenge_cookie(response: httpx.Response) -> str:
     return response.cookies[browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME]
 
@@ -128,20 +134,16 @@ def test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash() -> None
     claim_response = _request(
         app,
         "POST",
-        "/api/v1/auth/local/bootstrap/claim",
+        "/api/v1/auth/local/bootstrap/prepare",
         headers=FRONTEND_HEADERS,
         cookies={
             browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: challenge_token,
         },
-        json={
-            "display_name": "Local Owner",
-            "local_label": "Test PC",
-            "privacy_acknowledged": True,
-        },
+        json={**_client_contract(app), "preferred_language": "en-US"},
     )
-    assert claim_response.status_code == 201
+    assert claim_response.status_code == 200
     payload = claim_response.json()
-    assert payload["user"]["display_name"] == "Local Owner"
+    assert payload["user"]["display_name"] == "User"
     assert "token" not in payload
     session_token = claim_response.cookies[browser_session.SESSION_COOKIE_NAME]
     assert session_token not in claim_response.text
@@ -150,7 +152,7 @@ def test_clean_bootstrap_claims_one_owner_and_stores_only_session_hash() -> None
         identity = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
         assert identity is not None
         assert identity.bootstrap_state == "claimed"
-        assert identity.local_label == "Test PC"
+        assert identity.local_label is None
         assert identity.owner_user_id == payload["user"]["id"]
         assert db.get(models.AuthSession, security.hash_token(session_token)) is not None
         assert db.scalar(select(models.AuthSession.token_hash)) != session_token
@@ -220,8 +222,7 @@ def test_existing_data_candidate_is_adopted_without_rewriting_foreign_keys() -> 
             )
         },
         json={
-            "owner_user_id": "user-existing",
-            "privacy_acknowledged": True,
+            **_client_contract(app), "owner_user_id": "user-existing",
         },
     )
     assert response.status_code == 201
@@ -230,7 +231,7 @@ def test_existing_data_candidate_is_adopted_without_rewriting_foreign_keys() -> 
         assert db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY).owner_user_id == "user-existing"
 
 
-def test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race() -> None:
+def test_bootstrap_closes_and_racing_prepare_reuses_committed_owner() -> None:
     app, _ = _app_and_engine()
     challenge = _request(
         app,
@@ -242,20 +243,20 @@ def test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race() -> Non
     claim = _request(
         app,
         "POST",
-        "/api/v1/auth/local/bootstrap/claim",
+        "/api/v1/auth/local/bootstrap/prepare",
         headers=FRONTEND_HEADERS,
         cookies={browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: token},
-        json={"display_name": "Owner", "privacy_acknowledged": True},
+        json={**_client_contract(app), "preferred_language": "en-US"},
     )
-    assert claim.status_code == 201
+    assert claim.status_code == 200
 
     replay = _request(
         app,
         "POST",
-        "/api/v1/auth/local/bootstrap/claim",
+        "/api/v1/auth/local/bootstrap/prepare",
         headers=FRONTEND_HEADERS,
         cookies={browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: token},
-        json={"display_name": "Other", "privacy_acknowledged": True},
+        json={**_client_contract(app), "preferred_language": "ko-KR"},
     )
     closed = _request(
         app,
@@ -263,8 +264,9 @@ def test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race() -> Non
         "/api/v1/auth/local/bootstrap/challenge",
         headers=FRONTEND_HEADERS,
     )
-    assert replay.status_code == 409
-    assert replay.json() == {"detail": "bootstrap_race_lost"}
+    assert replay.status_code == 200
+    assert replay.json()["user"]["id"] == claim.json()["user"]["id"]
+    assert replay.json()["user"]["display_name"] == "User"
     assert closed.status_code == 409
     assert closed.json() == {"detail": "bootstrap_closed"}
 
@@ -298,6 +300,7 @@ def test_local_session_reentry_issues_opaque_cookie_for_claimed_owner() -> None:
         "POST",
         "/api/v1/auth/local/session",
         headers=FRONTEND_HEADERS,
+        json=_client_contract(app),
     )
     assert response.status_code == 200
     assert response.json()["user"]["id"] == "user-owner"
@@ -347,15 +350,14 @@ def test_expired_challenge_is_rejected_without_creating_owner() -> None:
         )
         stored.expires_at = now - timedelta(seconds=1)
         db.commit()
-        with pytest.raises(Exception, match="invalid or expired bootstrap challenge"):
-            repository.claim_local_owner(
-                challenge_token=challenge.token,
-                owner_user_id=None,
-                display_name="Owner",
-                local_label=None,
-                privacy_acknowledged=True,
-                now=now,
-            )
+        from app.domains.identity.service.local_entry import LocalEntryError, LocalEntryService
+        from app.domains.identity.schemas_local_entry import LocalPrepareRequest
+        installation = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY).installation_id
+        db.rollback()
+        with pytest.raises(LocalEntryError, match="bootstrap_challenge_invalid"):
+            LocalEntryService(db).prepare(LocalPrepareRequest(protocol=2, installation_id=installation,
+                client_instance_id="synthetic-expiry-test", expected_generation=0, preferred_language="en-US"),
+                challenge_token=challenge.token, secret_ready=True)
         assert db.scalar(select(models.User)) is None
 
 
@@ -411,17 +413,17 @@ def test_valid_challenge_has_bounded_invalid_claim_attempts() -> None:
             "/api/v1/auth/local/bootstrap/claim",
             headers=FRONTEND_HEADERS,
             cookies={browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: token},
-            json={"owner_user_id": "missing-user", "privacy_acknowledged": True},
+            json={**_client_contract(app), "owner_user_id": "missing-user"},
         )
         assert response.status_code == 422
 
     rejected = _request(
         app,
         "POST",
-        "/api/v1/auth/local/bootstrap/claim",
+        "/api/v1/auth/local/bootstrap/prepare",
         headers=FRONTEND_HEADERS,
         cookies={browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: token},
-        json={"display_name": "Owner", "privacy_acknowledged": True},
+        json={**_client_contract(app), "preferred_language": "en-US"},
     )
     assert rejected.status_code == 401
     assert rejected.json() == {"detail": "bootstrap_challenge_invalid"}
@@ -442,10 +444,10 @@ def test_logout_revokes_local_session_and_expires_cookie() -> None:
     claim = _request(
         app,
         "POST",
-        "/api/v1/auth/local/bootstrap/claim",
+        "/api/v1/auth/local/bootstrap/prepare",
         headers=FRONTEND_HEADERS,
         cookies={browser_session.BOOTSTRAP_CHALLENGE_COOKIE_NAME: _challenge_cookie(challenge)},
-        json={"display_name": "Owner", "privacy_acknowledged": True},
+        json={**_client_contract(app), "preferred_language": "en-US"},
     )
     token = claim.cookies[browser_session.SESSION_COOKIE_NAME]
     response = _request(

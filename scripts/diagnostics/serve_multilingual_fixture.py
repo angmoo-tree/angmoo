@@ -51,6 +51,8 @@ def main() -> None:
 
     from app.runtime.contributor_backend import create_contributor_runtime_app
     from app.domains.identity.service.local_owner import LocalIdentityService
+    from app.domains.identity.service.local_entry import LocalEntryService
+    from app.domains.identity.schemas_local_entry import LocalPrepareRequest
     from app.domains.identity.models import AuthSession, InstallationIdentity, User
     from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
     from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
@@ -69,11 +71,18 @@ def main() -> None:
     with sessions() as db:
         identity = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
         if identity.bootstrap_state == "unclaimed":
+            installation_id = identity.installation_id
             workflow = LocalIdentityService(db)
             challenge = workflow.create_bootstrap_challenge()
-            workflow.claim_local_owner(challenge_token=challenge.token, owner_user_id=None,
-                display_name="Synthetic User · 原文 A-17", local_label="Multilingual fixture",
-                privacy_acknowledged=True)
+            issued = LocalEntryService(db).prepare(
+                LocalPrepareRequest(protocol=2, installation_id=installation_id,
+                    client_instance_id="multilingual-fixture-client", expected_generation=0,
+                    preferred_language="en-US"),
+                challenge_token=challenge.token, secret_ready=True, local_label="Multilingual fixture")
+            owner = db.get(User, issued.user.user_id)
+            owner.display_name = "Synthetic User · 原文 A-17"
+            owner.display_name_normalized = "synthetic user · 原文 a-17"
+            db.commit()
 
     def fixture_request(request):
         if request.client.host not in {"127.0.0.1", "::1"} or request.headers.get("x-fixture-control") != "synthetic-only":

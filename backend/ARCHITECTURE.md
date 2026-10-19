@@ -1,5 +1,69 @@
 # Angmoo Backend Architecture
 
+## Local entry, situation validation and durable activity recovery (2026-10-19 LOCAL)
+
+Identity owns local protocol 2. Protected POST preparation creates a default
+user only for a fresh installation, connects that user and issues a session in
+one bounded writer. Existing unclaimed data requires explicit owner selection;
+missing/deleted owners require recovery. GETs never create a user. The bootstrap
+challenge, Origin/Host checks and desktop launch-token boundary remain required.
+Checkbox acknowledgement is no longer part of this local protocol. Hosted policy
+consent remains independent.
+
+SQLite schema v40 adds `local_client_connections` and optional session client/
+generation bindings. The frozen v39 metadata/manifest remain unchanged. A client
+identifier is coordination metadata, never authentication. Every bound session
+read checks the canonical client state/generation and existing token expiry.
+Explicit stop invalidates the current client generation, including late-issued
+cookies; resume requires the expected generation. Other clients, user data,
+credentials and activity settings are unaffected. Legacy sessions can be adopted
+without extending their expiry. Normal authenticated reads perform no writes.
+
+Environment confirmation precedes creation of new default Worlds and owner
+profiles. Existing defaults are reused. New account and World display names are
+`사용자` for Korean and `User` otherwise; stored names are not translated later.
+Identity owns account/installation-label edits; Worlds and WorldCharacters retain
+their own content and profile contracts.
+
+Situation output v3/validation v5 uses the existing shared language resolver and
+one shared English description of grounded context, actions and concrete detail.
+Only empty/invalid values or an exact admitted locale/base/display-language marker
+are rejected. Short natural descriptions remain valid. Per-target auxiliary
+failures do not trigger regeneration or invalidate another target's public action.
+Historical receipt hashes/output statuses remain immutable; pending legacy marker
+values fail a new eligibility attempt, while previously applied history is kept.
+
+Chat evidence inspector v2 stores a bounded typed label/literal projection tied
+to the original reference and normalized text. This does not rewrite model input,
+evidence hashes or source text. Current authorization/revision checks precede
+projection delivery. v1 snapshots remain readable without speculative parsing.
+
+The relationship-effect-progress.v1 contract accepts only canonical effects of
+earlier successful actions in the same frozen activity/lane/decision. The private
+proof and public action commit together; scope, ordinal, digest, event and before/
+after facts must agree. External changes and ABA/view/perception changes remain
+invalid. Public result projection removes private proof fields. Old executions
+without the revision keep strict validation.
+
+Runtime cancellation carries a typed reason. Run/slot/graph interruption is a
+short conditional writer after the worker's existing drain/fence. Supported
+durable drafts receive a recovery due time separate from normal activity cadence.
+Routine recovery reclaims the original pending beat only within its real window,
+existing attempt budget and canonical binding; source/state/sequence changes or
+another live claim still fail. Successful effects are reused, never republished.
+No AI await, global timeout increase or new scheduler is introduced.
+
+World SNS credential configuration conflicts are typed 409 errors checked before
+key encryption/write. Credential revision and configuration revision remain
+different contracts. PNG import authorizes, closes a proved read-only snapshot,
+validates/encodes once and stages privately outside the writer. Fresh apply checks
+ownership/draft CAS again and commits source/mapping/media references together.
+Flushed/Core caller writes are rejected, not rolled back. File cleanup is bounded,
+lease-aware and canonical-reference-aware, including uncertain commit outcomes.
+
+Local validation and native/real-AI limitations are recorded in
+`docs/verification/local-entry-memory-sns-stability-20261019.md`.
+
 ## World activity schedule refresh (2026-10-18 LOCAL)
 
 WorldCharacter management compares normalized start/end/interval settings and

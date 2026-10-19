@@ -69,7 +69,7 @@ class DirectLlmCharacterResponseGenerator:
             schema = with_metric_schema(schema)
         from app.domains.memory.policies.situation_generation import with_chat_situation, instructions
         if situation_enabled:
-            schema = with_chat_situation(schema)
+            schema = with_chat_situation(schema, locale=request.situation_locale, revision=request.situation_output_revision)
         payload = _user_payload(request)
         user_prompt = _user_prompt(request, thought_enabled=self._thought_enabled, relationship_enabled=self._relationship_enabled, payload=payload)
         manifest = request.situation_manifest_factory(payload) if situation_enabled else None
@@ -92,7 +92,7 @@ class DirectLlmCharacterResponseGenerator:
                 api_key=self._material.reveal(),
                 context=context,
                 tracker=tracker,
-                system_prompt=_system_prompt(request) + ("\n" + THOUGHT_PROMPT if self._thought_enabled else "") + metric_prompt + (instructions(request.situation_locale) if situation_enabled else ""),
+                system_prompt=_system_prompt(request) + ("\n" + THOUGHT_PROMPT if self._thought_enabled else "") + metric_prompt + (instructions(request.situation_locale, revision=request.situation_output_revision) if situation_enabled else ""),
                 user_prompt=user_prompt,
                 **({"response_schema": schema, "response_mime_type": "application/json"} if structured else {}),
                 max_output_tokens=execution_policy.max_output_tokens,
@@ -124,7 +124,7 @@ class DirectLlmCharacterResponseGenerator:
                     keys = list(envelope)
                     ordered = "situation_description" not in keys or all(keys.index(key) < keys.index("situation_description")
                         for key in ("text", "thought", "relationship_metrics") if key in keys)
-                    situation_draft = parse_description(envelope.get("situation_description"), target_key=request.situation_target, ordered=ordered)
+                    situation_draft = parse_description(envelope.get("situation_description"), target_key=request.situation_target, ordered=ordered, locale=request.situation_locale if request.situation_output_revision == "situation-target-output.v3" else None)
             except ValueError as exc:
                 raise CharacterResponseGeneratorError(
                     "invalid_response_envelope", retryable=False,

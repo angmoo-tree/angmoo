@@ -23,9 +23,9 @@ from app.policies import name_policy
 
 
 def resolve_target(db, user, world_id):
-    if world_id is None:
-        world_id = ensure_default_space(db, owner_id=user.id).id
     try:
+        if world_id is None:
+            world_id = ensure_default_space(db, owner_id=user.id).id
         require_creator_access(db, world_id=world_id, user=user)
     except WorldServiceError as exc:
         raise AgentCreationDraftValidationError(exc.reason_code) from exc

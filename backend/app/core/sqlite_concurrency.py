@@ -186,6 +186,22 @@ def run_sqlite_immediate(
     raise exhausted from last_error
 
 
+def require_read_only_session(session: Session, *, error_code: str) -> None:
+    """Prove a dependency snapshot can be closed without discarding writes.
+
+    ORM dirty collections alone miss already-flushed/Core writes. SQLite's
+    public DBAPI in_transaction flag also detects those (and explicit BEGIN).
+    Other dialects conservatively require the caller to close its transaction.
+    This check never commits or rolls back the caller's work.
+    """
+    if session.new or session.dirty or session.deleted:
+        raise RuntimeError(error_code)
+    if session.in_transaction():
+        connection = session.connection()
+        if connection.dialect.name != "sqlite" or connection.connection.driver_connection.in_transaction:
+            raise RuntimeError(error_code)
+
+
 @observation.sqlite_observed
 def run_sqlite_session_immediate(
     session: Session,

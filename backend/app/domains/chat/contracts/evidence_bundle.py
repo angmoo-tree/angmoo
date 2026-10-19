@@ -127,6 +127,7 @@ class EvidenceItem:
     # Optional, server-verified authors. Not part of v1 text/hash/serialization.
     author_identities: tuple[tuple[str, str], ...] = ()
     relationship_projection: dict | None = None
+    display_projection: dict | None = None
     # Prepared canonical times are private until a v4 bundle binds them.
     prepared_times: tuple[str, str | None, str | None, str | None] | None = None
     time_provenance: tuple[str, str | None, str | None, str | None] | None = None
@@ -259,12 +260,13 @@ class EvidenceBundle:
 
         evidence_lineage("inspector", self.items)
         return {
-            "version": "evidence-inspector.v1",
+            "version": "evidence-inspector.v2",
             "items": [
                 {
                     "ref": item.opaque_reference,
                     "kind": item.kind.value,
                     "text": item.normalized_text,
+                    **({"display_projection": item.display_projection} if item.display_projection is not None else {}),
                     **({"time_provenance": _time_payload(item.time_provenance)} if item.time_provenance else {}),
                     "occurred_at": (
                         None

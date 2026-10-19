@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserEnvironment } from "@/hooks/use-user-environment";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 
@@ -91,6 +92,7 @@ function WorldAppContent({
   worldId,
 }: WorldAppProps) {
   const uiText = useUiText("shell");
+  const { ready: environmentReady } = useUserEnvironment();
   const searchParams = useRuntimeSearchParams();
   const [world, setWorld] = useState<LocalWorldAppRead["world"] | null>(null);
   const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
@@ -98,7 +100,7 @@ function WorldAppContent({
   const [error, setError] = useState<WorldAppApiError | Error | null>(null);
 
   useEffect(() => {
-    if (authStatus !== "authenticated") return;
+    if (authStatus !== "authenticated" || !environmentReady) return;
     const controller = new AbortController();
     const scope = captureAuthRequestScope();
     const current = () => !controller.signal.aborted && isCurrentAuthRequestScope(scope);
@@ -111,7 +113,7 @@ function WorldAppContent({
         // Reads may overlap, but a new identity requires a verified launchable
         // owner World. A rejected or abandoned route must not start a write.
         await worldRead;
-        return current() ? ensureMyProfile(worldId) : null;
+        return current() ? ensureMyProfile(worldId, { signal: controller.signal }) : null;
       }),
     ])
       .then(([read, identity]) => {
@@ -128,7 +130,7 @@ function WorldAppContent({
         if (current()) setLoading(false);
       });
     return () => controller.abort();
-  }, [authStatus, relationshipCharacterId, sectionId, worldId, notifications]);
+  }, [authStatus, environmentReady, relationshipCharacterId, sectionId, worldId, notifications]);
 
   const activeSection =
     WORLD_APP_SECTIONS.find((section) => section.id === sectionId) ?? WORLD_APP_SECTIONS[0];

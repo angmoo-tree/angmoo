@@ -177,11 +177,27 @@ def login(
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 @public_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
+    request: Request,
     response: Response,
     db: Session = Depends(get_db),
     session: models.AuthSession | None = Depends(get_current_session_for_logout),
 ) -> Response:
-    if session is not None:
+    if session is not None and session.local_client_id is not None:
+        from app.domains.identity.schemas_local_entry import LocalClientRequest
+        from app.domains.identity.service.local_entry import LocalEntryError, LocalEntryService
+        from app.core.sqlite_concurrency import SqliteConcurrencyError
+        browser_session.require_local_frontend_request(request, mutation=True)
+        client = db.get(models.LocalClientConnection, session.local_client_id)
+        data = LocalClientRequest(protocol=2, installation_id=client.installation_id,
+            client_instance_id=client.client_instance_id, expected_generation=session.local_client_generation)
+        db.rollback()
+        try:
+            LocalEntryService(db).stop(data, current_token=browser_session.session_cookie_token(request))
+        except LocalEntryError as exc:
+            raise HTTPException(status_code=exc.status, detail=exc.code) from exc
+        except SqliteConcurrencyError as exc:
+            raise HTTPException(status_code=503, detail="local_session_temporarily_busy", headers={"Retry-After": "1"}) from exc
+    elif session is not None:
         auth_service.revoke_current_session(db, session)
     browser_session.delete_session_cookie(response)
     response.status_code = status.HTTP_204_NO_CONTENT

@@ -102,6 +102,10 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str, configurat
         from app.domains.world_characters.contracts.social_io import new_policies
         from app.contracts.relationship_currentness import CURRENTNESS_POLICY_KEY, CURRENTNESS_REVISION
         row.result = {**row.result, **new_policies(), CURRENTNESS_POLICY_KEY: CURRENTNESS_REVISION}
+        from app.contracts.relationship_currentness import EFFECT_PROGRESS_KEY, EFFECT_PROGRESS_REVISION
+        row.result = {**row.result, EFFECT_PROGRESS_KEY: EFFECT_PROGRESS_REVISION}
+        from app.contracts.activity_cancellation import RECOVERY_POLICY_KEY, RECOVERY_REVISION
+        row.result = {**row.result, RECOVERY_POLICY_KEY: RECOVERY_REVISION}
         from app.contracts.sns_generation import new_generation_policies
         row.result = {**row.result, **new_generation_policies()}
     if engine == "personalized_graph_v2" and settings.SNS_CHECKPOINT_POLICY_ENABLED:

@@ -1,5 +1,13 @@
 import type { UserRead } from "@/lib/auth/browser-session";
 
+export type LocalClientState = {
+  protocol: 2;
+  installation_id: string;
+  client_instance_id: string;
+  generation: number;
+  state: "active" | "stopped";
+};
+
 export type LocalOwnerCandidateRead = {
   user_id: string;
   display_name: string;
@@ -10,6 +18,9 @@ export type LocalOwnerCandidateRead = {
 };
 
 export type LocalBootstrapRead = {
+  protocol: 2;
+  automatic_prepare_allowed: boolean;
+  client_connection: LocalClientState | null;
   state: "unclaimed" | "claimed" | "recovery_required";
   installation_id: string | null;
   local_label: string | null;

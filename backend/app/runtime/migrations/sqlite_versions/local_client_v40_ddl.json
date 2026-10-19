@@ -1,0 +1,8 @@
+[
+  "\nCREATE TABLE local_client_connections (\n\tid VARCHAR(64) NOT NULL, \n\tinstallation_id VARCHAR(64) NOT NULL, \n\tclient_instance_id VARCHAR(64) NOT NULL, \n\tgeneration INTEGER DEFAULT '0' NOT NULL, \n\tstate VARCHAR(16) DEFAULT 'active' NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id), \n\tCONSTRAINT ck_local_client_state CHECK (state IN ('active','stopped')), \n\tFOREIGN KEY(installation_id) REFERENCES installation_identities (installation_id), \n\tCONSTRAINT uq_local_client_installation UNIQUE (installation_id, client_instance_id), \n\tCONSTRAINT ck_local_client_generation CHECK (generation >= 0)\n)\n\n",
+  "ALTER TABLE auth_sessions RENAME TO auth_sessions_v39",
+  "\nCREATE TABLE auth_sessions (\n\ttoken_hash VARCHAR(64) NOT NULL, \n\tuser_id VARCHAR(64) NOT NULL, \n\tauth_method VARCHAR(20) NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\texpires_at DATETIME, \n\tlocal_client_id VARCHAR(64), \n\tlocal_client_generation INTEGER CONSTRAINT ck_auth_sessions_local_generation CHECK ((local_client_id IS NULL AND local_client_generation IS NULL) OR (local_client_id IS NOT NULL AND local_client_generation IS NOT NULL AND local_client_generation >= 0)), \n\tPRIMARY KEY (token_hash), \n\tFOREIGN KEY(local_client_id) REFERENCES local_client_connections (id), \n\tFOREIGN KEY(user_id) REFERENCES users (id)\n)\n\n",
+  "INSERT INTO auth_sessions (token_hash,user_id,auth_method,created_at,expires_at) SELECT token_hash,user_id,auth_method,created_at,expires_at FROM auth_sessions_v39",
+  "DROP TABLE auth_sessions_v39",
+  "CREATE INDEX ix_auth_sessions_local_client_id ON auth_sessions (local_client_id)"
+]

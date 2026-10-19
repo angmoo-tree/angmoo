@@ -1,3 +1,4 @@
+import { displaySegmentsMatch } from "../utils/evidence-display";
 import { captureAuthRequestScope, isCurrentAuthRequestScope, clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
@@ -53,7 +54,7 @@ export function getUnsavedExperiences(worldId: string, subjectId: string, signal
         value.items.some(row => !row || !Number.isSafeInteger(row.receipt_sequence) || row.receipt_sequence < 1 ||
           !Number.isSafeInteger(row.state_version) || row.state_version < 1 || !Number.isFinite(Date.parse(row.occurred_at)) ||
           (row.description !== null && (typeof row.description !== "string" || Array.from(row.description).length > 1000)) ||
-          !["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "result_invalid", "validation_failed"].includes(row.reason) ||
+          !["source_changed", "access_unavailable", "proof_unavailable", "activation_closed", "description_invalid", "description_language_only", "result_invalid", "validation_failed"].includes(row.reason) ||
           typeof row.can_recheck !== "boolean" || typeof row.can_discard !== "boolean") ||
         new Set(value.items.map(row => row.receipt_sequence)).size !== value.items.length) {
       throw new MemoryApiError(502, "memory_unsaved_contract_invalid");
@@ -532,6 +533,7 @@ function chatEvidenceMatches(value: unknown, worldId: string) {
     ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity", "episode_memory", "current_image_analysis"].includes(item.kind) &&
     episodeDetailMatches(item.episode) &&
     relationshipFieldsMatch(item) &&
+    displaySegmentsMatch(item) &&
     typeof item.label === "string" &&
     (item.excerpt === null || typeof item.excerpt === "string") &&
     (item.occurred_at === null || typeof item.occurred_at === "string") &&

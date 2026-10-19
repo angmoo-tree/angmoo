@@ -582,7 +582,8 @@ async def run_world_keyword_feed(
         ctx.db, signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
-        action_result = dict(existing_execution.result or {})
+        from app.contracts.public_activity_result import public_execution_result
+        action_result = public_execution_result(existing_execution.result)
         execution = existing_execution
         cycle_summary = _summary(
             ctx=ctx,

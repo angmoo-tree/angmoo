@@ -81,7 +81,7 @@ class SocialContextValidationService:
             facts = self._canonical(scope, tuple(dict.fromkeys(references)))
             return tuple(self.validate(scope=scope, _facts=facts, **request) for request in requests)
 
-    def validate(self, *, scope, binding, prompt, receipt, policy, _facts=None):
+    def validate(self, *, scope, binding, prompt, receipt, policy, _facts=None, effects=()):
         deadline = current_read_deadline.get()
         if deadline is not None and monotonic() >= deadline:
             raise SocialContextValidationError("canonical_read_deadline")
@@ -96,8 +96,17 @@ class SocialContextValidationService:
         references = tuple(CanonicalSocialContextReference(ref.target_world_character_id,
             ref.relationship_state_id) for ref in parsed.references)
         facts = self._canonical(scope, references) if _facts is None else _facts
+        proven_count = 0
         for reference, expected in zip(references, parsed.references, strict=True):
             item = self._item(scope, facts, reference)
+            from app.domains.relationships.contracts.social_context import RelationshipValidationReference
+            from app.domains.relationships.policies.effect_progress import proves
+            actual = RelationshipValidationReference(item.relationship.relationship_state_id,
+                item.relationship.target_world_character_id, item.relationship.relationship_version,
+                item.relationship.view_version, facts_digest(item))
+            if actual != expected and effects and proves(expected, actual, effects):
+                proven_count += 1
+                continue
             if item.relationship.relationship_version != expected.relationship_version:
                 raise SocialContextValidationError("version_changed")
             if item.relationship.view_version != expected.view_version:
@@ -105,7 +114,20 @@ class SocialContextValidationService:
             if facts_digest(item) != expected.facts_digest:
                 raise SocialContextValidationError("facts_changed")
         return SocialContextValidationResult(parsed.revision,
-            "valid" if parsed.basis == "facts" else parsed.basis, len(references))
+            "valid" if parsed.basis == "facts" else parsed.basis, len(references),
+            "same_decision_effects" if proven_count else None)
+
+    def capture(self, *, scope, references):
+        """Exact full canonical values under the caller's existing writer UoW."""
+        from app.domains.relationships.contracts.social_context import RelationshipValidationReference
+        facts = self._canonical(scope, references)
+        result = []
+        for reference in references:
+            item = self._item(scope, facts, reference)
+            result.append(RelationshipValidationReference(item.relationship.relationship_state_id,
+                item.relationship.target_world_character_id, item.relationship.relationship_version,
+                item.relationship.view_version, facts_digest(item)))
+        return tuple(result)
 
     def _legacy(self, *, scope, prompt, facts=None):
         if prompt == {}:

@@ -1,5 +1,7 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useUserEnvironment } from "@/hooks/use-user-environment";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -15,6 +17,7 @@ export function MyProfileEditor({ worldId, renderMedia, onSaved }: {
   worldId: string; renderMedia: (props: MyProfileMediaProps) => ReactNode; onSaved?: () => void;
 }) {
   const uiText = useUiText("worlds");
+  const { ready: environmentReady } = useUserEnvironment();
   const [identity, setIdentity] = useState<OwnerControlledIdentityRead | null>(null);
   const [preserved, setPreserved] = useState<OwnerControlledIdentityRead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,16 +25,20 @@ export function MyProfileEditor({ worldId, renderMedia, onSaved }: {
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => {
+    if (!environmentReady) return;
+    const controller = new AbortController();
+    const scope = captureAuthRequestScope();
     let active = true;
-    ensureMyProfile(worldId).then((value) => { if (active) setIdentity(value); })
+    const current = () => active && !controller.signal.aborted && isCurrentAuthRequestScope(scope);
+    ensureMyProfile(worldId, { signal: controller.signal }).then((value) => { if (current()) setIdentity(value); })
       .catch(async (reason) => {
-        if (!active) return;
+        if (!current()) return;
         setMessage(reason instanceof Error ? uiText(reason.message) : uiText("내 프로필을 확인하지 못했습니다."));
         try { const rows = await listOwnerControlledIdentities(worldId); if (active) setPreserved(rows); }
         catch { /* The original ownership/availability error stays visible. */ }
       }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [uiText, worldId]);
+    return () => { active = false; controller.abort(); };
+  }, [uiText, worldId, environmentReady]);
   async function perform(action: () => Promise<OwnerControlledIdentityRead>, propagate = false) {
     setBusy(true); setMessage(null);
     try { setIdentity(await action()); setDirty(false); setMessage(uiText("내 프로필을 저장했습니다. 기존 글·대화·관계는 그대로입니다.")); onSaved?.(); }

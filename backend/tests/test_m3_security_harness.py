@@ -28,6 +28,9 @@ UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 PREAUTH_MUTATION_ROUTES = {
     "POST /api/v1/auth/local/bootstrap/challenge",
     "POST /api/v1/auth/local/bootstrap/claim",
+    "POST /api/v1/auth/local/bootstrap/prepare",
+    "POST /api/v1/auth/local/client/stop",
+    "POST /api/v1/auth/local/client/resume",
     "POST /api/v1/auth/local/session",
     "POST /api/v1/posts/{post_id}/comments",
 }
@@ -159,7 +162,8 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 151
+    assert len(session_mutations) == 152
+    assert "PATCH /api/v1/auth/local/installation" in session_mutations
     assert {
         "PATCH /api/v1/worlds/{world_id}/notifications/{notification_id}/read",
         "POST /api/v1/worlds/{world_id}/notifications/read-all",

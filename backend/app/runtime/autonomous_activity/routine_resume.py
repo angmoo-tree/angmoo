@@ -1,6 +1,6 @@
 """Freeze identifiers and value objects, reattach canonical records on resume."""
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from app.domains.routine_posts.contracts.context import RoutinePostContext
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
@@ -15,10 +15,14 @@ from app.runtime.autonomous_activity.social_lane import plain
 from app.runtime.routine_posts.sqlalchemy_runtime import PreparedRoutine
 
 
-def freeze_prepared(prepared):
+def freeze_prepared(prepared, *, allow_reclaim=False):
     context = prepared.context
-    return plain({"refs": {name: getattr(context, name).id if getattr(context, name) else None for name in (
+    frozen = plain({"refs": {name: getattr(context, name).id if getattr(context, name) else None for name in (
             "world", "membership", "world_character", "profile", "plan", "item", "episode", "previous_beat", "previous_post")},
+        "beat_binding": {"episode_id":prepared.beat.episode_id, "idempotency_key":prepared.beat.idempotency_key,
+            "scheduled_for":utc(prepared.beat.scheduled_for).isoformat(), "source_event_ids":prepared.beat.source_event_ids,
+            "state_schema_version":prepared.beat.state_schema_version, "state_before":prepared.beat.state_before_snapshot,
+            "trigger_kind":prepared.beat.trigger_kind, "skipped_tick_count":prepared.beat.skipped_tick_count},
         "beat_id": prepared.beat.id, "joint_id": prepared.joint_activity.id if prepared.joint_activity else None,
         "opening_claim": asdict(prepared.opening_claim) if prepared.opening_claim else None,
         "claimed_manual_source_ids": prepared.claimed_manual_source_ids,
@@ -29,6 +33,9 @@ def freeze_prepared(prepared):
         "prompt_comment_chars": context.prompt_comment_chars,
         "output_contract": context.output_contract, "state_schema_version": context.state_schema_version,
         "thought_policy": context.thought_policy})
+    if not allow_reclaim:
+        frozen.pop("beat_binding")
+    return frozen
 
 
 def restore_prepared(ctx, frozen, tracker):
@@ -42,6 +49,12 @@ def restore_prepared(ctx, frozen, tracker):
     beat = ctx.db.get(ActivityBeat, frozen["beat_id"], populate_existing=True)
     if actor.character_id != ctx.character.id or actor.world_id != world.id or beat is None or beat.world_id != world.id or beat.world_character_id != actor.id:
         raise ValueError("routine_resume_scope_changed")
+    if beat.status == "pending" and frozen.get("beat_binding") is not None:
+        from app.domains.routines.service.execution.claims import reclaim_frozen_beat
+        beat_id = beat.id
+        ctx.db.rollback()  # End only the canonical read snapshot before a new writer.
+        beat = reclaim_frozen_beat(ctx.db, beat_id=beat_id, binding=frozen["beat_binding"],
+            claim_run_id=ctx.run_id, now=datetime.now(UTC), claim_expires_at=datetime.now(UTC)+timedelta(minutes=10))
     if beat.status not in {"claimed", "succeeded"} or (beat.status == "claimed" and beat.claim_run_id != ctx.run_id):
         raise ValueError("routine_resume_claim_changed")
     from app.contracts.routine_output import RoutineOutputPolicy
@@ -61,3 +74,7 @@ def restore_prepared(ctx, frozen, tracker):
     opening = OpeningClaim(**{**opening, "expires_at": datetime.fromisoformat(opening["expires_at"])}) if opening else None
     joint = ctx.db.get(JointActivity, frozen["joint_id"]) if frozen["joint_id"] else None
     return PreparedRoutine(context, beat, actor, joint, opening, frozen["claimed_manual_source_ids"], frozen["execution_signature"], tracker, True)
+
+
+def utc(value):
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)

@@ -1,3 +1,4 @@
+import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import type { Page, Route } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { uiDManualFeed, uiDManualPost, uiDOwnerActor, uiDWorld } from "./continuity-next-fixture";
@@ -91,6 +92,8 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
       (path === "/auth/local/environment" ? state.environmentWrites : state.writes).push(write);
     }
     if (/generate|completion|preflight/.test(path)) state.providerCalls.push(path);
+    const localSession = existingLocalSessionRead(new URL(route.request().url()), route.request().method(), { id: state.authUserId, display_name: "Local Owner" }, {});
+    if (localSession !== undefined) return route.fulfill({ json: localSession });
     if (path === "/auth/me") return reply(route, { id: state.authUserId, display_name: "Local Owner", email: null, profile_setup_completed: true,
       ui_language: state.language, ui_preference_revision: 1, feed_content_filter: "all", is_admin: true });
     if (path === "/auth/local/environment") return reply(route, { ...VISUAL_ENVIRONMENT, preferred_language: state.language, memory_search_locale: state.language });

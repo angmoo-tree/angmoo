@@ -34,6 +34,8 @@ def seed_configuration_fixture(path, *, legacy=False, browser_ready=False, schem
         db.flush()
         db.add(InstallationIdentity(singleton_key="local-installation", installation_id="configuration-fixture",
             owner_user_id=owner.id, bootstrap_state="claimed", local_label="fixture", claimed_at=datetime.now(UTC)))
+        from app.domains.identity.models_environment import LocalEnvironment
+        db.add(LocalEnvironment(owner_id=owner.id, installation_id="configuration-fixture", preferred_language="ko", timezone="Asia/Seoul", confirmed_at=datetime.now(UTC)))
         for suffix in ("a", "b"):
             wid, cid, wc = f"config-world-{suffix}", f"config-actor-{suffix}", f"config-role-{suffix}"
             db.add(World(id=wid, slug=wid, owner_user_id=owner.id, name=f"World {suffix}", tagline="fixture", setting_description="fixture",

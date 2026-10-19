@@ -1443,6 +1443,7 @@ async def _run_resident_slot_once(
     heartbeat_interval_seconds = slot.heartbeat_interval_seconds or 1800
     manual_next_tick_at = None
     run_created = False
+    cancellation_ids = (slot.agent_id, slot.assigned_user_id, slot.assigned_character_id)
     run_started_at = datetime.now(UTC)
     character: Character | None = None
     credential: LlmCredential | None = None
@@ -2073,34 +2074,25 @@ async def _run_resident_slot_once(
         if not individual_tool_flow:
             gateway_result["feed_perception"] = feed_perception_result
     except asyncio.CancelledError:
-        cancelled_at = datetime.now(UTC)
+        from app.contracts.activity_cancellation import cancellation_reason
+        from app.runtime.resident.activity_recovery import cancellation_schedule
+        cancelled_at, reason = datetime.now(UTC), cancellation_reason()
+        agent_id, owner_id, character_id = cancellation_ids
+        db.rollback()
         try:
             if run_created:
-                routine_runs.mark_agent_run_finished(
-                    db,
-                    run_id,
-                    "cancelled",
-                    gateway_result={
-                        "status": "cancelled",
-                        "reason": "runtime_shutdown",
-                        "cancelled_at": cancelled_at.isoformat(),
-                    },
-                )
-            slot_leases.complete_resident_slot_run(
-                db,
-                agent_id=slot.agent_id,
-                run_id=run_id,
-                heartbeat_interval_seconds=heartbeat_interval_seconds,
-                next_tick_at=cancelled_at
-                + timedelta(seconds=heartbeat_interval_seconds),
-                last_error="runtime_shutdown",
-            )
-        except Exception:
-            logger.exception(
-                "resident slot shutdown cleanup failed agent_id=%s run_id=%s",
-                slot.agent_id,
-                run_id,
-            )
+                def resolve(db, owned_slot, now):
+                    effective = read_effective_setting(db, character_id=character_id,
+                        setting=activity_settings.get_setting(db, character_id))
+                    return cancellation_schedule(db, owned_slot, now, run_id=run_id, reason=reason,
+                        heartbeat_interval=heartbeat_interval_seconds, setting=effective,
+                        timezone=agent_activity_policy.activity_timezone(db, character_id=character_id))
+                slot_leases.cancel_resident_run(db, agent_id=agent_id, run_id=run_id,
+                    owner_id=owner_id, character_id=character_id, now=cancelled_at,
+                    reason=reason, resolve_schedule=resolve)
+        except Exception as exc:
+            db.rollback()
+            logger.warning("resident_cancel_cleanup_failed code=%s run_id=%s reason=%s", type(exc).__name__, run_id, reason)
         raise
     except AgentRunConflictError as exc:
         slot_leases.complete_resident_slot_run(
@@ -2713,20 +2705,25 @@ async def tick_resident_slots(
             setting=activity_settings.get_setting(db, slot.assigned_character_id))
         if setting is None:
             return recovered_at
-        return agent_activity_policy.recovery_tick_schedule(
+        schedule = agent_activity_policy.recovery_tick_schedule(
             setting,
             character_id=slot.assigned_character_id,
             now=recovered_at,
             timezone=agent_activity_policy.activity_timezone(
                 db, character_id=slot.assigned_character_id
             ),
-        ).next_tick_at
+        )
+        from app.runtime.resident.activity_recovery import unfinished, routine_deadline, recovery_due
+        row = unfinished(db, owner_id=slot.assigned_user_id, character_id=slot.assigned_character_id)
+        return recovery_due(schedule, now=recovered_at, deadline=routine_deadline(db, row))
 
+    from app.runtime.resident.activity_recovery import has_supported_recovery
     recovered_count = slot_recovery.recover_expired_resident_slot_runs(
         db,
         now=now,
         next_tick_at_factory=_recovery_next_tick_at,
         autonomy_reader=read_autonomy_enabled,
+        unfinished_recovery_reader=has_supported_recovery,
     )
     if recovered_count:
         logger.warning(
