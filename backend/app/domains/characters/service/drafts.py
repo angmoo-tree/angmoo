@@ -296,6 +296,8 @@ def _get_owned_draft(
 def _cleanup_expired_drafts(db: Session,
     *, workflows: CreatorWorkflows,
 ) -> None:
+    from app.domains.characters.service.card_cleanup import cleanup_card_staging
+    cleanup_card_staging(db)
     now = datetime.now(UTC)
     expired = list(
         db.scalars(

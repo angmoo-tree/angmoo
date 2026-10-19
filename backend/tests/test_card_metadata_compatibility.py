@@ -179,7 +179,8 @@ def test_partial_display_write_failure_is_compensated(context, monkeypatch):
     session, owner, draft, workflows = context
     original_write = Path.write_bytes
     def fail(path, content):
-        if path.is_relative_to(settings.media_root_path):
+        from app.integrations.media.card_staging import staging_root
+        if path.is_relative_to(staging_root()):
             original_write(path, content[:8])
             raise OSError("synthetic incomplete write")
         return original_write(path, content)

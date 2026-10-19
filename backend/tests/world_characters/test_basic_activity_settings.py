@@ -81,6 +81,42 @@ def test_basic_whitelist_and_compare_swap(basic):
     with pytest.raises((ValidationError, WorldManagementError)): service.patch_activity_settings(**scope, data=BasicActivitySettingsPatch(expected_revision=2, activity_interval_minutes=1))
 
 
+def test_stale_sns_configuration_is_rejected_before_key_write(basic, monkeypatch):
+    db, service, owner = basic
+    scope = dict(world_id="config-world-a", world_character_id="config-role-a", user=owner)
+    service.patch_activity_settings(**scope, data=BasicActivitySettingsPatch(expected_revision=1, allow_like=False))
+    def forbidden(*args, **kwargs):
+        pytest.fail("credential encryption/write happened before configuration check")
+    monkeypatch.setattr(credentials.world_credentials, "save", forbidden)
+    with pytest.raises(WorldManagementError) as error:
+        credentials.write(service, **scope, purpose="sns", data=WorldCredentialWrite(
+            provider="google", model="gemini-3.1-flash-lite", thinking_level="high",
+            api_key="synthetic-only", expected_revision=0, expected_configuration_revision=1))
+    assert error.value.status_code == 409
+    assert error.value.reason_code == "world_character_revision_conflict"
+    assert service.activity_settings(**scope).revision == 2
+
+
+def test_sns_http_conflict_then_fresh_save_without_changing_configuration(basic):
+    from world_characters.test_world_character_configuration import _client
+    db, service, owner = basic
+    scope = dict(world_id="config-world-a", world_character_id="config-role-a", user=owner)
+    service.patch_activity_settings(**scope, data=BasicActivitySettingsPatch(expected_revision=1, allow_like=False))
+    with _client(db.bind) as client:
+        path = "/api/v1/worlds/config-world-a/world-characters/config-role-a/credentials/sns"
+        headers = {"Origin": "http://127.0.0.1:3000"}
+        body = dict(provider="google", model="gemini-3.1-flash-lite", thinking_level="high",
+            api_key="synthetic-only", expected_revision=0, expected_configuration_revision=1)
+        result = client.put(path, headers=headers, json=body)
+        assert result.status_code == 409 and result.json()["detail"] == "world_character_revision_conflict"
+        assert client.get(path).json()["has_key"] is False
+        body["expected_configuration_revision"] = 2
+        saved = client.put(path, headers=headers, json=body)
+        assert saved.status_code == 200 and saved.json()["has_key"]
+        assert saved.json()["configuration_revision"] == 2
+        assert client.put(path, headers=headers, json=body).status_code == 409
+
+
 def test_thin_http_contract_origin_cas_and_read_only(basic):
     from sqlalchemy import event
     from world_characters.test_world_character_configuration import _client

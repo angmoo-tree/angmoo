@@ -18,9 +18,9 @@ const REASONS: Record<string, string> = {
   activity_maintenance: "현재 활동 실행을 준비 중이에요.",
 };
 type EditorState = { dirty: boolean; busy: boolean };
-type Props = { worldId: string; actorId: string; revision: number; onEditorState?: (value: EditorState) => void; showActivation?: boolean; onActivationChange?: (value: ActivityActivation | null) => void };
+type Props = { worldId: string; actorId: string; revision: number; onEditorState?: (value: EditorState) => void; onMutation?: () => void; showActivation?: boolean; onActivationChange?: (value: ActivityActivation | null) => void };
 
-export function BasicActivitySettingsCard({ worldId, actorId, revision, onEditorState, showActivation = true, onActivationChange }: Props) {
+export function BasicActivitySettingsCard({ worldId, actorId, revision, onEditorState, onMutation, showActivation = true, onActivationChange }: Props) {
   const t = useUiText("characters");
   const load = useCallback((signal: AbortSignal) => readBasicActivitySettings(worldId, actorId, signal), [worldId, actorId]);
   const read = useActiveScopedRead({ scopeKey: `${worldId}:${actorId}`, active: true, read: load });
@@ -31,14 +31,14 @@ export function BasicActivitySettingsCard({ worldId, actorId, revision, onEditor
   }, [revision]);
   return (
     <SettingsCard elevated title={t("활동 설정")} description={t("활동 시간, 허용 행동, 작성 상한을 설정해요.")} icon={<Settings2 size={20} />}>
-      {read.data ? <BasicActivityEditor key={read.identity} data={read.data} refresh={read.refresh} onEditorState={onEditorState} showActivation={showActivation} onActivationChange={onActivationChange} available={!read.error && !read.loading} /> : <p role="status">{t("설정 확인 중")}</p>}
+      {read.data ? <BasicActivityEditor key={read.identity} data={read.data} refresh={read.refresh} onEditorState={onEditorState} onMutation={onMutation} showActivation={showActivation} onActivationChange={onActivationChange} available={!read.error && !read.loading} /> : <p role="status">{t("설정 확인 중")}</p>}
       {read.error ? <><p role="alert">{t("활동 설정을 불러오지 못했어요.")}</p><Button variant="ghost" onClick={read.refresh}>{t("다시 시도")}</Button></> : null}
     </SettingsCard>
   );
 }
 
-function BasicActivityEditor({ data, refresh, onEditorState, showActivation, onActivationChange, available }: {
-  data: BasicActivitySettings; refresh: () => void; onEditorState?: (value: EditorState) => void;
+function BasicActivityEditor({ data, refresh, onEditorState, onMutation, showActivation, onActivationChange, available }: {
+  data: BasicActivitySettings; refresh: () => void; onEditorState?: (value: EditorState) => void; onMutation?: () => void;
   showActivation: boolean; onActivationChange?: (value: ActivityActivation | null) => void; available: boolean;
 }) {
   const t = useUiText("characters");
@@ -78,7 +78,7 @@ function BasicActivityEditor({ data, refresh, onEditorState, showActivation, onA
     if (data.autonomous_enabled) return true;
     if (!data.can_activate) return false;
     return perform(async signal => {
-      try { await toggleBasicActivity(data.world_id, data.world_character_id, data.revision, true, signal); }
+      try { await toggleBasicActivity(data.world_id, data.world_character_id, data.revision, true, signal); if (!signal.aborted) onMutation?.(); }
       finally { if (!signal.aborted) refresh(); }
     });
   }; });
@@ -94,13 +94,13 @@ function BasicActivityEditor({ data, refresh, onEditorState, showActivation, onA
       return;
     }
     const result = await saveBasicActivitySettings(data.world_id, data.world_character_id, latest.revision, Object.fromEntries(keys.map(key => [key, draft[key]])), signal);
-    if (!signal.aborted) { setBaseline(result.policy); setDraft(result.policy); setSaved(true); refresh(); }
+    if (!signal.aborted) { setBaseline(result.policy); setDraft(result.policy); setSaved(true); onMutation?.(); refresh(); }
   }
   return <>
     <p role="status">{t(data.autonomous_enabled ? "자율활동 ON" : "자율활동 OFF")} · {data.timezone}</p>
     {showActivation ? <Button variant="secondary" loading={busy} disabled={data.autonomous_enabled ? !data.can_deactivate : !data.can_activate}
       onClick={() => void perform(async signal => {
-        try { await toggleBasicActivity(data.world_id, data.world_character_id, data.revision, !data.autonomous_enabled, signal); }
+        try { await toggleBasicActivity(data.world_id, data.world_character_id, data.revision, !data.autonomous_enabled, signal); if (!signal.aborted) onMutation?.(); }
         finally { if (!signal.aborted) refresh(); }
       })}>
       {t(data.autonomous_enabled ? "자율활동 끄기" : "자율활동 켜기")}

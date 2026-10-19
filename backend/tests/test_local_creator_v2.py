@@ -38,6 +38,8 @@ def db(tmp_path):
         session.flush()
         session.add(InstallationIdentity(singleton_key="local-installation", installation_id="test-installation",
             owner_user_id=owner.id, bootstrap_state="claimed", local_label="Test", claimed_at=datetime.now(UTC)))
+        from app.domains.identity.models_environment import LocalEnvironment
+        session.add(LocalEnvironment(owner_id=owner.id, installation_id="test-installation", preferred_language="ko", timezone="Asia/Seoul", confirmed_at=datetime.now(UTC)))
         session.commit()
         yield session, owner
     engine.dispose()

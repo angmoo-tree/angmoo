@@ -92,7 +92,7 @@ export function WorldCharacterSettingsForm({ activityKeyRef, onActivityKeySaved,
   <SettingsEditor {...props} kind="persona" />
   <SettingsEditor {...props} kind="activity" />
   <div ref={activityKeyRef} tabIndex={-1}>
-    <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="sns" onSaved={onActivityKeySaved} />
+    <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="sns" refreshRevision={initial.revision} externalBusy={props.pending} onSaved={onActivityKeySaved} />
   </div>
   {props.imageCard}
   <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="chat" />
