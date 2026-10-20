@@ -81,7 +81,7 @@
       "path": "frontend/src/app/api/backend/[...path]/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/api/backend/[...path]",
-      "source_sha256": "d1d737a5eddc10f7e30df4ded142d2d74d613b30410474c084cdff53c2baac37",
+      "source_sha256": "82972ae1e1dd11dd8b2eef5bac98550baee45bf0f2bb2736f363cfb10e5c56d6",
       "transition_pr": "ER5 PR K"
     },
     {

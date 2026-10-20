@@ -164,6 +164,24 @@ Chat preparation POST. It now checks exactly one scoped preparation with an
 empty body and no further mutations during diagnostic selection/export. A Home
 PWA fixture now waits for the existing asynchronous ensure effect; it retains
 the exact one-request assertion instead of treating shell visibility as readiness.
+Both focused browser cases passed locally, and the next PR frontend CI completed
+successfully. The design inventory updates only that fixture's content hash.
+
+The full backend CI also identified two older route consumers: the public API
+operation count and the P8-L-D later-route allowlist. They now explicitly include
+the protected preparation POST (238 paths / 293 operations). The frozen
+P8-L-A/B/D identity and migration evidence is unchanged. Five focused public-route
+and historical-inventory tests passed after this correction; forbidden routes
+and exact-count checks remain enforced.
+
+Two temporal-recall fixtures retained a historical event date as their execution
+deadline. Their fixed event-time semantics remain unchanged; the execution
+deadline now uses the live clock so the production response-generation reserve
+is exercised. The ER0 inventories were regenerated to update the hashes and line
+locations of changed sources; no storage, compatibility or parity allowance was
+broadened.
+The combined temporal-recall, ER0 inventory, public-route and P8-L-D regression
+selection passed all 28 cases locally.
 
 PR CI, main CI, fixed P3 artifacts, fresh-volume command preparation, actual user
 testing and official publication are separate statuses. No official publication

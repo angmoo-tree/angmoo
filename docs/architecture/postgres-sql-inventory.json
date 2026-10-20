@@ -464,16 +464,16 @@
         "driver_or_url": [
           39,
           78,
-          809
+          819
         ],
         "row_lock": [
-          810
+          820
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/service/threads.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9b1fe217c3cf4e7186ab7dfc491eb694d55a6573ab9a6df946c02ffa34a111e6",
+      "source_sha256": "edfbce97762ab7f495bf277a9bbc7ab8fecb8fa415c4169b0ae21f1051873f39",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
