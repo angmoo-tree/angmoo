@@ -226,6 +226,8 @@ class RoutineLane:
         schema.setdefault("required", []).append("state_update")
         from app.domains.relationships.policies.interpretation_prompt import with_metric_schema, METRIC_INSTRUCTIONS
         schema = with_metric_schema(schema)
+        from app.domains.routine_posts.service.evidence import google_routine_response_schema
+        schema = google_routine_response_schema(schema, profile=self.output_policy.provider_schema_profile)
         def validate(payload):
             value = dict(payload)
             from app.domains.characters.policies.authored_names import authored_fields
@@ -255,6 +257,9 @@ class RoutineLane:
             "Only already confirmed experience may change current state. The planned scene is not a completed experience; never assume its success or a future response. "
             + ("Legacy state_change remains for routine energy; " if context.output_contract != ENUM_OUTPUT else "Do not output energy, social_energy, effect classification or legacy motivation/emotion declarations. ") +
             "Common mood/intensity/note use state_update only. " + PLANNER_INSTRUCTIONS[PLANNER_INSTRUCTIONS.index("state_update is null"):] + "\n" + ROUTINE_TEMPORAL_INSTRUCTIONS + "\n" + ORIGINAL_POST_INSTRUCTIONS)
+        from app.contracts.routine_output import COMPACT_EFFECT_WIRE
+        if self.output_policy.provider_schema_profile == COMPACT_EFFECT_WIRE:
+            system += " source_event_effects contains at most 8 entries, with unique supplied source_event_id values; use only events also listed in used_source_event_ids and obey every state-change bound."
         receipt = {}
         async def before_request(_attempt):
             try:

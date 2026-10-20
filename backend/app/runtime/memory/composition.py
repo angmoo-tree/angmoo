@@ -23,6 +23,19 @@ def memory_repository(session: Session) -> SqlAlchemyMemoryRepository:
     return SqlAlchemyMemoryRepository(session, references=scope_references(session))
 
 
+def search_preparation_settings(session, owner_id, world_id, actor_id):
+    """Read current saved settings only; never creates a setting or resolves keys."""
+    from app.domains.memory.contracts.scope import MemoryScope
+    from app.domains.memory.repository.embedding import MemoryEmbeddingRepository
+    scope = MemoryScope(owner_id, world_id, actor_id)
+    repository = memory_repository(session)
+    repository.validate_scope(scope)
+    setting = repository.get_scope_setting(scope)
+    if setting is None or not setting.enabled:
+        return False, False
+    return True, MemoryEmbeddingRepository(session, repository).read(scope).enabled
+
+
 def memory_batch_repository(session: Session) -> SqlAlchemyMemoryBatchRepository:
     return SqlAlchemyMemoryBatchRepository(session, references=scope_references(session))
 

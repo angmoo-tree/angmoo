@@ -82,7 +82,7 @@ export async function proxyBackend(path: string, init?: RequestInit, lifecycle: 
       lifecycle.finish(phase, "cancelled");
       return cancelledResponse();
     }
-    lifecycle.finish(phase, "failed");
+    lifecycle.finish(phase, "failed", undefined, error);
     return failedProxyResponse();
   }
 }

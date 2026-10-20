@@ -162,7 +162,8 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 152
+    assert len(session_mutations) == 153
+    assert "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/memory-search/prepare" in session_mutations
     assert "PATCH /api/v1/auth/local/installation" in session_mutations
     assert {
         "PATCH /api/v1/worlds/{world_id}/notifications/{notification_id}/read",

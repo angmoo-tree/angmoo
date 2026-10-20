@@ -8,6 +8,7 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.models_world_image_credentials import WorldImageProviderCredential
 from app.domains.identity.models import User
 from app.domains.media.models_world_policy import WorldImagePolicy
+from app.domains.media.contracts import ImagePreparationError
 from app.runtime.world_characters import credentials
 from app.runtime.world_characters.management import management_service
 from world_configuration_fixture_support import seed_configuration_fixture
@@ -73,7 +74,7 @@ def test_current_and_provider_and_policy_cas_roll_back_as_one_unit(db):
     for changes,code in [({"expected_revision":0},"revision_conflict"),({"expected_key_revision":0},"key_revision_conflict"),({"expected_configuration_revision":policy_revision},"policy_revision_conflict")]:
         update=good.model_copy(update={"expected_revision":first.revision,"expected_key_revision":1,
             "expected_configuration_revision":first.configuration_revision,"api_key":good.api_key,**changes})
-        with pytest.raises((ValueError,CredentialResolutionError),match=code):
+        with pytest.raises((ImagePreparationError,CredentialResolutionError),match=code):
             credentials.write(service,world_id=SCOPE['world_id'],world_character_id=SCOPE['world_character_id'],user=user,purpose="image",data=update)
         assert world_credentials.resolve_image_keys(db,**SCOPE)[0].reveal() == "synthetic-first"
         assert world_image_credentials.metadata(db,**SCOPE,provider="novelai").key_revision == 1
@@ -120,3 +121,54 @@ def test_generic_image_delete_uses_vault_cas_and_tombstone(db):
     assert not world_image_credentials.metadata(db, **SCOPE, provider="novelai").has_key
     with pytest.raises(CredentialResolutionError, match="key_required"):
         world_credentials.resolve(db, **SCOPE, purpose="image", revision=1)
+
+
+def test_policy_conflict_http_409_then_metadata_read_preserves_data(db):
+    """The HTTP path handles a CAS conflict without an unhandled server error."""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.api.identity_dependencies import get_current_user
+    from app.domains.world_characters.router.management import (
+        router, get_management_service, credential_workflows,
+    )
+    from types import SimpleNamespace
+
+    app = FastAPI()
+    app.include_router(router)
+    service, user = management_service(db), db.get(User, "fixture-owner")
+    app.dependency_overrides[get_management_service] = lambda: service
+    app.dependency_overrides[get_current_user] = lambda: user
+    app.dependency_overrides[credential_workflows] = lambda: SimpleNamespace(
+        write=credentials.write, read=credentials.read)
+    path = f"/worlds/{SCOPE['world_id']}/world-characters/{SCOPE['world_character_id']}/credentials/image"
+    headers = {"Origin": "http://127.0.0.1:3000"}
+    with TestClient(app, base_url="http://127.0.0.1:3000") as client:
+        before = client.get(path, headers=headers)
+        assert before.status_code == 200, before.text
+        snapshot = before.json()
+        valid = dict(expected_revision=snapshot["revision"],
+            expected_configuration_revision=snapshot["configuration_revision"],
+            expected_key_revision=snapshot["key_revision"], provider="novelai",
+            model="nai-diffusion-4-5-full", api_key="synthetic-atomic")
+        saved = client.put(path, json=valid, headers=headers)
+        assert saved.status_code == 200, saved.text
+        latest = saved.json()
+        conflict = client.put(path, json={**valid, "expected_revision": latest["revision"],
+            "expected_key_revision": latest["key_revision"], "api_key": "synthetic-not-saved"}, headers=headers)
+        assert conflict.status_code == 409, conflict.text
+        assert conflict.json()["detail"] == "world_image_policy_revision_conflict"
+        after = client.get(path, headers=headers)
+        assert after.status_code == 200
+        assert after.json() == latest
+        assert world_credentials.resolve_image_keys(db, **SCOPE)[0].reveal() == "synthetic-atomic"
+
+
+def test_generic_programming_error_is_not_reclassified_as_conflict(db):
+    from app.domains.world_characters.router.management import _credential_call
+    from starlette.requests import Request
+    request = Request({"type": "http", "method": "PUT",
+        "headers": [(b"origin", b"http://127.0.0.1:3000"), (b"host", b"127.0.0.1:3000")]})
+    def invalid(_service):
+        raise ValueError("synthetic_programming_fault")
+    with pytest.raises(ValueError, match="synthetic_programming_fault"):
+        _credential_call(invalid, management_service(db), request, mutation=True)

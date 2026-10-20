@@ -56,6 +56,9 @@ REQUIRED_ROUTE_OPERATIONS = (
 )
 ALLOWED_LATER_ROUTE_OPERATIONS = (
     "PATCH /worlds/{world_id}/chat/threads/{thread_id}/model",
+    # Demand preparation is a later protected endpoint; historical identity
+    # routes and the frozen P8-L-D transport evidence remain unchanged.
+    "POST /worlds/{world_id}/chat/threads/{thread_id}/memory-search/prepare",
 )
 
 

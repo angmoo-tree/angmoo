@@ -13,7 +13,7 @@ const context = vm.createContext({
   console: { info: value => logs.push(value), warn: value => logs.push(value) },
   fetch: (...args) => { fetchCalls++; return fetchImpl(...args); },
   Headers, Response, URL, AbortController, ReadableStream, TextDecoder, Error,
-  performance, process, DOMException,
+  performance, process, DOMException, crypto,
 });
 const cache = new Map();
 function load(name) {
@@ -27,7 +27,14 @@ function load(name) {
   return loadedModule.exports;
 }
 const { proxyBackend } = load("backend");
-const { isRequestCancellation } = load("proxy-lifecycle");
+const { isRequestCancellation, proxyConnectionCode } = load("proxy-lifecycle");
+assert.equal(proxyConnectionCode({cause: {code: "UND_ERR_SOCKET"}}), "UND_ERR_SOCKET");
+assert.equal(proxyConnectionCode({code: "secret-text"}), "unknown");
+const cyclic = {}; cyclic.cause = cyclic;
+assert.equal(proxyConnectionCode(cyclic), "unknown");
+assert.equal(proxyConnectionCode(new Proxy({}, {getOwnPropertyDescriptor() {throw new Error("private");}})), "unknown");
+assert.equal(proxyConnectionCode({get cause() { throw new Error("getter must not run"); }}), "unknown");
+assert.equal(proxyConnectionCode({cause:{cause:{cause:{cause:{code:"ECONNRESET"}}}}}), "unknown");
 const aborted = new AbortController();
 const reason = new Error("private reason"); reason.name = "ResponseAborted";
 aborted.abort(reason);
@@ -38,6 +45,10 @@ assert.equal(fetchCalls, 0);
 
 fetchImpl = async () => { throw new TypeError("private upstream failure"); };
 assert.equal((await proxyBackend("/private")).status, 502);
+fetchImpl = async () => { throw new TypeError("private upstream failure", {cause: {code: "UND_ERR_SOCKET"}}); };
+assert.equal((await proxyBackend("/private")).status, 502);
+assert.equal(logs.at(-1).connection_code, "UND_ERR_SOCKET");
+assert.match(logs.at(-1).request_id, /^[0-9a-f-]{36}$/);
 for (const status of [204, 205, 304, 409, 503]) {
   fetchImpl = async () => new Response(status < 400 ? null : '{"detail":"expected"}', {
     status, headers: { "cache-control": "no-store", "retry-after": "3", "set-cookie": "angmoo_browser_session=opaque; HttpOnly" },

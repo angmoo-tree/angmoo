@@ -190,7 +190,7 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
     workflow = execution.workflow
     assert workflow._router._caps.payload() == {
         "row_limit": 20, "max_hops": 3, "fanout_limit": 20, "token_budget": 4000,
-        "timeout_ms": 10000 if mode is ChatRecallMode.SOCIAL_HYBRID else 4000,
+        "timeout_ms": 20000 if mode is ChatRecallMode.SOCIAL_HYBRID else 4000,
     }
     workflow._social_context_provider = SnapshotProvider()
     observer = RecordingExecutor()
@@ -206,7 +206,7 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
     if mode is ChatRecallMode.SOCIAL_HYBRID:
         assert stored.route is RetrievalRoute.CANONICAL
         assert len(searches) == 1 and searches[0].search_text == query and searches[0].scope == scope
-        assert search_deadlines == [1010.0]
+        assert search_deadlines == [1020.0]
         assert searches[0].occurred_from is None
         assert payload["recall_interpretation"]["time_expression"] == "열이틀 날"
         assert payload["recall_interpretation"]["mentions"][0]["resolution"] == "unmatched"

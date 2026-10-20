@@ -6,6 +6,9 @@ without either domain importing the other domain's implementation.
 from dataclasses import dataclass
 
 LEGACY_OUTPUT = "routine-output.legacy.v1"
+LEGACY_WIRE = "routine-google-wire.legacy.v1"
+COMPACT_EFFECT_WIRE = "routine-google-wire.effects.v2"
+
 ENUM_OUTPUT = "routine-output.enum-preserved.v1"
 
 
@@ -14,8 +17,11 @@ class RoutineOutputPolicy:
     output_contract: str = LEGACY_OUTPUT
     state_schema_version: int = 1
     thought_policy: str = "thought_v1"
+    provider_schema_profile: str = LEGACY_WIRE
 
     def __post_init__(self):
+        if self.provider_schema_profile not in {LEGACY_WIRE, COMPACT_EFFECT_WIRE}:
+            raise ValueError("routine_provider_schema_profile_invalid")
         if self.output_contract not in {LEGACY_OUTPUT, ENUM_OUTPUT}:
             raise ValueError("routine_output_contract_unsupported")
         expected = 2 if self.output_contract == ENUM_OUTPUT else 1
@@ -27,7 +33,7 @@ class RoutineOutputPolicy:
 
 def select_policy(*, engine: str, sns_version: int, output_policy: str, thought_policy: str) -> RoutineOutputPolicy:
     enabled = engine == "personalized_graph_v2" and sns_version == 2 and thought_policy == "thought_v1" and output_policy == "enum_preserved_v1"
-    return RoutineOutputPolicy(ENUM_OUTPUT if enabled else LEGACY_OUTPUT, 2 if enabled else 1, thought_policy)
+    return RoutineOutputPolicy(ENUM_OUTPUT if enabled else LEGACY_OUTPUT, 2 if enabled else 1, thought_policy, COMPACT_EFFECT_WIRE)
 
 
 def saved_policy(result: dict | None) -> RoutineOutputPolicy:

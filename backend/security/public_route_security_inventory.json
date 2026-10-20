@@ -1217,6 +1217,11 @@
       "module": "app.domains.chat.router.world_chat",
       "endpoint": "create_or_get_world_thread"
     },
+    "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/memory-search/prepare": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.world_chat",
+      "endpoint": "prepare_memory_search"
+    },
     "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/messages": {
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat_response",

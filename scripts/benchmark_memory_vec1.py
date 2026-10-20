@@ -37,7 +37,7 @@ def main():
     vectors = [tuple(rng.uniform(-1, 1) for _ in range(768)) for _ in range(256)]
     query = MemoryVectorQuery(scope, "benchmark-768-cos", vectors[0])
     now = datetime.now(UTC)
-    workers = VectorReadWorkers(database_path=database, extension_path=args.extension, extension_sha256=digest)
+
     def document(i):
         return MemoryVectorDocument(f"doc-{i:06}", f"item-{i:06}", scope, 1, "a"*64,
             query.profile, vectors[i % len(vectors)], now)
@@ -57,12 +57,13 @@ def main():
             assert result.allowed_count == count and len(result.hits) == min(count, 50)
             assert all(hit.document_id.startswith("doc-") for hit in result.hits)
         async def lifecycle():
+            workers = VectorReadWorkers(database_path=database, extension_path=args.extension, extension_sha256=digest)
             start = monotonic()
             values = await asyncio.gather(*(workers.search(query, deadline=monotonic()+30) for _ in range(2)))
             parallel_ms = (monotonic()-start)*1000
             assert all(len(value.hits) == min(count, 50) for value in values)
             task = asyncio.create_task(workers.search(query, deadline=monotonic()+30))
-            while not workers.active_processes:
+            while not workers.busy_jobs and not task.done():
                 await asyncio.sleep(0)
             cancel_start = monotonic()
             task.cancel()
@@ -70,6 +71,7 @@ def main():
                 await task
             except asyncio.CancelledError:
                 pass
+            await workers.stop()
             assert not workers.active_processes
             return parallel_ms, (monotonic()-cancel_start)*1000
         parallel_ms, cancel_ms = asyncio.run(lifecycle())

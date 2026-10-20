@@ -1,6 +1,7 @@
 """Actual SQLite/FTS5/Vec1 workers; deterministic embedding and episode output."""
 
 import asyncio
+from memory.worker_test_support import worker_lifetime
 from dataclasses import replace
 from hashlib import sha256
 import json
@@ -29,7 +30,7 @@ from memory.test_episode_chat_pipeline import setup, response_session
 from memory.test_sqlite_vec1 import index, A
 
 
-def test_successful_chat_thought_episode_projection_native_fusion_and_hydration(response_session, index, tmp_path):
+def test_successful_chat_thought_episode_projection_native_fusion_and_hydration(response_session, index, tmp_path, worker_lifetime):
     db = response_session
     scope, memory, bundle, done, now = setup(db)
     ids = SqlAlchemyEpisodeApply(db, memory).apply(bundle=bundle,
@@ -58,14 +59,16 @@ def test_successful_chat_thought_episode_projection_native_fusion_and_hydration(
             return MeasuredEmbeddingResponse(tuple(A), ProviderUsage(), 1)
     embedder = Embedder()
     fts_workers = FtsReadWorkers(database_path=fts.database_path, settings=fts.settings)
+    worker_lifetime.track(fts_workers)
     vector_workers = VectorReadWorkers(database_path=index.database_path, extension_path=index._extension,
         extension_sha256=sha256(index._extension.read_bytes()).hexdigest())
+    worker_lifetime.track(vector_workers)
     service = HybridRecallService(fts=FtsHybridAxis(fts_workers, lexical_policy="group_or_v1"),
         vector=VectorHybridAxis(vector_workers, embedder),
         canonical=SqlAlchemyEpisodeHybridReader(factory, detail_reader_factory=RuntimeEpisodeDetailReader, clock=lambda: now))
     request = HybridRecallRequest("test", "call", "a" * 64, scope, "사용자 도움", EMBEDDING_PROFILE,
         (RecallDocumentKind.MEMORY_ITEM,), result_limit=12)
-    result = asyncio.run(service.execute(request, deadline=monotonic() + 20))
+    result = worker_lifetime.run(service.execute(request, deadline=monotonic() + 20))
     assert all(axis.candidate_count == 1 and axis.status.value == "ready" for axis in result.axes)
     assert result.fused_count == 1 and len(result.records) == 1
     packet = json.loads(result.records[0].text)
@@ -74,13 +77,13 @@ def test_successful_chat_thought_episode_projection_native_fusion_and_hydration(
     assert len(packet["units"][0]["sources"]) == 2
     assert ids[0] not in result.records[0].text
     assert embedder.calls == 1
-    assert not fts_workers.active_processes and not vector_workers.active_processes
+    assert fts_workers.busy_jobs == vector_workers.busy_jobs == 0
     # Memory OFF revokes the whole package even while stale projections remain.
     from app.domains.memory.models.items import MemoryScopeSettingModel
     setting = db.get(MemoryScopeSettingModel, memory.get_scope_setting(scope).id)
     setting.enabled = False
     db.commit()
-    result = asyncio.run(service.execute(request, deadline=monotonic() + 20))
+    result = worker_lifetime.run(service.execute(request, deadline=monotonic() + 20))
     assert result.records == ()
-    assert not fts_workers.active_processes and not vector_workers.active_processes
+    assert fts_workers.busy_jobs == vector_workers.busy_jobs == 0
     fts.close()

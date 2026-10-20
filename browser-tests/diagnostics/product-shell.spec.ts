@@ -17,6 +17,7 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
   let releaseSlow: (() => void) | undefined;
   let slow = false;
   const writes: string[] = [];
+  const preparationPath = `/api/backend/worlds/${worldId}/chat/threads/${threadId}/memory-search/prepare`;
   const environmentReports: string[] = [];
   await page.route("**/api/backend/**", async route => {
     const url = new URL(route.request().url());
@@ -26,6 +27,11 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     }
     if (route.request().method() !== "GET") writes.push(url.pathname);
     const send = (value: unknown, status = 200) => route.fulfill({ contentType: "application/json", body: JSON.stringify(value), status });
+    if (url.pathname === preparationPath && route.request().method() === "POST") {
+      expect(route.request().postDataJSON()).toEqual({});
+      return send({ schema_version: "memory-search-preparation.v1", world_id: worldId, thread_id: threadId,
+        axes: { fts: { status: "ready", reason: null }, vector: { status: "ready", reason: null } } });
+    }
     const localSession = existingLocalSessionRead(url, route.request().method(),
       { id: "local-owner", display_name: "Local Owner" }, { installationId: "synthetic-diagnostic" });
     if (localSession !== undefined) return send(localSession);
@@ -58,6 +64,9 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     return send({ detail: "unexpected_fixture_route" }, 404);
   });
   await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+  // Entering the visible Chat prepares search once; diagnostic browsing/export
+  // must neither prepare again nor introduce any additional mutations.
+  await expect.poll(() => writes).toEqual([preparationPath]);
   await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "기억과 진단", exact: true })).toBeVisible();
   await page.getByText("검색 진단 · 문제 해결", { exact: true }).click();
@@ -94,5 +103,5 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
   latest = requests[4];
   await select.selectOption("");
   await expect(page.getByText("요청 ID: request-4", { exact: true })).toBeVisible();
-  expect(writes).toEqual([]);
+  expect(writes).toEqual([preparationPath]);
 });

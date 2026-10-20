@@ -479,3 +479,25 @@ export async function listDiagnosticRequests(worldId: string, threadId: string, 
       !(data.next_cursor === null || typeof data.next_cursor === "string")) throw new WorldChatApiError(502, "diagnostic_scope_mismatch");
   return data;
 }
+
+
+type PreparationReceipt = { schema_version: "memory-search-preparation.v1"; world_id: string; thread_id: string;
+  axes: Record<"fts" | "vector", { status: "disabled" | "not_started" | "preparing" | "ready" | "unavailable"; reason: string | null }> };
+const pendingPreparations = new Map<string, { scope: ReturnType<typeof captureAuthRequestScope>; request: Promise<PreparationReceipt> }>();
+/** A mounted, visible thread requests preparation once; no polling or search is performed. */
+export function prepareWorldChatSearch(worldId: string, threadId: string): Promise<PreparationReceipt> {
+  const key = JSON.stringify([worldId, threadId]);
+  const existing = pendingPreparations.get(key);
+  if (existing && isCurrentAuthRequestScope(existing.scope)) return existing.request;
+  const scope = captureAuthRequestScope();
+  const request = requestWorldChatApi<PreparationReceipt>(worldChatApiPath(worldId, `/threads/${encodeURIComponent(threadId)}/memory-search/prepare`), { method: "POST", body: {} }).then(value => {
+    const statuses = ["disabled", "not_started", "preparing", "ready", "unavailable"];
+    if (!isCurrentAuthRequestScope(scope) || value?.schema_version !== "memory-search-preparation.v1" || value.world_id !== worldId || value.thread_id !== threadId ||
+      !["fts", "vector"].every(axis => statuses.includes(value.axes?.[axis as "fts" | "vector"]?.status))) {
+      throw new WorldChatApiError(502, "world_chat_scope_mismatch");
+    }
+    return value;
+  }).finally(() => { if (pendingPreparations.get(key)?.request === request) pendingPreparations.delete(key); });
+  pendingPreparations.set(key, { scope, request });
+  return request;
+}

@@ -70,20 +70,25 @@ def test_real_vector_details_distinguish_empty_and_observed_generation(index):
     import hashlib
     workers = VectorReadWorkers(database_path=index.database_path, extension_path=index._extension,
         extension_sha256=hashlib.sha256(index._extension.read_bytes()).hexdigest())
-    for expected in (0, 1):
-        observation, token = recording()
+    async def run():
         try:
-            result = asyncio.run(workers.search(MemoryVectorQuery(SCOPE, PROFILE, A), deadline=monotonic()+10))
-            terminal = observation.search_trace.payload()["terminals"][0]
-            assert len(result.hits) == expected
-            assert terminal["eligible_vector_count"] == expected
-            assert terminal["nn_query_started"] is bool(expected)
-            assert terminal["generation_match"] is True
-            assert terminal["metadata_status"] == "observed"
-            assert terminal["observed_generation"] == "v1"
+            for expected in (0, 1):
+                observation, token = recording()
+                try:
+                    result = await workers.search(MemoryVectorQuery(SCOPE, PROFILE, A), deadline=monotonic()+10)
+                    terminal = observation.search_trace.payload()["terminals"][0]
+                    assert len(result.hits) == expected
+                    assert terminal["eligible_vector_count"] == expected
+                    assert terminal["nn_query_started"] is bool(expected)
+                    assert terminal["generation_match"] is True
+                    assert terminal["metadata_status"] == "observed"
+                    assert terminal["observed_generation"] == "v1"
+                finally:
+                    current.reset(token)
+                index.upsert((document(),))
         finally:
-            current.reset(token)
-        index.upsert((document(),))
+            await workers.stop()
+    asyncio.run(run())
 
 from pydantic import ValidationError
 
@@ -92,15 +97,17 @@ from app.contracts.search_diagnostics import (
     SearchDiagnosticTrace, SearchFailure, SearchTerminal, SearchStage, SearchTraceCollector,
     SearchLineage, bounded_capture, collector, lineage,
 )
-from app.runtime.memory.worker_diagnostics import ProgressSlots, phase, current_worker
+from app.runtime.memory.worker_diagnostics import phase, current_worker
+from app.runtime.memory.search_worker_progress import ProgressSlots
 from app.runtime.memory.vector_worker import VectorReadWorkers
+from app.runtime.memory.search_worker_pool import SearchReadWorkers, SearchWorkerUnavailable
 
 
 def fault_child(pipe, case, query, deadline):
     if case == "exit":
         os._exit(17)
     if case == "eof":
-        pipe.close()
+        pipe.pipe.close()
         return
     if case == "protocol":
         pipe.pipe.send({"protocol": "wrong"})
@@ -127,9 +134,14 @@ class FaultWorkers(VectorReadWorkers):
     _child_target = staticmethod(fault_child)
 
     def __init__(self, case):
-        self._slots = asyncio.Semaphore(1)
-        self._arguments = (case,)
-        self.active_processes = set()
+        SearchReadWorkers.__init__(self, arguments=(case,), concurrency=1)
+
+
+async def searched_and_stopped(workers, query=None, *, deadline=None):
+    try:
+        return await workers.search(query, deadline=deadline if deadline is not None else monotonic()+10)
+    finally:
+        await workers.stop()
 
 
 def recording():
@@ -191,7 +203,7 @@ def test_child_failure_survives_boundaries_without_exception_text(case, expected
     workers = FaultWorkers(case)
     try:
         with pytest.raises(Exception):
-            asyncio.run(workers.search(None, deadline=monotonic()+10))
+            asyncio.run(searched_and_stopped(workers))
         payload = observation.search_trace.payload()
         terminal = payload["terminals"][0]
         assert terminal["failure"]["failure_code"] == expected
@@ -206,7 +218,7 @@ def test_unexpected_exit_is_not_a_database_error():
     observation, token = recording()
     try:
         with pytest.raises(Exception):
-            asyncio.run(FaultWorkers("exit").search(None, deadline=monotonic()+10))
+            asyncio.run(searched_and_stopped(FaultWorkers("exit")))
         terminal = observation.search_trace.payload()["terminals"][0]
         assert terminal["terminal_state"] == "unexpected_exit"
         assert terminal["worker_exit_code"] == 17
@@ -220,21 +232,24 @@ def test_slot_timeout_and_spawn_failure_are_distinct(monkeypatch):
     try:
         async def blocked():
             workers = FaultWorkers("ok")
-            await workers._slots.acquire()
+            await workers._control.preparation_slots.acquire()
+            await workers._control.preparation_slots.acquire()
             try:
                 with pytest.raises(TimeoutError):
                     await workers.search(None, deadline=monotonic()+0.03)
             finally:
-                workers._slots.release()
+                workers._control.preparation_slots.release()
+                workers._control.preparation_slots.release()
+                await workers.stop()
         asyncio.run(blocked())
         terminal = observation.search_trace.payload()["terminals"][0]
         assert not terminal["worker_started"]
-        assert terminal["failure"]["failure_stage"] == "slot_wait"
+        assert terminal["failure"]["failure_stage"] == "waiting_ready"
         def fail_start(self):
             raise OSError("private-canary start path")
         monkeypatch.setattr(multiprocessing.context.SpawnProcess, "start", fail_start)
-        with pytest.raises(OSError):
-            asyncio.run(FaultWorkers("ok").search(None, deadline=monotonic()+10))
+        with pytest.raises(SearchWorkerUnavailable):
+            asyncio.run(searched_and_stopped(FaultWorkers("ok")))
         terminal = observation.search_trace.payload()["terminals"][0]
         assert terminal["failure"]["failure_code"] == "worker_start_failed"
         assert not terminal["worker_started"]
@@ -333,7 +348,7 @@ def test_success_off_on_has_same_value_and_basic_failure_free_summary():
         observation = Observation(detailed=detailed)
         token = current.set(observation)
         try:
-            outputs.append(asyncio.run(FaultWorkers("ok").search(None, deadline=monotonic()+10)))
+            outputs.append(asyncio.run(searched_and_stopped(FaultWorkers("ok"))))
             if detailed:
                 terminal = observation.search_trace.payload()["terminals"][0]
                 assert terminal["terminal_state"] == "success" and terminal["failure"] is None
@@ -364,7 +379,7 @@ def test_requested_metadata_survives_deadline_before_child_starts():
     observation, token = recording()
     try:
         with pytest.raises(TimeoutError):
-            asyncio.run(workers.search(SimpleNamespace(profile=EMBEDDING_PROFILE), deadline=monotonic()-1))
+            asyncio.run(searched_and_stopped(workers, SimpleNamespace(profile=EMBEDDING_PROFILE), deadline=monotonic()-1))
         row = observation.search_trace.payload()["terminals"][0]
         assert row["requested_generation"] == "expected-generation"
         assert row["requested_profile"] == EMBEDDING_PROFILE
@@ -403,7 +418,7 @@ def test_parallel_requests_keep_trace_and_aliases_isolated():
             observation, token = recording()
             try:
                 lineage("axis", "returned", identities={"document_ref": ("d", name)})
-                result = await FaultWorkers("ok").search(None, deadline=monotonic()+10)
+                result = await searched_and_stopped(FaultWorkers("ok"))
                 return result, observation.search_trace
             finally:
                 current.reset(token)
@@ -422,7 +437,7 @@ def test_diagnostic_stage_collection_failure_does_not_change_success(monkeypatch
     monkeypatch.setattr(target, "add_stage", lambda row: (_ for _ in ()).throw(ValueError("fixture")))
     workers = FaultWorkers("ok")
     try:
-        assert asyncio.run(workers.search(None, deadline=monotonic()+10)) == ("fixed-result",)
+        assert asyncio.run(searched_and_stopped(workers)) == ("fixed-result",)
         assert not workers.active_processes
         assert target.stage_dropped > 0
     finally:
@@ -462,10 +477,11 @@ def test_cleanup_reporting_error_keeps_result_and_releases_process(monkeypatch):
     observation, token = recording()
     workers = FaultWorkers("ok")
     try:
-        assert asyncio.run(workers.search(None, deadline=monotonic()+10)) == ("fixed-result",)
+        assert asyncio.run(searched_and_stopped(workers)) == ("fixed-result",)
         row = observation.search_trace.payload()["terminals"][0]
-        assert row["cleanup_error_code"] == "cleanup_failed"
-        assert row["joined"] and not workers.active_processes
+        assert row["request_cleanup_complete"] and row["worker_state_after"] == "ready"
+        assert workers._reason == "memory_search_handle_cleanup_failed"
+        assert not workers.active_processes
         assert "private-cleanup" not in json.dumps(observation.search_trace.payload())
     finally:
         current.reset(token)

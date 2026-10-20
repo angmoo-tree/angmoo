@@ -23,7 +23,12 @@ def test_spawn_policy_and_request_local_detail(tmp_path):
             assert bool(observation.details) is capture
             assert any(e.get('policy')=='group_or_v1' for e in observation.events)
         finally: current.reset(token)
-    async def main(): await asyncio.gather(run(True),run(False))
+    async def main():
+        try:
+            await asyncio.gather(run(True),run(False))
+            assert workers.busy_jobs == 0 and len(workers.active_processes) <= 2
+        finally:
+            await workers.stop()
     asyncio.run(main())
     assert not workers.active_processes
 
@@ -47,20 +52,23 @@ def test_cancel_queued_and_spawned_group_reads_releases_shared_slots(tmp_path):
     query=MemoryRecallSearchQuery(SCOPE,'별빛 축제',(RecallDocumentKind.MEMORY_ITEM,),50,
         lexical_policy='group_or_v1')
     async def run():
-        await workers._slots.acquire()
+        await workers._control.preparation_slots.acquire()
+        await workers._control.preparation_slots.acquire()
         queued=asyncio.create_task(workers.search(query,deadline=monotonic()+5))
         await asyncio.sleep(.01)
         assert not workers.active_processes
         queued.cancel()
         with pytest.raises(asyncio.CancelledError): await queued
-        workers._slots.release()
+        workers._control.preparation_slots.release()
+        workers._control.preparation_slots.release()
         spawned=asyncio.create_task(workers.search(query,deadline=monotonic()+5))
         async with asyncio.timeout(2):
             while not workers.active_processes:
                 await asyncio.sleep(0)
         spawned.cancel()
         with pytest.raises(asyncio.CancelledError): await spawned
+        # An unassigned common bootstrap survives caller cancellation. Runtime
+        # shutdown, not that caller, owns and reaps it.
+        await workers.stop()
         assert not workers.active_processes
-        async with asyncio.timeout(.1): await workers._slots.acquire()
-        workers._slots.release()
     asyncio.run(run())

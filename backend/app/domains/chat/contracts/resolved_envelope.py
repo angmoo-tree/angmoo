@@ -15,7 +15,7 @@ from app.domains.chat.contracts.retrieval_intent import (
 
 
 RESOLVED_RETRIEVAL_VERSION = "resolved-retrieval.v1"
-CHAT_HYBRID_SEARCH_TIMEOUT_MS = 10_000
+CHAT_HYBRID_SEARCH_TIMEOUT_MS = 20_000
 
 
 @dataclass(frozen=True, slots=True)

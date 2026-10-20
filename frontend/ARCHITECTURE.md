@@ -1,5 +1,35 @@
 # Angmoo Frontend Architecture
 
+## Quiet search preparation and image setting coordination (2026-10-20)
+
+The mounted, visible World Chat thread requests optional search preparation once
+after its authorized thread read succeeds. Chat's API client coalesces pending
+requests within the same auth/runtime/thread scope. Lists, prefetch, Home and
+Feed do not call this endpoint. Unmount does not cancel shared backend preparation.
+No polling, progress banner, message, embedding or input-blocking wait is added.
+Next and static/Tauri consume the same feature component and transport contract.
+
+`CredentialFields` owns confirmed credential/configuration/provider-key revisions
+separately from edit drafts. Image transport accepts only image-specific extra
+fields; those fields cannot overwrite the confirmed revisions, model or provider.
+Delete uses the same confirmed snapshot. Success, conflict, validation rejection
+and unknown transport outcome have different refresh behavior; a missing response
+never automatically resubmits a mutation.
+
+WorldCharacter composition coordinates image policy and credential cards only
+within the current authorized actor screen. Neutral metadata callbacks expose
+saved vision-key availability to Media controls. Loading/error/missing/saved are
+distinct; an unsaved key is not an activation prerequisite. Missing keys prevent
+turning recognition on, while turning it off remains possible. Key save does not
+automatically enable recognition. Media owns the contextual bilingual explanation;
+server validation still handles deletion in another tab.
+
+Next proxy terminal diagnostics add a request correlation ID and a bounded,
+allowlisted cause code. They never log raw exception messages, URLs, bodies,
+credentials or stacks. Causal cancellation and live-connection failures retain
+their existing separate outcomes. Search trace decoding/export accepts old v1
+records while displaying optional preparation, reuse and request-cleanup fields.
+
 ## Automatic local preparation and explicit session stop (2026-10-19 LOCAL)
 
 Composition's AuthProvider consumes the single controller owned by

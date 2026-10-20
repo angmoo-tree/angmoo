@@ -346,5 +346,8 @@
   "키를 삭제하지 못했어요.": "Could not delete the saved key.",
   "설정이 변경됐어요. 최신 내용을 확인해 주세요.": "Settings have changed. Review the latest settings.",
   "요청 결과를 확인하지 못했어요. 다시 저장하기 전에 현재 상태를 확인해 주세요.": "The request result could not be confirmed. Check the current settings before submitting again.",
-  "다시 불러오기": "Reload settings"
+  "다시 불러오기": "Reload",
+  "인식용 키 상태를 확인하고 있어요.": "Checking the image recognition key.",
+  "인식용 키 상태를 확인하지 못했어요.": "Could not check the image recognition key.",
+  "이미지 인식을 켜려면 먼저 인식용 API 키를 저장해 주세요.": "Save an image recognition API key before enabling image recognition."
 }

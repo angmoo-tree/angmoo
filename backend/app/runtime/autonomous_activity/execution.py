@@ -246,7 +246,13 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                 attempt.emit("daily_preparation", details=preparation_status)
             ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
+        search_settings = (False, False)
+        if binding.prepare_search is not None:
+            from app.runtime.memory.composition import search_preparation_settings
+            search_settings = search_preparation_settings(ctx.db, ctx.user_id, actor.world_id, actor.id)
         ctx.db.commit()
+        if search_settings[0]:
+            binding.prepare_search(semantic=search_settings[1])
         shared = plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id), environment=environment))
         if attempt and name_binding is not None:
             attempt.emit("name_binding", details={"policy_version": name_binding.policy_version,

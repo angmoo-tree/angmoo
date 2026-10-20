@@ -10,6 +10,7 @@ from typing import Any
 class ActivityRuntimeBinding:
     hybrid_service: Any
     data_directory: Path
+    prepare_search: Any = None
 
 
 logger = logging.getLogger(__name__)

@@ -2,15 +2,34 @@
 export type ProxyPhase = "request_body" | "upstream_headers" | "error_body" | "response_stream";
 export type ProxyRoute = "backend" | "community";
 
+const CONNECTION_CODES = new Set(["UND_ERR_SOCKET", "UND_ERR_CONNECT_TIMEOUT", "UND_ERR_HEADERS_TIMEOUT", "UND_ERR_BODY_TIMEOUT", "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EPIPE", "ENOTFOUND", "EAI_AGAIN"]);
+export function proxyConnectionCode(error: unknown): string {
+  const visited = new Set<object>();
+  for (let depth = 0; depth < 4 && error && typeof error === "object"; depth++) {
+    if (visited.has(error)) break;
+    visited.add(error);
+    // Inspect only own data properties; untrusted getters must not run in logging.
+    try {
+      const code = Object.getOwnPropertyDescriptor(error, "code")?.value;
+      if (typeof code === "string" && CONNECTION_CODES.has(code)) return code;
+      error = Object.getOwnPropertyDescriptor(error, "cause")?.value;
+    } catch { return "unknown"; }
+  }
+  return "unknown";
+}
+
 export function proxyLifecycle(method: string, route: ProxyRoute = "backend") {
   const started = performance.now();
   let reported = false;
+  const requestId = crypto.randomUUID();
   return {
-    finish(phase: ProxyPhase, outcome: "cancelled" | "failed", status?: number) {
+    finish(phase: ProxyPhase, outcome: "cancelled" | "failed", status?: number, error?: unknown) {
       if (reported) return;
       reported = true;
       const diagnostic = {
         event: "backend_proxy_terminal",
+        request_id: requestId,
+        connection_code: outcome === "failed" ? proxyConnectionCode(error) : undefined,
         method: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"].includes(method) ? method : "OTHER",
         route,
         phase,
@@ -85,7 +104,7 @@ export function forwardResponseStream(
       } catch (error) {
         if (ended) return;
         const cancelled = isRequestCancellation(error, downstream);
-        lifecycle.finish("response_stream", cancelled ? "cancelled" : "failed", status);
+        lifecycle.finish("response_stream", cancelled ? "cancelled" : "failed", status, error);
         finish();
         controller.error(error);
       }

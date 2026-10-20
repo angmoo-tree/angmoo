@@ -1,4 +1,5 @@
 "use client";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
@@ -36,7 +37,7 @@ import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/b
 import { useWorldChatDelete, WorldChatDeleteDialog } from "./world-chat-delete";
 import { IconButton } from "@/components/ui/button";
 import { formatHandle } from "@/utils/profile-presentation";
-import { getLatestWorldChatResponseRequest, getWorldChatResponseRequest, getWorldChatThread, listWorldChatThreads, retryWorldChatResponse, sendWorldChatMessage, streamWorldChatResponse, updateWorldChatThreadModel, WorldChatApiError } from "@/features/chat/api/world-chat-client";
+import { getLatestWorldChatResponseRequest, getWorldChatResponseRequest, getWorldChatThread, prepareWorldChatSearch, listWorldChatThreads, retryWorldChatResponse, sendWorldChatMessage, streamWorldChatResponse, updateWorldChatThreadModel, WorldChatApiError } from "@/features/chat/api/world-chat-client";
 import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
 import { type MessageGoogleGeminiModel } from "@/features/chat/types/chat-contract";
 import type { WorldChatGenerationRequestRead, WorldChatThreadDeleteRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
@@ -53,8 +54,9 @@ type LoadState = "loading" | "ready" | "error";
 type ModelSelection = "default" | MessageGoogleGeminiModel;
 
 export function WorldChat({ threadId, worldId, ...slots }: WorldChatProps) {
+  const identity = useAuthRuntimeIdentity(`${worldId}:${threadId ?? "list"}`);
   return threadId ? (
-    <WorldChatThread {...slots} key={`${worldId}:${threadId}`} threadId={threadId} worldId={worldId} />
+    <WorldChatThread {...slots} key={identity} threadId={threadId} worldId={worldId} />
   ) : (
     <WorldChatList key={worldId} worldId={worldId} />
   );
@@ -590,6 +592,22 @@ function WorldChatThread({
       clearTypingTimer();
     };
   }, [attempt, clearTypingTimer, hydrateRequest, threadId, worldId]);
+
+  const preparationRequested = useRef(false);
+  useEffect(() => {
+    if (state !== "ready" || !thread || thread.id !== threadId) return;
+    const auth = captureAuthRequestScope();
+    const prepare = () => {
+      if (document.visibilityState !== "visible" || preparationRequested.current || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
+      preparationRequested.current = true;
+      // The Runtime owns common preparation after admission. UI disposal must not
+      // stop shared workers; an ordinary search still has its own deadline.
+      void prepareWorldChatSearch(worldId, threadId).catch(() => {});
+    };
+    prepare();
+    document.addEventListener("visibilitychange", prepare);
+    return () => document.removeEventListener("visibilitychange", prepare);
+  }, [state, thread, threadId, worldId]);
 
   const retry = useCallback(() => {
     setState("loading");

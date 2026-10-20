@@ -359,3 +359,15 @@ def validate_routine_generation(
     if generation.state_after != expected_state:
         raise ValueError("routine state must be derived from validated effects")
     return RoutineGeneration(plan=plan, draft=draft, state_after=expected_state)
+
+
+def google_routine_response_schema(schema: dict, *, profile: str) -> dict:
+    """Wire-only projection. Domain output validation keeps every evidence bound."""
+    from app.contracts.routine_output import LEGACY_WIRE, COMPACT_EFFECT_WIRE
+    if profile == LEGACY_WIRE:
+        return schema
+    if profile != COMPACT_EFFECT_WIRE:
+        raise ValueError("routine_provider_schema_profile_invalid")
+    projected = deepcopy(schema)
+    projected["properties"]["source_event_effects"].pop("maxItems", None)
+    return projected

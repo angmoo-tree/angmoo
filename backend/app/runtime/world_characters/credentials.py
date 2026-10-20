@@ -1,5 +1,6 @@
 """World authorization and Identity writes share the management Session."""
 from app.domains.identity.service import world_credentials
+from app.domains.media.contracts import ImagePreparationError
 
 
 def read(service, *, world_id, world_character_id, user, purpose):
@@ -39,7 +40,7 @@ def write(service, *, world_id, world_character_id, user, purpose, data, remove=
             from app.domains.identity.service import world_image_credentials
             policy = service.db.get(WorldImagePolicy, role.id)
             if data.expected_configuration_revision != (policy.revision if policy else 0):
-                raise ValueError("world_image_policy_revision_conflict")
+                raise ImagePreparationError("world_image_policy_revision_conflict")
             before = world_credentials.find(service.db, **scope)
             selected_provider = before.provider if before else None
             if not remove and data.provider == "comfyui" and not data.clear_partner_key:

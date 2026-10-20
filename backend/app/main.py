@@ -368,7 +368,9 @@ def create_app(
             openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
         )
         if composition is not None:
-            runtime_app.state.activity_runtime_binding = ActivityRuntimeBinding(composition.memory_hybrid_runtime.service, composition.config.data_paths.root)
+            runtime_app.state.activity_runtime_binding = ActivityRuntimeBinding(
+                composition.memory_hybrid_runtime.service, composition.config.data_paths.root,
+                composition.memory_hybrid_runtime.request_preparation)
         from app.runtime.account_deletion import delete_current_user_account
 
         runtime_app.state.account_deletion_workflow = delete_current_user_account
@@ -384,7 +386,10 @@ def create_app(
         runtime_app.state.media_runtime = MediaRuntime(composition.session_factory if composition else SessionLocal, runtime_settings)
         runtime_app.state.media_worker_enabled = composition is not None
         from app.runtime.chat.message_composition import configure_chat_services
-        configure_chat_services(runtime_app)
+        configure_chat_services(runtime_app,
+            session_factory=composition.session_factory if composition else SessionLocal,
+            search_runtime=composition.memory_hybrid_runtime if composition else None,
+            recall_mode=runtime_settings.CHAT_RECALL_MODE)
         from app.runtime.chat.image_attachments import configure_chat_image_services
         configure_chat_image_services(runtime_app)
         from app.runtime.diagnostics.http import configure_runtime_diagnostics

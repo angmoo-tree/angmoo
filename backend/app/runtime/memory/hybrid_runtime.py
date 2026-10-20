@@ -15,6 +15,9 @@ from app.runtime.memory_embedding_provider import MemoryQueryEmbedder
 from app.runtime.memory.composition import memory_repository
 from app.domains.memory.repository.embedding import MemoryEmbeddingRepository
 import hashlib
+import asyncio
+from time import monotonic
+from app.runtime.memory.search_worker_pool import SearchWorkerControl
 
 
 class UnavailableVectorAxis:
@@ -29,10 +32,14 @@ class MemoryHybridRuntime:
         from app.runtime.memory.canonical_worker import DeadlineSessionFactory, CanonicalReadWorker
         canonical_sessions = DeadlineSessionFactory(session_factory)
         self._episode_only = episode_only
+        self._search_control = SearchWorkerControl()
+        self._transition = None
+        self._stopping = False
         self.projection = None
         self.vector_axis = UnavailableVectorAxis()
         self.status = "stopped"
-        self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path, settings=fts_index.settings), lexical_policy=fts_policy)
+        self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path,
+            settings=fts_index.settings, control=self._search_control), lexical_policy=fts_policy)
         if episode_only:
             from app.domains.memory.repository.episode_hybrid_recall import SqlAlchemyEpisodeHybridReader
             from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
@@ -46,7 +53,23 @@ class MemoryHybridRuntime:
         self._generations = VectorGenerations(data_paths.search / "memory-vectors", bundled_vector_index)
 
     async def search(self, request, *, deadline):
+        if self._transition is not None:
+            async with asyncio.timeout(max(0, deadline - monotonic())):
+                await asyncio.shield(self._transition)
         return await self.vector_axis.search(request, deadline=deadline)
+
+    def request_preparation(self, *, semantic=True):
+        """Readiness only; caller owns current scope/settings authorization."""
+        fts = self.fts._workers.request_preparation()
+        vector = {"status": "disabled", "reason": None}
+        if semantic:
+            if self._transition is not None and not self._transition.done():
+                vector = {"status": "preparing", "reason": "memory_vector_generation_transition"}
+            elif isinstance(self.vector_axis, VectorHybridAxis):
+                vector = self.vector_axis._workers.request_preparation()
+            else:
+                vector = {"status": "unavailable", "reason": "memory_vector_resources_unavailable"}
+        return {"fts": fts, "vector": vector}
 
     def read_status(self):
         if self.status == "ready" and self.projection is not None:
@@ -111,7 +134,7 @@ class MemoryHybridRuntime:
     def _bind(self, index):
         self.vector_axis = VectorHybridAxis(VectorReadWorkers(database_path=index.database_path,
             extension_path=index._extension, extension_sha256=hashlib.sha256(index._extension.read_bytes()).hexdigest(),
-            generation=index.generation), MemoryQueryEmbedder(self._factory,
+            generation=index.generation, control=self._search_control), MemoryQueryEmbedder(self._factory,
                 lambda session: MemoryEmbeddingRepository(session, memory_repository(session))))
 
     def _retained_indexes(self):
@@ -126,13 +149,42 @@ class MemoryHybridRuntime:
             yield self._generations._index(directory.name)
 
     def _promote(self, index):
+        if self._stopping:
+            return
         self._generations.promote(index)
-        self._bind(index)
-        self.status = "ready"
+        old = self.vector_axis
+
+        async def replace_binding():
+            if isinstance(old, VectorHybridAxis):
+                await old._workers.stop()
+            if not self._stopping:
+                self._bind(index)
+                self.status = "ready"
+        # Projection's callback is synchronous. Own the transition explicitly;
+        # reads await it and shutdown drains it before disposing database owners.
+        self._transition = asyncio.create_task(replace_binding())
 
     async def stop(self):
-        await self.canonical_worker.stop()
+        self._stopping = True
+        errors = []
+        async def drain(operation):
+            try:
+                await operation
+            except Exception as exc:
+                errors.append(exc)
+        await drain(self.fts._workers.stop())
+        if self._transition is not None:
+            await drain(asyncio.shield(self._transition))
+        if isinstance(self.vector_axis, VectorHybridAxis):
+            await drain(self.vector_axis._workers.stop())
+        await drain(self.canonical_worker.stop())
         if self.projection is not None:
-            await self.projection.stop()
+            await drain(self.projection.stop())
+        if errors:
+            self.status = "cleanup_failed"
+            # Retain quarantined ownership. Do not report stopped or dispose
+            # the control executor while an OS process may still be starting.
+            raise ExceptionGroup("memory_runtime_cleanup_failed", errors)
         self.vector_axis = UnavailableVectorAxis()
         self.status = "stopped"
+        self._search_control.close()

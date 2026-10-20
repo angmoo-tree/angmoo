@@ -7,7 +7,7 @@ from app.contracts.search_diagnostics import axis_receipts, collector, lineage, 
 from app.domains.memory.contracts.hybrid_recall import RankedMemoryCandidate
 from app.domains.memory.contracts.hybrid_recall import (
     HybridCanonicalReader, HybridRecallRequest, HybridRecallResult,
-    HybridSearchAxis, RecallAxisStatus,
+    HybridSearchAxis, RecallAxisStatus, HybridAxesUnavailable,
 )
 
 
@@ -52,13 +52,16 @@ class HybridRecallService:
         """Recheck only delivered dependencies; never call either search axis."""
         await self._canonical.assert_current_async(result, delivered_ids, deadline=deadline)
 
-    async def execute(self, request: HybridRecallRequest, *, deadline: float) -> HybridRecallResult:
+    async def execute(self, request: HybridRecallRequest, *, deadline: float,
+                      final_reserve_seconds: float = 0.5) -> HybridRecallResult:
         started = monotonic()
         if deadline <= started:
             raise TimeoutError("hybrid_recall_deadline")
         # Leave time for native worker termination and canonical validation, so
         # an axis timeout can return its unavailable receipt beside a ready axis.
-        axis_deadline = deadline - min(0.5, (deadline - started) * 0.1)
+        if not 0 <= final_reserve_seconds <= 3:
+            raise ValueError("hybrid_final_reserve_invalid")
+        axis_deadline = deadline - min(final_reserve_seconds, (deadline - started) * 0.1)
         axis_request = getattr(self._canonical, "axis_request", lambda value: value)(request)
         tasks = [asyncio.create_task(axis.search(axis_request, deadline=axis_deadline))
                  for axis in (self._fts, self._vector)]
@@ -80,7 +83,7 @@ class HybridRecallService:
             raise asyncio.CancelledError()
         available = {RecallAxisStatus.READY, RecallAxisStatus.PARTIAL}
         if not any(r.receipt.status in available for r in (fts, vector)):
-            raise RuntimeError("hybrid_all_axes_unavailable")
+            raise HybridAxesUnavailable((fts.receipt, vector.receipt))
         fused = reciprocal_rank_fusion(fts.candidates, vector.candidates)
         resolved = await self._canonical.resolve_async(request, fused, deadline=deadline)
         for record, selected in resolved.selection:
