@@ -2736,7 +2736,9 @@ test("PWA is standalone, cache-free, and shares the canonical Home", async ({ pa
   });
   expect(registration).toBe(`${new URL(page.url()).origin}/`);
   await expect(page.locator('main[data-product-surface="device-home"]')).toBeVisible();
-  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
+  // The Home shell and service worker can be ready before asynchronous owner
+  // preparation finishes. Wait for the exact expected effect, not a sleep.
+  await expect.poll(() => audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
 

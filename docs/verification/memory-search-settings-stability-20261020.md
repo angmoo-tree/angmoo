@@ -148,11 +148,22 @@ Each count (0, 1, 3, 5, 7, 8) is reserved before transmission; unknown outcomes
 cannot be retried. SDK retries are disabled. The ledger records hashes and safe
 outcomes, not the key, its file path or request/response prose.
 
-At the implementation checkpoint, provider acceptance is
-`PROVIDER_ACCEPTANCE_NOT_RUN`. Main merge and candidate generation require a
-valid six-condition real-provider PASS and the repository's required checks.
+After the implementation checkpoint, Google acceptance ran exactly six times
+against source `4311a22fa58348ff877b4de5ee2a0b6e076e9d98` and passed all
+0/1/3/5/7/8 conditions with `gemini-3.5-flash-lite` (medium, 8,192 output tokens,
+one SDK attempt). Every response passed JSON and server validation. The local
+receipt binds the full schema and implementation hashes; a later source can
+reuse it only while all fingerprinted implementation files remain unchanged.
+No request was retried. Main merge and candidate generation also require the
+repository's latest-head checks.
 The acceptance probe supplies a permitted synthetic output example; it verifies
 schema acceptance and server validation, not spontaneous narrative quality.
+
+PR browser CI exposed a consumer fixture still forbidding the newly approved
+Chat preparation POST. It now checks exactly one scoped preparation with an
+empty body and no further mutations during diagnostic selection/export. A Home
+PWA fixture now waits for the existing asynchronous ensure effect; it retains
+the exact one-request assertion instead of treating shell visibility as readiness.
 
 PR CI, main CI, fixed P3 artifacts, fresh-volume command preparation, actual user
 testing and official publication are separate statuses. No official publication
