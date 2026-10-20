@@ -84,7 +84,7 @@ function SettingsEditor({ initial, pending, onSave, kind }: {
 export function WorldCharacterSettingsForm({ activityKeyRef, onActivityKeySaved, ...props }: {
   initial: WorldCharacterSettingsRead; pending: boolean;
   onSave: (revision: number, values: Partial<WorldCharacterSettingsValues>) => Promise<WorldCharacterSettingsRead | null>;
-  imageCard?: ReactNode; visionControls?: ReactNode; interestCard?: ReactNode; modeCard?: ReactNode; dayCard?: ReactNode; deleteCard?: ReactNode;
+  imageCard?: ReactNode; visionCard?: ReactNode; interestCard?: ReactNode; modeCard?: ReactNode; dayCard?: ReactNode; deleteCard?: ReactNode;
   activityKeyRef?: Ref<HTMLDivElement>; onActivityKeySaved?: () => void;
 }) {
  const { initial } = props;
@@ -96,7 +96,7 @@ export function WorldCharacterSettingsForm({ activityKeyRef, onActivityKeySaved,
   </div>
   {props.imageCard}
   <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="chat" />
-  <WorldCredentialCard worldId={initial.world_id} actorId={initial.world_character_id} purpose="vision">{props.visionControls}</WorldCredentialCard>
+  {props.visionCard}
   {props.interestCard}{props.modeCard}{props.dayCard}{props.deleteCard}
  </div>;
 }

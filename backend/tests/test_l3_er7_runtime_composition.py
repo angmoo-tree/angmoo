@@ -161,7 +161,12 @@ def test_hybrid_fts_policy_reaches_application_owned_axis(tmp_path, policy, monk
         request = HybridRecallRequest('e10-default', 'call', 'a'*64, SCOPE,
             '아시도와 축제 공연을 진행했는지 확인', 'profile',
             (RecallDocumentKind.MEMORY_ITEM,))
-        result = asyncio.run(axis.search(request, deadline=monotonic()+10))
+        async def search_lifetime():
+            try:
+                return await axis.search(request, deadline=monotonic()+10)
+            finally:
+                await composition.memory_hybrid_runtime.stop()
+        result = asyncio.run(search_lifetime())
         assert result.receipt.status.value == 'ready'
         assert {row.candidate.memory_item_id for row in result.candidates} == (
             {'m24'} if expected == 'group_or_v1' else set())

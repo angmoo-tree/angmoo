@@ -1,4 +1,5 @@
 import asyncio
+from memory.worker_test_support import worker_lifetime
 from dataclasses import replace
 from datetime import UTC
 import hashlib
@@ -25,7 +26,7 @@ from memory.test_sqlite_vec1 import index, A
 
 @pytest.mark.parametrize("lexical_policy", ["legacy_strict_v1", "group_or_v1"])
 @pytest.mark.parametrize("revocation", ["blocked", "deleted_source", "memory_off"])
-def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version(runtime_factory, index, tmp_path, revocation, lexical_policy):
+def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version(runtime_factory, index, tmp_path, revocation, lexical_policy, worker_lifetime):
     scope, counterpart, thread, message, item_id = _accept_chat_memory(runtime_factory)
     source = recall_document_source(runtime_factory)
     documents = source.all_documents()
@@ -44,23 +45,25 @@ def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_vers
             return MeasuredEmbeddingResponse(tuple(A), ProviderUsage(), 1)
     embedder = Embedder()
     fts_workers = FtsReadWorkers(database_path=fts.database_path)
+    worker_lifetime.track(fts_workers)
     vec_workers = VectorReadWorkers(database_path=index.database_path, extension_path=index._extension,
         extension_sha256=hashlib.sha256(index._extension.read_bytes()).hexdigest())
+    worker_lifetime.track(vec_workers)
     canonical = SqlAlchemyHybridCanonicalReader(runtime_factory, source_reader_factory=source_evidence_reader,
         canonical=canonical_recall_repository(runtime_factory))
     service = HybridRecallService(fts=FtsHybridAxis(fts_workers, lexical_policy=lexical_policy), vector=VectorHybridAxis(vec_workers, embedder), canonical=canonical)
     request = HybridRecallRequest("test-request", "test-call", "b"*64, scope, "폭우", EMBEDDING_PROFILE,
         (RecallDocumentKind.MEMORY_ITEM, RecallDocumentKind.OWNER_MEMORY_REQUEST))
-    result = asyncio.run(service.execute(request, deadline=monotonic()+15))
+    result = worker_lifetime.run(service.execute(request, deadline=monotonic()+15))
     assert {axis.status.value for axis in result.axes} == {"ready"}
     assert all(axis.candidate_count > 0 for axis in result.axes)
     assert result.records[0].memory_item_id == item_id
     assert result.sources and all(receipt.record_count == 1 for receipt in result.sources)
     assert len(result.records) >= 2
     assert embedder.calls == 1
-    assert not fts_workers.active_processes and not vec_workers.active_processes
+    assert fts_workers.busy_jobs == vec_workers.busy_jobs == 0
     index.upsert((replace(vector, version=vector.version+1),))
-    stale = asyncio.run(service.execute(request, deadline=monotonic()+15))
+    stale = worker_lifetime.run(service.execute(request, deadline=monotonic()+15))
     assert stale.excluded_count >= 1
     assert stale.status.value == "partial"
     # Unresolved natural-language subjects cannot bypass current source policy,
@@ -82,6 +85,6 @@ def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_vers
             MemoryScopeService(repository).update(scope, expected_version=setting.version,
                 enabled=False, retention_days=setting.retention_days)
         session.commit()
-    revoked = asyncio.run(service.execute(replace(request, search_text="미등록별명과 겪은 사건"), deadline=monotonic()+15))
+    revoked = worker_lifetime.run(service.execute(replace(request, search_text="미등록별명과 겪은 사건"), deadline=monotonic()+15))
     assert revoked.records == ()
-    assert not fts_workers.active_processes and not vec_workers.active_processes
+    assert fts_workers.busy_jobs == vec_workers.busy_jobs == 0

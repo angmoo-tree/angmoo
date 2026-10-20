@@ -56,7 +56,14 @@ def main():
         query = MemoryVectorQuery(scope, profile, vector)
         assert index.search(query, cancellation=VectorCancellation(monotonic() + 30)).hits[0].document_id == "one"
         workers = VectorReadWorkers(database_path=index.database_path, extension_path=index._extension, extension_sha256=hashlib.sha256(elf).hexdigest())
-        result = asyncio.run(workers.search(query, deadline=monotonic() + 30))
+        async def search_lifetime():
+            try:
+                result = await workers.search(query, deadline=monotonic() + 30)
+                assert workers.busy_jobs == 0
+                return result
+            finally:
+                await workers.stop()
+        result = asyncio.run(search_lifetime())
         assert result.hits[0].document_id == "one"
         assert not workers.active_processes
     print(json.dumps({"status": "PASS", "architecture": platform.machine(), "python": sys.version.split()[0], "sqlite": sqlite3.sqlite_version, "sqlite_fts5": True, "ladybug_restart": True, "vec1_nn": True, "spawned_search_worker": True, "external_ai_calls": 0}))

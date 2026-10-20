@@ -6,6 +6,7 @@ import styles from "./retrieval-diagnostics.module.css";
 
 const labels: Record<string, string> = {
   embedding: "질문 임베딩", slot_wait: "작업 슬롯 대기", process_start: "프로세스 시작",
+  waiting_ready: "검색 작업자 준비 대기", request_cleanup: "요청 자원 정리", retired: "종료·회수됨", quarantined: "회수 확인 필요", preparing: "준비 중",
   child_bootstrap: "작업 프로세스 진입", extension_verify: "확장 무결성 확인", query_validate: "검색 입력 검증",
   db_open: "DB 열기", extension_load: "Vec1 로딩", metadata_read: "인덱스 정보 확인",
   eligible_count: "조회 범위의 벡터 수 확인", nn_query: "NN 검색", mapping_read: "문서 매핑",
@@ -47,7 +48,9 @@ export function SearchTraceDetails({ trace }: { trace: SearchDiagnosticTrace }) 
       <p>{uiText("마지막 확인 단계:")} {name(terminal.last_observed_stage)}</p>
       {terminal.failure && <p>{uiText("오류:")} {terminal.failure.failure_code} {uiText("· 실패 단계:")} {name(terminal.failure.failure_stage)} · {terminal.failure.exception_kind}</p>}
       <dl>
-        <dt>{uiText("프로세스 시작 / 결과 수신 / 정리 완료")}</dt><dd>{value(terminal.worker_started)} / {value(terminal.result_received)} / {value(terminal.joined)}</dd>
+        <dt>{uiText("프로세스 시작 / 결과 수신 / 프로세스 종료·회수")}</dt><dd>{value(terminal.worker_started)} / {value(terminal.result_received)} / {value(terminal.joined)}</dd>
+        <dt>{uiText("요청 정리 / 작업자 재사용 / 다음 상태")}</dt><dd>{value(terminal.request_cleanup_complete ?? null)} / {value(terminal.worker_reused ?? null)} / {terminal.worker_state_after === "ready" ? uiText("다음 검색 준비 완료") : name(terminal.worker_state_after ?? null)}</dd>
+        <dt>{uiText("작업자 준비 / 진입 / 모듈 준비 시간")}</dt><dd>{value(terminal.preparation_ms ?? null)} / {value(terminal.boot_ms ?? null)} / {value(terminal.child_import_ms ?? null)} ms</dd>
         <dt>{uiText("종료 사유 / 종료 코드")}</dt><dd>{terminal.termination_reason} / {value(terminal.worker_exit_code)}</dd>
         <dt>{uiText("대상 벡터 수")}</dt><dd>{value(terminal.eligible_vector_count)}</dd>
         <dt>{uiText("요청 세대 / 실제 확인 세대")}</dt><dd>{value(terminal.requested_generation)} / {value(terminal.observed_generation)}</dd>

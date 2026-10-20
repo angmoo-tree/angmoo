@@ -4,7 +4,6 @@ from __future__ import annotations
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-import json
 import sqlite3
 from time import monotonic
 
@@ -22,6 +21,9 @@ def failure(exc, stage=None):
         "memory_vector_invalid": "invalid_query",
         "memory_vector_worker_exited": "worker_exited",
         "memory_vector_cancelled": "cancelled",
+        "memory_search_binding_mismatch": "result_decode_failed",
+        "memory_search_result_mismatch": "result_decode_failed",
+        "memory_search_cleanup_mismatch": "result_decode_failed",
     }
     args = getattr(exc, "args", ())
     internal = known.get(args[0]) if args and isinstance(args[0], str) else None
@@ -111,58 +113,3 @@ def capture_failure(exc):
     trace = current_worker.get()
     if trace is not None and trace.error is None:
         trace.error = failure(exc, trace.last_stage)
-
-
-class ProgressSlots:
-    """32 immutable packets. A killed writer can never block its reader.
-
-    Unlike Queue/Pipe progress, there is no feeder or partial-frame receive.
-    A nonblocking lock protects publication. Losing a packet loses diagnostics
-    only; the terminal envelope carries the full available snapshot.
-    """
-    CAPACITY = 32
-    WIDTH = 512
-
-    def __init__(self, context):
-        self.data = context.RawArray("B", self.CAPACITY * self.WIDTH)
-        self.lengths = context.RawArray("i", self.CAPACITY)
-        self.lock = context.Lock()
-        self.metadata = context.RawArray("B", 1024)
-        self.metadata_length = context.RawValue("i", 0)
-
-    def write(self, value, metadata=None):
-        payload = json.dumps(value, separators=(",", ":"), ensure_ascii=True).encode()
-        if len(payload) > self.WIDTH or not self.lock.acquire(False):
-            return False
-        try:
-            meta = json.dumps(metadata or {}, separators=(",", ":"), ensure_ascii=True).encode()
-            if len(meta) <= 1024:
-                self.metadata[:len(meta)] = meta
-                self.metadata_length.value = len(meta)
-            index = next((i for i, size in enumerate(self.lengths) if size == 0), None)
-            if index is None:
-                return False
-            start = index*self.WIDTH
-            self.data[start:start+len(payload)] = payload
-            self.lengths[index] = len(payload)
-            return True
-        finally:
-            self.lock.release()
-
-    def read(self, after=0):
-        if not self.lock.acquire(False):
-            return [], after, None
-        try:
-            rows = []
-            while after < self.CAPACITY and self.lengths[after]:
-                size = self.lengths[after]
-                if not 0 < size <= self.WIDTH:
-                    break
-                start = after*self.WIDTH
-                rows.append(SearchStage.model_validate_json(bytes(self.data[start:start+size])))
-                after += 1
-            size = self.metadata_length.value
-            meta = json.loads(bytes(self.metadata[:size])) if 0 < size <= 1024 else None
-            return rows, after, meta
-        finally:
-            self.lock.release()

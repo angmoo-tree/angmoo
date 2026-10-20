@@ -8,6 +8,7 @@ import pytest
 from app.contracts.retrieval_observation import Observation, current
 from app.contracts.search_diagnostics import collector
 from app.runtime.memory.vector_worker import VectorReadWorkers
+from app.runtime.memory.search_worker_pool import SearchReadWorkers
 from app.runtime.memory.worker_diagnostics import phase
 
 
@@ -22,9 +23,7 @@ class TransportWorkers(VectorReadWorkers):
     _child_target = staticmethod(transport_child)
 
     def __init__(self):
-        self._slots = asyncio.Semaphore(1)
-        self._arguments = ("wait",)
-        self.active_processes = set()
+        SearchReadWorkers.__init__(self, arguments=("wait",), concurrency=1)
 
 
 @pytest.mark.parametrize("stop", ["cancel", "deadline"])
@@ -54,7 +53,10 @@ def test_transport_stop_is_reaped_and_next_request_can_use_slot(stop):
             assert not worker.active_processes
             worker._arguments = ("ok",)
             assert await worker.search(None, deadline=monotonic()+6) == "finished"
-            assert not worker.active_processes
+            assert worker.busy_jobs == 0 and len(worker.active_processes) == 1
+            assert collector().payload()["terminals"][0]["request_cleanup_complete"]
         finally:
+            await worker.stop()
+            assert not worker.active_processes
             current.reset(token)
     asyncio.run(run())

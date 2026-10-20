@@ -6,8 +6,10 @@ import type { WorldCharacterManagementView } from "@/features/characters/types/w
 import { parseWorldCharacterManagementView } from "@/features/characters/utils/world-character-dashboard-presentation";
 import { useRuntimeBack, useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
 import { worldCharacterDirectoryRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { WorldCharacterVisionSettings } from "./world-character-vision-settings";
 import { WorldCharacterProfile } from "./world-character-profile-screen";
-import { WorldImageGenerationCard, WorldVisionControls } from "@/features/media/components/world-image-policy-controls";
+import { WorldImageGenerationCard } from "@/features/media/components/world-image-policy-controls";
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
 import { WorldDailyPlanCard } from "@/features/characters/components/world-daily-plan-card";
@@ -16,8 +18,16 @@ import { RecommendationTopicsSummary } from "@/features/social/components/recomm
 import { WorldCharacterDeletionCard } from "@/features/characters/components/world-character-deletion-card";
 
 export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { worldId: string; worldCharacterId: string }) {
+  const identity = useAuthRuntimeIdentity(`${worldId}:${worldCharacterId}`);
+  return <ScopedManagementScreen key={identity} worldId={worldId} worldCharacterId={worldCharacterId} />;
+}
+
+function ScopedManagementScreen({ worldId, worldCharacterId }: { worldId: string; worldCharacterId: string }) {
   const router = useRuntimeRouter(), searchParams = useRuntimeSearchParams();
   const activityKeyRef = useRef<HTMLDivElement>(null);
+  const [imageRevision, setImageRevision] = useState(0);
+  const [imageBusy, setImageBusy] = useState(false), [visionBusy, setVisionBusy] = useState(false);
+  const imageChanged = () => setImageRevision(value => value + 1);
   const [settingsRevision, setSettingsRevision] = useState(0);
   const openActivityKey = () => {
     activityKeyRef.current?.scrollIntoView({ block: "center" });
@@ -37,8 +47,8 @@ export function WorldCharacterManagementScreen({ worldId, worldCharacterId }: { 
       <RecommendationTopicsSummary worldId={worldId} actorId={worldCharacterId} active={active} />
     </>} renderSettings={read => ({
       activityKeyRef, onActivityKeySaved: () => setSettingsRevision(value => value + 1),
-      imageCard: <WorldImageGenerationCard key={`${worldId}:${worldCharacterId}:image`} worldId={worldId} actorId={worldCharacterId} />,
-      visionControls: <WorldVisionControls key={`${worldId}:${worldCharacterId}:vision`} worldId={worldId} actorId={worldCharacterId} />,
+      imageCard: <WorldImageGenerationCard key={`${worldId}:${worldCharacterId}:image`} worldId={worldId} actorId={worldCharacterId} refreshRevision={imageRevision} externalBusy={visionBusy} onBusyChange={setImageBusy} onChanged={imageChanged} />,
+      visionCard: <WorldCharacterVisionSettings key={`${worldId}:${worldCharacterId}:vision`} worldId={worldId} actorId={worldCharacterId} refreshRevision={imageRevision} externalBusy={imageBusy} onBusyChange={setVisionBusy} onChanged={imageChanged} />,
       interestCard: <RecommendationTopicsPanel elevated key={`${worldId}:${worldCharacterId}:topics`} worldId={worldId} characterId={worldCharacterId} settingsRevision={settingsRevision} onOpenActivityKey={openActivityKey} />,
       modeCard: <PersonalizedActivityPanel elevated key={`${worldId}:${worldCharacterId}:mode`} worldId={worldId} actorId={worldCharacterId} onlyCharacter />,
       dayCard: <WorldDailyPlanCard key={`${worldId}:${worldCharacterId}:day`} worldId={worldId} actorId={worldCharacterId} characterId={read.character_id} />,

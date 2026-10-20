@@ -1,7 +1,7 @@
 {
-  "edge_count": 6907,
-  "external_import_count": 4665,
-  "module_count": 1587,
+  "edge_count": 6925,
+  "external_import_count": 4679,
+  "module_count": 1594,
   "modules": [
     {
       "external_imports": [],
@@ -297,9 +297,7 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.contracts.core_experience"
-      ],
+      "imports": [],
       "module": "app.contracts",
       "path": "backend/app/contracts/__init__.py",
       "wildcard_imports": []
@@ -506,6 +504,7 @@
     {
       "external_imports": [
         "__future__",
+        "contextvars",
         "dataclasses",
         "json",
         "pydantic",
@@ -2503,6 +2502,16 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.contracts.search_preparation",
+      "path": "backend/app/domains/chat/contracts/search_preparation.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.contracts.decision_observation",
@@ -2910,6 +2919,7 @@
       ],
       "imports": [
         "app.domains.chat.contracts.context",
+        "app.domains.chat.contracts.search_preparation",
         "app.domains.chat.dependencies",
         "app.domains.chat.exceptions",
         "app.domains.chat.schemas",
@@ -3482,6 +3492,16 @@
       ],
       "module": "app.domains.chat.service.retrieval_routing",
       "path": "backend/app/domains/chat/service/retrieval_routing.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "types"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.service.search_preparation",
+      "path": "backend/app/domains/chat/service/search_preparation.py",
       "wildcard_imports": []
     },
     {
@@ -17902,7 +17922,8 @@
         "app.runtime.autonomous_activity.revalidation",
         "app.runtime.autonomous_activity.social_lane",
         "app.runtime.character_activity_state",
-        "app.runtime.daily_preparation"
+        "app.runtime.daily_preparation",
+        "app.runtime.memory.composition"
       ],
       "module": "app.runtime.autonomous_activity.execution",
       "path": "backend/app/runtime/autonomous_activity/execution.py",
@@ -18212,6 +18233,7 @@
         "time"
       ],
       "imports": [
+        "app.contracts.search_diagnostics",
         "app.domains.memory.contracts.embedding",
         "app.domains.memory.contracts.hybrid_recall",
         "app.domains.memory.contracts.recall",
@@ -18927,15 +18949,18 @@
         "fastapi"
       ],
       "imports": [
+        "app.database",
         "app.domains.chat.service.evidence",
         "app.domains.chat.service.generation",
         "app.domains.chat.service.messages",
+        "app.domains.chat.service.search_preparation",
         "app.domains.chat.service.settings",
         "app.domains.chat.service.threads",
         "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.scope_queries"
+        "app.runtime.chat.scope_queries",
+        "app.runtime.memory.composition"
       ],
       "module": "app.runtime.chat.message_composition",
       "path": "backend/app/runtime/chat/message_composition.py",
@@ -20143,9 +20168,11 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.contracts.scope_references",
         "app.domains.memory.repository.batch",
         "app.domains.memory.repository.consolidation",
+        "app.domains.memory.repository.embedding",
         "app.domains.memory.repository.items",
         "app.runtime.memory.scope_queries",
         "app.runtime.memory.source_composition"
@@ -20389,7 +20416,6 @@
     },
     {
       "external_imports": [
-        "asyncio",
         "time"
       ],
       "imports": [
@@ -20398,8 +20424,16 @@
         "app.domains.memory.contracts.hybrid_recall",
         "app.domains.memory.contracts.recall",
         "app.runtime.memory.sqlite_fts5_recall",
-        "app.runtime.memory.vector_worker",
         "app.runtime.memory.worker_diagnostics"
+      ],
+      "module": "app.runtime.memory.fts_search_child",
+      "path": "backend/app/runtime/memory/fts_search_child.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.memory.search_worker_pool"
       ],
       "module": "app.runtime.memory.fts_worker",
       "path": "backend/app/runtime/memory/fts_worker.py",
@@ -20445,7 +20479,9 @@
     },
     {
       "external_imports": [
-        "hashlib"
+        "asyncio",
+        "hashlib",
+        "time"
       ],
       "imports": [
         "app.domains.memory.contracts.hybrid_recall",
@@ -20460,6 +20496,7 @@
         "app.runtime.memory.fts_worker",
         "app.runtime.memory.hybrid_axes",
         "app.runtime.memory.recall_composition",
+        "app.runtime.memory.search_worker_pool",
         "app.runtime.memory.source_composition",
         "app.runtime.memory.sqlite_vec1",
         "app.runtime.memory.vector_generations",
@@ -20563,6 +20600,55 @@
       ],
       "module": "app.runtime.memory.scope_queries",
       "path": "backend/app/runtime/memory/scope_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pickle",
+        "time"
+      ],
+      "imports": [
+        "app.contracts.retrieval_observation",
+        "app.runtime.memory.fts_search_child",
+        "app.runtime.memory.vector_search_child",
+        "app.runtime.memory.worker_diagnostics"
+      ],
+      "module": "app.runtime.memory.search_worker_child",
+      "path": "backend/app/runtime/memory/search_worker_child.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "collections",
+        "concurrent.futures",
+        "dataclasses",
+        "multiprocessing",
+        "pickle",
+        "time",
+        "uuid"
+      ],
+      "imports": [
+        "app.contracts.retrieval_observation",
+        "app.contracts.search_diagnostics",
+        "app.runtime.memory.search_worker_child",
+        "app.runtime.memory.search_worker_progress",
+        "app.runtime.memory.worker_diagnostics"
+      ],
+      "module": "app.runtime.memory.search_worker_pool",
+      "path": "backend/app/runtime/memory/search_worker_pool.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json"
+      ],
+      "imports": [
+        "app.contracts.search_diagnostics"
+      ],
+      "module": "app.runtime.memory.search_worker_progress",
+      "path": "backend/app/runtime/memory/search_worker_progress.py",
       "wildcard_imports": []
     },
     {
@@ -21098,6 +21184,16 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.memory.sqlite_vec1",
+        "app.runtime.memory.worker_diagnostics"
+      ],
+      "module": "app.runtime.memory.vector_search_child",
+      "path": "backend/app/runtime/memory/vector_search_child.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "time"
       ],
@@ -21123,16 +21219,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "asyncio",
-        "multiprocessing",
-        "time"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.contracts.retrieval_observation",
-        "app.contracts.search_diagnostics",
-        "app.runtime.memory.sqlite_vec1",
-        "app.runtime.memory.worker_diagnostics"
+        "app.runtime.memory.search_worker_pool"
       ],
       "module": "app.runtime.memory.vector_worker",
       "path": "backend/app/runtime/memory/vector_worker.py",
@@ -21144,7 +21233,6 @@
         "contextlib",
         "contextvars",
         "dataclasses",
-        "json",
         "sqlite3",
         "time"
       ],
@@ -24741,6 +24829,7 @@
         "app.domains.identity.service.environment",
         "app.domains.identity.service.world_credentials",
         "app.domains.identity.service.world_image_credentials",
+        "app.domains.media.contracts",
         "app.domains.media.generation_contracts",
         "app.domains.media.models_world_policy",
         "app.domains.media.service.comfy_workflows",

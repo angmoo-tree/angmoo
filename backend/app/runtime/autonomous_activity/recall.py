@@ -5,11 +5,14 @@ import json
 from datetime import UTC, datetime
 from time import monotonic
 
-from app.domains.memory.contracts.hybrid_recall import HybridRecallRequest
+from app.domains.memory.contracts.hybrid_recall import HybridRecallRequest, HybridAxesUnavailable
+from app.contracts.search_diagnostics import SearchSummaryCollector, summary_current
 from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.embedding import EMBEDDING_PROFILE
 from app.runtime.autonomous_activity.contracts import MEMORY_CHARS, MEMORY_LIMIT, RECALL_CONCURRENCY, identity_key
+
+SNS_RECALL_TIMEOUT_SECONDS = 30.0
 
 
 def bounded_records(records):
@@ -79,7 +82,9 @@ class SelectedRecall:
         self.scope = MemoryScope(owner_id, world_id, actor_id)
         self._limit = asyncio.Semaphore(RECALL_CONCURRENCY)
 
-    async def one(self, *, activity_id: str, target: dict, query: dict):
+    async def one(self, *, activity_id: str, target: dict, query: dict, deadline=None):
+        started = monotonic()
+        deadline = min(deadline, started + SNS_RECALL_TIMEOUT_SECONDS) if deadline is not None else started + SNS_RECALL_TIMEOUT_SECONDS
         text = query["query"]
         if not text:
             return {"status": "no_query_material", "packets": []}
@@ -93,17 +98,40 @@ class SelectedRecall:
         if query.get("image_hint"):
             from dataclasses import replace
             request = replace(request, image_base_text=query["image_base_text"], image_hint=query["image_hint"])
-        deadline = monotonic() + 15
+        summary = SearchSummaryCollector()
+        token = summary_current.set(summary)
+        phase = "queue"
+        queue_ms = None
+
+        def diagnostic(category=None, *, axes=(), io_code=None):
+            payload = {**summary.payload(), "call_id": key, "category": category,
+                "last_parent_phase": phase, "elapsed_ms": (monotonic() - started) * 1000,
+                "queue_ms": queue_ms, "canonical_status": summary.canonical_reads[-1].status if summary.canonical_reads else "not_observed",
+                "remaining_ms": max(0, deadline - monotonic()) * 1000,
+                "axis_receipts": [asdict(axis) for axis in axes][:2], "io_code": io_code}
+            while len(json.dumps(payload, ensure_ascii=True).encode()) > 8192 and payload["stages"]:
+                payload["stages"].pop(0)
+                payload["omitted_count"] += 1
+            return payload
+
         try:
             async with asyncio.timeout(max(0, deadline-monotonic())), self._limit:
+                queue_ms = (monotonic() - started) * 1000
+                phase = "search"
                 retrieved_after = datetime.now(UTC).isoformat()
-                result = await self.service.execute(request, deadline=deadline)
-        except (TimeoutError, OSError):
-            return {"status": "unavailable", "reason": "recall_transport_unavailable", "packets": []}
-        except RuntimeError as exc:
-            if str(exc) != "hybrid_all_axes_unavailable":
-                raise
-            return {"status": "unavailable", "reason": str(exc), "packets": []}
+                result = await self.service.execute(request, deadline=deadline, final_reserve_seconds=3.0)
+        except TimeoutError:
+            return {"status": "unavailable", "reason": "recall_transport_unavailable",
+                    "packets": [], "summary": diagnostic("deadline")}
+        except OSError as exc:
+            allowed_errno = exc.errno if exc.errno in {2, 5, 9, 13, 24, 28, 32, 104, 110} else None
+            return {"status": "unavailable", "reason": "recall_transport_unavailable",
+                    "packets": [], "summary": diagnostic("io_error", io_code=allowed_errno)}
+        except HybridAxesUnavailable as exc:
+            return {"status": "unavailable", "reason": "hybrid_all_axes_unavailable",
+                    "packets": [], "summary": diagnostic("axes_unavailable", axes=exc.axes)}
+        finally:
+            summary_current.reset(token)
         # Scope errors and cancellation propagate; they are never "no memory".
         if result.scope != self.scope:
             raise ValueError("recall_scope_mismatch")
@@ -114,12 +142,15 @@ class SelectedRecall:
                 if result.validation_snapshot is not None else None,
             "retrieved_after": retrieved_after,
             "duration_ms": result.duration_ms, "axes": [json.loads(json.dumps(asdict(a), default=lambda v: v.value)) for a in result.axes],
-            "embedding_usage": asdict(result.embedding_usage)}
+            "embedding_usage": asdict(result.embedding_usage),
+            "summary": diagnostic(axes=result.axes)}
 
-    async def selected(self, *, activity_id, targets, queries):
+    async def selected(self, *, activity_id, targets, queries, deadline=None):
+        started = monotonic()
+        deadline = min(deadline, started + SNS_RECALL_TIMEOUT_SECONDS) if deadline is not None else started + SNS_RECALL_TIMEOUT_SECONDS
         by_id = {t["target_id"]: t for t in targets}
         # An invalid target cannot broaden the search to an entire World.
         if any(q["target_id"] not in by_id for q in queries):
             raise ValueError("recall_target_invalid")
-        results = await asyncio.gather(*(self.one(activity_id=activity_id, target=by_id[q["target_id"]], query=q) for q in queries))
+        results = await asyncio.gather(*(self.one(activity_id=activity_id, target=by_id[q["target_id"]], query=q, deadline=deadline) for q in queries))
         return dict(zip((q["target_id"] for q in queries), results, strict=True))

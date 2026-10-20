@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Annotated, Literal
 import json
+from contextvars import ContextVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,7 +15,8 @@ Code = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}$", max_l
 Axis = Literal["fts", "vector"]
 StageName = Literal["embedding", "slot_wait", "process_start", "child_bootstrap",
     "extension_verify", "query_validate", "db_open", "extension_load", "metadata_read",
-    "eligible_count", "nn_query", "mapping_read", "result_transport", "worker_cleanup", "fts_search"]
+    "eligible_count", "nn_query", "mapping_read", "result_transport", "worker_cleanup", "fts_search",
+    "waiting_ready", "request_cleanup"]
 FailureCode = Literal["deadline_exceeded", "sqlite_busy", "sqlite_locked", "sqlite_error",
     "extension_integrity_failed", "extension_load_failed", "mapping_missing",
     "worker_start_failed", "worker_exited", "result_eof", "result_decode_failed",
@@ -72,6 +74,12 @@ class SearchTerminal(SafeModel):
     generation_match: bool | None = None
     metadata_status: Literal["not_requested", "observed", "unavailable", "budget_skipped"] = "not_requested"
     stage_events_dropped: Count = 0
+    request_cleanup_complete: bool | None = None
+    worker_state_after: Literal["ready", "retired", "quarantined", "preparing"] | None = None
+    worker_reused: bool | None = None
+    preparation_ms: Duration | None = None
+    child_import_ms: Duration | None = None
+    boot_ms: Duration | None = None
 
 
 class SearchLineage(SafeModel):
@@ -196,6 +204,42 @@ def collector():
     return observation.search_trace
 
 
+@dataclass
+class SearchSummaryCollector:
+    """SNS-only fixed content-free progress; never enables detailed lineage."""
+    stages: dict = field(default_factory=dict)
+    terminals: dict = field(default_factory=dict)
+    stage_dropped: int = 0
+
+    def add_stage(self, stage):
+        key = (stage.axis, stage.clock_domain, stage.stage)
+        if key in self.stages or len(self.stages) < 32:
+            self.stages[key] = stage
+        else:
+            self.stage_dropped += 1
+
+    canonical_reads: list = field(default_factory=list)
+
+    def payload(self):
+        result = {"version": "sns-recall-summary.v1",
+            "canonical_reads": [row.model_dump(mode="json") for row in self.canonical_reads][:2],
+            "axes": [row.model_dump(mode="json") for row in self.terminals.values()][:2],
+            "stages": [row.model_dump(mode="json") for row in self.stages.values()][:32],
+            "omitted_count": self.stage_dropped}
+        while len(json.dumps(result, ensure_ascii=True).encode()) > 8192 and result["stages"]:
+            result["stages"].pop(0)
+            result["omitted_count"] += 1
+        return result
+
+
+summary_current: ContextVar[SearchSummaryCollector | None] = ContextVar("sns_search_summary", default=None)
+
+
+def execution_collector():
+    """Only worker stages/terminals use SNS summary; lineage stays opt-in."""
+    return summary_current.get() or collector()
+
+
 def lineage(stage, action, *, identities=None, **values):
     target = collector()
     if target is None:
@@ -219,7 +263,7 @@ def record_identity(record):
 
 
 def canonical_read(receipt=None, *, stage=None, status="completed"):
-    target = collector()
+    target = execution_collector()
     if target is None:
         return
     try:
@@ -238,7 +282,7 @@ def canonical_read(receipt=None, *, stage=None, status="completed"):
 
 def axis_receipts(receipts):
     """Capture axis readiness before canonical work can fail; transport is separate."""
-    target = collector()
+    target = execution_collector()
     if target is None:
         return
     for receipt in receipts:

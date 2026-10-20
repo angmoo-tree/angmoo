@@ -101,6 +101,14 @@ class RecallAxisReceipt:
             raise ValueError("hybrid_axis_receipt_invalid")
 
 
+class HybridAxesUnavailable(RuntimeError):
+    """Preserve completed axis receipts without query, candidate or source text."""
+
+    def __init__(self, axes: tuple[RecallAxisReceipt, ...]):
+        super().__init__("hybrid_all_axes_unavailable")
+        self.axes = axes
+
+
 @dataclass(frozen=True, slots=True)
 class HybridEmbeddingUsage:
     logical_calls: int = 0

@@ -302,7 +302,7 @@ async function proxy(request: Request, context: RouteContext) {
       lifecycle.finish("request_body", "cancelled");
       return cancelledResponse();
     }
-    lifecycle.finish("request_body", "failed");
+    lifecycle.finish("request_body", "failed", undefined, error);
     return failedProxyResponse();
   }
   const query = new URL(request.url).search;

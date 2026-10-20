@@ -75,6 +75,11 @@ def test_search_honors_caller_cap_request_reserve_and_absolute_ceiling(
             received.append((request, deadline))
             return empty_result(request)
     now = datetime.now(UTC)
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return now
+    monkeypatch.setattr("app.domains.chat.service.hybrid_canonical.datetime", Clock)
     asyncio.run(HybridCanonicalService(Hybrid()).plan_and_execute(
         command(timeout_ms=timeout_ms), now=now, deadline_at=now+timedelta(seconds=remaining_seconds)))
     assert len(received) == 1

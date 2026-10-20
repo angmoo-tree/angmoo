@@ -1,5 +1,6 @@
 """The unchanged recall path remains useful without a paid embedding binding."""
 import asyncio
+from memory.worker_test_support import worker_lifetime
 from time import monotonic
 from unittest.mock import AsyncMock
 
@@ -26,7 +27,7 @@ from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 
 
 @pytest.mark.parametrize("enabled", [False, True])
-def test_off_or_missing_key_keeps_real_fts_and_skips_provider_and_vec1(runtime_factory, tmp_path, monkeypatch, enabled, deny_external_network):
+def test_off_or_missing_key_keeps_real_fts_and_skips_provider_and_vec1(runtime_factory, tmp_path, monkeypatch, enabled, deny_external_network, worker_lifetime):
     scope, _, _, _, item_id = _accept_chat_memory(runtime_factory)
     with runtime_factory() as db:
         setting = db.scalar(select(MemoryScopeSettingModel))
@@ -39,6 +40,7 @@ def test_off_or_missing_key_keeps_real_fts_and_skips_provider_and_vec1(runtime_f
     index = SqliteMemoryRecallIndex(StaticRuntimeDataPath(tmp_path / "fts"))
     index.open(); index.rebuild(recall_document_source(runtime_factory).all_documents())
     fts_workers = FtsReadWorkers(database_path=index.database_path)
+    worker_lifetime.track(fts_workers)
     canonical = SqlAlchemyHybridCanonicalReader(runtime_factory, source_reader_factory=source_evidence_reader,
         canonical=canonical_recall_repository(runtime_factory))
     service = HybridRecallService(fts=FtsHybridAxis(fts_workers),
@@ -46,8 +48,8 @@ def test_off_or_missing_key_keeps_real_fts_and_skips_provider_and_vec1(runtime_f
             lambda db: MemoryEmbeddingRepository(db, memory_repository(db)))), canonical=canonical)
     request = HybridRecallRequest("synthetic-request", "synthetic-call", "b" * 64, scope, "폭우", EMBEDDING_PROFILE,
         (RecallDocumentKind.MEMORY_ITEM,))
-    result = asyncio.run(service.execute(request, deadline=monotonic() + 15))
+    result = worker_lifetime.run(service.execute(request, deadline=monotonic() + 15))
     assert any(record.memory_item_id == item_id for record in result.records)
     assert result.embedding_usage.logical_calls == 0
     provider.assert_not_called(); workers.search.assert_not_called()
-    assert not fts_workers.active_processes
+    assert fts_workers.busy_jobs == 0

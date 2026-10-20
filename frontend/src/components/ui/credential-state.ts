@@ -21,3 +21,6 @@ export function credentialFailure(error: unknown, deleting: boolean): Credential
   }
   return "unknown";
 }
+
+export type SecretDelete = { expected_revision: number; expected_configuration_revision?: number; expected_key_revision?: number; provider: string };
+export type CredentialMetadataState = { status: "loading" | "error" } | { status: "ready"; metadata: SecretMetadata };

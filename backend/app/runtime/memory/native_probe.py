@@ -27,16 +27,22 @@ async def probe(output: Path):
     vector = (1.0,) + (0.0,) * 767
     query = MemoryVectorQuery(scope, "native-probe-768", vector)
     rows = []
-    for count in (0, 1, 2):
-        if count:
-            index.upsert((MemoryVectorDocument(f"probe-{count}", f"probe-{count}", scope, 1,
-                "a" * 64, query.profile, vector, datetime.now(UTC)),))
-        result = await workers.search(query, deadline=monotonic()+20)
-        assert len(result.hits) == count and result.allowed_count == count
-        foreign = await workers.search(replace(query, scope=replace(scope, owner_id="foreign")), deadline=monotonic()+20)
-        assert not foreign.hits
-        assert not workers.active_processes
-        rows.append({"count": count, "hits": len(result.hits), "cross_owner_hits": len(foreign.hits), "worker_joined": True})
+    try:
+        for count in (0, 1, 2):
+            if count:
+                index.upsert((MemoryVectorDocument(f"probe-{count}", f"probe-{count}", scope, 1,
+                    "a" * 64, query.profile, vector, datetime.now(UTC)),))
+            result = await workers.search(query, deadline=monotonic()+20)
+            assert len(result.hits) == count and result.allowed_count == count
+            foreign = await workers.search(replace(query, scope=replace(scope, owner_id="foreign")), deadline=monotonic()+20)
+            assert not foreign.hits
+            assert workers.busy_jobs == 0
+            rows.append({"count": count, "hits": len(result.hits), "cross_owner_hits": len(foreign.hits), "request_cleaned": True})
+    finally:
+        await workers.stop()
+    assert not workers.active_processes
+    for row in rows:
+        row["worker_joined"] = True  # Verified at the end of this shared Runtime lifetime.
     receipt = {"status": "passed", "frozen": bool(getattr(sys, "frozen", False)),
         "python": sys.version.split()[0], "sqlite": sqlite3.sqlite_version, "vec1": info,
         "extension_sha256": hashlib.sha256(index._extension.read_bytes()).hexdigest(),

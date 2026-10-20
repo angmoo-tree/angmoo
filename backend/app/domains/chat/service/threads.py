@@ -112,6 +112,12 @@ class ThreadService:
         thread = self._get_owned_world_thread(db, user, world_id, thread_id)
         return self._world_thread_read(db, thread, include_messages=True)
 
+    def search_preparation_subject(self, db, user, world_id, thread_id):
+        """Apply existing owner, role, block and deletion checks without messages."""
+        thread = self._get_owned_world_thread(db, user, world_id, thread_id)
+        _, responding = self._world_thread_participants(db, thread)
+        return responding.world_character_id
+
     def get_world_chat_entry(
         self, db: Session, user: ChatUser, world_id: str, responding_id: str
     ) -> schemas.WorldChatEntryRead:
@@ -580,14 +586,7 @@ class ThreadService:
             redact_content=thread.world_scope_status == "resolved",
         )
 
-    def _world_thread_read(
-        self,
-        db: Session,
-        thread: models.MessageThread,
-        *,
-        include_messages: bool,
-        lock_scope: bool = False,
-    ) -> schemas.WorldChatThreadRead:
+    def _world_thread_participants(self, db, thread, *, lock_scope=False):
         if (
             thread.world_scope_status != "resolved"
             or thread.world_id is None
@@ -630,6 +629,17 @@ class ThreadService:
             responding.world_character_id,
         ):
             raise MessageForbiddenError("이 Character와는 지금 대화할 수 없습니다.")
+        return requester, responding
+
+    def _world_thread_read(
+        self,
+        db: Session,
+        thread: models.MessageThread,
+        *,
+        include_messages: bool,
+        lock_scope: bool = False,
+    ) -> schemas.WorldChatThreadRead:
+        requester, responding = self._world_thread_participants(db, thread, lock_scope=lock_scope)
         messages = self._thread_messages(db, thread.id) if include_messages else []
         latest_message = (
             messages[-1] if messages else self._latest_thread_message(db, thread.id)

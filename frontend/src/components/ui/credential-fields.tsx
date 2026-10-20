@@ -7,8 +7,8 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
-import { credentialFailure, profileKey, sameCredential, type CredentialFailure, type SecretMetadata, type SecretKeyMetadata, type SecretProfile, type SecretWrite } from "./credential-state";
-export type { SecretMetadata, SecretKeyMetadata, SecretProfile, SecretWrite } from "./credential-state";
+import { credentialFailure, profileKey, sameCredential, type CredentialFailure, type SecretMetadata, type SecretKeyMetadata, type SecretProfile, type SecretWrite, type SecretDelete, type CredentialMetadataState } from "./credential-state";
+export type { SecretMetadata, SecretKeyMetadata, SecretProfile, SecretWrite, SecretDelete, CredentialMetadataState } from "./credential-state";
 
 type Props = {
   initialMetadata?: SecretMetadata;
@@ -21,11 +21,12 @@ type Props = {
   onProfileChange?: (value: SecretProfile) => void;
   onSaved?: (value: SecretMetadata) => void;
   onMetadata?: (value: SecretMetadata) => void;
+  onMetadataState?: (value: CredentialMetadataState) => void;
   onDirtyChange?: (value: boolean) => void;
   onBusyChange?: (value: boolean) => void;
   scopeKey: string; profiles: readonly SecretProfile[]; read: (signal: AbortSignal) => Promise<SecretMetadata>;
   save: (data: SecretWrite, signal: AbortSignal) => Promise<SecretMetadata>;
-  remove: (revision: number, signal: AbortSignal) => Promise<SecretMetadata>;
+  remove: (snapshot: SecretDelete, signal: AbortSignal) => Promise<SecretMetadata>;
   text: { model: string; key: string; stored: string; missing: string; save: string; remove: string; confirm: string; failed: string; saved: string; keep: string; unsupported: string; loading?: string; reload: string; review: string; loadFailed: string; keyLoadFailed: string; saveFailed: string; deleteFailed: string; conflict: string; unknown: string };
 };
 /** Write-only input. The caller supplies the authorized owner transport. */
@@ -34,7 +35,7 @@ export function CredentialFields(props: Props) {
   return <ScopedCredentialFields key={identity} {...props} />;
 }
 
-function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, onMetadata, onProfileChange, onSaved, onDirtyChange, onBusyChange, children, initialMetadata, showSecretFields, readSelectedKey, onSelectedKey, refreshRevision = 0, externalBusy = false }: Props) {
+function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, onMetadata, onMetadataState, onProfileChange, onSaved, onDirtyChange, onBusyChange, children, initialMetadata, showSecretFields, readSelectedKey, onSelectedKey, refreshRevision = 0, externalBusy = false }: Props) {
   const [metadata, setMetadata] = useState<SecretMetadata | null>(initialMetadata ?? null);
   const [candidate, setCandidate] = useState<SecretMetadata | null>(null);
   const [selected, setSelected] = useState(initialMetadata ? profileKey(initialMetadata) : "");
@@ -47,8 +48,11 @@ function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, 
   const [selectedKey, setSelectedKey] = useState<SecretKeyMetadata | null>(null);
   const [keyError, setKeyError] = useState(false);
   const [keyRefresh, setKeyRefresh] = useState(0);
+  const [readNonce, setReadNonce] = useState(0);
+  const deferredRead = useRef(false);
   const request = useRef<AbortController | null>(null);
   const readRequest = useRef<AbortController | null>(null);
+  const notifyMetadataState = useEffectEvent((value: CredentialMetadataState) => onMetadataState?.(value));
   const readCurrent = useEffectEvent((signal: AbortSignal) => read(signal));
   const readKey = useEffectEvent((provider: string, signal: AbortSignal) => readSelectedKey!(provider, signal));
   const notifyKey = useEffectEvent((value: SecretKeyMetadata | null) => onSelectedKey?.(value));
@@ -61,6 +65,7 @@ function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, 
   const blocked = busy || externalBusy || refreshing || loadedRevision !== refreshRevision;
   function acceptMetadata(value: SecretMetadata, acknowledge = false) {
     if (metadata && (value.revision < metadata.revision || (value.configuration_revision ?? 0) < (metadata.configuration_revision ?? 0))) return;
+    onMetadataState?.({ status: "ready", metadata: value });
     if (metadata && edited && !sameCredential(metadata, value) && !acknowledge) {
       setCandidate(value); setFailure("conflict"); setNotice(false); return;
     }
@@ -78,18 +83,22 @@ function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, 
     return () => { live = false; };
   }, [initialMetadata]);
   useEffect(() => {
-    if (busy) return;
+    if (request.current) { deferredRead.current = true; return; }
     const controller = new AbortController(); readRequest.current?.abort(); readRequest.current = controller;
     const scope = captureAuthRequestScope();
-    queueMicrotask(() => { if (!controller.signal.aborted) setRefreshing(true); });
+    queueMicrotask(() => {
+      if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
+        setRefreshing(true); notifyMetadataState({ status: "loading" });
+      }
+    });
     void readCurrent(controller.signal).then(value => {
       if (controller.signal.aborted || !isCurrentAuthRequestScope(scope)) return;
       reconcile(value); setLoadedRevision(refreshRevision);
     }).catch(() => {
-      if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) setFailure("loadFailed");
+      if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { setFailure("loadFailed"); notifyMetadataState({ status: "error" }); }
     }).finally(() => { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) setRefreshing(false); });
     return () => controller.abort();
-  }, [scopeKey, refreshRevision, busy]);
+  }, [scopeKey, refreshRevision, readNonce]);
   useEffect(() => () => { request.current?.abort(); readRequest.current?.abort(); }, []);
   useEffect(() => {
     if (!hasSelectedRead || !provider) return;
@@ -111,31 +120,30 @@ function ScopedCredentialFields({ scopeKey, profiles, read, save, remove, text, 
   async function reload() {
     if (busy || refreshing) return;
     const controller = new AbortController(); readRequest.current?.abort(); readRequest.current = controller;
-    const scope = captureAuthRequestScope(); setRefreshing(true); setKeyRefresh(value => value + 1);
+    const scope = captureAuthRequestScope(); setRefreshing(true); onMetadataState?.({ status: "loading" }); setKeyRefresh(value => value + 1);
     try {
       const value = await read(controller.signal);
       if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { acceptMetadata(value); setLoadedRevision(refreshRevision); }
-    } catch { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) setFailure("loadFailed"); }
+    } catch { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { setFailure("loadFailed"); onMetadataState?.({ status: "error" }); } }
     finally { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) setRefreshing(false); }
   }
   async function submit(deleting = false) {
     if (!metadata || blocked || candidate || failure === "conflict" || (readSelectedKey && !keyView) || (deleting && !window.confirm(text.confirm))) return;
     readRequest.current?.abort();
-    const controller = new AbortController(); request.current = controller; setBusy(true); setFailure(null); setNotice(false);
+    const controller = new AbortController(); request.current = controller; setRefreshing(false); setBusy(true); setFailure(null); setNotice(false);
     const scope = captureAuthRequestScope();
     try {
       const profile = profiles.find(p => profileKey(p) === selected) ?? metadata;
-      const value = deleting ? await remove(metadata.revision, controller.signal) : await save({ ...profile,
-        label: "label" in profile ? profile.label : "", expected_revision: metadata.revision,
-        expected_configuration_revision: metadata.configuration_revision ?? undefined,
-        expected_key_revision: selectedKey?.key_revision,
+      const snapshot = { provider: profile.provider, expected_revision: metadata.revision, expected_configuration_revision: metadata.configuration_revision ?? undefined, expected_key_revision: selectedKey?.key_revision ?? metadata.key_revision ?? undefined };
+      const value = deleting ? await remove(snapshot, controller.signal) : await save({ ...profile,
+        label: "label" in profile ? profile.label : "", ...snapshot,
         ...(secretVisible && key.trim() ? { api_key: key } : {}) }, controller.signal);
       if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
         setMetadata(value); setCandidate(null); setSelected(profileKey(value)); setKey(""); setNotice(true);
-        setKeyRefresh(value => value + 1); onMetadata?.(value); onSaved?.(value);
+        setSelectedKey(null); setKeyRefresh(value => value + 1); onMetadata?.(value); onMetadataState?.({ status: "ready", metadata: value }); onSaved?.(value);
       }
-    } catch (error) { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) setFailure(credentialFailure(error, deleting)); }
-    finally { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { request.current = null; setBusy(false); } }
+    } catch (error) { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { const kind = credentialFailure(error, deleting); setFailure(kind); if (kind === "conflict" || kind === "unknown") deferredRead.current = true; } }
+    finally { if (!controller.signal.aborted && isCurrentAuthRequestScope(scope)) { request.current = null; setBusy(false); if (deferredRead.current) { deferredRead.current = false; setReadNonce(value => value + 1); } } }
   }
   return <div>
     {metadata ? <>

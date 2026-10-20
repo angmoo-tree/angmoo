@@ -8,6 +8,8 @@ export type SearchFailure = {
   failure_code: string; failure_stage: string | null; exception_kind: string; sqlite_error_code: number | null;
 };
 export type SearchTerminal = {
+  request_cleanup_complete?: boolean | null; worker_state_after?: "ready" | "retired" | "quarantined" | "preparing" | null;
+  worker_reused?: boolean | null; preparation_ms?: number | null; boot_ms?: number | null; child_import_ms?: number | null;
   axis_reason?: string | null;
   axis_status?: "ready" | "partial" | "disabled" | "unavailable" | "cancelled" | null;
   axis: "fts" | "vector"; terminal_state: string; failure: SearchFailure | null;

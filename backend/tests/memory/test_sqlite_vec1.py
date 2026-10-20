@@ -113,12 +113,13 @@ def test_process_worker_search_and_cancellation_leave_no_native_worker(index):
     async def run():
         result = await workers.search(MemoryVectorQuery(SCOPE, PROFILE, A), deadline=monotonic()+10)
         assert result.hits[0].document_id == "one"
-        assert not workers.active_processes
+        assert workers.busy_jobs == 0 and 1 <= len(workers.active_processes) <= 2
         task = asyncio.create_task(workers.search(MemoryVectorQuery(SCOPE, PROFILE, A), deadline=monotonic()+10))
-        while not workers.active_processes:
+        while not workers.busy_jobs and not task.done():
             await asyncio.sleep(0)
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
+        await workers.stop()
         assert not workers.active_processes
     asyncio.run(run())

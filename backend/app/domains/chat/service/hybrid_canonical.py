@@ -81,7 +81,7 @@ class HybridCanonicalService:
                 RecallAxisStatus.DISABLED, (), tuple(RecallAxisReceipt(axis, RecallAxisStatus.DISABLED, False, 0, 0, short_reason)
                 for axis in ("fts", "vector")), (), HybridEmbeddingUsage(), 0, 0, 0)
         else:
-            remaining = (deadline_at-now).total_seconds()-15.0
+            remaining = (deadline_at-datetime.now(UTC)).total_seconds()-15.0
             if remaining <= 0:
                 raise RetrievalContractError("hybrid_crg_reserve_exhausted")
             request = HybridRecallRequest(resolved.request_id, command.call_id, resolved.envelope_hash, scope,

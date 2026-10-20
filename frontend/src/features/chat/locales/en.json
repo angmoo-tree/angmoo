@@ -312,5 +312,14 @@
   "추가": "Added",
   "기존 참조 유지": "Existing reference retained",
   "유지": "Retained",
-  "연결": "Linked"
+  "연결": "Linked",
+  "검색 작업자 준비 대기": "Waiting for a search worker",
+  "요청 자원 정리": "Request resource cleanup",
+  "종료·회수됨": "Stopped and reaped",
+  "회수 확인 필요": "Cleanup requires confirmation",
+  "준비 중": "Preparing",
+  "요청 정리 / 작업자 재사용 / 다음 상태": "Request cleanup / worker reused / next state",
+  "작업자 준비 / 진입 / 모듈 준비 시간": "Worker preparation / entry / module loading time",
+  "프로세스 시작 / 결과 수신 / 프로세스 종료·회수": "Process started / result received / process exited and reaped",
+  "다음 검색 준비 완료": "Ready for the next search"
 }

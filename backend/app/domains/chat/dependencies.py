@@ -20,6 +20,10 @@ def get_thread_service(request: Request) -> ThreadService:
     return cast(ThreadService, service)
 
 
+def get_search_preparation_service(request: Request):
+    return request.app.state.chat_search_preparation_service
+
+
 def get_settings_service(request: Request) -> MessageSettingsService:
     service = getattr(request.app.state, "chat_settings_service", None)
     if service is None:

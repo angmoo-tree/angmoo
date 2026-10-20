@@ -1,5 +1,55 @@
 # Angmoo Backend Architecture
 
+## Demand-prepared memory search and scoped setting conflicts (2026-10-20)
+
+`MemoryHybridRuntime` owns the shared FTS and vector read pools. Starting the
+Runtime or viewing Home/Feed does not create search processes. An authorized
+visible Chat thread or an admitted SNS activity may request preparation after
+reading the current memory settings and closing its read transaction. This
+signal performs no search, embedding, credential validation or business write.
+Chat owns its protected prepare endpoint; Runtime supplies the preparation port.
+
+Each axis has at most two processes and eight FIFO waiters; starting, busy,
+retiring and quarantined processes all consume that capacity. A shared control
+executor has four threads and two preparation slots. A preparation attempt has
+a 30-second process deadline and 60-second round deadline. Failed preparation
+can be reconsidered only by a new demand after a 30-second cooldown. One
+request's cancellation does not cancel unassigned shared preparation.
+
+The lightweight child entry announces BOOT before loading its search modules.
+READY is distinct from index availability. Worker/index/job bindings guard every
+message. A successful result is reusable only after request cleanup has been
+acknowledged. Failure, timeout, malformed IPC or uncertain cleanup retires that
+process and its channel; capacity is released only after confirmed OS exit.
+Generation replacement drains old readers before binding new readers. Shutdown
+attempts every owned cleanup and reports uncertain exit rather than pretending
+that disposal completed.
+
+Only the interpreter and loaded code persist between requests. SQLite connections,
+read snapshots, cancellation handlers and request context end per search. Search
+preparation/reuse introduces no canonical writer or schema migration. Existing
+scope, deletion, version, hydration and final delivery checks remain authoritative.
+
+New social-hybrid Chat admissions allow at most 20 seconds, still bounded by the
+current parent remainder and 15-second answer reserve. Historical admitted caps
+remain frozen; other Chat modes retain their existing limits. Each selected SNS
+batch shares a 30-second deadline from before queue admission, with a final
+reserve of min(3 seconds, 10 percent). Fast completion returns immediately.
+
+SNS checkpoints preserve a bounded content-free search summary (two axes,
+32 stages, 8 KiB). Timeout, I/O and both-axis failures remain distinguishable.
+The model-facing memory projection excludes diagnostics. Chat Detailed OFF
+continues to omit detailed search traces. Optional v1 trace fields distinguish
+request cleanup, process retirement and preparation/import timings without
+adding per-stage DB writes.
+
+Image policy CAS conflicts use the existing Media error contract and router 409
+mapping; generic programming exceptions are not reclassified. Routine owns the
+new Google wire profile: a pure copy removes only `source_event_effects.maxItems`
+from the provider schema. Existing server limits, reference checks and old
+admission profiles/hashes remain unchanged. No automatic repair, model fallback
+or extra normal-activity provider request is introduced.
+
 ## Local entry, situation validation and durable activity recovery (2026-10-19 LOCAL)
 
 Identity owns local protocol 2. Protected POST preparation creates a default

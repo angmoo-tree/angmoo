@@ -15,6 +15,7 @@ function exportSearchTrace(trace: NonNullable<RetrievalDiagnosticsRead["search_t
       "budget_at_start_ms", "remaining_at_end_ms", "deadline_exceeded"])),
     terminals: trace.terminals.slice(0, 2).map(row => ({
       ...selectFields(row, ["axis", "axis_status", "axis_reason", "terminal_state", "last_observed_stage", "cause_certainty", "worker_started",
+        "request_cleanup_complete", "worker_state_after", "worker_reused", "preparation_ms", "boot_ms", "child_import_ms",
         "nn_query_started", "result_received", "terminal_observed", "terminate_sent", "kill_sent", "joined",
         "worker_exit_code", "termination_reason", "cleanup_error_code", "eligible_vector_count", "requested_generation",
         "observed_generation", "requested_profile", "observed_schema_revision", "generation_match", "metadata_status", "stage_events_dropped"]),

@@ -42,6 +42,7 @@ const next = spawn(process.execPath, [fileURLToPath(new URL("../node_modules/nex
   cwd: fileURLToPath(new URL("..", import.meta.url)),
   env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", ANGMOO_NEXT_DIST_DIR: ".next-proxy-disconnect", ANGMOO_API_BASE_URL: `http://127.0.0.1:${upstream.address().port}` },
   stdio: ["ignore", "pipe", "pipe"],
+  windowsHide: true,
 });
 let logs = "";
 next.stdout.on("data", data => { logs += data; }); next.stderr.on("data", data => { logs += data; });

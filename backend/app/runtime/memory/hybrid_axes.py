@@ -1,7 +1,7 @@
 """Compose independent native reads with a measured, cancellable query embedding."""
 import asyncio
 from time import monotonic
-from app.contracts.search_diagnostics import collector, SearchTerminal
+from app.contracts.search_diagnostics import execution_collector, SearchTerminal
 from app.runtime.memory.worker_diagnostics import WorkerTrace
 from dataclasses import replace
 from app.contracts.retrieval_observation import observe, detail, current
@@ -49,7 +49,7 @@ class FtsHybridAxis:
             return HybridAxisResult((), RecallAxisReceipt("fts", RecallAxisStatus.UNAVAILABLE, True, 0,
                 (monotonic()-started)*1000, "memory_fts_unavailable"))
         finally:
-            target = collector()
+            target = execution_collector()
             if target is not None and "fts" in target.terminals:
                 target.terminals["fts"] = target.terminals["fts"].model_copy(update={"axis_status": axis_status})
 
@@ -63,7 +63,7 @@ class VectorHybridAxis:
         usage = HybridEmbeddingUsage()
         executed = False
         axis_status = "unavailable"
-        target = collector()
+        target = execution_collector()
         embedding_trace = WorkerTrace("vector", deadline, domain="parent", detailed=target is not None)
         if current.get() is not None:
             embedding_trace.started = current.get().started
