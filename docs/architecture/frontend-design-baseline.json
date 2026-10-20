@@ -334,7 +334,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "ad7ffc912eeb998e4cc152bb427108369126cd52025a41a3db461ec388f57fcc"
+        "sha256": "bb7c093d08869a4d074f827cfe6d3c66ae22e112e76b6eece51cdf79b8741996"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
