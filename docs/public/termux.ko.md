@@ -82,14 +82,16 @@ backend에만 데이터 경로를 연결합니다. Android 공유 저장소로 �
 전용 저장소에 복사해 아래와 같이 수행합니다.
 
 ```sh
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" install --manifest /absolute/candidate.json
+angmoo --home "$HOME/.local/share/angmoo-rehearsal" install --candidate-manifest /absolute/candidate.json
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" start
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" status
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" stop
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" restart
 ```
 
-manifest에는 완전한 쌍과 정확한 해시가 필요합니다. 소스·archive/config/diff-ID,
+로컬 manifest에는 ARM64 backend/frontend 쌍만 정확한 해시와 함께 있어야 합니다.
+공식 release 설치와 `--manifest`는 여전히 amd64/ARM64 네 항목을 요구합니다.
+로컬 후보 확인을 공식 출시 검증으로 취급하지 않습니다. 소스·archive/config/diff-ID,
 PRoot 버전, 호스트·QEMU/native 구분, 기동·종료 시간, readiness, 재시작 데이터
 보존, 오래된 PID·포트 충돌·부분 실패 검증을 기록합니다. 실제 Android의
 T01–T05/T11은 최초 준비 명령 수·권한·저장소·SNS/Chat 전경 실행·절전·복구를
@@ -106,3 +108,27 @@ PRoot 5.1.0과 QEMU 조합은 bind 경로에 파일을 생성할 수 있어도 s
 시작을 중단했습니다. Android 통과 결과가 아니며, 실제 Termux 기동·브라우저·재시작은
 P4 실기기 검증이 필요합니다. 이 리허설을 통과시키려고 쓰기권한 검사를 우회하거나
 사용자 데이터 권한을 완화하지 않습니다.
+
+## 저장된 서비스 로그
+
+`start`는 서비스를 백그라운드에서 실행합니다. 다음 명령으로 저장된 출력을 봅니다.
+
+```sh
+angmoo logs --service all --tail 200
+angmoo logs --service backend --follow
+angmoo diagnostics
+angmoo logs --session <launch-id> --service frontend
+```
+
+Ctrl+C는 로그 보기만 종료합니다. 기동 실패 시 최초 실패 서비스·단계·UTC 관측 시각·
+안전하게 가린 원래 오류·관측된 종료 코드를 `logs/<launch-id>/session.json`에 남깁니다.
+종료 코드는 PRoot 명령 기준이며, 그 값만으로 guest 충돌이나 Android OOM을 확정하지
+않습니다. 준비 상태 조회 실패와 정리 실패는 별도로 보존합니다. `diagnostics`에는
+supervisor 초기 실행 중 로그 누락 여부도 포함됩니다.
+
+로그는 전용 저장소에 디렉터리 0700·파일 0600으로 저장합니다. 민감한 필드와 알려진
+자격증명 형식은 파일 기록 전에 가립니다. 앱 출력에 개인적인 내용이 있을 수 있으므로
+공유 전 확인하세요. backend/frontend는 각각 2MiB 파일 3개, supervisor/초기 실행 로그는
+각각 1MiB 파일 2개를 유지합니다. 전체는 최대 4세션·64MiB입니다. 순환 삭제·긴 줄 생략·
+수집 큐 초과·디스크 오류는 기록 공백으로 남기며 완전 수집으로 표시하지 않습니다.
+로그 조회에는 서비스 실행·설치된 배포물·제품 DB 접근이 필요하지 않습니다.

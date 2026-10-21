@@ -16,6 +16,14 @@ a 30-second process deadline and 60-second round deadline. Failed preparation
 can be reconsidered only by a new demand after a 30-second cooldown. One
 request's cancellation does not cancel unassigned shared preparation.
 
+`runtime/memory/preparation_budget.py` owns these two preparation limits separately
+from Chat/SNS search budgets and the retry cooldown. The process deadline begins
+before `process.start()` and is shared by BOOT and READY. The round deadline also
+covers the shared preparation-slot wait. A bounded log summary per process/round
+records preparation, boot, module-load, queue and confirmed-exit evidence; it
+contains no query, memory text, credentials or DB writes. Local emulation-only
+budget changes must remain a separate commit and are not production defaults.
+
 The lightweight child entry announces BOOT before loading its search modules.
 READY is distinct from index availability. Worker/index/job bindings guard every
 message. A successful result is reusable only after request cleanup has been

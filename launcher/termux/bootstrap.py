@@ -27,7 +27,7 @@ TOOLS_SHA256 = "@ANGMOO_TOOLS_SHA256@"
 TOOLS_SIZE = "@ANGMOO_TOOLS_SIZE@"
 REPOSITORY = "angmoo-tree/angmoo"
 TOOLS_NAME = "angmoo-termux-tools.zip"
-FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "requirements.txt", "setup.sh", "LICENSE"})
+FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "requirements.txt", "setup.sh", "LICENSE"})
 MAX_TOOLS_BYTES = 4 * 1024 * 1024
 
 

@@ -112,6 +112,11 @@ class HostTests(unittest.TestCase):
                 state = angmoo.read_state(home)
                 self.assertEqual(state["state"], "failed")
                 self.assertEqual(state["error"], "service_exited_before_ready")
+                self.assertEqual(state["primary_failure"]["service"], "frontend")
+                self.assertEqual(state["primary_failure"]["returncode"], 7)
+                self.assertEqual(state["services"]["backend"]["termination_origin"], "sibling_failure")
+                self.assertEqual(state["primary_failure"]["exit_code_scope"], "proot_command")
+                self.assertTrue((home / state["log_reference"] / "session.json").is_file())
                 self.assertFalse(any(processes.session_members(r) for r in state["children"].values()))
                 self.assertIsNone(unrelated.poll())
             finally:

@@ -17,7 +17,7 @@ if [ ! -x "$tools/venv/bin/python" ]; then
   python -m venv "$tools/venv"
 fi
 "$tools/venv/bin/python" -m pip install --require-hashes --only-binary=:all: --no-deps -r "$here/requirements.txt"
-for file in angmoo.py payload.py processes.py requirements.txt; do
+for file in angmoo.py payload.py processes.py service_logs.py requirements.txt; do
   cp "$here/$file" "$tools/$file"
 done
 if [ -f "$here/LICENSE" ]; then
