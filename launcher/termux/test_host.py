@@ -18,6 +18,23 @@ import processes
 
 
 class HostPlatformTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix", "requires POSIX file mode bits")
+    def test_tool_import_does_not_broaden_adapter_file_permissions(self):
+        import builtins
+        original_import = builtins.__import__
+        def dependency_import(name, *args, **kwargs):
+            if name == "proot_distro.constants":
+                os.umask(0o022)
+                return SimpleNamespace(IS_TERMUX=True)
+            return original_import(name, *args, **kwargs)
+        previous = os.umask(0o077)
+        try:
+            with patch.object(builtins, "__import__", side_effect=dependency_import):
+                self.assertTrue(angmoo.is_termux_host())
+            self.assertEqual(os.umask(0o077), 0o077)
+        finally:
+            os.umask(previous)
+
     def test_android_python_requires_termux_and_pinned_tools(self):
         for termux in (True, False):
             with self.subTest(termux=termux), patch.object(angmoo.sys, "platform", "android"), \
