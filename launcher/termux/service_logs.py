@@ -324,12 +324,13 @@ class Capture:
                     self.error = type(exc).__name__
 
     def snapshot(self):
+        pruned = sum(f.pruned for f in self.files.values())
         return {"dropped_records": self.dropped_records, "dropped_bytes": self.dropped_bytes,
                 "first_drop_utc": self.first_drop_utc, "last_drop_utc": self.last_drop_utc,
                 "truncated_records": self.truncated_records, "logging_error": self.error,
-                "retention_pruned_segments": sum(f.pruned for f in self.files.values()),
+                "retention_pruned_segments": pruned,
                 "capture_complete": self.drained.is_set() and not self.writer.is_alive() and self.eof_complete
-                    and not self.dropped_records and not self.truncated_records and not self.error}
+                    and not self.dropped_records and not self.truncated_records and not self.error and not pruned}
 
     def close(self):
         self.closing.set()
