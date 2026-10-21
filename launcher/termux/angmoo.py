@@ -46,11 +46,15 @@ MESSAGES = {
 
 
 def tools() -> str:
-    require(sys.platform == "linux", "host_not_supported")
+    # Native Android Python reports Android separately from Linux.
+    require(sys.platform in ("linux", "android"), "host_not_supported")
     try:
         require(importlib.metadata.version("proot-distro") == PROOT_VERSION, "tools_unavailable")
     except importlib.metadata.PackageNotFoundError as exc:
         raise ValueError("tools_unavailable") from exc
+    if sys.platform == "android":
+        from proot_distro.constants import IS_TERMUX
+        require(IS_TERMUX, "host_not_supported")
     executable = shutil.which("proot-distro")
     require(executable and shutil.which("proot"), "tools_unavailable")
     return executable

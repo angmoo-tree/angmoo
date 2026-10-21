@@ -42,6 +42,20 @@ class BootstrapTests(unittest.TestCase):
             bootstrap.extract_verified(self.raw, self.checksums, Path(root))
             self.assertEqual({p.name for p in Path(root).iterdir()}, bootstrap.FILES)
 
+    def test_android_python_keeps_native_arm64_release_requirement(self):
+        for machine in ("aarch64", "x86_64"):
+            with self.subTest(machine=machine), tempfile.TemporaryDirectory() as root, \
+                 contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()), \
+                 patch.object(bootstrap.sys, "platform", "android"), \
+                 patch.object(bootstrap.platform, "machine", return_value=machine), \
+                 patch.object(bootstrap.shutil, "which", return_value="tool"), \
+                 patch.object(bootstrap.Path, "home", return_value=Path(root)), \
+                 patch.object(bootstrap, "download", side_effect=[self.checksums, self.raw]) as download, \
+                 patch.object(bootstrap, "install_and_start") as install:
+                self.assertEqual(bootstrap.main(), 0 if machine == "aarch64" else 1)
+                self.assertEqual(install.call_count, 1 if machine == "aarch64" else 0)
+                self.assertEqual(download.call_count, 2 if machine == "aarch64" else 0)
+
     def test_corrupt_missing_duplicate_or_wrong_checksum_extracts_nothing(self):
         cases = ((self.raw + b"changed", self.checksums),
                  (self.raw, b""), (self.raw, self.checksums * 2),

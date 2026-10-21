@@ -95,7 +95,7 @@ def main() -> int:
                 and TOOLS_SIZE.isdigit() and 0 < int(TOOLS_SIZE) <= MAX_TOOLS_BYTES,
                 "installer_not_packaged", "Use install-termux.py from the official versioned Release.",
                 "공식 버전별 Release의 install-termux.py를 사용하세요.")
-        require(sys.platform == "linux" and platform.machine() in {"aarch64", "arm64"},
+        require(sys.platform in {"linux", "android"} and platform.machine() in {"aarch64", "arm64"},
                 "host_not_supported", "This installer requires ARM64 Termux.", "이 설치기는 ARM64 Termux용입니다.")
         require(shutil.which("sh") and shutil.which("proot"), "prerequisites_missing",
                 "First run: pkg install python curl proot", "먼저 실행하세요: pkg install python curl proot")
