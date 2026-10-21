@@ -120,13 +120,16 @@ def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
     assert 'cache: "no-store"' in media_hook
     assert "URL.createObjectURL(blob)" in media_hook
     assert "URL.revokeObjectURL" in media_hook
-    for relative in (
-        "frontend/src/components/ui/profile-avatar.tsx",
-        "frontend/src/components/media/post-media-grid.tsx",
-        "frontend/src/features/worlds/components/world-creator-client.tsx",
-        "frontend/src/features/device-home/components/device-home.tsx",
+    assert "return useRuntimeMediaResource(sourceUrl).url" in media_hook
+    for relative, hook in (
+        ("frontend/src/components/ui/profile-avatar.tsx", "useRuntimeMediaUrl"),
+        ("frontend/src/components/media/post-media-grid.tsx", "useRuntimeMediaResource"),
+        ("frontend/src/features/worlds/components/world-creator-client.tsx", "useRuntimeMediaUrl"),
+        ("frontend/src/features/device-home/components/device-home.tsx", "useRuntimeMediaUrl"),
     ):
-        assert "useRuntimeMediaUrl" in _read(relative)
+        assert hook in _read(relative)
+    deferred_media = _read("frontend/src/components/media/post-media-grid.tsx")
+    assert "useRuntimeMediaResource(media.url, !deferred || nearVisible)" in deferred_media
 
 
 def test_static_route_matrix_and_dynamic_fallback_are_explicit() -> None:

@@ -167,3 +167,18 @@ contract. Its original profile-save/hidden-field assertions pass in both Next
 and static builds (`ci-remediation-creator-next.log`,
 `ci-remediation-creator-static.log`). Required workflow selection, fail-fast
 semantics, security and native upgrade gates are unchanged.
+
+The follow-up CI contract alignment explicitly inventories the new paginated
+Chat read, manual post summary and owner-selection read (240 paths / 296
+operations). The frozen P8-L-D inventory permits only the new Chat GET as a
+later operation; its historical snapshot and hashes are unchanged. The manual
+router ownership set includes the summary endpoint. Authenticated media checks
+now follow `useRuntimeMediaResource`, including its near-viewport gate, while
+still checking authenticated fetch, no-store and blob URL release. These
+targeted contract checks pass (43 route/upgrade checks and 12 media checks).
+
+The static exact-reply navigation fixture also supplies the explicit selected
+owner contract. All three tests in that file pass; the exact evidence row,
+viewport position and parent link assertions remain unchanged. Evidence:
+`ci-remediation-route-contracts.log`, `ci-remediation-media-contract.log`, and
+`ci-remediation-static-evidence.log`.

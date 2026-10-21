@@ -59,6 +59,9 @@ ALLOWED_LATER_ROUTE_OPERATIONS = (
     # Demand preparation is a later protected endpoint; historical identity
     # routes and the frozen P8-L-D transport evidence remain unchanged.
     "POST /worlds/{world_id}/chat/threads/{thread_id}/memory-search/prepare",
+    # Bounded history is a later owner-scoped read. Keep the recorded P8-L-D
+    # transport unchanged; current route/security and pagination tests own it.
+    "GET /worlds/{world_id}/chat/threads/{thread_id}/messages",
 )
 
 
