@@ -45,6 +45,17 @@ MESSAGES = {
 }
 
 
+def is_termux_host() -> bool:
+    # The pinned tool initializes its own umask at import. Keep the adapter's
+    # private-file policy; importing a dependency must not broaden new files.
+    previous = os.umask(0o077)
+    try:
+        from proot_distro.constants import IS_TERMUX
+        return IS_TERMUX
+    finally:
+        os.umask(previous)
+
+
 def tools() -> str:
     # Native Android Python reports Android separately from Linux.
     require(sys.platform in ("linux", "android"), "host_not_supported")
@@ -52,9 +63,8 @@ def tools() -> str:
         require(importlib.metadata.version("proot-distro") == PROOT_VERSION, "tools_unavailable")
     except importlib.metadata.PackageNotFoundError as exc:
         raise ValueError("tools_unavailable") from exc
-    if sys.platform == "android":
-        from proot_distro.constants import IS_TERMUX
-        require(IS_TERMUX, "host_not_supported")
+    termux = is_termux_host()
+    require(sys.platform != "android" or termux, "host_not_supported")
     executable = shutil.which("proot-distro")
     require(executable and shutil.which("proot"), "tools_unavailable")
     return executable
@@ -164,11 +174,10 @@ def command(executable: str, install: dict, service: str, nonce: str) -> list[st
         env.update(ANGMOO_BIND_HOST="127.0.0.1", ANGMOO_BACKEND_PORT="8080", ANGMOO_CONTRIBUTOR_DATA_ROOT="/var/lib/angmoo", ANGMOO_FRONTEND_ORIGIN="http://127.0.0.1:3000")
     else:
         env.update(HOSTNAME="127.0.0.1", PORT="3000", ANGMOO_API_BASE_URL="http://127.0.0.1:8080")
-    from proot_distro.constants import IS_TERMUX
     result = [executable, "run", install["containers"][service], "--user", "10001:10001" if backend else "1000:1000", "--work-dir", "/app"]
     # This flag exists only on Termux; Linux already omits the Termux host
     # mounts. Use the pinned tool's host detection, not a guessed PREFIX.
-    if IS_TERMUX:
+    if is_termux_host():
         result.append("--isolated")
     if backend:
         result += ["--bind", install["data_root"] + ":/var/lib/angmoo"]
