@@ -192,6 +192,22 @@ def _payload(**overrides):
     payload.update(overrides)
     return payload
 
+
+@pytest.mark.parametrize("name", ["admin", "official", "운영자", "삭제한 캐릭터", "fuck"])
+def test_semantic_names_are_allowed_by_owner_profile_patch(name):
+    client, engine, principal = _fixture()
+    _seed_world(engine, principal)
+    try:
+        created = client.post("/api/v1/worlds/world-a/owner-character", headers=FRONTEND_HEADERS, json=_payload())
+        assert created.status_code == 201
+        changed = client.patch("/api/v1/worlds/world-a/my-profile", headers=FRONTEND_HEADERS,
+                               json={"version": created.json()["version"], "display_name": name})
+        assert changed.status_code == 200, changed.text
+        assert changed.json()["profile"]["display_name"] == name
+    finally:
+        client.close()
+        engine.dispose()
+
 def test_owner_identity_create_update_reentry_is_private_and_write_bounded() -> None:
     client, engine, principal = _fixture()
     _seed_world(engine, principal)

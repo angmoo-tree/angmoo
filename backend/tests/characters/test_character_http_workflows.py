@@ -33,7 +33,8 @@ def _workflows(**changes):
     })
 
 
-def test_character_writes_reach_runtime_in_same_session_after_original_commits(tmp_path):
+@pytest.mark.parametrize("name", ["Owner Bird", "admin", "운영자", "삭제한 캐릭터", "fuck"])
+def test_character_writes_reach_runtime_in_same_session_after_original_commits(tmp_path, name):
     engine = create_engine(f"sqlite:///{tmp_path / 'character-entry.sqlite3'}")
     registered_models.User.__table__.create(engine)
     models.Character.__table__.create(engine)
@@ -61,7 +62,8 @@ def test_character_writes_reach_runtime_in_same_session_after_original_commits(t
             assert actual_character.one_liner == "changed"
             assert media_changed is False
             return actual_character
-        assert management.update_profile(db, owner, character.id, schemas.AgentProfileUpdate(one_liner="changed"), workflows=replace(callbacks, after_profile=profile_changed)) is character
+        assert management.update_profile(db, owner, character.id, schemas.AgentProfileUpdate(name=name, one_liner="changed"), workflows=replace(callbacks, after_profile=profile_changed)) is character
+        assert character.name == name
         with pytest.raises(exceptions.AgentNotFoundError):
             management.get_agent(db, SimpleNamespace(id="other"), character.id, workflows=callbacks)
     engine.dispose()
