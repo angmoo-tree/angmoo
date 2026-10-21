@@ -208,6 +208,31 @@ def test_semantic_names_are_allowed_by_owner_profile_patch(name):
         client.close()
         engine.dispose()
 
+def test_selection_is_read_only_and_distinguishes_missing_profile_from_broken_reference():
+    client, engine, principal = _fixture()
+    _seed_world(engine, principal)
+    path = "/api/v1/worlds/world-a/owner-character/selection"
+    try:
+        empty = client.get(path)
+        assert empty.status_code == 200
+        assert empty.json() == {"schema_version": "owner-character-selection-v1", "world_id": "world-a", "state": "unselected", "actor": None}
+        assert client.get("/api/v1/worlds/world-a/owner-character").status_code == 404
+        with Session(engine) as db:
+            assert db.query(models.WorldCharacter).filter_by(control_mode="owner_controlled").count() == 0
+        created = client.post("/api/v1/worlds/world-a/owner-character", headers=FRONTEND_HEADERS, json=_payload()).json()
+        selected = client.get(path)
+        assert selected.json()["state"] == "selected"
+        assert selected.json()["actor"] == created
+        with Session(engine) as db:
+            db.get(models.Character, created["character_id"]).deleted_at = datetime.now(UTC)
+            db.commit()
+        assert client.get(path).status_code == 404  # A dangling active selection is not unselected.
+        assert client.get("/api/v1/worlds/missing/owner-character/selection").status_code in {403, 404}
+    finally:
+        client.close()
+        engine.dispose()
+
+
 def test_owner_identity_create_update_reentry_is_private_and_write_bounded() -> None:
     client, engine, principal = _fixture()
     _seed_world(engine, principal)

@@ -142,6 +142,13 @@ class OwnerControlledIdentityRead(BaseModel):
     profile: OwnerControlledProfileRead
 
 
+class OwnerCharacterSelectionRead(BaseModel):
+    schema_version: Literal["owner-character-selection-v1"] = "owner-character-selection-v1"
+    world_id: str
+    state: Literal["selected", "unselected"]
+    actor: OwnerControlledIdentityRead | None
+
+
 class StudioWorldCharacterRead(BaseModel):
     world_character_id: str
     character_id: str

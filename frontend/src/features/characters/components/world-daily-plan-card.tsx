@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
-import { getDailyPreparation, getDailyActivityPlan, regenerateDailyPreparation, type DailyPreparationRead, type DailyActivityPlanRead } from "../api/world-activity-runtime";
+import { getPreparedDailyPlan, regenerateDailyPreparation, type DailyPreparationRead, type DailyActivityPlanRead } from "../api/world-activity-runtime";
 import { worldCredentialTransport } from "../api/world-credentials";
 import { DailyPlanCard } from "./daily-plan-card";
 export function WorldDailyPlanCard({ characterId, worldId, actorId }: { characterId: string; worldId: string; actorId: string }) {
@@ -14,7 +14,7 @@ export function WorldDailyPlanCard({ characterId, worldId, actorId }: { characte
   useEffect(() => {
     active.current = scope;
     const controller = new AbortController();
-    void Promise.all([getDailyPreparation(characterId, worldId, controller.signal), getDailyActivityPlan(characterId, worldId, controller.signal), worldCredentialTransport(worldId, actorId, "sns").read(controller.signal)]).then(([preparation, daily, credential]) => {
+    void Promise.all([getPreparedDailyPlan(characterId, worldId, controller.signal), worldCredentialTransport(worldId, actorId, "sns").read(controller.signal)]).then(([{ preparation, plan: daily }, credential]) => {
       if (controller.signal.aborted || preparation.world_character_id !== actorId || daily && daily.world_character_id !== actorId) return;
       setStatus(preparation); setPlan(daily); setHasKey(credential.has_key); setError(false);
     }).catch(() => { if (!controller.signal.aborted) setError(true); });

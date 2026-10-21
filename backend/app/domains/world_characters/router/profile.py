@@ -11,6 +11,7 @@ from app.api.identity_dependencies import browser_session
 from app.database import get_db
 from app.domains.world_characters.schemas.identity import (
     OwnerControlledIdentityRead,
+    OwnerCharacterSelectionRead,
     OwnerControlledProfileWrite,
     MyProfilePatch,
     MyProfileMediaUpload,
@@ -115,6 +116,20 @@ def _raise_public_profile_error(exc: Exception) -> None:
         status_code=code,
         detail=getattr(exc, "reason_code", "world_character_profile_error"),
     ) from exc
+
+
+@router.get("/{world_id}/owner-character/selection", response_model=OwnerCharacterSelectionRead)
+def read_owner_character_selection(
+    world_id: str, request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user),
+) -> OwnerCharacterSelectionRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        actor = OwnerControlledIdentityService(db).selection(world_id=world_id, current_user_id=current_user.id)
+        return OwnerCharacterSelectionRead(world_id=world_id, state="selected" if actor else "unselected",
+                                           actor=identity_read(actor) if actor else None)
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+        raise AssertionError("unreachable")
 
 
 @router.get(

@@ -8,6 +8,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/form-controls";
 import { ensureMyProfile, listOwnerControlledIdentities, patchMyProfile, selectOwnerControlledIdentity, uploadMyProfileMedia } from "@/features/worlds/api/worlds";
+import { getOwnerControlledActor } from "@/features/worlds/api/world-app-client";
 import type { OwnerControlledIdentityRead } from "@/features/worlds/types/worlds";
 
 export type MyProfileMediaProps = { name: string; avatarUrl: string; bannerUrl: string; disabled: boolean;
@@ -30,7 +31,11 @@ export function MyProfileEditor({ worldId, renderMedia, onSaved }: {
     const scope = captureAuthRequestScope();
     let active = true;
     const current = () => active && !controller.signal.aborted && isCurrentAuthRequestScope(scope);
-    ensureMyProfile(worldId, { signal: controller.signal }).then((value) => { if (current()) setIdentity(value); })
+    getOwnerControlledActor(worldId, { signal: controller.signal }).then(async (selected) => {
+      if (!current()) return;
+      const value = selected ?? await ensureMyProfile(worldId, { signal: controller.signal });
+      if (current()) setIdentity(value);
+    })
       .catch(async (reason) => {
         if (!current()) return;
         setMessage(reason instanceof Error ? uiText(reason.message) : uiText("내 프로필을 확인하지 못했습니다."));
