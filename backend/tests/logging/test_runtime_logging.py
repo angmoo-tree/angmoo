@@ -11,12 +11,16 @@ from types import SimpleNamespace
 
 import pytest
 from uvicorn.config import LOGGING_CONFIG
+import copy
 
 from app.runtime import logging_config
 
 
 BACKEND = Path(__file__).resolve().parents[2]
 ROOT = BACKEND.parent
+EXPECTED_CONSOLE_CONFIG = copy.deepcopy(LOGGING_CONFIG)
+EXPECTED_CONSOLE_CONFIG["loggers"]["app.runtime.memory.search_worker_pool"] = {
+    "handlers": ["default"], "level": "INFO", "propagate": False}
 
 
 def process(source: str, *arguments: str) -> subprocess.CompletedProcess[str]:
@@ -27,7 +31,7 @@ def process(source: str, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers():
-    assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG
+    assert logging_config.uvicorn_logging_config() == EXPECTED_CONSOLE_CONFIG
     result = process("import logging; from app.runtime.logging_config import configure_application_logging; configure_application_logging(); configure_application_logging(); assert logging.getLogger().level == logging.WARNING; assert logging.getLogger().handlers == []")
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
@@ -67,7 +71,7 @@ def test_source_resource_is_independent_of_working_directory(tmp_path, monkeypat
     monkeypatch.chdir(tmp_path)
     (tmp_path / "logging.ini").write_text("untrusted cwd configuration", encoding="utf-8")
     assert logging_config.logging_config_path() == BACKEND / "logging.ini"
-    assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG
+    assert logging_config.uvicorn_logging_config() == EXPECTED_CONSOLE_CONFIG
 
 
 @pytest.mark.parametrize("layout", ["_MEI12345", "sidecar/_internal"])
@@ -79,7 +83,7 @@ def test_frozen_onefile_and_onedir_read_only_the_bundle_resource(tmp_path, monke
     monkeypatch.setattr(sys, "_MEIPASS", str(bundle), raising=False)
     monkeypatch.chdir(tmp_path)
     assert logging_config.logging_config_path() == bundle / "logging.ini"
-    assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG
+    assert logging_config.uvicorn_logging_config() == EXPECTED_CONSOLE_CONFIG
     (bundle / "logging.ini").unlink()
     shutil.copyfile(BACKEND / "logging.ini", tmp_path / "logging.ini")
     with pytest.raises(logging_config.RuntimeLoggingConfigurationError, match="runtime_logging_configuration_missing"):
@@ -150,7 +154,7 @@ def test_contributor_server_and_reload_child_receive_the_same_logging_configurat
     contributor_backend.main()
     assert len(calls) == 1
     positional, kwargs = calls[0]
-    assert kwargs["log_config"] == LOGGING_CONFIG
+    assert kwargs["log_config"] == EXPECTED_CONSOLE_CONFIG
     if reload:
         assert positional == ("app.runtime.contributor_backend:create_contributor_runtime_app_from_environment",)
         assert kwargs["factory"] is True
@@ -170,7 +174,21 @@ def test_public_and_legacy_cli_keep_their_existing_asgi_target(monkeypatch):
     assert len(calls) == 2
     for args, kwargs in calls:
         assert args == ("app.main:public_app",)
-        assert kwargs == {"host": "0.0.0.0", "port": 8080, "reload": True, "log_config": LOGGING_CONFIG}
+        assert kwargs == {"host": "0.0.0.0", "port": 8080, "reload": True, "log_config": EXPECTED_CONSOLE_CONFIG}
+
+
+def test_worker_summaries_reach_stderr_without_general_info_output():
+    result = process("""
+import logging
+from uvicorn import Config
+from app.runtime.logging_config import uvicorn_logging_config
+Config(lambda scope, receive, send: None, log_config=uvicorn_logging_config())
+logging.getLogger('app.runtime.memory.search_worker_pool').info('memory_worker_preparation phase=ready')
+logging.getLogger('app.other').info('unrelated info must stay quiet')
+""")
+    assert result.returncode == 0, result.stderr
+    assert result.stderr.count('memory_worker_preparation phase=ready') == 1
+    assert 'unrelated info' not in result.stderr
 
 
 def test_installer_json_stdout_and_existing_redaction_are_unchanged(tmp_path):

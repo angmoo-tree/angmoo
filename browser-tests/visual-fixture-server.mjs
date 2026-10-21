@@ -1,3 +1,4 @@
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -145,7 +146,7 @@ const server = createServer((request, response) => {
   }
 
   const ownerCharacter = url.pathname.match(
-    /^\/api\/v1\/worlds\/([^/]+)\/owner-character$/,
+    /^\/api\/v1\/worlds\/([^/]+)\/owner-character\/selection$/,
   );
   if (ownerCharacter) {
     const worldId = decodeURIComponent(ownerCharacter[1]);
@@ -153,7 +154,7 @@ const server = createServer((request, response) => {
       sendJson(response, { detail: "owner_character_not_found" }, 404);
       return;
     }
-    sendJson(response, fixture.owner_character);
+    sendJson(response, selectedOwnerRead(fixture.owner_character));
     return;
   }
 

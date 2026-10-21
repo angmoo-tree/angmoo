@@ -43,7 +43,9 @@ import { type MessageGoogleGeminiModel } from "@/features/chat/types/chat-contra
 import type { WorldChatGenerationRequestRead, WorldChatThreadDeleteRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
 
 import styles from "./world-chat.module.css";
-import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
+import { useWorldChatHistory } from "../hooks/use-world-chat-history";
+import { useElementVisibility } from "@/hooks/use-element-visibility";
+import { useRuntimeMediaResource } from "@/hooks/use-runtime-media-url";
 
 type WorldChatProps = {
   threadId?: string;
@@ -239,7 +241,9 @@ function WorldChatThread({
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("chat");
   const router = useRuntimeRouter();
-  const [thread, setThread] = useState<WorldChatThreadRead | null>(null);
+  const { thread, setThread, hydrate, append, commit, cancel: cancelHistory, paneRef: messagePaneRef,
+    topRef, onScroll, followLatest, restore, older, newer, loading: pageLoading, error: pageError,
+    unread, read: readHistory } = useWorldChatHistory(worldId, threadId);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -247,6 +251,7 @@ function WorldChatThread({
   const [attachment, setAttachment] = useState<{ id: string; url: string; allowed: boolean } | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [sending, setSending] = useState(false);
+  const [trackingFailure, setTrackingFailure] = useState<WorldChatGenerationRequestRead | null>(null);
   const [sendFailure, setSendFailure] = useState<{
     content: string;
     idempotencyKey: string;
@@ -258,7 +263,6 @@ function WorldChatThread({
   const [evidenceRequestId, setEvidenceRequestId] = useState<string | null>(null);
   const [auxiliaryOpen, setAuxiliaryOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagePaneRef = useRef<HTMLDivElement>(null);
   const [generation, setGeneration] = useState<{
     phase: "pending" | "streaming" | "failed";
     request: WorldChatGenerationRequestRead;
@@ -274,9 +278,8 @@ function WorldChatThread({
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modelUpdateSequenceRef = useRef(0);
   useEffect(() => {
-    const pane = messagePaneRef.current;
-    if (pane) pane.scrollTop = pane.scrollHeight;
-  }, [thread?.messages.length, generation?.text]);
+    restore();
+  }, [thread?.messages.length, generation?.text, restore]);
 
   const clearTypingTimer = useCallback(() => {
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
@@ -286,6 +289,7 @@ function WorldChatThread({
   const deleteBusy = sending || imageBusy || modelUpdating || Boolean(generation && (generation.phase !== "failed" || generation.retrying));
   const onDeleted = useCallback(() => {
     threadDeletedRef.current = true;
+    cancelHistory();
     threadLoadControllerRef.current?.abort();
     streamControllerRef.current?.abort();
     activeGenerationRef.current = null;
@@ -297,22 +301,17 @@ function WorldChatThread({
     setGeneration(null);
     releaseLeaveGuard();
     router.replace(worldChatRoute(worldId));
-  }, [clearTypingTimer, releaseLeaveGuard, router, worldId]);
+  }, [cancelHistory, clearTypingTimer, releaseLeaveGuard, router, worldId]);
   const deletion = useWorldChatDelete(onDeleted, () => !deleteBusy);
-
-  const refreshThread = useCallback(async () => {
-    const auth = captureAuthRequestScope();
-    const result = await getWorldChatThread(worldId, threadId);
-    if (!threadDeletedRef.current && isCurrentAuthRequestScope(auth)) setThread(result);
-    return result;
-  }, [threadId, worldId]);
 
   const showTerminalRequest = useCallback(
     async (request: WorldChatGenerationRequestRead) => {
       clearTypingTimer();
+      setTrackingFailure(null);
       activeGenerationRef.current = null;
       if (request.state === "committed") {
-        await refreshThread();
+        commit(request);
+        void readHistory("after");
         setGeneration(null);
         return;
       }
@@ -324,7 +323,7 @@ function WorldChatThread({
         typingVisible: false,
       });
     },
-    [clearTypingTimer, refreshThread],
+    [clearTypingTimer, commit, readHistory],
   );
 
   const consumeGeneration = useCallback(
@@ -497,28 +496,21 @@ function WorldChatThread({
             setState("error");
             return;
           }
-          setGeneration({
-            phase: "failed",
-            request: {
-              ...request,
-              failure_class: "stream_interrupted",
-              retryable: true,
-              state: "failed",
-            },
-            retrying: false,
-            text: "",
-            typingVisible: false,
-          });
+          // An unavailable status read is not a failed generation. Keep the
+          // admitted request and offer GET reconciliation without another POST.
+          setTrackingFailure(request);
+          setGeneration({ phase: "pending", request, retrying: false, text: "", typingVisible: false });
         }
       } finally {
         clearTypingTimer();
       }
     },
-    [clearTypingTimer, showTerminalRequest, threadId, worldId],
+    [clearTypingTimer, showTerminalRequest, threadId, worldId, setThread],
   );
 
   const hydrateRequest = useCallback(
     async (request: WorldChatGenerationRequestRead, signal: AbortSignal) => {
+      try {
       if (request.state === "accepted") {
         await consumeGeneration(request);
         return;
@@ -554,6 +546,12 @@ function WorldChatThread({
           return;
         }
       }
+      } catch {
+        if (!signal.aborted && !threadDeletedRef.current) {
+          setTrackingFailure(request);
+          setGeneration({ phase: "pending", request, retrying: false, text: "", typingVisible: false });
+        }
+      }
     },
     [consumeGeneration, showTerminalRequest, threadId, worldId],
   );
@@ -570,7 +568,7 @@ function WorldChatThread({
     ])
       .then(async ([result, latest]) => {
         if (controller.signal.aborted || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
-        setThread(result);
+        hydrate(result);
         setModelSelection(threadModelSelection(result));
         setState("ready");
         if (latest.response_request) {
@@ -591,7 +589,7 @@ function WorldChatThread({
       modelUpdateSequenceRef.current += 1;
       clearTypingTimer();
     };
-  }, [attempt, clearTypingTimer, hydrateRequest, threadId, worldId]);
+  }, [attempt, clearTypingTimer, hydrate, hydrateRequest, threadId, worldId, setThread]);
 
   const preparationRequested = useRef(false);
   useEffect(() => {
@@ -615,22 +613,7 @@ function WorldChatThread({
     setAttempt((value) => value + 1);
   }, []);
 
-  const appendUserMessage = useCallback(
-    (message: WorldChatGenerationRequestRead["user_message"]) => {
-      setThread((current) => {
-        if (!current || current.messages.some((item) => item.id === message.id)) {
-          return current;
-        }
-        return {
-          ...current,
-          last_message_at: message.created_at,
-          latest_message: message,
-          messages: [...current.messages, message],
-        };
-      });
-    },
-    [],
-  );
+  const appendUserMessage = useCallback((message: WorldChatGenerationRequestRead["user_message"]) => append([message]), [append]);
 
   const submitMessage = useCallback(
     async (content: string, idempotencyKey: string, assetId?: string) => {
@@ -645,7 +628,9 @@ function WorldChatThread({
         appendUserMessage(accepted.user_message);
         setDraft("");
         setAttachment(null);
-        await hydrateRequest(accepted.response_request, new AbortController().signal);
+        const controller = new AbortController();
+        streamControllerRef.current = controller;
+        await hydrateRequest(accepted.response_request, controller.signal);
       } catch {
         setSendFailure({ content, idempotencyKey, assetId });
       } finally {
@@ -666,9 +651,10 @@ function WorldChatThread({
         modelUpdating ||
         (generation && generation.phase !== "failed")
       ) return;
+      followLatest();
       void submitMessage(content, newIdempotencyKey("message"), attachment?.id);
     },
-    [draft, attachment, imageBusy, generation, modelUpdating, sending, submitMessage, deletion.pending],
+    [draft, attachment, imageBusy, generation, modelUpdating, sending, submitMessage, deletion.pending, followLatest],
   );
 
   const retryResponse = useCallback(async (excludeAttachment = false) => {
@@ -718,7 +704,7 @@ function WorldChatThread({
             : { mode: "thread_override", selected_model: selection },
         );
         if (modelUpdateSequenceRef.current !== sequence || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
-        setThread(updated);
+        setThread(current => current ? { ...updated, messages: current.messages, evidence_summaries: current.evidence_summaries, message_page: current.message_page } : updated);
         setModelSelection(threadModelSelection(updated));
       } catch {
         if (modelUpdateSequenceRef.current !== sequence || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
@@ -730,7 +716,7 @@ function WorldChatThread({
         }
       }
     },
-    [thread, threadId, worldId, deletion.pending],
+    [thread, threadId, worldId, deletion.pending, setThread],
   );
 
   if (state === "loading") {
@@ -849,7 +835,15 @@ function WorldChatThread({
       </header>
 
 
-      <div className={styles.messagePane} ref={messagePaneRef}>
+      <div className={styles.messagePane} ref={messagePaneRef} onScroll={onScroll}>
+      <div ref={topRef} />
+      {older && <button className={styles.historyButton} disabled={pageLoading !== null} onClick={() => void readHistory("before")} type="button">{uiText("이전 대화 더 보기")}</button>}
+      {pageLoading && <p role="status">{uiText("대화를 불러오는 중…")}</p>}
+      {pageError && <p role="alert">{uiText("대화를 더 불러오지 못했어요. 기존 대화는 유지됩니다.")} <button className={styles.historyButton} onClick={() => void readHistory(pageError)} type="button">{uiText("조회 다시 시도")}</button></p>}
+      {(unread || newer) && <div className={styles.historyNotice} role="status">
+        <button className={styles.historyButton} type="button" onClick={followLatest}>{uiText("새 메시지 · 최신 위치로 이동")}</button>
+        {newer && <button className={styles.historyButton} type="button" disabled={pageLoading !== null} onClick={() => void readHistory("after")}>{uiText("빠진 대화 더 불러오기")}</button>}
+      </div>}
       {thread.messages.length === 0 && !generation ? (
         <div className={styles.empty}>
           <MessageCircle aria-hidden="true" size={28} />
@@ -871,6 +865,7 @@ function WorldChatThread({
                   fromRequester ? styles.requesterMessage : styles.respondingMessage
                 }
                 key={message.id}
+                data-message-id={message.id}
               >
                 {!fromRequester ? <ProfileAvatar avatarUrl={thread.responding.avatar_url} name={thread.responding.display_name} sizeClassName={styles.messageAvatar} /> : null}
                 <div className={styles.messageBubble}>
@@ -966,6 +961,16 @@ function WorldChatThread({
         />
         {renderImagePicker ? renderImagePicker({threadId, value: attachment, disabled: sending || modelUpdating || deletion.pending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy, renderLayout: composerLayout}) : composerLayout({trigger: null, preview: null, feedback: null})}
       </form>
+      {trackingFailure ? <div className={styles.sendFailure} role="alert">
+        <p>{uiText("답변 상태를 확인하지 못했습니다. 메시지는 다시 보내지 않습니다.")}</p>
+        <button type="button" className={styles.historyButton} onClick={() => {
+          const controller = new AbortController(), auth = captureAuthRequestScope();
+          streamControllerRef.current?.abort(); streamControllerRef.current = controller;
+          void getWorldChatResponseRequest(worldId, threadId, trackingFailure.request_id, { signal: controller.signal })
+            .then(value => { if (!controller.signal.aborted && isCurrentAuthRequestScope(auth)) { setTrackingFailure(null); return hydrateRequest(value, controller.signal); } })
+            .catch(() => undefined);
+        }}>{uiText("답변 상태 다시 확인")}</button>
+      </div> : null}
       {sendFailure ? (
         <div className={styles.sendFailure} role="alert">
           <span>{uiText("메시지를 보내지 못했어요.")}</span>
@@ -989,10 +994,16 @@ function WorldChatThread({
 
 function ChatAttachment({ url }: { url: string }) {
   const uiText = useUiText("chat");
-  const source = useRuntimeMediaUrl(url);
-  // Authenticated attachment bytes are displayed through a revocable blob URL.
-  // eslint-disable-next-line @next/next/no-img-element
-  return source ? <img src={source} alt={uiText("대화에 첨부한 이미지")} className={styles.attachmentImage} /> : <p>{uiText("첨부 이미지를 불러오는 중…")}</p>;
+  const { ref: nearRef, visible: nearVisible } = useElementVisibility<HTMLDivElement>({ margin: 200, once: true, identity: url });
+  const resource = useRuntimeMediaResource(url, nearVisible);
+  const [failed, setFailed] = useState<string | null>(null);
+  const isFailed = resource.error || failed === `${resource.url}:${resource.attempt}`;
+  return <div ref={nearRef} className={styles.attachmentFrame}>
+    {isFailed ? <button type="button" className={styles.historyButton} onClick={() => { setFailed(null); resource.retry(); }}>{uiText("이미지 다시 불러오기")}</button> : resource.url ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img key={resource.attempt} src={resource.url} alt={uiText("대화에 첨부한 이미지")} className={styles.attachmentImage} onError={() => setFailed(`${resource.url}:${resource.attempt}`)} />
+    ) : <p>{uiText("첨부 이미지를 불러오는 중…")}</p>}
+  </div>;
 }
 
 function TypingPresence({ name }: { name: string }) {

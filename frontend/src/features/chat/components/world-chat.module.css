@@ -665,3 +665,10 @@
   border-color: var(--color-border-interactive);
 }
 .attachmentImage { display: block; max-width: 100%; width: auto; height: auto; max-height: 480px; object-fit: contain; }
+
+/* LOCAL: history controls use the existing pane as the only scroll owner. */
+.messagePane { overflow-anchor: none; }
+.historyButton { min-height: 44px; padding: 0.5rem 0.75rem; color: var(--color-text-secondary); }
+.historyNotice { position: sticky; top: 0; z-index: 1; background: var(--color-surface); }
+
+.attachmentFrame { width: min(100%, 480px); min-height: 180px; aspect-ratio: 4 / 3; }

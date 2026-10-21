@@ -15,7 +15,6 @@ import { type UserRead } from "@/lib/auth/browser-session";
 
 import { createTreePost, listTreePosts } from "@/features/tree/api/tree";
 import { type TreeCategory, type TreeFeedPage, type TreePostDetail, type TreePostSummary } from "@/features/tree/types/tree";
-import { isOfficialOperatorName } from "@/utils/profile-presentation";
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 
 const TABS: { category: TreeCategory; label: string }[] = [
@@ -277,7 +276,7 @@ function TreeComposer({
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 text-[15px] font-bold text-[#667085]">
-            <span className={composerAuthorNameClass(user?.display_name)}>
+            <span className={composerAuthorNameClass()}>
               {user?.display_name ?? uiText("로그인이 필요합니다")}
             </span>
           </div>
@@ -347,7 +346,7 @@ function TreePostRow({ post }: { post: TreePostSummary }) {
               <span className="rounded-full bg-[#fff0ef] px-3 py-1 text-[13px] font-extrabold text-[#ff6b6b]">
                 {uiText(categoryLabel(post.category))}
               </span>
-              <Link href={authorHref} className={treeAuthorNameClass(post.author.display_name)}>
+              <Link href={authorHref} className={treeAuthorNameClass()}>
                 {post.author.display_name}
               </Link>
               <span className="font-medium text-[#667085]">·</span>
@@ -422,12 +421,12 @@ function categoryLabel(category: TreeCategory) {
   return TABS.find((tab) => tab.category === category)?.label ?? category;
 }
 
-function composerAuthorNameClass(name?: string | null) {
-  return `truncate ${isOfficialOperatorName(name) ? "text-[#ff6b6b]" : "text-[#101828]"}`;
+function composerAuthorNameClass() {
+  return "truncate text-text-strong";
 }
 
-function treeAuthorNameClass(name?: string | null) {
-  return `font-extrabold hover:underline ${isOfficialOperatorName(name) ? "text-[#ff6b6b]" : "text-[#101828]"}`;
+function treeAuthorNameClass() {
+  return "font-extrabold hover:underline text-text-strong";
 }
 
 function emptyText(category: TreeCategory, query: string) {

@@ -143,6 +143,34 @@ def test_pdf_parser_rejects_page_count_over_limit() -> None:
         )
 
 
+def test_pdf_parser_extracts_real_text_in_isolated_process() -> None:
+    # A small independent PDF fixture exercises the application reader and
+    # subprocess boundary without using the upgraded reader to create input.
+    text = b"BT /F1 12 Tf 72 720 Td (Angmoo bounded PDF text) Tj ET"
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        b"<< /Length " + str(len(text)).encode() + b" >>\nstream\n" + text + b"\nendstream",
+    ]
+    content = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for number, value in enumerate(objects, 1):
+        offsets.append(len(content))
+        content.extend(f"{number} 0 obj\n".encode() + value + b"\nendobj\n")
+    xref = len(content)
+    content.extend(b"xref\n0 6\n0000000000 65535 f \n")
+    for offset in offsets:
+        content.extend(f"{offset:010d} 00000 n \n".encode())
+    content.extend(f"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+
+    assert character_lore._extract_text(
+        ".pdf", bytes(content), content_type="application/pdf",
+    ) == "Angmoo bounded PDF text"
+
+
 def test_parser_timeout_terminates_the_child() -> None:
     started_at = time.monotonic()
 

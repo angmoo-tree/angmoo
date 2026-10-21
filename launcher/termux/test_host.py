@@ -10,19 +10,51 @@ import sys
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import angmoo
 import processes
 
 
-@unittest.skipUnless(sys.platform == "linux", "requires Linux /proc and flock")
+class HostPlatformTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix", "requires POSIX file mode bits")
+    def test_tool_import_does_not_broaden_adapter_file_permissions(self):
+        import builtins
+        original_import = builtins.__import__
+        def dependency_import(name, *args, **kwargs):
+            if name == "proot_distro.constants":
+                os.umask(0o022)
+                return SimpleNamespace(IS_TERMUX=True)
+            return original_import(name, *args, **kwargs)
+        previous = os.umask(0o077)
+        try:
+            with patch.object(builtins, "__import__", side_effect=dependency_import):
+                self.assertTrue(angmoo.is_termux_host())
+            self.assertEqual(os.umask(0o077), 0o077)
+        finally:
+            os.umask(previous)
+
+    def test_android_python_requires_termux_and_pinned_tools(self):
+        for termux in (True, False):
+            with self.subTest(termux=termux), patch.object(angmoo.sys, "platform", "android"), \
+                 patch.object(angmoo.importlib.metadata, "version", return_value=angmoo.PROOT_VERSION), \
+                 patch.object(angmoo.shutil, "which", return_value="/termux/proot-distro"), \
+                 patch.dict(sys.modules, {"proot_distro.constants": SimpleNamespace(IS_TERMUX=termux)}):
+                if termux:
+                    self.assertEqual(angmoo.tools(), "/termux/proot-distro")
+                else:
+                    with self.assertRaisesRegex(ValueError, "host_not_supported"):
+                        angmoo.tools()
+
+
+@unittest.skipUnless(sys.platform in ("linux", "android"), "requires Linux /proc and flock")
 class HostTests(unittest.TestCase):
     def test_status_does_not_create_home_or_open_database(self):
         with tempfile.TemporaryDirectory() as root:
             missing = Path(root) / "absent"
             result = subprocess.run([sys.executable, angmoo.__file__, "--home", str(missing), "status"], check=True, capture_output=True, text=True)
-            self.assertEqual(json.loads(result.stdout), {"state": "stopped"})
+            self.assertEqual(json.loads(result.stdout), {"state": "stopped", "log_policy": {"requested_mode": "legacy", "effective_mode": "unknown", "source_confirmation": "legacy"}})
             self.assertFalse(missing.exists())
 
     def test_flock_excludes_duplicate_owner_and_private_path_rejects_symlinks(self):
@@ -100,9 +132,10 @@ class HostTests(unittest.TestCase):
             home = angmoo.private_home(Path(directory) / "profile")
             unrelated = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"], start_new_session=True)
             previous_handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
-            def command(_exe, _config, service, _nonce):
+            def command(_exe, _config, service, _nonce, *, log_policy=None):
                 return [sys.executable, "-c", "import time;time.sleep(60)" if service == "backend" else "raise SystemExit(7)"]
             def readiness(process, _url, _source, _nonce, *, backend, **_):
+                self.assertEqual(_["timeout"], angmoo.BACKEND_READINESS_SECONDS if backend else angmoo.FRONTEND_READINESS_SECONDS)
                 if not backend:
                     process.wait(timeout=5)
                     raise ValueError("service_exited_before_ready")
@@ -112,6 +145,11 @@ class HostTests(unittest.TestCase):
                 state = angmoo.read_state(home)
                 self.assertEqual(state["state"], "failed")
                 self.assertEqual(state["error"], "service_exited_before_ready")
+                self.assertEqual(state["primary_failure"]["service"], "frontend")
+                self.assertEqual(state["primary_failure"]["returncode"], 7)
+                self.assertEqual(state["services"]["backend"]["termination_origin"], "sibling_failure")
+                self.assertEqual(state["primary_failure"]["exit_code_scope"], "proot_command")
+                self.assertTrue((home / state["log_reference"] / "session.json").is_file())
                 self.assertFalse(any(processes.session_members(r) for r in state["children"].values()))
                 self.assertIsNone(unrelated.poll())
             finally:

@@ -41,6 +41,7 @@ from app.domains.chat.repository.threads import (
     _lock_world_thread_tuple,
 )
 from app.domains.chat.service import profiles
+from app.domains.chat.service.message_pages import encode_message_cursor, decode_message_cursor, committed_evidence_summary
 from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.world_characters.service.configuration import (
@@ -111,6 +112,34 @@ class ThreadService:
         self._require_world_chat_owner_scope(db, user.id, world_id)
         thread = self._get_owned_world_thread(db, user, world_id, thread_id)
         return self._world_thread_read(db, thread, include_messages=True)
+
+    def get_world_message_page(self, db, user, world_id, thread_id, *, limit=50, before=None, after=None):
+        self._require_world_chat_owner_scope(db, user.id, world_id)
+        thread = self._get_owned_world_thread(db, user, world_id, thread_id)
+        self._world_thread_participants(db, thread)
+        return self._message_page(db, thread, limit=limit, before=before, after=after)
+
+    def _message_page(self, db, thread, *, limit=50, before=None, after=None):
+        if type(limit) is not int or not 1 <= limit <= 100 or (before is not None and after is not None):
+            raise MessageValidationError("chat_message_page_invalid")
+        direction = "before" if before is not None else "after" if after is not None else "latest"
+        cursor = before if before is not None else after
+        boundary = decode_message_cursor(cursor, thread) if cursor is not None else None
+        rows = thread_repository.message_page(db, thread.id, limit=limit, direction=direction, boundary=boundary)
+        has_more = len(rows) > limit
+        rows = rows[:limit]
+        if direction != "after":
+            rows.reverse()
+        oldest = encode_message_cursor(thread, rows[0].created_at, rows[0].id) if rows else None
+        # Empty rooms also have a contiguous boundary: catch up from creation,
+        # rather than taking a new latest page and skipping intervening messages.
+        newest = encode_message_cursor(thread, rows[-1].created_at, rows[-1].id) if rows else encode_message_cursor(thread, thread.created_at, 0)
+        return schemas.WorldChatMessagePageRead(world_id=thread.world_id, thread_id=thread.id,
+            items=[schemas.MessageMessageRead.model_validate(row) for row in rows],
+            evidence_summaries=self._thread_evidence_summaries(db, thread.id, [row.id for row in rows if row.role == "assistant"]),
+            direction=direction, has_more=has_more,
+            next_cursor=(newest if direction == "after" else oldest) if has_more else None,
+            oldest_cursor=oldest, newest_cursor=newest)
 
     def search_preparation_subject(self, db, user, world_id, thread_id):
         """Apply existing owner, role, block and deletion checks without messages."""
@@ -640,7 +669,8 @@ class ThreadService:
         lock_scope: bool = False,
     ) -> schemas.WorldChatThreadRead:
         requester, responding = self._world_thread_participants(db, thread, lock_scope=lock_scope)
-        messages = self._thread_messages(db, thread.id) if include_messages else []
+        page = self._message_page(db, thread) if include_messages else None
+        messages = page.items if page else []
         latest_message = (
             messages[-1] if messages else self._latest_thread_message(db, thread.id)
         )
@@ -670,44 +700,22 @@ class ThreadService:
             created_at=thread.created_at,
             latest_message=latest_message,
             messages=messages,
-            evidence_summaries=self._thread_evidence_summaries(db, thread.id)
-            if include_messages
-            else [],
+            message_page=page,
+            evidence_summaries=page.evidence_summaries if page else [],
         )
 
-    def _thread_evidence_summaries(
-        self, db: Session, thread_id: str
-    ) -> list[schemas.WorldChatEvidenceSummaryRead]:
-        rows = thread_repository.list_committed_response_requests(db, thread_id)
-        summaries: list[schemas.WorldChatEvidenceSummaryRead] = []
+    def _thread_evidence_summaries(self, db, thread_id, assistant_ids):
+        rows = thread_repository.list_committed_response_requests(db, thread_id, assistant_ids)
+        summaries = []
         for row in rows:
             try:
                 metadata = json.loads(row.response_metadata_json)
             except (TypeError, json.JSONDecodeError):
                 continue
-            if not isinstance(metadata, dict):
-                continue
-            capability = metadata.get("evidence_capability")
-            count = metadata.get("public_evidence_count")
-            current_snapshot = metadata.get("_social_context_inspector_v1")
-            current = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
-            if isinstance(current, list) and 0 < len(current) <= 12:
-                count = (count if isinstance(count, int) else 0) + len(current)
-                capability = "degraded" if capability == "degraded" else "available"
-            if (
-                capability not in {"available", "degraded"}
-                or not isinstance(count, int)
-                or count < 1
-            ):
-                continue
-            summaries.append(
-                schemas.WorldChatEvidenceSummaryRead(
-                    request_id=row.request_id,
-                    assistant_message_id=row.committed_assistant_message_id,
-                    capability=capability,
-                    count=count,
-                )
-            )
+            if isinstance(metadata, dict):
+                summary = committed_evidence_summary(row.request_id, row.committed_assistant_message_id, metadata)
+                if summary is not None:
+                    summaries.append(summary)
         return summaries
 
     def _world_chat_entry_role(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/runtime/runtime-config";
 import { AUTH_CHANGED_EVENT, captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 
-export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
+export function useRuntimeMediaResource(sourceUrl: string | null | undefined, enabled = true) {
   const source = sourceUrl?.trim() ?? "";
   const resolvedSource = source ? resolveRuntimeMediaUrl(source) : "";
   const runtime = getRuntimeConfig();
@@ -20,10 +20,14 @@ export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
         resolvedSource.startsWith(`${runtime.apiBaseUrl}/media/`))),
   );
   const [scopeRevision, setScopeRevision] = useState(0);
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => setAttempt(value => value + 1), []);
   const [objectUrl, setObjectUrl] = useState<{
     source: string;
     scopeRevision: number;
-    value: string;
+    value: string | null;
+    failed: boolean;
+    attempt: number;
   } | null>(null);
 
   useEffect(() => {
@@ -37,11 +41,12 @@ export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
   }, []);
 
   useEffect(() => {
-    if (!requiresAuthenticatedFetch || !resolvedSource) return;
+    if (!enabled || !requiresAuthenticatedFetch || !resolvedSource) return;
+    const controller = new AbortController();
     let active = true;
     let createdUrl: string | null = null;
     const scope = captureAuthRequestScope();
-    runtimeFetch(resolvedSource, { cache: "no-store" })
+    runtimeFetch(resolvedSource, { cache: "no-store", signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error(`media_http_${response.status}`);
         return response.blob();
@@ -49,19 +54,23 @@ export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
       .then((blob) => {
         createdUrl = URL.createObjectURL(blob);
         if (active && isCurrentAuthRequestScope(scope)) {
-          setObjectUrl({ source: resolvedSource, scopeRevision, value: createdUrl });
+          setObjectUrl({ source: resolvedSource, scopeRevision, value: createdUrl, failed: false, attempt });
         } else {
           URL.revokeObjectURL(createdUrl);
         }
       })
-      .catch(() => undefined);
+      .catch(() => { if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) setObjectUrl({ source: resolvedSource, scopeRevision, value: null, failed: true, attempt }); });
     return () => {
-      active = false;
+      active = false; controller.abort();
       if (createdUrl) URL.revokeObjectURL(createdUrl);
     };
-  }, [requiresAuthenticatedFetch, resolvedSource, scopeRevision]);
+  }, [requiresAuthenticatedFetch, resolvedSource, scopeRevision, enabled, attempt]);
 
-  if (!resolvedSource) return null;
-  if (!requiresAuthenticatedFetch) return resolvedSource;
-  return objectUrl?.source === resolvedSource && objectUrl.scopeRevision === scopeRevision ? objectUrl.value : null;
+  const current = objectUrl?.source === resolvedSource && objectUrl.scopeRevision === scopeRevision && objectUrl.attempt === attempt ? objectUrl : null;
+  const url = !enabled || !resolvedSource ? null : !requiresAuthenticatedFetch ? resolvedSource : current?.value ?? null;
+  return { url, retry, attempt, error: enabled && Boolean(current?.failed), loading: enabled && Boolean(resolvedSource) && !url && !current?.failed };
+}
+
+export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
+  return useRuntimeMediaResource(sourceUrl).url;
 }

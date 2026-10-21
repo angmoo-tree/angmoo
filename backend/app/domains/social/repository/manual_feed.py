@@ -26,12 +26,18 @@ def _unblocked(world_id: str, viewer_id: str | None):
 def _descendants(world_id: str, post_ids: list[str], viewer_id: str | None = None):
     # UNION (not UNION ALL) terminates malformed cycles; only visible edges
     # within this World are traversed. The root itself is excluded by readers.
-    tree = select(models.Post.id.label("root_id"), models.Post.id.label("post_id")).where(
-        models.Post.id.in_(post_ids), *_visible(world_id), *_unblocked(world_id, viewer_id)
+    # Materialize only visible IDs/edges once, as in World notifications. A
+    # recursive join directly against Post can choose a World-only index and
+    # rescan the World for every descendant. This remains a read-only statement;
+    # every traversed edge must pass the same visibility/block policy.
+    readable = select(models.Post.id.label("post_id"), models.Post.reply_to_post_id).where(
+        *_visible(world_id), *_unblocked(world_id, viewer_id)
+    ).cte("manual_readable_posts").prefix_with("MATERIALIZED")
+    tree = select(readable.c.post_id.label("root_id"), readable.c.post_id).where(
+        readable.c.post_id.in_(post_ids)
     ).cte("visible_descendants", recursive=True)
-    return tree.union(select(tree.c.root_id, models.Post.id).join(
-        tree, models.Post.reply_to_post_id == tree.c.post_id
-    ).where(*_visible(world_id), *_unblocked(world_id, viewer_id)))
+    return tree.union(select(tree.c.root_id, readable.c.post_id).join(
+        tree, readable.c.reply_to_post_id == tree.c.post_id))
 
 
 def reply_counts(db: Session, *, world_id: str, post_ids: list[str], viewer_id: str | None = None) -> dict[str, int]:
@@ -90,28 +96,16 @@ def visible_parent_ids(db: Session, *, world_id: str, post_ids: set[str], viewer
         *_visible(world_id), *_unblocked(world_id, viewer_id))))
 
 
-def list_visible_posts(db: Session, *, world_id: str, limit: int, viewer_id: str | None = None) -> list[models.Post]:
-    visible = select(models.Post.id).where(*_visible(world_id), *_unblocked(world_id, viewer_id), models.Post.reply_to_post_id.is_(None)).cte(
-        "visible_feed_posts", recursive=True
-    )
-    visible = visible.union(select(models.Post.id).join(
-        visible, models.Post.reply_to_post_id == visible.c.id
-    ).where(*_visible(world_id), *_unblocked(world_id, viewer_id)))
-    return list(
-        db.scalars(
-            select(models.Post)
-            .options(selectinload(models.Post.media))
-            .join(visible, models.Post.id == visible.c.id)
-            .where(
-                models.Post.world_id == world_id,
-                models.Post.visibility == "public",
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(max(1, min(limit, 200)))
-        )
-    )
+def list_visible_posts(db: Session, *, world_id: str, limit: int, viewer_id: str | None = None, boundary=None) -> list[models.Post]:
+    # Manual feed pages contain roots only. Descendant counts use the bounded
+    # page's root IDs separately; reply bodies never consume the page limit.
+    post = models.Post
+    query = select(post).options(selectinload(post.media)).where(
+        *_visible(world_id), *_unblocked(world_id, viewer_id), post.reply_to_post_id.is_(None))
+    if boundary is not None:
+        at, post_id = boundary
+        query = query.where(or_(post.created_at < at, (post.created_at == at) & (post.id < post_id)))
+    return list(db.scalars(query.order_by(post.created_at.desc(), post.id.desc()).limit(limit + 1)))
 
 
 def list_visible_replies(

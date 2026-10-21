@@ -47,6 +47,16 @@ def _client(engine):
     return TestClient(app, base_url="http://127.0.0.1:3000")
 
 
+@pytest.mark.parametrize("name", ["admin", "My official diary", "운영자", "삭제한 캐릭터", "fuck"])
+def test_semantic_names_are_allowed_by_world_profile_write(engine, name):
+    with Session(engine) as db:
+        service = management_service(db)
+        service.patch_profile(world_id="config-world-a", world_character_id="config-role-a", user=fixture_owner(db),
+                              data=WorldCharacterProfilePatch(expected_revision=1, display_name=name))
+        assert effective_configuration(db, world_character_id="config-role-a").profile.display_name == name
+        assert effective_configuration(db, world_character_id="config-role-b").profile.display_name == "Bram"
+
+
 def test_t49_t53_dashboard_partition_user_first_read_only_and_no_private_values(engine):
     with Session(engine) as db:
         owner = fixture_owner(db)

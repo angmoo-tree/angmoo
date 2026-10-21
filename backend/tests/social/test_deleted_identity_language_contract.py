@@ -9,7 +9,6 @@ from app.domains.characters.schemas import AgentDeleteCreate
 from app.domains.identity.models import User
 from app.domains.social.models.posts import Post
 from app.domains.social.service.presentation import _post_summary
-from app.policies.name_policy import is_blocked_name
 from app.runtime.characters.management import delete_agent
 from app.runtime.persistence.model_registration import register_models
 
@@ -44,8 +43,3 @@ def test_actual_deletion_and_legacy_named_active_characters_keep_separate_identi
             assert (result.title, result.body) == ("Original A-17", "앵무·둥지 · 原文 · لم أوافق")
         assert db.get(Character, "to-delete").deleted_at is not None
     engine.dispose()
-
-
-@pytest.mark.parametrize("name", ["삭제한 캐릭터", "Deleted character", "삭제한 앵무", "deleted_character"])
-def test_new_placeholder_names_stay_reserved(name):
-    assert is_blocked_name(name)

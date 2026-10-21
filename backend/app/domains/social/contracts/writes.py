@@ -28,6 +28,10 @@ class SocialWriteForbiddenError(SocialWriteError):
     reason_code = "social_write_forbidden"
 
 
+class SocialWriteValidationError(SocialWriteError):
+    reason_code = "social_write_validation"
+
+
 class SocialWriteConflictError(SocialWriteError):
     reason_code = "social_write_conflict"
 

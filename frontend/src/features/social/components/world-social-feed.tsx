@@ -22,6 +22,8 @@ import {
   useState,
 } from "react";
 
+import { useElementVisibility } from "@/hooks/use-element-visibility";
+import { useReadAnchor } from "@/hooks/use-read-anchor";
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 import { worldAppRoute, worldPostDetailRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { Button, IconButton } from "@/components/ui/button";
@@ -29,7 +31,7 @@ import { formatHandle } from "@/utils/profile-presentation";
 import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/form-controls";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { createOwnerManualPost, createOwnerManualReply, getManualSocialFeed, getManualSocialPostThread, SocialWriteApiError } from "@/features/social/api/social-write-client";
+import { createOwnerManualPost, createOwnerManualReply, getManualSocialPostSummary, getManualSocialFeed, getManualSocialPostThread, SocialWriteApiError } from "@/features/social/api/social-write-client";
 import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
 import type { ManualSocialFeedRead, ManualSocialThreadRead, ManualSocialPostRead, SocialOwnerActor } from "@/features/social/types/social-write-contract";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
@@ -200,6 +202,16 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
     status: "loading",
   });
   const [busy, setBusy] = useState(false);
+  const [readBusy, setReadBusy] = useState(false);
+  const [readFailure, setReadFailure] = useState<{kind: "refresh" | "append" | "summary"; id?: string} | null>(null);
+  const reads = useRef(new Set<AbortController>());
+  const pageFlight = useRef<AbortController | null>(null);
+  const summaryVersions = useRef(new Map<string, number>());
+  const mutationReads = useRef(0);
+  const surfaceRef = useRef<HTMLElement>(null);
+  const { remember: rememberAnchor } = useReadAnchor(surfaceRef, "[data-social-post-row]", "data-social-post-row", routeKey);
+  const { ref: moreRef, visible: moreVisible } = useElementVisibility<HTMLDivElement>({ margin: 600 });
+  const moreArmed = useRef(true);
   const [writeError, setWriteError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -233,40 +245,68 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
   );
 
   const loadFeed = useCallback(
-    async (signal?: AbortSignal, offset?: number) => {
-      if (!ownerActor) return;
+    async (signal?: AbortSignal, offset?: number, cursor?: string) => {
+      if (!ownerActor || (pageFlight.current && !pageFlight.current.signal.aborted)) return;
+      const controller = new AbortController();
+      pageFlight.current = controller;
+      reads.current.add(controller);
+      const abort = () => controller.abort();
+      signal?.addEventListener("abort", abort, { once: true });
+      if (signal?.aborted) controller.abort();
+      setReadBusy(true); setReadFailure(null);
+      const mutationAtStart = mutationReads.current;
+      const summariesAtStart = new Map(summaryVersions.current);
       const generation = ++requestGenerationRef.current;
       const authScope = captureAuthRequestScope();
       const readRevision = captureReadRevision();
-      setLoadState({ key: routeKey, status: "loading" });
+      setLoadState(current => current.key === routeKey && current.status === "ready" ? current : { key: routeKey, status: "loading" });
       try {
         const result = postId
           ? await getManualSocialPostThread(worldId, postId, {
               ownerWorldCharacterId: ownerActor.world_character_id,
-              signal,
+              signal: controller.signal,
               offset,
             })
           : await getManualSocialFeed(worldId, {
               ownerWorldCharacterId: ownerActor.world_character_id,
-              signal,
+              signal: controller.signal, cursor,
             });
-        if (generation !== requestGenerationRef.current || signal?.aborted || !isCurrentAuthRequestScope(authScope)) return;
+        if (generation !== requestGenerationRef.current || controller.signal.aborted || !isCurrentAuthRequestScope(authScope)) return;
         const feed = "selected_post" in result
           ? { ...result, selected_post: reconcilePost(result.selected_post, readRevision), replies: result.replies.map(post => reconcilePost(post, readRevision)) }
           : { ...result, items: result.items.map(post => reconcilePost(post, readRevision)) };
-        setLoadState({ key: routeKey, status: "ready", feed });
+        rememberAnchor();
+        setLoadState(current => {
+          if (current.key === routeKey && current.status === "ready" && !("selected_post" in current.feed) && !("selected_post" in feed)) {
+            const incoming = new Map(feed.items.map(p => [p.id, p]));
+            if (cursor) {
+              const merged = current.feed.items.map(p => summaryVersions.current.get(p.id) !== summariesAtStart.get(p.id) ? p : incoming.get(p.id) ?? p);
+              const ids = new Set(merged.map(p => p.id));
+              return { key: routeKey, status: "ready", feed: { ...feed, items: [...merged, ...feed.items.filter(p => !ids.has(p.id))] } };
+            }
+            // A successful local write/summary arriving during refresh wins.
+            if (mutationReads.current !== mutationAtStart) return current;
+          }
+          return { key: routeKey, status: "ready", feed };
+        });
       } catch (reason: unknown) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
-        if (generation !== requestGenerationRef.current || signal?.aborted || !isCurrentAuthRequestScope(authScope)) return;
-        setLoadState({ key: routeKey, status: "error", failure: feedFailure(reason) });
+        if (generation !== requestGenerationRef.current || controller.signal.aborted || !isCurrentAuthRequestScope(authScope)) return;
+        setReadFailure({ kind: cursor ? "append" : "refresh" });
+        setLoadState(current => current.key === routeKey && current.status === "ready" ? current : { key: routeKey, status: "error", failure: feedFailure(reason) });
+      } finally {
+        signal?.removeEventListener("abort", abort);
+        reads.current.delete(controller); if (pageFlight.current === controller) pageFlight.current = null;
+        if (generation === requestGenerationRef.current) setReadBusy(false);
       }
     },
-    [ownerActor, postId, routeKey, worldId, captureReadRevision, reconcilePost],
+    [ownerActor, postId, routeKey, worldId, captureReadRevision, reconcilePost, rememberAnchor],
   );
 
   useEffect(() => {
     if (!ownerActor) return;
     const controller = new AbortController();
+    const ownedReads = reads.current, ownedVersions = summaryVersions.current;
     const startTimer = window.setTimeout(() => {
       void loadFeed(controller.signal);
     }, 0);
@@ -274,6 +314,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
       window.clearTimeout(startTimer);
       requestGenerationRef.current += 1;
       controller.abort();
+      for (const read of ownedReads) read.abort();
+      ownedReads.clear(); ownedVersions.clear();
     };
   }, [loadFeed, ownerActor]);
 
@@ -286,7 +328,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
 
   useMobilePullToRefresh({
     enabled: Boolean(ownerActor),
-    refreshing: currentState.status === "loading",
+    refreshing: readBusy,
     onRefresh: loadFeed,
   });
 
@@ -298,13 +340,46 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
     () => items.filter((item) => item.reply_to_post_id === null),
     [items],
   );
-  const detailRoot = postId && currentState.status === "ready" && "selected_post" in currentState.feed ? currentState.feed.selected_post : null;
+  const detailPage = postId && currentState.status === "ready" && "selected_post" in currentState.feed ? currentState.feed : null;
+  const detailRoot = detailPage?.selected_post ?? null;
   const detailReplies = detailRoot ? items.slice(1) : [];
 
   useEffect(() => {
     if (!postId || currentState.status !== "ready") return;
     document.getElementById(`world-reply-${postId}`)?.scrollIntoView({ block: "center" });
   }, [postId, currentState]);
+
+  const page = currentState.status === "ready" && !("selected_post" in currentState.feed) ? currentState.feed : null;
+  useEffect(() => {
+    if (!moreVisible) { moreArmed.current = true; return; }
+    if (moreArmed.current && page?.has_more && !readBusy && !readFailure) {
+      moreArmed.current = false;
+      void loadFeed(undefined, undefined, page.next_cursor!);
+    }
+  }, [moreVisible, page, readBusy, readFailure, loadFeed]);
+
+  async function refreshPost(id: string) {
+    if (!ownerActor) return;
+    if (postId) { await loadFeed(undefined, currentState.status === "ready" && "selected_post" in currentState.feed ? currentState.feed.page_offset : 0); return; }
+    const controller = new AbortController(), auth = captureAuthRequestScope();
+    reads.current.add(controller);
+    const version = (summaryVersions.current.get(id) ?? 0) + 1;
+    summaryVersions.current.set(id, version);
+    const revision = captureReadRevision();
+    try {
+      const result = reconcilePost(await getManualSocialPostSummary(worldId, id, { signal: controller.signal, ownerWorldCharacterId: ownerActor.world_character_id }), revision);
+      if (controller.signal.aborted || !isCurrentAuthRequestScope(auth) || summaryVersions.current.get(id) !== version) return;
+      ++mutationReads.current; rememberAnchor();
+      setLoadState(current => {
+        if (current.key !== routeKey || current.status !== "ready" || "selected_post" in current.feed) return current;
+        const exists = current.feed.items.some(p => p.id === id);
+        return { ...current, feed: { ...current.feed, items: exists ? current.feed.items.map(p => p.id === id ? result : p) : [result, ...current.feed.items] } };
+      });
+      setReadFailure(null);
+    } catch {
+      if (!controller.signal.aborted && isCurrentAuthRequestScope(auth)) setReadFailure({ kind: "summary", id });
+    } finally { reads.current.delete(controller); }
+  }
 
   async function submitPost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -345,7 +420,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
           ? uiText("같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요.")
           : uiText("게시글을 저장했습니다."),
       );
-      await loadFeed();
+      await refreshPost(result.post.reply_to_post_id ?? result.post.id);
     } catch (reason) {
       if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setWriteError(writeErrorMessage(reason));
     } finally {
@@ -385,7 +460,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
           ? uiText("같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요.")
           : uiText("답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요."),
       );
-      await loadFeed();
+      await refreshPost(result.post.reply_to_post_id ?? result.post.id);
       window.requestAnimationFrame(() => replyTextareaRef.current?.focus());
     } catch (reason) {
       if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setWriteError(writeErrorMessage(reason));
@@ -418,6 +493,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
   return (
     <section
       className={styles.manualFeed}
+      ref={surfaceRef}
       data-world-social-surface={postId ? "detail" : "feed"}
     >
       {!postId ? <div className={styles.feedHeader}>{feedHeader}</div> : (
@@ -431,7 +507,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
         </div>
         </div>
         <div className={styles.headerActions}>
-          <IconButton label={uiText("새로고침")} onClick={() => void loadFeed()} disabled={currentState.status === "loading"}>
+          <IconButton label={uiText("새로고침")} onClick={() => void loadFeed()} disabled={readBusy}>
             <RefreshCw aria-hidden="true" size={22} />
           </IconButton>
         </div>
@@ -499,6 +575,10 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
 
       {notice ? <Toast tone="success">{notice}</Toast> : null}
       {writeError ? <InlineError>{writeError}</InlineError> : null}
+      {readFailure && currentState.status === "ready" ? <InlineError>
+        {uiText("조회하지 못했습니다. 저장된 내용은 유지됩니다.")}
+        <Button variant="ghost" onClick={() => readFailure.kind === "summary" ? void refreshPost(readFailure.id!) : void loadFeed(undefined, undefined, readFailure.kind === "append" ? page?.next_cursor ?? undefined : undefined)}>{uiText("조회 다시 시도")}</Button>
+      </InlineError> : null}
       {reactions.error ? <InlineError>{uiText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</InlineError> : null}
 
       {currentState.status === "loading" ? <WorldFeedLoading /> : null}
@@ -529,19 +609,23 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
                 ? worldCharacterProfileRoute(worldId, post.author_world_character_id)
                 : undefined;
             return (
-              <div key={post.id}><SocialPostRow
+              <VisibleFeedItem key={post.id} status={ImageStatus} worldId={worldId} post={post} onCompleted={() => void refreshPost(post.id)}><SocialPostRow
+                deferMedia
                 actions={aggregateManualPostActions(post, detailHref, reactions.likeAction(post).disabled)}
                 onAction={() => void reactions.setReaction(post)}
                 authorHref={authorHref}
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post, formatDate)}
-              />{ImageStatus && (!post.media?.length || post.media.some(item => item.source_kind === "generated")) ? <ImageStatus worldId={worldId} postId={post.id} hasResult={Boolean(post.media?.length)} onCompleted={() => void loadFeed()} /> : null}</div>
+              /></VisibleFeedItem>
             );
           })}
         </div>
       ) : null}
 
+      {!postId && page ? <div ref={moreRef}>
+        {page.has_more ? <Button variant="ghost" disabled={readBusy} onClick={() => void loadFeed(undefined, undefined, page.next_cursor!)}>{uiText(readBusy ? "게시글을 불러오는 중…" : "게시글 더 보기")}</Button> : page.items.length ? <p>{uiText("모든 게시글을 확인했습니다.")}</p> : null}
+      </div> : null}
       {currentState.status === "ready" && detailRoot ? (
         <div className={styles.detailSurface}>
           <SocialPostRow
@@ -562,7 +646,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
             post={presentManualPost(detailRoot, formatDate)}
             variant="detail"
           />
-          {ImageStatus && (!detailRoot.media?.length || detailRoot.media.some(item => item.source_kind === "generated")) ? <ImageStatus worldId={worldId} postId={detailRoot.id} hasResult={Boolean(detailRoot.media?.length)} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
+          {ImageStatus && (!detailRoot.media?.length || detailRoot.media.some(item => item.source_kind === "generated")) ? <ImageStatus worldId={worldId} postId={detailRoot.id} hasResult={Boolean(detailRoot.media?.length)} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" && "selected_post" in currentState.feed ? detailPage?.page_offset ?? 0 : 0)} /> : null}
           {detailRoot.reply_to_post_id && currentState.feed.schema_version === "owner-manual-social-thread-v2" ? (
             currentState.feed.parent?.state === "available" ? <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, detailRoot.reply_to_post_id)}>{uiText("부모 게시글 보기")}</Link> : <p className={styles.parentReply}>{uiText("부모 게시글을 볼 수 없습니다.")}</p>
           ) : null}
@@ -603,11 +687,11 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, rende
               <p className={styles.noReplies}>{uiText("아직 공개된 답글이 없어요.")}</p>
             )}
             <div className={styles.threadPages}>
-              {(currentState.feed.page_offset ?? 0) > 0 ? (
-                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>{uiText("이전 답글")}</Button>
+              {(detailPage?.page_offset ?? 0) > 0 ? (
+                <Button onClick={() => void loadFeed(undefined, Math.max(0, (detailPage?.page_offset ?? 0) - 50))}>{uiText("이전 답글")}</Button>
               ) : null}
-              {currentState.feed.next_offset != null ? (
-                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>{uiText("다음 답글")}</Button>
+              {detailPage?.next_offset != null ? (
+                <Button onClick={() => void loadFeed(undefined, detailPage?.next_offset ?? undefined)}>{uiText("다음 답글")}</Button>
               ) : null}
             </div>
           </section>
@@ -678,4 +762,13 @@ function WorldFeedFailure({
       }
     />
   );
+}
+
+// LOCAL: visibility owns only the status reader, never the server generation job.
+function VisibleFeedItem({ children, status: Status, worldId, post, onCompleted }: {
+  children: ReactNode; status: Props["imageStatus"]; worldId: string; post: ManualSocialPostRead; onCompleted: () => void;
+}) {
+  const { ref, visible } = useElementVisibility<HTMLDivElement>({ margin: 600 });
+  return <div ref={ref}>{children}{visible && Status && (!post.media?.length || post.media.some(m => m.source_kind === "generated")) ?
+    <Status worldId={worldId} postId={post.id} hasResult={Boolean(post.media?.length)} onCompleted={onCompleted} /> : null}</div>;
 }

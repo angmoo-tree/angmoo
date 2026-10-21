@@ -50,6 +50,7 @@ class Post(Base):
         ),
         UniqueConstraint("id", "world_id", name="uq_posts_id_world"),
         Index("ix_posts_world_created_at", "world_id", "created_at"),
+        Index("ix_posts_world_root_page", "world_id", "reply_to_post_id", "visibility", "deleted_at", "report_hidden_at", "created_at", "id"),
         Index("ix_posts_world_author_created", "world_id", "author_world_character_id", "created_at", "id"),
     )
 

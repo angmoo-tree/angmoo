@@ -12,7 +12,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from launcher.termux.payload import digest_file, inspect_oci, proot_archive, validate_manifest, verify_archive
+from launcher.termux.payload import digest_file, inspect_oci, proot_archive, validate_manifest, validate_candidate_manifest, verify_archive
 from scripts.release.github import GitHub
 from scripts.release.publish import synchronize
 from scripts.release.workflow_policy import validate as validate_workflow
@@ -20,6 +20,30 @@ from scripts.release.windows_receipt import aggregate
 from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors, partition_versions, SCHEMA
 
 SOURCE = "a" * 40
+
+
+def test_local_arm64_pair_does_not_relax_public_release_contract():
+    digest = "sha256:" + "a" * 64
+    manifest = {"schema": "angmoo-release-candidate.v1", "repository": "angmoo-tree/angmoo",
+                "source_sha": SOURCE, "source_tree": SOURCE, "clean": True,
+                "version": "0.1.0", "tag": "release-v0.1.0", "images": []}
+    for service in ("backend", "frontend"):
+        manifest["images"].append({"service": service, "platform": "linux/arm64", "source_sha": SOURCE,
+            "version": "0.1.0", "repository": f"ghcr.io/angmoo-tree/angmoo-{service}",
+            "manifest_digest": digest, "config_digest": digest, "archive_digest": digest,
+            "layers": [digest], "diff_ids": [digest], "attestation_manifests": [digest],
+            "archive": f"{service}.oci.tar", "archive_size": 100})
+    validate_candidate_manifest(manifest)
+    with pytest.raises(ValueError, match="manifest_platform_missing"):
+        validate_manifest(manifest)
+    bad = copy.deepcopy(manifest)
+    bad["images"].pop()
+    with pytest.raises(ValueError, match="candidate_arm64_pair_required"):
+        validate_candidate_manifest(bad)
+    bad = copy.deepcopy(manifest)
+    bad["images"][0]["source_sha"] = "b" * 40
+    with pytest.raises(ValueError, match="manifest_pair_mismatch"):
+        validate_candidate_manifest(bad)
 
 
 @pytest.mark.parametrize("exit_code", [0, 1])
@@ -169,7 +193,7 @@ def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_
     root = tmp_path / "source"
     tools = root / "launcher/termux"
     tools.mkdir(parents=True)
-    names = ("angmoo.py", "payload.py", "processes.py", "requirements.txt", "setup.sh")
+    names = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
     for name in names:
         (tools / name).write_bytes(("synthetic " + name).encode())
     (root / "LICENSE").write_text("synthetic license")
@@ -183,6 +207,24 @@ def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_
     with zipfile.ZipFile(first) as archive:
         assert set(archive.namelist()) == {*names, "LICENSE"}
         assert archive.read("setup.sh") == b"synthetic setup.sh"
+
+
+def test_termux_installer_is_bound_to_exact_tools_and_version(tmp_path):
+    from scripts.release.prepare import package_termux_installer, package_termux_tools
+    tools = tmp_path / "angmoo-termux-tools.zip"
+    package_termux_tools(tools)
+    installer = tmp_path / "install-termux.py"
+    package_termux_installer(installer, tools, "0.1.0")
+    first = installer.read_bytes()
+    namespace = {"__name__": "packaged_installer"}
+    exec(compile(first, str(installer), "exec"), namespace)
+    assert namespace["RELEASE"] == "0.1.0"
+    assert namespace["TOOLS_SHA256"] == digest_file(tools)[7:]
+    assert int(namespace["TOOLS_SIZE"]) == tools.stat().st_size
+    package_termux_installer(installer, tools, "0.1.0")
+    assert installer.read_bytes() == first
+    with pytest.raises(ValueError, match="termux_installer_version_invalid"):
+        package_termux_installer(installer, tools, "../main")
 
 
 def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target=None, nested=False):

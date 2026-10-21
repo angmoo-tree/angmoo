@@ -324,3 +324,6 @@
   gap: var(--spacing-control);
   padding: var(--spacing-phone);
 }
+
+/* LOCAL: JS preserves the visible post across in-place updates. */
+.manualFeed { overflow-anchor: none; }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import pytest
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -121,8 +122,9 @@ def test_saved_character_creation_allows_more_than_the_old_per_mode_cap() -> Non
         assert all(setting.auto_enabled is False for setting in activity_settings)
 
 
+@pytest.mark.parametrize("name,handle", [("llm bird 3", "llm_bird_3"), ("운영자", "admin"), ("삭제한 캐릭터", "official"), ("fuck", "fuck")])
 def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
-    monkeypatch,
+    monkeypatch, name, handle,
 ) -> None:
     engine = create_engine("sqlite:///:memory:")
     from app.runtime.persistence.model_registration import register_models
@@ -169,8 +171,8 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
             draft.id,
             schemas.AgentCreationDraftUpdate(
                 revision=draft.revision,
-                name="llm bird 3",
-                handle="llm_bird_3",
+                name=name,
+                handle=handle,
                 one_liner="fourth LLM bird",
                 personality="calm",
                 speech_style="plain",
@@ -187,7 +189,8 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
             schemas.AgentCreationDraftComplete(revision=edited.revision),
         )
 
-        assert completed.character.handle == "llm_bird_3"
+        assert completed.character.handle == handle
+        assert completed.character.name == name
         assert _count_by_mode(db, "llm") == 4
         assert db.get(models.AgentCreationDraft, draft.id).status == "completed"
 

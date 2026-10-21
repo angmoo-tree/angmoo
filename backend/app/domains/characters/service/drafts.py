@@ -22,7 +22,6 @@ from app.domains.characters.service.creator import (
     _ensure_not_in_cooldown, _parse_json_object, _safe_payload_text,
     _build_persona_enhance_prompt,
 )
-from app.policies import name_policy
 
 logger = logging.getLogger(__name__)
 
@@ -110,8 +109,6 @@ def update_draft(
                 if value is None or not str(value).strip():
                     draft.handle = None
                     continue
-                if name_policy.is_blocked_name(str(value)):
-                    raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
                 try:
                     draft.handle = character_profile.validate_character_handle_for_create(
                         db, str(value)

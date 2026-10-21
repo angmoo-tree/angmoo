@@ -1000,3 +1000,29 @@ Memory feature는 자기 evidence DTO와 presentation utility에서 사건/출�
 catalog를 함께 유지하며 `retrieval_timeout`은 기억 검색 시간초과로 안내한다.
 새 조회/쓰기 API, polling 또는 전역 캐시는 추가하지 않는다.
 검증: [검색 최적화 관련 로컬 결과](../docs/verification/recall-validation-optimization-20261017.md).
+
+## Bounded World reads and media lifetime (2026-10-22, LOCAL)
+
+Chat's useWorldChatHistory owns one message collection, contiguous read cursors, request
+cancellation and reading intent. A committed response upserts its two stored messages and
+evidence summary; it does not advance the contiguous catch-up cursor. Focus/online/visibility
+events read at most two after-pages each, with explicit continuation. Before-pages prepend
+using the reader's position at response time. Resize/IME/image changes respect current bottom
+intent. A failed read preserves the draft and never retries an accepted write.
+
+World Feed keeps 30-root pages mounted through append/refresh failures. Refresh replaces its
+page chain only after success. Confirmed writes refresh their root summary, with per-ID sequence
+fences and reaction revisions. A confirmed reaction publishes while the auth/runtime scope
+is still current even if the initiating tab changed; consumers enforce World/actor identity.
+Offscreen image-generation polling is detached without canceling the server job.
+
+useElementVisibility uses the actual scroll viewport and a callback ref so controls mounted
+after the first response are observed. useRuntimeMediaResource starts the authenticated fetch
+near the viewport, aborts on source/auth/runtime change and revokes owned blob URLs. The
+existing string wrapper preserves avatar/composer consumers. Chat and Feed reserve image
+space and expose translated retries. No new product authorization enters these generic hooks.
+The same feature components serve production Next and static/Tauri.
+
+The server-only service-log policy gates normal proxy cancellation summaries for Termux;
+failures remain warnings. It never changes request transport, authorization or cancellation.
+Termux fixed terminal instructions are English; web UI and public guides retain KO/EN.

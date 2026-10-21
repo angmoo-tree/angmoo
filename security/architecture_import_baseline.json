@@ -1,7 +1,7 @@
 {
-  "edge_count": 6925,
-  "external_import_count": 4679,
-  "module_count": 1594,
+  "edge_count": 6933,
+  "external_import_count": 4700,
+  "module_count": 1600,
   "modules": [
     {
       "external_imports": [],
@@ -845,7 +845,6 @@
         "contextlib",
         "contextvars",
         "dataclasses",
-        "logging",
         "sqlalchemy",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
@@ -1565,8 +1564,7 @@
         "app.domains.characters.service.creator",
         "app.domains.characters.service.persona",
         "app.domains.characters.service.profile",
-        "app.integrations.media.files",
-        "app.policies.name_policy"
+        "app.integrations.media.files"
       ],
       "module": "app.domains.characters.service.drafts",
       "path": "backend/app/domains/characters/service/drafts.py",
@@ -1778,8 +1776,7 @@
         "app.domains.characters.service.persona",
         "app.domains.characters.service.profile",
         "app.domains.characters.service.promotion",
-        "app.domains.identity.service.demo_access",
-        "app.policies.name_policy"
+        "app.domains.identity.service.demo_access"
       ],
       "module": "app.domains.characters.service.mutations",
       "path": "backend/app/domains/characters/service/mutations.py",
@@ -3217,6 +3214,7 @@
         "app.domains.chat.schemas",
         "app.domains.chat.service.db_observation",
         "app.domains.chat.service.diagnostic_capture",
+        "app.domains.chat.service.message_pages",
         "app.domains.chat.service.profiles",
         "app.domains.chat.service.response_workflow",
         "app.domains.chat.service.settings",
@@ -3283,6 +3281,22 @@
       ],
       "module": "app.domains.chat.service.hybrid_canonical",
       "path": "backend/app/domains/chat/service/hybrid_canonical.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "re"
+      ],
+      "imports": [
+        "app.domains.chat.exceptions",
+        "app.domains.chat.schemas",
+        "app.pagination"
+      ],
+      "module": "app.domains.chat.service.message_pages",
+      "path": "backend/app/domains/chat/service/message_pages.py",
       "wildcard_imports": []
     },
     {
@@ -3556,6 +3570,7 @@
         "app.domains.chat.policies",
         "app.domains.chat.repository.threads",
         "app.domains.chat.schemas",
+        "app.domains.chat.service.message_pages",
         "app.domains.chat.service.profiles",
         "app.domains.chat.service.settings",
         "app.domains.identity.service.environment",
@@ -4036,8 +4051,7 @@
         "app.domains.identity.service.demo_access",
         "app.domains.identity.service.external_verification",
         "app.domains.identity.service.login_throttle",
-        "app.integrations.google_identity",
-        "app.policies.name_policy"
+        "app.integrations.google_identity"
       ],
       "module": "app.domains.identity.service.auth",
       "path": "backend/app/domains/identity/service/auth.py",
@@ -10020,6 +10034,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -11725,6 +11740,7 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
         "typing"
       ],
       "imports": [
@@ -11969,7 +11985,8 @@
     },
     {
       "external_imports": [
-        "__future__"
+        "__future__",
+        "datetime"
       ],
       "imports": [
         "app.domains.runtime.contracts.lease",
@@ -13513,6 +13530,20 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "json",
+        "re"
+      ],
+      "imports": [
+        "app.domains.social.contracts.writes",
+        "app.pagination"
+      ],
+      "module": "app.domains.social.service.feed_pages",
+      "path": "backend/app/domains/social/service/feed_pages.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "json"
       ],
       "imports": [
@@ -13781,6 +13812,7 @@
         "app.domains.social.repository.event_evidence",
         "app.domains.social.repository.manual_feed",
         "app.domains.social.schemas.manual",
+        "app.domains.social.service.feed_pages",
         "app.domains.social.service.post_attachments"
       ],
       "module": "app.domains.social.service.manual_feed",
@@ -15320,8 +15352,7 @@
         "app.domains.world_characters.schemas.identity",
         "app.domains.world_characters.schemas.management",
         "app.domains.world_characters.service.configuration",
-        "app.domains.worlds.service",
-        "app.policies.name_policy"
+        "app.domains.worlds.service"
       ],
       "module": "app.domains.world_characters.service.management",
       "path": "backend/app/domains/world_characters/service/management.py",
@@ -15383,8 +15414,7 @@
         "app.domains.world_characters.service.configuration",
         "app.domains.worlds.service",
         "app.domains.worlds.service.character_entry",
-        "app.integrations.media.files",
-        "app.policies.name_policy"
+        "app.integrations.media.files"
       ],
       "module": "app.domains.world_characters.service.owner_identity",
       "path": "backend/app/domains/world_characters/service/owner_identity.py",
@@ -17437,20 +17467,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "csv",
-        "functools",
-        "pathlib",
-        "re",
-        "unicodedata"
-      ],
-      "imports": [],
-      "module": "app.policies.name_policy",
-      "path": "backend/app/policies/name_policy.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.providers.contracts",
@@ -18626,7 +18642,6 @@
         "app.integrations.pollinations_image",
         "app.integrations.provider_http",
         "app.integrations.replicate_image",
-        "app.policies.name_policy",
         "app.runtime.characters.management",
         "app.runtime.characters.registration",
         "app.runtime.extensions.resident_adapter",
@@ -18751,7 +18766,6 @@
         "app.integrations.direct_llm",
         "app.integrations.media.files",
         "app.integrations.media.images",
-        "app.policies.name_policy",
         "app.runtime.creator_privacy",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.local_bot.keys",
@@ -18803,7 +18817,6 @@
         "app.domains.worlds.service.creator",
         "app.domains.worlds.service.default_space",
         "app.integrations.media.files",
-        "app.policies.name_policy",
         "app.runtime.characters.management",
         "app.runtime.world_characters.creation_configuration"
       ],
@@ -19892,7 +19905,9 @@
         "pathlib",
         "sys"
       ],
-      "imports": [],
+      "imports": [
+        "app.runtime.service_log_policy"
+      ],
       "module": "app.runtime.logging_config",
       "path": "backend/app/runtime/logging_config.py",
       "wildcard_imports": []
@@ -20535,6 +20550,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.memory.preparation_budget",
+      "path": "backend/app/runtime/memory/preparation_budget.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "datetime"
       ],
@@ -20624,6 +20646,7 @@
         "collections",
         "concurrent.futures",
         "dataclasses",
+        "logging",
         "multiprocessing",
         "pickle",
         "time",
@@ -20632,6 +20655,7 @@
       "imports": [
         "app.contracts.retrieval_observation",
         "app.contracts.search_diagnostics",
+        "app.runtime.memory.preparation_budget",
         "app.runtime.memory.search_worker_child",
         "app.runtime.memory.search_worker_progress",
         "app.runtime.memory.worker_diagnostics"
@@ -21689,6 +21713,18 @@
     },
     {
       "external_imports": [
+        "json",
+        "pathlib"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.paged_reads_v41",
+      "path": "backend/app/runtime/migrations/sqlite_versions/paged_reads_v41.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "dataclasses",
@@ -21709,6 +21745,7 @@
         "app.runtime.migrations.sqlite_versions.images_v26",
         "app.runtime.migrations.sqlite_versions.local_client_v40",
         "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
+        "app.runtime.migrations.sqlite_versions.paged_reads_v41",
         "app.runtime.migrations.sqlite_versions.routine_state_v24",
         "app.runtime.migrations.sqlite_versions.situation_recovery_v32",
         "app.runtime.migrations.sqlite_versions.situation_result_binding_v36",
@@ -22149,6 +22186,21 @@
     },
     {
       "external_imports": [
+        "contextlib",
+        "contextvars",
+        "dataclasses",
+        "threading",
+        "typing"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency"
+      ],
+      "module": "app.runtime.persistence.lease_operation",
+      "path": "backend/app/runtime/persistence/lease_operation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy"
       ],
       "imports": [
@@ -22348,7 +22400,8 @@
         "app.domains.identity.constants",
         "app.domains.identity.models",
         "app.domains.runtime.policies.lease",
-        "app.domains.runtime.service.sqlite_lease"
+        "app.domains.runtime.service.sqlite_lease",
+        "app.runtime.persistence.lease_operation"
       ],
       "module": "app.runtime.persistence.sqlite_scheduler_lease",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
@@ -23122,6 +23175,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.resident.lease_errors",
+      "path": "backend/app/runtime/resident/lease_errors.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "asyncio",
@@ -23129,11 +23189,13 @@
         "logging",
         "threading",
         "time",
-        "typing"
+        "typing",
+        "uuid"
       ],
       "imports": [
         "app.core.sqlite_concurrency",
-        "app.exceptions"
+        "app.exceptions",
+        "app.runtime.persistence.lease_operation"
       ],
       "module": "app.runtime.resident.lease_executor",
       "path": "backend/app/runtime/resident/lease_executor.py",
@@ -23208,6 +23270,7 @@
         "app.runtime.persistence.scheduler_lease",
         "app.runtime.persistence.sqlite_scheduler_lease",
         "app.runtime.resident.execution",
+        "app.runtime.resident.lease_errors",
         "app.runtime.resident.lease_executor",
         "app.runtime.routines.lifecycle_references"
       ],
@@ -23738,6 +23801,23 @@
       ],
       "module": "app.runtime.search.sqlite_fts5",
       "path": "backend/app/runtime/search/sqlite_fts5.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "logging",
+        "math",
+        "os",
+        "re",
+        "sys",
+        "time"
+      ],
+      "imports": [],
+      "module": "app.runtime.service_log_policy",
+      "path": "backend/app/runtime/service_log_policy.py",
       "wildcard_imports": []
     },
     {

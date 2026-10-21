@@ -65,9 +65,14 @@ def test_sqlite_manifests_match_frozen_v1_and_latest_model_contract(
     assert all(
         contract.source_version == source_version
         and contract.target_version == source_version + 1
-        and contract.mutable_identity_tables
         for source_version, contract in MIGRATION_CONTRACTS.items()
     )
+    # v40 -> v41 changes indexes only. Allowing identity-table mutation there
+    # would weaken preservation; every other existing step owns a data delta.
+    assert {
+        version for version, contract in MIGRATION_CONTRACTS.items()
+        if not contract.mutable_identity_tables
+    } == {40}
 
 
 def test_ladybug_manifest_matches_adapter_command_and_query_contract() -> None:

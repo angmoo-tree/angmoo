@@ -83,7 +83,6 @@ from app.config import settings
 from app.core.redaction import redact_exact_secret_text
 from app.credentials import CredentialResolutionError, CredentialResolver
 
-from app.policies import name_policy
 from app.runtime.characters import management as agent_service
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service

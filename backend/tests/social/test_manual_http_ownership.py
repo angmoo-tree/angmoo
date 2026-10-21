@@ -41,6 +41,7 @@ def test_manual_http_factories_share_request_session_without_constructor_io():
             assert names == [
                 "read_world_character_social_activity",
                 "read_manual_social_feed",
+                "read_manual_social_summary",
                 "read_manual_social_post_thread",
                 "write_owner_post",
                 "set_owner_post_like",

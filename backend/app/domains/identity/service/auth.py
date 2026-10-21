@@ -15,7 +15,6 @@ from app.core import security
 from app.config import settings
 
 
-from app.policies import name_policy
 from app.domains.identity.service import (
     demo_access as demo_lock,
     external_verification as external_auth_verification,
@@ -27,9 +26,6 @@ from app.domains.identity.constants import (
     DELETED_USER_DISPLAY_NAME,
     DELETED_CHARACTER_NAME,
     DELETED_CHARACTER_PLACEHOLDER,
-    OFFICIAL_OPERATOR_DISPLAY_NAME,
-    OFFICIAL_OPERATOR_DISPLAY_NAME_KEY,
-    LEGACY_ADMIN_DISPLAY_NAME_KEY,
     PRIVACY_POLICY_VERSION,
     TERMS_VERSION,
     GOOGLE_SIGNUP_PENDING_VERSION,
@@ -52,8 +48,6 @@ from app.domains.identity.exceptions import (
     PolicyAgreementRequiredError,
     DisplayNameAlreadyExistsError,
     DisplayNameInvalidError,
-    ReservedDisplayNameError,
-    DisplayNameBlockedError,
     DisplayNameCooldownError,
     AccountDeletionConfirmationError,
     AccountDeletionBusyError,
@@ -125,7 +119,6 @@ def create_user(db: Session, data: schemas.SignupCreate) -> IssuedAuthSession:
     display_name_normalized = normalize_display_name_key(display_name)
     if not display_name:
         raise DisplayNameInvalidError("Display name is required")
-    _ensure_display_name_allowed(display_name, display_name_normalized)
     _ensure_display_name_available(db, display_name_normalized)
 
     now = _utcnow()
@@ -300,7 +293,6 @@ def complete_google_signup(
     display_name_normalized = normalize_display_name_key(display_name)
     if not display_name:
         raise DisplayNameInvalidError("Display name is required")
-    _ensure_display_name_allowed(display_name, display_name_normalized)
     _ensure_display_name_available(db, display_name_normalized)
 
     now = _utcnow()
@@ -399,7 +391,6 @@ def update_user_display_name(
         raise DisplayNameInvalidError("Display name is required")
     if _is_same_display_name(user, display_name, display_name_normalized):
         return schemas.UserRead.model_validate(user)
-    _ensure_display_name_allowed(display_name, display_name_normalized, user=user)
     _ensure_display_name_change_allowed(user)
     _ensure_display_name_available(db, display_name_normalized, exclude_user_id=user.id)
 
@@ -767,34 +758,10 @@ def _ensure_display_name_available(
         raise DisplayNameAlreadyExistsError(display_name_normalized)
 
 
-def _ensure_display_name_allowed(
-    display_name: str,
-    display_name_normalized: str,
-    *,
-    user: models.User | None = None,
-) -> None:
-    if display_name_normalized == OFFICIAL_OPERATOR_DISPLAY_NAME_KEY:
-        if (
-            user is not None
-            and _is_official_operator_user(user)
-            and display_name == OFFICIAL_OPERATOR_DISPLAY_NAME
-        ):
-            return
-        raise ReservedDisplayNameError(display_name_normalized)
-
-    if display_name_normalized == LEGACY_ADMIN_DISPLAY_NAME_KEY:
-        raise ReservedDisplayNameError(display_name_normalized)
-
-    _ensure_display_name_not_blocked(display_name)
 
 
-def _is_official_operator_user(user: models.User) -> bool:
-    return user.id in settings.official_operator_user_ids
 
 
-def _ensure_display_name_not_blocked(display_name: str) -> None:
-    if name_policy.is_blocked_name(display_name):
-        raise DisplayNameBlockedError("display name is blocked by policy")
 
 
 def _ensure_display_name_change_allowed(user: models.User) -> None:

@@ -4,6 +4,7 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 import type { WorldChatGenerationEvent, WorldChatGenerationRequestRead, WorldChatLatestRequestRead, WorldChatMessageAcceptRead, WorldChatThreadCreate, WorldChatThreadCreateRead, WorldChatEntryRead, WorldChatThreadListRead, WorldChatThreadModelUpdate, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
 import type { WorldChatThreadDeleteRead } from "@/features/chat/types/world-chat-contract";
+import type { WorldChatMessagePageRead } from "@/features/chat/types/world-chat-contract";
 
 type WorldChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -79,11 +80,29 @@ export async function getWorldChatThread(
   );
   if (
     !worldChatThreadMatchesScope(payload, worldId) ||
-    payload.id !== threadId
+    payload.id !== threadId || !messagePageMatchesScope(payload.message_page, worldId, threadId)
   ) {
     throw new WorldChatApiError(502, "world_chat_scope_mismatch");
   }
   return payload;
+}
+
+function messagePageMatchesScope(page: WorldChatMessagePageRead | null, worldId: string, threadId: string) {
+  return page?.schema_version === "world-chat-message-page.v1" && page.world_id === worldId &&
+    page.thread_id === threadId && Array.isArray(page.items) && page.items.length <= 100 &&
+    page.items.every(message => message.thread_id === threadId) && Array.isArray(page.evidence_summaries) &&
+    typeof page.has_more === "boolean" && ["latest", "before", "after"].includes(page.direction);
+}
+
+export async function getWorldChatMessagePage(worldId: string, threadId: string,
+  options: { before?: string; after?: string; signal?: AbortSignal } = {}): Promise<WorldChatMessagePageRead> {
+  const query = new URLSearchParams({ limit: "50" });
+  if (options.before) query.set("before", options.before);
+  if (options.after) query.set("after", options.after);
+  const page = await requestWorldChatApi<WorldChatMessagePageRead>(
+    worldChatApiPath(worldId, `/threads/${encodeURIComponent(threadId)}/messages?${query}`), { signal: options.signal });
+  if (!messagePageMatchesScope(page, worldId, threadId)) throw new WorldChatApiError(502, "world_chat_page_mismatch");
+  return page;
 }
 
 export async function createOrGetWorldChatThread(

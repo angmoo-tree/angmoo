@@ -1,6 +1,6 @@
 """Canonical local World Chat v2 thread identity routes."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.domains.chat import exceptions as errors
@@ -148,6 +148,22 @@ def get_world_thread(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(exc)
         ) from exc
+
+
+@router.get("/threads/{thread_id}/messages", response_model=chat.WorldChatMessagePageRead)
+def get_world_message_page(world_id: str, thread_id: str, request: Request,
+    limit: int = Query(50, ge=1, le=100), before: str | None = Query(None, max_length=1024),
+    after: str | None = Query(None, max_length=1024), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user), chat_service: ThreadService = Depends(get_thread_service)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return chat_service.get_world_message_page(db, user, world_id, thread_id, limit=limit, before=before, after=after)
+    except errors.MessageNotFoundError as exc:
+        raise HTTPException(404, detail=str(exc)) from exc
+    except errors.MessageForbiddenError as exc:
+        raise HTTPException(403, detail=str(exc)) from exc
+    except errors.MessageValidationError as exc:
+        raise HTTPException(422, detail=str(exc)) from exc
 
 
 @router.patch(

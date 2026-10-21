@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { continuityAgentDetail as staticAgentDetail } from "./continuity-fixture";
 import { verifyMemoryRecovery } from "./memory-recovery-fixture";
 import { json, uiDWorld, uiDManualThread } from "./continuity-next-fixture";
@@ -195,6 +196,7 @@ test("continuity: static evidence reply uses its verified root and exact target"
     const url = new URL(route.request().url());
     if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) return route.fulfill({json: staticUiDWorld()});
     if (url.pathname.endsWith("/owner-character")) return route.fulfill({json: staticUiDOwnerActor()});
+    if (url.pathname.endsWith("/owner-character/selection")) return route.fulfill({json: selectedOwnerRead(staticUiDOwnerActor())});
     if (url.pathname.includes("/manual-social/posts/")) return route.fulfill({json:
       uiDManualThread(target, [], { rootId: root.id, ownerId: "wc-ui-d-static-owner", pageOffset: 50 }),
     });

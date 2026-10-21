@@ -9,31 +9,21 @@ from app.runtime.resident import scheduler
 from app.runtime.resident.lease_executor import SchedulerLeaseExecutor
 
 
-@pytest.mark.parametrize("failures,expiry,calls", [(1, 45, 2), (2, 45, 3), (3, 45, 3), (1, 20, 1)])
-def test_only_busy_retries_with_committed_expiry_margin(failures, expiry, calls):
+@pytest.mark.parametrize("expiry", [45, 20])
+def test_exhaustion_is_not_retried_by_runtime_and_expiry_prevents_admission(expiry):
+    from app.runtime.resident.lease_errors import SchedulerHeartbeatDeadlineExceeded
     config = SimpleNamespace(RESIDENT_TICK_READY_PATH="test-budget", resident_tick_shutdown_drain_seconds=20)
-    snapshot = SimpleNamespace(lease_owner_id="owner", fencing_epoch=3, lease_expires_at=datetime.now(UTC) + timedelta(seconds=expiry))
-    scheduler._record_proof(config, snapshot)
+    proof = SimpleNamespace(lease_owner_id="owner", fencing_epoch=3, lease_expires_at=datetime.now(UTC) + timedelta(seconds=expiry))
     class Coordinator:
         count = 0
         def heartbeat(self, **kwargs):
             self.count += 1
-            assert kwargs == {"owner_id": "owner", "fencing_epoch": 3}
-            if self.count <= failures:
-                raise SqliteBusyRetryExhausted("test_busy")
-            return snapshot
+            raise SqliteBusyRetryExhausted("test_busy")
     owner = Coordinator()
-    async def run():
-        if failures >= calls:
-            with pytest.raises(SqliteBusyRetryExhausted):
-                await scheduler._heartbeat_with_budget(owner, owner_id="owner", fencing_epoch=3, config=config)
-        else:
-            assert await scheduler._heartbeat_with_budget(owner, owner_id="owner", fencing_epoch=3, config=config) is snapshot
-    try:
-        asyncio.run(run())
-        assert owner.count == calls
-    finally:
-        scheduler._clear_proof(config)
+    expected = SqliteBusyRetryExhausted if expiry == 45 else SchedulerHeartbeatDeadlineExceeded
+    with pytest.raises(expected):
+        asyncio.run(scheduler._heartbeat_with_budget(owner, owner_id="owner", fencing_epoch=3, config=config, proof=proof))
+    assert owner.count == (1 if expiry == 45 else 0)
 
 
 def test_real_sqlite_busy_release_recovers_same_epoch(tmp_path):

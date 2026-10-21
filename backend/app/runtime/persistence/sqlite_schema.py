@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text, event
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 40
-SOURCE_ALEMBIC_REVISION = "20261019_0117"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 116
+SQLITE_SCHEMA_VERSION = 41
+SOURCE_ALEMBIC_REVISION = "20261022_0118"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 117
 EXPECTED_CANONICAL_TABLE_COUNT = 181
 VECTOR_V39_TABLES = ("memory_vector_work", "memory_vector_changes", "memory_vector_validation_revisions", "memory_vector_dependencies", "memory_vector_maintenance", "memory_vector_attempts")
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
@@ -323,6 +323,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_page_indexes(metadata)
     _remove_local_client_schema(metadata)
     for name in VECTOR_V39_TABLES:
         if name in metadata.tables:
@@ -815,7 +816,7 @@ def build_sqlite_v38_metadata() -> MetaData:
 
 def build_sqlite_v39_metadata() -> MetaData:
     """Released pre-local-connection schema; no historical fixture rewrite."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v40_metadata()
     _remove_local_client_schema(metadata)
     return metadata
 
@@ -944,3 +945,17 @@ def _remove_character_background(metadata: MetaData) -> None:
         table = metadata.tables.get(name)
         if table is not None and "character_background" in table.c:
             table._columns.remove(table.c.character_background)
+
+
+def _remove_page_indexes(metadata: MetaData) -> None:
+    for table in metadata.tables.values():
+        for index in tuple(table.indexes):
+            if index.name in {"ix_message_messages_thread_created_id", "ix_posts_world_root_page"}:
+                table.indexes.remove(index)
+
+
+def build_sqlite_v40_metadata() -> MetaData:
+    """The immutable pre-pagination index schema; no prior manifest rewrite."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_page_indexes(metadata)
+    return metadata

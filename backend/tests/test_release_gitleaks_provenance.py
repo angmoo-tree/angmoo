@@ -7,6 +7,7 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[2]
 DESCRIPTION = "Exact release-integration public source Git blobs"
 EVIDENCE = (
+    ('security/post_refactor_contract_changes.json', 'backend/app/domains/identity/service/auth.py', 'b12955a6330ff3bfdca4f0fc5d54c0564cc5e3ea', 'aec45230abd9bcb7df34d82b3d186331943688fe'),
     ('security/post_refactor_contract_changes.json', 'backend/app/domains/identity/router/auth.py', 'c179b5be953030242bf9cb626e1b86c0b3275293', 'dd96e488b578c061d1226247b1a093a400ce83e4'),
     ('security/post_refactor_contract_changes.json', 'backend/app/domains/identity/service/auth.py', '081df2d94c5d3ac0a0c182c6946772f94936d727', 'dd96e488b578c061d1226247b1a093a400ce83e4'),
     ('security/post_refactor_contract_changes.json', 'backend/tests/chat/test_p8_l_d_world_chat_api.py', '3d9dfdd39629eb24c5cc1062d5db7934032220eb', 'd2ada054d0c979794daecaca25907b6ac84947a6'),

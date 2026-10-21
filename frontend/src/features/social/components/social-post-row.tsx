@@ -36,6 +36,7 @@ export type SocialPostRowProps = {
   post: SocialPostPresentation;
   reference?: ReactNode;
   variant?: SocialPostRowVariant;
+  deferMedia?: boolean;
 };
 
 const ACTION_ICONS: Record<SocialPostActionKind, LucideIcon> = {
@@ -64,6 +65,7 @@ export function SocialPostRow({
   post,
   reference,
   variant = "feed",
+  deferMedia = false,
 }: SocialPostRowProps) {
   const uiText = useUiText("social");
   const router = useRuntimeRouter();
@@ -168,7 +170,7 @@ export function SocialPostRow({
             title={post.title}
           />
         ) : null}
-        <PostMediaGrid media={post.media} />
+        <PostMediaGrid media={post.media} deferred={deferMedia} />
         {reference ? (
           <div className={styles.reference} data-post-card-ignore>
             {reference}

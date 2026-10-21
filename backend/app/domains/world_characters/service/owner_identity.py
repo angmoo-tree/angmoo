@@ -75,9 +75,6 @@ class OwnerControlledIdentityService:
         character = get_character(self._db, row.character_id)
         changes = data.model_dump(exclude_unset=True, exclude={"version"})
         from app.domains.characters.service.profile import normalize_character_handle
-        from app.policies import name_policy
-        if "display_name" in changes and name_policy.is_blocked_name(changes["display_name"]):
-            raise ValueError("사용할 수 없는 이름입니다.")
         stored = self._db.get(WorldCharacterConfiguration, row.id)
         if stored is None:
             raise OwnerControlledIdentityConflictError("world_configuration_missing")
@@ -147,6 +144,14 @@ class OwnerControlledIdentityService:
         if character is None or character.deleted_at is not None:
             raise OwnerControlledIdentityNotFoundError(world_id)
         return _snapshot(character, world_character, db=self._db)
+
+    def selection(self, *, world_id: str, current_user_id: str):
+        """Read selection without creating an identity or hiding a broken reference."""
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        if self._find_identity(world_id, current_user_id) is None:
+            return None
+        return self.get(world_id=world_id, current_user_id=current_user_id)
 
     def create(
         self,

@@ -91,14 +91,27 @@ def uvicorn_logging_config() -> dict:
             handlers[name] = {"class": "logging.NullHandler"}
         else:
             handlers[name] = {"formatter": name, "class": "logging.StreamHandler", "stream": f"ext://sys.{stream}"}
-    return {
+    result = {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": formatters,
         "handlers": handlers,
         "loggers": {
+            # Only bounded worker lifecycle summaries; do not enable general
+            # application INFO logs or alter the embedding host's root logger.
+            "app.runtime.memory.search_worker_pool": {"handlers": ["default"], "level": "INFO", "propagate": False},
             "uvicorn": {"handlers": ["default"], "level": _level(config, "logger_uvicorn"), "propagate": config.getboolean("logger_uvicorn", "propagate")},
             "uvicorn.error": {"level": _level(config, "logger_uvicorn_error")},
             "uvicorn.access": {"handlers": ["access"], "level": _level(config, "logger_uvicorn_access"), "propagate": config.getboolean("logger_uvicorn_access", "propagate")},
         },
     }
+    # The launcher alone opts in. No app-factory/global handler changes, and
+    # desktop's stdout JSON protocol remains owned by the sidecar.
+    from app.runtime.service_log_policy import configured_policy
+    if not getattr(sys, "frozen", False) and configured_policy() is not None:
+        result["filters"] = {"termux_policy": {"()": "app.runtime.service_log_policy.ServiceLogFilter"}}
+        for handler in result["handlers"].values():
+            handler["filters"] = ["termux_policy"]
+        for name in ("app.runtime.resident.scheduler", "app.runtime.resident.lease_executor", "app.runtime.persistence.sqlite_scheduler_lease"):
+            result["loggers"][name] = {"handlers": ["default"], "level": "INFO", "propagate": False}
+    return result

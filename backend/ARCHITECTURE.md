@@ -16,6 +16,14 @@ a 30-second process deadline and 60-second round deadline. Failed preparation
 can be reconsidered only by a new demand after a 30-second cooldown. One
 request's cancellation does not cancel unassigned shared preparation.
 
+`runtime/memory/preparation_budget.py` owns these two preparation limits separately
+from Chat/SNS search budgets and the retry cooldown. The process deadline begins
+before `process.start()` and is shared by BOOT and READY. The round deadline also
+covers the shared preparation-slot wait. A bounded log summary per process/round
+records preparation, boot, module-load, queue and confirmed-exit evidence; it
+contains no query, memory text, credentials or DB writes. Local emulation-only
+budget changes must remain a separate commit and are not production defaults.
+
 The lightweight child entry announces BOOT before loading its search modules.
 READY is distinct from index availability. Worker/index/job bindings guard every
 message. A successful result is reusable only after request cleanup has been
@@ -1370,6 +1378,17 @@ owner/epoch는 실제 heartbeat 후 재개하며 만료는 새 generation, 다�
 보조 task가 실제로 끝나지 않으면 FAILED와 최초 오류를 유지하고 새 tick/runner를 만들지 않는다.
 release 실패는 최초 오류와 별도로 기록하고 stale owner는 expiry/fence로 차단한다.
 
+2026-10-21 공통 Runtime: heartbeat의 첫 호출부터 큐 대기와 SQLite 재시도에
+하나의 monotonic 종료 시각을 전달한다. 최대 2초이며 마지막 성공 lease의 만료 전
+drain + 1초 여유를 보존한다. Runtime executor의 요청 범위 context를 persistence
+adapter가 writer의 명시적 deadline으로 전달하며 Domain lease 규칙은 변경하지 않는다.
+이 대기 경계에서 발생한 timeout과 writer deadline만 SchedulerHeartbeatDeadlineExceeded로
+분류한다. 다른 TimeoutError와 사용자 취소는 바꾸지 않는다. 해당 오류는 기존 DEGRADED,
+실제 Future/자식 drain, owner/epoch/expiry 확인, 실제 heartbeat 성공 절차로 복구한다.
+committed 이후의 정리 실패로 쓰기를 재실행하지 않고, 대기 종료와 실제 작업 종료를
+operation_id로 연결한다. 큐·checkout·BEGIN·commit·cleanup 시간은 제한된 로그에만
+남기며 추가 진단 DB 쓰기나 실행권 TTL 확대는 하지 않는다.
+
 health는 scheduler READY 표시에 더해 유효 owner/epoch/expiry의 실제 heartbeat proof를 확인한다.
 DEGRADED/FAILED/만료는503, 복구 확인 뒤200이다. projector 기존 정책은 유지한다. 진단은
 단계·안전한 code·시도/queue/transaction 시간·owner/epoch만 기록하며 SQL/본문/키를 출력하지 않는다.
@@ -1683,3 +1702,33 @@ speech follows the existing persona/conversation policy. Mapping performs no
 SQL, file, network or AI call. Tendency analysis is outside this change.
 
 Evidence: [situation/query language verification](../docs/verification/situation-query-language-20261018.md).
+
+## SQLite lease, paged reads and Termux logging (2026-10-22, LOCAL)
+
+LeaseOperation carries one immutable monotonic deadline and an operation-specific retry policy.
+Heartbeat uses at most 12 attempts / 2 seconds; tick completion at most 4 attempts / 2 seconds,
+clipped by lease expiry and drain safety. The global writer remains 4 attempts / 0.25 seconds;
+the lease executor remains one worker, capacity four and a one-second queue age. Only BUSY is
+retried after rollback and connection cleanup. Runtime no longer nests another BUSY loop.
+Tick completion freezes the logical tick and actual finish time, then CAS checks owner, epoch,
+expiry and that tick. Delayed writes cannot finish a later tick or replay activity. Observers
+collect bounded facts in memory and emit summaries after connection cleanup, never DB traces.
+
+Chat owns a versioned owner/World/thread cursor over (created_at, integer id), latest/before/after
+queries and limit+1 detection (default50, maximum100). Attachments and committed evidence
+summaries are projected only for the current page. Request status and pages share the same
+evidence projection. A newly empty thread exposes its initial boundary for later gap filling.
+Manual World Feed v2 owns a separate owner/World/actor cursor, 30 root posts per page, and a
+single-root summary GET. Existing thread reply pagination and write-v1 contracts stay intact.
+These GETs do not create records, trigger providers, or retain transactions between requests.
+SQLite v41 / Alembic 0118 adds only the two supporting read indexes; frozen predecessors and
+row-preservation checks remain immutable. No memory search or launch time limit is increased.
+
+Termux opts in with an immutable angmoo-service-log.v1 envelope bound to launch/service.
+Runtime service_log_policy filters owned service handlers before formatting/output, with a
+local monotonic deadline capped by the shared UTC expiry. Missing policy preserves legacy
+logging; malformed explicit policy falls back to basic with a bounded warning. Uvicorn access
+logs contain only method, fixed route class and status. Basic retains lifecycle/warnings/errors;
+detailed temporarily admits safe access and lease/worker summaries. Sidecar JSON and root
+logging ownership are not redirected. Per-service acknowledgements prove policy acceptance;
+launcher UTC estimates cannot claim to observe a service's local monotonic clock.

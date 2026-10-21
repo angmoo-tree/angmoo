@@ -5,7 +5,7 @@ import { SettingsCard } from "@/components/ui/settings-card";
 import { Button } from "@/components/ui/button";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useActiveScopedRead } from "@/hooks/use-active-scoped-read";
-import { getDailyPreparation, getDailyActivityPlan, type DailyPreparationRead, type DailyActivityPlanRead } from "../api/world-activity-runtime";
+import { getPreparedDailyPlan, type DailyPreparationRead, type DailyActivityPlanRead } from "../api/world-activity-runtime";
 import { dailyPlanPresentation, nextWorldDateBoundary, PLAN_STATES } from "../utils/daily-plan-presentation";
 import { DailyPlanRows } from "./daily-plan-rows";
 
@@ -14,7 +14,7 @@ const boundary = (value: Read) => value.plan ? nextWorldDateBoundary(value.plan.
 export function WorldDailyPlanSummary({ worldId, actorId, characterId, active }: { worldId: string; actorId: string; characterId: string; active: boolean }) {
   const t = useUiText("characters");
   const load = useCallback(async (signal: AbortSignal): Promise<Read> => {
-    const [preparation, plan] = await Promise.all([getDailyPreparation(characterId, worldId, signal), getDailyActivityPlan(characterId, worldId, signal)]);
+    const { preparation, plan } = await getPreparedDailyPlan(characterId, worldId, signal);
     if (preparation.world_character_id !== actorId || (plan && (plan.world_id !== worldId || plan.world_character_id !== actorId))) throw new Error("daily_plan_scope_invalid");
     return { preparation, plan };
   }, [worldId, actorId, characterId]);

@@ -11,7 +11,7 @@ import { ActivityCredentialForm } from "@/features/characters/components/activit
 import { ActiveHoursControl, getActiveHoursValidation } from "@/features/characters/components/activity-hours-control";
 import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
 import { activateAgent, deactivateAgent, getAgent, updateAgentSettings } from "@/features/characters/api/agents";
-import { getDailyPreparation, getDailyActivityPlan, regenerateDailyPreparation, updateActivityRuntimeMode, type ActivityRuntimeMode, type DailyPreparationRead, type DailyActivityPlanRead } from "@/features/characters/api/world-activity-runtime";
+import { getPreparedDailyPlan, regenerateDailyPreparation, updateActivityRuntimeMode, type ActivityRuntimeMode, type DailyPreparationRead, type DailyActivityPlanRead } from "@/features/characters/api/world-activity-runtime";
 import type { AgentDetailRead } from "@/features/characters/types/agents";
 
 
@@ -35,13 +35,16 @@ export function DailyPreparationPanel({ initialAgent, initialRuntimeMode, worldI
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   useEffect(() => {
     const controller = new AbortController();
+    let reading = false;
     async function refresh() {
+      if (reading) return;
+      reading = true;
       try {
-        const next = await getDailyPreparation(characterId, worldId, controller.signal);
-        const nextPlan = await getDailyActivityPlan(characterId, worldId);
+        const { preparation: next, plan: nextPlan } = await getPreparedDailyPlan(characterId, worldId, controller.signal);
         if (controller.signal.aborted) return;
         setStatus(next); setPlan(nextPlan); setError(null);
       } catch { if (!controller.signal.aborted) setError(uiText("준비 상태를 읽지 못했습니다. 새로고침해 주세요.")); }
+      finally { reading = false; }
     }
     void refresh();
     const interval = setInterval(() => void refresh(), 15000);

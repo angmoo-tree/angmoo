@@ -61,7 +61,7 @@ export async function getOwnerControlledActor(
   options: { signal?: AbortSignal } = {},
 ): Promise<OwnerControlledActorRead | null> {
   const response = await runtimeFetch(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/owner-character`,
+    `/api/backend/worlds/${encodeURIComponent(worldId)}/owner-character/selection`,
     {
       cache: "no-store",
       credentials: "same-origin",
@@ -69,18 +69,24 @@ export async function getOwnerControlledActor(
       signal: options.signal,
     },
   );
-  if (response.status === 404) return null;
-  const payload = (await response.json().catch(() => null)) as unknown;
+  const selection = (await response.json().catch(() => null)) as unknown;
+  const payload = typeof selection === "object" && selection !== null && "actor" in selection ? selection.actor : selection;
   if (!response.ok) {
     const detail =
-      typeof payload === "object" &&
-      payload !== null &&
-      "detail" in payload &&
-      typeof payload.detail === "string"
-        ? payload.detail
+      typeof selection === "object" &&
+      selection !== null &&
+      "detail" in selection &&
+      typeof selection.detail === "string"
+        ? selection.detail
         : `http_${response.status}`;
     throw new WorldAppApiError(response.status, detail);
   }
+  if (typeof selection !== "object" || selection === null || !("schema_version" in selection) ||
+      selection.schema_version !== "owner-character-selection-v1" || !("world_id" in selection) || selection.world_id !== worldId || !("state" in selection)) {
+    throw new WorldAppApiError(502, "owner_selection_schema_mismatch");
+  }
+  if (selection.state === "unselected" && payload === null) return null;
+  if (selection.state !== "selected") throw new WorldAppApiError(502, "owner_selection_schema_mismatch");
   if (
     typeof payload !== "object" ||
     payload === null ||
