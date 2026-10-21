@@ -5,7 +5,6 @@ from __future__ import annotations
 import sqlite3
 import time
 import asyncio
-import logging
 from contextvars import copy_context
 from uuid import uuid4
 from app.core import work_observation as observation
@@ -36,7 +35,8 @@ class SqlitePostCommitError(RuntimeError):
 
 
 def _notify(observer: SqliteWriteObserver | None, **facts: object) -> None:
-    logging.getLogger(__name__).debug("sqlite_writer_attempt %s", facts)
+    # Observers only collect bounded in-memory facts; log after the connection
+    # and transaction have been released, never while holding the writer lock.
     observation.emit("sqlite_attempt", **facts)
     if observer is not None:
         try:

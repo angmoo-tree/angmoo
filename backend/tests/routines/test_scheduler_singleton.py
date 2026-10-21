@@ -76,29 +76,36 @@ def test_scheduler_lease_rejects_duplicate_and_fences_stale_owner() -> None:
             db.commit()
 
 
-def test_scheduler_heartbeat_preserves_failure_until_next_tick() -> None:
+def test_scheduler_heartbeat_preserves_failure_until_next_tick(monkeypatch) -> None:
     repository, factory = _repository()
-    lease = repository.acquire(owner_id="owner-error", ttl_seconds=30)
+    lease = repository.acquire(owner_id="owner-error", ttl_seconds=120)
 
+    from app.domains.runtime.service import scheduler_lease as service
+    now = datetime.now(UTC)
+    monkeypatch.setattr(service, "_database_now", lambda db: now)
+    previous = repository.begin_tick(owner_id="owner-error", fencing_epoch=lease.fencing_epoch,
+                                     ttl_seconds=120, interval_seconds=60)
     failed = repository.finish_tick(
         owner_id="owner-error",
         fencing_epoch=lease.fencing_epoch,
+        expected_tick=previous.logical_window_at, finished_at=now,
         result=SchedulerTickResult.FAILED,
         error_code="TypeError",
     )
     heartbeat = repository.heartbeat(
         owner_id="owner-error",
         fencing_epoch=lease.fencing_epoch,
-        ttl_seconds=30,
+        ttl_seconds=120,
     )
 
     assert failed.last_error_code == "TypeError"
     assert heartbeat.last_error_code == "TypeError"
 
+    now += timedelta(seconds=61)
     permit = repository.begin_tick(
         owner_id="owner-error",
         fencing_epoch=lease.fencing_epoch,
-        ttl_seconds=30,
+        ttl_seconds=120,
         interval_seconds=60,
     )
     assert permit.should_run is True
@@ -110,6 +117,7 @@ def test_scheduler_heartbeat_preserves_failure_until_next_tick() -> None:
     completed = repository.finish_tick(
         owner_id="owner-error",
         fencing_epoch=lease.fencing_epoch,
+        expected_tick=permit.logical_window_at, finished_at=now,
         result=SchedulerTickResult.SUCCESS,
     )
     assert completed.last_error_code is None
@@ -178,6 +186,8 @@ class _FakeCoordinator:
         *,
         owner_id: str,
         fencing_epoch: int,
+        expected_tick: datetime,
+        finished_at: datetime,
         result: SchedulerTickResult,
         error_code: str | None = None,
     ):

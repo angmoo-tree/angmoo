@@ -26,6 +26,8 @@ def test_all_lease_writes_survive_a_short_real_lock(tmp_path, operation):
     database = _database(tmp_path); _seed_installation(database)
     repo = SqliteSchedulerLeaseRepository(database.engine)
     lease = repo.acquire(owner_id="test-owner", ttl_seconds=30)
+    if operation == "finish_tick":
+        permit = repo.begin_tick(owner_id="test-owner", fencing_epoch=lease.fencing_epoch, ttl_seconds=30, interval_seconds=60)
     locked, unlock = Event(), Event()
     def holder():
         with sqlite3.connect(database.database_path) as connection:
@@ -37,7 +39,8 @@ def test_all_lease_writes_survive_a_short_real_lock(tmp_path, operation):
     if operation != "acquire": kwargs["fencing_epoch"] = lease.fencing_epoch
     if operation == "begin_tick": kwargs["interval_seconds"] = 60
     if operation in {"finish_tick", "release"}: kwargs.pop("ttl_seconds")
-    if operation == "finish_tick": kwargs["result"] = scheduler.SchedulerTickResult.SUCCESS
+    if operation == "finish_tick":
+        kwargs.update(result=scheduler.SchedulerTickResult.SUCCESS, expected_tick=permit.logical_window_at, finished_at=datetime.now(UTC))
     try:
         result = getattr(repo, operation)(**kwargs)
         assert result is not None

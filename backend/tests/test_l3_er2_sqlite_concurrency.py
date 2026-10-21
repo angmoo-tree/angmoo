@@ -274,11 +274,14 @@ def test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick(
     _seed_installation(database)
     clock = MutableClock(NOW)
     repository = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
-    lease = repository.acquire(owner_id="scheduler-error", ttl_seconds=30)
+    lease = repository.acquire(owner_id="scheduler-error", ttl_seconds=120)
 
+    previous = repository.begin_tick(owner_id="scheduler-error", fencing_epoch=lease.fencing_epoch,
+                                     ttl_seconds=120, interval_seconds=60)
     failed = repository.finish_tick(
         owner_id="scheduler-error",
         fencing_epoch=lease.fencing_epoch,
+        expected_tick=previous.logical_window_at, finished_at=clock(),
         result=SchedulerTickResult.FAILED,
         error_code="TypeError",
     )
@@ -286,32 +289,60 @@ def test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick(
     heartbeat = repository.heartbeat(
         owner_id="scheduler-error",
         fencing_epoch=lease.fencing_epoch,
-        ttl_seconds=30,
+        ttl_seconds=120,
     )
 
     assert failed.last_error_code == "TypeError"
     assert heartbeat.last_error_code == "TypeError"
 
+    clock.advance(seconds=60)
     permit = repository.begin_tick(
         owner_id="scheduler-error",
         fencing_epoch=lease.fencing_epoch,
-        ttl_seconds=30,
+        ttl_seconds=120,
         interval_seconds=60,
     )
     assert permit.should_run is True
     after_begin = repository.heartbeat(
         owner_id="scheduler-error",
         fencing_epoch=lease.fencing_epoch,
-        ttl_seconds=30,
+        ttl_seconds=120,
     )
     assert after_begin.last_error_code is None
 
     completed = repository.finish_tick(
         owner_id="scheduler-error",
         fencing_epoch=lease.fencing_epoch,
+        expected_tick=permit.logical_window_at, finished_at=clock(),
         result=SchedulerTickResult.SUCCESS,
     )
     assert completed.last_error_code is None
+    database.close()
+
+
+def test_late_finish_cannot_overwrite_next_tick_and_keeps_actual_completion_time(tmp_path):
+    database = _database(tmp_path)
+    _seed_installation(database)
+    clock = MutableClock(NOW)
+    repo = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
+    lease = repo.acquire(owner_id="owner", ttl_seconds=120)
+    first = repo.begin_tick(owner_id="owner", fencing_epoch=lease.fencing_epoch, ttl_seconds=120, interval_seconds=60)
+    completed_at = clock()
+    clock.advance(seconds=5)
+    repo.heartbeat(owner_id="owner", fencing_epoch=lease.fencing_epoch, ttl_seconds=120)
+    result = repo.finish_tick(owner_id="owner", fencing_epoch=lease.fencing_epoch,
+                             expected_tick=first.logical_window_at, finished_at=completed_at,
+                             result=SchedulerTickResult.SUCCESS)
+    assert result.last_tick_finished_at == completed_at
+    clock.advance(seconds=60)
+    second = repo.begin_tick(owner_id="owner", fencing_epoch=lease.fencing_epoch, ttl_seconds=120, interval_seconds=60)
+    with pytest.raises(SchedulerLeaseLostError):
+        repo.finish_tick(owner_id="owner", fencing_epoch=lease.fencing_epoch,
+                         expected_tick=first.logical_window_at, finished_at=completed_at,
+                         result=SchedulerTickResult.FAILED)
+    stored = repo.read()
+    assert stored.last_tick_window_at == second.logical_window_at
+    assert stored.last_tick_finished_at is None
     database.close()
 
 

@@ -123,6 +123,7 @@ def cas_current(
     fencing_epoch: int,
     now: datetime,
     values: dict[str, Any],
+    expected_tick: datetime | None = None,
 ):
     table = RuntimeSchedulerLease.__table__
     result = connection.execute(
@@ -133,6 +134,7 @@ def cas_current(
             table.c.fencing_epoch == fencing_epoch,
             table.c.state == SchedulerLeaseState.ACTIVE.value,
             table.c.lease_expires_at > now,
+            *([table.c.last_tick_window_at == expected_tick] if expected_tick is not None else []),
         )
         .values(**values)
     )

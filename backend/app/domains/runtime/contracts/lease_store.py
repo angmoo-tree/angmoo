@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from typing import Protocol, runtime_checkable
 
 from app.domains.runtime.contracts.lease import SchedulerLeaseSnapshot
@@ -29,6 +31,8 @@ class ClaimLeasePort(Protocol):
         *,
         owner_id: str,
         fencing_epoch: int,
+        expected_tick: datetime,
+        finished_at: datetime,
         result: SchedulerTickResult,
         error_code: str | None = None,
     ) -> SchedulerLeaseSnapshot: ...

@@ -11,7 +11,7 @@ from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.runtime.service.sqlite_lease import SqliteSchedulerLeaseService
 from app.domains.runtime.policies.lease import aware_utc
 from app.core.sqlite_concurrency import SqliteRetryPolicy, run_sqlite_immediate, _get_busy_timeout, _set_busy_timeout
-from app.runtime.persistence.lease_operation import current_lease_operation
+from app.runtime.persistence.lease_operation import LeaseOperation, current_lease_operation
 
 logger = logging.getLogger(__name__)
 
@@ -51,18 +51,16 @@ class SqliteSchedulerLeaseRepository(SqliteSchedulerLeaseService):
 
     def _write(self, operation: Callable[[Any], Any]) -> Any:
         name = operation.__qualname__.split(".")[-3]
-        context = current_lease_operation()
-
-        def observe(facts: dict[str, Any]) -> None:
-            if context is not None:
-                context.record(facts)
-            logger.info("scheduler_lease_transaction operation=%s operation_id=%s facts=%s",
-                        name, context.operation_id if context else None, facts)
-
-        return run_sqlite_immediate(
-            self._engine, operation, retry_policy=self._retry_policy,
-            deadline=context.deadline if context else None, observer=observe,
-        )
+        context = current_lease_operation() or LeaseOperation("direct", None)
+        try:
+            return run_sqlite_immediate(
+                self._engine, operation,
+                retry_policy=context.retry_policy or self._retry_policy,
+                deadline=context.deadline, observer=context.record,
+            )
+        finally:
+            # run_sqlite_immediate has returned its connection even on failure.
+            logger.info("scheduler_lease_transaction operation=%s facts=%s", name, context.snapshot())
 
     def _now(self) -> datetime:
         return aware_utc(self._clock())
