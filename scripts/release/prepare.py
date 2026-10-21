@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import zipfile
 
-from launcher.termux.payload import REPOSITORY, SOURCE, digest_file, read_manifest, require
+from launcher.termux.payload import REPOSITORY, SOURCE, VERSION, digest_file, read_manifest, require
 from scripts.ci.check_release_tag import validate_release_tag
 from scripts.release.candidate import ROOT, write_json
 from scripts.release.github import GitHub, successful_images
@@ -29,6 +29,18 @@ def package_termux_tools(target: Path, root: Path = ROOT) -> None:
             entry.external_attr = (0o100755 if name == "setup.sh" else 0o100644) << 16
             entry.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(entry, path.read_bytes(), compresslevel=9)
+
+
+def package_termux_installer(target: Path, tools: Path, version: str, root: Path = ROOT) -> None:
+    """Bind the first-install entry point to this release's exact adapter ZIP."""
+    require(VERSION.fullmatch(version), "termux_installer_version_invalid")
+    source = (root / "launcher/termux/bootstrap.py").read_text(encoding="utf-8")
+    for marker, value in (("@ANGMOO_RELEASE@", version),
+                          ("@ANGMOO_TOOLS_SHA256@", digest_file(tools)[7:]),
+                          ("@ANGMOO_TOOLS_SIZE@", str(tools.stat().st_size))):
+        require(source.count(marker) == 1, "termux_installer_template_invalid")
+        source = source.replace(marker, value)
+    target.write_bytes(source.encode("utf-8"))
 
 
 def unique(root: Path, name: str) -> Path:
@@ -107,6 +119,7 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
     shutil.copyfile(bundle_files[0], stage / "windows-installer.attestation.jsonl")
     # Package only the reviewed adapter, not arbitrary artifact scripts or data.
     package_termux_tools(stage / "angmoo-termux-tools.zip")
+    package_termux_installer(stage / "install-termux.py", stage / "angmoo-termux-tools.zip", manifest["version"])
     for locale in ("en", "ko"):
         shutil.copyfile(ROOT / f"docs/public/termux.{locale}.md", stage / f"termux.{locale}.md")
     publication = {"candidate_validation": "PASS", "p5": "NOT_RUN", "tag": "NOT_READY", "images": "NOT_READY"}

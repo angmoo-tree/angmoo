@@ -17,9 +17,12 @@ if [ ! -x "$tools/venv/bin/python" ]; then
   python -m venv "$tools/venv"
 fi
 "$tools/venv/bin/python" -m pip install --require-hashes --only-binary=:all: --no-deps -r "$here/requirements.txt"
-for file in angmoo.py payload.py processes.py; do
+for file in angmoo.py payload.py processes.py requirements.txt; do
   cp "$here/$file" "$tools/$file"
 done
+if [ -f "$here/LICENSE" ]; then
+  cp "$here/LICENSE" "$tools/LICENSE"
+fi
 cat > "$HOME/.local/bin/angmoo" <<'SH'
 #!/bin/sh
 PATH="$HOME/.local/share/angmoo-tools/venv/bin:$PATH"
@@ -28,5 +31,4 @@ exec "$HOME/.local/share/angmoo-tools/venv/bin/python" "$HOME/.local/share/angmo
 SH
 chmod 0755 "$HOME/.local/bin/angmoo"
 printf '%s\n' 'Setup complete. / 최초 준비 완료.' \
-  'export PATH="$HOME/.local/bin:$PATH"' \
-  'angmoo install --release 0.1.0' 'angmoo start'
+  '~/.local/bin/angmoo install --release 0.1.0' '~/.local/bin/angmoo start'

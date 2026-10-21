@@ -185,6 +185,24 @@ def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_
         assert archive.read("setup.sh") == b"synthetic setup.sh"
 
 
+def test_termux_installer_is_bound_to_exact_tools_and_version(tmp_path):
+    from scripts.release.prepare import package_termux_installer, package_termux_tools
+    tools = tmp_path / "angmoo-termux-tools.zip"
+    package_termux_tools(tools)
+    installer = tmp_path / "install-termux.py"
+    package_termux_installer(installer, tools, "0.1.0")
+    first = installer.read_bytes()
+    namespace = {"__name__": "packaged_installer"}
+    exec(compile(first, str(installer), "exec"), namespace)
+    assert namespace["RELEASE"] == "0.1.0"
+    assert namespace["TOOLS_SHA256"] == digest_file(tools)[7:]
+    assert int(namespace["TOOLS_SIZE"]) == tools.stat().st_size
+    package_termux_installer(installer, tools, "0.1.0")
+    assert installer.read_bytes() == first
+    with pytest.raises(ValueError, match="termux_installer_version_invalid"):
+        package_termux_installer(installer, tools, "../main")
+
+
 def oci(tmp_path, *, service="backend", architecture="arm64", attestation_target=None, nested=False):
     blobs = {}
     def blob(value):

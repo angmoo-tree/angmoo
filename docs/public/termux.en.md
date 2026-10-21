@@ -11,7 +11,44 @@ set, patch the images, or require editing ports or environment files.
 results are not evidence that Android sleep, Doze, or background activity works.
 Physical-device certification remains P4; until recorded, Android is experimental.
 
-After installing a current supported Termux, download `angmoo-termux-tools.zip`
+## First install and start: two commands
+
+Install Termux on a supported ARM64 Android device, then enter these two commands.
+The second downloads the installer from the official versioned Release before
+running it. A missing release never falls back to another version or main code.
+
+```sh
+pkg update && pkg install -y python curl proot
+```
+
+```sh
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.0/install-termux.py && python "$HOME/install-angmoo.py"
+```
+
+The installer downloads the tools ZIP, checks `RELEASE-SHA256SUMS`, extracts it,
+sets up host tools, installs the images and starts backend/frontend in order.
+The release producer embeds the exact ZIP SHA-256 and size in the installer;
+both that binding and the checksum entry must match before tools code runs.
+Existing image architecture/source/version/digest checks, data preservation,
+duplicate-process protection and port checks remain in the existing launcher.
+A failed step prevents later steps. No shell startup files are edited.
+
+The initial installer's trust source is the official GitHub Release HTTPS URL
+above. Its own SHA-256 is also in `RELEASE-SHA256SUMS` for separate review and
+verification. This is not release-signature verification or Android certification.
+
+On success, open **http://127.0.0.1:3000**. For subsequent use, skip installation:
+these explicit paths work without a separate PATH setup command.
+
+```sh
+~/.local/bin/angmoo start
+~/.local/bin/angmoo status
+~/.local/bin/angmoo stop
+```
+
+## Manual setup and controlled validation
+
+To review the individual steps, download `angmoo-termux-tools.zip`
 from the official `angmoo-tree/angmoo` release and verify its entry in
 `RELEASE-SHA256SUMS`. Extract it into Termux private storage, then perform the
 one-time host-tool setup from that directory:

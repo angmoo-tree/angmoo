@@ -11,7 +11,42 @@ P1/P2 구현만으로 공개하지 않습니다. Linux ARM64·QEMU 성공은 And
 절전·Doze·백그라운드 실행 성공을 의미하지 않습니다. 실제 기기 확인은 P4이며,
 그 근거를 확보하기 전 Android 지원은 실험 범위입니다.
 
-지원되는 최신 Termux를 설치한 뒤 공식 `angmoo-tree/angmoo` Release에서
+## 처음 설치하고 실행하기: 두 명령
+
+지원되는 ARM64 Android 기기에 Termux를 설치하고 아래 두 명령을 각각 실행합니다.
+두 번째 명령은 공식 버전별 Release의 설치 파일을 내려받은 뒤 실행합니다.
+아직 공개하지 않은 버전의 다운로드 실패를 다른 버전이나 main 코드로 우회하지 않습니다.
+
+```sh
+pkg update && pkg install -y python curl proot
+```
+
+```sh
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.0/install-termux.py && python "$HOME/install-angmoo.py"
+```
+
+설치기는 실행기 ZIP 다운로드, `RELEASE-SHA256SUMS` 대조, 압축 해제, 최초 준비,
+이미지 설치, backend·frontend 시작을 차례로 처리합니다. 배포 시 설치 파일에
+고정한 ZIP의 SHA-256·크기와 체크섬 목록이 모두 일치해야 실행기 코드를 실행합니다.
+기존 이미지 아키텍처·소스·버전·digest 검증과 데이터 보존, 중복 실행·포트 검사는 유지합니다.
+어느 단계든 실패하면 후속 단계를 실행하지 않습니다. 쉘 초기화 파일은 수정하지 않습니다.
+
+최초 설치 파일의 신뢰 출처는 위 공식 GitHub Release의 HTTPS 주소입니다.
+설치 파일 자체의 SHA-256도 `RELEASE-SHA256SUMS`에 포함되므로 별도 검토·대조할 수 있습니다.
+이 절차를 배포 서명 검증이나 Android 실기기 인증으로 해석하지 않습니다.
+
+성공하면 **http://127.0.0.1:3000**을 엽니다. 다음부터 설치 과정을 반복하지 않고
+아래 명령을 사용합니다. 전체 경로를 쓰므로 PATH 등록 명령이 필요하지 않습니다.
+
+```sh
+~/.local/bin/angmoo start
+~/.local/bin/angmoo status
+~/.local/bin/angmoo stop
+```
+
+## 수동 설치와 통제 검증
+
+단계를 직접 확인하려면 공식 `angmoo-tree/angmoo` Release에서
 `angmoo-termux-tools.zip`을 받고 `RELEASE-SHA256SUMS`의 해시를 확인하세요.
 Termux 내부 전용 저장소에 압축을 풀고 해당 폴더에서 최초 한 번 준비합니다.
 
