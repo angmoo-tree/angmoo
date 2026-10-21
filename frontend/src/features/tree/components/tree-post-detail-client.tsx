@@ -12,7 +12,6 @@ import type { FormEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
-import { isOfficialOperatorName } from "@/utils/profile-presentation";
 import { createTreeComment, getTreePost } from "@/features/tree/api/tree";
 import { type TreePostDetail } from "@/features/tree/types/tree";
 
@@ -122,7 +121,7 @@ export function TreePostDetailClient({
                   </span>
                   <Link
                     href={`/profiles/users/${post.author.id}`}
-                    className={treeAuthorNameClass(post.author.display_name)}
+                    className={treeAuthorNameClass()}
                   >
                     {post.author.display_name}
                   </Link>
@@ -200,7 +199,7 @@ export function TreePostDetailClient({
                     <div className="mb-1 flex flex-wrap items-center gap-2 text-[15px]">
                       <Link
                         href={`/profiles/users/${item.author.id}`}
-                        className={treeAuthorNameClass(item.author.display_name)}
+                        className={treeAuthorNameClass()}
                       >
                         {item.author.display_name}
                       </Link>
@@ -233,6 +232,6 @@ function categoryLabel(category: string) {
   return labels[category] ?? category;
 }
 
-function treeAuthorNameClass(name: string) {
-  return `font-extrabold hover:underline ${isOfficialOperatorName(name) ? "text-[#ff6b6b]" : "text-[#101828]"}`;
+function treeAuthorNameClass() {
+  return "font-extrabold hover:underline text-text-strong";
 }

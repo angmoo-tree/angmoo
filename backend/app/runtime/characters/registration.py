@@ -19,7 +19,6 @@ from app.domains.worlds.service.character_entry import refresh_entry_world_contr
 from app.domains.worlds.service.creator import require_creator_access
 from app.domains.worlds.service.default_space import ensure_default_space
 from app.domains.routines.service.activity_settings import ensure_setting
-from app.policies import name_policy
 
 
 def resolve_target(db, user, world_id):
@@ -71,8 +70,6 @@ def register_draft(db, user, draft, data):
             "name", "one_liner", "personality", "speech_style", "worldview", "character_background", "topic_preferences", "safety_rules")})
     except ValueError as exc:
         raise AgentCreationDraftValidationError("항목별 길이를 확인해주세요.") from exc
-    if name_policy.is_blocked_name(draft.name):
-        raise AgentCreationDraftValidationError("사용할 수 없는 이름입니다.")
     values = {key: getattr(draft, key) for key in persona.PERSONA_PROMPT_SAFETY_FIELDS}
     _ensure_draft_persona_prompt_safety(values)
     world, membership = require_creator_access(db, world_id=draft.target_world_id, user=user)

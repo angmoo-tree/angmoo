@@ -48,7 +48,6 @@ class Settings(BaseSettings):
     GOOGLE_AUTH_VERIFY_MAX_IN_FLIGHT: int = 8
     GOOGLE_AUTH_VERIFY_LEASE_SECONDS: int = 30
     GOOGLE_AUTH_VERIFY_RETENTION_HOURS: int = 24
-    OFFICIAL_OPERATOR_USER_IDS: str = ""
     DEMO_USER_PASSWORD: SecretStr | None = None
     LOCKED_DEMO_USER_EMAILS: str = ""
     GOOGLE_OAUTH_CLIENT_ID: str | None = None
@@ -233,15 +232,6 @@ class Settings(BaseSettings):
                 return value
         return self.app_secret
 
-    @property
-    def official_operator_user_ids(self) -> tuple[str, ...]:
-        return tuple(
-            dict.fromkeys(
-                item.strip()
-                for item in self.OFFICIAL_OPERATOR_USER_IDS.split(",")
-                if item.strip()
-            )
-        )
 
     @property
     def demo_user_password(self) -> str | None:

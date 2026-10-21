@@ -13,7 +13,6 @@ from app.domains.characters.service.profile import normalize_character_handle
 from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.worlds.service import require_world_read_access, require_creator_access
-from app.policies import name_policy
 from app.domains.world_characters.contracts.scheduling import ActivityScheduleUpdater, SCHEDULE_FIELDS
 
 
@@ -181,7 +180,7 @@ class WorldCharacterManagementService:
             changes = data.model_dump(exclude_unset=True, exclude={"expected_revision"})
             if "display_name" in changes:
                 name = changes["display_name"].strip() if changes["display_name"] else ""
-                if not name or name_policy.is_blocked_name(name):
+                if not name:
                     raise WorldManagementError("world_profile_name_invalid", 422)
                 changes["display_name"] = name
             if "handle" in changes:

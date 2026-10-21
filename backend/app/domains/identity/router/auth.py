@@ -117,16 +117,6 @@ def signup(
             status_code=status.HTTP_409_CONFLICT,
             detail="이미 사용 중인 닉네임입니다.",
         ) from exc
-    except auth_service.ReservedDisplayNameError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="공식 닉네임은 사용할 수 없습니다.",
-        ) from exc
-    except auth_service.DisplayNameBlockedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="사용할 수 없는 닉네임입니다.",
-        ) from exc
     except auth_service.DisplayNameInvalidError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -290,16 +280,6 @@ def complete_google_signup(
             status_code=status.HTTP_409_CONFLICT,
             detail="이미 사용 중인 닉네임입니다.",
         ) from exc
-    except auth_service.DisplayNameBlockedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="사용할 수 없는 닉네임입니다.",
-        ) from exc
-    except auth_service.ReservedDisplayNameError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="공식 닉네임은 사용할 수 없습니다.",
-        ) from exc
     except auth_service.DisplayNameInvalidError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -375,16 +355,6 @@ def update_me(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="이미 사용 중인 닉네임입니다.",
-        ) from exc
-    except auth_service.DisplayNameBlockedError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="사용할 수 없는 닉네임입니다.",
-        ) from exc
-    except auth_service.ReservedDisplayNameError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="공식 닉네임은 사용할 수 없습니다.",
         ) from exc
     except auth_service.DisplayNameInvalidError as exc:
         raise HTTPException(

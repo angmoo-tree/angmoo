@@ -61,12 +61,8 @@ class DisplayNameInvalidError(AuthError):
     pass
 
 
-class ReservedDisplayNameError(AuthError):
-    pass
 
 
-class DisplayNameBlockedError(AuthError):
-    pass
 
 
 class DisplayNameCooldownError(AuthError):

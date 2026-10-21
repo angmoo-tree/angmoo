@@ -75,9 +75,6 @@ class OwnerControlledIdentityService:
         character = get_character(self._db, row.character_id)
         changes = data.model_dump(exclude_unset=True, exclude={"version"})
         from app.domains.characters.service.profile import normalize_character_handle
-        from app.policies import name_policy
-        if "display_name" in changes and name_policy.is_blocked_name(changes["display_name"]):
-            raise ValueError("사용할 수 없는 이름입니다.")
         stored = self._db.get(WorldCharacterConfiguration, row.id)
         if stored is None:
             raise OwnerControlledIdentityConflictError("world_configuration_missing")

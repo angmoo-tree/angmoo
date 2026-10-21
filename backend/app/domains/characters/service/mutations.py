@@ -7,13 +7,12 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 from app.domains.characters import models, schemas
 from app.domains.characters.contracts import CharacterOwner
-from app.domains.characters.exceptions import AgentHandleConflictError, AgentHandleInvalidError, AgentProfileNameInvalidError
+from app.domains.characters.exceptions import AgentHandleConflictError, AgentHandleInvalidError
 from app.domains.characters.service import profile
 from app.domains.characters.service.access import _get_owned_character
 from app.domains.characters.service.persona import ensure_persona_prompt_safety
 from app.domains.characters.service.promotion import _set_promotion_usage
 from app.domains.identity.service import demo_access as demo_lock
-from app.policies import name_policy
 
 
 def create_owned_character(db: Session, user: CharacterOwner, data: schemas.AgentCreate) -> models.Character:
@@ -35,10 +34,6 @@ def create_owned_character(db: Session, user: CharacterOwner, data: schemas.Agen
 def update_owned_profile(db: Session, user: CharacterOwner, character_id: str, data: schemas.AgentProfileUpdate) -> tuple[models.Character, bool]:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
-    if data.name is not None and name_policy.is_blocked_name(data.name):
-        raise AgentProfileNameInvalidError("사용할 수 없는 닉네임입니다.")
-    if data.handle is not None and name_policy.is_blocked_name(data.handle):
-        raise AgentHandleInvalidError("사용할 수 없는 핸들입니다.")
     old_avatar_url = character.avatar_url
     old_banner_url = character.banner_url
     try:
