@@ -41,7 +41,8 @@ from app.domains.runtime.contracts.lease import SchedulerTickResult
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
 from app.runtime.persistence.sqlite_scheduler_lease import SqliteSchedulerLeaseRepository
 from app.runtime.resident.lease_executor import SchedulerLeaseExecutor, lease_call
-from app.exceptions import SqliteBusyRetryExhausted, SqliteTaskQueueFull
+from app.runtime.resident.lease_errors import SchedulerHeartbeatDeadlineExceeded
+from app.exceptions import SqliteBusyRetryExhausted, SqliteTaskQueueFull, SqliteWriteDeadlineExceeded
 from datetime import UTC, datetime
 
 from app.runtime.persistence.scheduler_fence import scheduler_fence
@@ -218,7 +219,7 @@ async def _run_fenced_tick_with_heartbeat(
         if heartbeat_task.done() and not heartbeat_task.cancelled() and heartbeat_task.exception() is not None:
             failure = heartbeat_task.exception()
             cancellation.reason = (CancellationReason.LEASE_LOST if isinstance(failure, SchedulerLeaseLostError)
-                else CancellationReason.HEARTBEAT if isinstance(failure, (SqliteBusyRetryExhausted, SqliteTaskQueueFull))
+                else CancellationReason.HEARTBEAT if isinstance(failure, (SqliteBusyRetryExhausted, SqliteTaskQueueFull, SchedulerHeartbeatDeadlineExceeded))
                 else CancellationReason.UNKNOWN)
         elif stop_event is not None and stop_event.is_set():
             cancellation.reason = CancellationReason.SHUTDOWN
@@ -325,7 +326,8 @@ async def run_resident_tick_scheduler(
                     if recovering:
                         # A snapshot alone is not readiness: verify a live heartbeat
                         # before resuming, or acquire a new epoch after expiry.
-                        lease = await lease_coordinator.call("heartbeat", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch)
+                        lease = await _heartbeat_with_budget(lease_coordinator, owner_id=lease_owner_id,
+                            fencing_epoch=lease.fencing_epoch, config=config, proof=lease)
                         if stop.is_set(): break
                         _record_proof(config, lease)
                         readiness.parent.mkdir(parents=True, exist_ok=True)
@@ -345,7 +347,8 @@ async def run_resident_tick_scheduler(
                                 raise
                             logger.warning("scheduler_tick_failed code=%s", type(exc).__name__)
                             result_kind, tick_error = SchedulerTickResult.FAILED, type(exc).__name__
-                        except (asyncio.CancelledError, SchedulerLeaseLostError, SqliteBusyRetryExhausted, SqliteTaskQueueFull):
+                        except (asyncio.CancelledError, SchedulerLeaseLostError, SqliteBusyRetryExhausted,
+                                SqliteTaskQueueFull, SchedulerHeartbeatDeadlineExceeded):
                             raise
                         except Exception as exc:
                             # Even a non-lease primary failure may leave a child
@@ -363,9 +366,12 @@ async def run_resident_tick_scheduler(
                     if not await _sleep_until_next_tick_with_heartbeat(coordinator=lease_coordinator, owner_id=lease_owner_id,
                         fencing_epoch=lease.fencing_epoch, duration_seconds=config.resident_tick_interval_seconds, sleep=sleep,
                         monotonic_clock=monotonic_clock, stop_event=stop, config=config): break
-                except (SqliteBusyRetryExhausted, SqliteTaskQueueFull) as exc:
+                except (SqliteBusyRetryExhausted, SqliteTaskQueueFull, SchedulerHeartbeatDeadlineExceeded) as exc:
                     if getattr(exc, "pending_tasks", ()):
                         raise
+                    # Keep the last successful heartbeat for the recovery margin,
+                    # but remove its public readiness proof before draining.
+                    lease = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH, lease)
                     observe("degraded"); recovering = True
                     logger.warning("scheduler_recovery code=%s owner=%s epoch=%s backoff_seconds=%s",
                         type(exc).__name__, lease_owner_id, lease.fencing_epoch if lease else None, backoff)
@@ -417,33 +423,47 @@ async def run_resident_tick_scheduler(
 _scheduler_proofs: dict[str, Any] = {}
 
 
-async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config):
-    """Only exhausted BUSY may retry, within the last committed lease's margin."""
+async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config, proof=None):
+    """Share one deadline from first queue admission through bounded DB retries.
+
+    Timeout of this wait is recoverable only after the executor's real work has
+    drained. An unrelated TimeoutError from inside the operation stays fatal.
+    """
     started = monotonic()
-    try:
-        return await lease_call(coordinator, "heartbeat", owner_id=owner_id, fencing_epoch=fencing_epoch)
-    except SqliteBusyRetryExhausted as first:
-        proof = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH)
-        if (proof is None or proof.lease_expires_at is None
-                or proof.lease_owner_id != owner_id or proof.fencing_epoch != fencing_epoch):
-            raise
+    deadline = started + 2.0
+    proof = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH, proof)
+    if proof is not None:
+        if (proof.lease_expires_at is None or proof.lease_owner_id != owner_id
+                or proof.fencing_epoch != fencing_epoch):
+            raise SchedulerLeaseLostError("scheduler_heartbeat_proof_mismatch")
         expiry = proof.lease_expires_at.replace(tzinfo=UTC)
-        safe_seconds = (expiry - datetime.now(UTC)).total_seconds() - config.resident_tick_shutdown_drain_seconds - 1
-        deadline = min(started + 2.0, monotonic() + safe_seconds)
-        error = first
-        for delay in (0.05, 0.1):
-            if monotonic() + delay >= deadline:
-                raise error
-            await asyncio.sleep(delay)
-            remaining = deadline - monotonic()
-            if remaining <= 0:
-                raise error
-            try:
-                return await asyncio.wait_for(lease_call(coordinator, "heartbeat", owner_id=owner_id,
-                    fencing_epoch=fencing_epoch, queue_deadline=deadline), timeout=remaining)
-            except SqliteBusyRetryExhausted as exc:
-                error = exc
-        raise error
+        remaining_lease = (expiry - datetime.now(UTC)).total_seconds()
+        if remaining_lease <= 0:
+            raise SchedulerLeaseLostError("scheduler_heartbeat_proof_expired")
+        safe_seconds = remaining_lease - config.resident_tick_shutdown_drain_seconds - 1
+        deadline = min(deadline, started + safe_seconds)
+    if deadline <= monotonic():
+        raise SchedulerHeartbeatDeadlineExceeded("scheduler_heartbeat_safety_margin")
+    # asyncio's timeout clock is loop.time(); convert from the same monotonic
+    # clock used by the executor/writer without assuming identical epochs.
+    timeout = asyncio.timeout(max(0.0, deadline - monotonic()))
+    try:
+        async with timeout:
+            for attempt, delay in enumerate((0.0, 0.05, 0.1)):
+                if delay:
+                    await asyncio.sleep(delay)  # No transaction survives a retry.
+                try:
+                    return await lease_call(coordinator, "heartbeat", owner_id=owner_id,
+                        fencing_epoch=fencing_epoch, queue_deadline=deadline)
+                except SqliteBusyRetryExhausted:
+                    if proof is None or attempt == 2:
+                        raise
+    except TimeoutError as exc:
+        if not timeout.expired():
+            raise
+        raise SchedulerHeartbeatDeadlineExceeded("scheduler_heartbeat_wait_deadline") from exc
+    except SqliteWriteDeadlineExceeded as exc:
+        raise SchedulerHeartbeatDeadlineExceeded("scheduler_heartbeat_writer_deadline") from exc
 
 def _record_proof(config: Settings, lease: Any) -> None:
     _scheduler_proofs[config.RESIDENT_TICK_READY_PATH] = lease

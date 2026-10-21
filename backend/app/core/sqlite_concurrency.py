@@ -24,6 +24,7 @@ from app.exceptions import (
     SqliteBusyRetryExhausted,
     SqliteConcurrencyError,
     SqliteTaskQueueFull,
+    SqliteWriteDeadlineExceeded,
 )
 
 T = TypeVar("T")
@@ -79,6 +80,7 @@ def run_sqlite_immediate(
     sleep: Callable[[float], None] = time.sleep,
     monotonic: Callable[[], float] = time.monotonic,
     observer: SqliteWriteObserver | None = None,
+    deadline: float | None = None,
 ) -> T:
     """Run one short writer transaction with bounded SQLITE_BUSY retry.
 
@@ -94,25 +96,51 @@ def run_sqlite_immediate(
     started = monotonic()
     delay = policy.initial_delay_seconds
     last_error: BaseException | None = None
+
+    def check_deadline() -> None:
+        if deadline is not None and monotonic() >= deadline:
+            raise SqliteWriteDeadlineExceeded("sqlite_writer_execution_deadline")
+
     for attempt in range(1, policy.max_attempts + 1):
+        check_deadline()
         attempt_started = monotonic()
         acquired_at: float | None = None
+        begin_started_at: float | None = None
+        begin_finished_at: float | None = None
         committed = False
         try:
+            _notify(observer, result="checkout_started", attempt=attempt)
             observation.emit("sqlite", boundary="checkout_started", attempt=attempt)
             with engine.connect() as connection:
+                _notify(observer, result="checkout_complete", attempt=attempt,
+                        checkout_ms=round((monotonic() - attempt_started) * 1000, 3))
                 observation.emit("sqlite", boundary="checkout_complete", attempt=attempt)
+                check_deadline()
                 driver = connection.connection.driver_connection
                 previous_timeout_ms = _get_busy_timeout(driver)
                 remaining = max(0.001, policy.maximum_elapsed_seconds - (monotonic() - started))
+                if deadline is not None:
+                    remaining = min(remaining, max(0.0, deadline - monotonic()))
                 _set_busy_timeout(driver, max(1, min(50, int(remaining * 1000))))
                 try:
+                    check_deadline()
+                    _notify(observer, result="begin_started", attempt=attempt)
                     observation.emit("sqlite", boundary="begin_started", attempt=attempt)
-                    connection.exec_driver_sql("BEGIN IMMEDIATE")
+                    begin_started_at = monotonic()
+                    try:
+                        connection.exec_driver_sql("BEGIN IMMEDIATE")
+                    finally:
+                        begin_finished_at = monotonic()
                     acquired_at = monotonic()
+                    _notify(observer, result="acquired", attempt=attempt,
+                            lock_wait_ms=round((acquired_at - begin_started_at) * 1000, 3),
+                            acquire_ms=round((acquired_at - attempt_started) * 1000, 3))
                     observation.emit("sqlite", boundary="acquired", attempt=attempt)
                     try:
+                        check_deadline()
                         result = operation(connection)
+                        check_deadline()  # Roll back before COMMIT if no time remains.
+                        _notify(observer, result="commit_started", attempt=attempt)
                         observation.emit("sqlite", boundary="commit_started", attempt=attempt)
                         connection.commit()
                         committed = True
@@ -132,8 +160,13 @@ def run_sqlite_immediate(
                 finally:
                     # BEGIN may fail after SQLAlchemy has opened its transaction.
                     # Keep the bounded timeout through rollback, too.
-                    connection.rollback()
-                    _set_busy_timeout(driver, previous_timeout_ms)
+                    cleanup_started = monotonic()
+                    try:
+                        connection.rollback()
+                    finally:
+                        _set_busy_timeout(driver, previous_timeout_ms)
+                        _notify(observer, result="cleanup_complete", attempt=attempt,
+                                cleanup_ms=round((monotonic() - cleanup_started) * 1000, 3))
         except PoolCheckoutTimeout as exc:
             raise SqliteTaskQueueFull("sqlite_connection_checkout_deadline") from exc
         except OperationalError as exc:
@@ -144,6 +177,7 @@ def run_sqlite_immediate(
             last_error = exc
             error_code, error_name = sqlite_error_identity(exc)
             _notify(observer, result="busy", attempt=attempt, sqlite_code=error_code,
+                    lock_wait_ms=round((begin_finished_at - begin_started_at) * 1000, 3) if begin_finished_at is not None else None,
                     sqlite_primary_code=error_code & 0xFF if error_code is not None else None,
                     sqlite_name=error_name, max_attempts=policy.max_attempts,
                     acquire_ms=round((monotonic() - attempt_started) * 1000, 3),
@@ -156,14 +190,18 @@ def run_sqlite_immediate(
             last_error = exc
             error_code, error_name = sqlite_error_identity(exc)
             _notify(observer, result="busy", attempt=attempt, sqlite_code=error_code,
+                    lock_wait_ms=round((begin_finished_at - begin_started_at) * 1000, 3) if begin_finished_at is not None else None,
                     sqlite_primary_code=error_code & 0xFF if error_code is not None else None,
                     sqlite_name=error_name, max_attempts=policy.max_attempts,
                     acquire_ms=round((monotonic() - attempt_started) * 1000, 3),
                     attempt_ms=round((monotonic() - attempt_started) * 1000, 3))
         elapsed = monotonic() - started
+        check_deadline()
         if attempt >= policy.max_attempts or elapsed >= policy.maximum_elapsed_seconds:
             break
         remaining = policy.maximum_elapsed_seconds - elapsed
+        if deadline is not None:
+            remaining = min(remaining, max(0.0, deadline - monotonic()))
         sleep_for = min(delay, max(0.0, remaining))
         if sleep_for <= 0:
             break

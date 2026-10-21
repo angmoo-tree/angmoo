@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import os
 from pathlib import Path
 from types import SimpleNamespace
@@ -156,7 +156,8 @@ class _FakeCoordinator:
 
     def acquire(self, *, owner_id: str):
         self.calls.append(f"acquire:{owner_id}")
-        return SimpleNamespace(fencing_epoch=7)
+        return SimpleNamespace(fencing_epoch=7, lease_owner_id=owner_id,
+                               lease_expires_at=datetime.now(UTC) + timedelta(seconds=45))
 
     def begin_tick(self, *, owner_id: str, fencing_epoch: int):
         self.calls.append(f"begin:{owner_id}:{fencing_epoch}")
@@ -169,7 +170,8 @@ class _FakeCoordinator:
 
     def heartbeat(self, *, owner_id: str, fencing_epoch: int):
         self.calls.append(f"heartbeat:{owner_id}:{fencing_epoch}")
-        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_expires_at=datetime.now(UTC))
+        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_owner_id=owner_id,
+                               lease_expires_at=datetime.now(UTC) + timedelta(seconds=45))
 
     def finish_tick(
         self,
@@ -180,7 +182,8 @@ class _FakeCoordinator:
         error_code: str | None = None,
     ):
         self.calls.append(f"finish:{result.value}:{error_code}")
-        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_expires_at=datetime.now(UTC))
+        return SimpleNamespace(fencing_epoch=fencing_epoch, lease_owner_id=owner_id,
+                               lease_expires_at=datetime.now(UTC) + timedelta(seconds=45))
 
     def release(self, *, owner_id: str, fencing_epoch: int):
         self.calls.append(f"release:{owner_id}:{fencing_epoch}")

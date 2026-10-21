@@ -135,6 +135,7 @@ def test_runtime_adapter_recovers_on_same_loop_with_live_proof(tmp_path, monkeyp
     probe = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
     config = Settings().model_copy(update={"RESIDENT_TICK_INTERVAL_SECONDS": 10,
         "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS": 1, "RESIDENT_TICK_LEASE_TTL_SECONDS": 6,
+        "RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS": 1,
         "RESIDENT_TICK_READY_PATH": str(tmp_path / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
     states = []; effects = []; ticks = asyncio.Event()
     async def tick(): effects.append("one"); ticks.set(); return SimpleNamespace(started_count=1)
@@ -253,7 +254,8 @@ def test_failed_finish_with_real_lock_does_not_replay_completed_effect(tmp_path)
     database = _database(tmp_path); _seed_installation(database)
     holder = sqlite3.connect(database.database_path, check_same_thread=False)
     config = Settings().model_copy(update={"RESIDENT_TICK_INTERVAL_SECONDS": 60, "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS": 1,
-        "RESIDENT_TICK_LEASE_TTL_SECONDS": 6, "RESIDENT_TICK_READY_PATH": str(tmp_path / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
+        "RESIDENT_TICK_LEASE_TTL_SECONDS": 6, "RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS": 1,
+        "RESIDENT_TICK_READY_PATH": str(tmp_path / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
     states, effects = [], []
     async def scenario():
         stop = asyncio.Event()
@@ -300,7 +302,8 @@ def test_non_lease_primary_with_live_child_never_finishes_or_restarts(tmp_path, 
         "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
     lease = SimpleNamespace(fencing_epoch=1, lease_expires_at=datetime.now(UTC) + timedelta(seconds=30))
     class Coordinator:
-        def acquire(self, **_kwargs): calls.append("acquire"); return lease
+        def acquire(self, **kwargs):
+            calls.append("acquire"); lease.lease_owner_id = kwargs["owner_id"]; return lease
         def heartbeat(self, **_kwargs): return lease
         def begin_tick(self, **_kwargs): calls.append("begin"); return SimpleNamespace(should_run=True)
         def finish_tick(self, **_kwargs): calls.append("finish"); return lease

@@ -13,6 +13,12 @@ class SqliteTaskQueueFull(SqliteConcurrencyError):
     reason_code = "sqlite_task_queue_full"
 
 
+class SqliteWriteDeadlineExceeded(SqliteConcurrencyError):
+    """An explicitly supplied execution deadline forbids starting more SQL work."""
+
+    reason_code = "sqlite_write_deadline_exceeded"
+
+
 class RequestBodyTooLargeError(Exception):
     pass
 
