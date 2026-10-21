@@ -94,7 +94,13 @@ def select_session(home, identifier=None):
         checked(path, directory=True)
     if not sessions:
         raise ValueError("logs_missing")
-    return max(sessions, key=lambda p: p.stat().st_mtime_ns)
+    return max(sessions, key=session_started)
+
+
+def session_started(path):
+    # Directory mtime also changes on rotation and atomic metadata replacement.
+    # Retention order must use the immutable session start, not those writes.
+    return datetime.fromisoformat(read_session(path)["started_at_utc"])
 
 
 def create_session(home, identifier, metadata):
@@ -103,7 +109,7 @@ def create_session(home, identifier, metadata):
     root = home / "logs"
     root.mkdir(mode=0o700, exist_ok=True)
     checked(root, directory=True)
-    sessions = sorted((p for p in root.iterdir() if SESSION_ID.fullmatch(p.name)), key=lambda p: p.stat().st_mtime_ns)
+    sessions = [p for p in root.iterdir() if SESSION_ID.fullmatch(p.name)]
     removed = []
     # Retention removes only known regular files in completed, owned sessions.
     sizes = {}
@@ -113,6 +119,7 @@ def create_session(home, identifier, metadata):
         for file in files:
             checked(file)
         sizes[path] = sum(p.stat().st_size for p in files)
+    sessions.sort(key=session_started)
     while sessions and (len(sessions) >= SESSION_LIMIT or sum(sizes.values()) > TOTAL_BYTES - 17 * 1024 * 1024):
         old = sessions[0]
         if not read_session(old).get("ended_at_utc"):

@@ -96,11 +96,11 @@ class LogTests(unittest.TestCase):
             self.path = logs.create_session(self.home, f"{number:032x}", {})
         self.assertEqual(len(list((self.home / "logs").iterdir())), 4)
         self.assertFalse((self.home / "logs" / ("b" * 32)).exists())
-        oldest = min((self.home / "logs").iterdir(), key=lambda p: p.stat().st_mtime_ns)
+        oldest = min((self.home / "logs").iterdir(), key=logs.session_started)
         data = logs.read_session(oldest)
         data["ended_at_utc"] = None
         logs.save_session(oldest, data)
-        # Updating metadata changes directory mtime; explicitly locate it first.
+        # Rotation or final metadata updates must not change retention order.
         with patch.object(logs, "SESSION_LIMIT", 1):
             with self.assertRaisesRegex(ValueError, "log_retention_active_session"):
                 logs.create_session(self.home, "a" * 32, {})
@@ -118,6 +118,40 @@ class LogTests(unittest.TestCase):
         response = io.BytesIO(json.dumps({"source_sha": "different"}).encode())
         with patch.object(processes.urllib.request, "urlopen", return_value=response):
             self.assertEqual(processes.probe_ready("http://localhost", "a", "b", backend=True)["code"], "source_sha_mismatch")
+
+    def test_detached_supervisor_hands_over_its_pipes_and_keeps_original_failure(self):
+        import angmoo
+        program = r'''
+import os, sys
+from pathlib import Path
+from unittest.mock import patch
+import angmoo
+print('bootstrap marker', flush=True)
+def command(exe, config, service, nonce):
+    body = "import time; print('backend alive',flush=True); time.sleep(60)" if service == 'backend' else "import sys; print('frontend native failure',file=sys.stderr,flush=True); raise SystemExit(7)"
+    return [sys.executable, '-c', body]
+def readiness(process, *args, backend, **kwargs):
+    if not backend:
+        process.wait(timeout=5)
+        raise ValueError('service_exited_before_ready')
+with patch.object(angmoo,'installation',return_value={'manifest':{'source_sha':'a'*40,'version':'0.1.0'}}), patch.object(angmoo,'tools',return_value='unused'), patch.object(angmoo,'free_port'), patch.object(angmoo,'command',side_effect=command), patch.object(angmoo,'await_ready',side_effect=readiness):
+    angmoo.supervise(Path(sys.argv[1]),int(sys.argv[2]),'b'*32,capture_self=True)
+'''
+        with angmoo.lock(self.home) as owned:
+            capture = logs.Capture(self.path, names=("bootstrap",))
+            child = subprocess.Popen([sys.executable, "-c", program, str(self.home), str(owned.fileno())],
+                pass_fds=(owned.fileno(),), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={**os.environ, "PYTHONPATH":str(Path(logs.__file__).parent)})
+            capture.attach("bootstrap", child)
+            self.assertEqual(child.wait(timeout=10), 0)
+            self.assertTrue(capture.close()["capture_complete"])
+        state = angmoo.read_state(self.home)
+        self.assertEqual(state["primary_failure"]["returncode"], 7)
+        self.assertEqual(state["primary_failure"]["service"], "frontend")
+        text = "\n".join(row["message"] for row in logs.tail(self.path))
+        self.assertIn("bootstrap marker", text)
+        self.assertIn("frontend native failure", text)
+        self.assertEqual(logs.read_session(self.path)["primary_failure"]["returncode"], 7)
 
 
 if __name__ == "__main__":
