@@ -1,3 +1,4 @@
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { test, expect, type Page } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
@@ -76,7 +77,7 @@ async function fixtures(page:Page, staticShell:boolean, initial:{comfy?:Record<s
     if(path.endsWith("/preflight"))return json(route,{allowed:false,reason:"interpretation_disabled"});
     if(path.startsWith("/media/assets/")&&request.method()==="DELETE")return route.fulfill({status:204});
     if(path.endsWith("/image-generation"))return json(route,null);
-    if(path.endsWith("/owner-character"))return json(route,uiDOwnerActor());
+    if(path.endsWith("/owner-character/selection"))return json(route,selectedOwnerRead(uiDOwnerActor()));
     if(path.endsWith("/app")||path===`/worlds/mine/${uiDWorld().world_id}`)return json(route,{schema_version:"local-world-app-v1",surface:"world_app",world:uiDWorld()});
     if(path.includes("/chat/threads/")){
       const role={world_character_id:"wc-image",character_id:character,display_name:"이미지 친구",handle:"image_friend",avatar_url:null,banner_url:null,role_key:null,control_mode:"autonomous",profile_capability:"available"};
@@ -419,13 +420,13 @@ test(`completed ${extension} generation displays original authenticated pixels w
     URL.createObjectURL=(value)=>{const url=create(value);if(value instanceof Blob){audit.types.push(value.type);audit.created.push(url);}return url;};
     URL.revokeObjectURL=(url)=>{audit.revoked.push(url);revoke(url);};
   });
-  let feedReads=0,jobReads=0,generationWrites=0;
+  let feedReads=0,summaryReads=0,jobReads=0,generationWrites=0;
   const post=uiDManualPost({id:"image-progress-post",title:"생성 장면",body:"새 사진이 붙는 글"});
   await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
     const request=route.request();const path=new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/,"");
     if(path.includes("/image-generation")&&request.method()!=="GET")generationWrites++;
-    if(path.endsWith("/manual-social/feed")){
-      feedReads++;
+    if(path.endsWith("/manual-social/feed") || path.endsWith(`/manual-social/posts/${post.id}/summary`)){
+      if(path.endsWith("/summary")) summaryReads++; else feedReads++;
       const media=jobReads>=2?[{id:7,media_type:"image",url:"/api/v1/media/assets/generated-one/content",alt_text:"새로 생성된 사진",source_kind:"generated",model:"z-image-turbo",prompt_hash:"a".repeat(64),byte_size:80,width:18,height:24,created_at:"2026-09-30T00:00:00Z"}]:[];
       return json(route,uiDManualFeed([{...post,media}]));
     }
@@ -441,7 +442,7 @@ test(`completed ${extension} generation displays original authenticated pixels w
   await expect(page.getByText("이미지 생성 대기",{exact:true})).toBeVisible();
   await expect(page.getByRole("img",{name:"새로 생성된 사진"})).toBeVisible();
   await expect(page.getByLabel("게시글 이미지 생성 상태")).toHaveCount(0);
-  expect(feedReads).toBe(2);expect(jobReads).toBe(3);expect(generationWrites).toBe(0);
+  expect(feedReads).toBe(1);expect(summaryReads).toBe(1);expect(jobReads).toBe(3);expect(generationWrites).toBe(0);
   const image=page.getByRole("img",{name:"새로 생성된 사진"});
   await expect.poll(()=>image.evaluate((element)=>[ (element as HTMLImageElement).naturalWidth,(element as HTMLImageElement).naturalHeight ])).toEqual([18,24]);
   expect(await page.evaluate(()=>Reflect.get(window,"__imageFormatAudit").types)).toContain(mime);

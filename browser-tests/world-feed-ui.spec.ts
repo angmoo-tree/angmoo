@@ -107,14 +107,22 @@ test("photo replacement and removal discard only old drafts and an upload failur
   await expect(title(page)).toHaveValue("Synthetic title"); expect(audit.providerCalls).toEqual([]);
 });
 
-test("upload pending disables photo and publication with an accessible busy name", async ({ page }, info) => {
+test("upload pending blocks publication and exposes status with replacement and cancellation", async ({ page }, info) => {
   const audit = await installWorldFeedFixture(page, info.project.name === "static-export", String(info.project.use.baseURL));
-  audit.uploadDelay = 700; await page.goto(feedRoute()); await fill(page);
+  let release!: () => void;
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/media/assets', async route => {
+    if (route.request().method() === 'POST') await pending;
+    await route.fallback();
+  });
+  await page.goto(feedRoute()); await fill(page);
   await composer(page).locator('input[type="file"]').setInputFiles(synthetic("png", "image/png"));
   await expect(publish(page)).toBeDisabled();
-  const busyPhoto = composer(page).locator('button[aria-busy="true"]');
-  await expect(busyPhoto).toHaveAccessibleName("사진을 업로드하고 확인하는 중…"); await expect(busyPhoto).toBeDisabled();
+  await expect(composer(page).getByRole("status")).toHaveText("사진을 업로드하고 확인하는 중…");
+  await expect(photo(page)).toBeEnabled();
+  await expect(composer(page).getByRole("button", {name:"사진 준비 취소"})).toBeEnabled();
   await expectActionSizes(page);
+  release();
   await expect(composer(page).getByRole("img", { name: "선택한 첨부 이미지 미리보기" })).toBeVisible(); await expect(publish(page)).toBeEnabled();
 });
 

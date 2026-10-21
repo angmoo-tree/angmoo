@@ -257,6 +257,7 @@ class MessageThread(Base):
 
 class MessageMessage(Base):
     __tablename__ = "message_messages"
+    __table_args__ = (Index("ix_message_messages_thread_created_id", "thread_id", "created_at", "id"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     thread_id: Mapped[str] = mapped_column(ForeignKey("message_threads.id"), nullable=False)

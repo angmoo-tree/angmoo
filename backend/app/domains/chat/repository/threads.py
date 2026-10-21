@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import hashlib
 from sqlalchemy import func, select, text
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, load_only
 
 from app.domains.chat import models
 
@@ -165,6 +165,20 @@ def list_thread_messages(db: Session, thread_id: str) -> list[models.MessageMess
     ).all()
 
 
+def message_page(db: Session, thread_id: str, *, limit: int, direction: str, boundary=None):
+    from sqlalchemy import and_, or_
+    from sqlalchemy.orm import selectinload
+    message = models.MessageMessage
+    query = select(message).options(selectinload(message.attachment)).where(message.thread_id == thread_id)
+    if boundary is not None:
+        at, message_id = boundary
+        query = query.where(or_(message.created_at > at, and_(message.created_at == at, message.id > message_id))
+                            if direction == "after" else
+                            or_(message.created_at < at, and_(message.created_at == at, message.id < message_id)))
+    query = query.order_by(message.created_at.asc(), message.id.asc()) if direction == "after" else query.order_by(message.created_at.desc(), message.id.desc())
+    return list(db.scalars(query.limit(limit + 1)))
+
+
 def latest_thread_message(db: Session, thread_id: str) -> models.MessageMessage | None:
     return db.scalar(
         select(models.MessageMessage)
@@ -192,14 +206,21 @@ def get_owned_thread(
 
 
 def list_committed_response_requests(
-    db: Session, thread_id: str
+    db: Session, thread_id: str, assistant_ids: list[int]
 ) -> list[models.ChatResponseRequest]:
+    if not assistant_ids:
+        return []
     return list(
         db.scalars(
-            select(models.ChatResponseRequest).where(
+            select(models.ChatResponseRequest).options(load_only(
+                models.ChatResponseRequest.request_id,
+                models.ChatResponseRequest.committed_assistant_message_id,
+                models.ChatResponseRequest.response_metadata_json,
+            )).where(
                 models.ChatResponseRequest.thread_id == thread_id,
                 models.ChatResponseRequest.state == "committed",
                 models.ChatResponseRequest.committed_assistant_message_id.is_not(None),
+                models.ChatResponseRequest.committed_assistant_message_id.in_(assistant_ids),
             )
         )
     )

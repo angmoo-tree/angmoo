@@ -46,6 +46,7 @@ from app.domains.social.contracts.writes import (
     OwnerReplyCommand,
     OwnerLikeCommand,
     SocialWriteConflictError,
+    SocialWriteValidationError,
     SocialWriteError,
     SocialWriteForbiddenError,
     SocialWriteNotFoundError,
@@ -66,6 +67,7 @@ from app.domains.social.service.post_authors import enrich_post_authors
 from app.domains.social.service.manual_feed import (
     get_owner_world_post_thread,
     list_owner_world_feed,
+    get_owner_world_post_summary,
 )
 from app.domains.social.dependencies import (
     get_world_profile_service,
@@ -656,7 +658,7 @@ def _raise_error(exc: Exception) -> None:
         ),
     ):
         code = status.HTTP_403_FORBIDDEN
-    elif isinstance(exc, WorldCharacterSocialProfileValidationError):
+    elif isinstance(exc, (WorldCharacterSocialProfileValidationError, SocialWriteValidationError)):
         code = status.HTTP_422_UNPROCESSABLE_CONTENT
     elif isinstance(exc, world_service.WorldArchivedError) or isinstance(
         exc, SocialWriteConflictError
@@ -709,6 +711,8 @@ def read_world_character_social_activity(
 def read_manual_social_feed(
     world_id: str,
     request: Request,
+    limit: int = Query(default=30, ge=1, le=100),
+    cursor: str | None = Query(default=None, max_length=1024),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
     references: ManualFeedReferences = Depends(get_manual_feed_references),
@@ -716,11 +720,24 @@ def read_manual_social_feed(
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
         return list_owner_world_feed(
-            db,
+            db, limit=limit, cursor=cursor,
             world_id=world_id,
             current_user_id=current_user.id,
             references=references,
         )
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+
+
+@manual_router.get("/{world_id}/manual-social/posts/{post_id}/summary", response_model=ManualSocialFeedRead)
+def read_manual_social_summary(world_id: str, post_id: str, request: Request,
+    db: Session = Depends(get_db), current_user=Depends(get_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references)) -> ManualSocialFeedRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return get_owner_world_post_summary(db, references=references, world_id=world_id,
+            current_user_id=current_user.id, post_id=post_id)
     except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")

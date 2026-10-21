@@ -73,12 +73,16 @@
       "intro": "관찰한 것을 꼼꼼하게 기록하는 히어로 지망생",
       "role_key": null,
       "preferred_address": "미도리야",
-      "interests": ["히어로", "분석", "훈련"],
+      "interests": [
+        "히어로",
+        "분석",
+        "훈련"
+      ],
       "background": "루멘 히어로 아카데미 학생"
     }
   },
   "world_feed": {
-    "schema_version": "owner-manual-social-v1",
+    "schema_version": "owner-manual-social-feed-v2",
     "world_id": "world-ui-f-lumen",
     "owner_world_character_id": "wc-ui-f-owner",
     "items": [
@@ -116,7 +120,9 @@
         "reply_count": 0,
         "like_count": 0
       }
-    ]
+    ],
+    "has_more": false,
+    "next_cursor": null
   },
   "global_feed": {
     "items": [

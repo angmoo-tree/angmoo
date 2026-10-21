@@ -1,3 +1,4 @@
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installIntegrationFixture } from "./home-activity-memory-fixture";
@@ -21,7 +22,7 @@ test("continuity: nested evidence opens the exact later-page reply and its paren
   const child = uiDManualPost({ id: "reply-child-later-page", title: "", body: "대댓글의 마지막 페이지 답글", replyToPostId: target.id });
   await page.route("**/api/backend/**", async (route) => {
     const url = new URL(route.request().url());
-    if (url.pathname.endsWith("/owner-character")) return json(route, uiDOwnerActor());
+    if (url.pathname.endsWith("/owner-character/selection")) return json(route, selectedOwnerRead(uiDOwnerActor()));
     if (url.pathname.includes("/manual-social/posts/")) {
       const targetId = url.pathname.split("/").at(-1);
       if (targetId === parent.id) return json(route, uiDManualThread(parent, [target], { rootId: root.id }));

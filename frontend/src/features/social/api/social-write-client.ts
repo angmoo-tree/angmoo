@@ -5,6 +5,7 @@ import { buildReplyTree } from "../utils/reply-tree";
 
 type ManualSocialReadOptions = {
   offset?: number;
+  cursor?: string;
   ownerWorldCharacterId?: string;
   signal?: AbortSignal;
 };
@@ -77,8 +78,9 @@ export function getManualSocialFeed(
   options: ManualSocialReadOptions = {},
 ): Promise<ManualSocialFeedRead> {
   return socialWriteRequest<ManualSocialFeedRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/feed`,
+    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/feed?limit=30${options.cursor ? `&cursor=${encodeURIComponent(options.cursor)}` : ""}`,
     { signal: options.signal },
+    "owner-manual-social-feed-v2",
   ).then((result) =>
     assertWorldScopedFeed(
       result,
@@ -131,56 +133,25 @@ export async function setOwnerManualLike(worldId: string, postId: string, ownerI
   return result;
 }
 
-function assertWorldScopedFeed(
-  result: ManualSocialFeedRead,
-  worldId: string,
-  rootPostId: string | null,
-  ownerWorldCharacterId?: string,
-): ManualSocialFeedRead {
-  if (
-    !Array.isArray(result.items) ||
-    result.items.some(
-      (item) =>
-        !Number.isInteger(item.reply_count) ||
-        item.reply_count < 0 ||
-        !Number.isInteger(item.like_count) ||
-        item.like_count < 0 ||
-        typeof item.author_world_character_id !== "string" ||
-        !["available", "unavailable"].includes(item.author_profile_capability),
-    )
-  ) {
-    throw new SocialWriteApiError(502, "manual_social_count_schema_mismatch");
-  }
-  const worldScopeMismatch =
-    result.world_id !== worldId ||
-    result.items.some((item) => item.world_id !== worldId) ||
-    (ownerWorldCharacterId !== undefined &&
-      result.owner_world_character_id !== ownerWorldCharacterId);
-  const uniqueItemIds = new Set(result.items.map((item) => item.id));
-  const threadScopeMismatch =
-    rootPostId !== null &&
-    (result.items.length === 0 ||
-      result.items[0]?.id !== (result.root_post_id ?? rootPostId)
-      || (result.target_post_id !== undefined && result.target_post_id !== rootPostId) ||
-      result.items[0]?.reply_to_post_id !== null ||
-      uniqueItemIds.size !== result.items.length ||
-      result.items
-        .slice(1)
-        .some((item) => item.reply_to_post_id === null || (
-          item.thread_root_post_id != null
-            ? item.thread_root_post_id !== (result.root_post_id ?? rootPostId)
-            : item.reply_to_post_id !== (result.root_post_id ?? rootPostId)
-        )));
-
-  if (worldScopeMismatch || threadScopeMismatch) {
-    throw new SocialWriteApiError(
-      502,
-      rootPostId === null
-        ? "manual_social_feed_scope_mismatch"
-        : "manual_social_thread_scope_mismatch",
-    );
+function assertWorldScopedFeed(result: ManualSocialFeedRead, worldId: string, _root: string | null, ownerId?: string): ManualSocialFeedRead {
+  if (!result || result.schema_version !== "owner-manual-social-feed-v2" || result.world_id !== worldId ||
+      !result.owner_world_character_id || (ownerId !== undefined && result.owner_world_character_id !== ownerId) ||
+      !Array.isArray(result.items) || result.items.length > 100 || new Set(result.items.map(p => p.id)).size !== result.items.length ||
+      typeof result.has_more !== "boolean" || (result.has_more ? typeof result.next_cursor !== "string" || !result.next_cursor || result.next_cursor.length > 1024 : result.next_cursor !== null) ||
+      result.items.some(p => !p || !p.id || p.world_id !== worldId || p.reply_to_post_id !== null || !p.author_world_character_id ||
+        !Number.isInteger(p.reply_count) || p.reply_count < 0 || !Number.isInteger(p.like_count) || p.like_count < 0 ||
+        !["available", "unavailable"].includes(p.author_profile_capability))) {
+    throw new SocialWriteApiError(502, "manual_social_feed_scope_mismatch", true);
   }
   return result;
+}
+
+export async function getManualSocialPostSummary(worldId: string, postId: string, options: ManualSocialReadOptions = {}) {
+  const page = assertWorldScopedFeed(await socialWriteRequest<ManualSocialFeedRead>(
+    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}/summary`,
+    { signal: options.signal }, "owner-manual-social-feed-v2"), worldId, null, options.ownerWorldCharacterId);
+  if (page.items.length !== 1 || page.items[0].id !== postId || page.has_more) throw new SocialWriteApiError(502, "manual_social_feed_scope_mismatch", true);
+  return page.items[0];
 }
 
 export function createOwnerManualPost(

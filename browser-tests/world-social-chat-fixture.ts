@@ -18,9 +18,12 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
   const message = (id: number, own = false) => ({id, thread_id: SYNTHETIC_THREAD, role: own ? "user" : "assistant", status: "ok", sender_user_id: own ? "local-owner" : null, sender_character_id: own ? null : "character-synthetic-responder", content: `Synthetic ${own ? "user" : "assistant"} message ${id}`, created_at: "2026-10-05T01:00:00Z", attachment: null});
   const thread = {id: SYNTHETIC_THREAD, world_id: FEED_WORLD, requester: role(ownerId(),true), responding: role("synthetic-responder"), selected_model: "gemini-3.1-flash-lite", selected_thinking_level: "medium", default_model: "gemini-3.1-flash-lite", default_thinking_level: "medium", model_binding_mode: "default", last_message_at: null, created_at: "2026-10-05T01:00:00Z", latest_message: null,
     messages: [message(1,true),message(2)], evidence_summaries: [{request_id:"synthetic-evidence",assistant_message_id:2,capability:"available",count:2}]};
+  const readThread = () => ({...thread, messages:thread.messages.slice(-50), evidence_summaries:thread.evidence_summaries.filter(e=>thread.messages.slice(-50).some(m=>m.id===e.assistant_message_id)), message_page:{ schema_version:"world-chat-message-page.v1",world_id:FEED_WORLD,thread_id:SYNTHETIC_THREAD,
+    items:thread.messages.slice(-50),evidence_summaries:thread.evidence_summaries,direction:"latest",has_more:thread.messages.length>50,
+    next_cursor:thread.messages.length>50?String(thread.messages.at(-50)!.id):null,oldest_cursor:String(thread.messages.at(-50)?.id??thread.messages[0]?.id??0),newest_cursor:String(thread.messages.at(-1)?.id??0)}});
   const state = {base, posts: [post(SYNTHETIC_ROOT),post(SYNTHETIC_REPLY,SYNTHETIC_ROOT),post("synthetic-leaf",SYNTHETIC_REPLY)],
     writes: [] as {path:string; method:string; key:string|undefined; data:Record<string,unknown>}[], reads: [] as string[], replyFailures:0, likeFailures:0, delay:0, corrupt:false, hiddenParent:false,
-    thread, threadCount:20, maxThreads:null as number|null|undefined, chatFailure:false, modelFailure:false, chatEventDelay:0};
+    thread, readThread, threadCount:20, maxThreads:null as number|null|undefined, chatFailure:false, modelFailure:false, chatEventDelay:0};
   const reply = (route:Route,data:unknown,status=200) => route.fulfill({status,json:data});
   const readPost = (value:ReturnType<typeof post>) => ({...value, reply_count: descendants(value.id).length});
   const descendants = (id:string):ReturnType<typeof post>[] => state.posts.filter(item => item.reply_to_post_id===id).flatMap(item=>[item,...descendants(item.id)]);
@@ -29,7 +32,13 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
     const request=route.request(), url=new URL(request.url()), path=url.pathname.replace(/^\/api\/(backend|v1)/,""), method=request.method();
     if (method==="GET") state.reads.push(path);
     else if (path.includes("manual-social") || path.includes("/chat/")) state.writes.push({path,method,key:request.headers()["idempotency-key"],data:request.postData()?request.postDataJSON():{}});
-    if (path===`/worlds/${FEED_WORLD}/manual-social/feed`) return reply(route,{schema_version:"owner-manual-social-v1",world_id:FEED_WORLD,owner_world_character_id:ownerId(),items:state.posts.map(readPost)});
+    if(path.endsWith("/memory-search/prepare") && method === "POST") return reply(route,{state:"disabled"});
+    if (path===`/worlds/${FEED_WORLD}/manual-social/feed`) return reply(route,{schema_version:"owner-manual-social-feed-v2",world_id:FEED_WORLD,owner_world_character_id:ownerId(),items:state.posts.filter(p => p.reply_to_post_id === null).map(readPost),has_more:false,next_cursor:null});
+    const summary=path.match(/\/manual-social\/posts\/([^/]+)\/summary$/);
+    if(summary){
+      const root=state.posts.find(p=>p.id===summary[1] && p.reply_to_post_id===null);
+      return root ? reply(route,{schema_version:"owner-manual-social-feed-v2",world_id:FEED_WORLD,owner_world_character_id:ownerId(),items:[readPost(root)],has_more:false,next_cursor:null}) : reply(route,{detail:"post_not_in_world"},404);
+    }
     const like=path.match(/\/manual-social\/posts\/([^/]+)\/like$/);
     if(like){
       if(state.likeFailures-- >0)return reply(route,{detail:"sqlite_busy_retry_exhausted"},503);
@@ -53,18 +62,27 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
       state.posts.push(created);
       return reply(route,{schema_version:"owner-manual-social-v1",operation:"reply",post:created,replayed:false,delivery:{provider_call_count:0,public_reaction_required:false,inbox_candidate_id:"synthetic-inbox",inbox_status:"pending"}},201);
     }
+    if(path===`/worlds/${FEED_WORLD}/world-characters/synthetic-responder`) return reply(route,{
+      schema_version:"world-character-profile-v1",world_id:FEED_WORLD,...role("synthetic-responder"),intro:"Synthetic responder",status:"active"});
     const profile=path.match(/\/world-characters\/([^/]+)\/social-profile$/);
     if(profile){ const tab=url.searchParams.get("tab"), rows=tab==="likes"?state.posts.filter(p=>p.viewer_like_state==="liked"):state.posts.filter(p=>p.author_world_character_id===profile[1]&&(tab==="replies"?Boolean(p.reply_to_post_id):!p.reply_to_post_id));
       return reply(route,{schema_version:"world-character-social-profile-v1",world_id:FEED_WORLD,world_character_id:profile[1],character_id:`character-${profile[1]}`,tab,counts:{post_count:1,reply_count:2,liked_post_count:state.posts.filter(p=>p.viewer_like_state==="liked").length,received_like_count:1},items:rows.map(p=>({...readPost(p),author_character_id:`character-${p.author_world_character_id}`,mentioned_characters:[],target_post_id:null,deleted_at:null})),next_cursor:null}); }
     if(path===`/worlds/${FEED_WORLD}/chat/threads`){ const payload={items:Array.from({length:state.threadCount},(_,i)=>({...thread,id:i?`synthetic-chat-${i}`:SYNTHETIC_THREAD,messages:[],evidence_summaries:[]})),ambiguous_legacy_count:0,max_threads:state.maxThreads};return reply(route,payload); }
-    if(path===`/worlds/${FEED_WORLD}/chat/threads/${SYNTHETIC_THREAD}`)return reply(route,thread);
+    if(path===`/worlds/${FEED_WORLD}/chat/threads/${SYNTHETIC_THREAD}`)return reply(route,readThread());
     if(path.endsWith("/requests/latest"))return reply(route,{response_request:null});
     if(path.endsWith("/requests/synthetic-request"))return accepted
       ? reply(route,accepted) : reply(route,{detail:"chat_request_not_found"},404);
+    if(path.endsWith("/messages")&&method==="GET") {
+      const before=url.searchParams.get("before"), after=url.searchParams.get("after"), direction=before!==null?"before":after!==null?"after":"latest";
+      const rows=thread.messages.filter(m=>before!==null?m.id<Number(before):after!==null?m.id>Number(after):true);
+      const page=direction==="after"?rows.slice(0,50):rows.slice(-50);
+      return reply(route,{schema_version:"world-chat-message-page.v1",world_id:FEED_WORLD,thread_id:SYNTHETIC_THREAD,items:page,evidence_summaries:thread.evidence_summaries.filter(e=>page.some(m=>m.id===e.assistant_message_id)),direction,has_more:rows.length>50,
+        next_cursor:rows.length>50?String(direction==="after"?page.at(-1)!.id:page[0].id):null,oldest_cursor:page.length?String(page[0].id):null,newest_cursor:String(page.at(-1)?.id??0)});
+    }
     if(path.endsWith("/messages")&&method==="POST"){
       if(state.chatFailure)return reply(route,{detail:"sqlite_busy_retry_exhausted"},503);
       const data=request.postDataJSON(), user={...message(thread.messages.length+1,true),content:data.content};thread.messages.push(user);
-      accepted={protocol_version:"chat-generation-stream.v1",request_id:"synthetic-request",request_scope_hash:"a".repeat(64),generation_id:"synthetic-generation",attempt_number:1,response_slot_id:"synthetic-slot",state:"accepted",route:null,retryable:false,failure_class:null,last_accepted_sequence:-1,user_message:user,assistant_message:null,response_metadata:{}};
+      accepted={protocol_version:"chat-generation-stream.v1",request_id:"synthetic-request",request_scope_hash:"a".repeat(64),generation_id:"synthetic-generation",attempt_number:1,response_slot_id:"synthetic-slot",state:"accepted",route:null,retryable:false,failure_class:null,last_accepted_sequence:-1,user_message:user,assistant_message:null,evidence_summary:null,response_metadata:{}};
       return reply(route,{outcome:"accepted",user_message:user,response_request:accepted});
     }
     if(path.endsWith("/events")){
@@ -79,7 +97,7 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
       if(state.modelFailure)return reply(route,{detail:"model_update_failed"},503);
       const data=request.postDataJSON();thread.model_binding_mode=data.mode;
       thread.selected_model=data.mode==="default"?thread.default_model:data.selected_model;thread.selected_thinking_level=data.mode==="default"?thread.default_thinking_level:data.selected_thinking_level??"high";
-      return reply(route,thread);
+      return reply(route,readThread());
     }
     if(path.includes("diagnostics"))return reply(route,{schema_version:"chat-retrieval-diagnostics.v1",capability:"disabled",enabled:false,requests:[],count:0});
     if(path.match(/^\/media\/assets\/[^/]+\/preflight$/)&&method==="GET")return reply(route,{allowed:true,reason:null});

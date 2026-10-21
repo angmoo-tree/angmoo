@@ -116,6 +116,15 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
     const worldRead = path.match(/^\/worlds\/mine\/([^/]+)$/);
     if (worldRead) return state.worldForbidden ? reply(route, { detail: "world_not_found" }, 404)
       : reply(route, { schema_version: "local-world-app-v1", surface: "world_app", world: uiDWorld(worldRead[1]) });
+    const selection = path.match(/^\/worlds\/([^/]+)\/owner-character\/selection$/);
+    if (selection) {
+      state.ownerReads[selection[1]] = (state.ownerReads[selection[1]] ?? 0) + 1;
+      const snapshot = owner(selection[1]);
+      if (state.ownerDelays[selection[1]]) await new Promise(resolve => setTimeout(resolve, state.ownerDelays[selection[1]]));
+      if (state.ownerFailures-- > 0) return reply(route, { detail: "owner_lookup_unavailable" }, 503);
+      state.ownerResponses.push(selection[1]);
+      return reply(route, {schema_version:"owner-character-selection-v1", world_id:selection[1], state:state.missingOwner ? "unselected" : "selected", actor:state.missingOwner ? null : snapshot});
+    }
     const ownerRead = path.match(/^\/worlds\/([^/]+)\/owner-character$/);
     if (ownerRead) {
       state.ownerReads[ownerRead[1]] = (state.ownerReads[ownerRead[1]] ?? 0) + 1;
@@ -165,7 +174,13 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
     const feed = path.match(/^\/worlds\/([^/]+)\/manual-social\/feed$/);
     if (feed) {
       if (state.feedFailures-- > 0) return reply(route, { detail: "sqlite_busy_retry_exhausted" }, 503);
-      return reply(route, readFeed(feed[1]));
+      const offset = Number(url.searchParams.get("cursor") ?? 0), roots = state.posts.filter(p => p.reply_to_post_id === null).map(p => ({ ...p, world_id: feed[1] }));
+      return reply(route, { ...readFeed(feed[1]), items: roots.slice(offset, offset + 30), has_more: roots.length > offset + 30, next_cursor: roots.length > offset + 30 ? String(offset + 30) : null });
+    }
+    const summary = path.match(/^\/worlds\/([^/]+)\/manual-social\/posts\/([^/]+)\/summary$/);
+    if (summary) {
+      const post = state.posts.find(p => p.id === summary[2]);
+      return post ? reply(route, { ...readFeed(summary[1]), items:[{ ...post, world_id: summary[1] }], has_more:false, next_cursor:null }) : reply(route,{detail:"post_not_in_world"},404);
     }
     const write = path.match(/^\/worlds\/([^/]+)\/manual-social\/posts$/);
     if (write && method === "POST") {

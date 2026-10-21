@@ -9,10 +9,10 @@ from memory.test_p8_l_h_canonical_recall import runtime_factory
 from memory.projection_fixture import index
 
 
-@pytest.mark.parametrize("version", (1, 8, 19, 37, 38, 39, 40))
+@pytest.mark.parametrize("version", (1, 8, 19, 37, 38, 39, 40, 41))
 def test_frozen_schema_manifests_and_current_trigger_parity(version):
     register_models()
-    metadata = schema.build_sqlite_baseline_metadata() if version == 40 else getattr(schema, f"build_sqlite_v{version}_metadata")()
+    metadata = schema.build_sqlite_baseline_metadata() if version == 41 else getattr(schema, f"build_sqlite_v{version}_metadata")()
     engine = create_engine("sqlite://")
     with engine.begin() as connection:
         metadata.create_all(connection)

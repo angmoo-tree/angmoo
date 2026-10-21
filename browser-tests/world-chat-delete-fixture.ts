@@ -9,7 +9,8 @@ export async function installChatDeleteFixture(page: Page, staticShell: boolean,
     deleteMode: "ok" as "ok" | "409" | "500" | "offline" | "corrupt" | "wrong_world" | "wrong_thread" | "lost" | "401" | "403" | "404",
     delay: 0, listDelay: 0, longDiagnostics: false, activeResponse: false, ownerId: "local-owner" as string | null,
   };
-  const thread = (id: string) => ({ ...base.thread, id,
+  const thread = (id: string) => ({ ...base.readThread(), id,
+    message_page: { ...base.readThread().message_page, thread_id:id },
     messages: id === SYNTHETIC_THREAD ? base.thread.messages : [],
     evidence_summaries: id === SYNTHETIC_THREAD ? base.thread.evidence_summaries : [],
   });

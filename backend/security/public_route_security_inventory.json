@@ -572,6 +572,11 @@
       "module": "app.domains.chat.router.retrieval_diagnostics",
       "endpoint": "diagnostic_requests"
     },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/messages": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.world_chat",
+      "endpoint": "get_world_message_page"
+    },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat_response",
@@ -617,6 +622,11 @@
       "module": "app.domains.social.router",
       "endpoint": "read_manual_social_post_thread"
     },
+    "GET /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/summary": {
+      "access": "owner-only",
+      "module": "app.domains.social.router",
+      "endpoint": "read_manual_social_summary"
+    },
     "GET /api/v1/worlds/{world_id}/media/{filename}": {
       "access": "public",
       "module": "app.domains.worlds.router",
@@ -636,6 +646,11 @@
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "read_owner_character"
+    },
+    "GET /api/v1/worlds/{world_id}/owner-character/selection": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.profile",
+      "endpoint": "read_owner_character_selection"
     },
     "GET /api/v1/worlds/{world_id}/owner-characters": {
       "access": "owner-only",
