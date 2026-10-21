@@ -11,7 +11,7 @@ Package authors retain all rights granted by their respective licenses.
 - `annotated-types 0.7.0` — OSI Approved :: MIT License
 - `anyio 4.15.1` — MIT
 - `attrs 26.1.0` — MIT
-- `certifi 2026.4.22` — MPL-2.0
+- `certifi 2026.10.19` — MPL-2.0
 - `cffi 2.0.0` — MIT
 - `charset-normalizer 3.4.7` — MIT
 - `click 8.3.3` — BSD-3-Clause
@@ -48,7 +48,7 @@ Package authors retain all rights granted by their respective licenses.
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
 - `pgvector 0.5.0` — MIT
-- `pillow 12.3.0` — MIT-CMU
+- `pillow 13.0.0` — MIT-CMU
 - `pluggy 1.6.0` — MIT
 - `pyasn1 0.6.4` — BSD-2-Clause
 - `pyasn1-modules 0.4.2` — BSD
@@ -176,7 +176,7 @@ Package authors retain all rights granted by their respective licenses.
   - Provide exact library and codec source/build links and keep rebuild/replacement rights available; no proprietary wrapping or remote conversion.
   - Redistribution must include corresponding source for the shipped library and its compiled dependencies. See docs/operations/local-photo-codec.md.
 
-### `python/certifi 2026.4.22`
+### `python/certifi 2026.10.19`
 
 - Reported license: `MPL-2.0`
 - Normalized license: `MPL-2.0`

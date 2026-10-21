@@ -84,7 +84,7 @@ from app.runtime.persistence.sqlite_schema import (
 SUPPORTED_SOURCE_VERSIONS = (
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
     13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -621,6 +621,12 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
+                if source_version < 41:
+                    # Only this isolated synthetic predecessor is reconstructed.
+                    # The real installer must add v41's indexes itself while
+                    # preserving all canonical rows and frozen older manifests.
+                    sql_connection.exec_driver_sql("DROP INDEX ix_message_messages_thread_created_id")
+                    sql_connection.exec_driver_sql("DROP INDEX ix_posts_world_root_page")
                 if source_version < 40:
                     # Reconstruct only this synthetic predecessor. Rebuilding
                     # auth_sessions also removes v40's column CHECK/FK/index;

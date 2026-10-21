@@ -132,3 +132,38 @@ Actual original SQLite lock holders, real-AI answer quality, phone installation,
 native ARM64 timing, screen-off activity and OEM power behavior remain unobserved
 by this implementation verification. They are not prerequisites for the approved
 PC handoff, but must not be labelled device PASS.
+
+## Initial CI findings and corrections (2026-10-22 KST)
+
+PR #395 tested `2bc3c548a1aa9200cf7a8700cefce25643c347e4`. Eleven inherited
+commits lacked DCO trailers. To preserve that published branch and avoid a force
+push, all seventeen commits were replayed with signoff on
+`feat/runtime-pages-termux-release`, starting from the same `origin/main`.
+Replay HEAD `8807ada1cc5b60d0dd8aefce760f401eae378476` has an identical tree to
+the first PR head and passes the DCO check. The old commits remain reachable on
+`feat/termux-release-common`; subsequent corrections belong to the new PR.
+
+The dependency and container gates rejected Pillow 12.3.0 and certifi
+2026.4.22. Only these two locked packages were upgraded to Pillow 13.0.0 and
+certifi 2026.10.19, with a matching minimum Pillow dependency, conditional
+license review and generated notices. The certifi license bytes are unchanged.
+No advisory was ignored or audit threshold weakened. Backend `uv audit` and
+production frontend `pnpm audit` pass. Angmoo does not use Pillow 13's removed
+APIs; image decode/geometry/metadata/card/codec/TLS regression results are in
+`ci-remediation-backend.log`: 166 passed, 3 optional-original fixture skips.
+
+Migration CI had incorrectly required every step to allow row mutation. It now
+requires the v40-to-v41 index-only contract to have no mutable identity tables,
+with all other existing steps still declaring their expected data deltas. Cold
+registration expects schema 41. The native upgrade fixture builder now includes
+v40 and removes only the two v41 indexes while reconstructing isolated older
+fixtures, so the real installer must add them. Frozen historical manifests and
+all production preservation checks remain intact. Five targeted cold-open,
+v1/v39/v40 fixture and authenticated v40 upgrade checks pass in
+`ci-remediation-v41-fixtures.log`.
+
+The existing World profile browser fixture now serves the selected-owner read
+contract. Its original profile-save/hidden-field assertions pass in both Next
+and static builds (`ci-remediation-creator-next.log`,
+`ci-remediation-creator-static.log`). Required workflow selection, fail-fast
+semantics, security and native upgrade gates are unchanged.

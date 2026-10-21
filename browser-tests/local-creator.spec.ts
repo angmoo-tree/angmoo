@@ -1,4 +1,5 @@
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { expect, test, type Page } from "@playwright/test";
 import type { CharacterCardSourceRead } from "../frontend/src/features/characters/types/agents";
 import { staticDocumentFallback } from "./world-ui-improvements-fixture";
@@ -79,6 +80,7 @@ async function fixture(page: Page, language: "ko" | "en" = "ko") {
     if (method !== "GET") writes.push({ path, body });
     if (path === "/worlds/world-test/creator-context") return reply(context());
     if (path === "/worlds/world-test/characters") return reply({schema_version:"studio-world-character-list-v1",world_id:world.id,items:[]});
+    if (path === "/worlds/world-test/owner-character/selection" && method === "GET") return reply(selectedOwnerRead(identity));
     if (path === "/worlds/world-test/my-profile/ensure") return reply(identity);
     if (path === "/worlds/world-test/my-profile" && method === "PATCH") {
       expect(body.version).toBe(identity.version);
