@@ -85,14 +85,16 @@ For P1/P4 controlled validation before publication, copy the validated candidate
 manifest and both ARM64 `.oci.tar` files to private Linux storage, then use:
 
 ```sh
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" install --manifest /absolute/candidate.json
+angmoo --home "$HOME/.local/share/angmoo-rehearsal" install --candidate-manifest /absolute/candidate.json
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" start
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" status
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" stop
 angmoo --home "$HOME/.local/share/angmoo-rehearsal" restart
 ```
 
-The manifest must contain the complete pair and exact hashes. Record source,
+The local manifest must contain exactly the ARM64 backend/frontend pair and exact
+hashes. Public release installation and `--manifest` still require all four
+amd64/ARM64 entries. Local candidates are not public release verification. Record source,
 archive/config/diff-ID identity, PRoot version, host architecture, QEMU or native,
 start/stop times, app readiness, restart data preservation, and stale/port/failure
 tests. Physical Android T01–T05/T11 additionally records setup command count,
@@ -110,3 +112,28 @@ checks reported that path unavailable. App start correctly refused the data
 root. This is not an Android PASS: startup, browser use and restart still require
 P4 on a real supported Termux device. Do not bypass the write-access check or
 change user-data permissions to force this rehearsal to pass.
+
+## Saved service logs
+
+`start` runs services in the background. View their saved output with:
+
+```sh
+angmoo logs --service all --tail 200
+angmoo logs --service backend --follow
+angmoo diagnostics
+angmoo logs --session <launch-id> --service frontend
+```
+
+Ctrl+C stops only the log viewer. Failed launches retain the first failed service,
+phase, UTC observation time, safe original error and observed exit code in
+`logs/<launch-id>/session.json`. The exit code is that of the PRoot command; it does
+not alone prove a guest crash or Android OOM. Readiness probe failures and cleanup
+failures are separate. `diagnostics` also reports bootstrap capture gaps.
+
+Logs stay in private storage (directory 0700, files 0600). Sensitive fields and
+recognizable credentials are redacted before writing. Inspect before sharing:
+application output can still contain personal text. Backend/frontend each retain
+three 2 MiB segments; supervisor/bootstrap each retain two 1 MiB segments. At most
+four sessions and 64 MiB are retained. Rotation, oversized lines, queue overflow
+and disk errors are reported as evidence gaps, never as complete capture.
+Viewing logs requires no running service, installed payload or product DB access.

@@ -23,8 +23,9 @@ import time
 import urllib.request
 import uuid
 
-from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, validate_manifest, verify_archive
+from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, validate_manifest, validate_candidate_manifest, verify_archive
 from processes import alive, atomic_json, await_ready, free_port, identity, session_members, stop_child
+from service_logs import Capture, create_session, launcher_hash, open_private, read_session, redact, save_session, select_session, show_logs, utc
 
 PROOT_VERSION = "5.10.0"
 DEFAULT_HOME = Path.home() / ".local/share/angmoo"
@@ -37,6 +38,10 @@ MESSAGES = {
     "not_installed": ("Run angmoo install --release 0.1.0 first.", "먼저 angmoo install --release 0.1.0을 실행하세요."),
     "download_failed": ("The official release is unavailable or the connection failed. Existing data is preserved.", "공식 배포물이 없거나 연결에 실패했습니다. 기존 데이터는 보존됩니다."),
     "stale_processes": ("An earlier session still owns processes. Do not start another backend; inspect diagnostics.", "이전 세션의 프로세스가 남아 있습니다. backend를 추가 실행하지 말고 diagnostics로 확인하세요."),
+    "logs_missing": ("No saved log session was found.", "저장된 로그 세션이 없습니다."),
+    "service_exited_before_ready": ("A service exited before it was ready. Inspect diagnostics and logs.", "서비스가 준비되기 전에 종료됐습니다. diagnostics와 logs로 확인하세요."),
+    "service_readiness_timeout": ("A service did not become ready in time. Inspect diagnostics and logs.", "서비스 준비가 제한 시간 안에 완료되지 않았습니다. diagnostics와 logs로 확인하세요."),
+    "logging_degraded": ("Some logs could not be saved. Inspect the reported gaps.", "로그 일부를 저장하지 못했습니다. 기록된 누락 범위를 확인하세요."),
 }
 
 
@@ -85,14 +90,19 @@ def reject_survivors(home: Path):
     require(not any(alive(p) or session_members(p) for p in state.get("children", {}).values()), "stale_processes")
 
 
-def install(home: Path, release: str | None, manifest_path: Path | None) -> None:
+def install(home: Path, release: str | None, manifest_path: Path | None, candidate_path: Path | None = None) -> None:
     executable = tools()
+    local_candidate = candidate_path is not None
+    require(sum(x is not None for x in (release, manifest_path, candidate_path)) == 1, "install_source_invalid")
+    manifest_path = candidate_path if local_candidate else manifest_path
     require(platform.machine() in ("aarch64", "arm64") or manifest_path is not None, "host_not_supported")
     with lock(home):
         reject_survivors(home)
         if manifest_path:
             manifest_path = manifest_path.resolve()
-            manifest = read_manifest(manifest_path)
+            manifest = read_manifest(manifest_path, require_all=False) if local_candidate else read_manifest(manifest_path)
+            if local_candidate:
+                validate_candidate_manifest(manifest)
         else:
             require(release is not None and VERSION.fullmatch(release), "release_version_invalid")
             url = f"https://github.com/{REPOSITORY}/releases/download/release-v{release}/release-manifest.json"
@@ -138,7 +148,8 @@ def install(home: Path, release: str | None, manifest_path: Path | None) -> None
         data_root.mkdir(mode=0o700, exist_ok=True)
         require(os.access(data_root, os.W_OK) and data_root.stat().st_mode & 0o077 == 0, "data_permissions_invalid")
         # Selection is atomic only after BOTH imports. Previous roots/data stay.
-        atomic_json(home / "installation.json", {"manifest": manifest, "containers": names, "data_root": str(data_root), "proot_version": PROOT_VERSION})
+        atomic_json(home / "installation.json", {"manifest": manifest, "containers": names, "data_root": str(data_root), "proot_version": PROOT_VERSION,
+                    "source_kind": "local_candidate" if local_candidate else "release", "host_architecture": platform.machine()})
         print("Installed; run angmoo start. / 설치 완료. angmoo start로 실행하세요.")
 
 
@@ -166,18 +177,44 @@ def installation(home: Path) -> dict:
     path = home / "installation.json"
     require(path.is_file() and not path.is_symlink(), "not_installed")
     value = json.loads(path.read_text(encoding="utf-8"))
-    validate_manifest(value["manifest"])
+    require(value.get("source_kind", "release") in ("release", "local_candidate"), "installation_invalid")
+    if value.get("source_kind") == "local_candidate":
+        validate_candidate_manifest(value["manifest"])
+    else:
+        validate_manifest(value["manifest"])
     require(value["proot_version"] == PROOT_VERSION and Path(value["data_root"]) == home / "data", "installation_invalid")
     require(set(value["containers"]) == {"backend", "frontend"} and all(re.fullmatch(r"angmoo-(?:backend|frontend)-[0-9a-f]{12}-[0-9a-f]{12}", v) for v in value["containers"].values()), "installation_invalid")
     return value
 
 
-def supervise(home: Path, fd: int, nonce: str) -> None:
+def failure_record(exc, service, phase, started, process=None, record=None):
+    code = str(exc) if isinstance(exc, ValueError) and re.fullmatch(r"[a-z_]+", str(exc)) else "service_start_failed"
+    summary = code in {"service_start_failed", "service_exited", "service_exited_before_ready", "service_readiness_timeout"}
+    return {"service": service, "phase": phase, "observed_at_utc": utc(),
+            "elapsed_ms": round((time.monotonic() - started) * 1000, 2), "code": code,
+            "exception_type": type(exc).__name__, "errno": getattr(exc, "errno", None),
+            "message_redacted": redact(str(exc))[:2048], "original_error_observed": not summary,
+            "original_error_scope": "host_adapter", "process_identity": record,
+            "returncode": process.poll() if process is not None else None, "exit_code_scope": "proot_command",
+            "termination_origin": "readiness_timeout" if code == "service_readiness_timeout" else "spontaneous"}
+
+
+def session_metadata(config):
+    return {"launcher_files_sha256": launcher_hash(), "source_sha": config["manifest"]["source_sha"],
+            "version": config["manifest"]["version"], "host_architecture": platform.machine(),
+            "payload_architecture": "arm64", "images": [{k: i[k] for k in ("service", "manifest_digest")} for i in config["manifest"].get("images", [])],
+            "preparation_budget": "image_owned; inspect backend preparation diagnostics"}
+
+
+def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
     # The inheritable flock is held for the entire host session, including drain.
     owner_lock = os.fdopen(fd, "a+")
     children = {}
     state = {"state": "starting", "nonce": nonce, "owner": identity(os.getpid()), "children": {}}
     stopping = False
+    started, capture, log_path = time.monotonic(), None, None
+    service, phase = "supervisor", "bootstrap"
+    state.update(schema="angmoo-host-state.v2", primary_failure=None, cleanup_failures=[], services={})
 
     def request_stop(*_):
         nonlocal stopping
@@ -187,6 +224,24 @@ def supervise(home: Path, fd: int, nonce: str) -> None:
     signal.signal(signal.SIGINT, request_stop)
     try:
         config = installation(home)
+        log_path = home / "logs" / nonce
+        if not log_path.exists():
+            log_path = create_session(home, nonce, session_metadata(config))
+        capture = Capture(log_path)
+        if capture_self:
+            # Hand bootstrap stdout/stderr over to the supervisor's bounded
+            # collector. Closing the inherited write ends lets start detach.
+            class Streams:
+                pass
+            streams = Streams()
+            for name, descriptor in (("stdout", 1), ("stderr", 2)):
+                getattr(sys, name).flush()
+                reader, writer = os.pipe()
+                setattr(streams, name, os.fdopen(reader, "rb", buffering=0))
+                os.dup2(writer, descriptor)
+                os.close(writer)
+            capture.attach("supervisor", streams)
+        state["log_reference"] = "logs/" + nonce
         source = config["manifest"]["source_sha"]
         state.update(source_sha=source, version=config["manifest"]["version"])
         atomic_json(home / "state.json", state)
@@ -195,54 +250,139 @@ def supervise(home: Path, fd: int, nonce: str) -> None:
         free_port(3000)
         for service, url in (("backend", "http://127.0.0.1:8080/health"), ("frontend", "http://127.0.0.1:3000/api/runtime-identity")):
             require(not stopping, "start_cancelled")
-            process = subprocess.Popen(command(executable, config, service, nonce), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            phase = "spawn"
+            process = subprocess.Popen(command(executable, config, service, nonce), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
             children[service] = process
+            capture.attach(service, process)
             state["children"][service] = identity(process.pid)
+            detail = state["services"][service] = {"phase": "readiness", "probe_count": 0, "started_at_utc": utc()}
+            phase = "readiness"
             atomic_json(home / "state.json", state)
-            await_ready(process, url, source, nonce, backend=service == "backend", cancelled=lambda: stopping or (home / f"stop-{nonce}").exists())
+            def observe(probe):
+                detail.update(last_probe=probe, probe_count=detail["probe_count"] + 1)
+            await_ready(process, url, source, nonce, backend=service == "backend", cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
+            detail.update(phase="running", ready_at_utc=utc())
+            capture.emit("supervisor", "event", json.dumps({"service": service, "event": "ready", "probe_count": detail["probe_count"]}))
         state["state"] = "running"
+        phase = "running"
         atomic_json(home / "state.json", state)
         while not stopping and not (home / f"stop-{nonce}").exists():
-            require(all(p.poll() is None for p in children.values()), "service_exited")
+            for service, process in children.items():
+                require(process.poll() is None, "service_exited")
             time.sleep(0.5)
     except Exception as exc:
-        state["error"] = str(exc) if isinstance(exc, ValueError) and re.fullmatch(r"[a-z_]+", str(exc)) else "service_start_failed"
+        if str(exc) != "start_cancelled":
+            state["primary_failure"] = failure_record(exc, service, phase, started, children.get(service), state["children"].get(service))
+            state["error"] = state["primary_failure"]["code"]
+            if capture:
+                capture.emit("supervisor", "error", json.dumps(state["primary_failure"], ensure_ascii=False))
     finally:
         state["state"] = "stopping"
-        atomic_json(home / "state.json", state)
+        def persist():
+            try:
+                atomic_json(home / "state.json", state)
+            except OSError as exc:
+                if len(state["cleanup_failures"]) < 8:
+                    state["cleanup_failures"].append(failure_record(exc, "supervisor", "logging", started))
+        persist()
         for service in ("frontend", "backend"):
             if service in children:
                 try:
-                    stop_child(children[service], state["children"][service], 20 if service == "frontend" else 200)
+                    record = state["children"].get(service)
+                    if record is None:
+                        # A child whose identity could not be established must
+                        # not authorize signalling an unknown process group.
+                        children[service].wait(timeout=1)
+                    else:
+                        stop_child(children[service], record, 20 if service == "frontend" else 200)
                 except (OSError, ValueError, subprocess.TimeoutExpired):
-                    state["error"] = "owned_process_stop_failed"
-        state["state"] = "failed" if state.get("error") else "stopped"
-        atomic_json(home / "state.json", state)
+                    state["cleanup_failures"].append({"service": service, "phase": "shutdown", "code": "owned_process_stop_failed", "observed_at_utc": utc()})
+                primary = state.get("primary_failure") or {}
+                detail = state["services"].setdefault(service, {})
+                detail.update(returncode=children[service].poll(), exit_code_scope="proot_command", ended_at_utc=utc(),
+                              termination_origin=(primary["termination_origin"] if primary.get("service") == service
+                                                  else "sibling_failure" if primary else "user_stop"))
+                if capture:
+                    capture.emit("supervisor", "event", json.dumps({"event": "exit", "service": service, **detail}))
+        if capture:
+            if capture_self:
+                sys.stdout.flush()
+                sys.stderr.flush()
+                with open(os.devnull, "wb") as null:
+                    os.dup2(null.fileno(), 1)
+                    os.dup2(null.fileno(), 2)
+            coverage = capture.close()
+            state["log_capture"] = coverage
+            try:
+                metadata = read_session(log_path)
+                metadata.update(ended_at_utc=utc(), **coverage, primary_failure=state["primary_failure"],
+                                cleanup_failures=state["cleanup_failures"], services=state["services"])
+                save_session(log_path, metadata)
+            except (OSError, ValueError) as exc:
+                state["cleanup_failures"].append(failure_record(exc, "supervisor", "logging", started))
+        state["state"] = "failed" if state.get("error") or state["cleanup_failures"] else "stopped"
+        persist()
         owner_lock.close()
 
 
 def start(home: Path) -> None:
     tools()
-    installation(home)
+    config = installation(home)
     with lock(home) as owner_lock:
         reject_survivors(home)
         free_port(8080)
         free_port(3000)
         nonce = uuid.uuid4().hex
-        process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--home", str(home), "_supervise", "--fd", str(owner_lock.fileno()), "--nonce", nonce], pass_fds=(owner_lock.fileno(),), start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        deadline = time.monotonic() + 370
-        while time.monotonic() < deadline:
-            state = read_state(home)
-            if state.get("nonce") == nonce:
-                if state["state"] == "running":
-                    print("Angmoo: http://127.0.0.1:3000 / 브라우저에서 이 주소를 여세요.")
-                    return
-                if state["state"] in ("stopped", "failed"):
-                    raise ValueError(state.get("error", "service_start_failed"))
-            require(process.poll() is None, "supervisor_exited")
-            time.sleep(0.5)
-        (home / f"stop-{nonce}").touch(mode=0o600)
-        raise ValueError("service_readiness_timeout")
+        path = create_session(home, nonce, session_metadata(config))
+        bootstrap = Capture(path, names=("bootstrap",))
+        try:
+            process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--home", str(home), "_supervise", "--fd", str(owner_lock.fileno()), "--nonce", nonce], pass_fds=(owner_lock.fileno(),), start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except OSError as exc:
+            bootstrap.emit("bootstrap", "error", str(exc))
+            coverage = bootstrap.close()
+            metadata = read_session(path)
+            metadata.update(ended_at_utc=utc(), **coverage,
+                            primary_failure=failure_record(exc, "supervisor", "spawn", time.monotonic()))
+            save_session(path, metadata)
+            raise
+        bootstrap.attach("bootstrap", process)
+        try:
+            await_start(home, path, nonce, process)
+        except KeyboardInterrupt:
+            (home / f"stop-{nonce}").touch(mode=0o600)
+            raise ValueError("start_cancelled") from None
+        finally:
+            coverage = bootstrap.close()
+            with open_private(path / "bootstrap-summary.json") as stream:
+                stream.write((json.dumps(coverage) + "\n").encode())
+
+
+def await_start(home, path, nonce, process):
+    deadline = time.monotonic() + 370
+    while time.monotonic() < deadline:
+        state = read_state(home)
+        if state.get("nonce") == nonce:
+            if state["state"] == "running":
+                # The supervisor owns subsequent errors and service pipes.
+                print("Angmoo: http://127.0.0.1:3000 / 브라우저에서 이 주소를 여세요.")
+                print("Logs: angmoo logs --service all --follow / 로그: angmoo logs --service all --follow")
+                return
+            if state["state"] in ("stopped", "failed"):
+                print(json.dumps(state.get("primary_failure"), ensure_ascii=False), file=sys.stderr)
+                raise ValueError(state.get("error", "service_start_failed"))
+        if process.poll() is not None:
+            state = {"state": "failed", "nonce": nonce, "error": "supervisor_exited", "log_reference": "logs/" + nonce,
+                     "primary_failure": {"service": "supervisor", "phase": "bootstrap", "observed_at_utc": utc(),
+                                         "returncode": process.returncode, "exit_code_scope": "supervisor", "original_error_observed": False},
+                     "log_capture": {"capture_complete": False}}
+            atomic_json(home / "state.json", state)
+            metadata = read_session(path)
+            metadata.update(ended_at_utc=utc(), primary_failure=state["primary_failure"], capture_complete=False)
+            save_session(path, metadata)
+            raise ValueError("supervisor_exited")
+        time.sleep(0.5)
+    (home / f"stop-{nonce}").touch(mode=0o600)
+    raise ValueError("service_readiness_timeout")
 
 
 def stop(home: Path) -> None:
@@ -263,6 +403,7 @@ def stop(home: Path) -> None:
 
 
 def main() -> int:
+    os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--home", type=Path, default=DEFAULT_HOME)
     commands = parser.add_subparsers(dest="action", required=True)
@@ -270,25 +411,44 @@ def main() -> int:
     choice = p.add_mutually_exclusive_group(required=True)
     choice.add_argument("--release")
     choice.add_argument("--manifest", type=Path)
-    for name in ("start", "stop", "restart", "status", "diagnostics"):
+    choice.add_argument("--candidate-manifest", type=Path)
+    for name in ("start", "stop", "restart", "status"):
         commands.add_parser(name)
+    p = commands.add_parser("diagnostics")
+    p.add_argument("--session")
+    p = commands.add_parser("logs")
+    p.add_argument("--session")
+    p.add_argument("--service", choices=("backend", "frontend", "supervisor", "all"), default="all")
+    p.add_argument("--tail", type=int, choices=range(1, 2001), metavar="1..2000", default=200)
+    p.add_argument("--follow", action="store_true")
     p = commands.add_parser("_supervise", help=argparse.SUPPRESS)
     p.add_argument("--fd", type=int, required=True)
     p.add_argument("--nonce", required=True)
     args = parser.parse_args()
     try:
+        if args.action == "logs":
+            show_logs(args.home, args.service, args.session, args.tail, args.follow)
+            return 0
         if args.action in ("status", "diagnostics"):
             state = read_state(args.home.resolve())
             if not alive(state.get("owner", {})) and state.get("state") in ("running", "starting", "stopping"):
                 state["state"] = "stale"
-            print(json.dumps({k: state[k] for k in ("state", "source_sha", "version", "error") if k in state}, ensure_ascii=False))
+            if args.action == "diagnostics":
+                path = select_session(args.home, args.session)
+                metadata = read_session(path)
+                summary = path / "bootstrap-summary.json"
+                from service_logs import checked
+                bootstrap = json.loads(checked(summary).read_text()) if summary.exists() else None
+                print(json.dumps({"current": state, "session": metadata, "bootstrap_capture": bootstrap}, ensure_ascii=False, indent=2))
+            else:
+                print(json.dumps({k: state[k] for k in ("state", "source_sha", "version", "error", "primary_failure", "log_reference") if k in state}, ensure_ascii=False))
             return 0
         home = private_home(args.home)
         if args.action == "install":
-            install(home, args.release, args.manifest)
+            install(home, args.release, args.manifest, args.candidate_manifest)
         elif args.action == "_supervise":
             require(re.fullmatch(r"[0-9a-f]{32}", args.nonce), "state_invalid")
-            supervise(home, args.fd, args.nonce)
+            supervise(home, args.fd, args.nonce, capture_self=True)
         elif args.action == "start":
             start(home)
         elif args.action == "stop":

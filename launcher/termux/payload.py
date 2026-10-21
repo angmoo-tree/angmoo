@@ -49,6 +49,13 @@ def read_manifest(path: Path, *, require_all: bool = True) -> dict:
     return value
 
 
+def validate_candidate_manifest(value: dict) -> None:
+    """Explicit local ARM64 pair; never relax the public release contract."""
+    validate_manifest(value, require_all=False)
+    require({(i["service"], i["platform"]) for i in value["images"]} ==
+            {("backend", "linux/arm64"), ("frontend", "linux/arm64")}, "candidate_arm64_pair_required")
+
+
 def validate_manifest(value: dict, *, require_all: bool = True) -> None:
     require(isinstance(value, dict) and value.get("schema") == "angmoo-release-candidate.v1", "manifest_schema_invalid")
     require(value.get("repository") == REPOSITORY, "manifest_repository_invalid")

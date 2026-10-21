@@ -10,6 +10,7 @@ import socket
 import subprocess
 import time
 import urllib.request
+import urllib.error
 
 from payload import require
 
@@ -46,13 +47,37 @@ def free_port(port: int) -> None:
             raise ValueError("port_in_use") from exc
 
 
-def ready(url: str, source: str, nonce: str, *, backend: bool) -> bool:
+def probe_ready(url: str, source: str, nonce: str, *, backend: bool) -> dict:
     try:
         with urllib.request.urlopen(url, timeout=2) as response:
-            payload = json.loads(response.read(65537))
-        return payload.get("source_sha") == source and payload.get("launch_id") == nonce and payload.get("version") == "0.1.0" and (not backend or payload.get("status") == "ok" and payload.get("persistence") == "sqlite" and payload.get("graph") == "ladybug")
-    except (OSError, ValueError):
-        return False
+            raw = response.read(65537)
+        if len(raw) > 65536:
+            return {"ready": False, "code": "response_too_large"}
+        payload = json.loads(raw)
+        if not isinstance(payload, dict):
+            return {"ready": False, "code": "invalid_json_shape"}
+        for key, expected in (("source_sha", source), ("launch_id", nonce), ("version", "0.1.0")):
+            if payload.get(key) != expected:
+                return {"ready": False, "code": key + "_mismatch"}
+        if backend and (payload.get("status"), payload.get("persistence"), payload.get("graph")) != ("ok", "sqlite", "ladybug"):
+            return {"ready": False, "code": "backend_not_ready"}
+        return {"ready": True, "code": "ready"}
+    except urllib.error.HTTPError as exc:
+        return {"ready": False, "code": "http_status", "http_status": exc.code}
+    except urllib.error.URLError as exc:
+        reason = exc.reason
+        return {"ready": False, "code": "timeout" if isinstance(reason, TimeoutError) else "connection_error",
+                "exception_type": type(reason).__name__, "errno": getattr(reason, "errno", None)}
+    except TimeoutError:
+        return {"ready": False, "code": "timeout"}
+    except ValueError:
+        return {"ready": False, "code": "invalid_json"}
+    except OSError as exc:
+        return {"ready": False, "code": "io_error", "exception_type": type(exc).__name__, "errno": exc.errno}
+
+
+def ready(url: str, source: str, nonce: str, *, backend: bool) -> bool:
+    return probe_ready(url, source, nonce, backend=backend)["ready"]
 
 
 def session_members(record: dict) -> list[dict]:
@@ -107,12 +132,14 @@ def stop_child(process: subprocess.Popen, record: dict, grace: float) -> None:
     raise ValueError("owned_process_stop_failed")
 
 
-def await_ready(process, url, source, nonce, *, backend, timeout=180, cancelled=lambda: False):
+def await_ready(process, url, source, nonce, *, backend, timeout=180, cancelled=lambda: False, observe=lambda value: None):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         require(not cancelled(), "start_cancelled")
         require(process.poll() is None, "service_exited_before_ready")
-        if ready(url, source, nonce, backend=backend):
+        probe = probe_ready(url, source, nonce, backend=backend)
+        observe(probe)
+        if probe["ready"]:
             return
         time.sleep(0.5)
     raise ValueError("service_readiness_timeout")

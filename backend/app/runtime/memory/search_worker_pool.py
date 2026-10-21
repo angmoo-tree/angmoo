@@ -6,6 +6,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 import multiprocessing
+import logging
 import pickle
 from time import monotonic
 from uuid import uuid4
@@ -15,6 +16,9 @@ from app.contracts.retrieval_observation import observe
 from app.runtime.memory.search_worker_child import MAX_MESSAGE_BYTES, PROTOCOL, run_worker
 from app.runtime.memory.worker_diagnostics import WorkerTrace, failure
 from app.runtime.memory.search_worker_progress import ProgressSlots
+from app.runtime.memory.preparation_budget import PROCESS_PREPARATION_SECONDS, ROUND_PREPARATION_SECONDS
+
+logger = logging.getLogger(__name__)
 
 
 class SearchWorkerUnavailable(RuntimeError):
@@ -147,8 +151,9 @@ class SearchReadWorkers:
         return message
 
     async def _prepare_round(self, slots):
+        started = monotonic()
         try:
-            async with asyncio.timeout(60):
+            async with asyncio.timeout_at(started + ROUND_PREPARATION_SECONDS):
                 await asyncio.gather(*(self._prepare(slot) for slot in slots))
         except asyncio.CancelledError:
             raise
@@ -159,9 +164,14 @@ class SearchReadWorkers:
                 if slot.state == "starting":
                     await self._retire(slot)
             await self._notify()
+            logger.info("memory_worker_preparation_round axis=%s budget_seconds=%s elapsed_ms=%.2f ready=%s retired=%s",
+                        self._axis, ROUND_PREPARATION_SECONDS, (monotonic() - started) * 1000,
+                        sum(s.state in {"ready", "busy"} for s in slots), sum(s.joined for s in slots))
 
     async def _prepare(self, slot):
         sender = None
+        queued = monotonic()
+        phase, started, error_type = "slot_wait", None, None
         try:
             async with self._control.preparation_slots:
                 if self._stopped:
@@ -178,25 +188,32 @@ class SearchReadWorkers:
                     args=(sender, self._axis, slot.identifier, self._requested_generation,
                           arguments, slot.progress, self._child_target), daemon=True)
                 started = monotonic()
+                deadline = started + PROCESS_PREPARATION_SECONDS
+                phase = "process_start"
                 slot.start_task = asyncio.create_task(self._control.run(slot.process.start))
-                async with asyncio.timeout(30):
+                async with asyncio.timeout_at(deadline):
                     await asyncio.shield(slot.start_task)
                     sender.close()
                     sender = None
                     slot.sender = None
-                    boot = await self._receive(slot, started + 30)
+                    phase = "waiting_boot"
+                    boot = await self._receive(slot, deadline)
                     slot.boot_ms = (monotonic() - started) * 1000
-                    ready = await self._receive(slot, started + 30)
+                    phase = "waiting_ready"
+                    ready = await self._receive(slot, deadline)
                     if boot.get("kind") != "BOOT" or ready.get("kind") != "READY":
                         raise SearchWorkerUnavailable("memory_search_preparation_protocol")
                 slot.preparation_ms = (monotonic() - started) * 1000
                 slot.child_import_ms = ready["import_ms"]
                 slot.state = "ready"
+                phase = "ready"
                 await self._notify()
         except asyncio.CancelledError:
+            error_type = "CancelledError"
             await self._retire(slot)
             raise
         except Exception as exc:
+            error_type = type(exc).__name__
             self._preparation_failure = failure(exc, "process_start" if not slot.process or slot.process.pid is None else "child_bootstrap")
             self._reason, self._failed_at = "memory_search_preparation_failed", monotonic()
             await self._retire(slot)
@@ -204,6 +221,10 @@ class SearchReadWorkers:
             if sender is not None and (slot.start_task is None or slot.start_task.done()):
                 sender.close()
                 slot.sender = None
+            logger.info("memory_worker_preparation axis=%s worker=%s phase=%s budget_seconds=%s queue_ms=%.2f preparation_ms=%s boot_ms=%s child_import_ms=%s exit_code=%s joined=%s error_type=%s",
+                        self._axis, slot.identifier, phase, PROCESS_PREPARATION_SECONDS,
+                        ((started or monotonic()) - queued) * 1000, slot.preparation_ms, slot.boot_ms,
+                        slot.child_import_ms, slot.exit_code, slot.joined, error_type)
 
     async def _retire(self, slot):
         async with slot.retire_lock:
