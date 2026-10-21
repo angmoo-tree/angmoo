@@ -1,4 +1,5 @@
 """Owner daily plan and runtime-mode HTTP endpoints."""
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -33,6 +34,7 @@ def _raise_plan_error(exc: exceptions.DailyActivityPlanError) -> None:
 def get_daily_activity_plan(
     character_id: str,
     world_id: str,
+    local_date: date | None = None,
     db: Session = Depends(get_db),
     user: PlanOwner = Depends(get_current_user),
     references: PlanReferences = Depends(get_plan_references),
@@ -44,6 +46,7 @@ def get_daily_activity_plan(
             world_id=world_id,
             user=user,
             references=references,
+            local_date=local_date,
         )
     except exceptions.DailyActivityPlanError as exc:
         _raise_plan_error(exc)

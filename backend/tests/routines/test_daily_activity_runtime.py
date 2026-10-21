@@ -368,6 +368,25 @@ def test_prepare_creates_four_items_without_enabling_autonomy_and_reuses() -> No
         assert db.scalar(select(func.count(models.DailyActivityPlanItem.id))) == 4
 
 
+def test_plan_absence_is_typed_and_requested_date_preserves_existing_plan():
+    from app.domains.routines.exceptions import DailyActivityPlanAbsentError, DailyActivityPlanNotFoundError
+    engine = _engine()
+    now = _utc(datetime(2026, 8, 9, 0, 30))
+    with Session(engine, expire_on_commit=False) as db:
+        _world_row, fixture, _other = _seed(db)
+        arguments = dict(references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id,
+                         world_id=fixture.world_character.world_id, user=fixture.user, now=now)
+        with pytest.raises(DailyActivityPlanAbsentError):
+            _actual_domains_routines_service_plans.get_activity_plan(db, **arguments)
+        created = _prepare(db, fixture, now=now)
+        result = _actual_domains_routines_service_plans.get_activity_plan(db, **{**arguments, "now": now + timedelta(days=1)}, local_date=created.local_date)
+        assert result.id == created.id
+        with pytest.raises(DailyActivityPlanNotFoundError) as missing:
+            _actual_domains_routines_service_plans.get_activity_plan(db, **{**arguments, "character_id": "missing"})
+        assert not isinstance(missing.value, DailyActivityPlanAbsentError)
+    engine.dispose()
+
+
 def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None:
     engine = _engine()
     now = _utc(datetime(2026, 8, 9, 0, 30))

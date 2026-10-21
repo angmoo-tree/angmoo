@@ -1,7 +1,8 @@
 """Daily plan policy, own persistence, and the original transaction boundary."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
+from app.domains.routines.exceptions import DailyActivityPlanAbsentError
 from hashlib import sha256
 from typing import Any
 
@@ -307,6 +308,7 @@ def get_activity_plan(
     world_id: str,
     user: PlanOwner,
     references: PlanReferences,
+    local_date: date | None = None,
     now: datetime | None = None,
     clock: Clock | None = None,
 ) -> schemas.DailyActivityPlanRead:
@@ -317,7 +319,7 @@ def get_activity_plan(
         world_id=world_id,
         user=user,
     )
-    target_date = local_activity_date(current, scope.environment.timezone)
+    target_date = local_date or local_activity_date(current, scope.environment.timezone)
     plan = db.scalar(
         select(models.DailyActivityPlan).where(
             models.DailyActivityPlan.world_character_id == scope.world_character.id,
@@ -325,7 +327,7 @@ def get_activity_plan(
         )
     )
     if plan is None:
-        raise DailyActivityPlanNotFoundError(character_id)
+        raise DailyActivityPlanAbsentError(character_id)
     return _plan_read(
         db,
         plan=plan,

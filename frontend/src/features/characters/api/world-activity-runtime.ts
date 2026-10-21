@@ -177,7 +177,7 @@ export class DailyActivityPlanApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly detail: unknown,
+    readonly detail: unknown = null,
   ) {
     super(message);
     this.name = "DailyActivityPlanApiError";
@@ -226,15 +226,9 @@ function planPath(characterId: string, worldId: string, suffix = "") {
   return `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/activity-plan${suffix}`;
 }
 
-export async function getDailyActivityPlan(characterId: string, worldId: string, signal?: AbortSignal) {
-  try {
-    return await apiRequest<DailyActivityPlanRead>(planPath(characterId, worldId), { signal });
-  } catch (error) {
-    if (error instanceof DailyActivityPlanApiError && error.status === 404) {
-      return null;
-    }
-    throw error;
-  }
+export function getDailyActivityPlan(characterId: string, worldId: string, signal?: AbortSignal, localDate?: string) {
+  const suffix = localDate ? `?local_date=${encodeURIComponent(localDate)}` : "";
+  return apiRequest<DailyActivityPlanRead>(planPath(characterId, worldId, suffix), { signal });
 }
 
 export function prepareDailyActivityPlan(
@@ -297,6 +291,27 @@ function preparationPath(characterId: string, worldId: string) {
 
 export function getDailyPreparation(characterId: string, worldId: string, signal?: AbortSignal) {
   return apiRequest<DailyPreparationRead>(preparationPath(characterId, worldId), { signal });
+}
+
+// LOCAL: preparation owns the optional plan. One reconciliation handles a date
+// rollover/replacement; a newer version of the same plan remains valid.
+export async function getPreparedDailyPlan(characterId: string, worldId: string, signal?: AbortSignal) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const preparation = await getDailyPreparation(characterId, worldId, signal);
+    if (!preparation.plan_id) return { preparation, plan: null };
+    try {
+      const plan = await getDailyActivityPlan(characterId, worldId, signal, preparation.local_date);
+      if (plan.world_id !== worldId || plan.world_character_id !== preparation.world_character_id) {
+        throw new DailyActivityPlanApiError("daily_plan_scope_invalid", 502);
+      }
+      if (plan.id === preparation.plan_id && plan.local_date === preparation.local_date &&
+          (preparation.plan_version === null || plan.version >= preparation.plan_version)) return { preparation, plan };
+    } catch (error) {
+      if (!(error instanceof DailyActivityPlanApiError && error.message === "activity_plan_absent")) throw error;
+    }
+    if (attempt === 1) throw new DailyActivityPlanApiError("plan_lost", 409);
+  }
+  throw new DailyActivityPlanApiError("plan_lost", 409);
 }
 
 export function regenerateDailyPreparation(characterId: string, worldId: string, requestId: string, expectedVersion?: number) {

@@ -41,6 +41,11 @@ class DailyActivityPlanNotFoundError(DailyActivityPlanError):
     reason_code = "activity_plan_not_found"
 
 
+class DailyActivityPlanAbsentError(DailyActivityPlanNotFoundError):
+    """Authorized scope exists, but has no plan for the requested local date."""
+    reason_code = "activity_plan_absent"
+
+
 class DailyActivityPlanForbiddenError(DailyActivityPlanError):
     reason_code = "character_not_owned"
 

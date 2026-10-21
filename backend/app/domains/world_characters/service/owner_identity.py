@@ -145,6 +145,14 @@ class OwnerControlledIdentityService:
             raise OwnerControlledIdentityNotFoundError(world_id)
         return _snapshot(character, world_character, db=self._db)
 
+    def selection(self, *, world_id: str, current_user_id: str):
+        """Read selection without creating an identity or hiding a broken reference."""
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        if self._find_identity(world_id, current_user_id) is None:
+            return None
+        return self.get(world_id=world_id, current_user_id=current_user_id)
+
     def create(
         self,
         *,
