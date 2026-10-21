@@ -115,6 +115,38 @@ change user-data permissions to force this rehearsal to pass.
 
 ## Saved service logs
 
+Angmoo's fixed terminal instructions are in English, regardless of the web
+language. The web UI and this installation guide remain available in English
+and Korean. Original service output, external tool messages and user file names
+are preserved with the existing redaction rules.
+
+Each new start automatically uses `basic` logging. To temporarily include safe
+service diagnostics, choose the mode before starting:
+
+```sh
+~/.local/bin/angmoo start --log-mode detailed --log-duration 15m
+~/.local/bin/angmoo restart --log-mode detailed --log-duration 15m
+```
+
+Detailed mode defaults to 15 minutes and accepts integer `1m` through `60m`.
+Startup time counts toward that interval. It expires to basic without a restart;
+the next launch also defaults to basic. Invalid restart options are rejected
+before stopping the current services. `start` never changes an already running
+session. This option does not enable Chat/SNS capture or memory diagnostics.
+
+Basic retains startup/shutdown, warnings, failures and recovery. Detailed adds
+allowlisted access categories and worker/lease/proxy summaries, never request
+bodies, query strings, keys, SQL parameters or global DEBUG. `status` and
+`diagnostics` separate the requested policy, UTC-based effective-mode estimate
+and each service's acknowledgement. A lazy frontend or old image can remain
+unconfirmed; that is not a health failure. Each service also enforces its own
+one-way monotonic expiry, which the host's UTC estimate cannot directly observe.
+
+The two capture threads block while idle and wake on output or lifecycle events.
+Only dirty files are flushed, at most one second after the first pending write.
+The supervisor's process checks and an explicitly opened `logs --follow` viewer
+remain separate costs. These changes do not establish phone battery usage.
+
 `start` runs services in the background. View their saved output with:
 
 ```sh

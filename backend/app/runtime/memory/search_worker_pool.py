@@ -222,7 +222,8 @@ class SearchReadWorkers:
             if sender is not None and (slot.start_task is None or slot.start_task.done()):
                 sender.close()
                 slot.sender = None
-            logger.info("memory_worker_preparation axis=%s worker=%s phase=%s budget_seconds=%s queue_ms=%.2f preparation_ms=%s boot_ms=%s child_import_ms=%s exit_code=%s joined=%s error_type=%s elapsed_ms=%.2f",
+            log = logger.warning if error_type else logger.info
+            log("memory_worker_preparation axis=%s worker=%s phase=%s budget_seconds=%s queue_ms=%.2f preparation_ms=%s boot_ms=%s child_import_ms=%s exit_code=%s joined=%s error_type=%s elapsed_ms=%.2f",
                         self._axis, slot.identifier, phase, PROCESS_PREPARATION_SECONDS,
                         ((admitted or monotonic()) - queued) * 1000, slot.preparation_ms, slot.boot_ms,
                         slot.child_import_ms, slot.exit_code, slot.joined, error_type, (monotonic() - queued) * 1000)

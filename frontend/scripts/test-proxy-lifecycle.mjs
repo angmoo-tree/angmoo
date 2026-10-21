@@ -17,6 +17,7 @@ const context = vm.createContext({
 });
 const cache = new Map();
 function load(name) {
+  if (name === "server-only") return {};
   const filename = path.resolve(root, name + ".ts");
   if (cache.has(filename)) return cache.get(filename).exports;
   const loadedModule = { exports: {} }; cache.set(filename, loadedModule);

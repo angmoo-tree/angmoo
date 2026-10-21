@@ -26,6 +26,7 @@ import uuid
 from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, validate_manifest, validate_candidate_manifest, verify_archive
 from processes import alive, atomic_json, await_ready, free_port, identity, session_members, stop_child
 from service_logs import Capture, create_session, launcher_hash, open_private, read_session, redact, save_session, select_session, show_logs, utc
+from log_policy import ENVIRONMENT, PolicyClock, describe, duration, new_policy
 
 PROOT_VERSION = "5.10.0"
 BACKEND_READINESS_SECONDS = 180.0
@@ -33,18 +34,19 @@ FRONTEND_READINESS_SECONDS = 180.0
 START_READINESS_SECONDS = 370.0
 DEFAULT_HOME = Path.home() / ".local/share/angmoo"
 MESSAGES = {
-    "tools_unavailable": ("Run the documented one-time setup for PRoot-Distro 5.10.0.", "안내된 최초 준비 명령으로 PRoot-Distro 5.10.0을 준비하세요."),
-    "host_not_supported": ("Use Termux on ARM64 or the documented Linux rehearsal.", "ARM64 Termux 또는 안내된 Linux 리허설 환경을 사용하세요."),
-    "port_in_use": ("Port 3000 or 8080 is in use. Stop its owner before retrying.", "3000 또는 8080 포트가 사용 중입니다. 해당 프로그램을 종료한 뒤 다시 시도하세요."),
-    "already_running": ("Angmoo is already starting or running; use status.", "Angmoo가 시작 중이거나 실행 중입니다. status로 확인하세요."),
-    "disk_space_low": ("Free space without deleting Angmoo data, then retry install.", "Angmoo 데이터를 보존하며 여유 공간을 확보한 뒤 설치를 다시 시도하세요."),
-    "not_installed": ("Run angmoo install --release 0.1.0 first.", "먼저 angmoo install --release 0.1.0을 실행하세요."),
-    "download_failed": ("The official release is unavailable or the connection failed. Existing data is preserved.", "공식 배포물이 없거나 연결에 실패했습니다. 기존 데이터는 보존됩니다."),
-    "stale_processes": ("An earlier session still owns processes. Do not start another backend; inspect diagnostics.", "이전 세션의 프로세스가 남아 있습니다. backend를 추가 실행하지 말고 diagnostics로 확인하세요."),
-    "logs_missing": ("No saved log session was found.", "저장된 로그 세션이 없습니다."),
-    "service_exited_before_ready": ("A service exited before it was ready. Inspect diagnostics and logs.", "서비스가 준비되기 전에 종료됐습니다. diagnostics와 logs로 확인하세요."),
-    "service_readiness_timeout": ("A service did not become ready in time. Inspect diagnostics and logs.", "서비스 준비가 제한 시간 안에 완료되지 않았습니다. diagnostics와 logs로 확인하세요."),
-    "logging_degraded": ("Some logs could not be saved. Inspect the reported gaps.", "로그 일부를 저장하지 못했습니다. 기록된 누락 범위를 확인하세요."),
+    "log_options_invalid": "Use basic without a duration, or detailed with an integer duration of 1m..60m.",
+    "tools_unavailable": "Run the documented one-time setup for PRoot-Distro 5.10.0.",
+    "host_not_supported": "Use Termux on ARM64 or the documented Linux rehearsal.",
+    "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
+    "already_running": "Angmoo is already starting or running; use status.",
+    "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
+    "not_installed": "Run angmoo install --release 0.1.0 first.",
+    "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
+    "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
+    "logs_missing": "No saved log session was found.",
+    "service_exited_before_ready": "A service exited before it was ready. Inspect diagnostics and logs.",
+    "service_readiness_timeout": "A service did not become ready in time. Inspect diagnostics and logs.",
+    "logging_degraded": "Some logs could not be saved. Inspect the reported gaps.",
 }
 
 
@@ -167,12 +169,14 @@ def install(home: Path, release: str | None, manifest_path: Path | None, candida
         # Selection is atomic only after BOTH imports. Previous roots/data stay.
         atomic_json(home / "installation.json", {"manifest": manifest, "containers": names, "data_root": str(data_root), "proot_version": PROOT_VERSION,
                     "source_kind": "local_candidate" if local_candidate else "release", "host_architecture": platform.machine()})
-        print("Installed; run angmoo start. / 설치 완료. angmoo start로 실행하세요.")
+        print("Installed; run angmoo start.")
 
 
-def command(executable: str, install: dict, service: str, nonce: str) -> list[str]:
+def command(executable: str, install: dict, service: str, nonce: str, *, log_policy=None) -> list[str]:
     backend = service == "backend"
     env = {"ANGMOO_LAUNCH_ID": nonce}
+    if log_policy is not None:
+        env[ENVIRONMENT] = log_policy
     if backend:
         env.update(ANGMOO_BIND_HOST="127.0.0.1", ANGMOO_BACKEND_PORT="8080", ANGMOO_CONTRIBUTOR_DATA_ROOT="/var/lib/angmoo", ANGMOO_FRONTEND_ORIGIN="http://127.0.0.1:3000")
     else:
@@ -244,8 +248,11 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         config = installation(home)
         log_path = home / "logs" / nonce
         if not log_path.exists():
-            log_path = create_session(home, nonce, session_metadata(config))
-        capture = Capture(log_path)
+            log_path = create_session(home, nonce, {**session_metadata(config), "log_policy": new_policy(nonce, "basic", 0)})
+        policy = read_session(log_path).get("log_policy") or new_policy(nonce, "basic", 0)
+        policy_clock = PolicyClock(policy)
+        state["log_policy"] = policy
+        capture = Capture(log_path, policy=policy)
         if capture_self:
             # Hand bootstrap stdout/stderr over to the supervisor's bounded
             # collector. Closing the inherited write ends lets start detach.
@@ -269,7 +276,7 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         for service, url in (("backend", "http://127.0.0.1:8080/health"), ("frontend", "http://127.0.0.1:3000/api/runtime-identity")):
             require(not stopping, "start_cancelled")
             phase = "spawn"
-            process = subprocess.Popen(command(executable, config, service, nonce), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+            process = subprocess.Popen(command(executable, config, service, nonce, log_policy=policy_clock.envelope(service)), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
             children[service] = process
             capture.attach(service, process)
             state["children"][service] = identity(process.pid)
@@ -345,7 +352,8 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         owner_lock.close()
 
 
-def start(home: Path) -> None:
+def start(home: Path, *, log_mode="basic", log_duration=None) -> None:
+    seconds = duration(log_mode, log_duration)
     tools()
     config = installation(home)
     with lock(home) as owner_lock:
@@ -353,7 +361,8 @@ def start(home: Path) -> None:
         free_port(8080)
         free_port(3000)
         nonce = uuid.uuid4().hex
-        path = create_session(home, nonce, session_metadata(config))
+        policy = new_policy(nonce, log_mode, seconds)
+        path = create_session(home, nonce, {**session_metadata(config), "log_policy": policy})
         bootstrap = Capture(path, names=("bootstrap",))
         try:
             process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--home", str(home), "_supervise", "--fd", str(owner_lock.fileno()), "--nonce", nonce], pass_fds=(owner_lock.fileno(),), start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -384,8 +393,8 @@ def await_start(home, path, nonce, process):
         if state.get("nonce") == nonce:
             if state["state"] == "running":
                 # The supervisor owns subsequent errors and service pipes.
-                print("Angmoo: http://127.0.0.1:3000 / 브라우저에서 이 주소를 여세요.")
-                print("Logs: angmoo logs --service all --follow / 로그: angmoo logs --service all --follow")
+                print("Angmoo: http://127.0.0.1:3000")
+                print("Logs: angmoo logs --service all --follow")
                 return
             if state["state"] in ("stopped", "failed"):
                 print(json.dumps(state.get("primary_failure"), ensure_ascii=False), file=sys.stderr)
@@ -409,7 +418,7 @@ def stop(home: Path) -> None:
     state = read_state(home)
     if not alive(state.get("owner", {})):
         reject_survivors(home)
-        print("Stopped. / 중지 상태입니다.")
+        print("Stopped.")
         return
     nonce = state.get("nonce", "")
     require(re.fullmatch(r"[0-9a-f]{32}", nonce), "state_invalid")
@@ -419,7 +428,18 @@ def stop(home: Path) -> None:
         time.sleep(0.5)
     require(not alive(state["owner"]), "stop_timeout")
     reject_survivors(home)
-    print("Stopped; data preserved. / 종료했습니다. 데이터는 보존됩니다.")
+    print("Stopped; data preserved.")
+
+
+def policy_status(path, policy):
+    from service_logs import checked
+    source = path / "policy-state.json"
+    acknowledgements = {}
+    if source.exists():
+        checked(source)
+        require(source.stat().st_size <= 8192, "log_metadata_too_large")
+        acknowledgements = json.loads(source.read_text(encoding="utf-8"))
+    return describe(policy, acknowledgements)
 
 
 def main() -> int:
@@ -433,7 +453,10 @@ def main() -> int:
     choice.add_argument("--manifest", type=Path)
     choice.add_argument("--candidate-manifest", type=Path)
     for name in ("start", "stop", "restart", "status"):
-        commands.add_parser(name)
+        p = commands.add_parser(name)
+        if name in ("start", "restart"):
+            p.add_argument("--log-mode", choices=("basic", "detailed"), default="basic", help="Service log detail for this launch only (default: basic).")
+            p.add_argument("--log-duration", help="Detailed mode duration: 1m..60m (default: 15m, includes startup).")
     p = commands.add_parser("diagnostics")
     p.add_argument("--session")
     p = commands.add_parser("logs")
@@ -446,6 +469,8 @@ def main() -> int:
     p.add_argument("--nonce", required=True)
     args = parser.parse_args()
     try:
+        if args.action in ("start", "restart"):
+            duration(args.log_mode, args.log_duration)  # Validate before stop or any filesystem mutation.
         if args.action == "logs":
             show_logs(args.home, args.service, args.session, args.tail, args.follow)
             return 0
@@ -459,9 +484,12 @@ def main() -> int:
                 summary = path / "bootstrap-summary.json"
                 from service_logs import checked
                 bootstrap = json.loads(checked(summary).read_text()) if summary.exists() else None
-                print(json.dumps({"current": state, "session": metadata, "bootstrap_capture": bootstrap}, ensure_ascii=False, indent=2))
+                print(json.dumps({"current": state, "session": metadata, "bootstrap_capture": bootstrap,
+                                  "log_policy": policy_status(path, metadata.get("log_policy"))}, ensure_ascii=False, indent=2))
             else:
-                print(json.dumps({k: state[k] for k in ("state", "source_sha", "version", "error", "primary_failure", "log_reference") if k in state}, ensure_ascii=False))
+                result = {k: state[k] for k in ("state", "source_sha", "version", "error", "primary_failure", "log_reference", "log_capture") if k in state}
+                result["log_policy"] = policy_status(select_session(args.home, state["nonce"]), state.get("log_policy")) if state.get("log_reference") else describe(None)
+                print(json.dumps(result, ensure_ascii=False))
             return 0
         home = private_home(args.home)
         if args.action == "install":
@@ -470,17 +498,17 @@ def main() -> int:
             require(re.fullmatch(r"[0-9a-f]{32}", args.nonce), "state_invalid")
             supervise(home, args.fd, args.nonce, capture_self=True)
         elif args.action == "start":
-            start(home)
+            start(home, log_mode=args.log_mode, log_duration=args.log_duration)
         elif args.action == "stop":
             stop(home)
         else:
             stop(home)
-            start(home)
+            start(home, log_mode=args.log_mode, log_duration=args.log_duration)
         return 0
     except (ValueError, OSError, subprocess.SubprocessError) as exc:
         code = str(exc) if isinstance(exc, ValueError) and re.fullmatch(r"[a-z_]+", str(exc)) else "operation_failed"
-        en, ko = MESSAGES.get(code, ("Operation could not complete. Existing data is preserved; inspect diagnostics.", "작업을 완료하지 못했습니다. 기존 데이터는 보존됩니다. diagnostics로 확인하세요."))
-        print(f"{code}: {en} / {ko}", file=sys.stderr)
+        message = MESSAGES.get(code, "Operation could not complete. Existing data is preserved; inspect diagnostics.")
+        print(f"{code}: {message}", file=sys.stderr)
         return 1
 
 

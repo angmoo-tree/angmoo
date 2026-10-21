@@ -54,7 +54,7 @@ class HostTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             missing = Path(root) / "absent"
             result = subprocess.run([sys.executable, angmoo.__file__, "--home", str(missing), "status"], check=True, capture_output=True, text=True)
-            self.assertEqual(json.loads(result.stdout), {"state": "stopped"})
+            self.assertEqual(json.loads(result.stdout), {"state": "stopped", "log_policy": {"requested_mode": "legacy", "effective_mode": "unknown", "source_confirmation": "legacy"}})
             self.assertFalse(missing.exists())
 
     def test_flock_excludes_duplicate_owner_and_private_path_rejects_symlinks(self):
@@ -132,7 +132,7 @@ class HostTests(unittest.TestCase):
             home = angmoo.private_home(Path(directory) / "profile")
             unrelated = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"], start_new_session=True)
             previous_handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
-            def command(_exe, _config, service, _nonce):
+            def command(_exe, _config, service, _nonce, *, log_policy=None):
                 return [sys.executable, "-c", "import time;time.sleep(60)" if service == "backend" else "raise SystemExit(7)"]
             def readiness(process, _url, _source, _nonce, *, backend, **_):
                 self.assertEqual(_["timeout"], angmoo.BACKEND_READINESS_SECONDS if backend else angmoo.FRONTEND_READINESS_SECONDS)
