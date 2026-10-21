@@ -28,6 +28,9 @@ from processes import alive, atomic_json, await_ready, free_port, identity, sess
 from service_logs import Capture, create_session, launcher_hash, open_private, read_session, redact, save_session, select_session, show_logs, utc
 
 PROOT_VERSION = "5.10.0"
+BACKEND_READINESS_SECONDS = 180.0
+FRONTEND_READINESS_SECONDS = 180.0
+START_READINESS_SECONDS = 370.0
 DEFAULT_HOME = Path.home() / ".local/share/angmoo"
 MESSAGES = {
     "tools_unavailable": ("Run the documented one-time setup for PRoot-Distro 5.10.0.", "안내된 최초 준비 명령으로 PRoot-Distro 5.10.0을 준비하세요."),
@@ -216,7 +219,9 @@ def session_metadata(config):
     return {"launcher_files_sha256": launcher_hash(), "source_sha": config["manifest"]["source_sha"],
             "version": config["manifest"]["version"], "host_architecture": platform.machine(),
             "payload_architecture": "arm64", "images": [{k: i[k] for k in ("service", "manifest_digest")} for i in config["manifest"].get("images", [])],
-            "preparation_budget": "image_owned; inspect backend preparation diagnostics"}
+            "preparation_budget": "image_owned; inspect backend preparation diagnostics",
+            "service_readiness_seconds": {"backend": BACKEND_READINESS_SECONDS, "frontend": FRONTEND_READINESS_SECONDS,
+                                          "start": START_READINESS_SECONDS}}
 
 
 def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
@@ -273,7 +278,9 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             atomic_json(home / "state.json", state)
             def observe(probe):
                 detail.update(last_probe=probe, probe_count=detail["probe_count"] + 1)
-            await_ready(process, url, source, nonce, backend=service == "backend", cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
+            await_ready(process, url, source, nonce, backend=service == "backend",
+                        timeout=BACKEND_READINESS_SECONDS if service == "backend" else FRONTEND_READINESS_SECONDS,
+                        cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
             detail.update(phase="running", ready_at_utc=utc())
             capture.emit("supervisor", "event", json.dumps({"service": service, "event": "ready", "probe_count": detail["probe_count"]}))
         state["state"] = "running"
@@ -371,7 +378,7 @@ def start(home: Path) -> None:
 
 
 def await_start(home, path, nonce, process):
-    deadline = time.monotonic() + 370
+    deadline = time.monotonic() + START_READINESS_SECONDS
     while time.monotonic() < deadline:
         state = read_state(home)
         if state.get("nonce") == nonce:
