@@ -210,3 +210,15 @@ passes (13). The fixture exercises the actual isolated reader, not a mock.
 The locked 77-package backend audit and updated license notice pass. Logs:
 `ci-e19-dependency-failure.log`, `ci-remediation-pypdf.log`, and
 `ci-remediation-pypdf-upload.log`.
+
+The final compatibility and generated-inventory rerun passes all nine selected
+checks (`ci-remediation-runtime-contract-final.log`). Gitleaks then identified
+one newly recorded public Git blob as a generic API key in the preservation
+ledger. Its value is proven to be the auth source blob at implementation commit
+`aec45230abd9bcb7df34d82b3d186331943688fe`. The existing exact path/field/value
+review and committed-source proof are extended for that one object; changed
+values, paths, keys and appended data remain rejected (10 focused tests pass).
+No credential pattern, directory or history scan is disabled.
+The tracked-tree and full 1,283-commit ancestor Gitleaks scans pass with no
+findings (`ci-remediation-gitleaks-directory.log`,
+`ci-remediation-gitleaks-history.log`).
