@@ -91,7 +91,7 @@ def uvicorn_logging_config() -> dict:
             handlers[name] = {"class": "logging.NullHandler"}
         else:
             handlers[name] = {"formatter": name, "class": "logging.StreamHandler", "stream": f"ext://sys.{stream}"}
-    return {
+    result = {
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": formatters,
@@ -105,3 +105,13 @@ def uvicorn_logging_config() -> dict:
             "uvicorn.access": {"handlers": ["access"], "level": _level(config, "logger_uvicorn_access"), "propagate": config.getboolean("logger_uvicorn_access", "propagate")},
         },
     }
+    # The launcher alone opts in. No app-factory/global handler changes, and
+    # desktop's stdout JSON protocol remains owned by the sidecar.
+    from app.runtime.service_log_policy import configured_policy
+    if not getattr(sys, "frozen", False) and configured_policy() is not None:
+        result["filters"] = {"termux_policy": {"()": "app.runtime.service_log_policy.ServiceLogFilter"}}
+        for handler in result["handlers"].values():
+            handler["filters"] = ["termux_policy"]
+        for name in ("app.runtime.resident.scheduler", "app.runtime.resident.lease_executor", "app.runtime.persistence.sqlite_scheduler_lease"):
+            result["loggers"][name] = {"handlers": ["default"], "level": "INFO", "propagate": False}
+    return result

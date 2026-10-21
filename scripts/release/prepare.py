@@ -19,7 +19,7 @@ WINDOWS_FILES = ("SHA256SUMS", "angmoo-installer.spdx.json", "angmoo-installer.p
 
 def package_termux_tools(target: Path, root: Path = ROOT) -> None:
     """Stable bytes across reruns/checkouts, so draft recovery can compare hashes."""
-    tools = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "requirements.txt", "setup.sh")
+    tools = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
     files = [(name, root / "launcher/termux" / name) for name in tools]
     files.append(("LICENSE", root / "LICENSE"))
     with zipfile.ZipFile(target, "w") as archive:

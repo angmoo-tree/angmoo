@@ -193,7 +193,7 @@ def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_
     root = tmp_path / "source"
     tools = root / "launcher/termux"
     tools.mkdir(parents=True)
-    names = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "requirements.txt", "setup.sh")
+    names = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
     for name in names:
         (tools / name).write_bytes(("synthetic " + name).encode())
     (root / "LICENSE").write_text("synthetic license")

@@ -12,6 +12,7 @@ import selectors
 import stat
 import threading
 import time
+from log_policy import acknowledge
 
 SERVICES = ("backend", "frontend", "supervisor", "bootstrap")
 MAX_LINE = 16384
@@ -125,7 +126,7 @@ def create_session(home, identifier, metadata):
         if not read_session(old).get("ended_at_utc"):
             raise ValueError("log_retention_active_session")
         files = list(old.iterdir())
-        allowed = {"session.json", "session.tmp", "bootstrap-summary.json"} | {s + ".jsonl" + suffix for s in SERVICES for suffix in ("", ".1", ".2")}
+        allowed = {"session.json", "session.tmp", "bootstrap-summary.json", "policy-state.json", "policy-state.tmp"} | {s + ".jsonl" + suffix for s in SERVICES for suffix in ("", ".1", ".2")}
         if any(p.name not in allowed for p in files):
             raise ValueError("log_retention_unknown_file")
         for file in files:
@@ -176,7 +177,7 @@ class RotatingFile:
 
 class Capture:
     """One nonblocking pipe drainer and one bounded writer per supervisor."""
-    def __init__(self, path, names=("backend", "frontend", "supervisor"), *, limit=None, queue_bytes=QUEUE_BYTES):
+    def __init__(self, path, names=("backend", "frontend", "supervisor"), *, limit=None, queue_bytes=QUEUE_BYTES, policy=None):
         checked(path, directory=True)
         self.path, self.started = path, time.monotonic()
         self.files = {}
@@ -199,6 +200,12 @@ class Capture:
         self.closing = threading.Event()
         self.drained = threading.Event()
         self.eof_complete = True
+        self.policy, self.policy_ack = policy, {}
+        self.wake_read, self.wake_write = os.pipe()
+        for fd in (self.wake_read, self.wake_write):
+            os.set_blocking(fd, False)
+            os.set_inheritable(fd, False)
+        self.close_deadline = None
         self.writer = threading.Thread(target=self._write, name="angmoo-log-writer", daemon=True)
         self.drainer = threading.Thread(target=self._drain, name="angmoo-log-drain", daemon=True)
         self.writer.start()
@@ -208,10 +215,22 @@ class Capture:
         if service not in self.files:
             raise ValueError("log_service_invalid")
         with self.condition:
+            if self.closing.is_set() or self.drained.is_set():
+                raise ValueError("log_capture_closed")
             for name in ("stdout", "stderr"):
                 stream = getattr(process, name)
                 if stream is not None:
                     self.pending.append((service, name, stream))
+            self._wake()
+
+    def _wake(self):
+        # Called under the command lock. EAGAIN coalesces with a pending wakeup;
+        # the drainer rechecks commands before entering the next blocking select.
+        if self.wake_write is not None:
+            try:
+                os.write(self.wake_write, b"x")
+            except BlockingIOError:
+                pass
 
     def emit(self, service, stream, message, *, partial=False, truncated=False):
         if service not in self.files:
@@ -220,6 +239,10 @@ class Capture:
         truncated = truncated or len(safe) > MAX_MESSAGE
         safe = safe[:MAX_MESSAGE].decode("utf-8", errors="replace")
         with self.condition:
+            ack = acknowledge(message, service, self.path.name, self.policy)
+            if ack is not None and service not in self.policy_ack:
+                self.policy_ack[service] = ack
+                self.condition.notify()
             self.sequence += 1
             record = {"received_at_utc": utc(), "elapsed_ms": round((time.monotonic() - self.started) * 1000, 2),
                       "launch_id": self.path.name, "service": service, "stream": stream,
@@ -241,7 +264,7 @@ class Capture:
 
     def _drain(self):
         selector = selectors.DefaultSelector()
-        stop_at = None
+        selector.register(self.wake_read, selectors.EVENT_READ, None)
         try:
             while True:
                 with self.condition:
@@ -250,13 +273,20 @@ class Capture:
                         os.set_blocking(stream.fileno(), False)
                         selector.register(stream, selectors.EVENT_READ, [service, name, bytearray(), False, False])
                 if self.closing.is_set():
-                    stop_at = stop_at or time.monotonic() + 2
-                    if not selector.get_map():
+                    if len(selector.get_map()) == 1:
                         break
-                    if time.monotonic() >= stop_at:
+                    if time.monotonic() >= self.close_deadline:
                         self.eof_complete = False
                         break
-                for key, _ in selector.select(.02):
+                timeout = max(0, self.close_deadline - time.monotonic()) if self.closing.is_set() else None
+                for key, _ in selector.select(timeout):
+                    if key.data is None:
+                        try:
+                            while os.read(key.fd, 4096):
+                                pass
+                        except BlockingIOError:
+                            pass
+                        continue
                     service, name, buffer, oversized, sensitive = key.data
                     try:
                         chunk = os.read(key.fd, 16384)
@@ -291,38 +321,62 @@ class Capture:
             self.eof_complete = False
         finally:
             for key in list(selector.get_map().values()):
-                key.fileobj.close()
+                if key.data is not None:
+                    key.fileobj.close()
             selector.close()
-            self.drained.set()
             with self.condition:
+                for _, _, stream in self.pending:
+                    stream.close()
+                self.pending.clear()
+                os.close(self.wake_read)
+                os.close(self.wake_write)
+                self.wake_read = self.wake_write = None
+                self.drained.set()
                 self.condition.notify_all()
 
     def _write(self):
-        flush_at = time.monotonic() + 1
+        flush_at, dirty, saved_ack_count = None, set(), 0
         try:
             while True:
                 with self.condition:
-                    if not self.queue and not self.drained.is_set():
-                        self.condition.wait(.2)
+                    while not self.queue and not self.drained.is_set() and len(self.policy_ack) == saved_ack_count:
+                        remaining = None if flush_at is None else max(0, flush_at - time.monotonic())
+                        if remaining == 0:
+                            break
+                        self.condition.wait(remaining)
+                    acknowledgements = dict(self.policy_ack)
                     item = self.queue.popleft() if self.queue else None
                     if item:
                         self.queued_bytes -= len(item[1])
-                    elif self.drained.is_set():
-                        break
+                    done = not item and self.drained.is_set()
+                if len(acknowledgements) != saved_ack_count:
+                    try:
+                        with open_private(self.path / "policy-state.tmp") as stream:
+                            stream.write((json.dumps(acknowledgements) + "\n").encode())
+                        (self.path / "policy-state.tmp").replace(self.path / "policy-state.json")
+                    except (OSError, ValueError) as exc:
+                        self.error = type(exc).__name__
+                    saved_ack_count = len(acknowledgements)
                 if item:
                     try:
                         self.files[item[0]].write(item[1])
+                        dirty.add(item[0])
+                        if flush_at is None:
+                            flush_at = time.monotonic() + 1
                     except (OSError, ValueError) as exc:
                         self.error = type(exc).__name__
                         with self.condition:
                             self._drop(len(item[1]))
-                if time.monotonic() >= flush_at:
-                    for file in self.files.values():
+                if flush_at is not None and (done or time.monotonic() >= flush_at):
+                    for name in dirty:
                         try:
-                            file.flush()
+                            self.files[name].flush()
                         except (OSError, ValueError) as exc:
                             self.error = type(exc).__name__
-                    flush_at = time.monotonic() + 1
+                    dirty.clear()
+                    flush_at = None
+                if done:
+                    break
         finally:
             for file in self.files.values():
                 try:
@@ -335,12 +389,17 @@ class Capture:
         return {"dropped_records": self.dropped_records, "dropped_bytes": self.dropped_bytes,
                 "first_drop_utc": self.first_drop_utc, "last_drop_utc": self.last_drop_utc,
                 "truncated_records": self.truncated_records, "logging_error": self.error,
+                "source_policy_acknowledgements": dict(self.policy_ack),
                 "retention_pruned_segments": pruned,
                 "capture_complete": self.drained.is_set() and not self.writer.is_alive() and self.eof_complete
                     and not self.dropped_records and not self.truncated_records and not self.error and not pruned}
 
     def close(self):
-        self.closing.set()
+        with self.condition:
+            if not self.closing.is_set():
+                self.close_deadline = time.monotonic() + 2
+                self.closing.set()
+                self._wake()
         self.drainer.join(3)
         self.writer.join(3)
         return self.snapshot()
@@ -394,7 +453,7 @@ def show_logs(home, service, identifier, count, follow):
                 return
             time.sleep(.5)
     except KeyboardInterrupt:
-        print("Log viewing stopped; the service is unchanged. / 로그 보기를 종료했습니다. 서비스는 그대로 실행됩니다.")
+        print("Log viewing stopped; the service is unchanged.")
     except BrokenPipeError:
         return
 

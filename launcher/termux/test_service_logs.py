@@ -127,7 +127,7 @@ from pathlib import Path
 from unittest.mock import patch
 import angmoo
 print('bootstrap marker', flush=True)
-def command(exe, config, service, nonce):
+def command(exe, config, service, nonce, *, log_policy=None):
     body = "import time; print('backend alive',flush=True); time.sleep(60)" if service == 'backend' else "import sys; print('frontend native failure',file=sys.stderr,flush=True); raise SystemExit(7)"
     return [sys.executable, '-c', body]
 def readiness(process, *args, backend, **kwargs):

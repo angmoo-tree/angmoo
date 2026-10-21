@@ -1,3 +1,5 @@
+import { detailedServiceLogs } from "./service-log-policy";
+
 /** Transport diagnostics contain only fixed categories, never request data. */
 export type ProxyPhase = "request_body" | "upstream_headers" | "error_body" | "response_stream";
 export type ProxyRoute = "backend" | "community";
@@ -19,6 +21,7 @@ export function proxyConnectionCode(error: unknown): string {
 }
 
 export function proxyLifecycle(method: string, route: ProxyRoute = "backend") {
+  detailedServiceLogs(); // Lazy service ACK includes time already spent starting.
   const started = performance.now();
   let reported = false;
   const requestId = crypto.randomUUID();
@@ -37,7 +40,7 @@ export function proxyLifecycle(method: string, route: ProxyRoute = "backend") {
         elapsed_ms: Math.round(performance.now() - started),
         ...(status === undefined ? {} : { status }),
       };
-      if (outcome === "cancelled") console.info(diagnostic);
+      if (outcome === "cancelled") { if (detailedServiceLogs()) console.info(diagnostic); }
       else console.warn(diagnostic);
     },
   };

@@ -5,7 +5,7 @@ import ts from "typescript";
 import { createServer } from "node:http";
 import { once } from "node:events";
 
-const context = vm.createContext({process, fetch, Request, Response, Headers, URL, Error, Set});
+const context = vm.createContext({process, fetch, Request, Response, Headers, URL, Error, Set, performance, crypto, console});
 function load(file, require = () => { throw new Error("unexpected import"); }) {
   const source = fs.readFileSync(new URL(file, import.meta.url), "utf8");
   const code = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText;
@@ -13,7 +13,8 @@ function load(file, require = () => { throw new Error("unexpected import"); }) {
   vm.runInContext(`(function(module,exports,require){${code}\n})`, context)(loaded, loaded.exports, require);
   return loaded.exports;
 }
-const lifecycle = load("../src/lib/server/proxy-lifecycle.ts");
+const policy = load("../src/lib/server/service-log-policy.ts", name => { assert.equal(name, "server-only"); return {}; });
+const lifecycle = load("../src/lib/server/proxy-lifecycle.ts", name => { assert.equal(name, "./service-log-policy"); return policy; });
 const backend = load("../src/lib/server/backend.ts", name => {
   assert.equal(name, "./proxy-lifecycle"); return lifecycle;
 });
