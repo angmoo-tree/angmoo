@@ -97,6 +97,9 @@ def uvicorn_logging_config() -> dict:
         "formatters": formatters,
         "handlers": handlers,
         "loggers": {
+            # Only bounded worker lifecycle summaries; do not enable general
+            # application INFO logs or alter the embedding host's root logger.
+            "app.runtime.memory.search_worker_pool": {"handlers": ["default"], "level": "INFO", "propagate": False},
             "uvicorn": {"handlers": ["default"], "level": _level(config, "logger_uvicorn"), "propagate": config.getboolean("logger_uvicorn", "propagate")},
             "uvicorn.error": {"level": _level(config, "logger_uvicorn_error")},
             "uvicorn.access": {"handlers": ["access"], "level": _level(config, "logger_uvicorn_access"), "propagate": config.getboolean("logger_uvicorn_access", "propagate")},
