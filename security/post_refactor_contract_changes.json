@@ -50344,6 +50344,32 @@
           ]
         }
       ]
+    },
+    {
+      "id": "local-semantic-name-policy-removal-20261021",
+      "implementation_commit": "aec45230abd9bcb7df34d82b3d186331943688fe",
+      "reason": "The approved local-only name policy removes semantic profanity/reserved-word blocking and name-derived operator exceptions. Record only the three deliberately deleted auth helper definitions; retain identity, ownership, uniqueness, format and cooldown contracts and all other historical exports.",
+      "review": "https://github.com/angmoo-tree/angmoo/pull/396",
+      "source_blobs": {
+        "backend/app/domains/identity/service/auth.py": "b12955a6330ff3bfdca4f0fc5d54c0564cc5e3ea"
+      },
+      "removed_bindings": [
+        {
+          "source": "backend/app/domains/identity/service/auth.py",
+          "symbol": "_ensure_display_name_allowed",
+          "before_ast": "FunctionDef(name='_ensure_display_name_allowed', args=arguments(args=[arg(arg='display_name', annotation=Name(id='str', ctx=Load())), arg(arg='display_name_normalized', annotation=Name(id='str', ctx=Load()))], kwonlyargs=[arg(arg='user', annotation=BinOp(left=Attribute(value=Name(id='models', ctx=Load()), attr='User', ctx=Load()), op=BitOr(), right=Constant(value=None)))], kw_defaults=[Constant(value=None)]), body=[If(test=Compare(left=Name(id='display_name_normalized', ctx=Load()), ops=[Eq()], comparators=[Name(id='OFFICIAL_OPERATOR_DISPLAY_NAME_KEY', ctx=Load())]), body=[If(test=BoolOp(op=And(), values=[Compare(left=Name(id='user', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Call(func=Name(id='_is_official_operator_user', ctx=Load()), args=[Name(id='user', ctx=Load())]), Compare(left=Name(id='display_name', ctx=Load()), ops=[Eq()], comparators=[Name(id='OFFICIAL_OPERATOR_DISPLAY_NAME', ctx=Load())])]), body=[Return()]), Raise(exc=Call(func=Name(id='ReservedDisplayNameError', ctx=Load()), args=[Name(id='display_name_normalized', ctx=Load())]))]), If(test=Compare(left=Name(id='display_name_normalized', ctx=Load()), ops=[Eq()], comparators=[Name(id='LEGACY_ADMIN_DISPLAY_NAME_KEY', ctx=Load())]), body=[Raise(exc=Call(func=Name(id='ReservedDisplayNameError', ctx=Load()), args=[Name(id='display_name_normalized', ctx=Load())]))]), Expr(value=Call(func=Name(id='_ensure_display_name_not_blocked', ctx=Load()), args=[Name(id='display_name', ctx=Load())]))], returns=Constant(value=None))"
+        },
+        {
+          "source": "backend/app/domains/identity/service/auth.py",
+          "symbol": "_is_official_operator_user",
+          "before_ast": "FunctionDef(name='_is_official_operator_user', args=arguments(args=[arg(arg='user', annotation=Attribute(value=Name(id='models', ctx=Load()), attr='User', ctx=Load()))]), body=[Return(value=Compare(left=Attribute(value=Name(id='user', ctx=Load()), attr='id', ctx=Load()), ops=[In()], comparators=[Attribute(value=Name(id='settings', ctx=Load()), attr='official_operator_user_ids', ctx=Load())]))], returns=Name(id='bool', ctx=Load()))"
+        },
+        {
+          "source": "backend/app/domains/identity/service/auth.py",
+          "symbol": "_ensure_display_name_not_blocked",
+          "before_ast": "FunctionDef(name='_ensure_display_name_not_blocked', args=arguments(args=[arg(arg='display_name', annotation=Name(id='str', ctx=Load()))]), body=[If(test=Call(func=Attribute(value=Name(id='name_policy', ctx=Load()), attr='is_blocked_name', ctx=Load()), args=[Name(id='display_name', ctx=Load())]), body=[Raise(exc=Call(func=Name(id='DisplayNameBlockedError', ctx=Load()), args=[Constant(value='display name is blocked by policy')]))])], returns=Constant(value=None))"
+        }
+      ]
     }
   ]
 }

@@ -182,3 +182,11 @@ owner contract. All three tests in that file pass; the exact evidence row,
 viewport position and parent link assertions remain unchanged. Evidence:
 `ci-remediation-route-contracts.log`, `ci-remediation-media-contract.log`, and
 `ci-remediation-static-evidence.log`.
+
+The retired-export proof now records the exact three auth helpers deliberately
+deleted by the approved local name policy, using the committed preimage,
+source blob and implementation commit. The 263 preceding ledger records remain
+byte-for-byte equivalent as data; no generic exemption or substitute helper is
+introduced. Generated embedded-runtime/PostgreSQL-marker inventories are refreshed
+from the current scheduler, read models, lease owner and dependency declaration.
+The exact deletion proof and unfiltered generated-inventory check pass.
