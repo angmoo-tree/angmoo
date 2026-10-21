@@ -137,6 +137,8 @@ class SchedulerLeaseService:
         *,
         owner_id: str,
         fencing_epoch: int,
+        expected_tick: datetime,
+        finished_at: datetime,
         result: SchedulerTickResult,
         error_code: str | None = None,
     ) -> SchedulerLeaseSnapshot:
@@ -146,7 +148,10 @@ class SchedulerLeaseService:
                 owner_id=owner_id,
                 fencing_epoch=fencing_epoch,
             )
-            row.last_tick_finished_at = now
+            if row.last_tick_window_at is None or aware_utc(row.last_tick_window_at) != aware_utc(expected_tick):
+                db.rollback()
+                raise SchedulerLeaseLostError("scheduler tick fence rejected")
+            row.last_tick_finished_at = aware_utc(finished_at)
             row.last_tick_result = result.value
             row.last_error_code = error_code
             db.commit()

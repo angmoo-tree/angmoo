@@ -168,6 +168,8 @@ class SqliteSchedulerLeaseService:
         *,
         owner_id: str,
         fencing_epoch: int,
+        expected_tick: datetime,
+        finished_at: datetime,
         result: SchedulerTickResult,
         error_code: str | None = None,
     ) -> SchedulerLeaseSnapshot:
@@ -179,8 +181,9 @@ class SqliteSchedulerLeaseService:
                 owner_id=owner_id,
                 fencing_epoch=fencing_epoch,
                 now=now,
+                expected_tick=aware_utc(expected_tick),
                 values={
-                    "last_tick_finished_at": now,
+                    "last_tick_finished_at": aware_utc(finished_at),
                     "last_tick_result": result.value,
                     "last_error_code": error_code,
                     "updated_at": now,
@@ -211,6 +214,7 @@ class SqliteSchedulerLeaseService:
         fencing_epoch: int,
         now: datetime,
         values: dict[str, Any],
+        expected_tick: datetime | None = None,
     ) -> None:
         result = lease_repository.cas_current(
             connection,
@@ -218,6 +222,7 @@ class SqliteSchedulerLeaseService:
             fencing_epoch=fencing_epoch,
             now=now,
             values=values,
+            expected_tick=expected_tick,
         )
         if result.rowcount != 1:
             raise SchedulerLeaseLostError("scheduler lease CAS fence rejected")

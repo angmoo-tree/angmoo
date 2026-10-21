@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from app.domains.runtime.contracts.lease import SchedulerLeaseSnapshot
 from app.domains.runtime.contracts.lease import SchedulerTickPermit
 from app.domains.runtime.contracts.lease import SchedulerTickResult
@@ -52,12 +54,16 @@ class SchedulerLeaseCoordinator:
         *,
         owner_id: str,
         fencing_epoch: int,
+        expected_tick: datetime,
+        finished_at: datetime,
         result: SchedulerTickResult,
         error_code: str | None = None,
     ) -> SchedulerLeaseSnapshot:
         return self._repository.finish_tick(
             owner_id=owner_id,
             fencing_epoch=fencing_epoch,
+            expected_tick=expected_tick,
+            finished_at=finished_at,
             result=result,
             error_code=error_code,
         )

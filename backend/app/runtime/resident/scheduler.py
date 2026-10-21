@@ -360,13 +360,15 @@ async def run_resident_tick_scheduler(
                             result_kind, tick_error = SchedulerTickResult.FAILED, type(exc).__name__
                         # A failed finish never causes this completed tick to rerun:
                         # begin_tick's committed logical window is retained.
-                        lease = await lease_coordinator.call("finish_tick", owner_id=lease_owner_id, fencing_epoch=lease.fencing_epoch,
+                        lease = await _finish_tick_with_budget(lease_coordinator, owner_id=lease_owner_id,
+                            fencing_epoch=lease.fencing_epoch, config=config, proof=lease,
+                            expected_tick=permit.logical_window_at, finished_at=datetime.now(UTC),
                             result=result_kind, error_code=tick_error)
                     if stop.is_set(): break
                     if not await _sleep_until_next_tick_with_heartbeat(coordinator=lease_coordinator, owner_id=lease_owner_id,
                         fencing_epoch=lease.fencing_epoch, duration_seconds=config.resident_tick_interval_seconds, sleep=sleep,
                         monotonic_clock=monotonic_clock, stop_event=stop, config=config): break
-                except (SqliteBusyRetryExhausted, SqliteTaskQueueFull, SchedulerHeartbeatDeadlineExceeded) as exc:
+                except (SqliteBusyRetryExhausted, SqliteTaskQueueFull, SchedulerHeartbeatDeadlineExceeded, SqliteWriteDeadlineExceeded) as exc:
                     if getattr(exc, "pending_tasks", ()):
                         raise
                     # Keep the last successful heartbeat for the recovery margin,
@@ -423,12 +425,7 @@ async def run_resident_tick_scheduler(
 _scheduler_proofs: dict[str, Any] = {}
 
 
-async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config, proof=None):
-    """Share one deadline from first queue admission through bounded DB retries.
-
-    Timeout of this wait is recoverable only after the executor's real work has
-    drained. An unrelated TimeoutError from inside the operation stays fatal.
-    """
+def _lease_write_deadline(*, owner_id, fencing_epoch, config, proof=None):
     started = monotonic()
     deadline = started + 2.0
     proof = _scheduler_proofs.get(config.RESIDENT_TICK_READY_PATH, proof)
@@ -442,6 +439,31 @@ async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config
             raise SchedulerLeaseLostError("scheduler_heartbeat_proof_expired")
         safe_seconds = remaining_lease - config.resident_tick_shutdown_drain_seconds - 1
         deadline = min(deadline, started + safe_seconds)
+    return deadline
+
+
+async def _finish_tick_with_budget(coordinator, *, owner_id, fencing_epoch, config, proof, **result):
+    deadline = _lease_write_deadline(owner_id=owner_id, fencing_epoch=fencing_epoch, config=config, proof=proof)
+    if deadline <= monotonic():
+        raise SqliteWriteDeadlineExceeded("scheduler_finish_safety_margin")
+    timeout = asyncio.timeout(max(0.0, deadline - monotonic()))
+    try:
+        async with timeout:
+            return await lease_call(coordinator, "finish_tick", owner_id=owner_id,
+                fencing_epoch=fencing_epoch, queue_deadline=deadline, **result)
+    except TimeoutError as exc:
+        if not timeout.expired():
+            raise
+        raise SqliteWriteDeadlineExceeded("scheduler_finish_wait_deadline") from exc
+
+
+async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config, proof=None):
+    """Share one deadline from first queue admission through bounded DB retries.
+
+    Timeout of this wait is recoverable only after the executor's real work has
+    drained. An unrelated TimeoutError from inside the operation stays fatal.
+    """
+    deadline = _lease_write_deadline(owner_id=owner_id, fencing_epoch=fencing_epoch, config=config, proof=proof)
     if deadline <= monotonic():
         raise SchedulerHeartbeatDeadlineExceeded("scheduler_heartbeat_safety_margin")
     # asyncio's timeout clock is loop.time(); convert from the same monotonic
@@ -449,15 +471,8 @@ async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config
     timeout = asyncio.timeout(max(0.0, deadline - monotonic()))
     try:
         async with timeout:
-            for attempt, delay in enumerate((0.0, 0.05, 0.1)):
-                if delay:
-                    await asyncio.sleep(delay)  # No transaction survives a retry.
-                try:
-                    return await lease_call(coordinator, "heartbeat", owner_id=owner_id,
-                        fencing_epoch=fencing_epoch, queue_deadline=deadline)
-                except SqliteBusyRetryExhausted:
-                    if proof is None or attempt == 2:
-                        raise
+            return await lease_call(coordinator, "heartbeat", owner_id=owner_id,
+                fencing_epoch=fencing_epoch, queue_deadline=deadline)
     except TimeoutError as exc:
         if not timeout.expired():
             raise

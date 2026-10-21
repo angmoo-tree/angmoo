@@ -9,7 +9,7 @@ from time import monotonic
 from typing import Any, Callable
 from uuid import uuid4
 
-from app.core.sqlite_concurrency import SqliteBoundedTaskQueue
+from app.core.sqlite_concurrency import SqliteBoundedTaskQueue, SqliteRetryPolicy
 from app.exceptions import SqliteTaskQueueFull
 from app.runtime.persistence.lease_operation import LeaseOperation, lease_operation_scope
 
@@ -30,7 +30,12 @@ class SchedulerLeaseExecutor:
             raise RuntimeError("scheduler_lease_executor_closed")
         submitted = monotonic()
         deadline = kwargs.pop("queue_deadline", None)
-        observation = LeaseOperation(uuid4().hex, deadline)
+        policy = None
+        if deadline is not None and operation in {"heartbeat", "finish_tick"}:
+            policy = SqliteRetryPolicy(max_attempts=12 if operation == "heartbeat" else 4,
+                initial_delay_seconds=0.05, maximum_delay_seconds=0.2,
+                maximum_elapsed_seconds=2.0)
+        observation = LeaseOperation(uuid4().hex, deadline, policy)
         observation.record({"result": "queued", "worker_state": "queued"})
 
         def execute() -> Any:

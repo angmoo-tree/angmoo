@@ -8,12 +8,14 @@ from contextvars import ContextVar
 from dataclasses import dataclass, field
 from threading import Lock
 from typing import Any
+from app.core.sqlite_concurrency import SqliteRetryPolicy
 
 
 @dataclass
 class LeaseOperation:
     operation_id: str
     deadline: float | None
+    retry_policy: SqliteRetryPolicy | None = None
     _facts: dict[str, Any] = field(default_factory=dict)
     _lock: Lock = field(default_factory=Lock)
 

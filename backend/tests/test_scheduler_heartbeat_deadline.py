@@ -53,21 +53,23 @@ def test_deadline_before_sql_and_before_commit_rolls_back(tmp_path):
         engine.dispose()
 
 
-def test_first_call_and_busy_retry_share_one_deadline(tmp_path):
-    deadlines = []
+def test_first_queue_and_writer_use_one_deadline_without_runtime_replay(tmp_path):
+    contexts = []
     class Coordinator:
         def heartbeat(self, **_kwargs):
-            deadlines.append(current_lease_operation().deadline)
-            if len(deadlines) == 1:
-                raise SqliteBusyRetryExhausted("synthetic_busy")
-            return _proof()
+            contexts.append(current_lease_operation())
+            raise SqliteBusyRetryExhausted("synthetic_busy")
     async def scenario():
         executor = SchedulerLeaseExecutor(Coordinator)
+        started = monotonic()
         try:
-            result = await scheduler._heartbeat_with_budget(executor, owner_id="owner", fencing_epoch=1,
-                config=_config(tmp_path), proof=_proof())
-            assert result.fencing_epoch == 1
-            assert len(deadlines) == 2 and deadlines[0] == deadlines[1]
+            with pytest.raises(SqliteBusyRetryExhausted):
+                await scheduler._heartbeat_with_budget(executor, owner_id="owner", fencing_epoch=1,
+                    config=_config(tmp_path), proof=_proof())
+            assert len(contexts) == 1
+            assert started < contexts[0].deadline <= started + 2.1
+            assert contexts[0].retry_policy.max_attempts == 12
+            assert contexts[0].retry_policy.maximum_elapsed_seconds == 2
         finally:
             assert await executor.drain(1)
             executor.close()
@@ -129,10 +131,11 @@ def test_unrelated_timeout_and_user_cancel_are_not_relabelled(tmp_path):
     asyncio.run(scenario())
 
 
-@pytest.mark.parametrize("proof,expected", [(_proof(seconds=-1), SchedulerLeaseLostError),
-    (_proof(owner="other"), SchedulerLeaseLostError),
-    (_proof(seconds=10), SchedulerHeartbeatDeadlineExceeded)])
-def test_unsafe_lease_does_not_submit_heartbeat(tmp_path, proof, expected):
+@pytest.mark.parametrize("proof_args,expected", [({"seconds": -1}, SchedulerLeaseLostError),
+    ({"owner": "other"}, SchedulerLeaseLostError),
+    ({"seconds": 10}, SchedulerHeartbeatDeadlineExceeded)])
+def test_unsafe_lease_does_not_submit_heartbeat(tmp_path, proof_args, expected):
+    proof = _proof(**proof_args)
     class Coordinator:
         def heartbeat(self, **_kwargs): raise AssertionError("must not submit")
     with pytest.raises(expected):
