@@ -1378,6 +1378,17 @@ owner/epoch는 실제 heartbeat 후 재개하며 만료는 새 generation, 다�
 보조 task가 실제로 끝나지 않으면 FAILED와 최초 오류를 유지하고 새 tick/runner를 만들지 않는다.
 release 실패는 최초 오류와 별도로 기록하고 stale owner는 expiry/fence로 차단한다.
 
+2026-10-21 로컬 Termux 시험 브랜치: heartbeat의 첫 호출부터 큐 대기와 SQLite 재시도에
+하나의 monotonic 종료 시각을 전달한다. 최대 2초이며 마지막 성공 lease의 만료 전
+drain + 1초 여유를 보존한다. Runtime executor의 요청 범위 context를 persistence
+adapter가 writer의 명시적 deadline으로 전달하며 Domain lease 규칙은 변경하지 않는다.
+이 대기 경계에서 발생한 timeout과 writer deadline만 SchedulerHeartbeatDeadlineExceeded로
+분류한다. 다른 TimeoutError와 사용자 취소는 바꾸지 않는다. 해당 오류는 기존 DEGRADED,
+실제 Future/자식 drain, owner/epoch/expiry 확인, 실제 heartbeat 성공 절차로 복구한다.
+committed 이후의 정리 실패로 쓰기를 재실행하지 않고, 대기 종료와 실제 작업 종료를
+operation_id로 연결한다. 큐·checkout·BEGIN·commit·cleanup 시간은 제한된 로그에만
+남기며 추가 진단 DB 쓰기나 실행권 TTL 확대는 하지 않는다.
+
 health는 scheduler READY 표시에 더해 유효 owner/epoch/expiry의 실제 heartbeat proof를 확인한다.
 DEGRADED/FAILED/만료는503, 복구 확인 뒤200이다. projector 기존 정책은 유지한다. 진단은
 단계·안전한 code·시도/queue/transaction 시간·owner/epoch만 기록하며 SQL/본문/키를 출력하지 않는다.

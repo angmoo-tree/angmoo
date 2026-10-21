@@ -7,9 +7,11 @@ from concurrent.futures import Future
 from threading import Lock
 from time import monotonic
 from typing import Any, Callable
+from uuid import uuid4
 
 from app.core.sqlite_concurrency import SqliteBoundedTaskQueue
 from app.exceptions import SqliteTaskQueueFull
+from app.runtime.persistence.lease_operation import LeaseOperation, lease_operation_scope
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +30,21 @@ class SchedulerLeaseExecutor:
             raise RuntimeError("scheduler_lease_executor_closed")
         submitted = monotonic()
         deadline = kwargs.pop("queue_deadline", None)
+        observation = LeaseOperation(uuid4().hex, deadline)
+        observation.record({"result": "queued", "worker_state": "queued"})
 
         def execute() -> Any:
             delay = monotonic() - submitted
+            observation.record({"queue_ms": round(delay * 1000, 3), "worker_state": "running"})
             if delay > 1 or (deadline is not None and monotonic() >= deadline):
                 raise SqliteTaskQueueFull("scheduler_lease_queue_deadline")
-            logger.info("scheduler_lease_queue operation=%s queue_ms=%.3f owner=%s epoch=%s",
-                        operation, delay * 1000, kwargs.get("owner_id"), kwargs.get("fencing_epoch"))
+            logger.info("scheduler_lease_queue operation=%s operation_id=%s queue_ms=%.3f owner=%s epoch=%s",
+                        operation, observation.operation_id, delay * 1000, kwargs.get("owner_id"), kwargs.get("fencing_epoch"))
             # The injected session/bind is first resolved inside the worker.
-            if self._coordinator is None:
-                self._coordinator = self._factory()
-            return getattr(self._coordinator, operation)(**kwargs)
+            with lease_operation_scope(observation):
+                if self._coordinator is None:
+                    self._coordinator = self._factory()
+                return getattr(self._coordinator, operation)(**kwargs)
 
         future = self._queue.submit(execute)
         with self._lock:
@@ -50,8 +56,12 @@ class SchedulerLeaseExecutor:
             # Retrieve the exception even if the async waiter was cancelled.
             if not done.cancelled():
                 error = done.exception()
-                if error is not None:
-                    logger.warning("scheduler_lease_operation_failed operation=%s code=%s", operation, type(error).__name__)
+                observation.record({"worker_state": "done", "total_ms": round((monotonic() - submitted) * 1000, 3)})
+                facts = observation.snapshot()
+                if error is not None or facts.get("caller_cancelled"):
+                    event = "scheduler_lease_operation_failed" if error is not None else "scheduler_lease_operation_finished"
+                    logger.warning("%s operation=%s code=%s facts=%s",
+                                   event, operation, type(error).__name__ if error is not None else "late_success", facts)
 
         future.add_done_callback(complete)
         waiter = asyncio.wrap_future(future)
@@ -60,6 +70,9 @@ class SchedulerLeaseExecutor:
             return await asyncio.shield(waiter)
         except asyncio.CancelledError:
             future.cancel()  # A queued call cancels; a running call remains tracked.
+            observation.record({"caller_cancelled": True, "worker_state":
+                "cancelled" if future.cancelled() else "running" if future.running() else "done"})
+            logger.warning("scheduler_lease_wait_cancelled operation=%s facts=%s", operation, observation.snapshot())
             raise
 
     async def drain(self, timeout: float) -> bool:
