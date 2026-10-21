@@ -57,7 +57,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-core 2.46.4` — MIT
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
-- `pypdf 6.19.0` — BSD-3-Clause
+- `pypdf 6.21.1` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
 - `python-docx 1.2.0` — MIT
 - `python-dotenv 1.2.2` — BSD-3-Clause

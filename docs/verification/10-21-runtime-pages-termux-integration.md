@@ -198,3 +198,15 @@ preimage, and the new chain reaches the current implementation. Scanning every
 original export against the previous main finds no other new signature change.
 The other 60 compatibility/inventory checks pass in the local diagnostic run;
 the failing callable is rechecked after this evidence addition.
+
+Security advisory data subsequently flagged four pypdf 6.19.0 issues in the
+e19a4fc4 CI run. The upstream changelog also documents additional stream-work
+and JPEG-decoder hardening after the minimum 6.20.1 fixes, so the locked package
+and minimum dependency are now 6.21.1. Source:
+https://pypdf.readthedocs.io/en/stable/meta/CHANGELOG.html . No audit exception,
+parser limit or subprocess cleanup boundary was changed. Character-lore tests
+pass (38), and the upload-security subset including a new real text-PDF fixture
+passes (13). The fixture exercises the actual isolated reader, not a mock.
+The locked 77-package backend audit and updated license notice pass. Logs:
+`ci-e19-dependency-failure.log`, `ci-remediation-pypdf.log`, and
+`ci-remediation-pypdf-upload.log`.
