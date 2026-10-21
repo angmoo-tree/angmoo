@@ -132,7 +132,7 @@ class BootstrapTests(unittest.TestCase):
         with self.assertRaisesRegex(bootstrap.InstallError, "download_redirect_invalid"):
             bootstrap.HTTPSRedirects().redirect_request(None, None, 302, "", {}, "http://example.invalid/file")
 
-    @unittest.skipUnless(sys.platform == "linux", "requires a real POSIX shell")
+    @unittest.skipUnless(os.name == "posix", "requires a real POSIX shell")
     def test_real_setup_and_wrapper_with_offline_packages_and_image_commands(self):
         """Exercise the real shell boundary, not Android or image execution."""
         for install_fails in (False, True):

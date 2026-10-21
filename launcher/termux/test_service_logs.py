@@ -15,7 +15,7 @@ import processes
 import service_logs as logs
 
 
-@unittest.skipUnless(sys.platform == "linux", "real nonblocking Linux pipes")
+@unittest.skipUnless(sys.platform in ("linux", "android"), "real nonblocking Linux pipes")
 class LogTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

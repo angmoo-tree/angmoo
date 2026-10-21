@@ -48,7 +48,7 @@ class HostPlatformTests(unittest.TestCase):
                         angmoo.tools()
 
 
-@unittest.skipUnless(sys.platform == "linux", "requires Linux /proc and flock")
+@unittest.skipUnless(sys.platform in ("linux", "android"), "requires Linux /proc and flock")
 class HostTests(unittest.TestCase):
     def test_status_does_not_create_home_or_open_database(self):
         with tempfile.TemporaryDirectory() as root:
@@ -135,6 +135,7 @@ class HostTests(unittest.TestCase):
             def command(_exe, _config, service, _nonce):
                 return [sys.executable, "-c", "import time;time.sleep(60)" if service == "backend" else "raise SystemExit(7)"]
             def readiness(process, _url, _source, _nonce, *, backend, **_):
+                self.assertEqual(_["timeout"], angmoo.BACKEND_READINESS_SECONDS if backend else angmoo.FRONTEND_READINESS_SECONDS)
                 if not backend:
                     process.wait(timeout=5)
                     raise ValueError("service_exited_before_ready")
