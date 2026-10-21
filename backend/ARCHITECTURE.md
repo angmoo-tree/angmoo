@@ -1378,7 +1378,7 @@ owner/epoch는 실제 heartbeat 후 재개하며 만료는 새 generation, 다�
 보조 task가 실제로 끝나지 않으면 FAILED와 최초 오류를 유지하고 새 tick/runner를 만들지 않는다.
 release 실패는 최초 오류와 별도로 기록하고 stale owner는 expiry/fence로 차단한다.
 
-2026-10-21 로컬 Termux 시험 브랜치: heartbeat의 첫 호출부터 큐 대기와 SQLite 재시도에
+2026-10-21 공통 Runtime: heartbeat의 첫 호출부터 큐 대기와 SQLite 재시도에
 하나의 monotonic 종료 시각을 전달한다. 최대 2초이며 마지막 성공 lease의 만료 전
 drain + 1초 여유를 보존한다. Runtime executor의 요청 범위 context를 persistence
 adapter가 writer의 명시적 deadline으로 전달하며 Domain lease 규칙은 변경하지 않는다.
@@ -1702,3 +1702,33 @@ speech follows the existing persona/conversation policy. Mapping performs no
 SQL, file, network or AI call. Tendency analysis is outside this change.
 
 Evidence: [situation/query language verification](../docs/verification/situation-query-language-20261018.md).
+
+## SQLite lease, paged reads and Termux logging (2026-10-22, LOCAL)
+
+LeaseOperation carries one immutable monotonic deadline and an operation-specific retry policy.
+Heartbeat uses at most 12 attempts / 2 seconds; tick completion at most 4 attempts / 2 seconds,
+clipped by lease expiry and drain safety. The global writer remains 4 attempts / 0.25 seconds;
+the lease executor remains one worker, capacity four and a one-second queue age. Only BUSY is
+retried after rollback and connection cleanup. Runtime no longer nests another BUSY loop.
+Tick completion freezes the logical tick and actual finish time, then CAS checks owner, epoch,
+expiry and that tick. Delayed writes cannot finish a later tick or replay activity. Observers
+collect bounded facts in memory and emit summaries after connection cleanup, never DB traces.
+
+Chat owns a versioned owner/World/thread cursor over (created_at, integer id), latest/before/after
+queries and limit+1 detection (default50, maximum100). Attachments and committed evidence
+summaries are projected only for the current page. Request status and pages share the same
+evidence projection. A newly empty thread exposes its initial boundary for later gap filling.
+Manual World Feed v2 owns a separate owner/World/actor cursor, 30 root posts per page, and a
+single-root summary GET. Existing thread reply pagination and write-v1 contracts stay intact.
+These GETs do not create records, trigger providers, or retain transactions between requests.
+SQLite v41 / Alembic 0118 adds only the two supporting read indexes; frozen predecessors and
+row-preservation checks remain immutable. No memory search or launch time limit is increased.
+
+Termux opts in with an immutable angmoo-service-log.v1 envelope bound to launch/service.
+Runtime service_log_policy filters owned service handlers before formatting/output, with a
+local monotonic deadline capped by the shared UTC expiry. Missing policy preserves legacy
+logging; malformed explicit policy falls back to basic with a bounded warning. Uvicorn access
+logs contain only method, fixed route class and status. Basic retains lifecycle/warnings/errors;
+detailed temporarily admits safe access and lease/worker summaries. Sidecar JSON and root
+logging ownership are not redirected. Per-service acknowledgements prove policy acceptance;
+launcher UTC estimates cannot claim to observe a service's local monotonic clock.

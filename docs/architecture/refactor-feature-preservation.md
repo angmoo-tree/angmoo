@@ -330,3 +330,25 @@ dependency freeze2개도 현재 변경과 분리한다. 두 Feed placeholder 시
 
 80단계·원계획 A54/B32 대응, 관련 회귀·격리 Docker·성능·미관찰·복구 근거는
 [통합 구현 결과](../verification/chat-memory-world-integrated-20261011.md)에 기록한다.
+
+## 2026-10-22 integrated runtime and paging preservation (LOCAL)
+
+The approved implementation removes semantic name filtering and name-based official styling,
+while retaining nonempty/length/format/uniqueness rules, owner ID authorization and real deleted
+author state. No stored name or content is migrated. Existing shared Termux installation,
+logging, heartbeat recovery and CI discovery implementations are reused. The three emulator
+timeout commits remain excluded.
+
+Chat latest50/before50 and World Feed root30 replace unbounded read payloads. Threads, writes,
+idempotency, evidence scope, attachments and draft ownership remain separate contracts. Read
+failures never replay successful writes. Source/actor/auth/runtime fences and current reading
+position protect late responses. New cursor and summary APIs are explicitly classified owner-only.
+
+Termux log Capture retains bounded queues, rotation, redaction, finite cleanup and loss counters;
+selector/self-pipe and condition waits eliminate periodic idle polling. Basic/detailed source
+policy is launch-bound, one-way expiring and independently acknowledged. It adds no database
+writes, network collector, or global root logger replacement. The original data directory and
+secrets remain separate from replaceable image/runtime content.
+
+Related regression, synthetic measurements and remaining actual-device gates are recorded in
+[the integration verification](../verification/10-21-runtime-pages-termux-integration.md).

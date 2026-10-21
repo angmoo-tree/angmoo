@@ -395,6 +395,11 @@ jobs:
       - name: Verify runtime media transport
         working-directory: frontend
         run: pnpm test:media-proxy
+      - name: Verify opt-in service log expiry and proxy lifecycle
+        working-directory: frontend
+        run: |
+          node scripts/test-service-log-policy.mjs
+          node scripts/test-proxy-lifecycle.mjs
       - name: Verify Identity request and session parity
         run: node scripts/test-identity-session.mjs
         working-directory: frontend
@@ -461,6 +466,11 @@ jobs:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/web.xml
         run: pnpm exec playwright test --config playwright.continuity.config.ts --reporter=github,junit
         working-directory: browser-tests
+      - name: Verify bounded Chat and Feed pages and deferred authenticated media
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/runtime-pages.xml
+        run: pnpm exec playwright test --config playwright.runtime-pages.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Verify UI-E Local Settings fail-closed states
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/settings.xml
@@ -481,6 +491,12 @@ jobs:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build:static
         working-directory: frontend
+      - name: Verify bounded Chat and Feed pages in static
+        env:
+          ANGMOO_RUNTIME_PAGES_STATIC: "1"
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/runtime-pages-static.xml
+        run: pnpm exec playwright test --config playwright.runtime-pages.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Verify shared SNS and Chat image flows in Next and static
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/image-integration.xml

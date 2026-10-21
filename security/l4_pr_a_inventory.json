@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4679,
-      "internal_edge_count": 6925,
+      "external_import_count": 4700,
+      "internal_edge_count": 6933,
       "legacy_import_exception_count": 0,
-      "module_count": 1594,
+      "module_count": 1600,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1728,6 +1728,14 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.writes",
+              "app.pagination"
+            ],
+            "module": "app.domains.social.service.feed_pages",
+            "path": "backend/app/domains/social/service/feed_pages.py"
+          },
+          {
+            "imports": [
               "app.core.context_text",
               "app.domains.characters.service.prompt_persona",
               "app.domains.social.constants",
@@ -1901,6 +1909,7 @@
               "app.domains.social.repository.event_evidence",
               "app.domains.social.repository.manual_feed",
               "app.domains.social.schemas.manual",
+              "app.domains.social.service.feed_pages",
               "app.domains.social.service.post_attachments"
             ],
             "module": "app.domains.social.service.manual_feed",
@@ -3524,8 +3533,10 @@
             "@/features/social/components/social-post-row",
             "@/features/social/types/social-presentation-contract",
             "@/features/social/types/social-write-contract",
+            "@/hooks/use-element-visibility",
             "@/hooks/use-mobile-pull-to-refresh",
             "@/hooks/use-product-leave-guard",
+            "@/hooks/use-read-anchor",
             "@/hooks/use-ui-date-formatter",
             "@/hooks/use-ui-text",
             "@/lib/auth/browser-session",
@@ -3536,7 +3547,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
-          "sha256": "ea6bad9141774f6672b6c01def55d345ba66bf7db11734d972bbca78c56313ab"
+          "sha256": "dcb34bbeda462e1d70b8c34c40d5e595ef910d19661f6beed615fb7013672bc2"
         }
       ],
       "planned_feature_allowlist": [
@@ -3591,7 +3602,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "87cd5d52c8350958d0cf1f5b763e81df2467164dd6001ef6374a91b2af7bb296"
+        "sha256": "e89b8e7fc5175a5a7de3b1da876a26eab908ba0dc0201cdaafd4d6707bfd44d0"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -3633,7 +3644,7 @@
       },
       {
         "path": "backend/tests/social/test_l3_owner_manual_social_inbox.py",
-        "sha256": "6098367e178dffcffe0e07950e42c8936f00325c23b951173ba39785a0e9df7d"
+        "sha256": "b9fda48d6219ab092cef9efb7bde5acea7ea107b0f061cfc71aa5b3a2184c7f3"
       },
       {
         "path": "backend/tests/social/test_l4_social_search_projection.py",
@@ -3860,7 +3871,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "757f8d0252febc75bbd7b532c3c4fa70af11ccb527dd4801414ccb177ada1ad5"
+        "sha256": "fafc9b1f2c9b03b4e573fa37de1bc7f13e55b3fd4dfec4905b8c46ebd4038708"
       },
       "steps": [
         {

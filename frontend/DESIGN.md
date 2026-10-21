@@ -1643,3 +1643,12 @@ commit과 nested 진단 저장은 바깥 구간에 포함되며 다른 작업 �
 근거 화면은 사건 시각/출처 범위/기억 기록 시각/unknown을 구분한다. KO/EN은 동일한 의미를
 갖고, 좁은 화면에서 긴 시각 문자열을 줄바꿈하며 details 키보드 접근과 44px 조작 영역을 유지한다.
 검증: [Chat 시간·계측 로컬 결과](../docs/verification/chat-temporal-recall-20261017.md).
+
+## 2026-10-22 World pagination and deferred media (LOCAL)
+
+Chat and Feed retain the existing compact shell, semantic tokens, composer controls and one
+scroll owner. Manual load/retry and return-to-latest buttons use existing primitives and KO/EN
+labels. Older messages preserve their visible anchor; new messages do not force a reader out
+of history. Feed append and root refresh preserve mounted rows and draft input. Authenticated
+images reserve space before near-viewport download and provide an explicit retry. No new
+remote assets, hosted identity semantics or raw-color tokens are introduced.
