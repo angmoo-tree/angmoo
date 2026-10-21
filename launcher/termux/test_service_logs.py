@@ -60,6 +60,7 @@ class LogTests(unittest.TestCase):
             capture.emit("backend", "stdout", f"line {index}: " + "x" * 200)
         summary = capture.close()
         self.assertGreater(summary["retention_pruned_segments"], 0)
+        self.assertFalse(summary["capture_complete"])
         self.assertLessEqual(len(list(self.path.glob("backend.jsonl*"))), 3)
         self.assertTrue(all(p.stat().st_size <= 1200 for p in self.path.glob("backend.jsonl*")))
         self.assertIn("line 49", logs.tail(self.path)[-1]["message"])
