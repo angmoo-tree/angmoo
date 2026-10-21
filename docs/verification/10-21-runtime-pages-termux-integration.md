@@ -190,3 +190,11 @@ byte-for-byte equivalent as data; no generic exemption or substitute helper is
 introduced. Generated embedded-runtime/PostgreSQL-marker inventories are refreshed
 from the current scheduler, read models, lease owner and dependency declaration.
 The exact deletion proof and unfiltered generated-inventory check pass.
+
+The remaining historical callable check identifies `get_activity_plan`'s approved
+optional `local_date` argument. Its exact before/after definition is appended to
+the existing commit-backed ledger; the prior definition chain reaches that
+preimage, and the new chain reaches the current implementation. Scanning every
+original export against the previous main finds no other new signature change.
+The other 60 compatibility/inventory checks pass in the local diagnostic run;
+the failing callable is rechecked after this evidence addition.
