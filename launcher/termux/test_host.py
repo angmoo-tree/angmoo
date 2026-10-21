@@ -10,10 +10,25 @@ import sys
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import angmoo
 import processes
+
+
+class HostPlatformTests(unittest.TestCase):
+    def test_android_python_requires_termux_and_pinned_tools(self):
+        for termux in (True, False):
+            with self.subTest(termux=termux), patch.object(angmoo.sys, "platform", "android"), \
+                 patch.object(angmoo.importlib.metadata, "version", return_value=angmoo.PROOT_VERSION), \
+                 patch.object(angmoo.shutil, "which", return_value="/termux/proot-distro"), \
+                 patch.dict(sys.modules, {"proot_distro.constants": SimpleNamespace(IS_TERMUX=termux)}):
+                if termux:
+                    self.assertEqual(angmoo.tools(), "/termux/proot-distro")
+                else:
+                    with self.assertRaisesRegex(ValueError, "host_not_supported"):
+                        angmoo.tools()
 
 
 @unittest.skipUnless(sys.platform == "linux", "requires Linux /proc and flock")
