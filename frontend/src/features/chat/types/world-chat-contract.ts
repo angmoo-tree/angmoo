@@ -31,6 +31,19 @@ export type WorldChatEntryRead = {
     | null;
 };
 
+export type WorldChatMessagePageRead = {
+  schema_version: "world-chat-message-page.v1";
+  world_id: string;
+  thread_id: string;
+  items: MessageMessageRead[];
+  evidence_summaries: WorldChatThreadRead["evidence_summaries"];
+  direction: "latest" | "before" | "after";
+  has_more: boolean;
+  next_cursor: string | null;
+  oldest_cursor: string | null;
+  newest_cursor: string | null;
+};
+
 export type WorldChatThreadRead = {
   id: string;
   world_id: string;
@@ -45,6 +58,7 @@ export type WorldChatThreadRead = {
   created_at: string;
   latest_message: MessageMessageRead | null;
   messages: MessageMessageRead[];
+  message_page: WorldChatMessagePageRead | null;
   evidence_summaries: {
     request_id: string;
     assistant_message_id: number;
@@ -124,6 +138,7 @@ export type WorldChatGenerationRequestRead = {
   last_accepted_sequence: number;
   user_message: MessageMessageRead;
   assistant_message: MessageMessageRead | null;
+  evidence_summary: WorldChatThreadRead["evidence_summaries"][number] | null;
   response_metadata: Record<string, unknown>;
   image_analysis_state?: "none" | "waiting" | "recognized" | "failed" | "excluded";
   can_retry_without_image?: boolean;

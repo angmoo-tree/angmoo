@@ -12,7 +12,7 @@ test("actual HTTP SQLite source survives lost reply response and reaction reload
   };
   let lostReply=true;
   await page.route("**/api/backend/worlds/world-manual/manual-social/**",actual);
-  await page.route("**/api/backend/worlds/world-manual/owner-character",actual);
+  await page.route("**/api/backend/worlds/world-manual/owner-character/selection",actual);
   await page.goto("/worlds/world-manual/posts/reply-C");
   const surface=page.locator('[data-world-social-surface="detail"]');await expect(surface).toBeVisible();
   const row=page.locator('[data-social-post-row="reply-C"]');

@@ -1,3 +1,5 @@
+import { withChatPages } from "./fixtures/chat-pages.mjs";
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
@@ -236,11 +238,11 @@ async function installBackendFixture(
       // Home now ensures the keyless SNS space before reading the owner list.
       return json(route, { id: "default-sns", name: "SNS", timezone: "Asia/Seoul" });
     }
-    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character$/);
+    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character\/selection$/);
     if (ownerMatch && method === "GET") {
       const worldId = decodeURIComponent(ownerMatch[1]);
       return fixture.worldReads?.[worldId]
-        ? json(route, uiDOwnerActor(worldId))
+        ? json(route, selectedOwnerRead(uiDOwnerActor(worldId)))
         : json(route, { detail: "world_not_found" }, 404);
     }
     const manualFeedMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/manual-social\/feed$/);
@@ -287,7 +289,7 @@ async function installBackendFixture(
 
 async function json(route: Route, body: unknown, status = 200): Promise<void> {
   await route.fulfill({
-    body: JSON.stringify(body),
+    body: JSON.stringify(withChatPages(body)),
     contentType: "application/json",
     status,
   });
@@ -426,10 +428,11 @@ function uiDManualFeed(
   worldId = UI_D_WORLD_ID,
 ) {
   return {
-    schema_version: "owner-manual-social-v1",
+    schema_version: "owner-manual-social-feed-v2",
     world_id: worldId,
     owner_world_character_id: "wc-ui-d-owner",
-    items,
+    items: items.filter(post => post.reply_to_post_id === null),
+    has_more: false, next_cursor: null,
   } as const;
 }
 
@@ -726,9 +729,9 @@ test("World entry creates a missing profile only after verifying its launchable 
       if (!worldReleased) await new Promise<void>(resolve => { pendingWorldReads.push(resolve); });
       return json(route, { schema_version: "local-world-app-v1", surface: "world_app", world: WORLD_ALPHA });
     }
-    if (pathname === `/api/backend/worlds/${worldId}/owner-character`) {
+    if (pathname === `/api/backend/worlds/${worldId}/owner-character/selection`) {
       ownerRead = true;
-      return json(route, { detail: "owner_character_not_found" }, 404);
+      return json(route, { schema_version: "owner-character-selection-v1", world_id: worldId, state: "unselected", actor: null });
     }
     if (pathname === `/api/backend/worlds/${worldId}/my-profile/ensure`) {
       expect(route.request().method()).toBe("POST");
@@ -1049,6 +1052,12 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
         ...acceptedRequest,
         state: "committed",
         assistant_message: generatedAssistantMessage,
+        evidence_summary: {
+          request_id: acceptedRequest.request_id,
+          assistant_message_id: generatedAssistantMessage.id,
+          capability: "available",
+          count: 2,
+        },
         last_accepted_sequence: 2,
       });
     }
@@ -1594,8 +1603,8 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
       return;
     }
     requests.push(`${method} ${url.pathname}`);
-    if (url.pathname === `/api/backend/worlds/${worldId}/owner-character`) {
-      await json(route, uiDOwnerActor(worldId));
+    if (url.pathname === `/api/backend/worlds/${worldId}/owner-character/selection`) {
+      await json(route, selectedOwnerRead(uiDOwnerActor(worldId)));
       return;
     }
     if (
@@ -2002,8 +2011,8 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
       return;
     }
     requestedSocialPaths.push(`${method} ${url.pathname}`);
-    if (url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/owner-character`) {
-      await json(route, uiDOwnerActor());
+    if (url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/owner-character/selection`) {
+      await json(route, selectedOwnerRead(uiDOwnerActor()));
       return;
     }
     if (
@@ -2012,6 +2021,10 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     ) {
       await json(route, uiDManualFeed(feedItems));
       return;
+    }
+    if (method === "GET" && /\/manual-social\/posts\/[^/]+\/summary$/.test(url.pathname)) {
+      const postId = url.pathname.split("/").at(-2);
+      return route.fulfill({json: uiDManualFeed(feedItems.filter(post => post.id === postId))});
     }
     if (
       url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts` &&
@@ -2254,8 +2267,8 @@ test("UI-D Next World social errors distinguish 403, 404, 503, scope mismatch, a
     if (/^\/api\/backend\/(feed|posts)(\/|$)/.test(url.pathname)) {
       globalSocialPaths.push(`${request.method()} ${url.pathname}`);
     }
-    if (url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/owner-character`) {
-      await json(route, uiDOwnerActor());
+    if (url.pathname === `/api/backend/worlds/${UI_D_WORLD_ID}/owner-character/selection`) {
+      await json(route, selectedOwnerRead(uiDOwnerActor()));
       return;
     }
     if (url.pathname !== `/api/backend/worlds/${UI_D_WORLD_ID}/manual-social/feed`) {

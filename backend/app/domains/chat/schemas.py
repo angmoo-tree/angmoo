@@ -162,6 +162,19 @@ class WorldChatEntryRead(BaseModel):
     ] | None = None
 
 
+class WorldChatMessagePageRead(BaseModel):
+    schema_version: Literal["world-chat-message-page.v1"] = "world-chat-message-page.v1"
+    world_id: str
+    thread_id: str
+    items: list[MessageMessageRead] = Field(max_length=100)
+    evidence_summaries: list["WorldChatEvidenceSummaryRead"] = Field(default_factory=list, max_length=100)
+    direction: Literal["latest", "before", "after"]
+    has_more: bool
+    next_cursor: str | None
+    oldest_cursor: str | None
+    newest_cursor: str | None
+
+
 class WorldChatThreadRead(BaseModel):
     id: str
     world_id: str
@@ -176,6 +189,7 @@ class WorldChatThreadRead(BaseModel):
     created_at: datetime
     latest_message: MessageMessageRead | None = None
     messages: list[MessageMessageRead] = Field(default_factory=list)
+    message_page: WorldChatMessagePageRead | None = None
     evidence_summaries: list["WorldChatEvidenceSummaryRead"] = Field(
         default_factory=list
     )
@@ -262,6 +276,7 @@ class WorldChatGenerationRequestRead(BaseModel):
     last_accepted_sequence: int = -1
     user_message: MessageMessageRead
     assistant_message: MessageMessageRead | None = None
+    evidence_summary: "WorldChatEvidenceSummaryRead | None" = None
     response_metadata: dict[str, Any] = Field(default_factory=dict)
     image_analysis_state: Literal["none", "waiting", "recognized", "failed", "excluded"] = "none"
     can_retry_without_image: bool = False

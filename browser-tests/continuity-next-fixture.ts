@@ -1,3 +1,5 @@
+import { withChatPages } from "./fixtures/chat-pages.mjs";
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import type { Page, Route } from "@playwright/test";
 import type { ManualSocialPostRead, ManualSocialThreadRead } from "../frontend/src/features/social/types/social-write-contract";
@@ -95,11 +97,11 @@ async function installBackendFixture(
     if (url.pathname === "/api/backend/agents" && method === "GET") {
       return json(route, fixture.agents ?? []);
     }
-    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character$/);
+    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character\/selection$/);
     if (ownerMatch && method === "GET") {
       const worldId = decodeURIComponent(ownerMatch[1]);
       return fixture.worldReads?.[worldId]
-        ? json(route, uiDOwnerActor(worldId))
+        ? json(route, selectedOwnerRead(uiDOwnerActor(worldId)))
         : json(route, { detail: "world_not_found" }, 404);
     }
     if (url.pathname === "/api/backend/worlds/mine") {
@@ -142,7 +144,7 @@ async function installBackendFixture(
 
 async function json(route: Route, body: unknown, status = 200): Promise<void> {
   await route.fulfill({
-    body: JSON.stringify(body),
+    body: JSON.stringify(withChatPages(body)),
     contentType: "application/json",
     status,
   });
@@ -229,10 +231,11 @@ function uiDManualFeed(
   worldId = UI_D_WORLD_ID,
 ) {
   return {
-    schema_version: "owner-manual-social-v1",
+    schema_version: "owner-manual-social-feed-v2",
+    has_more: false, next_cursor: null,
     world_id: worldId,
     owner_world_character_id: "wc-ui-d-owner",
-    items,
+    items: items.filter(item => item.reply_to_post_id === null),
   } as const;
 }
 

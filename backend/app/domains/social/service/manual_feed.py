@@ -1,6 +1,7 @@
 """Owner feed/thread visibility, profile capability and response composition."""
 from __future__ import annotations
 from sqlalchemy.orm import Session
+from app.domains.social.service.feed_pages import decode_feed_cursor, encode_feed_cursor
 from app.domains.social.models import posts as models
 from app.domains.social.schemas.manual import ManualSocialFeedRead, ManualSocialPostRead, ManualSocialThreadRead, ManualSocialParentRead
 from app.domains.social.contracts.actors import SocialCharacter
@@ -154,15 +155,22 @@ def _author_profile_available(
 
 
 def list_owner_world_feed(
-    db: Session, *, references: ManualFeedReferences, world_id: str, current_user_id: str, limit: int = 100
+    db: Session, *, references: ManualFeedReferences, world_id: str, current_user_id: str, limit: int = 30, cursor: str | None = None
 ) -> ManualSocialFeedRead:
     actor, _character = _owner_actor(
         references, world_id=world_id, current_user_id=current_user_id
     )
-    # Feed v1 retains public posts; blocking disables profile/reaction
-    # capabilities. The selected-thread v2 reader separately filters replies.
-    items = queries.list_visible_posts(db, world_id=world_id, limit=limit)
+    # Public roots remain visible; blocking disables profile/reaction capability.
+    from app.domains.social.contracts.writes import SocialWriteValidationError
+    if type(limit) is not int or not 1 <= limit <= 100:
+        raise SocialWriteValidationError("manual_social_page_invalid")
+    boundary = decode_feed_cursor(cursor, current_user_id, world_id, actor.id) if cursor is not None else None
+    rows = queries.list_visible_posts(db, world_id=world_id, limit=limit, boundary=boundary)
+    has_more = len(rows) > limit
+    items = rows[:limit]
     return ManualSocialFeedRead(
+        has_more=has_more,
+        next_cursor=encode_feed_cursor(items[-1], current_user_id, actor.id) if has_more else None,
         world_id=world_id,
         owner_world_character_id=actor.id,
         items=_post_reads(
@@ -217,3 +225,13 @@ def get_owner_world_post_thread(
         owner_world_character_id=actor.id,
         replies=[item.model_copy(update={"thread_root_post_id": root_id}) for item in reads[1:]],
     )
+
+
+def get_owner_world_post_summary(db: Session, *, references: ManualFeedReferences,
+    world_id: str, current_user_id: str, post_id: str) -> ManualSocialFeedRead:
+    actor, _ = _owner_actor(references, world_id=world_id, current_user_id=current_user_id)
+    post = queries.visible_post(db, world_id=world_id, post_id=post_id)
+    if post is None or post.reply_to_post_id is not None:
+        raise ManualSocialNotFoundError("post_not_in_world")
+    return ManualSocialFeedRead(world_id=world_id, owner_world_character_id=actor.id,
+        items=_post_reads(db, references=references, world_id=world_id, posts=[post], viewer_world_character_id=actor.id))

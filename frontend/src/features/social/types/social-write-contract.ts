@@ -60,11 +60,9 @@ export type ManualSocialWritePostRead = Omit<
 >;
 
 export type ManualSocialFeedRead = {
-  root_post_id?: string | null;
-  target_post_id?: string | null;
-  page_offset?: number;
-  next_offset?: number | null;
-  schema_version: "owner-manual-social-v1";
+  schema_version: "owner-manual-social-feed-v2";
+  has_more: boolean;
+  next_cursor: string | null;
   world_id: string;
   owner_world_character_id: string;
   items: ManualSocialPostRead[];

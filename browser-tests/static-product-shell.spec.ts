@@ -1,3 +1,5 @@
+import { withChatPages } from "./fixtures/chat-pages.mjs";
+import { selectedOwnerRead } from "./fixtures/owner-selection.mjs";
 import { existingLocalSessionRead } from "./fixtures/existing-local-session.mjs";
 import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { expect, test, type Page } from "@playwright/test";
@@ -234,10 +236,11 @@ function staticUiDManualFeed(
   worldId = UI_D_STATIC_WORLD_ID,
 ) {
   return {
-    schema_version: "owner-manual-social-v1",
+    schema_version: "owner-manual-social-feed-v2",
     world_id: worldId,
     owner_world_character_id: "wc-ui-d-static-owner",
-    items,
+    items: items.filter(post => post.reply_to_post_id === null),
+    has_more: false, next_cursor: null,
   } as const;
 }
 
@@ -2186,10 +2189,10 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
       });
       return;
     }
-    if (pathname === "/api/v1/worlds/world-static-probe/owner-character") {
+    if (pathname === "/api/v1/worlds/world-static-probe/owner-character/selection") {
       await route.fulfill({
         contentType: "application/json",
-        json: {
+        json: selectedOwnerRead({
           schema_version: "owner-controlled-world-character-v1",
           world_character_id: "wc-static-owner",
           world_id: "world-static-probe",
@@ -2207,7 +2210,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
             interests: [],
             background: "",
           },
-        },
+        }),
         status: 200,
       });
       return;
@@ -2345,10 +2348,10 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
       });
       return;
     }
-    if (url.pathname === `/api/v1/worlds/${worldId}/owner-character`) {
+    if (url.pathname === `/api/v1/worlds/${worldId}/owner-character/selection`) {
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDOwnerActor(worldId),
+        json: selectedOwnerRead(staticUiDOwnerActor(worldId)),
         status: 200,
       });
       return;
@@ -2438,7 +2441,7 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
       });
       await route.fulfill({
         contentType: "application/json",
-        json: { outcome: "created", thread, resolution_code: null },
+        json: withChatPages({ outcome: "created", thread, resolution_code: null }),
         status: 200,
       });
       return;
@@ -2449,7 +2452,7 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     ) {
       await route.fulfill({
         contentType: "application/json",
-        json: thread,
+        json: withChatPages(thread),
         status: 200,
       });
       return;
@@ -2868,10 +2871,10 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       });
       return;
     }
-    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character/selection`) {
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDOwnerActor(),
+        json: selectedOwnerRead(staticUiDOwnerActor()),
         status: 200,
       });
       return;
@@ -2887,6 +2890,10 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
         status: 200,
       });
       return;
+    }
+    if (method === "GET" && /\/manual-social\/posts\/[^/]+\/summary$/.test(url.pathname)) {
+      const postId = url.pathname.split("/").at(-2);
+      return route.fulfill({json: staticUiDManualFeed(feedItems.filter(post => post.id === postId))});
     }
     if (
       url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts` &&
@@ -3169,10 +3176,10 @@ test("UI-D static World social errors distinguish 403, 404, 503, scope mismatch,
       });
       return;
     }
-    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character/selection`) {
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDOwnerActor(),
+        json: selectedOwnerRead(staticUiDOwnerActor()),
         status: 200,
       });
       return;
@@ -3279,10 +3286,10 @@ test("UI-D static World detail rejects an unrelated same-World reply and owner m
       });
       return;
     }
-    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character`) {
+    if (url.pathname === `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/owner-character/selection`) {
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDOwnerActor(),
+        json: selectedOwnerRead(staticUiDOwnerActor()),
         status: 200,
       });
       return;
@@ -3525,12 +3532,12 @@ async function installStaticRelationshipScope(page: Page, graph = false): Promis
       await route.fulfill({json: staticUiDWorld(worldId)});
       return;
     }
-    if (pathname === `/api/v1/worlds/${worldId}/owner-character`) {
-      await route.fulfill({json: {
+    if (pathname === `/api/v1/worlds/${worldId}/owner-character/selection`) {
+      await route.fulfill({json: selectedOwnerRead({
         ...staticUiDOwnerActor(worldId),
         world_character_id: "wc-static-owner",
         character_id: "character-static-owner",
-      }});
+      })});
       return;
     }
     if (pathname.endsWith("/relationship-review")) {
@@ -4238,10 +4245,10 @@ test("Tauri Phone embeds the owner relationship graph without opening a product 
       });
       return;
     }
-    if (pathname === "/api/v1/worlds/world-static-probe/owner-character") {
+    if (pathname === "/api/v1/worlds/world-static-probe/owner-character/selection") {
       await route.fulfill({
         contentType: "application/json",
-        json: {
+        json: selectedOwnerRead({
           schema_version: "owner-controlled-world-character-v1",
           world_character_id: "wc-static-owner",
           world_id: "world-static-probe",
@@ -4259,7 +4266,7 @@ test("Tauri Phone embeds the owner relationship graph without opening a product 
             interests: [],
             background: "",
           },
-        },
+        }),
         status: 200,
       });
       return;

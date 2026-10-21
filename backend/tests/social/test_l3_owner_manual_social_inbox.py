@@ -458,14 +458,18 @@ def test_owner_manual_post_and_reply_are_idempotent_and_provider_free() -> None:
     )
     assert feed.status_code == 200
     assert feed.json()["world_id"] == "world-manual"
-    assert len(feed.json()["items"]) == 3
+    assert len(feed.json()["items"]) == 2
+    assert all(item["reply_to_post_id"] is None for item in feed.json()["items"])
+    assert next(item for item in feed.json()["items"] if item["id"] == "post-autonomous-target")["reply_count"] == 1
     items_by_id = {item["id"]: item for item in feed.json()["items"]}
     assert items_by_id["post-autonomous-target"]["reply_count"] == 1
     assert items_by_id["post-autonomous-target"]["like_count"] == 0
     assert items_by_id[created_payload["post"]["id"]]["reply_count"] == 0
     assert items_by_id[created_payload["post"]["id"]]["like_count"] == 0
-    assert items_by_id[reply_payload["post"]["id"]]["reply_count"] == 0
-    assert items_by_id[reply_payload["post"]["id"]]["like_count"] == 0
+    assert reply_payload["post"]["id"] not in items_by_id
+    detail = client.get("/api/v1/worlds/world-manual/manual-social/posts/post-autonomous-target", headers=FRONTEND_HEADERS).json()
+    stored_reply = next(item for item in detail["replies"] if item["id"] == reply_payload["post"]["id"])
+    assert stored_reply["reply_count"] == 0 and stored_reply["like_count"] == 0
 
     with Session(engine) as db:
         assert db.scalar(select(func.count(models.Post.id))) == 3

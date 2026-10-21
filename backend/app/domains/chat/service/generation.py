@@ -7,6 +7,7 @@ from app.domains.identity.service.environment import lock_environment_admission,
 import asyncio
 import json
 
+from app.domains.chat.service.message_pages import committed_evidence_summary
 from app.domains.chat.service.diagnostic_capture import capture
 from app.domains.chat.service.db_observation import observe_admission, observe_generation
 from app.core.session_write_observation import finish_session
@@ -430,6 +431,8 @@ class GenerationService:
             assistant_message=None
             if assistant is None
             else schemas.MessageMessageRead.model_validate(assistant),
+            evidence_summary=committed_evidence_summary(record.request_id, assistant.id, record.response_metadata)
+                if assistant is not None and record.state.value == "committed" else None,
             response_metadata={
                 key: value
                 for key, value in record.response_metadata.items()

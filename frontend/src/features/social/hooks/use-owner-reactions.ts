@@ -67,7 +67,9 @@ export function useOwnerReactions(scope: string, onConfirmed: (change: Confirmed
     setError({ scope: scopeKey, failed: false });
     try {
       const result = await setOwnerManualLike(world, post.id, actor, post.viewer_like_state !== "liked");
-      if (current === generation.current && isCurrentAuthRequestScope(authScope)) publishConfirmedReaction(result);
+      // A confirmed write belongs to the authenticated runtime, not the tab
+      // that initiated it. Current consumers still enforce World/actor scope.
+      if (isCurrentAuthRequestScope(authScope)) publishConfirmedReaction(result);
     } catch {
       if (current === generation.current && isCurrentAuthRequestScope(authScope)) setError({ scope: scopeKey, failed: true });
     } finally {

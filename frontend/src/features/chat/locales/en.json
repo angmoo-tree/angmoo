@@ -321,5 +321,14 @@
   "요청 정리 / 작업자 재사용 / 다음 상태": "Request cleanup / worker reused / next state",
   "작업자 준비 / 진입 / 모듈 준비 시간": "Worker preparation / entry / module loading time",
   "프로세스 시작 / 결과 수신 / 프로세스 종료·회수": "Process started / result received / process exited and reaped",
-  "다음 검색 준비 완료": "Ready for the next search"
+  "다음 검색 준비 완료": "Ready for the next search",
+  "이전 대화 더 보기": "Load earlier messages",
+  "대화를 불러오는 중…": "Loading messages…",
+  "대화를 더 불러오지 못했어요. 기존 대화는 유지됩니다.": "Could not load more messages. Your current conversation is still available.",
+  "조회 다시 시도": "Retry loading",
+  "새 메시지 · 최신 위치로 이동": "New messages · Jump to latest",
+  "빠진 대화 더 불러오기": "Load more missing messages",
+  "이미지 다시 불러오기": "Reload image",
+  "답변 상태를 확인하지 못했습니다. 메시지는 다시 보내지 않습니다.": "Could not check the response. Your message will not be sent again.",
+  "답변 상태 다시 확인": "Check response status again"
 }

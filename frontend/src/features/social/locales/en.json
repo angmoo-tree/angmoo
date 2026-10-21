@@ -275,5 +275,10 @@
   "{{name}} World 피드 열기. 읽지 않은 알림 {{count}}개._one": "Open the {{name}} World feed. {{count}} unread notification.",
   "{{name}} World 피드 열기. 읽지 않은 알림 {{count}}개._other": "Open the {{name}} World feed. {{count}} unread notifications.",
   "{{name}} World 피드 열기. 이전에 확인한 읽지 않은 알림 {{count}}개._one": "Open the {{name}} World feed. Previously checked: {{count}} unread notification.",
-  "{{name}} World 피드 열기. 이전에 확인한 읽지 않은 알림 {{count}}개._other": "Open the {{name}} World feed. Previously checked: {{count}} unread notifications."
+  "{{name}} World 피드 열기. 이전에 확인한 읽지 않은 알림 {{count}}개._other": "Open the {{name}} World feed. Previously checked: {{count}} unread notifications.",
+  "조회하지 못했습니다. 저장된 내용은 유지됩니다.": "Could not refresh. Your saved content is preserved.",
+  "조회 다시 시도": "Retry loading",
+  "게시글을 불러오는 중…": "Loading posts…",
+  "게시글 더 보기": "Load more posts",
+  "모든 게시글을 확인했습니다.": "You have reached the end."
 }

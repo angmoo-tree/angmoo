@@ -1,3 +1,4 @@
+import { installWorldCharacterManagementRoutes } from "./world-character-management-fixture";
 import {expect,test} from "@playwright/test";
 import {readFileSync,writeFileSync} from "node:fs";
 import {FEED_WORLD, OTHER_FEED_WORLD, feedRoute, profileRoute} from "./world-feed-fixture";
@@ -53,7 +54,7 @@ for(const language of ["ko","en"] as const){
     const draft=surface.locator("form textarea");await draft.fill("Synthetic unsent draft");
     await trigger.click();const dialog=page.getByRole("dialog");await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");await expect(dialog).toHaveCount(0);await expect(trigger).toBeFocused();await expect(draft).toHaveValue("Synthetic unsent draft");
-    expect(state.writes).toEqual([]);
+    expect(state.writes).toEqual([{path:`/worlds/${FEED_WORLD}/chat/threads/${state.thread.id}/memory-search/prepare`,method:"POST",key:undefined,data:{}}]);
     const layout=await surface.evaluate(element=>{
       const form=element.querySelector("form")!,list=element.querySelector("ol")!,pane=list.parentElement!;
       return {surface:element.getBoundingClientRect().toJSON(),form:form.getBoundingClientRect().toJSON(),pane:pane.getBoundingClientRect().toJSON(),paneOverflow:getComputedStyle(pane).overflowY,scroll:pane.scrollHeight,client:pane.clientHeight};
@@ -115,6 +116,7 @@ test("locale refresh preserves failed reply text, focus, and idempotency key",as
 test("profile tab change clears the completed reaction lock in its new scope",async({page},info)=>{
   const state=await installSocialChatFixture(page,info.project.name==="static-export",String(info.project.use.baseURL));
   state.posts[0].author_world_character_id="synthetic-responder";state.delay=600;
+  await installWorldCharacterManagementRoutes(page);
   await page.goto(`/worlds/${FEED_WORLD}/characters/synthetic-responder`);
   const row=page.locator('[data-social-post-row="synthetic-root"]');
   await row.getByRole("button",{name:/좋아요/}).click();
