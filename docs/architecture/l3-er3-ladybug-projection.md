@@ -62,6 +62,31 @@ an unused drive, keeps the canonical files in the original directory, and
 removes the alias on close. Opening failure releases both the alias and writer
 lock.
 
+## Portable virtual address reservation (2026-10-22)
+
+Runtime opens and schema inspection explicitly use `max_db_size=64 * 1024**3`
+through the adapter's `LADYBUG_MAX_DB_SIZE_BYTES` policy. Ladybug 0.19.1 otherwise
+reserves 8 TiB of virtual address space; that reservation fails on the tested
+native ARM64 Android phone even though the small graph needs little resident
+memory. This uses Ladybug's supported constructor option on all platforms,
+without changing the library, query results, startup deadlines, or schema v3.
+
+64 GiB is a finite graph mapping/capacity limit, not a RAM requirement or an
+immediate disk allocation. SQLite, media and chat storage are not covered by
+this graph-only limit. Large graphs can exhaust this native capacity; the
+adapter keeps its existing failure/rollback and canonical-outbox recovery
+semantics rather than deleting data, silently increasing the reservation, or
+reporting a failed graph as ready. Changing this policy in the future requires
+capacity and supported-device verification, including existing graph reopen.
+The buffer pool's memory policy is separate and is not changed by this fix.
+
+The focused regression creates, writes, closes, inspects and reopens a real
+graph behind a factory that rejects the unbounded library default. It also
+reopens a graph created with a different reservation size and compares its
+relationship digest. Existing writer-lock, replay and World isolation tests
+remain applicable. Actual Android startup and memory use must be measured
+separately; passing the desktop regression does not establish those outcomes.
+
 ## Error and privacy boundary
 
 Provider-specific exceptions map to the domain-owned
