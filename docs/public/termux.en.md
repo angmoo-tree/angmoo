@@ -11,6 +11,12 @@ set, patch the images, or require editing ports or environment files.
 results are not evidence that Android sleep, Doze, or background activity works.
 Physical-device certification remains P4; until recorded, Android is experimental.
 
+On the tested Samsung Android 14 device, the system terminated a Termux child
+process during screen-off use even with a partial wake lock and battery
+optimization exclusion. These settings do not guarantee continuous operation.
+This is a device-specific observation, not a universal Android memory limit.
+Closing the browser does not itself stop the server; Android may still interrupt it.
+
 ## First install and start: two commands
 
 Install Termux on a supported ARM64 Android device, then enter these two commands.
