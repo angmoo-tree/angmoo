@@ -526,7 +526,7 @@
     },
     {
       "path": "backend/app/domains/memory/contracts/activity_situation.py",
-      "sha256": "57903081f99cdbad39227dfbc08422ba74521e9114b096c58be2d2b2be4ae0bd"
+      "sha256": "b93010e618e7265f9f81e5c114adab1228bf27a36338f756eac6f0145b1c26ca"
     },
     {
       "path": "backend/app/domains/memory/contracts/batch.py",
@@ -626,7 +626,7 @@
     },
     {
       "path": "backend/app/domains/memory/contracts/situation_result_binding.py",
-      "sha256": "7e65ca24dcb02713fee59176ad082509bbcd4e45194838764811836283a843d5"
+      "sha256": "1eb9cd1fc1c7957de6f10dc6c5791d31dd91b4c2286d306637715dc6d6bb2827"
     },
     {
       "path": "backend/app/domains/memory/contracts/situation_source_binding.py",
@@ -814,7 +814,7 @@
     },
     {
       "path": "backend/app/domains/memory/policies/situation_validation.py",
-      "sha256": "ad4c1a996cc35245fd1b3dfafcf7df77da014f9c39e682f09f0502f64342891d"
+      "sha256": "08c91d3e9eb163706721ace92029518d9fdf6c0321fa0fb09034fc4dce6938d2"
     },
     {
       "path": "backend/app/domains/memory/policies/validation.py",
@@ -958,7 +958,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/situation_validation.py",
-      "sha256": "fe02a714e7757e93cb05ccf1800c627efb7ff0bad792e79953091f888184a32d"
+      "sha256": "a83cc55154188d8dfbe91355844ac4b6bfcd0b5d3bb843f1598326d8c090fa9f"
     },
     {
       "path": "backend/app/domains/memory/repository/situation_vector_delivery.py",
@@ -1314,7 +1314,7 @@
     },
     {
       "path": "backend/app/domains/social/contracts/today_references.py",
-      "sha256": "b0bd25eae6e055926287b439039216436550ea314d302f522d10fe80d5419ab5"
+      "sha256": "f34c9d6e58eefcaf31279db48e34c6e6697c98958979f3a58a9b84dc1274ee2a"
     },
     {
       "path": "backend/app/domains/social/contracts/topic_history.py",
@@ -1770,7 +1770,7 @@
     },
     {
       "path": "backend/app/domains/social/service/today_activity.py",
-      "sha256": "61395ad20e76fe6dedbd29b8519463026ce8ccbdcee64ca0f1eb9f4038a3ae84"
+      "sha256": "87e80c7fad29b807979226f4786be2266f285f419844da8b5c8f5b584bf9a496"
     },
     {
       "path": "backend/app/domains/social/service/today_activity_thoughts.py",
@@ -2053,6 +2053,10 @@
       "sha256": "f880b0087a077ef81473b9ccc794687f8881238ea65a0b6fdaac745d223e9ed6"
     },
     {
+      "path": "backend/app/runtime/memory/manual_situation_sources.py",
+      "sha256": "10eac9156676016a65858d7eefcbe2a16d384ac4286df45f5c8e0bfa28a853b2"
+    },
+    {
       "path": "backend/app/runtime/memory/native_probe.py",
       "sha256": "21fd52987bdbf3f9d5f8a3294e7ec85a94540d67d05b911fc4017fd6511d16e3"
     },
@@ -2118,11 +2122,11 @@
     },
     {
       "path": "backend/app/runtime/memory/situation_source_batch.py",
-      "sha256": "c9d7c6ccd5d3d8863485b4886afca5065bc96f34af559a6e98548e1b6b4e60e5"
+      "sha256": "0352004929c90cb4c78afe2b01e17563616fed350ad575d33138289951931eb2"
     },
     {
       "path": "backend/app/runtime/memory/situation_sources.py",
-      "sha256": "6ef70864af40e469bcf8f75801fde6a957cf90d96f0113ea85c3760aa837bdec"
+      "sha256": "6fa6170de470cb61074b020fb081617382a1f9ff1b1caf710a8daaf2f3d95b67"
     },
     {
       "path": "backend/app/runtime/memory/source_catalogs.py",
@@ -2886,7 +2890,7 @@
     },
     {
       "path": "backend/app/runtime/social/today_activity_queries.py",
-      "sha256": "cbda205ed6553bce1a34c7e0d539de354f3192135cf29c10e7a35960fd67c327"
+      "sha256": "1198a78c8d97f5c04738921472732f7a17aac21b494d19b3253605f8ac15c767"
     },
     {
       "path": "backend/app/runtime/social/topic_metadata.py",
@@ -3602,11 +3606,11 @@
     },
     {
       "path": "backend/tests/memory/test_situation_language_eligibility.py",
-      "sha256": "56a0b8d5878cf4b7fb0bc672231cdc3232b7dff201804cc2b9cb8debd4fdfc54"
+      "sha256": "15303213a21436ebda837a1681304ffebe6c9cf9190181f60fb57ff4567e4585"
     },
     {
       "path": "backend/tests/memory/test_situation_parent_binding_recovery.py",
-      "sha256": "012b6e244cdf8484912f327021fabbfd52c0500e3e71a0903eb51e8cff63c0fa"
+      "sha256": "d8e7c6e22f8c12c1cdcca9072e4bdc9645fdea43198ebfad8e36c090ae34788b"
     },
     {
       "path": "backend/tests/memory/test_situation_prepared_page.py",

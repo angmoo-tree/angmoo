@@ -1733,7 +1733,27 @@ detailed temporarily admits safe access and lease/worker summaries. Sidecar JSON
 logging ownership are not redirected. Per-service acknowledgements prove policy acceptance;
 launcher UTC estimates cannot claim to observe a service's local monotonic clock.
 
-## Delivered manual social sources (2026-10-22, LOCAL)
+## Default SNS relationship policy enrollment (2026-10-23)
+
+The owner-bound default SNS command requires a Runtime-supplied initializer;
+there is no optional no-op. Worlds owns the command transaction and Runtime
+composes Relationships' idempotent policy activation using the same Session.
+World, membership, owner binding and the first policy commit together. Missing
+policy repair on existing/adopted/concurrent-winner paths uses the existing
+admission lock, rechecks after locking, and never changes an existing activation,
+mode or version. The already initialized fast path issues no UPDATE or commit.
+
+HTTP composition lives in API dependencies; character target resolution and
+registration compose the same initializer without importing Runtime from domain
+services. Registration of an older draft enrolls a missing policy inside its
+existing registration transaction. Initializer/flush/commit failures roll back;
+only a duplicate owner binding may reload a validated concurrent winner. Commands
+that own a new commit reject unrelated pending or already-flushed caller writes.
+GET, memory/relationship reads and startup preservation semantics stay unchanged.
+There is no provider call, topic preparation, schema migration, new scheduler,
+historical receipt replay or retroactive activation-time adjustment.
+
+## Delivered manual social sources (2026-10-22)
 
 Manual like/unlike/post/reply events retain their `audit_only` classification and
 remain excluded from generic event recall and relationship projection. Relationships

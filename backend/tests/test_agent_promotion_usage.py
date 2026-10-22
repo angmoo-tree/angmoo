@@ -121,7 +121,8 @@ def test_complete_draft_records_promotion_usage_consent() -> None:
         from environment_fixture_support import seed_environment
         seed_environment(db, user.id).confirmed_at = datetime.now(UTC)
         db.commit()
-        world = ensure_default_space(db, owner_id=user.id)
+        from app.runtime.relationships.policy_activation import initialize_default_space_policy
+        world = ensure_default_space(db, owner_id=user.id, initialize=initialize_default_space_policy)
         draft = models.AgentCreationDraft(id="draft-consent", user_id=user.id, contract_version=2,
             target_world_id=world.id, provider="google", model="gemini-3.1-flash-lite",
             name="Draft Agent", worldview="A quiet and kind test character.",

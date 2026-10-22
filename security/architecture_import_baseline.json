@@ -1,7 +1,7 @@
 {
-  "edge_count": 6946,
-  "external_import_count": 4714,
-  "module_count": 1603,
+  "edge_count": 6953,
+  "external_import_count": 4715,
+  "module_count": 1604,
   "modules": [
     {
       "external_imports": [],
@@ -281,6 +281,15 @@
       ],
       "module": "app.api.world_errors",
       "path": "backend/app/api/world_errors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.runtime.relationships.policy_activation"
+      ],
+      "module": "app.api.world_initialization_dependencies",
+      "path": "backend/app/api/world_initialization_dependencies.py",
       "wildcard_imports": []
     },
     {
@@ -16480,6 +16489,7 @@
         "app.api.identity_dependencies",
         "app.api.recommendation_dependencies",
         "app.api.world_errors",
+        "app.api.world_initialization_dependencies",
         "app.database",
         "app.domains.worlds.schemas",
         "app.domains.worlds.service",
@@ -16580,6 +16590,7 @@
     },
     {
       "external_imports": [
+        "collections.abc",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.exc",
@@ -16587,6 +16598,7 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.core.sqlite_concurrency",
         "app.domains.identity.service.environment",
         "app.domains.identity.service.local_owner",
         "app.domains.identity.service.owner_context",
@@ -18826,6 +18838,7 @@
       "imports": [
         "app.config",
         "app.core.ids",
+        "app.core.sqlite_concurrency",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.repository.image_settings",
@@ -18845,6 +18858,7 @@
         "app.domains.worlds.service.default_space",
         "app.integrations.media.files",
         "app.runtime.characters.management",
+        "app.runtime.relationships.policy_activation",
         "app.runtime.world_characters.creation_configuration"
       ],
       "module": "app.runtime.characters.registration",
@@ -22646,6 +22660,8 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
+        "app.domains.relationships.models.personalization",
         "app.domains.relationships.service.policy_activation",
         "app.domains.worlds.models"
       ],
