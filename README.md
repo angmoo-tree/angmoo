@@ -192,6 +192,12 @@ docker compose -f compose.yml -f compose.dev.yml up --watch
 
 This development environment uses its own named data volume. Do not connect it to an installed user's data directory.
 
+To stop the development stack and preserve its data volume:
+
+```sh
+docker compose -f compose.yml -f compose.dev.yml down
+```
+
 The English documents are the canonical source when a translation differs.
 
 ## Security and license

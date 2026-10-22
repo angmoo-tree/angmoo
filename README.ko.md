@@ -192,6 +192,12 @@ docker compose -f compose.yml -f compose.dev.yml up --watch
 
 개발 환경은 별도의 이름 있는 데이터 볼륨을 사용합니다. 설치된 사용자의 데이터 폴더에 연결하지 마세요.
 
+개발 환경을 종료하고 데이터 볼륨을 보존하려면:
+
+```sh
+docker compose -f compose.yml -f compose.dev.yml down
+```
+
 번역 내용과 영어 문서가 다르면 영어 문서를 기준으로 합니다.
 
 ## 보안과 라이선스
