@@ -126,6 +126,8 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 - **이미지:** 이미지 생성과 인식은 별도 기능입니다. 각각 필요한 키·모델·활성화 설정을 확인하세요.
 - **World 패키지:** 공유할 World의 초기 구성을 옮기는 기능입니다. 대화·기억·API 키를 포함한 전체 데이터 백업을 대신하지 않습니다.
 
+원본 World와 가져온 World는 서로 독립적으로 변경됩니다. 가져오기·내보내기와 비공개 데이터의 범위는 [World 패키지 안내 — 영어](docs/public/world-package-v1.md)를 확인하세요.
+
 상세 안내:
 
 - [Android Termux 설치·실행·로그](docs/public/termux.ko.md)
@@ -173,12 +175,29 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 
 개발 환경과 변경 범위별 검증 절차는 [한국어 기여 가이드](CONTRIBUTING.ko.md)를 확인해 주세요.
 
+작업 목적에 맞는 실행 경로를 선택하세요.
+
+| 실행 경로 | 용도 |
+|---|---|
+| Windows 설치 파일 | 설치형 데스크톱 사용. 위의 Windows 설치 절차를 따릅니다 |
+| Docker 브라우저 실행 | 공개 이미지를 브라우저에서 사용. 위의 Docker 실행 절차를 따릅니다 |
+| Docker 기여자 개발 | 현재 소스를 수정하며 frontend·backend 자동 새로고침으로 확인 |
+| Windows Host Tauri 개발 | 기여자 Docker 환경에 연결해 네이티브 화면을 개발. [Windows 호스트 안내 — 영어](docs/public/windows-host-tauri-dev.md) 참고 |
+
+Docker 기여자 개발 환경은 저장소 루트에서 시작합니다.
+
+```sh
+docker compose -f compose.yml -f compose.dev.yml up --watch
+```
+
+개발 환경은 별도의 이름 있는 데이터 볼륨을 사용합니다. 설치된 사용자의 데이터 폴더에 연결하지 마세요.
+
 번역 내용과 영어 문서가 다르면 영어 문서를 기준으로 합니다.
 
 ## 보안과 라이선스
 
 취약점은 [보안 정책](SECURITY.md)의 비공개 제보 절차를 이용해 주세요.
 
-Angmoo 애플리케이션 소스는 [GNU GPL version 3 only](LICENSE)로 배포됩니다. 함께 배포되는 구성요소의 고지는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인하세요.
+Angmoo 애플리케이션 소스는 GNU GPL version 3 only(`GPL-3.0-only`)로 배포됩니다. [LICENSE](LICENSE)와 함께 배포되는 구성요소의 고지인 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인하세요.
 
-이 라이선스가 사용자가 만들거나 가져온 캐릭터·World 패키지·로컬 데이터에 자동으로 적용되는 것은 아닙니다. 이름과 로고의 사용은 [브랜드 정책](BRANDING.md)을 확인하세요.
+이 라이선스가 사용자가 만들거나 가져온 World Package 콘텐츠·캐릭터·로컬 Runtime 데이터에 자동으로 적용되는 것은 아닙니다. 이름과 로고의 사용은 [브랜드 정책](BRANDING.md)을 확인하세요.

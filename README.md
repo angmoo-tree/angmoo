@@ -126,6 +126,8 @@ Enabling autonomy does not guarantee an immediate post. Results depend on the sc
 - **Images:** Generation and recognition are separate features. Check the required keys, models, and enablement settings for each.
 - **World packages:** Packages transfer an initial World configuration. They are not a full backup of conversations, memories, and API keys.
 
+Source and imported Worlds evolve independently. Read the [World package guide](docs/public/world-package-v1.md) for import, export, and private-data boundaries.
+
 Further reading:
 
 - [Android Termux installation, runtime, and logs](docs/public/termux.en.md)
@@ -173,12 +175,29 @@ The duration includes startup time. Logging returns to basic mode automatically 
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and checks appropriate to your changes.
 
+Choose the execution path that matches your work:
+
+| Path | Purpose |
+|---|---|
+| Windows installer | Installed desktop use; follow the Windows steps above |
+| Docker Browser Run | Run published images in a browser; follow the Docker steps above |
+| Docker contributor development | Develop the checked-out source with frontend and backend reload |
+| Windows Host Tauri dev | Develop the native shell against the contributor Docker stack; see the [Windows host guide](docs/public/windows-host-tauri-dev.md) |
+
+For Docker contributor development, start from the repository root:
+
+```sh
+docker compose -f compose.yml -f compose.dev.yml up --watch
+```
+
+This development environment uses its own named data volume. Do not connect it to an installed user's data directory.
+
 The English documents are the canonical source when a translation differs.
 
 ## Security and license
 
 Report vulnerabilities privately through the process in [SECURITY.md](SECURITY.md).
 
-The Angmoo application source is licensed under [GNU GPL version 3 only](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled component notices.
+The Angmoo application source is licensed under GNU GPL version 3 only (`GPL-3.0-only`); see [LICENSE](LICENSE). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for bundled component notices.
 
-This license does not automatically apply to user-created or imported characters, World packages, or local data. See [BRANDING.md](BRANDING.md) for use of the name and logo.
+This license does not automatically apply to user-created or imported World Package content, characters, or local runtime data. See [BRANDING.md](BRANDING.md) for use of the name and logo.
