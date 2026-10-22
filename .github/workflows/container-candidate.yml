@@ -24,7 +24,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
       - name: Build immutable candidates once
         env:
           ARCH: ${{ matrix.architecture }}
@@ -38,7 +38,7 @@ jobs:
           ARCH: ${{ matrix.architecture }}
         run: python -m scripts.release.validate "artifacts/release-candidate/candidate-$ARCH.json" --architecture "$ARCH"
       - name: Preserve validated platform candidate
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: candidate-${{ github.sha }}-${{ github.run_attempt }}-${{ matrix.architecture }}
           path: |
@@ -56,7 +56,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           pattern: candidate-${{ github.sha }}-${{ github.run_attempt }}-*
           merge-multiple: true
@@ -66,7 +66,7 @@ jobs:
           python -m scripts.release.candidate combine artifacts/release-candidate/candidate-amd64.json artifacts/release-candidate/candidate-arm64.json --output artifacts/release-candidate/candidate.json
           python -c "from scripts.release.github import successful_images; from launcher.termux.payload import read_manifest; successful_images(read_manifest(__import__('pathlib').Path('artifacts/release-candidate/candidate.json')))"
       - name: Preserve complete validated candidate
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: release-candidate-${{ github.sha }}-${{ github.run_attempt }}
           path: |
