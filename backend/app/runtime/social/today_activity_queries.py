@@ -8,9 +8,20 @@ from app.domains.relationships.models.social import SocialEvent, SocialEventEvid
 from app.domains.routines.models.resident import AgentPublicActionExecution
 from app.domains.social.repository.today_activity import TodayActivityRepository
 from app.domains.social.constants import _POST_EVENT_TYPES
+from app.domains.relationships.service.source_event_evidence import (
+    manual_source_basis, SourceEventEvidenceError,
+)
 
 
 class RuntimeTodayReferences:
+    @staticmethod
+    def manual_event_revision(event, evidences, posts, **facts):
+        # Compose the pure Relationships contract without a reverse domain edge.
+        try:
+            return manual_source_basis(event, evidences, posts, **facts).digest
+        except SourceEventEvidenceError:
+            return None
+
     def __init__(self, db: Session) -> None:
         self._db = db
         self._queries = TodayActivityRepository(db)

@@ -15,8 +15,10 @@ DESCRIPTION_LIMIT = 1000
 DELIVERED_SOURCE_LIMIT = 256
 SITUATION_BASIS_DOCUMENT_MAX_BYTES = 8 * 1024 * 1024
 Lane = Literal["chat", "inbox", "feed", "routine"]
-VALIDATION_REVISION = "situation-validation.v5"
-PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", "situation-validation.v4", VALIDATION_REVISION})
+VALIDATION_REVISION = "situation-validation.v6"
+MANUAL_EVENT_REVISIONS = frozenset({VALIDATION_REVISION})
+LANGUAGE_ELIGIBILITY_REVISIONS = frozenset({"situation-validation.v5", VALIDATION_REVISION})
+PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", "situation-validation.v4", "situation-validation.v5", VALIDATION_REVISION})
 LEGACY_VALIDATION_REVISION = "situation-validation.v2"
 SUPPORTED_VALIDATION_REVISIONS = frozenset({LEGACY_VALIDATION_REVISION, *PARENT_BINDING_REVISIONS})
 

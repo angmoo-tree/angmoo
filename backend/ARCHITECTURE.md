@@ -1732,3 +1732,24 @@ logs contain only method, fixed route class and status. Basic retains lifecycle/
 detailed temporarily admits safe access and lease/worker summaries. Sidecar JSON and root
 logging ownership are not redirected. Per-service acknowledgements prove policy acceptance;
 launcher UTC estimates cannot claim to observe a service's local monotonic clock.
+
+## Delivered manual social sources (2026-10-22, LOCAL)
+
+Manual like/unlike/post/reply events retain their `audit_only` classification and
+remain excluded from generic event recall and relationship projection. Relationships
+owns a pure, typed source-basis contract; Runtime composes it into Today's existing
+references port and Memory's canonical source adapter. Social never imports Memory
+internals or Relationships ORM/services. The contract binds event/evidence identity,
+current public post ancestry, participants, membership and blocks. Event-time content
+hashes are distinct from the current delivered post version; unlike requires no
+current `PostLike` row. Source identity/version is bound to the final delivered record.
+
+Situation validation v6 admits these sources only as background with a restored v2
+manifest delivery proof and matching canonical source digest. Generic evidence stays
+invisible; purpose-specific access never modifies the raw evidence cache. Existing
+v2-v5 receipt contracts remain supported; v5 language eligibility and v3/v4 parent
+and result binding capabilities also apply to v6. No old receipt hash is rewritten.
+Apply, recall, hydration, details and prior validation share this source adapter.
+Canonical reads use bounded operation-scoped row/collection caches; fresh apply
+validation still runs inside the existing transaction fence. No new writer, provider
+call, table, migration, retry or timeout policy is introduced.

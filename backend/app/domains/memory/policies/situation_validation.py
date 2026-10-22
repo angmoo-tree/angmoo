@@ -2,6 +2,18 @@
 from dataclasses import replace
 
 from app.domains.memory.contracts.activity_situation import SituationValidationContext
+from app.domains.memory.contracts.activity_situation import MANUAL_EVENT_REVISIONS
+
+
+def manual_event_delivery(context, source):
+    """Receipt delivery grants this purpose only, never general event recall."""
+    if (not isinstance(context, SituationValidationContext)
+            or context.revision not in MANUAL_EVENT_REVISIONS or context.version != 2
+            or source.source_type != "SOCIAL_EVENT" or source.role != "background"
+            or source.source_version != source.source_digest):
+        return False
+    proof = context.proof_for(source)
+    return proof is not None and proof.origin == "situation_delivered"
 
 
 def delivered_evidence(context, source, evidence, blocked_code):

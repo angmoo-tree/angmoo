@@ -1,7 +1,7 @@
 {
-  "edge_count": 6933,
-  "external_import_count": 4700,
-  "module_count": 1600,
+  "edge_count": 6946,
+  "external_import_count": 4714,
+  "module_count": 1603,
   "modules": [
     {
       "external_imports": [],
@@ -789,11 +789,13 @@
         "contextlib",
         "ctypes",
         "dataclasses",
+        "errno",
         "msvcrt",
         "os",
         "pathlib",
         "secrets",
-        "stat"
+        "stat",
+        "sys"
       ],
       "imports": [],
       "module": "app.core.secret_file_access",
@@ -7798,6 +7800,17 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.relationships.contracts.source_event_evidence",
+      "path": "backend/app/domains/relationships/contracts/source_event_evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "typing"
       ],
       "imports": [
@@ -8717,6 +8730,20 @@
       ],
       "module": "app.domains.relationships.service.social_context_validation",
       "path": "backend/app/domains/relationships/service/social_context_validation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "datetime",
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.source_event_evidence"
+      ],
+      "module": "app.domains.relationships.service.source_event_evidence",
+      "path": "backend/app/domains/relationships/service/source_event_evidence.py",
       "wildcard_imports": []
     },
     {
@@ -20527,6 +20554,24 @@
     },
     {
       "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.repository.access_batch",
+        "app.domains.relationships.models.social",
+        "app.domains.relationships.service.source_event_evidence",
+        "app.domains.routines.models.resident",
+        "app.domains.social.constants",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.runtime.memory.source_queries"
+      ],
+      "module": "app.runtime.memory.manual_situation_sources",
+      "path": "backend/app/runtime/memory/manual_situation_sources.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "argparse",
         "asyncio",
         "dataclasses",
@@ -20810,6 +20855,7 @@
         "app.domains.relationships.models.social",
         "app.domains.routines.models.plans",
         "app.domains.social.models.posts",
+        "app.runtime.memory.manual_situation_sources",
         "app.runtime.memory.situation_sources"
       ],
       "module": "app.runtime.memory.situation_source_batch",
@@ -20818,7 +20864,11 @@
     },
     {
       "external_imports": [
-        "hashlib"
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging"
       ],
       "imports": [
         "app.domains.chat.models",
@@ -20837,8 +20887,10 @@
         "app.domains.memory.service.items",
         "app.domains.memory.service.source_evidence",
         "app.domains.relationships.models.social",
+        "app.domains.relationships.service.source_event_evidence",
         "app.domains.routines.models.plans",
         "app.domains.social.models.posts",
+        "app.runtime.memory.manual_situation_sources",
         "app.runtime.memory.scope_queries",
         "app.runtime.memory.source_queries"
       ],
@@ -24582,6 +24634,7 @@
       ],
       "imports": [
         "app.domains.relationships.models.social",
+        "app.domains.relationships.service.source_event_evidence",
         "app.domains.routines.models.resident",
         "app.domains.social.constants",
         "app.domains.social.repository.today_activity",

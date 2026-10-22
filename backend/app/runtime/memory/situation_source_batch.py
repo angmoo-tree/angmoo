@@ -31,6 +31,8 @@ def prepare_sources(session, contexts, *, validation, queries_factory):
     indexed(validation, DailyActivityPlan, DailyActivityPlan.id, (row.plan_id for row in routine))
     reader = SqlAlchemyMemorySourceEvidenceReader(session, queries=queries)
     validation.runtime_sources = SituationSources(session, reader=reader)
+    from app.runtime.memory.manual_situation_sources import prepare as prepare_manual
+    prepare_manual(validation, (identifier for kind, identifier in identities if kind == "SOCIAL_EVENT"))
     # Evidence access decisions remain proof-specific. Only raw canonical facts
     # are shared across manifests, with the same fresh Session and timestamp.
     for context in contexts:

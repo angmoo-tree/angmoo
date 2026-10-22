@@ -1,5 +1,9 @@
 """Current canonical source checks for delivered situations, including deletion."""
 from hashlib import sha256
+from dataclasses import replace
+from datetime import UTC, datetime
+import json
+import logging
 
 from app.domains.chat.models import MessageMessage, MessageThread
 from app.domains.social.models.posts import Post
@@ -10,7 +14,8 @@ from app.domains.memory.models.items import MemoryItem
 from app.domains.memory.contracts.activity_situation import DeliveredSourceEntry, stable_digest
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.memory.contracts.situation_validation import SituationSourceAccess
-from app.domains.memory.policies.situation_validation import delivered_evidence, historical_relationship
+from app.domains.memory.policies.situation_validation import delivered_evidence, historical_relationship, manual_event_delivery
+from app.domains.relationships.service.source_event_evidence import SourceEventEvidenceError
 from app.domains.memory.policies.retrievability import item_retrievable
 from app.domains.memory.service.items import memory_evidence_blocked_code
 from app.domains.memory.service.source_evidence import SqlAlchemyMemorySourceEvidenceReader
@@ -18,6 +23,7 @@ from app.runtime.memory import source_queries
 from app.runtime.memory.scope_queries import read_scope_presence
 from app.domains.memory.exceptions import MemoryScopeError
 from app.runtime.memory.source_queries import block_id, active_participant_ids
+from app.runtime.memory import manual_situation_sources
 
 
 class SituationSources:
@@ -25,6 +31,12 @@ class SituationSources:
         self.session = session
         self.result_basis = result_basis
         self.reader = reader if reader is not None else SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries)
+
+    def prepare_manual_events(self, identifiers):
+        from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+        validation = MemoryAccessValidation(self.session, datetime.now(UTC))
+        manual_situation_sources.prepare(validation, identifiers)
+        return validation
 
     def read_evidence(self, **values):
         return self.reader.read_evidence(**values)
@@ -68,7 +80,7 @@ class SituationSources:
             post.created_at, entry, digest, parent.created_at, accessible)
 
     def describe(self, scope, *, kind, identifier, delivered, path, role, ordinal, target=None,
-                 private_thread=None, delivery=None, relationship_basis=None):
+                 private_thread=None, delivery=None, relationship_basis=None, capture_validation=None):
         if delivery is not None and (delivery.path != path or delivery.text != delivered):
             raise ValueError("situation_delivery_fragment_mismatch")
         if kind == "ROUTINE_ACTIVITY":
@@ -118,7 +130,25 @@ class SituationSources:
             source_type = MemorySourceTypeV1(kind)
             evidence = self.reader.read_evidence(scope=scope, source_type=source_type, source_id=identifier)
             code = memory_evidence_blocked_code(scope=scope, source_type=source_type, source_id=identifier, evidence=evidence)
-            if evidence is None or (code is not None and not (
+            manual = None
+            if kind == "SOCIAL_EVENT":
+                facts = capture_validation if capture_validation is not None else self.prepare_manual_events((identifier,))
+                event = facts.get(SocialEvent, identifier)
+                if event is not None and event.retrieval_status == "audit_only":
+                    try:
+                        if (delivery is None or role != "background" or evidence is None
+                                or not all(value is not None for value in read_scope_presence(self.session, scope))):
+                            raise SourceEventEvidenceError("situation_manual_delivery_missing")
+                        manual = manual_situation_sources.basis(self.session, scope, event, facts)
+                        record = json.loads(delivered)
+                        if not manual.matches_record(record):
+                            raise SourceEventEvidenceError("situation_manual_delivery_mismatch")
+                    except (SourceEventEvidenceError, json.JSONDecodeError) as exc:
+                        reason = str(exc) if isinstance(exc, SourceEventEvidenceError) else "situation_manual_record_invalid"
+                        logging.getLogger(__name__).warning("Situation source admission failed: phase=freeze type=SOCIAL_EVENT class=audit_only reason=%s", reason)
+                        raise ValueError("situation_source_not_admitted") from exc
+                    evidence = replace(evidence, source_digest=manual.digest)
+            if evidence is None or (manual is None and code is not None and not (
                     delivery is not None and code == "memory_unobserved" and kind in {"POST", "REPLY"})):
                 raise ValueError("situation_source_not_admitted")
             raw, digest, version, thread = evidence.deterministic_summary, evidence.source_digest, evidence.source_digest, evidence.thread_id
@@ -280,6 +310,20 @@ class SituationSources:
                 return SituationSourceAccess("forbidden", reason="situation_event_scope_forbidden")
             if event.invalidation_reason == "source_deleted":
                 return SituationSourceAccess("deleted")
+            if event.retrieval_status == "audit_only":
+                if not manual_event_delivery(manifest, source):
+                    return SituationSourceAccess("forbidden", reason="situation_delivery_proof_missing")
+                try:
+                    manual = manual_situation_sources.basis(self.session, scope, event, validation)
+                except SourceEventEvidenceError as exc:
+                    return SituationSourceAccess("forbidden", reason=str(exc))
+                if (current is None or manual.digest != source.source_digest
+                        or source.actor_id != manual.actor_id or source.counterpart_id != manual.counterpart_id):
+                    return SituationSourceAccess("changed", reason="situation_source_changed")
+                # Purpose-specific access. Preserve visible=False on generic
+                # evidence; neither the raw cache nor event classification changes.
+                return SituationSourceAccess("available", replace(current, source_digest=manual.digest),
+                    proof_origin="situation_delivered")
         if current is None:
             return SituationSourceAccess("forbidden", reason="situation_source_forbidden")
         code = memory_evidence_blocked_code(scope=scope, source_type=kind, source_id=source.source_id, evidence=current)
