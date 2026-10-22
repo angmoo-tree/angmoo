@@ -1,5 +1,6 @@
 """Only owned synthetic key roots; never inspect or alter an installed key."""
 import os
+import sys
 from concurrent.futures import ThreadPoolExecutor
 import pytest
 from app.core.secret_file_access import create_secret_once, protect_existing_secret, inspect_windows_secret_access, SecretFileAccessError
@@ -111,7 +112,7 @@ def test_portable_io_contract_does_not_load_windows_apis(tmp_path,monkeypatch):
     # Exercise the portable branch with real IO and a permission-call port.
     # This proves import/IO separation, not Linux filesystem ACLs on Windows.
     portable=types.SimpleNamespace(**{name:getattr(os,name) for name in
-        ("open","fdopen","fsync","link","fstat","close","O_RDONLY","O_WRONLY","O_CREAT","O_EXCL")},
+        ("open","fdopen","fsync","link","fstat","close","fsencode","O_RDONLY","O_WRONLY","O_CREAT","O_EXCL")},
         name="posix",fchmod=lambda fd,mode:modes.append(mode))
     monkeypatch.setattr(module,"os",portable)
     monkeypatch.setattr(module,"_WindowsAccess",lambda:pytest.fail("Windows API must be lazy"))
@@ -139,6 +140,37 @@ def test_creation_restart_and_concurrent_winner_preserve_key_bytes(tmp_path):
         assert report.resolved_path.startswith("\\\\?\\")
     else:
         assert path.stat().st_mode&0o777==0o600
+
+
+@pytest.mark.skipif(sys.platform != "linux", reason="Linux atomic publication")
+def test_linux_secret_publication_never_uses_hardlinks(tmp_path, monkeypatch):
+    import app.core.secret_file_access as module
+
+    monkeypatch.setattr(module.os, "link", lambda *a, **k: pytest.fail("hardlink publication escapes PRoot data bind"))
+    path = tmp_path / "secrets" / "app-secret"
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        list(pool.map(lambda value: create_secret_once(path, value), [b"first", b"second"]))
+    original = path.read_bytes()
+    assert original in (b"first", b"second")
+    assert path.is_file() and not path.is_symlink()
+    create_secret_once(path, b"must-not-replace")
+    assert path.read_bytes() == original
+    assert not list(path.parent.glob("*.tmp-*"))
+
+
+def test_secret_publication_failure_keeps_destination_absent_and_cleans_temp(tmp_path, monkeypatch):
+    import errno
+    import app.core.secret_file_access as module
+
+    def fail(*_args):
+        raise OSError(errno.EIO, "injected publication failure")
+
+    monkeypatch.setattr(module, "_publish_secret_no_replace", fail)
+    path = tmp_path / "secrets" / "app-secret"
+    with pytest.raises(SecretFileAccessError):
+        create_secret_once(path, b"unpublished")
+    assert not path.exists()
+    assert not list(path.parent.glob("*.tmp-*"))
 
 
 def test_link_path_preserves_target_and_does_not_generate_a_replacement(tmp_path):
