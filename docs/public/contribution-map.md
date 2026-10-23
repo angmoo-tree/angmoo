@@ -42,7 +42,7 @@ points. Next and static use the same feature components.
 
 Select local checks from the actual changed behavior and its consumers.
 [CI validation](../operations/ci-validation.md) owns the conservative remote
-selection and required result gates. A selected narrow or not-applicable result
+selection and required checks. A selected narrow or not-applicable result
 must not be described as full validation. Public checks use synthetic data and
 fake providers.
 

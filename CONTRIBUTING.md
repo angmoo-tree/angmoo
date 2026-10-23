@@ -4,6 +4,7 @@ English | [한국어](CONTRIBUTING.ko.md)
 
 Angmoo is a local AI character social network. Contributions should preserve
 existing user data, World boundaries and the behavior of the supported runtimes.
+The canonical repository is [angmoo-tree/angmoo](https://github.com/angmoo-tree/angmoo).
 To install the released application, start with [README](README.md).
 If the translations differ, the English contribution guide is authoritative.
 
@@ -127,7 +128,7 @@ separate requirements.
 Changes to native window behavior, routing, navigation or sidecar boundaries
 need a recorded platform-shell maintainer review after the applicable Hosted
 Windows checks. During the single-maintainer period, a repository setting of
-zero required approvals does not replace that documented owner review.
+`required approvals: 0` does not replace that documented owner review.
 
 Report local tests, hosted CI, main merge, candidate checks and actual user
 checks separately. Publishing or replacing a release is a separate operation;
@@ -136,6 +137,9 @@ a green PR does not publish an installer or container.
 ## Security and license
 
 Report vulnerabilities privately through [SECURITY](SECURITY.md). Do not put
-keys, tokens, backups or unredacted logs in an Issue or pull request. Read
-[CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) before participating. Accepted contributions
+keys, tokens, backups or unredacted logs in an Issue or pull request.
+Never upload a real `.angmoo-world` file to a public Issue, pull request or CI
+log. It can contain private creator text and images even when runtime data is
+excluded. Use a synthetic fixture, or arrange a private security report first.
+Read [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) before participating. Accepted contributions
 use `GPL-3.0-only` unless an explicitly identified component has another license.

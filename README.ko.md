@@ -264,7 +264,7 @@ docker compose -f compose.yml -f compose.dev.yml down
 
 Angmoo 애플리케이션 소스는 GNU GPL version 3 only(`GPL-3.0-only`)로 배포됩니다. [LICENSE](LICENSE)와 함께 배포되는 구성 요소의 고지인 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인하세요.
 
-이 라이선스가 사용자가 만들거나 가져온 World Package 콘텐츠·캐릭터·로컬 실행 데이터에 자동으로 적용되는 것은 아닙니다. 이름과 로고의 사용은 [브랜드 정책](BRANDING.md)을 확인하세요.
+이 라이선스가 사용자가 만들거나 가져온 World Package 콘텐츠·캐릭터·로컬 실행 데이터(Runtime 데이터)에 자동으로 적용되는 것은 아닙니다. 이름과 로고의 사용은 [브랜드 정책](BRANDING.md)을 확인하세요.
 
 ## 감사의 말
 

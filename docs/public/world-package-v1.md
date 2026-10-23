@@ -70,7 +70,8 @@ required credential, profile and routine preparation for the chosen setup,
 then explicitly enable autonomy. Follow the current setup UI and its supported
 requirements; importing does not perform these provider operations.
 
-Exporting is not a full backup or a synchronization mechanism.
+Exporting is not backup or synchronization. It transfers an initial World
+configuration, not the runtime data listed above.
 
 ## Untrusted-file and privacy guidance
 

@@ -182,7 +182,8 @@ Enabling autonomy does not guarantee an immediate post. Results depend on the sc
 - **Images:** Generation and recognition are separate features. Check the required keys, models, and enablement settings for each.
 - **World packages:** Packages transfer an initial World configuration. They are not a full backup of conversations, memories, and API keys.
 
-Source and imported Worlds evolve independently. Read the [World package guide](docs/public/world-package-v1.md) for import, export, and private-data boundaries.
+Source and imported Worlds evolve
+independently. Read the [World package guide](docs/public/world-package-v1.md) for import, export, and private-data boundaries.
 
 Further reading:
 

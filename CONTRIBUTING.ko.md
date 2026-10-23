@@ -4,6 +4,7 @@
 
 Angmoo는 로컬 AI 캐릭터 SNS입니다. 기여할 때는 기존 사용자 데이터, World 경계,
 지원 실행 환경의 동작을 보존합니다. 배포된 앱의 설치는 [README](README.ko.md)를 참고하세요.
+공식 저장소는 [angmoo-tree/angmoo](https://github.com/angmoo-tree/angmoo)입니다.
 
 ## 코드 변경 전
 
@@ -104,7 +105,7 @@ migration 계약을 변경하면 `embedded-data-migration` 라벨을 적용합�
 
 번역 내용이 다르면 영어 기여 안내를 기준으로 합니다. 네이티브 창 동작·라우팅·탐색·sidecar
 경계를 변경하면 관련 Hosted Windows 검사 뒤 플랫폼 shell maintainer의 검토 기록이 필요합니다.
-1인 maintainer 기간의 필수 승인 수 0 설정은 해당 소유자 검토 기록을 대신하지 않습니다.
+1인 maintainer 기간의 필수 승인 수 0(`required approvals: 0`) 설정은 해당 소유자 검토 기록을 대신하지 않습니다.
 
 로컬 검사·원격 CI·main 병합·후보 검증·실사용 확인은 나누어 기록합니다.
 릴리스 공개나 교체는 별도 작업이며 PR 통과만으로 설치 파일·이미지가 배포되지는 않습니다.
@@ -112,5 +113,7 @@ migration 계약을 변경하면 `embedded-data-migration` 라벨을 적용합�
 ## 보안과 라이선스
 
 취약점은 [SECURITY](SECURITY.md)의 비공개 경로로 신고합니다. 키·토큰·백업·원문 로그를
-Issue나 PR에 올리지 않습니다. [행동 규범](CODE_OF_CONDUCT.md)을 따릅니다.
+Issue나 PR에 올리지 않습니다. 실제 `.angmoo-world` 파일도 공개 Issue·PR·CI 로그에 올리지 않습니다.
+실행 데이터가 제외되어도 제작자의 비공개 글과 이미지가 포함될 수 있습니다. 합성 시험 파일을 사용하거나
+비공개 보안 신고 경로를 먼저 협의합니다. [행동 규범](CODE_OF_CONDUCT.md)을 따릅니다.
 별도로 명시된 구성 요소를 제외한 기여에는 `GPL-3.0-only`를 적용합니다.
