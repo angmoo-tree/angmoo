@@ -36,8 +36,8 @@ Package authors retain all rights granted by their respective licenses.
 - `langchain-protocol 0.0.19` — MIT
 - `langcodes 3.5.1` — OSI Approved :: MIT License
 - `langgraph 1.2.13` — MIT
-- `langgraph-checkpoint 4.1.1` — MIT
-- `langgraph-checkpoint-sqlite 3.1.1` — MIT
+- `langgraph-checkpoint 4.3.0` — MIT
+- `langgraph-checkpoint-sqlite 3.1.2` — MIT
 - `langgraph-prebuilt 1.1.0` — MIT
 - `langgraph-sdk 0.4.4` — MIT
 - `langsmith 0.10.10` — MIT
@@ -57,7 +57,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-core 2.46.4` — MIT
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
-- `pypdf 6.21.1` — BSD-3-Clause
+- `pypdf 6.21.2` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
 - `python-docx 1.2.0` — MIT
 - `python-dotenv 1.2.2` — BSD-3-Clause
