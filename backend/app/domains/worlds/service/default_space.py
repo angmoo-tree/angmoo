@@ -1,11 +1,13 @@
 """Owner-bound default SNS space. Mutations are explicit; no membership backfill."""
 from datetime import UTC, datetime
+from collections.abc import Callable
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
+from app.core.sqlite_concurrency import require_read_only_session
 from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.identity.service.environment import environment_confirmed, lock_environment_admission, snapshot
 from app.domains.identity.service.local_owner import read_ui_language
@@ -32,16 +34,28 @@ def _existing_space(db: Session, owner_id: str) -> World | None:
     return None
 
 
-def ensure_default_space(db: Session, *, owner_id: str) -> World:
-    if not is_claimed_local_owner(db, owner_id):
-        raise WorldCreatorRoleRequiredError("local_owner_required")
-    existing = _existing_space(db, owner_id)
-    if existing is not None:
-        return existing
+def ensure_default_space(
+    db: Session, *, owner_id: str, initialize: Callable[[Session, World], bool],
+) -> World:
+    """Own this command's UoW, including the required Runtime initializer.
+
+    The initializer uses this Session, never commits, and returns whether it
+    acquired a writer or changed state. An already initialized space stays a
+    read-only fast path. Reject caller writes before any query can autoflush.
+    """
+    require_read_only_session(db, error_code="default_space_requires_clean_unit_of_work")
     try:
+        if not is_claimed_local_owner(db, owner_id):
+            raise WorldCreatorRoleRequiredError("local_owner_required")
+        existing = _existing_space(db, owner_id)
+        if existing is not None:
+            if initialize(db, existing):
+                db.commit()
+            return existing
         lock_environment_admission(db, owner_id)
         existing = _existing_space(db, owner_id)
         if existing is not None:
+            initialize(db, existing)
             db.commit()
             return existing
         legacy = db.get(World, ANGMOO_GLOBAL_WORLD_ID)
@@ -72,15 +86,30 @@ def ensure_default_space(db: Session, *, owner_id: str) -> World:
             refresh_world_contract(db, world)
             db.add(WorldMembership(id=uuid7_string(), world_id=world.id, user_id=owner_id,
                                    role="owner", status="active", joined_at=datetime.now(UTC)))
+        # Flush creation separately: only a duplicate owner binding can be a
+        # concurrent winner, never a policy, membership or World failure.
+        db.flush()
         db.add(OwnerDefaultWorld(owner_id=owner_id, world_id=world.id))
+        try:
+            db.flush()
+        except IntegrityError as exc:
+            if getattr(exc.orig, "sqlite_errorname", None) != "SQLITE_CONSTRAINT_PRIMARYKEY":
+                raise
+            db.rollback()
+            if not is_claimed_local_owner(db, owner_id):
+                raise
+            existing = _existing_space(db, owner_id)
+            if existing is None:
+                raise
+            if initialize(db, existing):
+                db.commit()
+            return existing
+        initialize(db, world)
         db.commit()
         return world
-    except IntegrityError:
+    except Exception:
         db.rollback()
-        existing = _existing_space(db, owner_id)
-        if existing is None:
-            raise
-        return existing
+        raise
 
 
 def is_default_space(db: Session, world_id: str) -> bool:

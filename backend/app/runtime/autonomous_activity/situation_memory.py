@@ -25,9 +25,15 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
     payload_digest = sha256(transmitted.encode()).hexdigest()
     if json.JSONDecoder().raw_decode(transmitted)[0] != payload:
         raise ValueError("situation_final_payload_mismatch")
+    context = payload.get("context", payload)
+    today = context.get("today_activity", {})
+    capture_validation = reader.prepare_manual_events(record["source_id"] for record in
+        (today.get("records", []) if isinstance(today, dict) else [])
+        if record.get("source_type", "").lower() == "social_event")
     def add(kind, identifier, delivered, path, role="background", target=None, basis=None):
         sources.append(reader.describe(snapshot.scope, kind=kind, identifier=str(identifier), delivered=delivered,
             path=path, role=role, ordinal=len(sources), target=target, relationship_basis=basis,
+            capture_validation=capture_validation,
             delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)))
     def relation(ref, delivered, path):
         basis = RelationshipDeliveryBasis(ref["relationship_state_id"], snapshot.scope.subject_world_character_id,
@@ -56,14 +62,12 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
         if target.get("relationship"):
             for ref in relationship_receipt.get("references", []):
                 relation(ref, json.dumps(target["relationship"], ensure_ascii=False), target_path + "/relationship")
-    context = payload.get("context", payload)
     prefix = "/context" if "context" in payload else ""
     for index, source in enumerate(context.get("source_manifest", [])):
         identifier = source.get("post_id")
         if identifier and not any(row.source_id == identifier for row in sources):
             # The transmitted source projection, not an undisclosed full body.
             post(identifier, json.dumps(source, ensure_ascii=False, default=str), f"{prefix}/source_manifest/{index}", "background")
-    today = context.get("today_activity", {})
     for index, record in enumerate(today.get("records", []) if isinstance(today, dict) else []):
         path = f"{prefix}/today_activity/records/{index}"
         kind = record["source_type"].upper()

@@ -253,29 +253,77 @@ def test_expired_proof_fails_readiness_without_another_database_call():
     finally: scheduler._clear_proof(config)
 
 
-def test_failed_finish_with_real_lock_does_not_replay_completed_effect(tmp_path):
-    database = _database(tmp_path); _seed_installation(database)
-    holder = sqlite3.connect(database.database_path, check_same_thread=False)
-    config = Settings().model_copy(update={"RESIDENT_TICK_INTERVAL_SECONDS": 60, "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS": 1,
-        "RESIDENT_TICK_LEASE_TTL_SECONDS": 6, "RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS": 1,
-        "RESIDENT_TICK_READY_PATH": str(tmp_path / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(tmp_path / "lock")})
-    states, effects = [], []
-    async def scenario():
-        stop = asyncio.Event()
-        async def tick():
-            effects.append("committed_effect"); holder.execute("BEGIN IMMEDIATE")
-            return SimpleNamespace(started_count=1)
-        task = asyncio.create_task(scheduler.run_resident_tick_scheduler(config=config, session_factory=database.session_factory,
-            tick_runner=tick, stop_event=stop, state_listener=states.append))
-        deadline = monotonic() + 3
-        while "degraded" not in states and monotonic() < deadline: await asyncio.sleep(0.05)
-        assert states[-1] == "degraded"; holder.rollback()
-        deadline = monotonic() + 3
-        while states[-1] != "ready" and monotonic() < deadline: await asyncio.sleep(0.05)
-        assert states[-1] == "ready" and effects == ["committed_effect"]
-        stop.set(); await asyncio.wait_for(task, 3)
-    try: asyncio.run(scenario())
-    finally: holder.rollback(); holder.close(); database.close()
+def test_failed_finish_with_real_lock_does_not_replay_completed_effect(tmp_path, monkeypatch):
+    def run_case(advance_seconds):
+        case_root = tmp_path / str(advance_seconds); case_root.mkdir()
+        database = _database(case_root); _seed_installation(database)
+        # A recovery crossing a minute boundary may legitimately admit the next
+        # window. Share an explicit clock across lease writes and readiness rather
+        # than treating every later effect as a replay of the first logical tick.
+        clock = MutableClock(NOW + timedelta(seconds=59, microseconds=900_000))
+        permits = []; recovery_decided = Event()
+        class ClockedRepository(SqliteSchedulerLeaseRepository):
+            def __init__(self, engine):
+                super().__init__(engine, clock=clock)
+            def begin_tick(self, **kwargs):
+                permit = super().begin_tick(**kwargs)
+                permits.append(permit)
+                if len(permits) == 2: recovery_decided.set()
+                return permit
+        monkeypatch.setattr(scheduler, "SqliteSchedulerLeaseRepository", ClockedRepository)
+        monkeypatch.setattr(scheduler, "datetime", SimpleNamespace(now=lambda _tz=None: clock()))
+        probe = SqliteSchedulerLeaseRepository(database.engine, clock=clock)
+        holder = sqlite3.connect(database.database_path, check_same_thread=False)
+        config = Settings().model_copy(update={"RESIDENT_TICK_INTERVAL_SECONDS": 60, "RESIDENT_TICK_HEARTBEAT_INTERVAL_SECONDS": 1,
+            "RESIDENT_TICK_LEASE_TTL_SECONDS": 6, "RESIDENT_TICK_SHUTDOWN_DRAIN_SECONDS": 1,
+            "RESIDENT_TICK_READY_PATH": str(case_root / "ready"), "RESIDENT_TICK_PROCESS_LOCK_PATH": str(case_root / "lock")})
+        states, effects, effect_windows = [], [], []
+        async def scenario():
+            stop = asyncio.Event()
+            async def tick():
+                effects.append("committed_effect")
+                effect_windows.append(permits[-1].logical_window_at)
+                if len(effects) == 1: holder.execute("BEGIN IMMEDIATE")
+                return SimpleNamespace(started_count=1)
+            task = asyncio.create_task(scheduler.run_resident_tick_scheduler(config=config, session_factory=database.session_factory,
+                tick_runner=tick, stop_event=stop, state_listener=states.append))
+            try:
+                deadline = monotonic() + 3
+                while "degraded" not in states and monotonic() < deadline: await asyncio.sleep(0.05)
+                assert states[-1] == "degraded"
+                assert not scheduler.scheduler_is_ready(config)
+                failed_receipt = await asyncio.to_thread(probe.read)
+                assert failed_receipt.last_tick_window_at == NOW
+                assert failed_receipt.last_tick_finished_at is None
+                clock.advance(seconds=advance_seconds)
+                holder.rollback()
+                assert await asyncio.to_thread(recovery_decided.wait, 3)
+                assert states[-1] == "ready" and scheduler.scheduler_is_ready(config)
+                assert [permit.should_run for permit in permits] == [True, bool(advance_seconds)]
+                expected = [NOW]
+                if advance_seconds:
+                    expected.append(NOW + timedelta(minutes=1))
+                    deadline = monotonic() + 3
+                    while True:
+                        receipt = await asyncio.to_thread(probe.read)
+                        if receipt.last_tick_finished_at is not None: break
+                        assert monotonic() < deadline, "next logical tick did not finish"
+                        await asyncio.sleep(0.01)
+                    assert receipt.last_tick_window_at == expected[-1]
+                    assert receipt.last_tick_result is scheduler.SchedulerTickResult.SUCCESS
+                if not advance_seconds:
+                    assert states[-1] == "ready" and effects == ["committed_effect"]
+                else:
+                    assert effects == ["committed_effect", "committed_effect"]
+                assert effect_windows == expected
+                assert len(effect_windows) == len(set(effect_windows))  # No logical tick was replayed.
+            finally:
+                holder.rollback(); stop.set(); await asyncio.wait_for(task, 3)
+        try: asyncio.run(scenario())
+        finally: holder.rollback(); holder.close(); database.close()
+
+    for advance_seconds in (0, 1):
+        run_case(advance_seconds)
 
 
 def test_primary_start_failure_survives_actual_locked_release(tmp_path, caplog):

@@ -98,6 +98,8 @@ def test_card_failed_commit_rolls_back_original_source_and_revision(db, monkeypa
 
 
 def test_copy_new_world_creates_new_identity_without_key_or_raw_source(db):
+    from sqlalchemy import delete
+    from app.domains.relationships.models.personalization import RelationshipPolicy
     session, owner = db
     workflows = build_creator_workflows()
     original = asyncio.run(drafts.create_draft(session, owner, schemas.AgentCreationDraftCreate(), workflows=workflows))
@@ -106,7 +108,11 @@ def test_copy_new_world_creates_new_identity_without_key_or_raw_source(db):
     other = create_world(session, user=owner, data=WorldDraftCreate(name="Other", idempotency_key="other-world"))
     draft = asyncio.run(drafts.create_draft(session, owner, schemas.AgentCreationDraftCreate(target_world_id=other.world.id), workflows=workflows))
     copied = settings_copy.copy_settings(session, owner, draft.id, schemas.CharacterSettingsCopy(revision=1, character_id=saved.character.id), workflows=workflows)
+    assert session.get(RelationshipPolicy, other.world.id) is not None
+    session.execute(delete(RelationshipPolicy).where(RelationshipPolicy.world_id == other.world.id))
+    session.commit()
     registered = drafts.complete_draft(session, owner, draft.id, schemas.AgentCreationDraftComplete(revision=copied.revision), workflows=workflows)
+    assert session.get(RelationshipPolicy, other.world.id) is not None
     assert registered.character.id != saved.character.id
     row = session.get(models.Character, registered.character.id)
     assert row.personality == "Curious" and row.credential is None and not row.activity_setting.auto_enabled

@@ -14,6 +14,29 @@ sys.modules[SPEC.name] = checker
 SPEC.loader.exec_module(checker)
 
 
+def test_current_release_readmes_keep_bilingual_scope_and_limitations() -> None:
+    for relative in ("README.md", "README.ko.md"):
+        text = (REPO_ROOT / relative).read_text(encoding="utf-8")
+        missing = [marker for marker in checker.REQUIRED_MARKERS[relative] if marker not in text]
+        assert not missing, (relative, missing)
+        assert "Angmoo_0.1.0_x64-setup.exe" in text
+        assert "release-v0.1.0/install-termux.py" in text
+
+
+def test_document_checker_requires_memory_and_android_limitations(tmp_path: Path) -> None:
+    for relative in checker.REQUIRED:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("\n".join(checker.REQUIRED_MARKERS.get(relative, ())), encoding="utf-8")
+    for relative, missing in (
+        ("README.md", "A saved memory is not necessarily retrieved or used in every response."),
+        ("README.ko.md", "모든 휴대폰에서의 동작을 보장하지 않습니다."),
+    ):
+        target = tmp_path / relative
+        target.write_text(target.read_text(encoding="utf-8").replace(missing, ""), encoding="utf-8")
+        assert f"{relative}: missing required marker {missing}" in checker.check(tmp_path)
+
+
 def test_document_checker_ignores_next_route_directories_named_markdown(
     tmp_path: Path,
 ) -> None:

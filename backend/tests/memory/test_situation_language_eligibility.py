@@ -62,8 +62,9 @@ def test_new_and_historical_marker_receipts_do_not_become_memories(stack, histor
     session.commit()
     if historical:
         assert restore_admission(session, row, revision="situation-validation.v4").receipt.description == "en"
-        with pytest.raises(ValueError, match="situation_description_language_only"):
-            restore_admission(session, row, revision="situation-validation.v5")
+        for revision in ("situation-validation.v5", "situation-validation.v6"):
+            with pytest.raises(ValueError, match="situation_description_language_only"):
+                restore_admission(session, row, revision=revision)
         apply(session, setting, memory)
     assert row.state == "blocked" and row.error_code == "situation_description_language_only"
     assert (row.content_digest, row.description, row.description_status, stable_digest(row.result)) == original

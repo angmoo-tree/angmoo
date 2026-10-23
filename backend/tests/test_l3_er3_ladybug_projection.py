@@ -106,6 +106,50 @@ def test_schema_projection_is_idempotent_and_reopens(tmp_path: Path) -> None:
     }
 
 
+@pytest.mark.parametrize("existing_mapping_size", [None, 1024**3], ids=["new", "existing"])
+def test_projection_and_schema_inspection_fit_portable_address_space(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, existing_mapping_size: int | None,
+) -> None:
+    root = _root(tmp_path)
+    command = _relationship(version=2)
+    native_database = ladybug_projection.lb.Database
+    expected_digest = None
+    if existing_mapping_size is not None:
+        # The reservation size is an open-time policy, not a persisted schema.
+        # Seed an existing graph with a different, portable reservation size.
+        def previous_database(path, **kwargs):
+            return native_database(path, max_db_size=existing_mapping_size)
+
+        monkeypatch.setattr(ladybug_projection.lb, "Database", previous_database)
+        with LadybugRelationshipProjection(database_root=root) as previous:
+            previous.apply(command)
+            expected_digest = previous.world_digest(command.event.world_id)
+
+    opens = []
+
+    def constrained_database(path, **kwargs):
+        # Model a native ARM64 address space that cannot reserve the 8 TiB
+        # library default. Still run all queries against the real database.
+        limit = kwargs.get("max_db_size")
+        if limit is None or limit > 64 * 1024**3:
+            raise RuntimeError("Buffer manager exception: Mmap failed")
+        opens.append(limit)
+        return native_database(path, **kwargs)
+
+    monkeypatch.setattr(ladybug_projection.lb, "Database", constrained_database)
+    with LadybugRelationshipProjection(database_root=root) as projection:
+        projection.verify_connectivity()
+        projection.apply(command)
+        digest = projection.world_digest(command.event.world_id)
+        if expected_digest is not None:
+            assert digest == expected_digest
+
+    assert ladybug_projection.inspect_ladybug_projection_schema_version(root) == 3
+    with LadybugRelationshipProjection(database_root=root) as reopened:
+        assert reopened.world_digest(command.event.world_id) == digest
+    assert len(opens) == 3
+
+
 def test_event_without_target_projects_only_actor_and_source(tmp_path: Path) -> None:
     event = _event(event_id="event-post-1", target_id=None)
     with LadybugRelationshipProjection(database_root=_root(tmp_path)) as projection:

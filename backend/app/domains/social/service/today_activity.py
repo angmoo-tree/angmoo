@@ -65,8 +65,10 @@ class TodaySocialActivityService:
         )
         evidence_rows = self.references.evidence([event.id for event in events])
         evidence_by_event = {}
+        all_evidence = {}
         for evidence in sorted(evidence_rows, key=lambda row: row.id):
             evidence_by_event.setdefault(evidence.social_event_id, evidence)
+            all_evidence.setdefault(evidence.social_event_id, []).append(evidence)
         executions = {
             row.id: row
             for row in self.references.executions(
@@ -233,6 +235,17 @@ class TodaySocialActivityService:
             kind = _event_kind(event, subject_world_character_id)
             if kind is None:
                 continue
+            manual_revision = None
+            if event.retrieval_status == "audit_only":
+                manual_revision = self.references.manual_event_revision(
+                    event, all_evidence.get(event.id, ()), posts,
+                    world_id=world_id, subject_id=subject_world_character_id,
+                    active_ids=active, blocked_ids=blocked, max_depth=MAX_TODAY_BRANCH_DEPTH,
+                    allowed_visibilities=_VISIBLE_POST_VISIBILITIES, execution=execution)
+                if manual_revision is None:
+                    # Invalid source bindings were never Today authority. Valid
+                    # manual events retain their audit-only classification.
+                    continue
             parent = chain[1] if chain and len(chain) > 1 else None
             if kind is TodaySocialActivityKind.REPLY_RECEIVED and (
                 parent is None
@@ -245,7 +258,7 @@ class TodaySocialActivityService:
                 kind=kind,
                 source_type="social_event",
                 source_id=event.id,
-                source_revision=_source_revision(
+                source_revision=manual_revision if manual_revision is not None else _source_revision(
                     event, evidence, chain or [], thoughts.get(event.id) or subjective.get(event.id)
                 ),
                 actor_world_character_id=event.actor_world_character_id,

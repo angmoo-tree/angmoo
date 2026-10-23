@@ -35,6 +35,14 @@ class TodayEvidence(SubjectiveEvidence, Protocol):
 
 
 class TodayReferences(Protocol):
+    def manual_event_revision(
+        self, event: TodayEvent, evidences, posts, *, world_id: str, subject_id: str,
+        active_ids: set[str], blocked_ids: set[str], max_depth: int,
+        allowed_visibilities: set[str], execution,
+    ) -> str | None:
+        """Bind already-read manual source facts; None means not admissible."""
+        ...
+
     def scope(
         self, world_id: str, subject_id: str
     ) -> tuple[

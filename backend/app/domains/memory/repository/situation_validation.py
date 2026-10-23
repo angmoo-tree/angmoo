@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass
 from app.domains.memory.contracts.activity_situation import (
     DeliveredInputManifest, DeliveredSourceEntry, SituationDraft, SituationValidationContext,
     SITUATION_POLICY, stable_digest,
-    VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS,
+    VALIDATION_REVISION, SUPPORTED_VALIDATION_REVISIONS, LANGUAGE_ELIGIBILITY_REVISIONS,
     DELIVERED_SOURCE_LIMIT,
 )
 from app.domains.memory.models.activity_situation import MemorySituationManifest
@@ -56,7 +56,7 @@ def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validat
         raise ValueError("situation_receipt_integrity_invalid")
     # Authenticate the immutable original draft/hash before current eligibility.
     # Never reinterpret a historical valid draft while reconstructing its hash.
-    if revision == "situation-validation.v5" and (
+    if revision in LANGUAGE_ELIGIBILITY_REVISIONS and (
         draft.error_code == "situation_description_language_only"
         or language_only(receipt.description, snapshot.memory_search_locale)
     ):

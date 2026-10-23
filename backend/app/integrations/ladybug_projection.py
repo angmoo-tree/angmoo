@@ -37,6 +37,11 @@ from app.domains.relationships.contracts.projection_commands import (
 
 
 LADYBUG_PROJECTION_SCHEMA_VERSION = 3
+# Ladybug's default reserves 8 TiB of virtual address space, which can fail
+# on native ARM64 Android. This is the graph's mapping/capacity limit, not
+# resident RAM or preallocated disk. Use the same policy for runtime and
+# schema inspection so upgrades can reopen the same projection.
+LADYBUG_MAX_DB_SIZE_BYTES = 64 * 1024**3
 
 _QUERY_RESULT_CONTRACT = {
     "direct_relationship": ("actor_id", "target_id", "relationship"),
@@ -111,7 +116,10 @@ def inspect_ladybug_projection_schema_version(database_root: Path) -> int | None
     try:
         writer_lock.acquire()
         native_root = path_alias.open()
-        database = lb.Database(str(native_root / "relationships.lbdb"))
+        database = lb.Database(
+            str(native_root / "relationships.lbdb"),
+            max_db_size=LADYBUG_MAX_DB_SIZE_BYTES,
+        )
         connection = lb.Connection(database)
         try:
             rows = _rows(
@@ -344,7 +352,10 @@ class LadybugRelationshipProjection:
         try:
             self._writer_lock.acquire()
             native_root = self._path_alias.open()
-            self._database = lb.Database(str(native_root / "relationships.lbdb"))
+            self._database = lb.Database(
+                str(native_root / "relationships.lbdb"),
+                max_db_size=LADYBUG_MAX_DB_SIZE_BYTES,
+            )
             self._connection = lb.Connection(self._database)
             self.bootstrap()
         except LadybugProjectionError:

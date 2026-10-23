@@ -184,7 +184,7 @@ def test_unknown_revision_stops_without_guessing(durable_stack):
     fresh = request_run(db, setting, trigger="manual", work_kind="blocked_recheck", request_key="unknown-retry-0001",
         expected_version=1, receipt_sequence=row.sequence, expected_receipt_version=row.state_version, now=NOW)
     assert fresh.run_id != run.id
-    assert db.get(MemorySituationApplyRun, fresh.run_id).settings_snapshot["validation_revision"] == "situation-validation.v5"
+    assert db.get(MemorySituationApplyRun, fresh.run_id).settings_snapshot["validation_revision"] == "situation-validation.v6"
 
 
 def test_shared_binding_discard_and_owner_cleanup_preserve_posts(durable_stack):

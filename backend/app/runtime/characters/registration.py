@@ -7,6 +7,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.core.ids import uuid7_string
+from app.core.sqlite_concurrency import require_read_only_session
 from app.domains.characters import models, schemas
 from app.domains.characters.exceptions import AgentCreationDraftHandleConflictError, AgentCreationDraftValidationError
 from app.domains.characters.service import profile, persona
@@ -19,15 +20,23 @@ from app.domains.worlds.service.character_entry import refresh_entry_world_contr
 from app.domains.worlds.service.creator import require_creator_access
 from app.domains.worlds.service.default_space import ensure_default_space
 from app.domains.routines.service.activity_settings import ensure_setting
+from app.runtime.relationships.policy_activation import initialize_default_space_policy
 
 
 def resolve_target(db, user, world_id):
+    require_read_only_session(db, error_code="registration_target_requires_clean_unit_of_work")
     try:
         if world_id is None:
-            world_id = ensure_default_space(db, owner_id=user.id).id
-        require_creator_access(db, world_id=world_id, user=user)
+            world_id = ensure_default_space(db, owner_id=user.id, initialize=initialize_default_space_policy).id
+        world, _ = require_creator_access(db, world_id=world_id, user=user)
+        if initialize_default_space_policy(db, world):
+            db.commit()
     except WorldServiceError as exc:
+        db.rollback()
         raise AgentCreationDraftValidationError(exc.reason_code) from exc
+    except Exception:
+        db.rollback()
+        raise
     return world_id
 
 
@@ -87,6 +96,7 @@ def register_draft(db, user, draft, data):
             if receipt and receipt.request_digest == digest:
                 return _registered_result(db, user, receipt)
             raise AgentCreationDraftHandleConflictError("registration_conflict")
+        initialize_default_space_policy(db, world)
         character = models.Character(id=character_id, owner_id=user.id, name=draft.name.strip(), handle=handle,
             one_liner=draft.one_liner, personality=draft.personality, speech_style=draft.speech_style,
             worldview=draft.worldview, character_background=draft.character_background,

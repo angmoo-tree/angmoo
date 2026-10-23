@@ -9,6 +9,7 @@ from app.api.identity_dependencies import get_current_user, get_optional_current
 from app.database import get_db
 from app.api.world_errors import _raise_world_error
 from app.api.recommendation_dependencies import recommendation_workflows
+from app.api.world_initialization_dependencies import default_space_initializer
 from app.domains.worlds import schemas, service as world_service
 
 
@@ -35,10 +36,13 @@ def read_world_media(
 
 
 @router.post("/default-space/ensure", response_model=schemas.WorldRead)
-def ensure_default_space(db: Session = Depends(get_db), user=Depends(get_current_user)):
+def ensure_default_space(
+    db: Session = Depends(get_db), user=Depends(get_current_user),
+    initialize=Depends(default_space_initializer),
+):
     from app.domains.worlds.service.default_space import ensure_default_space as ensure
     try:
-        world = ensure(db, owner_id=user.id)
+        world = ensure(db, owner_id=user.id, initialize=initialize)
         return world_service.get_world_read(db, world_id=world.id, user=user)
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)

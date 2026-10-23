@@ -4,8 +4,10 @@ Windows APIs are loaded only on Windows. Inspection never reads secret bytes.
 Existing keys are never rotated or replaced when access cannot be verified.
 """
 import os
+import errno
 import secrets
 import stat
+import sys
 from pathlib import Path
 from dataclasses import dataclass
 from contextlib import contextmanager
@@ -213,6 +215,29 @@ def create_secret_once(path:Path,content:bytes)->None:
         _create_secret_once(path,content)
 
 
+def _publish_secret_no_replace(temporary: Path, path: Path) -> None:
+    if sys.platform != "linux":
+        os.link(temporary, path)
+        return
+    # PRoot can turn link() into a symlink backed by the disposable rootfs.
+    # Publish inside the persistent directory instead, retaining the atomic
+    # first-writer-wins contract. Never fall back to an overwriting rename.
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    rename = getattr(libc, "renameat2", None)
+    if rename is None:
+        raise OSError(errno.ENOSYS, "atomic_secret_publication_unsupported")
+    rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int,
+                      ctypes.c_char_p, ctypes.c_uint]
+    rename.restype = ctypes.c_int
+    if rename(-100, os.fsencode(temporary), -100, os.fsencode(path), 1) != 0:
+        code = ctypes.get_errno()
+        if code == errno.EEXIST:
+            raise FileExistsError(code, "secret_already_published")
+        raise OSError(code, "atomic_secret_publication_failed")
+
+
 def _create_secret_once(path,content):
     try:path.lstat()
     except FileNotFoundError:pass
@@ -235,7 +260,7 @@ def _create_secret_once(path,content):
             fd=os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,"O_NOFOLLOW",0),0o600)
         with os.fdopen(fd,"wb") as stream:
             stream.write(content);stream.flush();os.fsync(stream.fileno())
-        try:os.link(temporary,path)
+        try:_publish_secret_no_replace(temporary,path)
         except FileExistsError:pass # Never replace the first key.
         protect_existing_secret(path)
     except OSError as exc:

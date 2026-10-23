@@ -108,7 +108,7 @@ Package authors retain all rights granted by their respective licenses.
 - `@jridgewell/resolve-uri 3.1.2` — MIT
 - `@jridgewell/sourcemap-codec 1.5.5` — MIT
 - `@jridgewell/trace-mapping 0.3.31` — MIT
-- `@next/env 16.3.8` — MIT
+- `@next/env 16.4.1` — MIT
 - `@swc/helpers 0.5.23` — Apache-2.0
 - `@types/node 20.19.40` — MIT
 - `baseline-browser-mapping 2.11.14` — Apache-2.0
@@ -132,7 +132,7 @@ Package authors retain all rights granted by their respective licenses.
 - `lucide-react 1.29.0` — ISC
 - `ms 2.1.3` — MIT
 - `nanoid 3.3.18` — MIT
-- `next 16.3.8` — MIT
+- `next 16.4.1` — MIT
 - `node-releases 2.0.53` — MIT
 - `picocolors 1.1.1` — ISC
 - `postcss 8.5.23` — MIT

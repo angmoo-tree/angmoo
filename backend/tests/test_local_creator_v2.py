@@ -20,6 +20,7 @@ from app.domains.world_characters.schemas.identity import MyProfilePatch
 from app.domains.world_characters.service.owner_identity import OwnerControlledIdentityService
 from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY
 from app.domains.worlds.service.default_space import ensure_default_space
+from app.runtime.relationships.policy_activation import initialize_default_space_policy
 from app.runtime.characters.creator import build_creator_workflows
 from app.domains.identity.schemas import UserPreferencesUpdate
 from app.domains.identity.service.auth import update_user_preferences
@@ -47,10 +48,10 @@ def db(tmp_path):
 
 def test_default_and_same_profile_identity(db):
     session, owner = db
-    world = ensure_default_space(session, owner_id=owner.id)
+    world = ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy)
     assert world.name == "SNS"
     assert world.readiness_status == "publish_ready"
-    assert ensure_default_space(session, owner_id=owner.id).id == world.id
+    assert ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy).id == world.id
     service = OwnerControlledIdentityService(session)
     first = service.ensure(world_id=world.id, current_user_id=owner.id)
     assert first.profile.display_name == "사용자"
@@ -69,14 +70,14 @@ def test_default_space_is_publish_ready_for_both_owner_languages(db, language):
     update_user_preferences(session, owner, UserPreferencesUpdate(
         ui_language=language, expected_ui_revision=owner.ui_preference_revision,
     ))
-    world = ensure_default_space(session, owner_id=owner.id)
+    world = ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy)
     assert world.language == language
     assert world.status == "published"
     assert world.readiness_status == "publish_ready"
     readiness = evaluate_world_readiness(session, world)
     assert readiness.ready_for_publish
     assert readiness.issues == []
-    assert ensure_default_space(session, owner_id=owner.id).id == world.id
+    assert ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy).id == world.id
 
 
 def test_keyless_registration_is_atomic_off_and_replayed(db):
@@ -180,7 +181,7 @@ def test_default_space_cannot_be_archived(db):
     from app.domains.worlds.schemas import WorldMutationRequest
     from app.domains.worlds.exceptions import WorldDefinitionValidationError
     session, owner = db
-    world = ensure_default_space(session, owner_id=owner.id)
+    world = ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy)
     with pytest.raises(WorldDefinitionValidationError):
         archive_world(session, world_id=world.id, user=owner, data=WorldMutationRequest(row_version=world.row_version))
     assert world.status == "published"
@@ -222,7 +223,7 @@ def test_two_independent_sessions_ensure_same_space_and_profile(db):
     def ensure(_):
         with Session(session.get_bind()) as worker:
             barrier.wait(timeout=10)
-            world = ensure_default_space(worker, owner_id=owner_id)
+            world = ensure_default_space(worker, owner_id=owner_id, initialize=initialize_default_space_policy)
             profile = OwnerControlledIdentityService(worker).ensure(world_id=world.id, current_user_id=owner_id)
             return world.id, profile.character_id, profile.world_character_id
     with ThreadPoolExecutor(2) as pool:
