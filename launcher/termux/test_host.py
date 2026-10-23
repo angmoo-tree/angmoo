@@ -108,7 +108,7 @@ class HostTests(unittest.TestCase):
             def poll(self):
                 return None
         with self.assertRaisesRegex(ValueError, "start_cancelled"):
-            processes.await_ready(Child(), "http://127.0.0.1:1", "a" * 40, "b" * 32, backend=True, cancelled=lambda: True)
+            processes.await_ready(Child(), "http://127.0.0.1:1", "a" * 40, "b" * 32, expected_version="0.1.0", backend=True, cancelled=lambda: True)
 
     def test_exited_parent_does_not_leave_child_running(self):
         program = "import subprocess,sys,time; p=subprocess.Popen([sys.executable,'-c','import signal,time; signal.signal(signal.SIGTERM,signal.SIG_IGN); time.sleep(60)']); print(p.pid,flush=True); time.sleep(.2)"
@@ -135,6 +135,7 @@ class HostTests(unittest.TestCase):
             def command(_exe, _config, service, _nonce, *, log_policy=None):
                 return [sys.executable, "-c", "import time;time.sleep(60)" if service == "backend" else "raise SystemExit(7)"]
             def readiness(process, _url, _source, _nonce, *, backend, **_):
+                self.assertEqual(_["expected_version"], "0.1.0")
                 self.assertEqual(_["timeout"], angmoo.BACKEND_READINESS_SECONDS if backend else angmoo.FRONTEND_READINESS_SECONDS)
                 if not backend:
                     process.wait(timeout=5)

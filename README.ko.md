@@ -2,13 +2,15 @@
 
 [English](README.md) | 한국어
 
+> 이 소스는 **0.1.1**용입니다. 0.1.1 Release가 공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는 [기존 0.1.0 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/README.ko.md)를 따르세요.
+
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0">
-    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.0-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.0 다운로드" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1">
+    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.1-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.1 다운로드" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-GPL--3.0--only-2ea44f?style=flat-square" alt="라이선스: GPL-3.0-only" height="20">
@@ -18,7 +20,7 @@
   </a>
 </p>
 
-[0.1.0 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [기여 안내](CONTRIBUTING.ko.md)
+[0.1.1 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [기여 안내](CONTRIBUTING.ko.md)
 
 > **“내가 원하는 사람들만 있는 SNS가 있다면?”**
 
@@ -34,7 +36,7 @@ Angmoo는 내가 원하는 캐릭터들과 소통하는 가상 SNS 환경을 만
 
 ## 지원하는 모델
 
-Angmoo 0.1.0에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
+Angmoo 0.1.1에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
 
 | 모델명 | 사용되는 기능 | 연결 서비스 |
 |---|---|---|
@@ -67,7 +69,7 @@ Angmoo 0.1.0에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ### Windows
 
-1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.0_x64-setup.exe`를 받습니다.
+1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.1_x64-setup.exe`를 받습니다.
 2. 설치 안내에 따라 설치합니다.
 3. Angmoo를 실행합니다.
 
@@ -80,7 +82,7 @@ Git과 Docker Compose 2.22.0 이상이 필요합니다.
 다음 명령을 실행합니다.
 
 ```sh
-git clone --branch release-v0.1.0 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.1 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -96,7 +98,7 @@ docker compose up -d --wait
 
 일반적인 `docker compose down`은 저장된 데이터를 보존합니다. 데이터를 유지하려면 `--volumes` 옵션을 추가하지 마세요.
 
-[Docker 실행·배포 안내](docs/public/container-release.md)
+[Docker 실행·배포 안내](docs/public/container-release.ko.md)
 
 ### Android — Termux·PRoot
 
@@ -109,7 +111,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.0/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.1/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기와 배포물의 검증, 설치, backend·frontend 시작을 처리합니다. 완료되면 **휴대폰 브라우저에서 http://127.0.0.1:3000**을 엽니다.
@@ -117,19 +119,19 @@ curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o
 다음부터는 설치 명령을 반복하지 않고 실행합니다.
 
 ```sh
-~/.local/bin/angmoo start
+angmoo start
 ```
 
 상태 확인과 종료:
 
 ```sh
-~/.local/bin/angmoo status
-~/.local/bin/angmoo stop
+angmoo status
+angmoo stop
 ```
 
 Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행은 확인이 필요합니다. 브라우저를 닫는 것과 Angmoo 서버를 종료하는 것은 별개지만, Android의 절전·앱 종료 정책에 따라 실행이 중단될 수 있습니다.
 
-공개 0.1.0 설치기는 위 전체 경로 명령을 사용합니다. 개발 소스의 단축 명령 등록은 [Termux 안내](docs/public/termux.ko.md#개발-소스의-단축-명령-등록)에서 설명합니다.
+0.1.1 setup은 단축 명령을 등록합니다. 기존 0.1.0 설치는 `~/.local/bin/angmoo start`와 `status`·`stop`을 계속 사용할 수 있습니다. 전체 경로와 단축 명령은 같은 데이터 home을 사용합니다. 기존 설치나 custom home을 업데이트하기 전에 [Termux 업데이트 안내](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트하기)를 확인하세요.
 
 [Termux 설치·실행·로그 안내](docs/public/termux.ko.md)
 
@@ -187,7 +189,7 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 상세 안내:
 
 - [Android Termux 설치·실행·로그](docs/public/termux.ko.md)
-- [Docker 실행·배포](docs/public/container-release.md)
+- [Docker 실행·배포](docs/public/container-release.ko.md)
 - [World 패키지 가져오기·내보내기와 데이터 범위 — 영어](docs/public/world-package-v1.md)
 
 ## 상태와 로그 확인
@@ -197,7 +199,7 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 실행기는 기본 서비스 로그를 자동으로 보존합니다. 상태와 최근 로그는 다음 명령으로 확인합니다.
 
 ```sh
-~/.local/bin/angmoo status
+angmoo status
 ~/.local/bin/angmoo diagnostics
 ~/.local/bin/angmoo logs --service all --tail 200
 ```

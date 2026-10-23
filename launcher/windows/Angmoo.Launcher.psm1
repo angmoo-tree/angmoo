@@ -271,7 +271,7 @@ function Get-AngmooVolumeInventory {
 }
 
 function Test-AngmooReleaseImagesPresent {
-    $backend = if ($env:ANGMOO_IMAGE_TAG) { $env:ANGMOO_IMAGE_TAG } else { 'release-v0.1.0' }
+    $backend = if ($env:ANGMOO_IMAGE_TAG) { $env:ANGMOO_IMAGE_TAG } else { 'release-v0.1.1' }
     $images = @(
         "ghcr.io/angmoo-tree/angmoo-backend:$backend",
         "ghcr.io/angmoo-tree/angmoo-frontend:$backend"
@@ -311,11 +311,11 @@ function Invoke-AngmooPreflight {
     try {
         $renderedConfig = ($config.output -join "`n") | ConvertFrom-Json
         $productVersion = [string]$renderedConfig.services.backend.environment.ANGMOO_VERSION
-        if ($productVersion -notmatch '^0\.1\.0(-dev(-[0-9a-f]{7,40})?)?$') {
+        if ($productVersion -notmatch '^0\.1\.1(-dev(-[0-9a-f]{7,40})?)?$') {
             throw 'product_version_mismatch'
         }
     } catch {
-        return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'product_version_mismatch'; message = 'Set ANGMOO_VERSION=0.1.0 and ANGMOO_IMAGE_TAG=release-v0.1.0 before starting. / 시작 전에 제품 버전은 ANGMOO_VERSION=0.1.0, 이미지 선택은 ANGMOO_IMAGE_TAG=release-v0.1.0으로 설정하세요.'; checks = @($checks) }
+        return [pscustomobject]@{ ok = $false; degraded = $false; exit_code = (Get-AngmooExitCode 'preflight_failed'); error_code = 'product_version_mismatch'; message = 'Set ANGMOO_VERSION=0.1.1 and ANGMOO_IMAGE_TAG=release-v0.1.1 before starting. / 시작 전에 제품 버전은 ANGMOO_VERSION=0.1.1, 이미지 선택은 ANGMOO_IMAGE_TAG=release-v0.1.1으로 설정하세요.'; checks = @($checks) }
     }
     $checks.Add([pscustomobject]@{ name = 'compose_config'; state = 'ready'; detail = 'valid' })
 

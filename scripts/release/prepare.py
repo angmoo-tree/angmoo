@@ -175,12 +175,15 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
         manifest["p5"] = {"review_ref": review_ref, "report_sha256": "sha256:" + __import__("hashlib").sha256(raw).hexdigest(), "evidence": json.loads(raw)}
         publication["p5"] = "PASS"
         note_sources, modern = reviewed_notes(github, review_ref, prefix)
+        parts = []
         # Frozen legacy publications keep their original order and asset bytes.
         for locale in (("en", "ko") if modern else ("ko", "en")):
             body = reviewed_file(github, review_ref, prefix + "/" + note_sources[locale])
             require(len(body) > 40 and b"TODO" not in body and b"NOT_RELEASED" not in body, "release_notes_not_ready")
             (stage / f"release-notes.{locale}.md").write_bytes(body)
-            notes += body.decode("utf-8") + "\n\n"
+            parts.append(body.decode("utf-8"))
+        notes = ("\n\n---\n\n".join(part.rstrip() for part in parts) + "\n"
+                 if modern else "".join(part + "\n\n" for part in parts))
     try:
         remote_source = github.read(f"commits/{tag}")["sha"]
     except subprocess.CalledProcessError:

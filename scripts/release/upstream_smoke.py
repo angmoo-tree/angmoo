@@ -54,7 +54,7 @@ def docker(*args):
     return subprocess.run(["docker", *args], check=True, text=True, encoding="utf-8", stdout=subprocess.PIPE).stdout.strip()
 
 
-def run(frontend, backend, platform, output):
+def run(frontend, backend, platform, output, *, expected_version):
     from launcher.termux.payload import require
     from scripts.release.candidate import ROOT
     name = "angmoo-upstream-" + uuid.uuid4().hex[:12]
@@ -82,11 +82,14 @@ def run(frontend, backend, platform, output):
             while True:
                 try:
                     with urllib.request.urlopen(origin + "/api/runtime-identity", timeout=2) as response:
-                        require(json.load(response)["version"] == "0.1.0", "upstream_identity_invalid")
-                    break
-                except (OSError, ValueError):
+                        identity = json.load(response)
+                except OSError:
                     require(time.monotonic() < deadline, "upstream_frontend_not_ready")
                     time.sleep(.5)
+                else:
+                    require(isinstance(identity, dict) and identity.get("version") == expected_version,
+                            "upstream_identity_invalid")
+                    break
             for path, method, headers, expected, data in (
                 ("/media/file", "GET", {}, 200, BODY),
                 ("/media/file", "HEAD", {}, 200, b""),

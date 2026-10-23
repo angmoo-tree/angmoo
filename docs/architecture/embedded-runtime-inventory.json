@@ -3,11 +3,11 @@
   "behavior_critical_file_hashes": [
     {
       "path": "compose.yml",
-      "sha256": "044d4adcdc052f0d10b969cbc3a471d6065946974468413e7f4cbc1279877924"
+      "sha256": "6e2430b03d0f007b9a794a14ff5a951485827fb19160f3d03a7a22c7aeff36ad"
     },
     {
       "path": "compose.dev.yml",
-      "sha256": "ea3ac8baf87c09ed95b8332dc8d479919a1c4609edde25215cd727e9db057b54"
+      "sha256": "b91679335f26a7757afa626b589be95fc747899f078554ba999bf484fec28338"
     },
     {
       "path": "compose.ci.yml",
@@ -15,11 +15,11 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "bef929e4e1e173c9b9bd6930de04080636d53ebf3b3bda6483f673c970000e17"
+      "sha256": "beb0307f19c95be22c2e031d80a05d87ac84f45650c2b96d0f4bfe941a089578"
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "0c4ccec878b5ceff882c49788dbbbde4aaa25b51c3f8abd7f120bb560ede17ca"
+      "sha256": "06ae2d920a6f00fecf76667a936f7741f3e7151bd545eaf507f42bb01bc85944"
     },
     {
       "path": "frontend/next.config.ts",
@@ -208,7 +208,7 @@
       "owner": "ER4",
       "path": "compose.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "044d4adcdc052f0d10b969cbc3a471d6065946974468413e7f4cbc1279877924",
+      "source_sha256": "6e2430b03d0f007b9a794a14ff5a951485827fb19160f3d03a7a22c7aeff36ad",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -221,7 +221,7 @@
       "owner": "ER4",
       "path": "compose.dev.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "ea3ac8baf87c09ed95b8332dc8d479919a1c4609edde25215cd727e9db057b54",
+      "source_sha256": "b91679335f26a7757afa626b589be95fc747899f078554ba999bf484fec28338",
       "transition_pr": "ER4 PR J"
     },
     {

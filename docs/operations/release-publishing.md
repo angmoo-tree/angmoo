@@ -5,7 +5,8 @@ publishing it. The public 0.1.0 release already exists; this document
 describes the reusable publishing procedure, not a request to republish it.
 All ten dispatch inputs are identities, not an approval bypass:
 
-- `source`: full main-history candidate SHA; `tag`: `release-v0.1.0`.
+- `source`: full main-history candidate SHA; `tag`: the matching product tag,
+  for example `release-v0.1.1` for the next release.
 - `windows_run`, `windows_attempt`, `windows_artifact`: successful full Windows
   run and original build artifact, including its final validation receipt.
 - `candidate_run`, `candidate_attempt`, `candidate_artifact`: successful
@@ -30,8 +31,8 @@ producer workflow, source digest and hosted-runner requirement; local provenance
 JSON alone cannot establish producer trust.
 
 Before publication, add these files through normal main review under
-`docs/releases/0.1.0/`: `p5.json`, `notes.ko.md`, `notes.md`.
-Use `p5.example.json` as the schema outline, replacing all placeholders with
+`docs/releases/<version>/`: `p5.json`, `notes.ko.md`, `notes.md`.
+Use [the existing schema outline](../releases/0.1.0/p5.example.json), replacing all placeholders with
 actual records. The report references exact successful Core CI, Local Smoke and
 Security workflow runs, the tested EXE, four platform digests, and the Windows
 user's concrete test record. The verifier retrieves referenced CI outcomes and
@@ -86,7 +87,7 @@ The prepared asset names remain `termux.en.md`, `termux.ko.md`,
 Preparation selects one complete language pair from the fixed product root or
 review ref. Older fixed sources using `.en.md` are supported explicitly; missing
 or ambiguous pairs fail instead of falling back to the publisher checkout.
-New note sources compose English before Korean; frozen legacy sources keep
+New note sources compose English, a Markdown horizontal rule, then Korean; frozen legacy sources keep
 their original order. Tool ZIP contents must match the same product source's
 literal bootstrap allowlist, including the command-registration helper only in
 sources that declare it. This does not modify an already published release.

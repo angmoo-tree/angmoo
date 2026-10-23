@@ -49,7 +49,8 @@ def validate(manifest_path: Path, architecture: str) -> None:
     from scripts.release.feature_smoke import run as feature_smoke
     from scripts.release.upstream_smoke import run as upstream_smoke
     feature_smoke(by_service["backend"], "linux/" + architecture, output)
-    upstream_smoke(by_service["frontend"], by_service["backend"], "linux/" + architecture, output)
+    upstream_smoke(by_service["frontend"], by_service["backend"], "linux/" + architecture, output,
+                   expected_version=manifest["version"])
     env = {**os.environ, "ANGMOO_CI_PLATFORM": "linux/" + architecture, "ANGMOO_VERSION": manifest["version"]}
     project = "angmoo-candidate-" + uuid.uuid4().hex[:12]
     subprocess.run([sys.executable, "scripts/ci/run_l0_container_smoke.py", "--tag", tag, "--project", project, "--report", str(output / "runtime.json")], cwd=ROOT, env=env, check=True)

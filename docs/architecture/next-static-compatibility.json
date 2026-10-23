@@ -131,7 +131,7 @@
       "path": "frontend/src/app/api/runtime-identity/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/api/runtime-identity",
-      "source_sha256": "e9b94d635b74af09eebc4f1c0e6b0162db5de646ee1fb5d703f716bd5a154139",
+      "source_sha256": "1dc1713044eed99a208d2f5d4809e8f52e3028faba1d2c9b12b3169716582939",
       "transition_pr": "ER5 PR K"
     },
     {

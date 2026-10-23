@@ -114,10 +114,10 @@ class LogTests(unittest.TestCase):
         import urllib.error
         for reason, code in ((TimeoutError(), "timeout"), (ConnectionRefusedError(111, "refused"), "connection_error")):
             with patch.object(processes.urllib.request, "urlopen", side_effect=urllib.error.URLError(reason)):
-                self.assertEqual(processes.probe_ready("http://localhost", "a", "b", backend=True)["code"], code)
+                self.assertEqual(processes.probe_ready("http://localhost", "a", "b", expected_version="0.1.0", backend=True)["code"], code)
         response = io.BytesIO(json.dumps({"source_sha": "different"}).encode())
         with patch.object(processes.urllib.request, "urlopen", return_value=response):
-            self.assertEqual(processes.probe_ready("http://localhost", "a", "b", backend=True)["code"], "source_sha_mismatch")
+            self.assertEqual(processes.probe_ready("http://localhost", "a", "b", expected_version="0.1.0", backend=True)["code"], "source_sha_mismatch")
 
     def test_detached_supervisor_hands_over_its_pipes_and_keeps_original_failure(self):
         import angmoo

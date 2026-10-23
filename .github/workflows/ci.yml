@@ -395,6 +395,9 @@ jobs:
       - name: Verify runtime media transport
         working-directory: frontend
         run: pnpm test:media-proxy
+      - name: Verify current runtime identity and reject mixed versions
+        working-directory: frontend
+        run: pnpm test:runtime-identity
       - name: Verify opt-in service log expiry and proxy lifecycle
         working-directory: frontend
         run: |

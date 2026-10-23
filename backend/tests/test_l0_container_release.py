@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import sys
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -59,11 +61,42 @@ def test_repository_container_release_contract_passes() -> None:
 
 
 def test_release_tag_matches_both_application_versions() -> None:
-    assert RELEASE_TAG.expected_release_tag(ROOT) == "release-v0.1.0"
-    assert RELEASE_TAG.validate_release_tag("release-v0.1.0", ROOT) == []
+    assert RELEASE_TAG.expected_release_tag(ROOT) == "release-v0.1.1"
+    assert RELEASE_TAG.validate_release_tag("release-v0.1.1", ROOT) == []
     assert "release tag mismatch" in RELEASE_TAG.validate_release_tag(
         "v0.2.1", ROOT
     )[0]
+    assert "release tag mismatch" in RELEASE_TAG.validate_release_tag("release-v0.1.0", ROOT)[0]
+
+
+@pytest.mark.parametrize("changed", [
+    "backend/pyproject.toml", "backend/uv.lock", "backend/app/runtime/product_identity.py",
+    "frontend/package.json", "desktop/package.json", "desktop/package-lock.json",
+    "desktop/src-tauri/tauri.conf.json", "desktop/src-tauri/Cargo.toml", "desktop/src-tauri/Cargo.lock",
+])
+def test_mixed_product_or_self_lock_version_is_rejected(tmp_path, changed) -> None:
+    paths = (
+        "backend/pyproject.toml", "backend/uv.lock", "backend/app/runtime/product_identity.py",
+        "frontend/package.json", "desktop/package.json", "desktop/package-lock.json",
+        "desktop/src-tauri/tauri.conf.json", "desktop/src-tauri/Cargo.toml", "desktop/src-tauri/Cargo.lock",
+    )
+    for relative in paths:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        contents = (ROOT / relative).read_text(encoding="utf-8")
+        if relative == changed:
+            # Change only the product/self package occurrence, not dependency versions.
+            if relative.endswith("uv.lock"):
+                old = 'name = "backend"\nversion = "0.1.1"'
+            elif relative.endswith("Cargo.lock"):
+                old = 'name = "angmoo-desktop"\nversion = "0.1.1"'
+            else:
+                old = '"0.1.1"'
+            assert old in contents
+            contents = contents.replace(old, old.replace("0.1.1", "0.1.0"), 1)
+        target.write_text(contents, encoding="utf-8")
+    errors = RELEASE_TAG.validate_release_tag("release-v0.1.1", tmp_path)
+    assert len(errors) == 1 and "product versions must be identical" in errors[0]
 
 
 def test_image_contract_accepts_non_root_metadata() -> None:

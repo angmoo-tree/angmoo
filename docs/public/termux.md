@@ -6,7 +6,10 @@ separately, preserving the backend Debian/Python and frontend Debian/Node bases.
 It runs the existing app entrypoints; it does not install another app dependency
 set, patch the images, or require editing ports or environment files.
 
-**Release:** [Angmoo 0.1.0](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0) is available.
+**Version:** these instructions target 0.1.1. Use its downloads only after
+[Angmoo 0.1.1](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1)
+is published. Until then, use the
+[published 0.1.0 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/docs/public/termux.en.md).
 Android support remains experimental. Linux ARM64 or QEMU checks do not certify
 phone power management, background execution or performance.
 
@@ -27,7 +30,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.0/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.1/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 The installer downloads the tools ZIP, checks `RELEASE-SHA256SUMS`, extracts it,
@@ -42,19 +45,21 @@ The initial installer's trust source is the official GitHub Release HTTPS URL
 above. Its own SHA-256 is also in `RELEASE-SHA256SUMS` for separate review and
 verification. This is not release-signature verification or Android certification.
 
-On success, open **http://127.0.0.1:3000**. For subsequent use, skip installation:
-these explicit paths work without a separate PATH setup command.
+On success, open **http://127.0.0.1:3000**. After `Command ready: angmoo`,
+subsequent use needs only these commands, in the current or a new Termux shell:
 
 ```sh
-~/.local/bin/angmoo start
-~/.local/bin/angmoo status
-~/.local/bin/angmoo stop
+angmoo start
+angmoo status
+angmoo stop
 ```
 
-## Command registration in the development source
+## Command registration and existing 0.1.0 installations
 
-The command registration described here is **not included in the published
-0.1.0 tools**. The explicit paths above remain valid for that release.
+Command registration is included in the 0.1.1 tools. Published 0.1.0 tools
+still use `~/.local/bin/angmoo start`, `~/.local/bin/angmoo status` and
+`~/.local/bin/angmoo stop`. These full paths also remain valid after updating;
+the short command uses the same wrapper and does not create another data home.
 
 With reviewed tools containing `command_registration.py`, normal `sh setup.sh`
 also registers `$PREFIX/bin/angmoo` as a link to the existing
@@ -97,11 +102,10 @@ one-time host-tool setup from that directory:
 
 ```sh
 sh setup.sh
-export PATH="$HOME/.local/bin:$PATH"
 ```
 
-For published 0.1.0, this export affects only the current shell. Tools with the
-verified prefix registration above do not need it.
+The 0.1.1 setup registers the command without editing PATH or shell startup files.
+For old 0.1.0 tools, keep using the full wrapper path instead.
 
 Setup installs the platform's Python/PRoot if missing and the hash-pinned
 PRoot-Distro 5.10.0 wheel in a private virtual environment. No root or Docker
@@ -109,7 +113,7 @@ daemon is needed. Keep its licenses and versioned upstream source notices.
 Installation and each later start are one command each:
 
 ```sh
-angmoo install --release 0.1.0
+angmoo install --release 0.1.1
 angmoo start
 ```
 
@@ -125,6 +129,45 @@ shared Android storage. Neither credentials nor data go into the images.
 Keep both service payloads on the same version/source. A failed import does not
 select the partial pair or erase the prior install. If owned processes survive an interrupted session, the launcher refuses to
 start a second backend and reports the state through diagnostics.
+
+## Update while keeping the same data home
+
+Use this controlled sequence for an existing installation, especially one with
+a custom home. The two-command first-install bootstrap uses the default home;
+it does not discover or migrate a different custom home automatically.
+
+1. Record the existing home, version/source, active image pair and session with
+   the existing wrapper's `status` and `diagnostics` commands. Include
+   `--home "$HOME/.local/share/angmoo-custom"` when that is the actual home.
+2. Stop that installation normally with the same `--home` and `stop`. Confirm
+   both services have stopped before backing up. Do not terminate Termux to
+   bypass a cleanup failure.
+3. Back up the complete data directory, media, installation secret, host state,
+   image identity records and logs to private storage. A DB file or World Package
+   alone is not enough. Keep the previous image pair and tools for recovery.
+4. Download and verify the 0.1.1 tools using the manual setup procedure above.
+   Run `sh setup.sh` from those new tools. This updates the tools and registers
+   the command; it does not select a different application data home.
+5. Install the matching pair and start with the **same** recorded home:
+
+   ```sh
+   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.1
+   angmoo --home "$HOME/.local/share/angmoo-custom" start
+   angmoo --home "$HOME/.local/share/angmoo-custom" status
+   ```
+
+   Replace the example with your recorded path. For the default installation,
+   it is `$HOME/.local/share/angmoo`. Keep that same path for every command.
+6. Confirm the version/source, characters and existing data before deleting any
+   backup. If installation or readiness fails, keep its diagnostics and logs;
+   do not reset data or force an unmatched pair to start. Stop owned services
+   normally before restoring the previous tools/image selection. Restore a
+   complete stopped-data backup if a supported data rollback is necessary;
+   do not assume arbitrary older images can read newer data.
+
+New tools check the version from the verified installed manifest, so querying
+an existing 0.1.0 pair still works. A different version, source or launch identity
+is rejected; receiving HTTP 200 alone does not mean the services are ready.
 
 ## Local candidate validation
 

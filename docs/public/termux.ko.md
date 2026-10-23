@@ -6,7 +6,10 @@ Android에서 Docker를 실행하는 방식은 아닙니다. PRoot-Distro가 두
 유지합니다. 기존 앱 진입점을 실행하며 앱 라이브러리 재설치, 이미지 수정,
 포트·환경 파일 수동 편집을 요구하지 않습니다.
 
-**릴리스:** [Angmoo 0.1.0](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0)을 사용할 수 있습니다.
+**대상 버전:** 이 안내는 0.1.1용입니다.
+[Angmoo 0.1.1](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1)이
+공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는
+[기존 0.1.0 설치 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/docs/public/termux.ko.md)를 따르세요.
 Android는 계속 실험 지원입니다. Linux ARM64·QEMU 검사는 실제 휴대폰의
 전원 관리·백그라운드 실행·성능 인증이 아닙니다.
 
@@ -27,7 +30,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.0/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.1/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기 ZIP 다운로드, `RELEASE-SHA256SUMS` 대조, 압축 해제, 최초 준비,
@@ -40,19 +43,21 @@ curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o
 설치 파일 자체의 SHA-256도 `RELEASE-SHA256SUMS`에 포함되므로 별도 검토·대조할 수 있습니다.
 이 절차를 배포 서명 검증이나 Android 실기기 인증으로 해석하지 않습니다.
 
-성공하면 **http://127.0.0.1:3000**을 엽니다. 다음부터 설치 과정을 반복하지 않고
-아래 명령을 사용합니다. 전체 경로를 쓰므로 PATH 등록 명령이 필요하지 않습니다.
+성공하면 **http://127.0.0.1:3000**을 엽니다. `Command ready: angmoo`를 확인한 뒤에는
+설치 과정을 반복하지 않고 현재 셸이나 새 Termux 셸에서 아래 명령을 사용합니다.
 
 ```sh
-~/.local/bin/angmoo start
-~/.local/bin/angmoo status
-~/.local/bin/angmoo stop
+angmoo start
+angmoo status
+angmoo stop
 ```
 
-## 개발 소스의 단축 명령 등록
+## 단축 명령 등록과 기존 0.1.0 설치
 
-이 절의 명령 등록 기능은 **공개된 0.1.0 도구에는 포함되어 있지 않습니다.**
-0.1.0에서는 위 전체 경로 명령을 그대로 사용할 수 있습니다.
+0.1.1 도구에는 단축 명령 등록이 포함됩니다. 공개된 0.1.0 도구는
+`~/.local/bin/angmoo start`, `~/.local/bin/angmoo status`, `~/.local/bin/angmoo stop`을
+사용합니다. 업데이트 후에도 전체 경로는 유효합니다. 단축 명령은 같은 wrapper를
+사용하므로 새로운 데이터 home을 만들지 않습니다.
 
 `command_registration.py`가 포함된 검토한 새 도구의 `sh setup.sh`는
 기존 `$HOME/.local/bin/angmoo` wrapper를 가리키는 링크를
@@ -92,11 +97,10 @@ Termux 내부 전용 저장소에 압축을 풀고 해당 폴더에서 최초 �
 
 ```sh
 sh setup.sh
-export PATH="$HOME/.local/bin:$PATH"
 ```
 
-공개 0.1.0의 이 export는 현재 셸에만 적용됩니다. 위 prefix 등록을 검증한 새 도구에는
-별도 export가 필요하지 않습니다.
+0.1.1 setup은 PATH나 셸 초기화 파일을 수정하지 않고 명령을 등록합니다.
+기존 0.1.0 도구를 계속 사용한다면 전체 wrapper 경로를 사용하세요.
 
 준비 도구는 없는 Python·PRoot를 플랫폼 패키지로 설치하고, 해시를 고정한
 PRoot-Distro 5.10.0을 전용 가상 환경에 설치합니다. root·Docker daemon은
@@ -104,7 +108,7 @@ PRoot-Distro 5.10.0을 전용 가상 환경에 설치합니다. root·Docker dae
 이후 설치와 시작은 각각 한 명령입니다.
 
 ```sh
-angmoo install --release 0.1.0
+angmoo install --release 0.1.1
 angmoo start
 ```
 
@@ -120,6 +124,43 @@ backend에만 데이터 경로를 연결합니다. Android 공유 저장소로 �
 자격 증명·데이터는 이미지에 넣지 않습니다. 두 서비스의 버전·소스를 일치시키며,
 가져오기 실패 시 불완전한 쌍을 선택하거나 기존 설치를 지우지 않습니다.
 이전 세션 프로세스가 남으면 backend 중복 실행을 거부하고 진단 상태를 남깁니다.
+
+## 같은 데이터 home을 유지하며 업데이트하기
+
+기존 설치, 특히 custom home을 사용하는 설치에는 아래 절차를 적용하세요.
+최초 설치용 두 명령은 기본 home을 사용하며 다른 custom home을 자동으로 찾아
+연결하거나 옮기지 않습니다.
+
+1. 기존 wrapper의 `status`·`diagnostics`로 home, 버전·소스, 선택한 이미지 쌍과
+   실행 세션을 기록합니다. 실제 custom home을 사용한다면
+   `--home "$HOME/.local/share/angmoo-custom"`을 포함합니다.
+2. 같은 `--home`과 `stop`으로 정상 종료하고 두 서비스가 모두 끝난 뒤 백업합니다.
+   정리 실패를 우회하려고 Termux를 강제 종료하지 마세요.
+3. 전체 데이터 디렉터리, 미디어, 설치 비밀값, 실행기 상태, 이미지 식별 기록과 로그를
+   전용 저장소에 백업합니다. DB 파일 하나나 World Package만으로는 부족합니다.
+   복구에 필요한 이전 이미지 쌍과 도구도 보존합니다.
+4. 위 수동 설치 절차로 0.1.1 도구를 내려받아 검증하고 새 도구 폴더에서
+   `sh setup.sh`를 실행합니다. 도구 갱신과 명령 등록 단계이며 다른 데이터 home을
+   선택하는 작업이 아닙니다.
+5. 기록한 **같은 home**으로 이미지 쌍을 설치하고 실행합니다.
+
+   ```sh
+   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.1
+   angmoo --home "$HOME/.local/share/angmoo-custom" start
+   angmoo --home "$HOME/.local/share/angmoo-custom" status
+   ```
+
+   예시 경로는 실제 기록한 경로로 바꾸세요. 기본 설치는 `$HOME/.local/share/angmoo`입니다.
+   모든 명령에서 같은 경로를 유지합니다.
+6. 버전·소스, 캐릭터와 기존 데이터를 확인하기 전에는 백업을 삭제하지 마세요.
+   설치나 준비 확인에 실패하면 진단·로그를 보존하고 데이터를 초기화하거나 서로 다른
+   이미지 쌍의 실행을 강제하지 않습니다. 이전 도구·이미지 선택을 복구하기 전에도
+   소유한 서비스를 정상 종료합니다. 지원되는 데이터 복구가 필요하면 종료 상태에서
+   만든 전체 백업을 사용하며, 임의의 과거 이미지가 새 데이터를 읽을 수 있다고 가정하지 않습니다.
+
+새 도구는 검증된 설치 manifest의 버전을 기대값으로 사용하므로 기존 0.1.0 쌍도
+조회할 수 있습니다. 다른 버전·소스·실행 세션은 거부하며 HTTP 200만으로 준비 완료로
+판단하지 않습니다.
 
 ## 로컬 후보 검증
 

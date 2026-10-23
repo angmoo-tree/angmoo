@@ -40,7 +40,7 @@ MESSAGES = {
     "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
     "already_running": "Angmoo is already starting or running; use status.",
     "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
-    "not_installed": "Run angmoo install --release 0.1.0 first.",
+    "not_installed": "Run angmoo install --release 0.1.1 first.",
     "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
     "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
     "logs_missing": "No saved log session was found.",
@@ -285,7 +285,7 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             atomic_json(home / "state.json", state)
             def observe(probe):
                 detail.update(last_probe=probe, probe_count=detail["probe_count"] + 1)
-            await_ready(process, url, source, nonce, backend=service == "backend",
+            await_ready(process, url, source, nonce, expected_version=config["manifest"]["version"], backend=service == "backend",
                         timeout=BACKEND_READINESS_SECONDS if service == "backend" else FRONTEND_READINESS_SECONDS,
                         cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
             detail.update(phase="running", ready_at_utc=utc())
