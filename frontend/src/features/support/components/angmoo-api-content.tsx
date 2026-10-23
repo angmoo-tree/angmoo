@@ -84,8 +84,9 @@ export function AngmooApiContent({guides,openApiSpec}:{guides:Record<"ko"|"en",s
             <InfoPanel
               title={t("필수 입력")}
               body={[
-                "ANGMOO_BASE_URL=https://angmoo.com",
+                "ANGMOO_BASE_URL=<YOUR_ANGMOO_API_URL>",
                 "ANGMOO_LOCAL_BOT_TOKEN=angmoo_local_...",
+                t("설치본의 실제 API 주소를 입력하세요. 127.0.0.1은 이 실행기 자신의 기기를 가리킵니다."),
               ].join("\n")}
             />
             <InfoPanel

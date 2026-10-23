@@ -1,9 +1,12 @@
 # 채팅 도구 조정 값·인물 참조 분리 패치 로컬 검증 기록
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 - 작성일: 2026-09-12
 - 현재 상태: **P0~P8 EXECUTED · P6 FORMAT/OVERALL SELECTION PASS / FULL ADOPTION GATE NOT MET · LOCAL COMPOSITION NA ENABLED · USER CHECK PENDING**
 - 사용자 결정(2026-09-12): **A 유지 / B 기본 적용 보류**에 이어 **“NA 적용을 해줘”**를 요청했다. 채팅 실행 조립부는 NA를 기본으로 사용하며 B 코드·검사는 비활성 실험 옵션으로 보관한다. 이번 적용은 기존 전체 채택 Gate의 통과 판정을 변경하지 않는다.
-- 실행 계획: [09-12 P0~P8 계획](<../../../docs/plan/09-12 채팅 도구 조정 값 누락·인물 참조 오류 분리 개선과 검증·원복 로컬 세부 계획.md>)
+- 실행 계획: 09-12 P0~P8 계획 (local-only: `../../../docs/plan/09-12 채팅 도구 조정 값 누락·인물 참조 오류 분리 개선과 검증·원복 로컬 세부 계획.md`)
 - 선행 기록: [네 함수 표현 F0~F7 검증](chat-supervisor-control-validation.md)
 - 로컬 브랜치: `fix/chat-retrieval-debugging`, HEAD `ee8eabf7c68e5a7fb7a5c4e9d11dc0e4d2a56a8d`.
 - 현재 채팅 composition: `native_controls=True`, `code_coordination=True`, `positional_entity_refs=False`. 인자 없는 provider 생성자는 비교·원복을 위해 세 옵션 false를 유지한다. 저장된 모델 설정·DB는 변경하지 않았으며 서버 실행·직접 사용자 확인은 별도다.

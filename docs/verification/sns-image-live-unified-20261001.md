@@ -1,5 +1,8 @@
 # SNS 이미지 생성 4개 Provider 실서비스 검증 기록 — 2026-10-01
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 이 문서는 실행 결과와 판정 범위의 저장소 기록이다. 아래 `artifacts/` 링크는 이 작업 환경에 보존한 로컬 상세 증거이며 Git 추적과 Docker 빌드 입력에서 제외한다. 저장소를 clone하면 해당 자료는 포함되지 않는다. 환경별 실서비스 실행 도구도 로컬에 보존하고 Git에서 제외한다. 원 17건 결과·실패·호출·비용·받은 이미지의 증거는 삭제하지 않고 로컬에서 유지하며, 다른 환경에서도 판단할 수 있는 결과 요약과 한계는 이 문서에 남긴다.
 
 ## 1. 결과와 판정 범위
@@ -12,9 +15,9 @@
 
 원본 계획:
 
-- [통합 실서비스 테스트 계획](../../../docs/plan/09-30%20SNS%20이미지%20생성%204개%20Provider%20실서비스%20연동과%20게시글%20첨부%20통합%20테스트%20계획.md)
-- [구현·로컬 검증 상위 계획](../../../docs/plan/09-30%20SNS·Chat%20이미지%20생성·인식%20통합%20코드%20구현과%20로컬%20검증%20세부%20계획.md)
-- [최종 결과 JSON](../../artifacts/image-live-20261001/results.json)
+- 통합 실서비스 테스트 계획 (local-only: `../../../docs/plan/09-30 SNS 이미지 생성 4개 Provider 실서비스 연동과 게시글 첨부 통합 테스트 계획.md`)
+- 구현·로컬 검증 상위 계획 (local-only: `../../../docs/plan/09-30 SNS·Chat 이미지 생성·인식 통합 코드 구현과 로컬 검증 세부 계획.md`)
+- 최종 결과 JSON (local-only: `../../artifacts/image-live-20261001/results.json`)
 
 ## 2. 실행 환경과 보존 경계
 
@@ -64,7 +67,7 @@ PASS는 실제 이미지 bytes의 유효성·저장·같은 새 Routine 게시�
 
 FLUX Ultra의 4MP 출력은 선정한 공식 노드/모델의 실제 출력이다. 해당 graph는 일반 KSampler의 width/height/steps 입력을 제공하지 않는다. Angmoo에 지원하지 않는 입력 binding을 만들거나 1024 크기가 적용됐다고 주장하지 않는다. positive·seed를 binding하고 1:1 비율을 graph에 지정했다. negative는 저장했으나 이 graph에는 binding이 없어 미적용이다.
 
-각 job/post/asset ID, positive·negative 적용 상태, 옵션, 선택 참조 출처, 실제 요청의 field 이름, 첨부·재조회 결과는 [사례 원본](../../artifacts/image-live-20261001/case-results.json)과 [request counters](../../artifacts/image-live-20261001/request-counters.json)에 남겼다. 이미지 base64·헤더 원문·계정 키는 공개 증거에 넣지 않는다.
+각 job/post/asset ID, positive·negative 적용 상태, 옵션, 선택 참조 출처, 실제 요청의 field 이름, 첨부·재조회 결과는 사례 원본 (local-only: `../../artifacts/image-live-20261001/case-results.json`)과 request counters (local-only: `../../artifacts/image-live-20261001/request-counters.json`)에 남겼다. 이미지 base64·헤더 원문·계정 키는 공개 증거에 넣지 않는다.
 
 ### NanoGPT 5건의 실패 의미
 
@@ -99,7 +102,7 @@ Next 화면에서 계정 키 저장·입력 비우기·JSON 파일 가져오기�
 | CA05 | 키 없음·인증 모드 불일치 전송 전 차단 회귀 PASS. 실제 인증/잔액 오류를 고의로 유료 유발하지 않음 |
 | CA06 | 최종 산출물 privacy 검사 PASS. optional Comfy debug body 로그는 제거하고 status만 보존. UI/설정 저장의 새 생성 0 |
 
-[CT07 기록](../../artifacts/image-live-20261001/CT07-requery.json)은 성공한 Comfy 4개 prompt_id를 실제 GET으로 다시 회수해 정규화 픽셀 hash와 기존 SNS asset hash의 일치를 확인한다. **새 `/prompt` 0, 외부 Partner POST 0**, 실제 history에 계정 키 없음. 이 검사를 프로세스 장애/재시작 복구로 확대하지 않는다.
+CT07 기록 (local-only: `../../artifacts/image-live-20261001/CT07-requery.json`)은 성공한 Comfy 4개 prompt_id를 실제 GET으로 다시 회수해 정규화 픽셀 hash와 기존 SNS asset hash의 일치를 확인한다. **새 `/prompt` 0, 외부 Partner POST 0**, 실제 history에 계정 키 없음. 이 검사를 프로세스 장애/재시작 복구로 확대하지 않는다.
 
 ## 6. 수행 중 정식 코드 보완
 
@@ -135,10 +138,10 @@ Next 화면에서 계정 키 저장·입력 비우기·JSON 파일 가져오기�
 
 증거:
 
-- [165 PASS XML](../../artifacts/image-live-20261001/image-regressions-final.xml)
-- [24 PASS XML](../../artifacts/image-live-20261001/credential-regressions.xml)
-- [Next 설정 브라우저](../../artifacts/image-live-20261001/ui-evidence.json) / [static 상태](../../artifacts/image-live-20261001/static-ui-evidence.json)
-- [최종 privacy 확인](../../artifacts/image-live-20261001/privacy-check.json)
+- 165 PASS XML (local-only: `../../artifacts/image-live-20261001/image-regressions-final.xml`)
+- 24 PASS XML (local-only: `../../artifacts/image-live-20261001/credential-regressions.xml`)
+- Next 설정 브라우저 (local-only: `../../artifacts/image-live-20261001/ui-evidence.json`) / static 상태 (local-only: `../../artifacts/image-live-20261001/static-ui-evidence.json`)
+- 최종 privacy 확인 (local-only: `../../artifacts/image-live-20261001/privacy-check.json`)
 
 ## 8. 제한·품질 관찰·후속
 
@@ -159,7 +162,7 @@ Next 화면에서 계정 키 저장·입력 비우기·JSON 파일 가져오기�
 
 원본 키 JSON·Seraphina·설치 앱/DB·Docker·기존 사용자 자료를 보존했다. 테스트 DB·게시글·이미지·receipt·실패 자료도 보존한다. 키를 정리한 격리 환경을 재개할 때는 정상 API로 재등록해야 하며, **17건 runner를 처음부터 재실행해 유료 생성을 반복하지 않는다**. 지금 원 결과의 복구/조회만 하면 새 이미지 제출은 필요 없다. NanoGPT 새 실생성은 이번 17회 제한의 후속이며 별도 범위를 정해야 한다.
 
-[정리 기록](../../artifacts/image-live-20261001/cleanup.json) / [종료 기록](../../artifacts/image-live-20261001/shutdown.json) / [Comfy 실제 외부 요청](../../artifacts/image-live-20261001/partner-external-requests.json) / [usage 원본](../../artifacts/image-live-20261001/generation-attempts.json).
+정리 기록 (local-only: `../../artifacts/image-live-20261001/cleanup.json`) / 종료 기록 (local-only: `../../artifacts/image-live-20261001/shutdown.json`) / Comfy 실제 외부 요청 (local-only: `../../artifacts/image-live-20261001/partner-external-requests.json`) / usage 원본 (local-only: `../../artifacts/image-live-20261001/generation-attempts.json`).
 
 ## 10. 별도 NanoGPT MIME 후속 batch
 
@@ -169,4 +172,4 @@ MIME 없는 JPEG 3장/PNG 2장을 실제로 판독·저장했으며, 재조회/w
 
 ### 기존 실제 출력의 Next 화면 후속 확인
 
-위 화면 미완료 상태 이후 사용자 지시로 기존 NG01–NG05 게시글을 정상 Next `/api/backend` 인증 경로에서 각각 열고 새로고침해 **실제 화면 5 PASS**를 확인했다. 다섯 이미지가 두 번 모두 1024×1024로 decode됐고, 표시 Blob·인증 HTTP content·저장 파일의 MIME/용량/hash가 일치했다. 추가 이미지/Gemini 요청은 **0/0**이며 기존 MIME batch 총계 5/10과 파일 bytes는 그대로다. 최초 화면 실패 기록은 보존하고 실제 static·설치 Tauri·직접 USER CHECK·품질·실제 WebP 등은 잔여로 둔다. 키 제거·자동 생성 OFF를 재확인하고 작업 소유 backend/Next를 종료했다. [실제 화면 증거](../../artifacts/nanogpt-mime-retest-20261001/run-20261001T032012Z-334b42/ui-review-20261001T052846Z/ui-evidence.json)와 [새 검증 §6.1](./nanogpt-mime-format-retest-20261001.md)을 최신 근거로 사용한다.
+위 화면 미완료 상태 이후 사용자 지시로 기존 NG01–NG05 게시글을 정상 Next `/api/backend` 인증 경로에서 각각 열고 새로고침해 **실제 화면 5 PASS**를 확인했다. 다섯 이미지가 두 번 모두 1024×1024로 decode됐고, 표시 Blob·인증 HTTP content·저장 파일의 MIME/용량/hash가 일치했다. 추가 이미지/Gemini 요청은 **0/0**이며 기존 MIME batch 총계 5/10과 파일 bytes는 그대로다. 최초 화면 실패 기록은 보존하고 실제 static·설치 Tauri·직접 USER CHECK·품질·실제 WebP 등은 잔여로 둔다. 키 제거·자동 생성 OFF를 재확인하고 작업 소유 backend/Next를 종료했다. 실제 화면 증거 (local-only: `../../artifacts/nanogpt-mime-retest-20261001/run-20261001T032012Z-334b42/ui-review-20261001T052846Z/ui-evidence.json`)와 [새 검증 §6.1](./nanogpt-mime-format-retest-20261001.md)을 최신 근거로 사용한다.

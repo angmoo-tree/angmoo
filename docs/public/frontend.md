@@ -1,49 +1,42 @@
 # Frontend guide
 
-The frontend is a Next.js application. New backend calls belong behind the
-owning feature's `api` boundary or a canonical shared API adapter; legacy
-`src/lib` facades are compatibility surfaces, not the target architecture. UI
-components should not duplicate REST contracts.
+Angmoo uses Next.js for browser execution and a static frontend inside Tauri.
+Both render the same feature components. Start development through the
+[Docker contributor environment](development.md).
 
-[`frontend/DESIGN.md`](../../frontend/DESIGN.md) is the canonical visual and
-interaction contract for user-visible work. The portable reference,
-provenance, route/surface debt, raw-color baseline, and existing Playwright
-harness are recorded in
-[`docs/architecture/frontend-design-reference.md`](../architecture/frontend-design-reference.md).
-The contract applies to future L5 and later frontend work as well as L4.5.
+Read [Frontend Architecture](../../frontend/ARCHITECTURE.md) for code ownership,
+[DESIGN](../../frontend/DESIGN.md) for appearance and interaction, and
+[product shell](../architecture/frontend-product-shell.md) for viewport and
+navigation. [Design reference](../architecture/frontend-design-reference.md)
+explains reviewed visual adoption and asset provenance.
 
-Keep the feature-first direction: route wrappers consume migrated features
-through `features/<feature>/public`, while `shared/ui` stays product-neutral.
-Next and the static/Tauri router must render the same feature component. A
-hosted visual reference must be classified as `DIRECT`, `ADAPTED`, `LOCAL`, or
-`REJECTED`; the label does not authorize an unreviewed source or asset copy.
+## Where code belongs
 
-For ordinary Local user routes, keep the UI-C shell boundary intact:
-`shared/ui/DeviceFrame` is a neutral frame primitive,
-`features/device-shell/DeviceShell` owns Phone chrome and the reviewed Local
-route matrix, and the legacy `components/AppShell` only adapts existing route
-wrappers to that feature. Do not add a second Browser/Tauri shell, reintroduce
-desktop rails, or put Next-only destinations into Phone navigation. Creator
-Studio and Relationship Graph remain dedicated wide surfaces.
+- `src/app`: thin Next routes, layouts and server-specific work.
+- `src/composition`: screens, shells and providers that connect features.
+- `src/features/<feature>`: API, components, hooks, DTOs and feature utilities.
+- `src/components`, `hooks`, `lib`, `types`, `utils`, `styles`: appropriate common
+  presentation, transport and tools.
 
-Phone pages keep ownership of their own meaningful header; the compatibility
-shell must not inject a duplicate generic title. Use `LocalProductLink` where
-a hosted Next destination may be unsupported in static/Tauri, and bind
-pagination or pull-to-refresh to the single Device scroll owner rather than
-assuming document/window scrolling.
+Import concrete owner files. Different features communicate through composition,
+not direct sibling imports. Retired `public.ts` and `shared` paths are not new
+extension points. Do not put business authorization in a common primitive.
 
-`ANGMOO_API_BASE_URL` points server-side proxy routes at the local FastAPI
-process. `NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED` is `false` by default.
-Turning it on exposes the experimental image controls but does not enable the
-backend worker or supply provider credentials.
+## Runtime and UI behavior
 
-The public build uses the system font stack and must succeed without a remote
-font download. New default assets must be tracked, rights-cleared, and added to
-the exporter and asset manifest.
+`ProductViewport` provides the responsive body and native toolbar. The neutral
+`components/ui/device-frame.tsx` and `components/layout/device-shell.tsx` receive
+presentation inputs; they do not determine World permissions. Use the actual
+scroll owner for pagination, anchoring and lazy media.
 
-Check the design and ownership contracts with:
+Preserve distinct loading, empty, forbidden, missing, offline, degraded and error
+states. Accepted writes and subsequent refreshes have separate outcomes. Scope
+changes must cancel observation and reject late results without repeating a write.
 
-```bash
-uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
-uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
-```
+Keep API and credential transport in the existing adapters. A frontend flag
+does not supply credentials, enable backend work or establish authorization.
+User-visible text and accessible names require English and Korean. Use local,
+rights-cleared assets and the existing font/token policy.
+
+Follow [changing the frontend](changing-frontend.md) for a focused workflow and
+the applicable browser/build checks.

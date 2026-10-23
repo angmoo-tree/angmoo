@@ -1,8 +1,11 @@
 # 10-08 Chat·SNS 상황기억 관찰 검증과 차단 기록 복구 구현 결과
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 작성일: 2026-10-08 · Asia/Seoul
 
-대상: [관찰 증명·관계 스냅샷·차단 기록 복구 I00–I29](</D:/project_code/angmoo-workspace/docs/plan/10-08 Chat·SNS 관찰 증명과 관계 스냅샷 검증·차단 기록 복구 코드 구현 세부 계획.md>)
+대상: 관찰 증명·관계 스냅샷·차단 기록 복구 I00–I29 (local-only: `/D:/project_code/angmoo-workspace/docs/plan/10-08 Chat·SNS 관찰 증명과 관계 스냅샷 검증·차단 기록 복구 코드 구현 세부 계획.md`)
 
 제품 저장소: `D:\project_code\angmoo-workspace\angmoo-tree-angmoo`
 

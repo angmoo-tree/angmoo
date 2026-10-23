@@ -1,5 +1,8 @@
 # Local entry, memory and SNS stability — local implementation evidence
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 ## PR integration follow-up (2026-10-20)
 
 PR #393의 첫 원격 검사에서 committed import/ownership/current-memory inventory와
@@ -176,12 +179,12 @@ architecture/design 검사는 repository cwd의 scripts/ci/check_frontend_archit
 
 ## 증거 위치와 환경 분리
 
-- [초기 브라우저 8통과·선택자 2실패 기록](../../../.task-output/local-stability-validation/browser-initial-8-pass-2-selector-fail.json)
-- [선택자 수정 후 Next/static 2통과 기록](../../../.task-output/local-stability-validation/browser-final-2-pass.json)
-- [프로필 치수 측정](../../../.task-output/profile-evidence-browser-1792414389531/measurements.json)
-- [프로필 한국어 좁은 화면](../../../.task-output/profile-evidence-browser-1792414389531/profile-ko-small.png)
-- [영어 근거 Dialog](../../../.task-output/profile-evidence-browser-1792414389531/evidence-en-small.png)
-- [credential 오류·검토 UI](../../../.task-output/entry-settings-browser-1792414382834/credential-error.png)
+- 초기 브라우저 8통과·선택자 2실패 기록 (local-only: `../../../.task-output/local-stability-validation/browser-initial-8-pass-2-selector-fail.json`)
+- 선택자 수정 후 Next/static 2통과 기록 (local-only: `../../../.task-output/local-stability-validation/browser-final-2-pass.json`)
+- 프로필 치수 측정 (local-only: `../../../.task-output/profile-evidence-browser-1792414389531/measurements.json`)
+- 프로필 한국어 좁은 화면 (local-only: `../../../.task-output/profile-evidence-browser-1792414389531/profile-ko-small.png`)
+- 영어 근거 Dialog (local-only: `../../../.task-output/profile-evidence-browser-1792414389531/evidence-en-small.png`)
+- credential 오류·검토 UI (local-only: `../../../.task-output/entry-settings-browser-1792414382834/credential-error.png`)
 - 최종 registration/settings 진단은 artifacts/local-entry-browser/{next,static}-registered-settings.png에 저장했다. 모두 합성 데이터이며 커밋된 canonical visual baseline은 아니다.
 
 실제 브라우저 통합은 포트 3490/3491/3492와 일회용 SQLite/media를 사용했다. identity/environment/default World/profile/PNG 등록/활동 설정/credential 저장은 실제 backend 경로다. SNS feed·Chat streaming·evidence API는 같은 합성 ID에 결합한 **fake provider-boundary payload**를 사용한다. 실제 SNS effect→receipt→item→FTS→evidence 연결은 T3의 backend integration에서 별도로 확인했다. 이 두 증거를 실제 모델/실제 자율활동의 하나의 관찰 세션으로 합쳐 주장하지 않는다.

@@ -121,24 +121,6 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "docs/agent_guide.en.md"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "docs/agent_guide.md"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
       "path": "docs/public/architecture.md"
     },
     {
@@ -158,15 +140,6 @@
         "L0-L2 runtime feature-flag reference audit"
       ],
       "path": "frontend/.env.example"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "frontend/DESIGN.md"
     },
     {
       "markers": [
@@ -203,15 +176,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "frontend/src/features/characters/components/agent-detail-parts.tsx"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "frontend/src/features/support/components/angmoo-api-content.tsx"
     },
     {
       "markers": [

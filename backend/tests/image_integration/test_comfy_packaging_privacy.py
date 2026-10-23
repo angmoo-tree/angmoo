@@ -19,8 +19,23 @@ def test_metadata_refuses_runtime_and_secret_files_before_writing_reports(tmp_pa
 
 
 def test_actual_samples_and_guides_are_deterministic_public_staging_inputs(tmp_path):
-    for relative in ("backend/app/domains/media/samples/comfy-api-text.json","backend/app/domains/media/samples/comfy-api-reference.json","docs/agent_guide.md","docs/agent_guide.en.md"):
+    for relative in ("backend/app/domains/media/samples/comfy-api-text.json","backend/app/domains/media/samples/comfy-api-reference.json","docs/agent_guide.md","docs/agent_guide.ko.md"):
         target=tmp_path/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/relative,target)
         assert target.read_bytes()==(ROOT/relative).read_bytes()
         assert b"synthetic-private-sentinel" not in target.read_bytes()
     assert not list(tmp_path.rglob("app-secret*"))
+
+
+def test_docker_frontend_copies_both_current_guide_sources(tmp_path):
+    """Evaluate the explicit source COPY inputs without building an image."""
+    instructions = [line.split() for line in (ROOT / "Dockerfile.frontend").read_text(encoding="utf-8").splitlines()
+                    if line.startswith("COPY ") and line.split()[-1] == "/docs/"]
+    assert len(instructions) == 2  # development and production build stages
+    for index, fields in enumerate(instructions):
+        sources = [part for part in fields[1:-1] if not part.startswith("--")]
+        assert set(sources) == {"docs/agent_guide.md", "docs/agent_guide.ko.md"}
+        stage = tmp_path / str(index)
+        stage.mkdir()
+        for source in sources:
+            shutil.copyfile(ROOT / source, stage / Path(source).name)
+            assert (stage / Path(source).name).read_bytes() == (ROOT / source).read_bytes()

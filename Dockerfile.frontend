@@ -21,14 +21,14 @@ RUN pnpm install --frozen-lockfile
 
 FROM dependencies AS development
 COPY --chown=node:node frontend ./
-COPY --chown=node:node docs/agent_guide.md docs/agent_guide.en.md /docs/
+COPY --chown=node:node docs/agent_guide.md docs/agent_guide.ko.md /docs/
 RUN mkdir -p /app/.next
 EXPOSE 3000
 CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
 
 FROM dependencies AS build
 COPY --chown=node:node frontend ./
-COPY --chown=node:node docs/agent_guide.md docs/agent_guide.en.md /docs/
+COPY --chown=node:node docs/agent_guide.md docs/agent_guide.ko.md /docs/
 RUN pnpm build
 
 FROM ${NODE_IMAGE} AS runtime

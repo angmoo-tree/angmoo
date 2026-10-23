@@ -1,5 +1,6 @@
 """Read-only remote verification and a bounded, hash-addressed Release staging set."""
 
+import ast
 import base64
 import json
 from pathlib import Path
@@ -15,11 +16,51 @@ from scripts.release.promote import check_index, registry_document
 from scripts.release.windows_receipt import tested_installer
 
 WINDOWS_FILES = ("SHA256SUMS", "angmoo-installer.spdx.json", "angmoo-installer.provenance.json", "THIRD_PARTY_NOTICES.md", "LICENSE")
+LEGACY_TERMUX_FILES = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
+
+
+def termux_files(root: Path) -> tuple[str, ...]:
+    """Read a literal allowlist from the fixed source, never import its code."""
+    directory = root / "launcher/termux"
+    tree = ast.parse((directory / "bootstrap.py").read_text(encoding="utf-8"))
+    values = [node.value for node in tree.body if isinstance(node, ast.Assign)
+              and any(isinstance(name, ast.Name) and name.id == "FILES" for name in node.targets)]
+    require(len(values) == 1, "termux_tools_profile_invalid")
+    value = values[0]
+    require(isinstance(value, ast.Call) and isinstance(value.func, ast.Name)
+            and value.func.id == "frozenset" and len(value.args) == 1 and not value.keywords,
+            "termux_tools_profile_invalid")
+    try:
+        names = ast.literal_eval(value.args[0])
+    except (ValueError, TypeError, SyntaxError) as exc:
+        raise ValueError("termux_tools_profile_invalid") from exc
+    legacy = {*LEGACY_TERMUX_FILES, "LICENSE"}
+    modern = legacy | {"command_registration.py"}
+    require(isinstance(names, set) and names in (legacy, modern), "termux_tools_profile_invalid")
+    require((directory / "command_registration.py").is_file() == (names == modern),
+            "termux_tools_profile_mixed")
+    return LEGACY_TERMUX_FILES + (("command_registration.py",) if names == modern else ())
+
+
+def localized_sources(names: set[str], stem: str) -> tuple[dict[str, str], bool]:
+    """Select exactly one complete source layout, keeping asset names separate."""
+    modern, legacy, korean = f"{stem}.md", f"{stem}.en.md", f"{stem}.ko.md"
+    require(korean in names and ((modern in names) != (legacy in names)),
+            "localized_source_layout_invalid")
+    return {"en": modern if modern in names else legacy, "ko": korean}, modern in names
+
+
+def reviewed_notes(github, revision: str, prefix: str) -> tuple[dict[str, str], bool]:
+    github.main_source(revision)
+    entries = github.read(f"contents/{prefix}?ref={revision}")
+    require(isinstance(entries, list) and len(entries) < 1000, "reviewed_directory_invalid")
+    names = {entry["name"] for entry in entries if entry.get("type") == "file"}
+    return localized_sources(names, "notes")
 
 
 def package_termux_tools(target: Path, root: Path = ROOT) -> None:
     """Stable bytes across reruns/checkouts, so draft recovery can compare hashes."""
-    tools = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
+    tools = termux_files(root)
     files = [(name, root / "launcher/termux" / name) for name in tools]
     files.append(("LICENSE", root / "LICENSE"))
     with zipfile.ZipFile(target, "w") as archive:
@@ -120,8 +161,10 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
     # Package only the reviewed adapter, not arbitrary artifact scripts or data.
     package_termux_tools(stage / "angmoo-termux-tools.zip", root=product_root)
     package_termux_installer(stage / "install-termux.py", stage / "angmoo-termux-tools.zip", manifest["version"], root=product_root)
+    guide_root = product_root / "docs/public"
+    guides, _ = localized_sources({p.name for p in guide_root.iterdir() if p.is_file()}, "termux")
     for locale in ("en", "ko"):
-        shutil.copyfile(product_root / f"docs/public/termux.{locale}.md", stage / f"termux.{locale}.md")
+        shutil.copyfile(guide_root / guides[locale], stage / f"termux.{locale}.md")
     publication = {"candidate_validation": "PASS", "p5": "NOT_RUN", "tag": "NOT_READY", "images": "NOT_READY"}
     notes = ""
     if review_ref:
@@ -131,8 +174,10 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
         validate_p5(github, json.loads(raw), manifest, validation)
         manifest["p5"] = {"review_ref": review_ref, "report_sha256": "sha256:" + __import__("hashlib").sha256(raw).hexdigest(), "evidence": json.loads(raw)}
         publication["p5"] = "PASS"
-        for locale in ("ko", "en"):
-            body = reviewed_file(github, review_ref, prefix + f"/notes.{locale}.md")
+        note_sources, modern = reviewed_notes(github, review_ref, prefix)
+        # Frozen legacy publications keep their original order and asset bytes.
+        for locale in (("en", "ko") if modern else ("ko", "en")):
+            body = reviewed_file(github, review_ref, prefix + "/" + note_sources[locale])
             require(len(body) > 40 and b"TODO" not in body and b"NOT_RELEASED" not in body, "release_notes_not_ready")
             (stage / f"release-notes.{locale}.md").write_bytes(body)
             notes += body.decode("utf-8") + "\n\n"

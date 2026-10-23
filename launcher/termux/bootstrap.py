@@ -27,7 +27,7 @@ TOOLS_SHA256 = "@ANGMOO_TOOLS_SHA256@"
 TOOLS_SIZE = "@ANGMOO_TOOLS_SIZE@"
 REPOSITORY = "angmoo-tree/angmoo"
 TOOLS_NAME = "angmoo-termux-tools.zip"
-FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE"})
+FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE", "command_registration.py"})
 MAX_TOOLS_BYTES = 4 * 1024 * 1024
 
 
@@ -78,13 +78,18 @@ def extract_verified(raw: bytes, checksums: bytes, directory: Path) -> None:
             (directory / item.filename).write_bytes(archive.read(item))
 
 
-def install_and_start(directory: Path, home: Path) -> None:
+def install_and_start(directory: Path, home: Path) -> bool:
     launcher = home / ".local/bin/angmoo"
     # Keep setup separate from the product: the existing launcher still owns
     # image verification, installation selection, locking, readiness and stop.
     subprocess.run(["sh", str(directory / "setup.sh")], check=True)
+    registration = subprocess.run([sys.executable, str(directory / "command_registration.py"), "verify"],
+                                  check=True, stdout=subprocess.PIPE, text=True).stdout.strip()
+    require(registration in {"registered", "not-termux"}, "command_verification_invalid",
+            "Command registration could not be confirmed; later steps were not run.")
     subprocess.run([str(launcher), "install", "--release", RELEASE], check=True)
     subprocess.run([str(launcher), "start"], check=True)
+    return registration == "registered"
 
 
 def main() -> int:
@@ -106,9 +111,9 @@ def main() -> int:
         with tempfile.TemporaryDirectory(prefix=".angmoo-install-", dir=home) as staging:
             directory = Path(staging)
             extract_verified(raw, checksums, directory)
-            install_and_start(directory, home)
+            registered = install_and_start(directory, home)
         print("Ready: http://127.0.0.1:3000")
-        print("Next start: ~/.local/bin/angmoo start")
+        print("Next start: angmoo start" if registered else "Next start: ~/.local/bin/angmoo start")
         return 0
     except InstallError as exc:
         print(str(exc), file=sys.stderr)

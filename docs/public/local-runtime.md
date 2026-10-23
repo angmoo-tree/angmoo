@@ -1,6 +1,6 @@
 # Local embedded runtime contract
 
-Angmoo has one official persistence, graph, and lifecycle meaning. Installed
+Angmoo uses the same persistence, graph and lifecycle contracts across its supported runtimes. Installed
 users and contributors differ only in how the frontend and backend are
 packaged; they do not use different databases or worker topologies.
 
@@ -11,7 +11,7 @@ frontend
    ↓
 FastAPI backend
 ├─ SQLite canonical store
-├─ FTS5 search projection
+├─ FTS5 / vector search projections
 ├─ LadybugDB graph projection
 ├─ scheduler component
 └─ projector component
@@ -22,11 +22,11 @@ successful canonical events and is never an independent source of truth. The
 scheduler and projector are supervised in the FastAPI process; there are no
 external scheduler or projector services.
 
-The four typed profiles are:
+The supported typed profiles described here are:
 
 - `LOCAL_EMBEDDED`: Tauri static frontend and bundled FastAPI sidecar.
 - `CONTRIBUTOR_EMBEDDED`: Docker or optional host development frontend with
-  the same SQLite/LadybugDB/in-process backend meaning.
+  the same SQLite/LadybugDB storage and in-process backend behavior.
 - `TEST`: isolated SQLite/LadybugDB or explicitly supplied fakes.
 
 There is no supported PostgreSQL/Neo4j server runtime or
@@ -85,6 +85,20 @@ docker compose -f compose.yml -f compose.dev.yml down
 PostgreSQL or Neo4j services from Compose never prunes an old
 `angmoo_postgresql_data`, `angmoo_neo4j_data`, or `angmoo_neo4j_logs` volume.
 
+## Released Docker and experimental Android
+
+Released Docker runs the backend/frontend pair from the same version, with user
+data outside the images. Follow [container installation](container-release.md).
+Android ARM64 reuses the service files through Termux/PRoot; it does not run a
+Docker daemon. Follow [Termux](termux.md). OS power and memory policies can
+interrupt that runtime even if the browser is closed normally.
+
+Termux command registration belongs to `launcher/termux`. A native
+`$PREFIX/bin/angmoo` link selects the existing launcher wrapper; it does not
+change the runtime profile, data directory or running services. The
+[development-tools registration procedure](termux.md#command-registration-in-the-development-source)
+is separate from the published 0.1.0 installer.
+
 ## Installed product topology
 
 The Windows installed product runs the Tauri host and bundled FastAPI sidecar.
@@ -115,7 +129,8 @@ and writes only the repository-local `.angmoo-dev/webview` profile. The complete
 support, safety, and screen-check contract is in
 [`windows-host-tauri-dev.md`](windows-host-tauri-dev.md).
 
-Windows packaging is built and tested by Windows Actions. macOS packaging is
+Windows packaging has target-OS Actions workflows. A workflow definition is
+not evidence that an arbitrary candidate has passed. macOS packaging is
 not claimed as implemented until a separate target-OS plan and validation pass.
 
 ## State, privacy, and recovery

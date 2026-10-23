@@ -6,10 +6,9 @@ separately, preserving the backend Debian/Python and frontend Debian/Node bases.
 It runs the existing app entrypoints; it does not install another app dependency
 set, patch the images, or require editing ports or environment files.
 
-**Publication boundary:** the commands below require an actual published
-`release-v0.1.0`. P1/P2 implementation does not publish it. Linux ARM64/QEMU
-results are not evidence that Android sleep, Doze, or background activity works.
-Physical-device certification remains P4; until recorded, Android is experimental.
+**Release:** [Angmoo 0.1.0](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0) is available.
+Android support remains experimental. Linux ARM64 or QEMU checks do not certify
+phone power management, background execution or performance.
 
 On the tested Samsung Android 14 device, the system terminated a Termux child
 process during screen-off use even with a partial wake lock and battery
@@ -52,6 +51,43 @@ these explicit paths work without a separate PATH setup command.
 ~/.local/bin/angmoo stop
 ```
 
+## Command registration in the development source
+
+The command registration described here is **not included in the published
+0.1.0 tools**. The explicit paths above remain valid for that release.
+
+With reviewed tools containing `command_registration.py`, normal `sh setup.sh`
+also registers `$PREFIX/bin/angmoo` as a link to the existing
+`$HOME/.local/bin/angmoo` wrapper. After `Command ready: angmoo`, current and new
+Termux shells can use `angmoo start`, `angmoo status` and `angmoo stop`. No alias
+or shell startup-file edit is needed. Internal installation calls still use the
+verified full path, and readiness is reported only after both services are ready.
+
+For an already complete installation, run this from the reviewed **new tools**
+directory to register only the command:
+
+```sh
+sh setup.sh --register-command-only
+```
+
+This mode does not run pkg/pip, replace tool or image files, restart services, or
+read application data, keys or logs. It uses a private setup lock to coordinate
+installers. Do not rerun the whole first-install bootstrap merely to register an
+existing custom-home installation. Keep its existing home when using commands:
+
+```sh
+angmoo --home "$HOME/.local/share/angmoo-custom" status
+```
+
+An existing link to the same wrapper is reused. A different command, modified
+wrapper, unsafe prefix, or command shadowing earlier in PATH is an error; setup
+does not overwrite it. An incomplete installation cannot use register-only.
+`setup_busy` means another setup owns the lock. Let it finish before retrying.
+Inspect the conflicting command before making changes; the original full path
+remains available when that installation is intact. Native Termux detection is
+required for prefix registration; a non-Termux validation environment retains
+the full-path workflow. No power-management setting is changed.
+
 ## Manual setup and controlled validation
 
 To review the individual steps, download `angmoo-termux-tools.zip`
@@ -63,6 +99,9 @@ one-time host-tool setup from that directory:
 sh setup.sh
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+For published 0.1.0, this export affects only the current shell. Tools with the
+verified prefix registration above do not need it.
 
 Setup installs the platform's Python/PRoot if missing and the hash-pinned
 PRoot-Distro 5.10.0 wheel in a private virtual environment. No root or Docker
@@ -84,40 +123,16 @@ Host state and data live under `~/.local/share/angmoo`, mode 0700, outside eithe
 rootfs. Only backend receives the data mount. Do not move this directory to
 shared Android storage. Neither credentials nor data go into the images.
 Keep both service payloads on the same version/source. A failed import does not
-select the partial pair or erase the prior install. Interrupted sessions with
-surviving owned processes refuse a second backend; diagnostics reports the state.
+select the partial pair or erase the prior install. If owned processes survive an interrupted session, the launcher refuses to
+start a second backend and reports the state through diagnostics.
 
-For P1/P4 controlled validation before publication, copy the validated candidate
-manifest and both ARM64 `.oci.tar` files to private Linux storage, then use:
+## Local candidate validation
 
-```sh
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" install --candidate-manifest /absolute/candidate.json
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" start
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" status
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" stop
-angmoo --home "$HOME/.local/share/angmoo-rehearsal" restart
-```
-
-The local manifest must contain exactly the ARM64 backend/frontend pair and exact
-hashes. Public release installation and `--manifest` still require all four
-amd64/ARM64 entries. Local candidates are not public release verification. Record source,
-archive/config/diff-ID identity, PRoot version, host architecture, QEMU or native,
-start/stop times, app readiness, restart data preservation, and stale/port/failure
-tests. Physical Android T01–T05/T11 additionally records setup command count,
-permission/storage behavior, foreground SNS/Chat, device sleep and recovery.
-Do not mark these physical checks passed from a Linux container rehearsal.
-
-Local OCI import flattens only the index into a temporary transport archive for
-PRoot-Distro 5.10.0. Image manifests, compressed layers, configuration and
-SBOM/provenance blobs keep their original hashes; the original candidate stays
-unchanged. Registry installation already selects the exact execution digest.
-
-The initial Linux rehearsal imported both ARM64 payloads, but Debian's PRoot
-5.1.0 with QEMU could create a file through the bind while `statx`/write-access
-checks reported that path unavailable. App start correctly refused the data
-root. This is not an Android PASS: startup, browser use and restart still require
-P4 on a real supported Termux device. Do not bypass the write-access check or
-change user-data permissions to force this rehearsal to pass.
+Maintainers can use `install --candidate-manifest` with a separate `--home`
+for an explicitly validated ARM64 backend/frontend pair. Do not mix candidate
+and release data roots or change image validation to make a test start.
+See [candidate import](../operations/release-candidate-import.md) for identity
+checks. Local or emulated validation is not a physical-phone certification.
 
 ## Saved service logs
 
@@ -134,8 +149,8 @@ service diagnostics, choose the mode before starting:
 ~/.local/bin/angmoo restart --log-mode detailed --log-duration 15m
 ```
 
-Detailed mode defaults to 15 minutes and accepts integer `1m` through `60m`.
-Startup time counts toward that interval. It expires to basic without a restart;
+Detailed mode defaults to 15 minutes and accepts whole-minute durations from `1m` to `60m`.
+Startup time counts toward that interval. It returns to `basic` when the duration expires, without a restart;
 the next launch also defaults to basic. Invalid restart options are rejected
 before stopping the current services. `start` never changes an already running
 session. This option does not enable Chat/SNS capture or memory diagnostics.
@@ -162,7 +177,7 @@ angmoo diagnostics
 angmoo logs --session <launch-id> --service frontend
 ```
 
-Ctrl+C stops only the log viewer. Failed launches retain the first failed service,
+`Ctrl+C` stops only the log viewer. Failed launches retain the first failed service,
 phase, UTC observation time, safe original error and observed exit code in
 `logs/<launch-id>/session.json`. The exit code is that of the PRoot command; it does
 not alone prove a guest crash or Android OOM. Readiness probe failures and cleanup

@@ -1,6 +1,9 @@
 # 다국어 UI 계약 누락 F01–F04 수정과 로컬 재검증
 
-2026-10-04 KST. 작업 위치는 `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`, 브랜치는 `feat/0.1.0-release-readiness`, 수정 시작 HEAD는 `ab15b7b641f875e37b47e84b60d4bfb3cc696a96`다. 사용자 승인 범위는 독립 재검토에서 발견한 UI 계약 누락 세 범주와 필수 디자인 검사 실패 한 건의 제품 코드·기준 파일·원 계획 보완이다. [원 계획](<D:/project_code/angmoo-workspace/docs/plan/10-03 Angmoo 다국어·사용자 시간대와 Gemini SNS 스키마·누락 복구 통합 코드 구현·검증 세부 계획.md>)의 P09/P10/P15/P16/P25/P26 및 P28/P30 판단을 보완한다.
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
+2026-10-04 KST. 작업 위치는 `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`, 브랜치는 `feat/0.1.0-release-readiness`, 수정 시작 HEAD는 `ab15b7b641f875e37b47e84b60d4bfb3cc696a96`다. 사용자 승인 범위는 독립 재검토에서 발견한 UI 계약 누락 세 범주와 필수 디자인 검사 실패 한 건의 제품 코드·기준 파일·원 계획 보완이다. 원 계획 (local-only: `D:/project_code/angmoo-workspace/docs/plan/10-03 Angmoo 다국어·사용자 시간대와 Gemini SNS 스키마·누락 복구 통합 코드 구현·검증 세부 계획.md`)의 P09/P10/P15/P16/P25/P26 및 P28/P30 판단을 보완한다.
 
 이 문서의 초기 기록은 제품 수정 커밋에 포함되고, 커밋 SHA를 요구하는 공식 보존 검사 결과와 마감 기록을 후속 단위로 추가했다. 이전 계획 실행의 4,917 PASS·52 SKIP, 제품 104 PASS·10 SKIP, canonical visual 36 PASS는 역사 결과이며 이번 실행 수치로 합산하지 않는다.
 

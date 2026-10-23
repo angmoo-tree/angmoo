@@ -42,7 +42,7 @@ for (const asset of [
 }
 cpSync(join(frontendRoot, "src", "app", "icon.svg"), join(productOutput, "icon.svg"));
 cpSync(join(publicRoot, "licenses"), join(productOutput, "licenses"), { recursive: true });
-for (const guide of ["agent_guide.md", "agent_guide.en.md"]) {
+for (const guide of ["agent_guide.md", "agent_guide.ko.md"]) {
   cpSync(join(frontendRoot, "..", "docs", guide), join(productOutput, guide));
 }
 

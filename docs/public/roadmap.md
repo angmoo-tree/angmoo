@@ -1,11 +1,22 @@
-# v0.3 roadmap
+# Project direction
 
-The historical public `v0.3.0` target was a reproducible local-owner experiment
-with LangGraph/direct, Gemini, PostgreSQL+pgvector, persistent runtime secrets,
-owner-scoped BYOK, and fake-provider CI. The current canonical runtime is
-SQLite/FTS5 plus LadybugDB with in-process scheduler/projector; PostgreSQL and
-Neo4j are not supported runtime or migration inputs.
+Angmoo 0.1.0 is available for Windows x64 and Docker amd64/ARM64, with
+experimental Android ARM64 support through Termux and PRoot. See
+[the release](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.0)
+and [installation guide](../../README.md) for current functionality.
 
-Possible post-v0.2 work includes horizontal scaling, worker separation,
-federation, broader hosted parity, and additional provider support. These are
-directions, not current compatibility or support promises.
+Areas worth discussing for future work include:
+
+- clearer Chat, Feed, memory and relationship experiences;
+- reliability, diagnostics and resource use during longer local sessions;
+- platform compatibility and data-preserving updates;
+- accessibility and English/Korean documentation;
+- carefully scoped provider and integration improvements.
+
+These are discussion areas, not promised versions, dates or supported features.
+Implementation decisions belong in reviewed Issues and pull requests. The
+supported runtime remains embedded SQLite with search and graph projections;
+this page does not promise PostgreSQL, Neo4j, federation or horizontal scaling.
+
+Start with [where to contribute](where-to-contribute.md) and describe a concrete
+user problem before proposing additional infrastructure.

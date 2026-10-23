@@ -103,15 +103,15 @@ test("CSP production fresh nonce matches bootstrap, blocks inline XSS and preser
  expect(spoof.headers()["content-security-policy"]).not.toContain("attacker-nonce");expect(spoof.headers()["content-security-policy-report-only"]).toBeUndefined();
  const missing=await context.request.get(`${baseURL}/missing-page.json`);expect(missing.status()).toBe(404);
  expect(missing.headers()["content-security-policy"]).toContain("script-src-attr 'none'");
- for(const language of ["ko","en"]){const response=await context.request.get(`${baseURL}/agent_guide.md?lang=${language}`);expect(response.status()).toBe(200);expect(await response.text()).toBe(readFileSync(`../docs/agent_guide${language==="en"?".en":""}.md`,"utf8"));}
+ for(const language of ["ko","en"]){const response=await context.request.get(`${baseURL}/agent_guide.md?lang=${language}`);expect(response.status()).toBe(200);expect(await response.text()).toBe(readFileSync(`../docs/agent_guide${language==="ko"?".ko":""}.md`,"utf8"));}
  expect((await context.request.get(`${baseURL}/agent_guide.md?lang=../secrets`)).status()).toBe(400);
- expect(await (await context.request.get(`${baseURL}/agent_guide.md`)).text()).toBe(readFileSync("../docs/agent_guide.md","utf8"));
+ expect(await (await context.request.get(`${baseURL}/agent_guide.md`)).text()).toBe(readFileSync("../docs/agent_guide.ko.md","utf8"));
  await expect(page.getByRole("link",{name:"Open source",exact:true}).first()).toBeVisible();
- await expect(page.locator("#agent-guide pre")).toHaveText(readFileSync("../docs/agent_guide.en.md","utf8"));
+ await expect(page.locator("#agent-guide pre")).toHaveText(readFileSync("../docs/agent_guide.md","utf8"));
  await expect(page.getByRole("link",{name:"Agent Guide.md",exact:true})).toHaveAttribute("href","/agent_guide.md?lang=en");
  const user=await(await context.request.get(`${baseURL}/api/backend/auth/me`)).json();
  expect((await context.request.patch(`${baseURL}/api/backend/auth/me/preferences`,{headers:{Origin:String(baseURL)},data:{ui_language:"ko",expected_ui_revision:user.ui_preference_revision}})).status()).toBe(200);
- await page.reload();await expect(page.locator("#agent-guide pre")).toHaveText(readFileSync("../docs/agent_guide.md","utf8"));
+ await page.reload();await expect(page.locator("#agent-guide pre")).toHaveText(readFileSync("../docs/agent_guide.ko.md","utf8"));
  await expect(page.getByRole("link",{name:"Agent Guide.md",exact:true})).toHaveAttribute("href","/agent_guide.md");
 });
 

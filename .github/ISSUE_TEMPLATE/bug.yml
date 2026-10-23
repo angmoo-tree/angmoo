@@ -11,14 +11,14 @@ body:
     id: revision
     attributes:
       label: Revision
-      description: Commit SHA or release version
+      description: "Release version or commit SHA, if known."
     validations:
       required: true
   - type: input
     id: environment
     attributes:
       label: OS and Local profile
-      description: Operating system, Docker or native services, and enabled Local profile
+      description: "OS/version and Windows installer, Docker, Termux, or contributor environment. For Android include device model and Termux source/version."
     validations:
       required: true
   - type: textarea
@@ -31,7 +31,7 @@ body:
     id: reproduction
     attributes:
       label: Synthetic reproduction
-      description: Minimal steps using fake credentials and synthetic data
+      description: "Steps with non-sensitive sample data; never include real keys or personal backups."
     validations:
       required: true
   - type: textarea

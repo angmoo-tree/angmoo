@@ -17,6 +17,6 @@ copyFileSync(join(dist,"standalone","frontend","server.js"),join(product,"server
 for(const directory of ["server","static"])cpSync(join(dist,directory),join(output,directory),{recursive:true});
 for(const file of readdirSync(dist,{withFileTypes:true}))if(file.isFile())copyFileSync(join(dist,file.name),join(output,file.name));
 cpSync(join(frontend,"public"),join(product,"public"),{recursive:true});
-for(const file of ["agent_guide.md","agent_guide.en.md"])copyFileSync(join(repo,"docs",file),join(destination,"docs",file));
+for(const file of ["agent_guide.md","agent_guide.ko.md"])copyFileSync(join(repo,"docs",file),join(destination,"docs",file));
 symlinkSync(join(frontend,"node_modules"),join(product,"node_modules"),process.platform==="win32"?"junction":"dir");
 console.log("Prepared LOCAL production Next fixture. This does not certify a packaged dependency payload.");

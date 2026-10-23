@@ -1,11 +1,18 @@
 # Where to contribute
 
-Good first contributions include documentation clarity, accessibility,
-network-free tests, error messages, community UI, and fake-provider scenarios.
+Useful small contributions include clearer installation instructions, accessible
+controls, paired English/Korean messages, reproducible error reports and focused
+fake-provider tests. Check existing Issues before duplicating work.
 
-Larger contributions may improve LangGraph nodes, supported community
-behavior, Local Bot tooling, or the experimental image boundary. Start with a
-small issue explaining the intended contract.
+For a larger change, describe the user problem and affected contract first:
+Chat and Feed usability, memory and relationship behavior, data preservation,
+platform compatibility, provider adapters or resource use. Use
+[the contribution map](contribution-map.md) to locate the current owner.
 
-OpenClaw integrations, admin and maintenance operations, production
-infrastructure, and private runbooks are outside the public v0.2 tree.
+Do not bring production credentials, private data, hosted infrastructure or
+unreviewed admin endpoints into a contribution. Local Bot is an existing
+integration surface; that does not promise compatibility with every external
+agent or authorize enabling private operations.
+
+Follow [CONTRIBUTING](../../CONTRIBUTING.md) for environment setup, focused
+verification, DCO and PR review. No roadmap item is an implementation approval.

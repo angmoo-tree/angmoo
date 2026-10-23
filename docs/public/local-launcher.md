@@ -35,8 +35,9 @@ Repeated starts and stops are idempotent. Normal lifecycle commands preserve
 
 The plain non-contributor image mode is retained only for explicit container
 artifact validation. It is not the installed-user product path and does not
-restore PostgreSQL/Neo4j server compatibility. The canonical user product is
-the Tauri installer.
+restore PostgreSQL/Neo4j server compatibility. User installation uses the Windows installer, released Docker Compose pair
+or experimental Termux adapter described in the root README. This PowerShell
+wrapper remains contributor tooling.
 
 ## Aggregate status and doctor
 

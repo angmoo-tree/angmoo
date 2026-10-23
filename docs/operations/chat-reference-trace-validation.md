@@ -1,5 +1,8 @@
 # Chat reference trace RT validation
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 2026-09-12 · Local implementation on `fix/chat-retrieval-debugging`.
 Baseline HEAD: `ee8eabf7c68e5a7fb7a5c4e9d11dc0e4d2a56a8d`; 83 pre-existing dirty/untracked entries.
 Artifact directory: `D:/project_code/angmoo-workspace/.task-output/chat-ref-trace-20260912-224658`.
@@ -88,4 +91,4 @@ Results: GRAPH requested 10/10, Supervisor validation passed 7/10, graph actuall
 
 New evidence establishes builtin values in the invalid entity-ref position (questions 5/6), undeclared/self endpoint transitions (7/10), a Planner counterpart bound to responding_character rather than the expected counterpart (2), and the global outgoing contract rejecting a necessary incoming step for bidirectional questions (4/5). The fourth/eighth questionnaire numbers here belong to this ten-question test, not the earlier DT five-question set.
 
-Full questions, request IDs, evidence, policy limitation and follow-up proposals: [10-question browser report](../../../docs/plan/09-12%20미도리야%20Graph%2010문항%20브라우저%20실검증%20결과와%20실패%20원인%20분류.md). Evidence directory: `D:/project_code/angmoo-workspace/.task-output/graph-browser-10-20260912`. These are new requests; historical missing raw values remain unproven.
+Full questions, request IDs, evidence, policy limitation and follow-up proposals: 10-question browser report (local-only: `../../../docs/plan/09-12 미도리야 Graph 10문항 브라우저 실검증 결과와 실패 원인 분류.md`). Evidence directory: `D:/project_code/angmoo-workspace/.task-output/graph-browser-10-20260912`. These are new requests; historical missing raw values remain unproven.

@@ -2,7 +2,7 @@ Pull requests may be written in English or Korean.
 
 ## Purpose
 
-Describe the smallest user-visible or contract-visible change and reference an
+Describe the user-visible change or the change to a documented contract and reference an
 Issue when one exists (`Closes #number`). Small documentation or typo fixes may
 omit an Issue.
 
@@ -16,12 +16,14 @@ omit an Issue.
 
 ## Validation
 
-List the exact checks and user scenarios run.
+List the exact checks and user scenarios run, their scope, and cases not measured.
+Do not describe checks that were not run as a full-suite pass.
+
 
 - [ ] Focused backend tests when applicable
 - [ ] Frontend lint, typecheck, and build when applicable
 - [ ] SQLite / FTS5 / LadybugDB migration, replay, or graph checks when applicable
-- [ ] SQLite canonical baseline, generation lifecycle, and LocalAppData migration checks
+- [ ] Relevant SQLite baseline, generation or installed-data migration checks when those contracts change
 - [ ] No production credential, personal data, raw log, or external provider call used
 - [ ] Every human commit includes a DCO 1.1 `Signed-off-by` trailer (`git commit -s`)
 - [ ] I understand accepted contributions are provided under `GPL-3.0-only` unless explicitly stated otherwise
@@ -38,6 +40,6 @@ List the exact checks and user scenarios run.
 
 ## Cleanup and follow-up
 
-- Legacy paths removed or intentionally retained:
+- Compatibility paths changed or intentionally retained:
 - Known gap and follow-up Issue:
 - Advisory check result and promotion condition, if relevant:

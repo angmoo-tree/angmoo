@@ -1,6 +1,8 @@
-# Release publishing evidence and operation
+# Release publishing
 
-P1 implements the tools; P6 alone creates/attaches/publishes the official Release.
+The publisher verifies fixed candidate identities before creating a release, uploading its assets or
+publishing it. The public 0.1.0 release already exists; this document
+describes the reusable publishing procedure, not a request to republish it.
 All ten dispatch inputs are identities, not an approval bypass:
 
 - `source`: full main-history candidate SHA; `tag`: `release-v0.1.0`.
@@ -8,9 +10,9 @@ All ten dispatch inputs are identities, not an approval bypass:
   run and original build artifact, including its final validation receipt.
 - `candidate_run`, `candidate_attempt`, `candidate_artifact`: successful
   Container Candidate main run and complete, unexpired four-image artifact.
-- `review_ref`: full main-history commit containing reviewed P5 evidence and
+- `review_ref`: full main-history commit containing reviewed release evidence and
   release notes. A documentation-only commit can follow the fixed product source.
-- `operation`: defaults to `verify`; P6 uses `draft` or `publish`.
+- `operation`: defaults to `verify`; publication uses `draft` or `publish`.
 
 The workflow runs only from main in the canonical repository. It checks out the
 reviewed main publisher in `release-tools`, checks product source ancestry, then
@@ -27,21 +29,21 @@ SPDX subject and signed GitHub EXE attestation. It checks the attestation's
 producer workflow, source digest and hosted-runner requirement; local provenance
 JSON alone cannot establish producer trust.
 
-At P5, add these files through normal main review under
-`docs/releases/0.1.0/`: `p5.json`, `notes.ko.md`, `notes.en.md`.
+Before publication, add these files through normal main review under
+`docs/releases/0.1.0/`: `p5.json`, `notes.ko.md`, `notes.md`.
 Use `p5.example.json` as the schema outline, replacing all placeholders with
 actual records. The report references exact successful Core CI, Local Smoke and
 Security workflow runs, the tested EXE, four platform digests, and the Windows
 user's concrete test record. The verifier retrieves referenced CI outcomes and
-requires the installer/candidate identities to agree. A single P5 boolean is
-insufficient. Android remains `experimental-not-certified`; P4 findings and
+requires the installer/candidate identities to agree. A single approval boolean is
+insufficient. Android remains `experimental-not-certified`; physical-device findings and
 limitations must be described in both notes. Remove `NOT_RELEASED`/TODO only
-after the real P5 review. Templates are intentionally not publishable evidence.
+after the actual release review. Templates are intentionally not publishable evidence.
 
 `verify` can validate candidates before official tags/images exist. It reports
 candidate validity and publication readiness separately and makes zero remote
 writes. `draft`/`publish` additionally require the existing tag to resolve to
-the same source, both matching GHCR indexes and completed P5 review. Missing or
+the same source, both matching GHCR indexes and completed release review. Missing or
 expired artifacts require renewed validation of the new actual bytes; never
 reuse an old EXE receipt for a rebuilt EXE.
 
@@ -51,7 +53,7 @@ Termux tools/guides, KO/EN notes, release-manifest.json and RELEASE-SHA256SUMS
 are staged. The manifest hashes assets except itself and the aggregate checksum;
 the aggregate checksum includes the manifest and excludes itself. DB, credentials,
 fixtures, Defender tools and raw internal logs are never Release assets.
-Authenticode status must be described from actual P5 inspection, never inferred
+Authenticode status must be described from actual candidate inspection, never inferred
 from GitHub attestation.
 
 Creation always starts as a draft. Uploads are downloaded and hashed again before
@@ -68,28 +70,35 @@ bound fail closed rather than being treated as absence. See the
 
 Images publish separately on the official tag. Do not assume a tag created with
 GITHUB_TOKEN triggers another workflow; inspect the actual image run and both
-registry indexes before Release publication. P6 needs the intended human/API tag
+registry indexes before Release publication. Publication needs the intended human/API tag
 operation and its actual trigger result. No tag is created by Release Publish.
 
-## 한국어 운영 계약
+Use the fixed source, run, attempt, and artifact identities above with the default
+`verify` operation first. Deleting earlier development releases is outside this workflow's scope.
 
-P1은 구현, P6는 실제 생성·첨부·공개 단계입니다. 위 입력에 고정된 소스·run·attempt·
-artifact ID를 넣고 기본 `verify`로 먼저 확인합니다. 공개 전 후보 검사 성공과
-공개 준비 완료는 구분됩니다. 태그·양쪽 GHCR 이미지·P5 자료가 없으면
-`draft`/`publish`는 실행을 거부합니다.
+## Post-publication changes
 
-P5 자료는 정상 main 검토를 거친 문서 커밋의 `p5.json`, 한국어·영어 출시
-안내입니다. 실제 CI 링크·EXE 해시·4개 이미지 digest·Windows 사용자 확인을
-기록하며 예제나 P5 완료 체크 하나로 대체하지 않습니다. Android는 실험 범위로
-표시하고 P4 실기기 결과와 미검증 제한을 한영 안내에 함께 적습니다.
+Source documentation uses `docs/public/termux.md` for English and
+`termux.ko.md` for Korean. Release-note sources use `notes.md` and `notes.ko.md`.
+The prepared asset names remain `termux.en.md`, `termux.ko.md`,
+`release-notes.en.md` and `release-notes.ko.md`.
 
-공개 파일은 검증한 원본과 명시된 공개 자료만 허용합니다. 초안을 만들고 파일을
-첨부한 뒤 다시 내려받아 해시를 확인해야 공개합니다. 실패하면 같은 입력으로
-재실행하여 동일 파일을 재사용할 수 있으며 다른 내용의 기존 파일·태그를
-덮어쓰지 않습니다. 이전 개발 배포 삭제도 이 workflow의 범위가 아닙니다.
+Preparation selects one complete language pair from the fixed product root or
+review ref. Older fixed sources using `.en.md` are supported explicitly; missing
+or ambiguous pairs fail instead of falling back to the publisher checkout.
+New note sources compose English before Korean; frozen legacy sources keep
+their original order. Tool ZIP contents must match the same product source's
+literal bootstrap allowlist, including the command-registration helper only in
+sources that declare it. This does not modify an already published release.
 
-배포 도구는 검토된 main의 별도 checkout에서 실행하며, 설치 파일에 들어갈 실행기·
-안내 파일은 요청한 제품 SHA의 깨끗한 checkout에서만 읽습니다. 배포 API를
-수정해도 원본 제품·태그·자산을 교체하지 않으며 실행 기록에 도구 SHA를 따로 남깁니다.
-초안은 권한이 있는 계정의 페이지별 Release 목록으로 찾습니다. 같은 태그의
-중복 결과, 조회 오류, 잘못된 응답과 페이지 한도 소진을 ‘없음’으로 처리하지 않습니다.
+Treat released asset identity separately from GitHub's editable description.
+If the description changes after publication, keep the asset manifest and
+original checksum evidence intact and record the presentation-only difference.
+Do not overwrite published checksums or candidate receipts to make an edited
+description appear byte-identical to the originally staged notes.
+
+The publisher can leave an existing release unchanged only if its
+comparison confirms a complete match. Changed notes, assets or missing registry evidence
+may make a later replay fail. Diagnose that state instead of weakening checks,
+moving a tag or clobbering files. Preserve multi-platform execution manifests
+and any evidence needed by the published verification path when cleaning up tags.
