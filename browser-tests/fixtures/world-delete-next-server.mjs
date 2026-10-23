@@ -23,6 +23,6 @@ for (const file of readdirSync(dist, { withFileTypes: true })) {
 }
 cpSync(join(frontend, "public"), join(product, "public"), { recursive: true });
 mkdirSync(join(destination, "docs"));
-for (const file of ["agent_guide.md", "agent_guide.en.md"]) copyFileSync(join(repo, "docs", file), join(destination, "docs", file));
+for (const file of ["agent_guide.md", "agent_guide.ko.md"]) copyFileSync(join(repo, "docs", file), join(destination, "docs", file));
 symlinkSync(join(frontend, "node_modules"), join(product, "node_modules"), process.platform === "win32" ? "junction" : "dir");
 await import(pathToFileURL(join(product, "server.js")).href);

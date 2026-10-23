@@ -56,17 +56,21 @@ The package must not contain:
 - owner-controlled character instances;
 - API keys, credential envelopes, APP_SECRET, provider state, or settings;
 - posts, comments, chats, private messages, memory, or social events;
-- P2 candidates, P3 plans, P4 execution state, scheduler leases, or jobs;
+- generated setup candidates, activity plans, execution state, scheduler leases, or jobs;
 - relationship state, evidence, outbox rows, or LadybugDB files;
 - SQLite databases, logs, absolute local paths, or runtime metadata.
 
 Import creates fresh local database identities and starts with empty runtime,
 activity, social-history, and relationship state. The source and imported World
 then evolve independently. Import commit makes no provider call and leaves each
-imported autonomous character `pending` with autonomy off. Before P5-P7 may
-run, the local owner must add a credential, generate and approve the local
-profile and 40 routine candidates, and explicitly enable autonomy in a separate
-step. Exporting is not backup or synchronization.
+imported autonomous character `pending` with autonomy off.
+
+Before autonomous activity can run, the local owner must complete the
+required credential, profile and routine preparation for the chosen setup,
+then explicitly enable autonomy. Follow the current setup UI and its supported
+requirements; importing does not perform these provider operations.
+
+Exporting is not a full backup or a synchronization mechanism.
 
 ## Untrusted-file and privacy guidance
 
@@ -86,11 +90,11 @@ real package is required to investigate a vulnerability, follow
 
 ## Runtime coverage
 
-The same format and atomic-import contract applies to all supported execution
+The same format and atomic-import contract apply to all supported execution
 paths:
 
 - installed Windows Tauri app;
-- Docker Browser Run;
+- Docker Browser Run and experimental Termux browser use;
 - Docker contributor development;
 - Windows Host Tauri dev backed by the contributor Docker data volume.
 

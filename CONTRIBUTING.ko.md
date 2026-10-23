@@ -1,197 +1,116 @@
-# Angmoo 기여 가이드
-
-CI는 실제 변경 경로를 기준으로 검증 범위를 선택하고 커밋·실행 식별자와 함께
-기록합니다. 영향이 불명확하거나 공통 빌드 입력이 바뀌면 검증을 확대합니다.
-수동·주간 full 검증은 현재 전체 시험과 지원하는 Windows 업그레이드를 확인하며,
-main 검사 통과와 릴리스 후보 검증 완료는 구별합니다.
-[CI 검증과 실패 복구](docs/operations/ci-validation.md)를 참고하세요.
+# Angmoo 기여 안내
 
 [English](CONTRIBUTING.md) | 한국어
 
-Angmoo 개선에 참여해 주셔서 감사합니다. 공식 저장소는
-`angmoo-tree/angmoo`입니다. Issue와 Pull Request는 한국어와 영어 모두 사용할 수 있습니다.
-번역 내용이 다르면 영어 문서를 기준으로 합니다.
+Angmoo는 로컬 AI 캐릭터 SNS입니다. 기여할 때는 기존 사용자 데이터, World 경계,
+지원 실행 환경의 동작을 보존합니다. 배포된 앱의 설치는 [README](README.ko.md)를 참고하세요.
 
-## Issue와 작업 범위
+## 코드 변경 전
 
-- `docs/public/architecture.md`와 `docs/public/contribution-map.md`를 읽습니다.
-- 백엔드 역할은 `backend/ARCHITECTURE.md`, 프론트엔드의 현재·목표 범위는
-  `frontend/ARCHITECTURE.md`를 참고합니다.
-- 최신 `main`에서 branch 또는 fork를 만듭니다.
-- synthetic data와 fake provider만 사용합니다. credential, 개인정보, 원문
-  log, backup, 실제 사용자의 World Package를 제출하지 않습니다.
-- 변경을 증명하는 가장 작은 deterministic test를 추가하거나 수정합니다.
-- 기능 변경과 관계없는 대규모 refactoring을 한 PR에 섞지 않습니다.
+[기여 지도](docs/public/contribution-map.md)에서 기능의 소유자를 찾습니다.
+기능 추가와 구조 변경은 Issue로 범위를 논의하고, 작은 문서·오타 수정은 바로 PR을
+만들 수 있습니다. Issue와 PR은 한국어 또는 영어로 작성할 수 있습니다.
 
-기능·버그·구조 변경은 범위를 먼저 합의할 수 있도록 Issue 선행을
-권장합니다. 작은 문서 수정과 오탈자 교정은 Issue 없이 PR을 제출할 수
-있습니다. Issue 연결은 기계적으로 강제하지 않습니다. 관련 Issue가 있으면
-PR 본문에 `Closes #번호` 또는 명시적 reference를 남깁니다.
+백엔드는 [ARCHITECTURE](backend/ARCHITECTURE.md), 프론트엔드는
+[ARCHITECTURE](frontend/ARCHITECTURE.md)·[DESIGN](frontend/DESIGN.md)와 해당
+디렉터리 지침을 따릅니다. 버그 수정에 무관한 의존성·스키마·스타일·소유권 변경을 섞지 않습니다.
 
-## 개발 환경
+## 기여 환경 실행
 
-기여자 기준선에는 Git과 Docker Compose 2.22.0 이상이 필요합니다. repository
-root에서 전체 개발 stack을 시작합니다.
+기여용 백엔드는 `CONTRIBUTOR_EMBEDDED` 프로필을 사용합니다. SQLite가 유일한
+원본 저장소이며 FTS5와 LadybugDB는 다시 만들 수 있는 파생 저장소입니다.
 
-```powershell
+Git, Linux 엔진을 사용하는 Docker, Compose 2.22.0 이상을 준비하고 저장소 루트에서 실행합니다.
+
+```sh
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-checkout한 공개 Dockerfile을 build하고 Next.js frontend와
-`CONTRIBUTOR_EMBEDDED` FastAPI backend 두 service만 시작합니다. backend 안에서
-SQLite·FTS5·LadybugDB·scheduler·projector가 함께 실행됩니다. source 변경은
-Compose Watch가 sync하거나 rebuild합니다. 개발 데이터를 지우지 않고
-종료하려면 다음을 실행합니다.
+http://127.0.0.1:3000 을 엽니다. 개발 프론트엔드와 embedded 백엔드가 실행되며
+SQLite·검색·그래프 투영은 백엔드의 로컬 구성 요소입니다. PostgreSQL·Neo4j 서버는 필요하지 않습니다.
 
-```powershell
+```sh
+docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend
 docker compose -f compose.yml -f compose.dev.yml down
 ```
 
-host Python, uv, Node.js, pnpm version 차이를 막기 위해 같은 개발 container
-안에서 검사를 실행합니다.
+종료해도 기여 환경의 데이터 볼륨은 유지됩니다. 보존할 데이터가 있으면 `--volumes`를
+추가하지 않습니다. 설치 앱의 사용자 데이터를 개발·테스트에 연결하지 않습니다.
+호스트 도구와 격리 시험은 [개발 안내](docs/public/development.md)를 참고하세요.
 
-```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
-```
+실제 native 창을 변경할 때만 [Windows Host Tauri dev](docs/public/windows-host-tauri-dev.md)를
+사용합니다. 기여 Docker와 별도 WebView 프로필을 사용하며 설치 앱의 백엔드를 하나 더 띄우지 않습니다.
 
-제품 shell 변경은 Core CI의 필수 Chromium smoke도 실행합니다. repository가
-고정한 Node·pnpm 도구를 host에서 사용할 수 있는 기여자는 provider 호출이나
-DB write가 없는 동일한 fake-backend suite를 다음처럼 실행할 수 있습니다.
+## 코드 소유권
 
-```powershell
-cd browser-tests
-pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
-pnpm test
-```
+- 백엔드 도메인은 HTTP·service·model·schema·저장 역할을 소유합니다. 허용된 진입점의
+  실제 소유 파일을 사용합니다. 여러 도메인의 협력은 runtime에서 조립하며, 도메인이
+  runtime을 역으로 가져오거나 다른 업무의 저장 규칙을 우회하지 않습니다.
+- 호출자의 Session과 transaction 소유권을 유지합니다. AI 호출·대기·재시도 동안 SQLite
+  쓰기 transaction을 유지하지 않습니다. 늦은 결과 적용 전에 owner·scope·원본 revision·lease를 재검증합니다.
+- 프론트엔드 기능은 API·DTO·component·수명을 소유합니다. 기능 사이 연결은 composition의
+  props·callback·slot으로 처리합니다. 실제 역할 파일을 import하며 없어진 `public.ts`·`shared`를 복원하지 않습니다.
+- Next와 static/Tauri는 같은 기능 컴포넌트를 사용합니다. 공용 UI와 통신 코드에 제품 권한이나 업무 판단을 넣지 않습니다.
+- 사용자에게 보이는 웹 문구는 영어·한국어 번역 목록에 함께 반영합니다. Termux의 고정 터미널 안내는
+  영어이며, 공개 Termux 설치 문서는 두 언어를 제공합니다.
+- 새 자산·의존성에는 출처·라이선스·고지가 필요합니다. [BRANDING](BRANDING.md)을 따르고 기존 시맨틱 토큰과 공용 UI 요소를 사용합니다.
+  회귀를 숨기려고 색상이나 스냅샷 기준을 완화하지 않습니다.
 
-기본 port는 `3100`이며 이미 실행 중인 frontend를 사용할 때는
-`ANGMOO_E2E_BASE_URL`을 지정할 수 있습니다. 실제 사용자 데이터가 담긴
-profile을 이 검사 대상으로 사용하면 안 됩니다.
+## 변경 범위 검증
 
-required `local-core-smoke`는 release target build, image 취약점·secret scan,
-SPDX SBOM 검증과 격리된 Linux clean-clone lifecycle fixture도 실행합니다.
-기여자 named volume은 설치형 `%LOCALAPPDATA%\Angmoo`와 완전히 분리됩니다.
-실제 Phone·wide native window를 수정하는 경우에만 같은 Docker stack에
-선택적 Host Tauri dev를 연결합니다. Windows 패키징은 Windows Actions에서
-검증하며 macOS 패키징 구현은 아직 공식 지원으로 주장하지 않습니다.
-provider 관련 검사는 fake provider만 사용하고 외부 모델을 호출하지 않습니다.
+수정한 기능, 호출자, 실패 경계를 검증하는 테스트부터 실행합니다. 합성 사용자와 fake provider를
+사용합니다. 개인 DB·운영 키·비공개 패키지·유료 provider 요청을 CI에 넣지 않습니다.
 
-지원하는 Windows 11 x64 host에서는 고정된 desktop dependency를 설치하고
-fail-closed preflight와 bridge를 실행합니다.
+| 변경 | 선택할 로컬 검증 |
+| --- | --- |
+| 백엔드 service·조회 | 해당 domain/runtime 회귀, scope·권한·실패 경계 |
+| transaction·lease·migration | 경합·취소·재개·보존과 지원 업그레이드 |
+| 프론트엔드 상호작용 | 타입·lint와 관련 브라우저 시나리오, 공통 소비자의 Next/static 경로 |
+| 공용 프론트엔드·빌드 | 두 빌드와 영향을 받는 공용 소비자 |
+| native·설치기 | 해당 계약, 격리 설치·복구, 직접 사용자 확인 |
+| 문서 | 경로·명령·한영 일치·실제 구현과의 일치 |
 
-```powershell
-npm ci --ignore-scripts --prefix desktop
-.\scripts\dev\desktop-preflight.ps1
-.\scripts\dev\desktop-dev.ps1
-```
+원격 검사의 선택과 필수 결과는 [CI 안내](docs/operations/ci-validation.md)를 따릅니다.
+로컬 범위 검증이 더 넓은 CI를 면제하지 않습니다. 영향이 불확실하면 범위를 넓히되,
+문서 변경만을 이유로 전체 백엔드·프론트엔드 검증을 일괄 실행하지 않습니다.
 
-wrapper는 Docker dev stack을 시작하거나 재사용하고 host의 Phone·Studio·Graph
-Tauri shell만 엽니다. host `angmoo-sidecar`를 시작하거나
-`%LOCALAPPDATA%\Angmoo`를 사용하거나 Docker stack·named volume을 삭제해서는
-안 됩니다. 지원 범위와 사용자 확인은
-`docs/public/windows-host-tauri-dev.md`를 참고하세요.
+구조 변경 시 저장소 루트에서 필요한 검사를 선택합니다.
 
-CODEOWNERS의 platform-shell 보호 경계를 바꾸는 PR은 Hosted Windows PASS 뒤
-명시적인 **platform-shell maintainer review** 기록이 필요합니다. 1인 maintainer
-기간에는 불가능한 자기 Approve가 아니라 오너의 검토 기록을 뜻합니다. 사용자
-Phone·wide-window 화면 Gate는 기술 CI와 별도로 유지합니다.
-
-## Branch, commit과 Pull Request
-
-모든 변경은 PR을 통해 `main`에 들어갑니다. required check 의미는 다음을
-포함합니다.
-
-- `backend`
-- `frontend`
-- `embedded-data-migration`
-- `local-core-smoke`
-- `local-autonomy-smoke`
-- `local-full-graph` (LadybugDB와 동결된 static parity fixture)
-- `oss-boundary`
-- `dependency-license`
-- `dco`
-- `architecture-boundary`
-- `tauri-windows`
-- `tauri-windows-host-dev`
-- Windows installer release-candidate·installed-runtime smoke
-
-`windows-local-smoke`, `codeql`은 advisory check로 유지합니다. Advisory는
-실패를 무시한다는 뜻이 아니며 실패 원인과 required 승격 조건을 기록하고
-보안 finding은 해결하거나 명시적으로 판정해야 합니다.
-
-PostgreSQL·Neo4j server runtime이나 PostgreSQL offline importer를 다시
-추가하지 않습니다. SQLite가 유일한 canonical store이며 Neo4j parity는
-정적 fixture로만 보존합니다.
-
-외부 기여자는 PR을 제출하며 `main`에 직접 push하거나 PR을 merge할 수
-없습니다. required checks 통과와 conversation 해결 뒤 저장소 오너가 최종
-검토하고 merge합니다. 1인 maintainer 기간의 `required approvals: 0`은 자기
-PR에 공식 Approve를 할 수 없는 교착을 피하기 위한 설정이며, 오너 검토를
-없애거나 외부 기여자에게 merge 권한을 준다는 뜻이 아닙니다.
-
-## 라이선스와 DCO
-
-별도 표시가 없는 기여는 `GPL-3.0-only`로 제공됩니다. 모든 사람의 commit은
-Developer Certificate of Origin 1.1을 확인하는
-`Signed-off-by: Name <email>` trailer를 포함해야 합니다.
-
-```powershell
-git commit -s
-```
-
-DCO 1.1은 기여물을 제출할 권리가 있음을 확인하는 절차이며 프로젝트
-라이선스를 대신하지 않습니다. Dependabot에는 저장소 검사기가 확인하는 좁은
-bot 예외만 허용합니다.
-
-## 계약과 구조 변경
-
-REST/OpenAPI, Alembic, 일과·SNS·관계 그래프, 권한, credential, lease/retry,
-사용자 데이터 경계는 호환성 계약입니다. 의도적인 breaking change에는 Issue,
-필요한 migration 또는 호환 계획, focused test와 rollback 경로가 필요합니다.
-
-백엔드의 구조와 소유권 규칙은
-[`backend/ARCHITECTURE.md`](backend/ARCHITECTURE.md)에, 코드 탐색 안내는
-[`docs/architecture/backend-domains.md`](docs/architecture/backend-domains.md)에 있습니다.
-동작을 추가하기 전에 소유 업무와 역할을 정합니다. 다른 업무가 지원하는 service,
-schema, contract, exception은 실제 소유 위치에서 명시적으로 import하며,
-집합 `public.py`를 거칠 필요는 없습니다. service 파일의 모든 helper가 외부 호출을
-지원하는 것은 아닙니다. 다른 업무의 model이나 repository를 통해 권한·상태 전이·저장
-규칙을 우회하지 않습니다. 여러 업무의 협력은 runtime에서 조립하고 같은 Session과
-기존 commit/rollback 계약을 유지합니다. 폐기한 수평 service·model·schema·CRUD
-집합에 새 동작을 추가하지 않습니다.
-
-L2.5 frontend 제품 shell 계약은
-`docs/architecture/frontend-product-shell.md`에 있습니다. 이동을 완료한 route는
-`@/features/<feature>/public`을 통해서만 feature를 import합니다. feature끼리 서로의
-내부 module을 deep import하지 않으며, 제품 중립적인 `shared` primitive는 feature나
-legacy data client를 import하지 않습니다.
-
-import inventory는 현재 사실을 기록하고
-`security/architecture_import_policy.json`은 목표 규칙과 검토된 exact legacy
-예외를 기록합니다. 기존 예외는 줄일 수 있지만 CI를 통과시키기 위해 늘려서는
-안 됩니다. 다음을 실행합니다.
-
-```powershell
-uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
+```sh
+uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
 uv run --project backend python scripts/ci/check_architecture_boundaries.py
 uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
-uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py tests/test_l2_5_frontend_architecture_boundaries.py
+uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
 ```
 
-구조 전용 PR은 범위를 좁게 유지합니다. package 이동 PR에 동작 변경, migration,
-provider 설정, dependency major, transaction 의미, 일괄 formatting,
-Hosted·Private·Production 설정을 섞지 않습니다.
+의존성 목록을 다시 생성하면 현재 코드의 관계가 기록됩니다. 이 작업이 새 의존 관계를 허용하는 것은 아닙니다. 과거 전환 근거는 Git에 보존하고,
+일상 검증은 현재 동작과 지원 데이터 업그레이드를 보호합니다.
 
-Windows 설치 후보는 한국어·English 선택이 가능한 NSIS EXE 하나로 생성합니다.
-MSI의 신규 build·upload·attestation은 종료하며 기존 검증 기록은 보존합니다.
-설치 안내 언어와 앱 화면 언어는 분리합니다.
-관련 검증과 실제 화면 확인 범위는
-[설치 언어·EXE 안내](docs/operations/windows-installer-i18n.md)를 따릅니다.
+## PR 제출
 
-보안 문제는 public Issue에 작성하지 말고 `SECURITY.md`의 비공개 신고 절차를
-사용해 주세요.
+사람의 기여에는 Developer Certificate of Origin 1.1(DCO 1.1)이 적용됩니다.
+`git commit -s`로 자신의 `Signed-off-by` 문구를 추가합니다. embedded 데이터
+migration 계약을 변경하면 `embedded-data-migration` 라벨을 적용합니다.
+
+1. fork 또는 범위가 명확한 브랜치에서 작업하고 무관한 변경을 보존합니다.
+2. `git commit -s`로 DCO 1.1의 `Signed-off-by` 문구를 포함합니다.
+3. 문제, 변경 후 동작, 관련 계약과 실행한 검증을 설명합니다.
+4. 관련 Issue와 아직 확인하지 못한 항목을 기록합니다.
+5. UI는 화면·출처·언어·경로·의도한 시각 차이를, 데이터는 migration·보존·복구를 설명합니다.
+6. 해당 검사와 관리자 검토를 기다립니다. 재현되는 오류는 고치고 검사·해시·단언·데이터 보호를 끄지 않습니다.
+
+사람이 작성한 각 커밋에 `Signed-off-by` 문구가 필요합니다. 동의 없이 다른 기여자의 이력을 재작성하지 않습니다.
+한정된 자동화 예외는 사람의 커밋에 적용되지 않습니다. DCO와 플랫폼·코드 소유자 검토는 별개입니다.
+
+번역 내용이 다르면 영어 기여 안내를 기준으로 합니다. 네이티브 창 동작·라우팅·탐색·sidecar
+경계를 변경하면 관련 Hosted Windows 검사 뒤 플랫폼 shell maintainer의 검토 기록이 필요합니다.
+1인 maintainer 기간의 필수 승인 수 0 설정은 해당 소유자 검토 기록을 대신하지 않습니다.
+
+로컬 검사·원격 CI·main 병합·후보 검증·실사용 확인은 나누어 기록합니다.
+릴리스 공개나 교체는 별도 작업이며 PR 통과만으로 설치 파일·이미지가 배포되지는 않습니다.
+
+## 보안과 라이선스
+
+취약점은 [SECURITY](SECURITY.md)의 비공개 경로로 신고합니다. 키·토큰·백업·원문 로그를
+Issue나 PR에 올리지 않습니다. [행동 규범](CODE_OF_CONDUCT.md)을 따릅니다.
+별도로 명시된 구성 요소를 제외한 기여에는 `GPL-3.0-only`를 적용합니다.

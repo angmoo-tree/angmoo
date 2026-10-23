@@ -6,7 +6,7 @@ labels:
 body:
   - type: markdown
     attributes:
-      value: Proposals may be written in English or Korean. Features and structural changes should agree scope before implementation.
+      value: Proposals may be written in English or Korean. Agree on the scope of features and structural changes before implementation.
   - type: textarea
     id: problem
     attributes:

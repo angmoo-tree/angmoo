@@ -24,5 +24,7 @@ migration chain. Preserve existing revision and embedded migration bodies, and
 verify supported predecessor upgrades when adding a schema change. See
 [Local runtime](local-runtime.md) and [Contributor development](development.md).
 
-Run focused tests first, then the complete public suite. Network-facing
-provider behavior must be represented by a fake or mock in contributor CI.
+Select tests for the affected behavior, callers and failure boundaries. Shared
+runtime or data changes require broader coverage; remote selection follows
+[CI validation](../operations/ci-validation.md). Network-facing provider behavior
+must be represented by a fake or mock in contributor CI.

@@ -10,18 +10,20 @@ Angmoo uses one embedded backend composition for installed users and
 contributors:
 
 ```text
-Next.js dev, Tauri WebView, or bundled static frontend
+Next.js browser frontend or Tauri bundled static frontend
                          ↓
                     FastAPI
                     ├─ SQLite canonical persistence
-                    ├─ FTS5 search projection
+                    ├─ FTS5 / vector search projections
                     ├─ LadybugDB graph projection
                     ├─ scheduler component
                     └─ projector component
 ```
 
-The installed product runs Tauri plus a bundled FastAPI sidecar. The official
-contributor Quickstart runs a Next.js development frontend and the same typed
+Windows runs Tauri plus a bundled FastAPI sidecar. Released Docker uses a
+Next frontend and the embedded backend. Experimental Android reuses the ARM64
+service files through Termux/PRoot, without a Docker daemon on the phone.
+The official contributor Quickstart runs a Next.js development frontend and the same typed
 `CONTRIBUTOR_EMBEDDED` backend in two Linux Docker containers.
 
 PostgreSQL is not a supported application runtime or migration input. The
@@ -63,7 +65,7 @@ See [Backend Architecture](../../backend/ARCHITECTURE.md) for code placement,
 supported entry roles, the single `app/main.py` application factory and shared
 Base/Session ownership. [Historical compatibility](../architecture/backend-compatibility.md)
 explains the exact old import paths retained for supported data upgrades and
-extensions. PR and installation status lives in the separate results document.
+extensions. Release results and platform observations are separate from this architecture contract.
 
 ## Runtime profiles
 
@@ -77,8 +79,8 @@ database, Neo4j, or external workers. Missing or invalid profiles fail closed.
 
 ## Provider and credential boundaries
 
-Provider-neutral contracts live under `app/providers/`. Provider adapters are
-the only modules that import an external provider SDK. Fake providers cover
+Provider-neutral contracts live under `app/providers/`. External SDK access stays in the concrete provider or integration adapter;
+domain services retain business decisions. Fake providers cover
 network-free success and failure scenarios.
 
 The shared Gemini adapter lives in `app/providers/gemini.py`; other transport
@@ -96,7 +98,7 @@ and `dev-v1` read/migration remain supported with the original root secret.
 The former angmoo.com Oracle KMS provider and SDK are retired: `oci-kms-v1:`
 records are preserved but cannot be used as keys, and raw hosted production
 startup is rejected. Existing browser and desktop security checks still apply.
-See [credential retirement and recovery boundaries](../verification/oci-kms-retirement-20261017.md).
+Do not replace preserved encrypted records or the root secret to conceal an unsupported credential.
 
 ## Preserved contracts
 
@@ -104,7 +106,7 @@ See [credential retirement and recovery boundaries](../verification/oci-kms-reti
 - The frozen SQLite baseline and explicit SQLite migration chain are the
   canonical schema contract; historical PostgreSQL Alembic files are evidence,
   not a new-feature runtime chain.
-- World scope, owner control mode, deterministic P2/P3/P4 behavior,
+- World scope, owner control mode, deterministic preparation and execution behavior,
   credential redaction, lease/fencing, retry, and restart behavior remain
   compatibility surfaces.
 - Intentional breaking changes require an Issue, deterministic tests, a data

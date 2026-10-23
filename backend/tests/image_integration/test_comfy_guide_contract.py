@@ -3,8 +3,8 @@ import re
 ROOT=Path(__file__).resolve().parents[3]
 
 def test_english_guide_keeps_code_payloads_auth_routes_and_public_korean_policy():
-    ko=(ROOT/"docs/agent_guide.md").read_text("utf-8")
-    en=(ROOT/"docs/agent_guide.en.md").read_text("utf-8")
+    ko=(ROOT/"docs/agent_guide.ko.md").read_text("utf-8")
+    en=(ROOT/"docs/agent_guide.md").read_text("utf-8")
     pattern=r"```([^\n]*)\n(.*?)```"
     original=[(kind,text) for kind,text in re.findall(pattern,ko,re.S) if kind.strip()!="text"]
     translated=[(kind,text) for kind,text in re.findall(pattern,en,re.S) if kind.strip()!="text"]

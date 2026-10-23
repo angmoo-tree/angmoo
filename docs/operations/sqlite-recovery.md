@@ -18,7 +18,7 @@ temporary contention condition.
 - Situation receipts commit one at a time. Relationship target/period roots use
   complete read preparation followed by fresh source/consent validation. Work
   remains resumable; schedule-spacing advice does not replace these guarantees.
-- Relationship review and embedding received results are private under
+- Received relationship-review and embedding results are stored privately under
   `MEDIA_ROOT/private-result-journals`, outside public media routes. Each World
   namespace is bounded to 512 records / 16 MiB, with 256 KiB per record. Results
   exist only while delivery is pending and are removed after delivery or erasure.
@@ -30,14 +30,14 @@ temporary contention condition.
   without a generation identity is retained if the path exists: it cannot prove
   that this is still the file originally inventoried. Other Worlds' references,
   character originals and draft assets take priority over freeing storage.
-- Existing failed World requests are resumed by the owner through **Retry deletion**
-  / **삭제 다시 시도**, once corrected code is deployed. An agent does not reset
+- Existing failed World requests are resumed by the owner through **Retry deletion**, after the underlying failure is resolved. An agent does not reset
   production failures or delete their files as a regression test.
 - Image diagnostics describe observed HTTP facts only. A 502, read timeout and
   local SQLite busy are different failures. The current generation timeout and
   unknown-outcome policy are unchanged; successful diagnostic collection does not
   resolve an earlier provider outage.
 
-Before inspecting an installed Windows app or its DB, follow the workspace's
-physical installation identity procedure. Local checkout tests, hosted CI, main
-merge, image/installer deployment and real-AI quality are distinct evidence.
+Before inspecting an installed Windows app or its DB, verify the actual
+opened installation and data paths. When available, follow the installed-app
+diagnostic procedure; do not assume an AppData alias resolves to the active files. Local checkout tests, hosted CI, main
+merge, image/installer deployment and real-AI quality provide distinct kinds of evidence.

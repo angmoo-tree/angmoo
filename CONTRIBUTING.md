@@ -1,241 +1,141 @@
 # Contributing to Angmoo
 
-Thank you for helping improve Angmoo. The canonical repository is
-`angmoo-tree/angmoo`. Issues and pull requests may be written in English or Korean;
-the English guide is canonical if translations differ.
+English | [한국어](CONTRIBUTING.ko.md)
 
-## Before opening a change
+Angmoo is a local AI character social network. Contributions should preserve
+existing user data, World boundaries and the behavior of the supported runtimes.
+To install the released application, start with [README](README.md).
+If the translations differ, the English contribution guide is authoritative.
 
-- Read `docs/public/architecture.md` and `docs/public/contribution-map.md`.
-- Use `backend/ARCHITECTURE.md` for backend roles and `frontend/ARCHITECTURE.md`
-  for the frontend's current and target scopes.
-- Start from the latest `main` in a branch or fork.
-- Use synthetic data and fake providers. Never submit credentials, personal
-  data, raw logs, backups, or a local user's World Package.
-- Add or update the smallest relevant deterministic test.
-- Keep unrelated refactoring out of a behavior change.
+## Before changing code
 
-An Issue before implementation is recommended for features, bugs, and
-structural changes so scope can be agreed first. Small documentation and typo
-fixes may open a pull request without an Issue. Issue linkage is not enforced
-mechanically. When an Issue exists, use `Closes #number` or an explicit
-reference in the pull request.
+Use [the contribution map](docs/public/contribution-map.md) to find the owner of
+the behavior. Discuss features and structural changes in an Issue; small
+documentation and typo fixes may go directly to a pull request. Reports and pull
+requests may be written in English or Korean.
 
-## Local development and checks
+Read [Backend Architecture](backend/ARCHITECTURE.md) for backend changes. Frontend
+changes follow [Frontend Architecture](frontend/ARCHITECTURE.md),
+[DESIGN](frontend/DESIGN.md) and the applicable directory instructions.
+Keep a change focused. Do not combine a bug fix with unrelated dependency,
+schema, styling or ownership changes.
 
-CI selects validation from the actual changed paths and records the selection with
-its commit and run identity. Unknown or shared build inputs expand validation.
-Manual and weekly full runs cover the current complete test corpus and supported
-Windows upgrades; a main check pass is separate from release-candidate validation.
-See [CI validation and failure recovery](docs/operations/ci-validation.md).
+## Run the contributor environment
 
-The official contributor baseline requires Git and Docker Compose 2.22.0 or
-newer. It is a reproducible Linux Docker environment with exactly two services:
-Next.js development frontend and FastAPI `CONTRIBUTOR_EMBEDDED` backend. Start
-it from the repository root:
+The contributor backend uses the `CONTRIBUTOR_EMBEDDED` profile. SQLite is the
+only canonical store; FTS5 and LadybugDB are rebuildable projections.
 
-```powershell
+Install Git and Docker with a Linux engine and Compose 2.22.0 or newer. From the
+repository root:
+
+```sh
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-The backend process owns SQLite canonical persistence, FTS5, LadybugDB,
-scheduler, and projector. Frontend HMR and logs are available from the frontend
-container and browser DevTools; FastAPI reload and runtime logs are available
-from the backend container. The named volume is contributor-only and never
-mounts or copies `%LOCALAPPDATA%\Angmoo`.
+The command starts the development frontend and embedded backend. Open
+http://127.0.0.1:3000 in your browser. SQLite, search and graph projection are
+local components of that backend; PostgreSQL and Neo4j servers are not required.
 
-Run checks in the pinned containers:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
-```
-
-Stop without deleting the contributor data volume:
-
-```powershell
+```sh
+docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend
 docker compose -f compose.yml -f compose.dev.yml down
 ```
 
-Native Next.js/FastAPI commands remain an optional maintainer convenience, not
-the cross-platform baseline. Contributors who change the actual Phone or wide
-native windows may use the documented `Docker + Host Tauri dev` bridge against
-the same Docker stack. They must not point it at installed-user data. Windows
-packaging and installed-runtime behavior are verified on Windows Actions;
-macOS packaging is not yet claimed as implemented.
+Stopping preserves the contributor data volume. Do not add `--volumes` when the
+data is needed. Do not mount an installed user's data into development or tests.
+See [development](docs/public/development.md) for host tooling and isolated tests.
 
-On a supported Windows 11 x64 host, install the locked desktop dependencies,
-run the fail-closed preflight, and start the bridge:
+Use [Windows Host Tauri dev](docs/public/windows-host-tauri-dev.md) only when
+native window behavior needs testing. It reuses contributor Docker services and
+has its own WebView profile; it does not start a second installed backend.
 
-```powershell
-npm ci --ignore-scripts --prefix desktop
-.\scripts\dev\desktop-preflight.ps1
-.\scripts\dev\desktop-dev.ps1
-```
+## Code ownership
 
-The wrapper starts or reuses the Docker dev stack and opens only the host Tauri
-Phone/Studio/Graph shell. It must not start `angmoo-sidecar`, use
-`%LOCALAPPDATA%\Angmoo`, stop the Docker stack, or delete its named volume. See
-`docs/public/windows-host-tauri-dev.md` for support limits and the user check.
+- Backend domains own HTTP, service, model, schema and persistence roles.
+  Consume an explicitly supported entry from its actual owner. Runtime composes
+  cross-domain collaboration; domain services do not import runtime or bypass
+  another domain's storage rules.
+- Preserve the caller's Session and transaction ownership. Do not hold SQLite
+  writes across provider calls, waits or retries. Validate owner, scope, source
+  revision and lease again before applying delayed results.
+- Frontend features own their API, DTOs, components and lifecycle. Composition
+  connects different features through props, callbacks and slots. Import actual
+  role files; do not restore retired `public.ts` or `shared` facades.
+- Next and static/Tauri use the same feature components. Keep generic UI and
+  transport independent of product authorization and business decisions.
+- User-visible web copy needs matching English and Korean catalog entries.
+  Fixed Termux terminal instructions are English; public Termux guides are
+  provided in both languages.
+- New assets and dependencies need a source, license and appropriate notices.
+  Follow [BRANDING](BRANDING.md). Use existing semantic tokens and primitives;
+  do not loosen a color or snapshot baseline to conceal a regression.
 
-Changes under the CODEOWNERS platform-shell boundary require an explicit
-**platform-shell maintainer review** record after Hosted Windows checks pass.
-During the single-maintainer period this is a documented owner review Gate, not
-an impossible self-approval requirement. The final user Phone and wide-window
-screen Gate remains separate from technical CI.
+## Validate the affected behavior
 
-Do not add PostgreSQL/Neo4j server runtime behavior, an offline PostgreSQL
-importer, or a second implementation. SQLite is the only canonical store;
-Neo4j parity survives only as static fixtures.
+Start with tests that exercise the changed behavior, its callers and its failure
+boundaries. Use synthetic users and fake providers. No personal database,
+production credential, private package or paid provider request belongs in CI.
 
-Product-shell changes also run a required Chromium smoke in Core CI. A
-contributor with the repository-pinned Node/pnpm toolchain on the host can run
-the same deterministic, fake-backend suite without a provider or database
-write:
+| Change | Local verification to select |
+| --- | --- |
+| Backend service or query | Related domain/runtime tests, scope/authorization and failure cases |
+| Transaction, lease or migration | Contention, cancellation, replay, preservation and supported upgrade tests |
+| Frontend interaction | Type/lint checks and affected browser scenarios; Next/static where both consume it |
+| Shared frontend or build plumbing | Both builds and affected shared consumers |
+| Native or installer behavior | Corresponding native/installer contracts, isolated install/recovery tests and human checks |
+| Documentation | Paths, commands, paired languages and consistency with actual behavior |
 
-```powershell
-cd browser-tests
-pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
-pnpm test
-```
+Read [CI validation](docs/operations/ci-validation.md) for the classifier and
+required remote checks. Focused local checks do not waive a wider CI selection.
+Widen verification when the impact is uncertain. Do not run every backend/frontend
+test solely because a documentation file changed.
 
-The suite uses port `3100` by default and can use an already running frontend
-through `ANGMOO_E2E_BASE_URL`. It must not point at a profile containing real
-user data.
+For structural changes, use the existing checkers from the repository root:
 
-The required `local-core-smoke` check additionally builds the release targets,
-scans image vulnerabilities and secrets, validates SPDX SBOM output, and runs
-the isolated two-service Linux clean-clone lifecycle fixtures. Provider-dependent
-tests use fake providers and must not make external model calls.
-
-World Package changes must use synthetic fixtures only. The representative
-closeout suite verifies a source-to-target round trip, final-artifact exclusion,
-bounded staging, atomic commit/recovery, and independent target evolution:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend `
-  uv run python -m pytest -q `
-  tests/world_packages/test_v1_contract.py `
-  tests/world_packages/test_export.py `
-  tests/world_packages/test_preview.py `
-  tests/world_packages/test_import_commit.py `
-  tests/world_packages/test_closeout.py `
-  tests/world_packages/test_closeout_contract.py
-```
-
-Never upload a real `.angmoo-world` to a public Issue, pull request, Action
-artifact, or log. Create a minimal synthetic package for ordinary bugs. Follow
-`SECURITY.md` and agree on a private transfer before sharing a real artifact for
-a vulnerability investigation. See `docs/public/world-package-v1.md` for the
-portable-data and local-runtime exclusion boundary.
-
-## Pull requests and merge ownership
-
-Every change reaches `main` through a pull request. The required check meanings
-include:
-
-- `backend`
-- `frontend`
-- `embedded-data-migration`
-- `local-core-smoke`
-- `local-autonomy-smoke`
-- `local-full-graph` (LadybugDB plus frozen static parity fixtures)
-- `oss-boundary`
-- `dependency-license`
-- `dco`
-- `architecture-boundary`
-- `tauri-windows`
-- `tauri-windows-host-dev`
-- `windows-installer-build` for the exact-SHA bilingual NSIS EXE candidate
-- `windows-installer-clean-install` for an empty LocalAppData install/start
-- `windows-installer-supported-upgrade` for every supported predecessor
-- `windows-installer-failure-recovery` for fail-closed app/data rollback
-- final `windows-installer` only when the complete installer matrix passes
-
-`windows-local-smoke` and `codeql` remain advisory checks. Advisory does not
-mean ignored: failures and promotion conditions must be documented and
-security findings must be resolved or explicitly triaged.
-
-External contributors submit pull requests and cannot push to or merge
-`main`. The repository owner performs the final review and merge after required
-checks pass and conversations are resolved. During the single-maintainer
-period, `required approvals: 0` avoids requiring an impossible self-approval;
-it does not remove owner review or give contributors merge authority.
-
-## License and DCO
-
-Accepted contributions are provided under `GPL-3.0-only` unless explicitly
-stated otherwise. Every human commit must certify the Developer Certificate of Origin 1.1 with a `Signed-off-by: Name <email>` trailer. Use:
-
-```powershell
-git commit -s
-```
-
-The DCO 1.1 confirms that you have the right to submit the contribution; it
-does not replace the project license. Dependabot receives only the narrow bot
-exception enforced by the repository checker.
-
-## Contract and architecture changes
-
-REST/OpenAPI, Alembic, routine/social/graph contracts, authorization,
-credentials, lease/retry, and user-data boundaries are compatibility surfaces.
-Intentional breaking changes require an Issue, migration or compatibility plan
-when applicable, focused tests, and a clear rollback path.
-
-The backend structure and ownership rules are described in
-[`backend/ARCHITECTURE.md`](backend/ARCHITECTURE.md), with a navigation guide in
-[`docs/architecture/backend-domains.md`](docs/architecture/backend-domains.md).
-Before adding behavior, choose the owning domain and role. Import supported
-services, schemas, contracts, and exceptions explicitly from their actual owner;
-an aggregate `public.py` is not required. A service filename does not make every
-helper a supported cross-domain operation. Do not bypass another domain's
-authorization, state transitions, or persistence rules through its models or
-repositories. Compose multi-domain work in runtime, preserving the shared
-Session and commit/rollback contract. Do not add new behavior to the retired
-horizontal service, model, schema, or CRUD collections.
-
-The L2.5 frontend product-shell contract is documented in
-`docs/architecture/frontend-product-shell.md`. Route files import migrated
-features only through `@/features/<feature>/public`; features do not deep-import
-one another, and product-neutral `shared` primitives do not import features or
-legacy data clients.
-
-User-visible frontend work must also read `frontend/DESIGN.md` and
-`docs/architecture/frontend-design-reference.md`. Record whether hosted visual
-anatomy is `DIRECT`, `ADAPTED`, `LOCAL`, or `REJECTED`, keep Next and
-static/Tauri wrappers on the same feature component, and do not invent actions,
-counts, routes, or state absent from the Local capability contract. Run the
-design inventory alongside the architecture boundary:
-
-```powershell
+```sh
+uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
+uv run --project backend python scripts/ci/check_architecture_boundaries.py
+uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
 uv run --project backend python scripts/ci/check_frontend_design_contract.py --check
 ```
 
-An intentional raw-color reduction updates
-`security/frontend_design_policy.json` and regenerates
-`docs/architecture/frontend-design-baseline.json` with `--write`. Increasing
-the baseline or adding an asset, font, hosted-only source file, or screenshot
-requires explicit rationale and provenance; regenerating a report alone is not
-approval.
+Select the relevant commands. Inventory regeneration records facts; it does not
+authorize a new dependency. Historical migration proofs stay available in Git;
+ongoing validation protects current behavior and supported data upgrades.
 
-The import inventory records facts, while `security/architecture_import_policy.json`
-records target rules and exact reviewed legacy exceptions. Existing exceptions
-may shrink but must not grow merely to make CI pass. Run:
+## Submit a pull request
 
-```powershell
-uv run --project backend python scripts/ci/generate_architecture_inventory.py --write
-uv run --project backend python scripts/ci/check_architecture_boundaries.py
-uv run --project backend python scripts/ci/check_frontend_architecture_boundaries.py
-uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boundaries.py tests/test_l2_5_frontend_architecture_boundaries.py
-```
+Human contributions require the Developer Certificate of Origin 1.1 (DCO 1.1).
+Use `git commit -s` to add your own `Signed-off-by` trailer. Apply the
+`embedded-data-migration` label when changing an embedded data migration contract.
 
-Keep structure-only PRs focused. Do not mix behavior changes, migrations,
-provider configuration, dependency majors, transaction semantics, bulk
-formatting, or Hosted/Private/Production settings into a package-move PR.
+1. Work in a fork or a focused branch. Preserve unrelated changes.
+2. Commit with a DCO 1.1 sign-off: `git commit -s`.
+3. Explain the problem, resulting behavior, affected contracts and checks run.
+4. Link an Issue when one exists, and document any remaining unmeasured cases.
+5. For a UI change, identify its surface, design provenance, language/route
+   coverage and intentional visual differences. For data changes, describe
+   migration, preservation and recovery.
+6. Wait for applicable checks and maintainer review. Fix reproducible failures
+   rather than disabling checks, hashes, assertions or data safeguards.
 
-Report vulnerabilities through the private process in `SECURITY.md`, never a
-public Issue.
+Every human-authored commit needs its own sign-off. Do not rewrite another
+contributor's history without agreement. Existing narrowly scoped automation
+exceptions do not exempt human commits. DCO and platform/code-owner review remain
+separate requirements.
+
+Changes to native window behavior, routing, navigation or sidecar boundaries
+need a recorded platform-shell maintainer review after the applicable Hosted
+Windows checks. During the single-maintainer period, a repository setting of
+zero required approvals does not replace that documented owner review.
+
+Report local tests, hosted CI, main merge, candidate checks and actual user
+checks separately. Publishing or replacing a release is a separate operation;
+a green PR does not publish an installer or container.
+
+## Security and license
+
+Report vulnerabilities privately through [SECURITY](SECURITY.md). Do not put
+keys, tokens, backups or unredacted logs in an Issue or pull request. Read
+[CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) before participating. Accepted contributions
+use `GPL-3.0-only` unless an explicitly identified component has another license.

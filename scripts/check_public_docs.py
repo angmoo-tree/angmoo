@@ -33,7 +33,9 @@ REQUIRED_MARKERS = {
         "## Install and run",
         "## Current limitations",
         "A saved memory is not necessarily retrieved or used in every response.",
-        "Continuous execution is not guaranteed on every phone.",
+        "continuous execution is not guaranteed on every phone.",
+        "## Supported Models",
+        "local text models through tools such as Ollama or LM Studio are not currently supported.",
         "GPL-3.0-only",
         "[LICENSE](LICENSE)",
         "[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)",
@@ -48,16 +50,17 @@ REQUIRED_MARKERS = {
         "## 설치하고 실행하기",
         "## 현재 한계",
         "저장된 기억이 모든 응답에서 검색되거나 사용되는 것은 아닙니다.",
-        "모든 휴대폰에서의 동작을 보장하지 않습니다.",
+        "모든 휴대폰에서 지속 실행을 보장하지 않습니다.",
+        "## 지원하는 모델",
         "[한국어 기여 가이드](CONTRIBUTING.ko.md)",
         "GPL-3.0-only",
         "[LICENSE](LICENSE)",
         "[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)",
         "World Package",
-        "Runtime 데이터",
+        "로컬 실행 데이터",
     ),
     "CONTRIBUTING.md": (
-        "Issues and pull requests may be written in English or Korean",
+        "Reports and pull requests may be written in English or Korean.",
         "`CONTRIBUTOR_EMBEDDED`",
         "SQLite is the only canonical store",
         "GPL-3.0-only",
@@ -66,10 +69,10 @@ REQUIRED_MARKERS = {
         "Signed-off-by",
     ),
     "CONTRIBUTING.ko.md": (
-        "한국어와 영어 모두 사용할 수 있습니다",
-        "## 개발 환경",
-        "## Issue와 작업 범위",
-        "## Branch, commit과 Pull Request",
+        "Issue와 PR은 한국어 또는 영어로 작성할 수 있습니다.",
+        "## 기여 환경 실행",
+        "## 코드 변경 전",
+        "## PR 제출",
         "`CONTRIBUTOR_EMBEDDED`",
         "`embedded-data-migration`",
         "GPL-3.0-only",
@@ -79,7 +82,7 @@ REQUIRED_MARKERS = {
     ),
     ".github/PULL_REQUEST_TEMPLATE.md": (
         "SQLite / FTS5 / LadybugDB migration, replay, or graph checks",
-        "SQLite canonical baseline, generation lifecycle",
+        "Relevant SQLite baseline, generation or installed-data migration checks when those contracts change",
         "GPL-3.0-only",
         "DCO 1.1",
         "Signed-off-by",
@@ -95,9 +98,10 @@ REQUIRED_MARKERS = {
         "## License scope boundary",
     ),
     "SECURITY.md": (
-        "GitHub Private Vulnerability Reporting",
-        "## 한국어 신고 안내",
-        "신고는 한국어나 영어로 작성할 수 있습니다",
+        "GitHub private vulnerability reporting",
+        "## Report a vulnerability privately",
+        "Reports may be written in English or Korean.",
+        "Do not disclose an exploit, credential or personal data in a public Issue.",
     ),
 }
 LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -124,11 +128,11 @@ def check(root: Path) -> list[str]:
         document = root / relative
         if not document.is_file():
             continue
-        text = document.read_text(encoding="utf-8")
+        text = re.sub(r"\s+", " ", document.read_text(encoding="utf-8"))
         errors.extend(
             f"{relative}: missing required marker {marker}"
             for marker in markers
-            if marker not in text
+            if re.sub(r"\s+", " ", marker) not in text
         )
     for document in sorted(root.rglob("*.md")):
         if not document.is_file():

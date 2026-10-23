@@ -545,12 +545,12 @@
     "docs/architecture/frontend-design-reference.md": [
       "DIRECT / ADAPTED / LOCAL / REJECTED",
       "ManualSocialPostRead.reply_count",
-      "NOT WCAG AA PASS",
-      "Raw-color baseline",
-      "Route and surface inventory",
-      "UI-B semantic foundation",
-      "UI-D PR #207 follow-up",
-      "Visual harness extension"
+      "not a WCAG AA contrast pass",
+      "The raw-color scan covers sorted",
+      "next-static-compatibility.json",
+      "frontend/src/styles/semantic-tokens.css",
+      "Preserve actual write capabilities.",
+      "Playwright dependencies belong to `browser-tests`."
     ],
     "docs/public/changing-frontend.md": [
       "check_frontend_design_contract.py",
@@ -732,11 +732,11 @@
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",
-      "UI-A DESIGN CONTRACT CLOSEOUT",
-      "WCAG AA PASS가 아니다",
+      "Do not widen allowlists or baselines to hide regressions.",
+      "not a WCAG AA contrast pass",
       "check_frontend_design_contract.py",
       "frontend-design-reference.md",
-      "version: 1.11"
+      "Screenshot counts and earlier passes do"
     ],
     "scripts/ci/check_frontend_design_contract.py": [
       "UI_D_COLOR_CONTRACT",

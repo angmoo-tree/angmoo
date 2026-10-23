@@ -19,18 +19,24 @@ This starts:
   projector.
 
 Open <http://127.0.0.1:3000>. Use the browser DevTools for frontend console and
-network diagnostics. Use `docker compose ... logs -f backend` or `frontend` for
-container logs.
+network diagnostics. Use `docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend`
+for container logs.
 
-Run deterministic checks inside the pinned containers:
+Choose deterministic checks for the changed behavior inside the pinned containers.
+The following backend command is an example for Chat changes, not the default
+required suite for every edit. Select the actual affected test files:
 
 ```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
+docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q tests/chat
 docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
 ```
+
+Run build or CI-policy checks when those consumers are affected. Wider remote
+requirements follow [CI validation](../operations/ci-validation.md); focused local
+checks do not bypass them. Documentation-only changes need content/link review.
 
 The contributor named volume is separate from installed
 `%LOCALAPPDATA%\Angmoo`. Parent `DATABASE_URL`, `NEO4J_URI`, graph-provider, or

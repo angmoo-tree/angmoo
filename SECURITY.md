@@ -1,61 +1,56 @@
 # Security policy
 
-## Reporting a vulnerability
+## Report a vulnerability privately
 
-Use [GitHub Private Vulnerability Reporting](https://github.com/angmoo-tree/angmoo/security/advisories/new).
-Do not put credentials, exploits, personal information, local database dumps,
-World Packages, backups, or unredacted logs in a public Issue, Discussion, or
-pull request.
+Use [GitHub private vulnerability reporting](https://github.com/angmoo-tree/angmoo/security/advisories/new).
+Reports may be written in English or Korean.
+Do not disclose an exploit, credential or personal data in a public Issue.
+If a private report cannot be submitted, request a private contact channel
+without publishing sensitive details.
 
-Include only the minimum sanitized evidence:
+Include the release version or commit, operating system, installation method,
+affected behavior, expected security boundary and a minimal synthetic
+reproduction. Share safe error codes and redacted diagnostics. Do not attach
+personal databases, API keys, session tokens, backups, real World Packages or
+unredacted service logs.
 
-- affected revision, operating system, and Local profile;
-- impact and preconditions;
-- synthetic reproduction steps;
-- redacted paths, status codes, and fingerprints;
-- whether local user data, BYOK credentials, or backups may be affected.
+## Local data and credentials
 
-Do not test systems or data you do not own without explicit authorization.
+Angmoo stores application data on the device where it is installed. Configured AI requests send
+the content needed by that request to the selected provider. Local storage does
+not mean every enabled feature operates without a network.
 
-## Local data and BYOK boundary
+Credential read responses expose status or fingerprints, not stored plaintext.
+Keep the installation's secret material together with its protected backup;
+encryption does not make a backup safe to publish. Keep services on their
+documented loopback bindings. Remote access requires its own threat model and
+must not be enabled by disabling Origin, Host, token or authorization checks.
 
-Angmoo is a local-first application. The operator is responsible for access to
-the device, database services, backups, and imported World Packages. Provider
-keys are user-supplied BYOK secrets and must remain outside source control,
-Issues, PRs, logs, fixtures, and screenshots. Use synthetic fixed values only
-where an exact path+rule+value exception is reviewed by the repository policy.
+World Packages transfer creator-selected initial content, not a complete
+application backup. Review their content and license before sharing or importing.
 
-Backups can contain posts, comments, relationships, memories, routines,
-credentials, and World data. Store and dispose of them as sensitive user data.
-Deleting a UI record does not prove that an independent backup was erased.
+## Updates and recovery
 
-## Supported security controls
+Use the official versioned installer or image pair and preserve the data root or
+Docker named volume. Supported Local upgrades use the embedded SQLite migration
+chain. Do not apply historical PostgreSQL Alembic migrations to a Local database
+or start competing backends against the same data root.
 
-The repository runs secret/history scans, dependency and license audits, DCO
-verification, Local OSS boundary checks, and CodeQL triage. Local Bot and login
-abuse controls remain database-backed. Apply every Alembic migration before
-running multiple backend processes; process-local counters are not a supported
-substitute.
+Before diagnosing an installed Windows payload or database, confirm the actual
+installation and opened paths using the project's installed-app diagnostic
+procedure. A redirected or stale path alone is not evidence of data corruption.
+Use [SQLite recovery](docs/operations/sqlite-recovery.md) for contention and
+retained-result boundaries. Diagnose unexpected termination before manually
+removing locks, pending work or data.
 
-## Response and supported versions
+## Contributor security checks
 
-The maintainer may privately reproduce the issue with synthetic data, isolate
-the affected path, revoke test credentials, prepare a forward-fix PR, and
-publish an advisory after exposure risk is controlled. No hosted production
-incident-response service is promised by this repository.
+Use synthetic data and fake providers for public tests. Secret scanning,
+dependency and license checks, authorization tests, migration checks and build
+provenance protect different boundaries. A passing check does not certify all
+security properties. Fix the cause of a check failure rather than broadening an
+allowlist or disabling verification.
 
-Supported versions and security-update windows are stated in GitHub Releases.
-
-## 한국어 신고 안내
-
-신고는 한국어나 영어로 작성할 수 있습니다.
-
-보안 문제는 [GitHub 비공개 취약점 신고](https://github.com/angmoo-tree/angmoo/security/advisories/new)를
-사용해 주세요. credential, exploit, 개인정보, 로컬 DB dump, World Package,
-backup, 원문 log를 public Issue·Discussion·PR에 올리지 마세요.
-
-영향받는 revision과 OS, Local profile, 영향과 전제조건, synthetic 재현 절차,
-민감정보를 제거한 path·status code·fingerprint만 전달해 주세요. BYOK key와
-backup은 사용자의 민감한 로컬 데이터이며 source·Issue·PR·log에 복사하지
-않습니다. 명시적 승인 없이 다른 사람의 시스템이나 데이터를 시험하지
-마세요.
+Consult the release notes and repository security advisories for affected
+versions and available fixes. This policy does not promise a response deadline
+or indefinite support for every historical build.

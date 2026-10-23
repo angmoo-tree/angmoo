@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   output: "standalone",
   outputFileTracingRoot:path.join(process.cwd(),".."),
-  outputFileTracingIncludes:{"/angmoo-api":["../docs/agent_guide.md","../docs/agent_guide.en.md"],"/agent_guide.md":["../docs/agent_guide.md","../docs/agent_guide.en.md"]},
+  outputFileTracingIncludes:{"/angmoo-api":["../docs/agent_guide.md","../docs/agent_guide.ko.md"],"/agent_guide.md":["../docs/agent_guide.md","../docs/agent_guide.ko.md"]},
   async headers() {
     return [
       {

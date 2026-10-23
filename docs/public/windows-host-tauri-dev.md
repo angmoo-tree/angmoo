@@ -1,13 +1,13 @@
 # Windows Host Tauri dev
 
-Use this optional workflow only when changing Angmoo's actual Phone window,
-native drag/resize, Creator Studio wide window, Relationship Graph wide window,
-or Tauri window routing. Ordinary product development should use the Docker
-contributor environment in a host browser.
+Use this optional workflow only when changing Angmoo's native window behavior,
+resizing, Creator Studio or Memory workspaces, or Tauri window routing.
+For ordinary product development, use the Docker contributor environment in a
+host browser.
 
 ## Supported reference environment
 
-This PR verifies Windows 11 x64. You need:
+This workflow targets Windows 11 x64. You need:
 
 - Docker Desktop with a running Linux container engine and Docker Compose
   2.22.0 or newer;
@@ -18,13 +18,13 @@ This PR verifies Windows 11 x64. You need:
 - Microsoft Edge WebView2 Evergreen Runtime;
 - free loopback port `127.0.0.1:3000`.
 
-The recorded reference host is Windows 11 Home build `26200.9168`. Other
-Windows 11 builds may pass the same capability preflight; Windows 10, Windows
+Run the capability preflight on the actual host; an old reference build does
+not establish current compatibility. Windows 10, Windows
 ARM64, Server, Wine, WSL GUI, and macOS are not claimed by this workflow.
 
 ## One-command bridge
 
-From a clean checkout on the PR branch, close any installed Angmoo window and
+From the development checkout, close any installed Angmoo window and
 run:
 
 ```powershell
@@ -34,7 +34,7 @@ run:
 
 The first command reports every prerequisite and fails closed. The second
 starts or reuses the two-service Docker contributor stack, checks runtime
-readiness, starts Compose Watch, and opens the Windows Host Tauri Phone shell.
+readiness, starts Compose Watch, and opens the Windows Host Tauri main shell.
 It does not build a sidecar or start a host FastAPI process.
 
 Use `-NoWatch` only when the Docker stack is already healthy and source watch is
@@ -65,10 +65,10 @@ must handle the active Windows console encoding itself.
 
 ## What to verify
 
-1. The Phone window opens at Device Home and can move and resize.
-2. Creator Studio opens in the one `studio` wide window.
-3. Relationship Graph opens in the one `relationship-graph` wide window and
-   preserves its route.
+1. The main window opens at Device Home and can move, resize and maximize.
+2. Creator Studio opens in a single wide `studio` window.
+3. Memory opens in its `memory` workspace; current World relationships remain
+   inside the World route and retain scope.
 4. Closing and reopening each wide surface reuses its window label.
 5. Docker shows only healthy `frontend` and `backend` services.
 6. No host `angmoo-sidecar`, PostgreSQL, Neo4j, or Angmoo-owned JVM starts.

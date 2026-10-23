@@ -442,7 +442,9 @@ def test_candidate_workflow_cannot_gain_write_permissions_or_drop_arm64():
 
 
 @pytest.mark.parametrize("modern_guides", [False, True])
-def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tmp_path, monkeypatch, modern_guides):
+@pytest.mark.parametrize("review_layout", [None, "legacy", "modern"])
+def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tmp_path, monkeypatch, modern_guides, review_layout):
+    import base64
     import shutil
     import subprocess
     import scripts.release.prepare as preparation
@@ -484,9 +486,24 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
         "exe": exe, "source_sha": SOURCE, "run_id": "10", "attempt": "2", "artifact_id": "20"}))
     (directories["signed"] / "bundle.jsonl").write_text("synthetic signed bundle fixture")
 
+    review_ref = "d" * 40
+    note_names = {"en": "notes.md" if review_layout == "modern" else "notes.en.md", "ko": "notes.ko.md"}
+    note_bytes = {locale: (f"Reviewed {locale} notes from the fixed document source, not the product checkout.\n").encode()
+                  for locale in ("en", "ko")}
+    p5 = {"schema": "angmoo-p5.v1", "source_sha": SOURCE,
+          "windows": {"sha256": exe["sha256"], "run_id": "10", "attempt": "2"},
+          "images": {item["service"] + "/" + item["platform"]: item["manifest_digest"] for item in images},
+          "checks": [{"workflow": workflow, "run_id": str(i), "attempt": "1"} for i, workflow in enumerate(
+              ("ci.yml", "local-smoke.yml", "security.yml"), 30)],
+          "windows_user_check": {"result": "PASS", "reviewer": "jingujeon", "exe_sha256": exe["sha256"],
+                                 "evidence": "Synthetic acceptance record for the offline test only.", "checked_at": "fixture"},
+          "android_support": "experimental-not-certified"}
+    reviewed = {"p5.json": json.dumps(p5).encode(), **{note_names[locale]: data for locale, data in note_bytes.items()}}
+    read_paths = []
+
     class Evidence:
         def main_source(self, source):
-            assert source == SOURCE
+            assert source in {SOURCE, review_ref}
         def run(self, run_id, attempt, **kwargs):
             assert kwargs["source"] == SOURCE
             return {"id": run_id}
@@ -498,8 +515,16 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
             shutil.copytree(directories[artifact["kind"]], destination)
             return destination
         def read(self, path):
-            assert path == "commits/release-v0.1.0"
-            return {"sha": SOURCE}
+            read_paths.append(path)
+            if path == "commits/release-v0.1.0":
+                return {"sha": SOURCE}
+            prefix = "contents/docs/releases/0.1.0"
+            assert review_layout and path.endswith("?ref=" + review_ref)
+            name = path.split("?", 1)[0].removeprefix(prefix).lstrip("/")
+            if not name:
+                return [{"type": "file", "name": item} for item in reviewed]
+            body = reviewed[name]
+            return {"type": "file", "encoding": "base64", "size": len(body), "content": base64.b64encode(body).decode()}
 
     attestation_calls = []
     def attest(command, **kwargs):
@@ -510,7 +535,7 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     monkeypatch.setattr(preparation, "registry_document", lambda _: None)
     arguments = dict(source=SOURCE, tag="release-v0.1.0", windows_run="10", windows_attempt="2",
         windows_artifact="20", candidate_run="11", candidate_attempt="1", candidate_artifact="21",
-        review_ref=None, github=Evidence())
+        review_ref=review_ref if review_layout else None, github=Evidence())
     # A repaired publisher may be newer than the immutable product. Only the
     # product checkout may contribute adapter bytes and public guides.
     product = tmp_path / "product"
@@ -535,7 +560,7 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     output = tmp_path / "prepared"
     expected = preparation.prepare(**arguments, output=output)
     assert len(attestation_calls) == 1 and "--source-digest" in attestation_calls[0]
-    assert expected["publication_ready"] is False  # P5 and published images are absent.
+    assert expected["publication_ready"] is False  # Published images remain absent.
     assert "private.sqlite" not in {item["name"] for item in expected["assets"]}
     import zipfile
     with zipfile.ZipFile(output / "assets/angmoo-termux-tools.zip") as tools:
@@ -543,6 +568,13 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
         assert tools.read("LICENSE") == b"original product license"
     assert (output / "assets/termux.en.md").read_text() == "original product guide en"
     assert (output / "assets/install-termux.py").read_bytes().startswith(b"# original product bootstrap\n")
+    if review_layout:
+        order = ("en", "ko") if review_layout == "modern" else ("ko", "en")
+        assert expected["notes"] == "".join(note_bytes[locale].decode() + "\n\n" for locale in order)
+        for locale in ("en", "ko"):
+            assert (output / f"assets/release-notes.{locale}.md").read_bytes() == note_bytes[locale]
+        assert any(path.startswith("contents/") for path in read_paths)
+        assert all(path.endswith("?ref=" + review_ref) for path in read_paths if path.startswith("contents/"))
     api = Release()
     assert synchronize(expected, output / "assets", "verify", api, lambda: pytest.fail("no write"))["remote_writes"] == 0
     assert api.calls == []
