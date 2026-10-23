@@ -196,6 +196,7 @@ def test_termux_release_asset_is_identical_after_checkout_timestamp_changes(tmp_
     names = ("angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh")
     for name in names:
         (tools / name).write_bytes(("synthetic " + name).encode())
+    (tools / "bootstrap.py").write_text("FILES = frozenset(" + repr({*names, "LICENSE"}) + ")\n")
     (root / "LICENSE").write_text("synthetic license")
     first, second = tmp_path / "first.zip", tmp_path / "second.zip"
     package_termux_tools(first, root)
@@ -440,7 +441,8 @@ def test_candidate_workflow_cannot_gain_write_permissions_or_drop_arm64():
     assert validate_workflow(document, "container-candidate.yml")
 
 
-def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tmp_path, monkeypatch):
+@pytest.mark.parametrize("modern_guides", [False, True])
+def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tmp_path, monkeypatch, modern_guides):
     import shutil
     import subprocess
     import scripts.release.prepare as preparation
@@ -524,7 +526,8 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     (product / "docs/public").mkdir(parents=True)
     (product / "LICENSE").write_text("original product license")
     for locale in ("en", "ko"):
-        (product / f"docs/public/termux.{locale}.md").write_text("original product guide " + locale)
+        name = "termux.md" if modern_guides and locale == "en" else f"termux.{locale}.md"
+        (product / "docs/public" / name).write_text("original product guide " + locale)
     (product / "launcher/termux/angmoo.py").write_bytes(b"# original product adapter\n")
     bootstrap = product / "launcher/termux/bootstrap.py"
     bootstrap.write_bytes(b"# original product bootstrap\n" + bootstrap.read_bytes())

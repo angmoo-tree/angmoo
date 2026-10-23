@@ -78,19 +78,31 @@ class BootstrapTests(unittest.TestCase):
 
     def test_success_runs_setup_install_start_in_order_without_path_edits(self):
         with patch.object(bootstrap.subprocess, "run") as run:
+            run.return_value.stdout = "registered\n"
             root = Path("private")
             bootstrap.install_and_start(root / "stage", root)
         self.assertEqual([call.args[0] for call in run.call_args_list], [
             ["sh", str(root / "stage/setup.sh")],
+            [sys.executable, str(root / "stage/command_registration.py"), "verify"],
             [str(root / ".local/bin/angmoo"), "install", "--release", "0.1.0"],
             [str(root / ".local/bin/angmoo"), "start"],
         ])
         self.assertTrue(all(call.kwargs["check"] for call in run.call_args_list))
+        self.assertEqual(run.call_args_list[1].kwargs["stdout"], subprocess.PIPE)
+        self.assertNotIn("stderr", run.call_args_list[1].kwargs)
+
+    def test_unrecognized_registration_result_cannot_install_or_start(self):
+        with patch.object(bootstrap.subprocess, "run") as run:
+            run.return_value.stdout = "unexpected-success-marker\n"
+            with self.assertRaisesRegex(bootstrap.InstallError, "command_verification_invalid"):
+                bootstrap.install_and_start(Path("stage"), Path("private"))
+            self.assertEqual(run.call_count, 2)
 
     def test_setup_or_image_install_failure_never_starts_services(self):
-        for successful_steps in (0, 1):
+        for successful_steps in (0, 1, 2):
             with self.subTest(successful_steps=successful_steps), patch.object(bootstrap.subprocess, "run") as run:
-                run.side_effect = [None] * successful_steps + [subprocess.CalledProcessError(7, "synthetic")]
+                verified = subprocess.CompletedProcess([], 0, stdout="registered\n")
+                run.side_effect = [verified] * successful_steps + [subprocess.CalledProcessError(7, "synthetic")]
                 with self.assertRaises(subprocess.CalledProcessError):
                     bootstrap.install_and_start(Path("stage"), Path("private"))
                 self.assertEqual(run.call_count, successful_steps + 1)
@@ -160,6 +172,7 @@ class BootstrapTests(unittest.TestCase):
                 stages = home / "stages"
                 content = {name: b"synthetic" for name in bootstrap.FILES}
                 content["setup.sh"] = Path(__file__).with_name("setup.sh").read_bytes()
+                content["command_registration.py"] = Path(__file__).with_name("command_registration.py").read_bytes()
                 content["angmoo.py"] = (
                     'import os, sys\nfrom pathlib import Path\n'
                     'with Path(os.environ["ANGMOO_TEST_STAGES"]).open("a") as output:\n'
