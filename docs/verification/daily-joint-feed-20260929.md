@@ -1,10 +1,13 @@
 # 일반 일과·공동 활동 분리와 Feed 관찰 저장 경계 구현 결과
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 작성일: 2026-09-29
 제품 저장소: `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`
 브랜치: `fix/routine-output-contract-cleanup`
 구현 전 HEAD: `003d3876d50f6be0b2fd0e8e20a90ebac894feb8`
-실행 계획: [09-29 통합 코드 구현 세부 계획](<../../../docs/plan/09-29 일반 일과·공동 활동 분리와 Feed 관찰 SQLite 저장 경계 통합 코드 구현 세부 계획.md>)
+실행 계획: 09-29 통합 코드 구현 세부 계획 (local-only: `../../../docs/plan/09-29 일반 일과·공동 활동 분리와 Feed 관찰 SQLite 저장 경계 통합 코드 구현 세부 계획.md`)
 증거 폴더: `D:/project_code/angmoo-workspace/.local-diagnostics/daily-joint-feed-integration-20260929`
 
 ## 1. 최종 동작과 변경 범위

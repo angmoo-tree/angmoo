@@ -1,6 +1,9 @@
 # 다국어·사용자 시간대·Gemini SNS 통합 구현과 로컬 검증
 
-작성·검증일은 2026-10-04 KST다. 계획 식별자와 artifact 디렉터리의 `20261003`은 시작한 계획의 날짜를 유지한다. 기준은 workspace의 [통합 구현 계획](<D:/project_code/angmoo-workspace/docs/plan/10-03 Angmoo 다국어·사용자 시간대와 Gemini SNS 스키마·누락 복구 통합 코드 구현·검증 세부 계획.md>)이다.
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
+작성·검증일은 2026-10-04 KST다. 계획 식별자와 artifact 디렉터리의 `20261003`은 시작한 계획의 날짜를 유지한다. 기준은 workspace의 통합 구현 계획 (local-only: `D:/project_code/angmoo-workspace/docs/plan/10-03 Angmoo 다국어·사용자 시간대와 Gemini SNS 스키마·누락 복구 통합 코드 구현·검증 세부 계획.md`)이다.
 
 작업 repo는 `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`, 브랜치는 `feat/0.1.0-release-readiness`다. 시작 HEAD는 `8f4e92b9201284e7777b0927f0d1bc649a6e049b`이며 시작 작업 폴더는 clean이었다. 통합 이슈 [#360](https://github.com/angmoo-tree/angmoo/issues/360)을 생성했다. P00–P26 및 P28–P30의 구현·격리 로컬 검증을 수행하고, P27 실서비스 검증은 조건 미준비로 `NOT_RUN / FOLLOW_UP`에 둔다. 로컬 완료, 실제 AI 품질, 사용자 실행본 적용은 별개다.
 

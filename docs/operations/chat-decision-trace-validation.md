@@ -1,8 +1,11 @@
 # 채팅 Supervisor·Graph 판단 진단 추가 실행 기록
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 - 실행일: 2026-09-12
 - 상태: **진단 구현·로컬 검증·개발 runtime 반영 완료 / 사용자 5문항 결과·기본 진단 확인 / 1·3 상세값 판정 대기**
-- 계획: [09-12 세부 진단기록 추가 계획](../../../docs/plan/09-12%20채팅%20Supervisor·Graph%20판단%20불일치%20원인%20분리를%20위한%20세부%20진단기록%20추가%20로컬%20계획.md)
+- 계획: 09-12 세부 진단기록 추가 계획 (local-only: `../../../docs/plan/09-12 채팅 Supervisor·Graph 판단 불일치 원인 분리를 위한 세부 진단기록 추가 로컬 계획.md`)
 - 로컬 브랜치: `fix/chat-retrieval-debugging`
 - HEAD: `ee8eabf7c68e5a7fb7a5c4e9d11dc0e4d2a56a8d`
 - 증거 디렉터리: `D:/project_code/angmoo-workspace/.task-output/chat-decision-trace-20260912-205831`

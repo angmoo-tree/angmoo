@@ -1,13 +1,16 @@
 # SNS 상황기억 정규화 복구·설명 진단 구현 결과 — 2026-10-10
 
+> **Local evidence references:** Paths labeled local-only below identify records from the original verification workspace; those files are not distributed in this public repository. This link repair does not rerun or change the dated findings.
+> **로컬 근거 경로:** 아래 로컬 전용 경로는 원래 검증 작업 공간의 기록을 가리키며 공개 저장소에 포함되지 않습니다. 링크 표시 정비로 과거 검증을 재실행하거나 결과를 바꾸지 않았습니다.
+
 요청한 workspace 계획의 **I00–I29, 30개 단계**를 현재 로컬 브랜치에서 수행했다. 신규 접수의 저장 표현 비교, 기존 차단 기록의 증명 기반 복구, 설명 누락의 구조 진단, 별도 coverage, 외부 수집기를 구현했다. 기본 검증 V01–V17의 해당 범위를 확인했고 **V18 실제 AI 자연 관찰은 실행하지 않았다**. 원본 차단 기록의 재검사·원본 서버 조작도 수행하지 않았다.
 
 - 저장소: `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`.
 - 브랜치: `feat/0.1.0-release-readiness`.
 - 시작 HEAD: `b8104fac3ac99f01573d633fba6db9751cd25adf`; 시작 제품 working tree는 깨끗했다.
 - 이번 결과는 이 문서를 포함한 로컬 커밋으로 보존한다. PR·push·CI·main 전환/병합·새 worktree·설치/배포는 하지 않았다.
-- 실행 계획: [10-10 구현 계획](<../../../docs/plan/10-10 SNS 상황기억 본문 정규화 오탐 복구와 설명 누락 관찰 강화 코드 구현 세부 계획.md>).
-- 운영 판독: [10-07 가이드 §17–19](<../../../docs/plan/10-07 SNS V2 4회 활동·이미지 생성·인식·기억 검색·예약 정리 통합 관찰 세션 실행과 판독 가이드.md>).
+- 실행 계획: 10-10 구현 계획 (local-only: `../../../docs/plan/10-10 SNS 상황기억 본문 정규화 오탐 복구와 설명 누락 관찰 강화 코드 구현 세부 계획.md`).
+- 운영 판독: 10-07 가이드 §17–19 (local-only: `../../../docs/plan/10-07 SNS V2 4회 활동·이미지 생성·인식·기억 검색·예약 정리 통합 관찰 세션 실행과 판독 가이드.md`).
 
 ## 구현 계약
 
