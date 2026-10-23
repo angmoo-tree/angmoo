@@ -6,7 +6,7 @@ import sys
 
 def main():
     args = [sys.executable, "-m", "scripts.release.publish"]
-    for name in ("operation", "source", "tag", "windows-run", "windows-attempt", "windows-artifact", "candidate-run", "candidate-attempt", "candidate-artifact", "review-ref", "output"):
+    for name in ("operation", "source", "tag", "windows-run", "windows-attempt", "windows-artifact", "candidate-run", "candidate-attempt", "candidate-artifact", "review-ref", "product-root", "output"):
         value = os.environ.get("RELEASE_" + name.upper().replace("-", "_"))
         if value:
             args += ["--" + name, value]

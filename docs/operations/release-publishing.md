@@ -12,8 +12,16 @@ All ten dispatch inputs are identities, not an approval bypass:
   release notes. A documentation-only commit can follow the fixed product source.
 - `operation`: defaults to `verify`; P6 uses `draft` or `publish`.
 
-The workflow runs only from main in the canonical repository, checks source
-ancestry before checking out an input revision, then verifies actual run event,
+The workflow runs only from main in the canonical repository. It checks out the
+reviewed main publisher in `release-tools`, checks product source ancestry, then
+checks out that exact product revision separately in `product`. The product must
+be a clean Git root at the requested SHA. Adapter files, the bootstrap template,
+LICENSE and Termux guides are packaged only from that product checkout. A release
+API repair can therefore resume an immutable candidate without rebuilding it or
+silently packaging newer launcher code. The operation receipt separately records
+the tooling SHA; it does not change existing release asset bytes.
+
+The publisher verifies actual run event,
 attempt, source, artifact ID/digest/expiry, Windows full receipt, source metadata,
 SPDX subject and signed GitHub EXE attestation. It checks the attestation's
 producer workflow, source digest and hosted-runner requirement; local provenance
@@ -52,6 +60,12 @@ inputs, which re-verifies evidence and reuses matching files. Extra assets,
 different hashes or changed notes fail; no `--clobber`, deletion or tag movement.
 A fully matching already-public Release is reported without republishing.
 
+Release discovery uses the authenticated, paginated release list, including
+drafts visible to a writer. The tag lookup endpoint only finds published releases.
+Multiple matches, API errors, malformed responses or an exhausted pagination
+bound fail closed rather than being treated as absence. See the
+[GitHub release API contract](https://docs.github.com/en/rest/releases/releases#list-releases).
+
 Images publish separately on the official tag. Do not assume a tag created with
 GITHUB_TOKEN triggers another workflow; inspect the actual image run and both
 registry indexes before Release publication. P6 needs the intended human/API tag
@@ -73,3 +87,9 @@ P5 자료는 정상 main 검토를 거친 문서 커밋의 `p5.json`, 한국어�
 첨부한 뒤 다시 내려받아 해시를 확인해야 공개합니다. 실패하면 같은 입력으로
 재실행하여 동일 파일을 재사용할 수 있으며 다른 내용의 기존 파일·태그를
 덮어쓰지 않습니다. 이전 개발 배포 삭제도 이 workflow의 범위가 아닙니다.
+
+배포 도구는 검토된 main의 별도 checkout에서 실행하며, 설치 파일에 들어갈 실행기·
+안내 파일은 요청한 제품 SHA의 깨끗한 checkout에서만 읽습니다. 배포 API를
+수정해도 원본 제품·태그·자산을 교체하지 않으며 실행 기록에 도구 SHA를 따로 남깁니다.
+초안은 권한이 있는 계정의 페이지별 Release 목록으로 찾습니다. 같은 태그의
+중복 결과, 조회 오류, 잘못된 응답과 페이지 한도 소진을 ‘없음’으로 처리하지 않습니다.

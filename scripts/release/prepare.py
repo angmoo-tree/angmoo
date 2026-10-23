@@ -72,9 +72,9 @@ def validate_p5(github, report: dict, manifest: dict, windows: dict):
 
 def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, windows_artifact: str,
             candidate_run: str, candidate_attempt: str, candidate_artifact: str,
-            review_ref: str | None, output: Path, github=None) -> dict:
+            review_ref: str | None, output: Path, github=None, product_root: Path = ROOT) -> dict:
     github = github or GitHub()
-    require(SOURCE.fullmatch(source) and not validate_release_tag(tag), "release_identity_invalid")
+    require(SOURCE.fullmatch(source) and not validate_release_tag(tag, product_root), "release_identity_invalid")
     github.main_source(source)
     work = output / "evidence"
     stage = output / "assets"
@@ -118,10 +118,10 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
         shutil.copyfile(unique(windows_dir, name), stage / name)
     shutil.copyfile(bundle_files[0], stage / "windows-installer.attestation.jsonl")
     # Package only the reviewed adapter, not arbitrary artifact scripts or data.
-    package_termux_tools(stage / "angmoo-termux-tools.zip")
-    package_termux_installer(stage / "install-termux.py", stage / "angmoo-termux-tools.zip", manifest["version"])
+    package_termux_tools(stage / "angmoo-termux-tools.zip", root=product_root)
+    package_termux_installer(stage / "install-termux.py", stage / "angmoo-termux-tools.zip", manifest["version"], root=product_root)
     for locale in ("en", "ko"):
-        shutil.copyfile(ROOT / f"docs/public/termux.{locale}.md", stage / f"termux.{locale}.md")
+        shutil.copyfile(product_root / f"docs/public/termux.{locale}.md", stage / f"termux.{locale}.md")
     publication = {"candidate_validation": "PASS", "p5": "NOT_RUN", "tag": "NOT_READY", "images": "NOT_READY"}
     notes = ""
     if review_ref:

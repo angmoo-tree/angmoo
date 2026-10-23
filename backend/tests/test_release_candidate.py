@@ -509,11 +509,37 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     arguments = dict(source=SOURCE, tag="release-v0.1.0", windows_run="10", windows_attempt="2",
         windows_artifact="20", candidate_run="11", candidate_attempt="1", candidate_artifact="21",
         review_ref=None, github=Evidence())
+    # A repaired publisher may be newer than the immutable product. Only the
+    # product checkout may contribute adapter bytes and public guides.
+    product = tmp_path / "product"
+    shutil.copytree(ROOT / "launcher/termux", product / "launcher/termux")
+    for relative in (
+        "backend/pyproject.toml", "backend/uv.lock", "backend/app/runtime/product_identity.py",
+        "frontend/package.json", "desktop/package.json", "desktop/package-lock.json",
+        "desktop/src-tauri/tauri.conf.json", "desktop/src-tauri/Cargo.toml", "desktop/src-tauri/Cargo.lock",
+    ):
+        destination = product / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, destination)
+    (product / "docs/public").mkdir(parents=True)
+    (product / "LICENSE").write_text("original product license")
+    for locale in ("en", "ko"):
+        (product / f"docs/public/termux.{locale}.md").write_text("original product guide " + locale)
+    (product / "launcher/termux/angmoo.py").write_bytes(b"# original product adapter\n")
+    bootstrap = product / "launcher/termux/bootstrap.py"
+    bootstrap.write_bytes(b"# original product bootstrap\n" + bootstrap.read_bytes())
+    arguments["product_root"] = product
     output = tmp_path / "prepared"
     expected = preparation.prepare(**arguments, output=output)
     assert len(attestation_calls) == 1 and "--source-digest" in attestation_calls[0]
     assert expected["publication_ready"] is False  # P5 and published images are absent.
     assert "private.sqlite" not in {item["name"] for item in expected["assets"]}
+    import zipfile
+    with zipfile.ZipFile(output / "assets/angmoo-termux-tools.zip") as tools:
+        assert tools.read("angmoo.py") == b"# original product adapter\n"
+        assert tools.read("LICENSE") == b"original product license"
+    assert (output / "assets/termux.en.md").read_text() == "original product guide en"
+    assert (output / "assets/install-termux.py").read_bytes().startswith(b"# original product bootstrap\n")
     api = Release()
     assert synchronize(expected, output / "assets", "verify", api, lambda: pytest.fail("no write"))["remote_writes"] == 0
     assert api.calls == []
@@ -521,3 +547,6 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     (windows / "angmoo-installer.provenance.json").write_text(json.dumps(provenance))
     with pytest.raises(ValueError, match="windows_provenance_mismatch"):
         preparation.prepare(**arguments, output=tmp_path / "rejected")
+    (product / "frontend/package.json").write_text(json.dumps({"version": "9.9.9"}))
+    with pytest.raises(ValueError, match="release_identity_invalid"):
+        preparation.prepare(**arguments, output=tmp_path / "wrong-product-version")

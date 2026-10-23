@@ -46,6 +46,9 @@ on:
         required: false
 permissions:
   contents: read
+defaults:
+  run:
+    working-directory: release-tools
 concurrency:
   group: release-publish-${{ inputs.tag }}
   cancel-in-progress: false
@@ -60,7 +63,8 @@ env:
   RELEASE_CANDIDATE_ATTEMPT: ${{ inputs.candidate_attempt }}
   RELEASE_CANDIDATE_ARTIFACT: ${{ inputs.candidate_artifact }}
   RELEASE_REVIEW_REF: ${{ inputs.review_ref }}
-  RELEASE_OUTPUT: artifacts/release-publication
+  RELEASE_PRODUCT_ROOT: ${{ github.workspace }}/product
+  RELEASE_OUTPUT: ${{ github.workspace }}/artifacts/release-publication
 jobs:
   verify:
     if: github.repository == 'angmoo-tree/angmoo' && github.ref == 'refs/heads/main'
@@ -76,12 +80,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          ref: ${{ github.sha }}
+          path: release-tools
       - name: Verify input source belongs to main history before checkout
         run: python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ['RELEASE_SOURCE'])"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
           ref: ${{ inputs.source }}
+          path: product
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
       - name: Verify evidence
         run: python -m scripts.release.dispatch
@@ -109,12 +116,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          ref: ${{ github.sha }}
+          path: release-tools
       - name: Verify input source belongs to main history before checkout
         run: python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ['RELEASE_SOURCE'])"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
           ref: ${{ inputs.source }}
+          path: product
       - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
       - name: Verify evidence and perform requested P6 operation
         run: python -m scripts.release.dispatch

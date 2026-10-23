@@ -60,6 +60,8 @@ def validate(document, name):
         if "scripts.release.promote" not in text or "check_release_tag.py" not in text or "build-push-action" in text or "docker build " in text:
             errors.append("image publication must promote verified bytes without rebuilding")
     else:
+        if document.get("defaults") != {"run": {"working-directory": "release-tools"}} or document.get("env", {}).get("RELEASE_PRODUCT_ROOT") != "${{ github.workspace }}/product" or document.get("env", {}).get("RELEASE_OUTPUT") != "${{ github.workspace }}/artifacts/release-publication":
+            errors.append("Release tooling and original product checkout must be separate")
         inputs = events.get("workflow_dispatch", {}).get("inputs", {})
         if set(events) != {"workflow_dispatch"} or inputs.get("operation", {}).get("default") != "verify" or inputs.get("operation", {}).get("options") != ["verify", "draft", "publish"]:
             errors.append("Release dispatch must default to verify")
@@ -72,6 +74,12 @@ def validate(document, name):
                 errors.append("Release operation or main guard invalid")
             if not any(s.get("run") == "python -m scripts.release.dispatch" for s in job.get("steps", [])):
                 errors.append("Release evidence verifier is missing")
+            steps = job.get("steps", [])
+            checkouts = [(i, s) for i, s in enumerate(steps) if str(s.get("uses", "")).startswith("actions/checkout@")]
+            expected = [{"persist-credentials": False, "ref": "${{ github.sha }}", "path": "release-tools"}, {"persist-credentials": False, "ref": "${{ inputs.source }}", "path": "product"}]
+            guards = [i for i, s in enumerate(steps) if s.get("run") == 'python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ[\'RELEASE_SOURCE\'])"']
+            if [s.get("with") for _, s in checkouts] != expected or len(guards) != 1 or not (checkouts[0][0] < guards[0] < checkouts[1][0]):
+                errors.append("Release must check main ancestry before selecting the original product checkout")
         if jobs["publish"].get("needs") != "verify":
             errors.append("Release write must follow read-only verification")
     if document.get("concurrency", {}).get("cancel-in-progress") is not False:
