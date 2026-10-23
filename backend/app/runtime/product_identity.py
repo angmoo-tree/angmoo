@@ -3,17 +3,17 @@
 import os
 import re
 
-PRODUCT_VERSION = "0.1.0"
+PRODUCT_VERSION = "0.1.1"
 
 
 def validate_product_version() -> str:
     version = os.environ.get("ANGMOO_VERSION", PRODUCT_VERSION)
-    if not re.fullmatch(r"0\.1\.0(?:-dev(?:-[0-9a-f]{7,40})?)?", version):
+    if not re.fullmatch(re.escape(PRODUCT_VERSION) + r"(?:-dev(?:-[0-9a-f]{7,40})?)?", version):
         raise ValueError(
-            "product_version_mismatch: Set ANGMOO_VERSION=0.1.0 and select images "
-            "with ANGMOO_IMAGE_TAG=release-v0.1.0 before starting. / 시작 전에 "
-            "ANGMOO_VERSION=0.1.0으로 설정하고 이미지 선택에는 "
-            "ANGMOO_IMAGE_TAG=release-v0.1.0을 사용하세요."
+            f"product_version_mismatch: Set ANGMOO_VERSION={PRODUCT_VERSION} and select images "
+            f"with ANGMOO_IMAGE_TAG=release-v{PRODUCT_VERSION} before starting. / 시작 전에 "
+            f"ANGMOO_VERSION={PRODUCT_VERSION}으로 설정하고 이미지 선택에는 "
+            f"ANGMOO_IMAGE_TAG=release-v{PRODUCT_VERSION}을 사용하세요."
         )
     return version
 

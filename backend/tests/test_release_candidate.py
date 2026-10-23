@@ -540,14 +540,23 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     # product checkout may contribute adapter bytes and public guides.
     product = tmp_path / "product"
     shutil.copytree(ROOT / "launcher/termux", product / "launcher/termux")
-    for relative in (
-        "backend/pyproject.toml", "backend/uv.lock", "backend/app/runtime/product_identity.py",
-        "frontend/package.json", "desktop/package.json", "desktop/package-lock.json",
-        "desktop/src-tauri/tauri.conf.json", "desktop/src-tauri/Cargo.toml", "desktop/src-tauri/Cargo.lock",
-    ):
+    # This immutable 0.1.0 product fixture must not inherit the publisher's
+    # current version. Keep every declared/self-lock identity explicit.
+    metadata = {
+        "backend/pyproject.toml": '[project]\nversion = "0.1.0"\n',
+        "backend/uv.lock": '[[package]]\nname = "backend"\nversion = "0.1.0"\n',
+        "backend/app/runtime/product_identity.py": 'PRODUCT_VERSION = "0.1.0"\n',
+        "frontend/package.json": '{"version":"0.1.0"}',
+        "desktop/package.json": '{"version":"0.1.0"}',
+        "desktop/package-lock.json": '{"version":"0.1.0","packages":{"":{"version":"0.1.0"}}}',
+        "desktop/src-tauri/tauri.conf.json": '{"version":"0.1.0"}',
+        "desktop/src-tauri/Cargo.toml": '[package]\nversion = "0.1.0"\n',
+        "desktop/src-tauri/Cargo.lock": '[[package]]\nname = "angmoo-desktop"\nversion = "0.1.0"\n',
+    }
+    for relative, contents in metadata.items():
         destination = product / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / relative, destination)
+        destination.write_text(contents, encoding="utf-8")
     (product / "docs/public").mkdir(parents=True)
     (product / "LICENSE").write_text("original product license")
     for locale in ("en", "ko"):
@@ -569,8 +578,14 @@ def test_release_preparation_binds_windows_bytes_and_excludes_artifact_extras(tm
     assert (output / "assets/termux.en.md").read_text() == "original product guide en"
     assert (output / "assets/install-termux.py").read_bytes().startswith(b"# original product bootstrap\n")
     if review_layout:
-        order = ("en", "ko") if review_layout == "modern" else ("ko", "en")
-        assert expected["notes"] == "".join(note_bytes[locale].decode() + "\n\n" for locale in order)
+        if review_layout == "modern":
+            assert expected["notes"] == "\n\n---\n\n".join(
+                note_bytes[locale].decode().rstrip() for locale in ("en", "ko")
+            ) + "\n"
+        else:
+            assert expected["notes"] == "".join(
+                note_bytes[locale].decode() + "\n\n" for locale in ("ko", "en")
+            )
         for locale in ("en", "ko"):
             assert (output / f"assets/release-notes.{locale}.md").read_bytes() == note_bytes[locale]
         assert any(path.startswith("contents/") for path in read_paths)

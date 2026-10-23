@@ -3,9 +3,9 @@ name: angmoo
 # The official contributor runtime is the same embedded architecture shipped
 # by the installed product. Docker is only the reproducible Linux packaging:
 # it does not select PostgreSQL, Neo4j, or external worker processes.
-x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_IMAGE_TAG:-release-v0.1.0}
+x-backend-image: &backend-image ghcr.io/angmoo-tree/angmoo-backend:${ANGMOO_IMAGE_TAG:-release-v0.1.1}
 x-backend-environment: &backend-environment
-  ANGMOO_VERSION: ${ANGMOO_VERSION:-0.1.0}
+  ANGMOO_VERSION: ${ANGMOO_VERSION:-0.1.1}
   ANGMOO_CONTRIBUTOR_DATA_ROOT: /var/lib/angmoo
   ANGMOO_FRONTEND_ORIGIN: http://127.0.0.1:${ANGMOO_PORT:-3000}
 
@@ -37,7 +37,7 @@ services:
     stop_grace_period: 200s
 
   frontend:
-    image: ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_IMAGE_TAG:-release-v0.1.0}
+    image: ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_IMAGE_TAG:-release-v0.1.1}
     pull_policy: missing
     restart: unless-stopped
     init: true

@@ -9,11 +9,15 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.release.workflow_policy import validate, uploads, WORKFLOWS
-from scripts.ci.check_release_tag import validate_release_tag
+from scripts.ci.check_release_tag import expected_release_tag
 
 
 def validate_contract(root: Path = ROOT) -> list[str]:
-    errors = validate_release_tag("release-v0.1.0", root)
+    try:
+        tag = expected_release_tag(root)
+    except (OSError, ValueError, KeyError, StopIteration) as exc:
+        return [f"release version cannot be resolved: {exc}"]
+    errors = []
     for name in sorted(WORKFLOWS):
         path = root / ".github/workflows" / name
         if not path.is_file():
@@ -25,7 +29,7 @@ def validate_contract(root: Path = ROOT) -> list[str]:
     compose = yaml.safe_load((root / "compose.yml").read_text(encoding="utf-8"))
     ci = yaml.safe_load((root / "compose.ci.yml").read_text(encoding="utf-8"))
     for service in ("backend", "frontend"):
-        expected = "ghcr.io/angmoo-tree/angmoo-" + service + ":${ANGMOO_IMAGE_TAG:-release-v0.1.0}"
+        expected = "ghcr.io/angmoo-tree/angmoo-" + service + ":${ANGMOO_IMAGE_TAG:-" + tag + "}"
         if compose["services"][service].get("image") != expected:
             errors.append(f"image selection must be separate from product version: {service}")
         if ci["services"][service].get("platform") != "${ANGMOO_CI_PLATFORM:-linux/amd64}" or ci["services"][service].get("pull_policy") != "never":

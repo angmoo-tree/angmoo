@@ -47,7 +47,7 @@ def free_port(port: int) -> None:
             raise ValueError("port_in_use") from exc
 
 
-def probe_ready(url: str, source: str, nonce: str, *, backend: bool) -> dict:
+def probe_ready(url: str, source: str, nonce: str, *, expected_version: str, backend: bool) -> dict:
     try:
         with urllib.request.urlopen(url, timeout=2) as response:
             raw = response.read(65537)
@@ -56,7 +56,7 @@ def probe_ready(url: str, source: str, nonce: str, *, backend: bool) -> dict:
         payload = json.loads(raw)
         if not isinstance(payload, dict):
             return {"ready": False, "code": "invalid_json_shape"}
-        for key, expected in (("source_sha", source), ("launch_id", nonce), ("version", "0.1.0")):
+        for key, expected in (("source_sha", source), ("launch_id", nonce), ("version", expected_version)):
             if payload.get(key) != expected:
                 return {"ready": False, "code": key + "_mismatch"}
         if backend and (payload.get("status"), payload.get("persistence"), payload.get("graph")) != ("ok", "sqlite", "ladybug"):
@@ -76,8 +76,8 @@ def probe_ready(url: str, source: str, nonce: str, *, backend: bool) -> dict:
         return {"ready": False, "code": "io_error", "exception_type": type(exc).__name__, "errno": exc.errno}
 
 
-def ready(url: str, source: str, nonce: str, *, backend: bool) -> bool:
-    return probe_ready(url, source, nonce, backend=backend)["ready"]
+def ready(url: str, source: str, nonce: str, *, expected_version: str, backend: bool) -> bool:
+    return probe_ready(url, source, nonce, expected_version=expected_version, backend=backend)["ready"]
 
 
 def session_members(record: dict) -> list[dict]:
@@ -132,12 +132,12 @@ def stop_child(process: subprocess.Popen, record: dict, grace: float) -> None:
     raise ValueError("owned_process_stop_failed")
 
 
-def await_ready(process, url, source, nonce, *, backend, timeout=180, cancelled=lambda: False, observe=lambda value: None):
+def await_ready(process, url, source, nonce, *, expected_version, backend, timeout=180, cancelled=lambda: False, observe=lambda value: None):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         require(not cancelled(), "start_cancelled")
         require(process.poll() is None, "service_exited_before_ready")
-        probe = probe_ready(url, source, nonce, backend=backend)
+        probe = probe_ready(url, source, nonce, expected_version=expected_version, backend=backend)
         observe(probe)
         if probe["ready"]:
             return
