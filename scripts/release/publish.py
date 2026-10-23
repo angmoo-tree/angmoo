@@ -7,7 +7,7 @@ from pathlib import Path
 import subprocess
 
 from launcher.termux.payload import REPOSITORY, digest_file, require
-from scripts.release.candidate import run, write_json
+from scripts.release.candidate import ROOT, run, write_json
 from scripts.release.github import GitHub
 from scripts.release.prepare import prepare
 from scripts.release.promote import registry_document
@@ -15,12 +15,19 @@ from scripts.release.promote import registry_document
 
 class ReleaseAPI:
     def find(self, tag):
-        result = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/releases/tags/{tag}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode:
-            if b"HTTP 404" in result.stderr:
-                return None
-            raise ValueError("release_lookup_failed")
-        return json.loads(result.stdout)
+        # The tag endpoint only returns published releases. The authenticated
+        # list includes drafts and lets an interrupted upload resume by identity.
+        matches = []
+        for page in range(1, 101):
+            result = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/releases?per_page=100&page={page}"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            require(result.returncode == 0, "release_lookup_failed")
+            values = json.loads(result.stdout)
+            require(isinstance(values, list) and all(isinstance(v, dict) for v in values), "release_lookup_invalid")
+            matches.extend(v for v in values if v.get("tag_name") == tag)
+            require(len(matches) <= 1, "release_tag_ambiguous")
+            if len(values) < 100:
+                return matches[0] if matches else None
+        raise ValueError("release_pagination_limit")
 
     def write(self, path, method, payload):
         result = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/{path}", "--method", method, "--input", "-"], input=json.dumps(payload).encode(), stdout=subprocess.PIPE, check=True)
@@ -80,17 +87,26 @@ def synchronize(expected: dict, directory: Path, operation: str, api, authorize)
     return {"state": "DRAFT" if release["draft"] else "PUBLISHED", "release_id": release["id"], "url": release["html_url"], "tag": expected["tag"], "source_sha": expected["source_sha"], "assets": [{"id": a["id"], "name": a["name"]} for a in release["assets"]]}
 
 
+def verify_product_checkout(root: Path, source: str) -> Path:
+    root = root.resolve()
+    require(Path(run("git", "-C", str(root), "rev-parse", "--show-toplevel", capture=True)).resolve() == root, "release_product_root_invalid")
+    require(run("git", "-C", str(root), "rev-parse", "HEAD", capture=True) == source, "release_checkout_source_mismatch")
+    require(not run("git", "-C", str(root), "status", "--porcelain", "--untracked-files=all", capture=True), "release_product_checkout_dirty")
+    return root
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--operation", choices=("verify", "draft", "publish"), default="verify")
     for field in ("source", "tag", "windows-run", "windows-attempt", "windows-artifact", "candidate-run", "candidate-attempt", "candidate-artifact"):
         parser.add_argument("--" + field, required=True)
     parser.add_argument("--review-ref")
+    parser.add_argument("--product-root", type=Path, default=ROOT)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    require(run("git", "rev-parse", "HEAD", capture=True) == args.source, "release_checkout_source_mismatch")
+    product_root = verify_product_checkout(args.product_root, args.source)
     output = args.output.resolve()
-    expected = prepare(source=args.source, tag=args.tag, windows_run=args.windows_run, windows_attempt=args.windows_attempt, windows_artifact=args.windows_artifact, candidate_run=args.candidate_run, candidate_attempt=args.candidate_attempt, candidate_artifact=args.candidate_artifact, review_ref=args.review_ref or None, output=output)
+    expected = prepare(source=args.source, tag=args.tag, windows_run=args.windows_run, windows_attempt=args.windows_attempt, windows_artifact=args.windows_artifact, candidate_run=args.candidate_run, candidate_attempt=args.candidate_attempt, candidate_artifact=args.candidate_artifact, review_ref=args.review_ref or None, output=output, product_root=product_root)
     manifest = read_json(output / "assets/release-manifest.json")
     def authorize():
         github = GitHub()
@@ -102,6 +118,7 @@ def main():
             remote = registry_document(f"ghcr.io/{REPOSITORY}-{service}:{args.tag}")
             require(remote is not None and remote[0] == digest, "release_images_changed")
     receipt = synchronize(expected, output / "assets", args.operation, ReleaseAPI(), authorize)
+    receipt["tooling_source_sha"] = run("git", "rev-parse", "HEAD", capture=True)
     write_json(output / "release-publication.json", receipt)
     print(json.dumps({"validation": expected["validation"], "result": receipt}))
 
