@@ -1,0 +1,40 @@
+{
+  "schema": "angmoo-p5.v1",
+  "source_sha": "a2ee4a6962b33806bfb48f9c94213f01287efffc",
+  "windows": {
+    "sha256": "sha256:c708dafbacfa6224705c944758f82269609f9967ba31e9331ebe75f90dd2693b",
+    "run_id": "39875906000",
+    "attempt": "1"
+  },
+  "images": {
+    "backend/linux/amd64": "sha256:49e02caa473abd1be104ad80837d9fe1862ed4aa81c63f9384eb5abebf7b177e",
+    "frontend/linux/amd64": "sha256:daf38a340070889607ee0ac91d3557ec100fbfd28d8d010266c921868956459a",
+    "backend/linux/arm64": "sha256:a376071993c6367dfe6f29a4c70085692fed790f2b81aac07e48313c5f953a97",
+    "frontend/linux/arm64": "sha256:47fa9c46fedd7f6febcec469a709a6bfdc6382ebb64bc8c4ccd629309273565f"
+  },
+  "checks": [
+    {
+      "workflow": "ci.yml",
+      "run_id": "39875906006",
+      "attempt": "1"
+    },
+    {
+      "workflow": "local-smoke.yml",
+      "run_id": "39875905986",
+      "attempt": "1"
+    },
+    {
+      "workflow": "security.yml",
+      "run_id": "39875906053",
+      "attempt": "1"
+    }
+  ],
+  "windows_user_check": {
+    "result": "PASS",
+    "reviewer": "jingujeon",
+    "exe_sha256": "sha256:c708dafbacfa6224705c944758f82269609f9967ba31e9331ebe75f90dd2693b",
+    "evidence": "Maintainer jingujeon installed and used the exact full-validation candidate, checked detected English and Pacific timezone behavior, and explicitly confirmed on 2026-10-23 that the Windows installation appears problem-free and requested L043-L063 publication. See docs/releases/0.1.0/verification.md for scope, physical identity, preserved metadata and limitations. This is user acceptance, not a new AI or long-duration test.",
+    "checked_at": "2026-10-23T01:51:20.393560+00:00"
+  },
+  "android_support": "experimental-not-certified"
+}
