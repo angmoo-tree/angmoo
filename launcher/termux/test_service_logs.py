@@ -94,9 +94,11 @@ class LogTests(unittest.TestCase):
             metadata["ended_at_utc"] = logs.utc()
             logs.save_session(self.path, metadata)
             self.path = logs.create_session(self.home, f"{number:032x}", {})
-        self.assertEqual(len(list((self.home / "logs").iterdir())), 4)
+        entries = list((self.home / "logs").iterdir())
+        self.assertEqual(len([p for p in entries if logs.SESSION_ID.fullmatch(p.name)]), 4)
+        self.assertEqual([p.name for p in entries if not logs.SESSION_ID.fullmatch(p.name)], [".retention.json"])
         self.assertFalse((self.home / "logs" / ("b" * 32)).exists())
-        oldest = min((self.home / "logs").iterdir(), key=logs.session_started)
+        oldest = min((p for p in (self.home / "logs").iterdir() if logs.SESSION_ID.fullmatch(p.name)), key=logs.session_started)
         data = logs.read_session(oldest)
         data["ended_at_utc"] = None
         logs.save_session(oldest, data)

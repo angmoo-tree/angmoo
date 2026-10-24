@@ -27,7 +27,7 @@ TOOLS_SHA256 = "@ANGMOO_TOOLS_SHA256@"
 TOOLS_SIZE = "@ANGMOO_TOOLS_SIZE@"
 REPOSITORY = "angmoo-tree/angmoo"
 TOOLS_NAME = "angmoo-termux-tools.zip"
-FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE", "command_registration.py"})
+FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE", "command_registration.py", "session_recovery.py"})
 MAX_TOOLS_BYTES = 4 * 1024 * 1024
 
 
@@ -88,7 +88,12 @@ def install_and_start(directory: Path, home: Path) -> bool:
     require(registration in {"registered", "not-termux"}, "command_verification_invalid",
             "Command registration could not be confirmed; later steps were not run.")
     subprocess.run([str(launcher), "install", "--release", RELEASE], check=True)
-    subprocess.run([str(launcher), "start"], check=True)
+    try:
+        subprocess.run([str(launcher), "start"], check=True)
+    except subprocess.CalledProcessError as exc:
+        raise InstallError(f"installation_complete_start_failed (exit={exc.returncode})",
+                           "Installation completed, but Angmoo could not start. Existing data is preserved. "
+                           "Run angmoo diagnostics for details; then retry angmoo start.") from exc
     return registration == "registered"
 
 

@@ -36,10 +36,12 @@ def termux_files(root: Path) -> tuple[str, ...]:
         raise ValueError("termux_tools_profile_invalid") from exc
     legacy = {*LEGACY_TERMUX_FILES, "LICENSE"}
     modern = legacy | {"command_registration.py"}
-    require(isinstance(names, set) and names in (legacy, modern), "termux_tools_profile_invalid")
-    require((directory / "command_registration.py").is_file() == (names == modern),
-            "termux_tools_profile_mixed")
-    return LEGACY_TERMUX_FILES + (("command_registration.py",) if names == modern else ())
+    recovery = modern | {"session_recovery.py"}
+    require(isinstance(names, set) and names in (legacy, modern, recovery), "termux_tools_profile_invalid")
+    additions = ("command_registration.py", "session_recovery.py")
+    for name in additions:
+        require((directory / name).is_file() == (name in names), "termux_tools_profile_mixed")
+    return LEGACY_TERMUX_FILES + tuple(name for name in additions if name in names)
 
 
 def localized_sources(names: set[str], stem: str) -> tuple[dict[str, str], bool]:

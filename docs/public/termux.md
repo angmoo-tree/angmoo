@@ -233,3 +233,23 @@ three 2 MiB segments; supervisor/bootstrap each retain two 1 MiB segments. At mo
 four sessions and 64 MiB are retained. Rotation, oversized lines, queue overflow
 and disk errors are reported as evidence gaps, never as complete capture.
 Viewing logs requires no running service, installed payload or product DB access.
+
+If Android or a forced shutdown leaves a log session without an end record,
+the next `angmoo start` checks the previous processes under the installation's
+execution lock. When they are confirmed gone, it records an interrupted session
+and continues starting Angmoo. It does not invent an end time or claim complete
+log capture. The existing four-session retention limit still applies; completed
+and verified interrupted sessions can eventually be removed by that policy.
+Keep a separate copy of logs you need for a diagnosis.
+
+If a previous process is alive or cannot be checked, a second server is not
+started. Use `angmoo diagnostics` and keep the existing logs and data. Do not
+delete log folders or reset application data to get past this check. Log cleanup
+interrupted during a rename or deletion is rechecked on the next start. Older
+launchers do not understand recovered interrupted sessions; downgrading is not
+a recovery procedure.
+
+`installation_complete_start_failed` means image installation succeeded but
+automatic startup failed. Read the preceding error and run `angmoo diagnostics`;
+after resolving that cause, retry `angmoo start` with the same data home.
+Repeating downloads or deleting characters and API keys is not required.
