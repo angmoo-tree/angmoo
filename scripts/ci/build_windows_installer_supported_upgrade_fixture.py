@@ -51,11 +51,6 @@ from app.domains.memory.models.items import (
 from app.domains.social.models.subjective_context import (
     drop_subjective_context_schema,
 )
-from app.domains.worlds.contracts import (
-    NO_SPECIFIC_ROLE_DESCRIPTION,
-    NO_SPECIFIC_ROLE_KEY,
-    NO_SPECIFIC_ROLE_NAME,
-)
 from app.runtime.migrations.generation import EmbeddedGenerationController
 from app.runtime.migrations.ladybug_projection import (
     LadybugProjectionUpgradeCoordinator,
@@ -66,6 +61,11 @@ from app.runtime.migrations.ladybug_versions.registry import (
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
+    # Predecessor fixtures must contain the historical values, independently
+    # of the defaults used when the current product creates a new World.
+    NO_SPECIFIC_ROLE_DESCRIPTION,
+    NO_SPECIFIC_ROLE_KEY,
+    NO_SPECIFIC_ROLE_NAME,
     upgrade_v2_to_v3,
 )
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath

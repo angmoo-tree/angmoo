@@ -72,6 +72,36 @@ def test_all_is_not_permission_to_drop_unadvertised_exports(evidence):
         assert evidence.actual(module, name) is not None
 
 
+@pytest.mark.parametrize("mutation", [None, "missing_record", "extra", "removed", "append", "tuple"])
+def test_owner_advertised_exports_require_exact_committed_product_evidence(tmp_path, evidence, mutation):
+    module = "app.domains.worlds.contracts"
+    relative = evidence.paths[module]
+    source = (proof.ROOT / relative).read_text(encoding="utf-8")
+    if mutation == "extra":
+        source = source.replace('"has_supported_no_specific_role_content",', '"unexpected", "has_supported_no_specific_role_content",')
+    elif mutation == "removed":
+        source = source.replace('    "NO_SPECIFIC_ROLE_KEY",\n', '')
+    elif mutation == "append":
+        source += '\n__all__.append("unexpected")\n'
+    elif mutation == "tuple":
+        source = source.replace('__all__ = [', '__all__ = (').rstrip().removesuffix(']') + ')\n'
+    target = tmp_path / relative
+    target.parent.mkdir(parents=True)
+    target.write_text(source, encoding="utf-8")
+    changes, records = evidence.product_evidence()
+    if mutation == "missing_record":
+        records = [record for record in records if record["id"] != "english-default-role-legacy-preservation-20261024"]
+    candidate = object.__new__(proof.History)
+    candidate.root, candidate.paths = tmp_path, {module: relative}
+    candidate.tree = evidence.tree
+    candidate.product_evidence = lambda: (changes, records)
+    if mutation is None:
+        candidate.validate_owner_all(module)
+    else:
+        with pytest.raises(ValueError, match="actual owner advertised exports changed"):
+            candidate.validate_owner_all(module)
+
+
 @pytest.mark.parametrize("path,function,old,new", [
     ("backend/tests/world_characters/test_readiness_contract.py",
      "test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile",

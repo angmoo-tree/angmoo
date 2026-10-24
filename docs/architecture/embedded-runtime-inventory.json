@@ -3,7 +3,7 @@
   "behavior_critical_file_hashes": [
     {
       "path": "compose.yml",
-      "sha256": "6e2430b03d0f007b9a794a14ff5a951485827fb19160f3d03a7a22c7aeff36ad"
+      "sha256": "fd6ff7a5a244e3a8b821b9a7736386dfb430196eabf78cbd318c6199516ec6da"
     },
     {
       "path": "compose.dev.yml",
@@ -208,7 +208,7 @@
       "owner": "ER4",
       "path": "compose.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "6e2430b03d0f007b9a794a14ff5a951485827fb19160f3d03a7a22c7aeff36ad",
+      "source_sha256": "fd6ff7a5a244e3a8b821b9a7736386dfb430196eabf78cbd318c6199516ec6da",
       "transition_pr": "ER4 PR J"
     },
     {
