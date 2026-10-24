@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 4715,
-      "internal_edge_count": 6953,
+      "external_import_count": 4717,
+      "internal_edge_count": 6970,
       "legacy_import_exception_count": 0,
-      "module_count": 1604,
+      "module_count": 1605,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1254,7 +1254,8 @@
           {
             "imports": [
               "app.domains.social.models.feed",
-              "app.domains.social.models.manual_writes"
+              "app.domains.social.models.manual_writes",
+              "app.domains.social.models.posts"
             ],
             "module": "app.domains.social.repository.manual_inbox",
             "path": "backend/app/domains/social/repository/manual_inbox.py"
@@ -3629,7 +3630,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "c87c80a5047c6b0840b2dbbcd36ec5cbdb4421645069fc064691863434e65ad8"
+        "sha256": "f788eab0c6eb6527dd3670ab7ddae6326a637439dd2ec86e447dca5af7dc803d"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3649,7 +3650,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "5e2f0ae0de1111b8eaf897dfa6cf5b57e54e4bb499d2f294933b55d7d08068e2"
+        "sha256": "c1da5b568a8f4d5db64a91cb4cd1ee6b5a7f8f71b8cdff3baa09218e905144f3"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -3893,7 +3894,7 @@
         },
         {
           "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
-          "sha256": "3ca70bf32140f7389d737a723e6d44e078afc9ec59402af4a3ea411f8ce0bbca"
+          "sha256": "6da127c6aecec54eb483c286b11d6af8478061f7789eff774e72fe34be6efd9e"
         }
       ]
     }
