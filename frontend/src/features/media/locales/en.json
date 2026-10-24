@@ -315,7 +315,7 @@
   "원본 사진은 20MB 이하로 선택해주세요.": "Choose an original photo up to 20 MB.",
   "이 사진 형식을 변환하지 못했어요. JPG 또는 PNG로 다시 선택해주세요.": "This photo format could not be converted. Choose a JPG or PNG instead.",
   "이미지를 인식할 수 없어요. 이미지 인식 설정을 확인하거나 사진을 제거해주세요.": "The image cannot be recognized. Check image recognition settings or remove the photo.",
-  "첨부할 사진을 준비하는 중…": "Preparing the attachment photo…",
+  "첨부할 사진을 준비하는 중…": "Preparing your photo…",
   "첨부할 사진을 준비하지 못했어요. 더 작은 사진을 선택해주세요.": "The attachment photo could not be prepared. Choose a smaller photo.",
   "ComfyUI에서 내보낸 API JSON을 가져오거나, 선택 예시로 시작할 수 있어요.": "Import API JSON exported from ComfyUI, or start with an optional example.",
   "파일을 가져오거나 예시를 사용하면 이 경로의 입력 연결과 출력 선택이 초기화돼요. 편집창 수정은 기존 설정을 유지해요.": "Importing a file or using an example resets input bindings and output selection for this workflow. Editing the JSON keeps the current settings.",
@@ -349,5 +349,10 @@
   "다시 불러오기": "Reload",
   "인식용 키 상태를 확인하고 있어요.": "Checking the image recognition key.",
   "인식용 키 상태를 확인하지 못했어요.": "Could not check the image recognition key.",
-  "이미지 인식을 켜려면 먼저 인식용 API 키를 저장해 주세요.": "Save an image recognition API key before enabling image recognition."
+  "이미지 인식을 켜려면 먼저 인식용 API 키를 저장해 주세요.": "Save an image recognition API key before enabling image recognition.",
+  "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요.": "The photo could not be read. Select it again from your photos.",
+  "사진 내용을 해석하지 못했어요. 다른 사진을 선택해 주세요.": "The photo could not be decoded. Choose another photo.",
+  "사진 준비 시간이 초과됐어요. 다시 선택해 주세요.": "The photo took too long to prepare. Select it again.",
+  "사진을 준비하지 못했어요. 다시 선택해 주세요.": "The photo could not be prepared. Select it again.",
+  "10MB 이하의 PNG, JPG 또는 WebP 이미지를 선택해 주세요.": "Choose a PNG, JPG or WebP image up to 10 MB."
 }

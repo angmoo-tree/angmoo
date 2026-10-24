@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/http/api-request";
+import type { PreparedImageUpload } from "../types/photo-preparation";
 import type { Asset, Catalog, GenerationSettings, GenerationWrite, InterpretationSettings, Workflow, WorkflowAnalysis, UsageSettings, GenerationJob, ApiGraph, RetainedComfyContract } from "../types/media";
 
 export const getCatalog = (signal?: AbortSignal) => apiRequest<Catalog>("/media/catalog", { signal });
@@ -34,7 +35,8 @@ export class ImageUploadInputError extends Error {
   }
 }
 
-export async function uploadImage(file: File, scopeKind: "character" | "thread" | "world" | "world_character", scopeId: string, signal?: AbortSignal) {
+export async function uploadImage(input: PreparedImageUpload, scopeKind: "character" | "thread" | "world" | "world_character", scopeId: string, signal?: AbortSignal) {
+  const { file } = input;
   if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) throw new ImageUploadInputError("image_file_unsupported");
   const data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

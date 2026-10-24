@@ -410,12 +410,14 @@ export function deleteAgentImageKey(characterId: string) {
 export function uploadAgentImageSeed(
   characterId: string,
   data: AgentImageSeedUploadInput,
+  signal?: AbortSignal,
 ) {
   return apiRequest<AgentImageGenerationSettingRead>(
     `/agents/${characterId}/image-settings/seed`,
     {
       method: "POST",
       body: data,
+      signal,
     },
   );
 }

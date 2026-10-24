@@ -2,6 +2,10 @@
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { FileInputError } from "@/lib/media/read-file-input";
+import { prepareSeedImage } from "@/features/characters/controllers/prepare-seed-image";
 
 import { GenerationSettingsPanel } from "@/features/media/components/generation-settings";
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
@@ -32,7 +36,7 @@ DEFAULT_ACTIVE_HOURS_END,
 DEFAULT_ACTIVE_HOURS_START,
 isValidActiveHours,
 } from "@/features/characters/components/activity-hours-control";
-import { asGoogleGeminiModel,asPollinationsImageModel,DEVICE_SCROLL_OWNER_SELECTOR,fileToBase64Payload,formatClockTime,getCredentialKeyStatus,getInitialAgentDetailTab,getVisualIdentityUi,ImageGenerationSettingsFields,inputClassName,isReplicateImageModel,LocalConnectionSettings,LoreSourcesCard,mediaGenerationLabel,mediaUsageFor,Metric,normalizeHandleInput,NumberInput,PersonaTextArea,ProfileBanner,ProfileEditModal,PromotionUsageSettings,RUN_NOW_SCHEDULER_GUARD_MS,SectionHeader,StatusTab,TendencyCard,ToggleInput,usageLimitMessage,WorldActivityProfileCard,type AgentDetailTab,type MediaGenerationState,type MediaKind } from "@/features/characters/components/agent-detail-parts";
+import { asGoogleGeminiModel,asPollinationsImageModel,DEVICE_SCROLL_OWNER_SELECTOR,formatClockTime,getCredentialKeyStatus,getInitialAgentDetailTab,getVisualIdentityUi,ImageGenerationSettingsFields,inputClassName,isReplicateImageModel,LocalConnectionSettings,LoreSourcesCard,mediaGenerationLabel,mediaUsageFor,Metric,normalizeHandleInput,NumberInput,PersonaTextArea,ProfileBanner,ProfileEditModal,PromotionUsageSettings,RUN_NOW_SCHEDULER_GUARD_MS,SectionHeader,StatusTab,TendencyCard,ToggleInput,usageLimitMessage,WorldActivityProfileCard,type AgentDetailTab,type MediaGenerationState,type MediaKind } from "@/features/characters/components/agent-detail-parts";
 import { DEFAULT_GOOGLE_GEMINI_MODEL,DEFAULT_USER_IMAGE_MODEL,getGoogleGeminiModelNote,GOOGLE_GEMINI_MODELS,type GoogleGeminiModel,type PollinationsImageModel } from "@/features/characters/config/model-options";
 import { AGENT_AUTONOMY_MUTATION_EVENT,clearAgentAutonomyMutationState,getAgentAutonomyMutationState,setAgentAutonomyMutationState } from "@/features/characters/stores/agent-session";
 import { type AgentActivityMaintenanceRead,type AgentAutonomyMutationEventDetail,type AgentAutonomyMutationState,type AgentCreationDraftImageStyle,type AgentDetailRead,type AgentLocalConnectionRead,type AgentProfileImageUsageRead,type AgentProfileMediaUploadInput } from "@/features/characters/types/agents";
@@ -88,6 +92,11 @@ const PROFILE_FEED_TABS: Array<{
 ];
 
 export function AgentDetailClient({ characterId }: { characterId: string }) {
+  const seedScope = useAuthRuntimeIdentity(characterId);
+  const imageInputText = useUiText("characters");
+  const seedRequest = useRef<{ scope: string; controller: AbortController } | null>(null);
+  const [seedState, setSeedState] = useState<{ scope: string; preparing: boolean } | null>(null);
+  useEffect(() => () => { if (seedRequest.current?.scope === seedScope) seedRequest.current.controller.abort(); }, [seedScope]);
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("shell");
   const router = useRouter();
@@ -103,7 +112,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   const [profileFeedTab, setProfileFeedTab] = useState<ProfileFeedTab>("posts");
   const [isProfileEditorOpen, setIsProfileEditorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingOther, setSaving] = useState(false);
+  const saving = savingOther || seedState?.scope === seedScope;
   const [messageStarting, setMessageStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [maintenance, setMaintenance] =
@@ -670,22 +680,25 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
 
   async function handleUploadImageSeed(file: File) {
     if (!agent) return;
-    setSaving(true);
+    seedRequest.current?.controller.abort();
+    const controller = new AbortController(), auth = captureAuthRequestScope();
+    seedRequest.current = { scope: seedScope, controller };
+    const current = () => seedRequest.current?.controller === controller && !controller.signal.aborted && isCurrentAuthRequestScope(auth);
+    setSeedState({ scope: seedScope, preparing: true });
     setError(null);
     try {
-      const dataBase64 = await fileToBase64Payload(file);
-      const imageSettings = await uploadAgentImageSeed(characterId, {
-        filename: file.name,
-        content_type: file.type || "application/octet-stream",
-        data_base64: dataBase64,
-      });
+      const data = await prepareSeedImage(file, controller.signal);
+      if (!current()) return;
+      setSeedState({ scope: seedScope, preparing: false });
+      const imageSettings = await uploadAgentImageSeed(characterId, data, controller.signal);
+      if (!current()) return;
       setAgent((current) =>
         current ? { ...current, image_settings: imageSettings } : current,
       );
     } catch (err) {
-      setError(err instanceof Error ? uiText(err.message) : uiText("시드 이미지를 업로드하지 못했습니다."));
+      if (current()) setError(imageInputText(err instanceof FileInputError ? err.code === "size" ? "시드 이미지 파일이 너무 커요. 더 작은 파일을 선택해 주세요." : err.code === "timeout" ? "사진 준비 시간이 초과됐어요. 다시 선택해 주세요." : "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요." : err instanceof Error ? err.message : "시드 이미지를 업로드하지 못했습니다."));
     } finally {
-      setSaving(false);
+      if (seedRequest.current?.controller === controller) { seedRequest.current = null; setSeedState(null); }
     }
   }
 
@@ -1115,6 +1128,12 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       {error ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#ffd7d7] bg-[#fff5f5] px-5 py-4 text-[15px] font-medium text-[#c24141] md:mx-9">
           {error}
+        </div>
+      ) : null}
+      {seedState?.scope === seedScope && seedState.preparing ? (
+        <div className="mx-5 mt-4 flex items-center gap-3 text-sm text-text-muted" role="status">
+          {imageInputText("시드 이미지를 읽는 중이에요.")}
+          <Button compact variant="secondary" onClick={() => seedRequest.current?.controller.abort()}>{imageInputText("준비 취소")}</Button>
         </div>
       ) : null}
       {maintenance?.enabled ? (

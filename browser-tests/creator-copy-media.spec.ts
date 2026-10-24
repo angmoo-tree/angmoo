@@ -1,12 +1,15 @@
 import { verifyCreatorResponsive } from "./creator-copy-responsive";
 import { test, expect } from "@playwright/test";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { installWorldFeedFixture, feedRoute } from "./world-feed-fixture";
 import { installIntegrationFixture } from "./home-activity-memory-fixture";
 import { FEED_WORLD } from "./world-feed-fixture";
 import { installSocialChatFixture, chatRoute } from "./world-social-chat-fixture";
 import { checkPhotoDimensions } from "../frontend/src/features/media/utils/photo-header";
+
+const photoArtifacts = process.env.ANGMOO_BROWSER_PHOTO_ARTIFACTS ?? "../artifacts/creator-copy-media-20261010";
+mkdirSync(photoArtifacts, { recursive: true });
 
 function paddedJpeg(size: number) {
   const image = readFileSync("fixtures/photos/normal.jpg"), comments = []; let extra = size - image.length;
@@ -42,7 +45,7 @@ test("EXIF mirror survives browser preparation and final attachment", async ({ p
     image.close(); return result;
   }, { data: String(body.data_base64), mime: String(body.content_type) });
   expect(pixels).toMatchObject({ width: 320, height: 240 }); expect(pixels.left[2]).toBeGreaterThan(230);
-  writeFileSync(`../artifacts/creator-copy-media-20261010/prepared-${info.project.name}-mirror.jpg`, bytes);
+  writeFileSync(`${photoArtifacts}/prepared-${info.project.name}-mirror.jpg`, bytes);
 });
 
 test("resized transparent PNG retains its format and alpha", async ({ page }, info) => {
@@ -67,7 +70,7 @@ test("resized transparent PNG retains its format and alpha", async ({ page }, in
     bitmap.close(); return result;
   }, { data: String(body.data_base64), mime: String(body.content_type) });
   expect(geometry).toEqual({ width: 4096, height: 2867, alpha: 64 });
-  writeFileSync(`../artifacts/creator-copy-media-20261010/prepared-${info.project.name}-resized-alpha.png`, bytes);
+  writeFileSync(`${photoArtifacts}/prepared-${info.project.name}-resized-alpha.png`, bytes);
 });
 
 for (const language of ["ko", "en"] as const) {
@@ -96,11 +99,11 @@ for (const language of ["ko", "en"] as const) {
       if (["normal.jpg", "alpha.png"].includes(filename)) expect(bytes.equals(original)).toBe(true);
       if (filename === "alpha.png") expect(pixels.corner[3]).toBe(64);
       if (filename === "normal.jpg") await verifyCreatorResponsive(page);
-      writeFileSync(`../artifacts/creator-copy-media-20261010/prepared-${info.project.name}-${filename}`, bytes);
+      writeFileSync(`${photoArtifacts}/prepared-${info.project.name}-${filename}`, bytes);
       expect(createHash("sha256").update(original).digest("hex")).toBe(before);
       await expect(page.locator('img[alt]').filter({ visible: true }).first()).toBeVisible();
       console.log("PHOTO", language, filename, body.content_type, bytes.length, pixels);
-      await page.screenshot({ path: `../artifacts/creator-copy-media-20261010/${info.project.name}-${language}-${filename}.png`, fullPage: true });
+      await page.screenshot({ path: `${photoArtifacts}/${info.project.name}-${language}-${filename}.png`, fullPage: true });
     });
   }
   test(`photo limits and preserved text ${language}`, async ({ page }, info) => {

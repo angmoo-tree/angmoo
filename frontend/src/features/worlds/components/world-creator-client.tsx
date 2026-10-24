@@ -25,7 +25,9 @@ import { Button } from "@/components/ui/button";
 import { ImageCropDialog } from "@/components/media/image-crop-dialog";
 import { AppIcon } from "@/components/ui/app-icon";
 import { AppIconVisual, appIconBackground } from "@/components/ui/app-icon-visual";
-import { blobToBase64, cropToBlob, INITIAL_CROP, PROFILE_MEDIA_MAX_BYTES, type CropState } from "@/utils/image-crop";
+import { blobToBase64, cropToBlob, INITIAL_CROP, type CropState } from "@/utils/image-crop";
+import { FileInputError } from "@/lib/media/read-file-input";
+import { prepareWorldImage, WorldImageInputError } from "../controllers/prepare-world-image";
 import { WorldBanner } from "./world-banner";
 import { WorldDeleteControl } from "./world-delete-control";
 import { WorldDeletionProgress } from "./world-deletion-progress";
@@ -332,18 +334,20 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile, render
     setImageDraft(null); setCropError(null);
   }
   async function selectImage(file: File | null, kind: "icon" | "banner") {
-    if (!file || !context || pending || imageBusy.current) return;
-    if (file.size > PROFILE_MEDIA_MAX_BYTES) { setError(uiText("이미지는 5MB 이하로 선택해주세요.")); return; }
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) { setError(uiText("PNG, JPG, WebP 이미지를 선택해주세요.")); return; }
+    if (!file || !context || (pending && pending !== "image-decode") || (imageBusy.current && pending !== "image-decode")) return;
+    imageRequest.current?.abort();
+    const controller = new AbortController(); imageRequest.current = controller;
     const epoch = ++imageEpoch.current, scope = captureAuthRequestScope();
     imageBusy.current = true; setPending("image-decode"); setError(null);
     try {
-      const bitmap = await createImageBitmap(file);
+      const bitmap = await prepareWorldImage(file, controller.signal);
       if (epoch !== imageEpoch.current || !isCurrentAuthRequestScope(scope)) { bitmap.close(); return; }
       imageRef.current?.bitmap.close();
       const next = { bitmap, kind }; imageRef.current = next; setImageDraft(next);
       setCrop(INITIAL_CROP); setCropError(null); setImageConflict(false);
-    } catch { if (epoch === imageEpoch.current) setError(uiText("이미지를 읽지 못했어요. 다른 이미지를 선택해주세요.")); }
+    } catch (reason) {
+      if (epoch === imageEpoch.current && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) setError(uiText(reason instanceof FileInputError ? reason.code === "size" ? "이미지는 5MB 이하로 선택해주세요." : reason.code === "timeout" ? "사진 준비 시간이 초과됐어요. 다시 선택해 주세요." : "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요." : reason instanceof WorldImageInputError && reason.code === "format" ? "PNG, JPG, WebP 이미지를 선택해주세요." : "사진 내용을 해석하지 못했어요. 다른 사진을 선택해 주세요."));
+    }
     finally { if (epoch === imageEpoch.current) { imageBusy.current = false; setPending(null); } }
   }
   async function applyImage() {
@@ -563,6 +567,7 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile, render
             </div>
           </aside>
         </div>
+        {pending === "image-decode" ? <div role="status"><p>{uiText("첨부할 사진을 준비하는 중…")}</p><Button type="button" variant="secondary" onClick={() => imageRequest.current?.abort()}>{uiText("사진 준비 취소")}</Button></div> : null}
         {imageDraft ? <ImageCropDialog bitmap={imageDraft.bitmap} spec={imageDraft.kind === "icon" ? { width: 768, height: 768 } : { width: 1024, height: 384 }} crop={crop} busy={pending === "banner" || pending === "image-refresh"} error={cropError} disabled={imageConflict}
           recoveryAction={imageConflict ? <Button type="button" variant="secondary" disabled={pending !== null} onClick={() => void refreshImageVersion()}>{uiText("현재 이미지 상태 새로고침")}</Button> : undefined}
           labels={{ title: uiText(imageDraft.kind === "icon" ? "아이콘 자르기" : "배너 자르기"), close: uiText("닫기"), zoom: uiText("확대"), horizontal: uiText("가로 위치"), vertical: uiText("세로 위치"), cancel: uiText("취소"), apply: uiText("적용"), applying: uiText("이미지를 적용하는 중…") }}

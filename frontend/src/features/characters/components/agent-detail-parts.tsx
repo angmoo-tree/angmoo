@@ -253,6 +253,7 @@ export function ProfileEditModal({
         <div className="max-h-[calc(100vh-8rem)] overflow-y-auto px-5 py-5 md:px-6">
           <div className="mb-5">
             <ProfileMediaUploader
+              scopeKey={agent.character.id}
               avatarUrl={profileAvatarUrl}
               bannerUrl={profileBannerUrl}
               name={profileName || agent.character.name}
@@ -1912,19 +1913,6 @@ export function formatActiveHours(agent: AgentDetailRead) {
   const start = agent.settings.active_hours_start;
   const end = agent.settings.active_hours_end;
   return `${start}-${end}`;
-}
-
-export function fileToBase64Payload(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === "string" ? reader.result : "";
-      const commaIndex = result.indexOf(",");
-      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
-    };
-    reader.onerror = () => reject(reader.error ?? new Error("파일을 읽지 못했습니다."));
-    reader.readAsDataURL(file);
-  });
 }
 
 export function formatTendencyActionLabel(action: string, fallback: string) {

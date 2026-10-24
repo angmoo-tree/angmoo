@@ -14,8 +14,11 @@ import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import type { AgentProfileMediaUploadInput } from "@/features/characters/types/agents";
-import { usePrivateMediaUrl } from "@/hooks/use-private-media-url";
+import { usePrivateMediaResource } from "@/hooks/use-private-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
+import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
+import { FileInputError } from "@/lib/media/read-file-input";
+import { prepareProfileMedia, ProfileMediaInputError } from "../controllers/prepare-profile-media";
 
 type MediaKind = "avatar" | "banner";
 
@@ -24,29 +27,35 @@ const SPECS: Record<MediaKind, { width: number; height: number; label: string }>
   banner: { width: 1024, height: 384, label: "배너" },
 };
 
-const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
-
-export function ProfileMediaUploader({
-  name,
-  avatarUrl,
-  bannerUrl,
-  disabled,
-  generationOverlay,
-  onUpload,
-}: {
+type ProfileMediaUploaderProps = {
+  scopeKey?: string;
   name: string;
   avatarUrl: string;
   bannerUrl: string;
   disabled: boolean;
   generationOverlay?: { kind: MediaKind; label: string } | null;
   onUpload: (data: AgentProfileMediaUploadInput) => Promise<void>;
-}) {
+};
+
+export function ProfileMediaUploader(props: ProfileMediaUploaderProps) {
+  const identity = useAuthRuntimeIdentity(props.scopeKey ?? "profile-media");
+  return <ScopedProfileMediaUploader key={identity} {...props} />;
+}
+
+function ScopedProfileMediaUploader({
+  name,
+  avatarUrl,
+  bannerUrl,
+  disabled,
+  generationOverlay,
+  onUpload,
+}: ProfileMediaUploaderProps) {
   const uiText = useUiText("characters"), errorText = useUiErrorText("characters");
   const avatarInputId = useId();
   const bannerInputId = useId();
   const mounted = useRef(true), operationRef = useRef(0);
   const draftBitmapRef = useRef<ImageBitmap | null>(null);
+  const preparation = useRef<AbortController | null>(null);
   const [draft, setDraft] = useState<{
     kind: MediaKind;
     bitmap: ImageBitmap;
@@ -54,16 +63,20 @@ export function ProfileMediaUploader({
   } | null>(null);
   const [crop, setCrop] = useState<CropState>({ scale: 1, offsetX: 0, offsetY: 0 });
   const [uploading, setUploading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [mediaRevision, setMediaRevision] = useState({ avatar: 0, banner: 0 });
   const [error, setError] = useState<string | null>(null);
-  const resolvedAvatarUrl = usePrivateMediaUrl(avatarUrl);
-  const privateBannerUrl = usePrivateMediaUrl(bannerUrl);
-  const resolvedBannerUrl = useRuntimeMediaUrl(privateBannerUrl);
+  const avatar = usePrivateMediaResource(avatarUrl, mediaRevision.avatar);
+  const banner = usePrivateMediaResource(bannerUrl, mediaRevision.banner);
+  const resolvedAvatarUrl = avatar.url;
+  const resolvedBannerUrl = useRuntimeMediaUrl(banner.url);
 
-  useProductLeaveGuard(Boolean(draft) || uploading);
+  useProductLeaveGuard(Boolean(draft) || uploading || preparing);
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false; operationRef.current += 1;
+      preparation.current?.abort();
       draftBitmapRef.current?.close();
       draftBitmapRef.current = null;
     };
@@ -75,20 +88,13 @@ export function ProfileMediaUploader({
     const nextFile = event.target.files?.[0] ?? null;
     event.target.value = "";
     if (!nextFile) return;
-    setError(null);
-    if (!ACCEPTED_TYPES.has(nextFile.type)) {
-      setError(uiText("jpg, png, webp 이미지만 사용할 수 있습니다."));
-      return;
-    }
-    if (nextFile.size > MAX_MEDIA_BYTES) {
-      setError(uiText("이미지는 5MB 이하로 선택해주세요."));
-      return;
-    }
-
+    preparation.current?.abort();
+    const controller = new AbortController(); preparation.current = controller;
+    setError(null); setPreparing(true);
     const operation = ++operationRef.current, requestScope = captureAuthRequestScope();
     let bitmap: ImageBitmap | null = null;
     try {
-      bitmap = await createImageBitmap(nextFile);
+      bitmap = await prepareProfileMedia(nextFile, controller.signal);
       if (!mounted.current || operationRef.current !== operation || !isCurrentAuthRequestScope(requestScope)) { bitmap.close(); return; }
       closeCropper(false);
       draftBitmapRef.current = bitmap;
@@ -98,14 +104,21 @@ export function ProfileMediaUploader({
         naturalSize: { width: bitmap.width, height: bitmap.height },
       });
       setCrop({ scale: 1, offsetX: 0, offsetY: 0 });
-    } catch {
+    } catch (reason) {
       bitmap?.close();
-      if (mounted.current && operationRef.current === operation && isCurrentAuthRequestScope(requestScope)) setError(uiText("이미지를 열 수 없습니다."));
+      if (mounted.current && operationRef.current === operation && isCurrentAuthRequestScope(requestScope) && !controller.signal.aborted) {
+        setError(uiText(reason instanceof FileInputError ? reason.code === "size" ? "이미지는 5MB 이하로 선택해주세요." : reason.code === "timeout" ? "사진 준비 시간이 초과됐어요. 다시 선택해 주세요." : "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요." : reason instanceof ProfileMediaInputError && reason.code === "format" ? "jpg, png, webp 이미지만 사용할 수 있습니다." : "사진 내용을 해석하지 못했어요. 다른 사진을 선택해 주세요."));
+      }
+    } finally {
+      if (mounted.current && operationRef.current === operation) { setPreparing(false); preparation.current = null; }
     }
   }
 
   function closeCropper(advance = true) {
-    if (advance) operationRef.current += 1;
+    if (advance) {
+      preparation.current?.abort(); preparation.current = null;
+      operationRef.current += 1; setPreparing(false);
+    }
     draftBitmapRef.current?.close();
     draftBitmapRef.current = null;
     setDraft(null);
@@ -128,7 +141,11 @@ export function ProfileMediaUploader({
         content_type: blob.type,
         data_base64: dataBase64,
       });
-      if (current()) closeCropper(false);
+      if (current()) {
+        const kind = draft.kind;
+        setMediaRevision(previous => ({ ...previous, [kind]: previous[kind] + 1 }));
+        closeCropper(false);
+      }
     } catch (err) {
       if (current()) setError(errorText(err, "이미지를 저장하지 못했습니다."));
     } finally {
@@ -184,6 +201,12 @@ export function ProfileMediaUploader({
       </div>
 
       {error && !draft ? <p role="alert" className="mt-3 text-sm font-bold text-text-danger">{error}</p> : null}
+
+      {preparing ? <div role="status"><p>{uiText("첨부할 사진을 준비하는 중…")}</p><Button type="button" variant="ghost" onClick={() => preparation.current?.abort()}>{uiText("사진 준비 취소")}</Button></div> : null}
+      {([ ["avatar", avatar], ["banner", banner] ] as const).map(([kind, resource]) => <div key={kind}>
+        {mediaRevision[kind] > 0 && resource.loading ? <p role="status">{uiText("저장한 이미지 미리보기를 불러오는 중…")}</p> : null}
+        {resource.error ? <div role="alert"><p>{uiText(mediaRevision[kind] > 0 ? "이미지는 저장했지만 미리보기를 불러오지 못했어요." : "이미지 미리보기를 불러오지 못했어요.")}</p><Button type="button" variant="secondary" onClick={resource.retry}>{uiText("{{value0}} 미리보기 다시 불러오기", { value0: uiText(SPECS[kind].label) })}</Button></div> : null}
+      </div>)}
 
       {draft ? (
         <ImageCropDialog bitmap={draft.bitmap} spec={spec} crop={crop} onCrop={setCrop} onApply={() => void handleUpload()} onCancel={() => closeCropper()}
