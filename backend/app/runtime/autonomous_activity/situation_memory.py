@@ -82,8 +82,11 @@ def freeze_social_input(ctx, snapshot, *, node, payload, transmitted, state):
         if reply.get("body"):
             post(reply["post_id"], reply["body"], f"{prefix}/completed_social_replies/{index}/body", "background")
     routine = context.get("routine", {})
-    for index, record in enumerate(routine.get("source_events", [])):
-        add("SOCIAL_EVENT", record["source_event_id"], record.get("excerpt") or json.dumps(record, ensure_ascii=False),
+    from app.runtime.autonomous_activity.routine_sources import input_source_bindings
+    records = routine.get("source_events", [])
+    bindings = input_source_bindings(ctx, scope=snapshot.scope, records=records, state=state)
+    for index, (record, (kind, identifier)) in enumerate(zip(records, bindings, strict=True)):
+        add(kind, identifier, record.get("excerpt") or json.dumps(record, ensure_ascii=False),
             f"{prefix}/routine/source_events/{index}")
     previous = routine.get("previous_success") or {}
     previous_post = previous.get("post") or {}

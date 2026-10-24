@@ -18,12 +18,13 @@ class ManualInboxService:
         self.references = references
 
     def _valid_candidate(
-        self, db: Session, *, row: OwnerManualInboxCandidate
+        self, db: Session, *, row: OwnerManualInboxCandidate, refresh: bool = False
     ) -> tuple[Post, Post] | None:
-        reply = posts.get_post(db, row.source_reply_post_id)
-        target_post = posts.get_post(db, row.target_post_id)
-        actor = self.references.get_world_character(db, row.actor_world_character_id)
-        target = self.references.get_world_character(db, row.target_world_character_id)
+        read_post = repository.current_source_post if refresh else posts.get_post
+        reply = read_post(db, row.source_reply_post_id)
+        target_post = read_post(db, row.target_post_id)
+        actor = self.references.get_world_character(db, row.actor_world_character_id, refresh=refresh)
+        target = self.references.get_world_character(db, row.target_world_character_id, refresh=refresh)
         if (
             reply is None
             or target_post is None
@@ -48,8 +49,8 @@ class ManualInboxService:
             or repository._blocked(db, row=row)
         ):
             return None
-        actor_membership = self.references.get_membership(db, actor.membership_id)
-        target_membership = self.references.get_membership(db, target.membership_id)
+        actor_membership = self.references.get_membership(db, actor.membership_id, refresh=refresh)
+        target_membership = self.references.get_membership(db, target.membership_id, refresh=refresh)
         if (
             actor_membership is None
             or target_membership is None
@@ -183,7 +184,7 @@ class ManualInboxService:
             or (row.status != "claimed")
         ):
             raise ManualInboxRuntimeError("manual_inbox_claim_mismatch")
-        valid = self._valid_candidate(db, row=row)
+        valid = self._valid_candidate(db, row=row, refresh=True)
         if valid is None:
             raise ManualInboxRuntimeError("manual_inbox_source_context_invalid")
         reply, _target_post = valid

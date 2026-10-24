@@ -14,12 +14,12 @@ from app.domains.social.utils.manual_inbox import (
 
 class RuntimeManualInboxReferences:
     def get_world_character(
-        self, db: Session, world_character_id: str
+        self, db: Session, world_character_id: str, *, refresh: bool = False
     ) -> WorldCharacter | None:
-        return db.get(WorldCharacter, world_character_id)
+        return db.get(WorldCharacter, world_character_id, populate_existing=refresh)
 
-    def get_membership(self, db: Session, membership_id: str) -> WorldMembership | None:
-        return db.get(WorldMembership, membership_id)
+    def get_membership(self, db: Session, membership_id: str, *, refresh: bool = False) -> WorldMembership | None:
+        return db.get(WorldMembership, membership_id, populate_existing=refresh)
 
 
 manual_inbox_service = ManualInboxService(RuntimeManualInboxReferences())

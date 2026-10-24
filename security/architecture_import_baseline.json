@@ -1,6 +1,6 @@
 {
-  "edge_count": 6953,
-  "external_import_count": 4715,
+  "edge_count": 6958,
+  "external_import_count": 4717,
   "module_count": 1604,
   "modules": [
     {
@@ -12840,7 +12840,8 @@
       ],
       "imports": [
         "app.domains.social.models.feed",
-        "app.domains.social.models.manual_writes"
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts"
       ],
       "module": "app.domains.social.repository.manual_inbox",
       "path": "backend/app/domains/social/repository/manual_inbox.py",
@@ -18457,10 +18458,15 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "logging",
         "sqlalchemy"
       ],
       "imports": [
         "app.domains.relationships.models.social",
+        "app.domains.routine_posts.constants",
+        "app.domains.routine_posts.utils.text",
+        "app.domains.social.models.posts",
         "app.runtime.relationships.social_metrics",
         "app.runtime.social.manual_inbox"
       ],
@@ -18487,6 +18493,7 @@
         "app.domains.social.models.activity_thought",
         "app.domains.social.models.posts",
         "app.domains.social.utils.situation_output",
+        "app.runtime.autonomous_activity.routine_sources",
         "app.runtime.diagnostics.situation_observation",
         "app.runtime.memory.situation_sources"
       ],
@@ -22037,13 +22044,13 @@
         "typing"
       ],
       "imports": [
+        "app.core.ids",
         "app.domains.routines.models",
         "app.domains.world_characters.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.infrastructure.sqlalchemy_setup_models",
-        "app.domains.worlds.domain.reserved_roles",
+        "app.domains.worlds.exceptions",
         "app.domains.worlds.infrastructure.definition_repository",
         "app.domains.worlds.infrastructure.sqlalchemy_models",
-        "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles",
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.persistence.sqlite_schema"
       ],
