@@ -450,5 +450,7 @@
   "키를 삭제하지 못했어요.": "Could not delete the saved key.",
   "설정이 변경됐어요. 최신 내용을 확인해 주세요.": "Settings have changed. Review the latest settings.",
   "요청 결과를 확인하지 못했어요. 다시 저장하기 전에 현재 상태를 확인해 주세요.": "The request result could not be confirmed. Check the current settings before submitting again.",
-  "다시 불러오기": "Reload settings"
+  "다시 불러오기": "Reload settings",
+  "기억을 관리할 캐릭터가 없어요.": "There are no characters whose memories you can manage.",
+  "기억을 관리할 캐릭터를 선택해 주세요.": "Choose a character to manage their memories."
 }
