@@ -335,7 +335,7 @@ def test_manual_source_batch_has_bounded_reads_and_no_writes(durable_stack):
     assert statements == ["SELECT"] * 5
 
 
-def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index, tmp_path, deny_external_network):
+def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index, tmp_path, monkeypatch, deny_external_network):
     import asyncio
     from sqlalchemy.orm import sessionmaker
     from time import monotonic
@@ -354,6 +354,10 @@ def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index,
     from app.runtime.memory.vector_projection import MemoryVectorProjection
     from app.runtime.memory.situation_detail import situation_detail
     from app.runtime.memory.composition import memory_consolidation_repository
+    # The real result journal must share this test's isolated writable storage,
+    # including when the candidate runs as its unchanged non-root image user.
+    media_root = tmp_path / "media"
+    monkeypatch.setattr("app.config.settings.MEDIA_ROOT", str(media_root))
     db, scope, setting, memory = durable_stack
     world_credentials.save(db, owner_id=scope.owner_id, world_id=scope.world_id,
         world_character_id=scope.subject_world_character_id, purpose="embedding",
@@ -374,6 +378,7 @@ def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index,
             scope, row.description, (RecallDocumentKind.MEMORY_ITEM,), 5))] == [item.id]
         fake = Embeddings()
         projection = MemoryVectorProjection(factory, index, provider=fake, episode_only=True)
+        assert projection.journal.root.is_relative_to(media_root)
         assert asyncio.run(projection.sync_item(item.id)) == "indexed"
         hits = index.search(MemoryVectorQuery(scope, EMBEDDING_PROFILE, A),
             cancellation=VectorCancellation(monotonic()+10)).hits
