@@ -50,7 +50,7 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
           {profile.handle ? <p>{formatHandle(profile.handle)}</p> : null}
           <div className={styles.badges}>
             <span>{profile.control_mode === "owner_controlled" ? uiText("사용자") : uiText("자율 앵무")}</span>
-            <span>{!profile.role_key || profile.role_key === "no_specific_role" ? uiText("역할 없음") : profile.role_name ?? uiText("역할 정보를 확인할 수 없어요.")}</span>
+            <span>{profile.role_name ?? uiText("역할 정보를 확인할 수 없어요.")}</span>
           </div>
           {profile.intro ? <div className={styles.intro}>{profile.intro}</div> : null}
         </div>

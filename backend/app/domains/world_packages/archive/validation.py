@@ -30,7 +30,7 @@ from app.domains.world_packages.schemas.content import (
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_DESCRIPTION, NO_SPECIFIC_ROLE_NAME, NO_SPECIFIC_ROLE_PORTABLE_REF
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_PORTABLE_REF, has_supported_no_specific_role_content
 from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     persona_validation_error,
@@ -446,13 +446,7 @@ def _validate_references(
     for role in world.roles:
         if role.ref != NO_SPECIFIC_ROLE_PORTABLE_REF:
             continue
-        if not (
-            role.name == NO_SPECIFIC_ROLE_NAME
-            and role.description == NO_SPECIFIC_ROLE_DESCRIPTION
-            and role.responsibilities == []
-            and role.allowed_activity_scope == []
-            and role.autonomous_allowed is True
-        ):
+        if not has_supported_no_specific_role_content(role):
             _fail(WorldPackageReasonCode.REFERENCE_INVALID)
     if character_refs != seed_refs:
         _fail(WorldPackageReasonCode.REFERENCE_INVALID)

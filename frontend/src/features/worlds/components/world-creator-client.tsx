@@ -505,7 +505,10 @@ function WorldCreatorEditor({ worldId, renderWorldTools, renderMyProfile, render
 
             {context ? (
               <>
-                {renderWorldTools(context.world.id, definition.roles)}
+                {renderWorldTools(context.world.id, [
+                  ...context.world.roles.filter(role => role.key === NO_SPECIFIC_ROLE_KEY),
+                  ...definition.roles,
+                ])}
                 <div id="owner-controlled-identity" className="scroll-mt-6">
                   {renderMyProfile(context.world.id)}
                 </div>

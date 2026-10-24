@@ -226,7 +226,7 @@ def _fixture(relative: str) -> dict:
     return json.loads((FIXTURE_ROOT / relative).read_text(encoding="utf-8"))
 
 
-def _archive(*, with_image: bool = False, no_specific_role: bool = False) -> bytes:
+def _archive(*, with_image: bool = False, no_specific_role: bool = False, english_role: bool = False) -> bytes:
     world_payload = _fixture("content/world.json")
     world_characters_payload = _fixture("content/world-characters.json")
     if no_specific_role:
@@ -234,8 +234,8 @@ def _archive(*, with_image: bool = False, no_specific_role: bool = False) -> byt
             {
                 "allowed_activity_scope": [],
                 "autonomous_allowed": True,
-                "description": "별도의 World 역할을 지정하지 않은 캐릭터",
-                "name": "역할 없음",
+                "description": "A character with no specific World role." if english_role else "별도의 World 역할을 지정하지 않은 캐릭터",
+                "name": "No role" if english_role else "역할 없음",
                 "ref": "roles/no-specific-role",
                 "responsibilities": [],
             }
@@ -868,12 +868,14 @@ def test_commit_is_atomic_registers_one_home_world_and_replays_without_writes(
         assert _count(db, models.WorldPackageImportIdMap) == 4
 
 
+@pytest.mark.parametrize("english_role", [False, True])
 def test_commit_maps_portable_no_role_to_canonical_reserved_role(
     import_runtime,
+    english_role: bool,
 ) -> None:
     prepared = _stage(
         import_runtime.client,
-        _archive(no_specific_role=True),
+        _archive(no_specific_role=True, english_role=english_role),
     )
     committed = _commit(
         import_runtime.client,
@@ -892,8 +894,8 @@ def test_commit_maps_portable_no_role_to_canonical_reserved_role(
         assert world_character is not None
         assert world_character.role_key == "no_specific_role"
         assert reserved is not None
-        assert reserved.name == "역할 없음"
-        assert reserved.description == "별도의 World 역할을 지정하지 않은 캐릭터"
+        assert reserved.name == ("No role" if english_role else "역할 없음")
+        assert reserved.description == ("A character with no specific World role." if english_role else "별도의 World 역할을 지정하지 않은 캐릭터")
         assert reserved.responsibilities == []
         assert reserved.allowed_activity_scope == []
         assert reserved.autonomous_allowed is True

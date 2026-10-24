@@ -80,8 +80,12 @@ def test_default_space_is_publish_ready_for_both_owner_languages(db, language):
     assert ensure_default_space(session, owner_id=owner.id, initialize=initialize_default_space_policy).id == world.id
 
 
-def test_keyless_registration_is_atomic_off_and_replayed(db):
+@pytest.mark.parametrize("language", ["ko", "en"])
+def test_keyless_registration_is_atomic_off_and_replayed(db, language):
     session, owner = db
+    update_user_preferences(session, owner, UserPreferencesUpdate(
+        ui_language=language, expected_ui_revision=owner.ui_preference_revision,
+    ))
     async def forbidden(**kwargs):
         raise AssertionError("Registration must not call AI")
     workflows = replace(build_creator_workflows(), run_llm=forbidden)
@@ -102,6 +106,13 @@ def test_keyless_registration_is_atomic_off_and_replayed(db):
         "world_id": row.world_id, "world_character_id": row.id, "character_id": first.character.id,
     }
     assert row.role_key == NO_SPECIFIC_ROLE_KEY
+    from app.domains.worlds.models import World, WorldRole
+    role = session.scalar(select(WorldRole).where(
+        WorldRole.world_id == row.world_id, WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
+    ))
+    assert (role.name, role.description) == ("No role", "A character with no specific World role.")
+    assert session.get(World, row.world_id).language == language
+    assert first.character.name == "하루"
     preflight = preflight_setup(session, world_character_id=row.id, user=owner)
     assert preflight.safe_reason_code == "credential_required"
     assert row.autonomous_enabled is False

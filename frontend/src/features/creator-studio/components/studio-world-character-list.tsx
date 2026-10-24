@@ -131,7 +131,7 @@ export function StudioWorldCharacterList({
   } | null>(null);
 
   const roleOptions = [
-      { key: NO_SPECIFIC_ROLE_KEY, name: uiText("역할 없음"), autonomous_allowed: true },
+      roles.find(role => role.key === NO_SPECIFIC_ROLE_KEY) ?? { key: NO_SPECIFIC_ROLE_KEY, name: "No role", autonomous_allowed: true },
       ...roles.filter(
         (role) => role.autonomous_allowed && role.key !== NO_SPECIFIC_ROLE_KEY,
       ),

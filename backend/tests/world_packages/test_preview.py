@@ -500,8 +500,13 @@ def test_semantically_invalid_world_references_fail_after_integrity_passes(
     )
 
 
+@pytest.mark.parametrize("name,description", [
+    ("역할 없음", "별도의 World 역할을 지정하지 않은 캐릭터"),
+    ("No role", "A character with no specific World role."),
+])
 def test_reserved_no_role_payload_is_accepted_only_with_canonical_content(
     tmp_path: Path,
+    name: str, description: str,
 ) -> None:
     payloads = _payloads(_archive())
     world = json.loads(payloads["content/world.json"])
@@ -509,8 +514,8 @@ def test_reserved_no_role_payload_is_accepted_only_with_canonical_content(
         {
             "allowed_activity_scope": [],
             "autonomous_allowed": True,
-            "description": "별도의 World 역할을 지정하지 않은 캐릭터",
-            "name": "역할 없음",
+            "description": description,
+            "name": name,
             "ref": "roles/no-specific-role",
             "responsibilities": [],
         }

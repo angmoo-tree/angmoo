@@ -9,26 +9,53 @@ from typing import Any
 from sqlalchemy import Connection, select, update
 from sqlalchemy.orm import Session, load_only
 
+from app.core.ids import uuid7_string
 from app.domains.routines.models import DailyActivityPlan
 from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
 from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
     WorldActivityRepertoire,
     WorldCommunityProfile,
 )
-from app.domains.worlds.domain.reserved_roles import NO_SPECIFIC_ROLE_KEY
-from app.domains.worlds.domain.reserved_roles import (
-    NO_SPECIFIC_ROLE_DESCRIPTION,
-    NO_SPECIFIC_ROLE_NAME,
-)
+from app.domains.worlds.exceptions import ReservedWorldRoleConflictError
 from app.domains.worlds.infrastructure import definition_repository
-from app.domains.worlds.infrastructure.sqlalchemy_models import World
-from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
-    ensure_no_specific_role,
-)
+from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldRole
 from app.runtime.migrations.sqlite_versions.contracts import (
     SqliteMigrationDeltaError,
 )
 from app.runtime.persistence.sqlite_schema import build_sqlite_v1_metadata
+
+# This version's data contract is frozen. Current creation defaults must not
+# change the rows or hashes produced by a historical v2 -> v3 upgrade.
+NO_SPECIFIC_ROLE_KEY = "no_specific_role"
+NO_SPECIFIC_ROLE_NAME = "역할 없음"
+NO_SPECIFIC_ROLE_DESCRIPTION = "별도의 World 역할을 지정하지 않은 캐릭터"
+
+
+def _ensure_v3_no_specific_role(session: Session, *, world_id: str) -> None:
+    role = session.scalar(select(WorldRole).where(
+        WorldRole.world_id == world_id,
+        WorldRole.role_key == NO_SPECIFIC_ROLE_KEY,
+    ).with_for_update())
+    if role is None:
+        session.add(WorldRole(
+            id=uuid7_string(), world_id=world_id, role_key=NO_SPECIFIC_ROLE_KEY,
+            version=1, name=NO_SPECIFIC_ROLE_NAME,
+            description=NO_SPECIFIC_ROLE_DESCRIPTION, responsibilities=[],
+            allowed_activity_scope=[], autonomous_allowed=True, status="enabled",
+        ))
+        session.flush()
+        return
+    if not _canonical_reserved_role({
+        "role_key": role.role_key, "name": role.name, "description": role.description,
+        "responsibilities": role.responsibilities,
+        "allowed_activity_scope": role.allowed_activity_scope,
+        "autonomous_allowed": role.autonomous_allowed,
+    }):
+        raise ReservedWorldRoleConflictError("reserved_world_role_conflict")
+    if role.status != "enabled":
+        role.status = "enabled"
+        role.version += 1
+        session.flush()
 
 
 def _historical_world(session: Session, world_id: str) -> World | None:
@@ -322,7 +349,7 @@ def upgrade_v2_to_v3(connection: Connection) -> None:
             if world is None:
                 raise ValueError("roleless_world_missing")
             old_world_hash = world.contract_hash
-            ensure_no_specific_role(session, world_id=world_id)
+            _ensure_v3_no_specific_role(session, world_id=world_id)
             roleless_character_ids = tuple(
                 session.scalars(
                     select(WorldCharacter.id).where(

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from dataclasses import replace
 from datetime import UTC, datetime
 from io import BytesIO
@@ -496,8 +498,10 @@ def test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state(
     engine.dispose()
 
 
+@pytest.mark.parametrize("legacy", [False, True])
 def test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministically(
     tmp_path: Path,
+    legacy: bool,
 ) -> None:
     engine, factory, _owner = _database_fixture(tmp_path)
     with factory() as db:
@@ -505,7 +509,10 @@ def test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministic
         world = db.get(models.World, "private-source-world-id")
         assert autonomous is not None
         assert world is not None
-        ensure_no_specific_role(db, world_id=world.id)
+        role = ensure_no_specific_role(db, world_id=world.id)
+        if legacy:
+            role.name = "역할 없음"
+            role.description = "별도의 World 역할을 지정하지 않은 캐릭터"
         autonomous.role_key = "no_specific_role"
         db.flush()
         world.contract_hash = world_contract_hash(db, world)
@@ -527,7 +534,8 @@ def test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministic
         for role in first.world.roles
         if role.ref == NO_SPECIFIC_ROLE_PORTABLE_REF
     )
-    assert reserved.name == "역할 없음"
+    assert reserved.name == ("역할 없음" if legacy else "No role")
+    assert reserved.description == ("별도의 World 역할을 지정하지 않은 캐릭터" if legacy else "A character with no specific World role.")
     assert first.world_characters[0].role_ref == NO_SPECIFIC_ROLE_PORTABLE_REF
     assert first.source_fingerprint == second.source_fingerprint
     engine.dispose()
