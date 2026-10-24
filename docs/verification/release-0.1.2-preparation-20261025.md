@@ -92,6 +92,16 @@ ER0 corpus checks passed: 10 cases. The prior ledger records remain unchanged;
 the English-role record is append-only. The approved Windows platform files
 are byte-for-byte unchanged from the maintainer-reviewed `a6b9f3e4` diff.
 
+The final build-input audit also found stale Dockerfile and development Compose
+defaults. The official candidate already supplies an explicit version, but a
+default contributor build would be rejected by the current runtime identity.
+Both Dockerfile defaults and development build/runtime values now match 0.1.2.
+The container contract checks these defaults against the resolved product
+version and rejects independent drift in all five locations. The previous
+configuration was reproduced as a failing contract before the values changed.
+The version/container contract suite passed 34 cases, including five independent
+default-drift rejection cases, and the eight related ER0 checks also passed.
+
 This is local source evidence. PR checks, exact-head Windows path review, main
 merge, source-bound Windows/full and native container receipts, exact-EXE user
 acceptance, registry promotion and public asset verification are separate gates.

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import re
 import sys
 import yaml
 
@@ -12,12 +13,30 @@ from scripts.release.workflow_policy import validate, uploads, WORKFLOWS
 from scripts.ci.check_release_tag import expected_release_tag
 
 
+def validate_build_defaults(root: Path, version: str) -> list[str]:
+    errors = []
+    development = yaml.safe_load((root / "compose.dev.yml").read_text(encoding="utf-8"))
+    expected_dev = "${ANGMOO_VERSION:-" + version + "-dev}"
+    for service in ("backend", "frontend"):
+        source = (root / f"Dockerfile.{service}").read_text(encoding="utf-8")
+        defaults = re.findall(r"^ARG VERSION=(\S+)\s*$", source, re.MULTILINE)
+        if defaults != [version]:
+            errors.append(f"container default version must match product: {service}")
+        args = development["services"][service].get("build", {}).get("args", {})
+        if args.get("VERSION") != expected_dev:
+            errors.append(f"development build default version must match product: {service}")
+    environment = development["services"]["backend"].get("environment", {})
+    if environment.get("ANGMOO_VERSION") != expected_dev:
+        errors.append("development runtime default version must match product: backend")
+    return errors
+
+
 def validate_contract(root: Path = ROOT) -> list[str]:
     try:
         tag = expected_release_tag(root)
     except (OSError, ValueError, KeyError, StopIteration) as exc:
         return [f"release version cannot be resolved: {exc}"]
-    errors = []
+    errors = validate_build_defaults(root, tag.removeprefix("release-v"))
     for name in sorted(WORKFLOWS):
         path = root / ".github/workflows" / name
         if not path.is_file():

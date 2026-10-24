@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 
 import pytest
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,6 +59,31 @@ def _image_document(*, user: str = "10001:10001", environment: list[str] | None 
 
 def test_repository_container_release_contract_passes() -> None:
     assert CONTRACT.validate_contract(ROOT) == []
+
+
+@pytest.mark.parametrize("changed", [None, "backend-image", "frontend-image",
+                                    "backend-build", "frontend-build", "backend-runtime"])
+def test_container_default_versions_reject_drift(tmp_path, changed) -> None:
+    version = RELEASE_TAG.expected_release_tag(ROOT).removeprefix("release-v")
+    for name in ("Dockerfile.backend", "Dockerfile.frontend", "compose.dev.yml"):
+        text = (ROOT / name).read_text(encoding="utf-8")
+        if changed in ("backend-image", "frontend-image") and name == "Dockerfile." + changed.split("-")[0]:
+            text = text.replace("ARG VERSION=" + version, "ARG VERSION=0.0.0")
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    if changed and changed.endswith(("-build", "-runtime")):
+        path = tmp_path / "compose.dev.yml"
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+        service = changed.split("-")[0]
+        if changed.endswith("-build"):
+            document["services"][service]["build"]["args"]["VERSION"] = "${ANGMOO_VERSION:-0.0.0-dev}"
+        else:
+            document["services"][service]["environment"]["ANGMOO_VERSION"] = "${ANGMOO_VERSION:-0.0.0-dev}"
+        path.write_text(yaml.safe_dump(document), encoding="utf-8")
+    errors = CONTRACT.validate_build_defaults(tmp_path, version)
+    if changed is None:
+        assert errors == []
+    else:
+        assert len(errors) == 1 and "default version must match product" in errors[0]
 
 
 def test_release_tag_matches_both_application_versions() -> None:
