@@ -1,40 +1,40 @@
 {
   "schema": "angmoo-p5.v1",
-  "source_sha": "bfd63c2440d5d1d2f33898407fd329404f1b2359",
+  "source_sha": "72d2da52418516604025a1efa49aaca2cfdb0304",
   "windows": {
-    "sha256": "sha256:467ad3c72c7f32c025c91ae0da12f97abd8837038a54cb7df1d700c170ff2456",
-    "run_id": "40011355070",
+    "sha256": "sha256:ea0b022ff7ba8c33df5b257027fa9d4ade7411b3f41ee4cce63675b5836a92d1",
+    "run_id": "40045475052",
     "attempt": "1"
   },
   "images": {
-    "backend/linux/amd64": "sha256:6e734f457d4aca6171b6276e3a364edcabf476d4d06a65cd1cc04ea25e968e00",
-    "frontend/linux/amd64": "sha256:f7b26f2eeeac609a57f9d0f61d6e06340f3a2838cae87bd6e0ef177a938546ea",
-    "backend/linux/arm64": "sha256:4e37095700099cf529ba2b9fcd4d7b48cbfde8d33da79dcef2d9989afa13a11a",
-    "frontend/linux/arm64": "sha256:f0e196cbb75f4af11a98dc2608881f143882c5ea94eef557d02fdd9def3710e7"
+    "backend/linux/amd64": "sha256:71fdf79b81d7a46f72cec701955d0e4499039c4332fb0e6d3986129ec6bd31db",
+    "frontend/linux/amd64": "sha256:f3cec898e11480f5e89ceb3833f921d0d7ba337073c729db5f6c86fe941b276b",
+    "backend/linux/arm64": "sha256:5cd2e0514b8c0fd95f12ee26ee07be145fe410f5d8eff2ab82bc2afddadf72aa",
+    "frontend/linux/arm64": "sha256:10cbaae489d7192f3bce27a151f936fbc8dacdf955441f0442b6d6b1240989fb"
   },
   "checks": [
     {
       "workflow": "ci.yml",
-      "run_id": "40011355001",
+      "run_id": "40045475059",
       "attempt": "1"
     },
     {
       "workflow": "local-smoke.yml",
-      "run_id": "40011354950",
+      "run_id": "40045475279",
       "attempt": "1"
     },
     {
       "workflow": "security.yml",
-      "run_id": "40011354990",
+      "run_id": "40045475065",
       "attempt": "1"
     }
   ],
   "windows_user_check": {
     "result": "PASS",
     "reviewer": "jingujeon",
-    "exe_sha256": "sha256:467ad3c72c7f32c025c91ae0da12f97abd8837038a54cb7df1d700c170ff2456",
-    "checked_at": "2026-10-23T23:06:34.072435+00:00",
-    "evidence": "Maintainer jingujeon explicitly accepted installation-only verification of this exact EXE and requested completion of 0.1.1 publication without launching the app or making AI calls. Physical 0.1.0 to 0.1.1 update, exact source/payload identity and existing-data preservation were verified. This PASS is limited to that accepted scope; installed-app runtime, UI and restart were NOT_RUN. See docs/releases/0.1.1/verification.md for the instruction and evidence boundaries. Prior PR approvals and 0.1.0 acceptance are not reused.",
+    "exe_sha256": "sha256:ea0b022ff7ba8c33df5b257027fa9d4ade7411b3f41ee4cce63675b5836a92d1",
+    "checked_at": "2026-10-24T01:34:23.092672+00:00",
+    "evidence": "Maintainer jingujeon explicitly authorized completion of 0.1.1 publication after installation-only verification, without launching the app or making AI calls. Under that scope the agent installed and physically verified this exact security-corrected EXE, preserved existing data, and left the app stopped. This PASS is acceptance of installation-and-data-preservation-only scope, not a claim of direct maintainer runtime/UI use of this EXE. The earlier candidate and its acceptance evidence are not reused as this candidate verification. See docs/releases/0.1.1/verification.md.",
     "scope": "installation-and-data-preservation-only",
     "runtime_ui": "NOT_RUN",
     "app_restart": "NOT_RUN",
