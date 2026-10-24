@@ -5,6 +5,11 @@ from app.domains.chat.models import MessageMessage
 from app.core.calendar import utc_instant
 
 from app.domains.chat.contracts.evidence_bundle import EvidenceLocatorKind
+from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotChangedError
+from app.domains.chat.exceptions import ChatSituationEvidenceError
+from app.domains.chat.service.today_situation_delivery import selected_event_entries
+from app.domains.relationships.contracts.source_event_evidence import SourceEventBasis
+from app.domains.memory.exceptions import SituationSourceAdmissionError, SituationDeliveryBindingError
 from app.domains.memory.contracts.activity_situation import (
     DeliveredInputManifest, CommittedActivityResult, CommittedEffect, stable_digest,
     FinalDeliveredFragment, RelationshipDeliveryBasis,
@@ -21,18 +26,45 @@ class ChatSituationMemory:
         self.session = session
 
     def freeze(self, command, bundle, payload):
+        # Capturing delivery is read-only and never flushes a caller's pending
+        # writes. Each invocation owns fresh, bounded canonical facts.
+        with self.session.no_autoflush:
+            return self._freeze(command, bundle, payload)
+
+    def _freeze(self, command, bundle, payload):
         snapshot = restore(command.request.node_state.get("_situation_policy"))
         if snapshot is None:
             raise ValueError("situation_snapshot_required")
         sources = SituationSources(self.session)
+        selected = selected_event_entries(command, bundle, payload, snapshot.scope)
+        references = {index: SourceEventBasis(entry.source_id, entry.event_type, entry.actor_id,
+            entry.counterpart_id, entry.source_post_id, entry.target_post_id,
+            entry.root_post_id, entry.parent_post_id, entry.source_revision) for index, entry in selected.items()}
+        if references:
+            # Fresh populate_existing reads must not overwrite uncommitted
+            # caller edits. The response UoW checkpoints before this boundary;
+            # an unfinished edit must be resolved by its owner, never here.
+            if self.session.dirty or self.session.deleted:
+                raise ChatSituationEvidenceError("situation_today_pending_changes")
+            message = self.session.get(MessageMessage, command.request.user_message_id, populate_existing=True)
+            if message is None or message.thread_id != command.request.thread_id:
+                raise ChatSituationEvidenceError("situation_today_thread_invalid")
+        facts = sources.prepare_manual_events(ref.event_id for ref in references.values()) if references else None
         entries = []
         payload_digest = stable_digest(payload)
-        def add(kind, identifier, delivered, path, *, role="core", basis=None):
-            entries.append(sources.describe(snapshot.scope, kind=kind, identifier=identifier,
-                delivered=delivered, path=path, role=role, ordinal=len(entries),
-                target=command.request.response_slot_id if role == "core" else None,
-                private_thread=command.request.thread_id, relationship_basis=basis,
-                delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)))
+        def add(kind, identifier, delivered, path, *, role="core", basis=None, event_reference=None):
+            try:
+                entry = sources.describe(snapshot.scope, kind=kind, identifier=identifier,
+                    delivered=delivered, path=path, role=role, ordinal=len(entries),
+                    target=command.request.response_slot_id if role == "core" else None,
+                    private_thread=command.request.thread_id, relationship_basis=basis,
+                    manual_event_reference=event_reference, capture_validation=facts,
+                    delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest))
+            except SituationDeliveryBindingError as exc:
+                raise ChatSituationEvidenceError("situation_today_binding_invalid") from exc
+            except SituationSourceAdmissionError as exc:
+                raise TodaySnsSnapshotChangedError("situation_today_source_changed") from exc
+            entries.append(entry)
         latest = payload["latest_user_message"]
         if isinstance(latest, dict) and latest["content"] != f"{latest['name']}: {command.preflight.user_message}":
             raise ValueError("situation_chat_presentation_changed")
@@ -55,7 +87,7 @@ class ChatSituationMemory:
                     f"/frozen_evidence/items/{index}/text", role="prior")
             elif locator.kind is EvidenceLocatorKind.CANONICAL_SOURCE:
                 add(locator.source_type, locator.source_id, payload["frozen_evidence"]["items"][index]["text"],
-                    f"/frozen_evidence/items/{index}/text", role="background")
+                    f"/frozen_evidence/items/{index}/text", role="background", event_reference=references.get(index))
             elif locator.kind in {EvidenceLocatorKind.GRAPH_RELATIONSHIP, EvidenceLocatorKind.IMAGE_ASSET}:
                 basis = None
                 if locator.kind is EvidenceLocatorKind.GRAPH_RELATIONSHIP:

@@ -21,7 +21,8 @@ from app.domains.memory.service.items import memory_evidence_blocked_code
 from app.domains.memory.service.source_evidence import SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.memory import source_queries
 from app.runtime.memory.scope_queries import read_scope_presence
-from app.domains.memory.exceptions import MemoryScopeError
+from app.domains.memory.exceptions import MemoryScopeError, SituationSourceAdmissionError, SituationDeliveryBindingError
+from app.domains.relationships.contracts.source_event_evidence import SourceEventBasis
 from app.runtime.memory.source_queries import block_id, active_participant_ids
 from app.runtime.memory import manual_situation_sources
 
@@ -80,7 +81,8 @@ class SituationSources:
             post.created_at, entry, digest, parent.created_at, accessible)
 
     def describe(self, scope, *, kind, identifier, delivered, path, role, ordinal, target=None,
-                 private_thread=None, delivery=None, relationship_basis=None, capture_validation=None):
+                 private_thread=None, delivery=None, relationship_basis=None, capture_validation=None,
+                 manual_event_reference: SourceEventBasis | None = None):
         if delivery is not None and (delivery.path != path or delivery.text != delivered):
             raise ValueError("situation_delivery_fragment_mismatch")
         if kind == "ROUTINE_ACTIVITY":
@@ -140,17 +142,25 @@ class SituationSources:
                                 or not all(value is not None for value in read_scope_presence(self.session, scope))):
                             raise SourceEventEvidenceError("situation_manual_delivery_missing")
                         manual = manual_situation_sources.basis(self.session, scope, event, facts)
-                        record = json.loads(delivered)
-                        if not manual.matches_record(record):
-                            raise SourceEventEvidenceError("situation_manual_delivery_mismatch")
+                        if manual_event_reference is None:
+                            # SNS sends a structured record as the actual fragment.
+                            if not manual.matches_record(json.loads(delivered)):
+                                raise SourceEventEvidenceError("situation_manual_delivery_mismatch")
+                        else:
+                            # Chat owns the prose-to-reference projection. No JSON
+                            # parsing or invented record for that representation.
+                            if manual.digest != manual_event_reference.digest:
+                                raise SourceEventEvidenceError("situation_manual_revision_changed")
+                            if manual != manual_event_reference:
+                                raise SituationDeliveryBindingError("situation_manual_binding_invalid")
                     except (SourceEventEvidenceError, json.JSONDecodeError) as exc:
                         reason = str(exc) if isinstance(exc, SourceEventEvidenceError) else "situation_manual_record_invalid"
                         logging.getLogger(__name__).warning("Situation source admission failed: phase=freeze type=SOCIAL_EVENT class=audit_only reason=%s", reason)
-                        raise ValueError("situation_source_not_admitted") from exc
+                        raise SituationSourceAdmissionError("situation_source_not_admitted") from exc
                     evidence = replace(evidence, source_digest=manual.digest)
             if evidence is None or (manual is None and code is not None and not (
                     delivery is not None and code == "memory_unobserved" and kind in {"POST", "REPLY"})):
-                raise ValueError("situation_source_not_admitted")
+                raise SituationSourceAdmissionError("situation_source_not_admitted")
             raw, digest, version, thread = evidence.deterministic_summary, evidence.source_digest, evidence.source_digest, evidence.thread_id
             actor, counterpart = evidence.actor_world_character_id, evidence.counterpart_world_character_id
             if kind == "CHAT_MESSAGE":

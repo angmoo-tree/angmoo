@@ -68,7 +68,7 @@ from app.domains.chat.service.character_response import (
     character_response_deltas,
 )
 from app.domains.chat.service.diagnostic_capture import capture
-from app.contracts.search_diagnostics import trace_payload, lineage
+from app.contracts.search_diagnostics import trace_payload
 from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
 from app.domains.chat.service.graph_retrieval import GraphRetrievalPlanningService
 from app.domains.chat.service.response_steps import (
@@ -637,6 +637,9 @@ def _classify_failure(
 ) -> tuple[str, bool, ResponseTerminalReason]:
     from app.contracts.name_binding import NameBindingError
     from app.domains.chat.contracts.recall_currentness import RecallEvidenceChanged
+    from app.domains.chat.exceptions import ChatSituationEvidenceError
+    if isinstance(exc, ChatSituationEvidenceError):
+        return "situation_evidence_contract_invalid", False, ResponseTerminalReason.CONTRACT_INVALID
     if isinstance(exc, RecallEvidenceChanged):
         return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, NameBindingError):

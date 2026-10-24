@@ -35,3 +35,7 @@ class MessageInFlightError(MessageServiceError):
 
 class MessageValidationError(MessageServiceError):
     pass
+
+
+class ChatSituationEvidenceError(ValueError):
+    """A selected Chat source does not match its frozen delivery contract."""

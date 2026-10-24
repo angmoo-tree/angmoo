@@ -26,6 +26,14 @@ class MemoryCapacityReached(MemoryConflictError):
         super().__init__("memory_capacity_reached")
 
 
+class SituationSourceAdmissionError(ValueError):
+    """Current manual source facts no longer admit the prepared delivery."""
+
+
+class SituationDeliveryBindingError(ValueError):
+    """A private delivery reference disagrees with the same source revision."""
+
+
 __all__ = [
     "MemoryConflictError",
     "MemoryDomainError",

@@ -38,6 +38,7 @@ from app.domains.memory.contracts.recall import CanonicalRecallStatus
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.memory.contracts.recall import SOURCE_KIND_BY_TYPE
 from app.domains.relationships.contracts.graph_recall import GraphRecallStatus
+from app.domains.chat.exceptions import ChatSituationEvidenceError
 
 
 class EvidenceBundleAssembler:
@@ -499,14 +500,19 @@ class EvidenceBundleAssembler:
         candidates: tuple[EvidenceItem, ...],
         *, preserve_rank_order=False,
     ) -> tuple[EvidenceItem, ...]:
-        deduplicated: dict[tuple[str, str], EvidenceItem] = {}
+        deduplicated: dict[tuple, EvidenceItem] = {}
         for item in candidates:
             identity = item.opaque_reference if preserve_rank_order else item.normalized_text.casefold()
             if item.kind is EvidenceKind.GRAPH_RELATIONSHIP and item.locator is not None:
                 # Equal names and metrics do not make two different people one
                 # relationship. The canonical identity remains private.
                 identity = f"{item.locator.source_id}:{item.locator.source_revision}:{identity}"
-            key = (item.kind.value, identity)
+            if item.kind is EvidenceKind.TODAY_SNS_ACTIVITY:
+                # An event and its exact projection form one unit. Equal prose
+                # from different events is not evidence of the same occurrence.
+                key = (item.kind.value, item.locator, item.text, item.opaque_reference)
+            else:
+                key = (item.kind.value, identity)
             existing = deduplicated.get(key)
             if collector() is not None:
                 ids = evidence_identities(item)
@@ -517,6 +523,9 @@ class EvidenceBundleAssembler:
                     reason="reference" if preserve_rank_order else "text")
             if existing is None:
                 deduplicated[key] = item
+                continue
+            if item.kind is EvidenceKind.TODAY_SNS_ACTIVITY:
+                # Never mix a reference/locator with another item's metadata.
                 continue
             axes = tuple(
                 axis
@@ -646,6 +655,28 @@ class EvidenceBundleAssembler:
                 source_revision=entry.source_revision,
             ),
         )
+
+    @classmethod
+    def today_event_entry(cls, item: EvidenceItem, snapshot: TodaySnsActivitySnapshot) -> TodaySnsActivityEntry:
+        """Bind a selected event to the same pure projection used at assembly.
+
+        This is preparation evidence, not permission. Runtime must compare it
+        with fresh canonical facts before admitting a manual event.
+        """
+        entries = [entry for entry in snapshot.entries if entry.opaque_reference == item.opaque_reference]
+        if len(entries) != 1:
+            raise ChatSituationEvidenceError("situation_today_reference_invalid")
+        entry = entries[0]
+        expected = cls._today_item(entry)
+        if (expected is None or item.kind is not EvidenceKind.TODAY_SNS_ACTIVITY
+                or item.locator != expected.locator or item.text != expected.text
+                or item.occurred_at != expected.occurred_at
+                or item.author_identities != expected.author_identities
+                or item.display_projection != expected.display_projection
+                or entry.source_type != "social_event"
+                or not entry.actor_id or not entry.source_post_id or not entry.root_post_id):
+            raise ChatSituationEvidenceError("situation_today_projection_invalid")
+        return entry
 
     @staticmethod
     def _bounded_text(value: str) -> str:

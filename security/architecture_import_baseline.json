@@ -1,7 +1,7 @@
 {
-  "edge_count": 6958,
+  "edge_count": 6970,
   "external_import_count": 4717,
-  "module_count": 1604,
+  "module_count": 1605,
   "modules": [
     {
       "external_imports": [],
@@ -3179,6 +3179,7 @@
         "app.domains.chat.contracts.response_request",
         "app.domains.chat.contracts.retrieval_intent",
         "app.domains.chat.contracts.today_sns_activity",
+        "app.domains.chat.exceptions",
         "app.domains.chat.service.both_retrieval",
         "app.domains.chat.service.canonical_retrieval",
         "app.domains.chat.service.graph_retrieval",
@@ -3451,6 +3452,7 @@
         "app.domains.chat.contracts.retrieval_router",
         "app.domains.chat.contracts.successful_chat_memory",
         "app.domains.chat.contracts.today_sns_activity",
+        "app.domains.chat.exceptions",
         "app.domains.chat.graph_retry_policy",
         "app.domains.chat.service.both_retrieval",
         "app.domains.chat.service.canonical_retrieval",
@@ -3589,6 +3591,18 @@
       ],
       "module": "app.domains.chat.service.threads",
       "path": "backend/app/domains/chat/service/threads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.chat.contracts.evidence_bundle",
+        "app.domains.chat.contracts.response_request",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.service.evidence_assembly"
+      ],
+      "module": "app.domains.chat.service.today_situation_delivery",
+      "path": "backend/app/domains/chat/service/today_situation_delivery.py",
       "wildcard_imports": []
     },
     {
@@ -19163,11 +19177,16 @@
       "imports": [
         "app.core.calendar",
         "app.domains.chat.contracts.evidence_bundle",
+        "app.domains.chat.contracts.today_sns_activity",
+        "app.domains.chat.exceptions",
         "app.domains.chat.models",
+        "app.domains.chat.service.today_situation_delivery",
         "app.domains.memory.contracts.activity_situation",
+        "app.domains.memory.exceptions",
         "app.domains.memory.policies.situation_output",
         "app.domains.memory.repository.situation_admission",
         "app.domains.memory.service.situation_policy",
+        "app.domains.relationships.contracts.source_event_evidence",
         "app.domains.relationships.policies.social_context_validation",
         "app.runtime.memory.situation_sources"
       ],
@@ -20907,6 +20926,7 @@
         "app.domains.memory.repository.episode_privacy",
         "app.domains.memory.service.items",
         "app.domains.memory.service.source_evidence",
+        "app.domains.relationships.contracts.source_event_evidence",
         "app.domains.relationships.models.social",
         "app.domains.relationships.service.source_event_evidence",
         "app.domains.routines.models.plans",
