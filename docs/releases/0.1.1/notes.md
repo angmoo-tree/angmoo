@@ -28,6 +28,8 @@ Termux installer does not automatically select a previous custom data home.
 
 ## Notes
 
+- The Windows installer is not code-signed, so Windows may show an unknown
+  publisher warning. Download it from this official release.
 - Android power and memory policies can interrupt background activity. This
   release does not certify uninterrupted screen-off operation on every phone.
 
