@@ -50,6 +50,14 @@ are reported separately. Old and new release tool profiles remain explicit.
 - Lock changes update only the Angmoo self-package version to 0.1.3, not
   third-party dependency versions. No schema/data-version change is required.
 
+The first hosted CI run encountered a different runner-owned process whose
+`/proc/<pid>/environ` was inaccessible. Recovery correctly refused to prove
+inactivity, so fixtures expecting an otherwise empty host failed. The hosted
+lifecycle step now uses a private PID/mount/procfs namespace and immediately
+drops back to the ordinary runner UID. Actual Linux processes, the full test
+suite and explicit unreadable-process rejection remain exercised; production
+recovery is unchanged. Namespace teardown kills remaining synthetic children.
+
 Local evidence directory (not a release asset):
 `.task-output/termux-log-session-recovery-20261025/run-01` in the parent
 workspace. `linux-06.log`, `native-07.log` and their source-hash receipts are
