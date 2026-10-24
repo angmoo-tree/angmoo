@@ -102,6 +102,29 @@ configuration was reproduced as a failing contract before the values changed.
 The version/container contract suite passed 34 cases, including five independent
 default-drift rejection cases, and the eight related ER0 checks also passed.
 
+## Native candidate fixture correction
+
+After PR #409 merged, candidate run `40124245088` at source
+`5409d49bbb1dd661988c3b09277c513b0766933f` failed identically on native
+amd64 and ARM64: 19 checks passed, while the added manual-source Vec1 test
+attempted to create its embedding result journal under the default
+`/app/uploads`. The unchanged non-root image user cannot write that application
+directory. This direct pytest fixture had not selected isolated media storage;
+the production entrypoint and data-root composition are unchanged.
+
+The test now sets `MEDIA_ROOT` to its own `tmp_path` and asserts that the real
+journal is contained there. It retains the real Vec1 extension, FTS query,
+canonical revalidation, downstream privacy guards and synthetic embedding
+provider. No production path, image user, permission or skip gate is changed.
+
+A local image built with the official Dockerfile at the unchanged source above
+reproduced **1 failed, 19 passed** before the fixture correction and passed
+**20 tests with zero skips** afterwards, using the same image bytes and non-root
+user. The related release-candidate and ER0 contract suite passed 40 cases.
+These local results do not replace the required hosted native checks. The
+failed source is not eligible for publication; the fixture correction must be
+merged and new same-source Windows and container originals produced.
+
 This is local source evidence. PR checks, exact-head Windows path review, main
 merge, source-bound Windows/full and native container receipts, exact-EXE user
 acceptance, registry promotion and public asset verification are separate gates.
