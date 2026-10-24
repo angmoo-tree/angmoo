@@ -6,10 +6,10 @@ separately, preserving the backend Debian/Python and frontend Debian/Node bases.
 It runs the existing app entrypoints; it does not install another app dependency
 set, patch the images, or require editing ports or environment files.
 
-**Version:** these instructions target 0.1.1. Use its downloads only after
-[Angmoo 0.1.1](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1)
+**Version:** these instructions target 0.1.2. Use its downloads only after
+[Angmoo 0.1.2](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2)
 is published. Until then, use the
-[published 0.1.0 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/docs/public/termux.en.md).
+[published 0.1.1 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/docs/public/termux.md).
 Android support remains experimental. Linux ARM64 or QEMU checks do not certify
 phone power management, background execution or performance.
 
@@ -30,7 +30,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.1/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.2/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 The installer downloads the tools ZIP, checks `RELEASE-SHA256SUMS`, extracts it,
@@ -56,7 +56,7 @@ angmoo stop
 
 ## Command registration and existing 0.1.0 installations
 
-Command registration is included in the 0.1.1 tools. Published 0.1.0 tools
+Command registration is included in the 0.1.2 tools. Published 0.1.0 tools
 still use `~/.local/bin/angmoo start`, `~/.local/bin/angmoo status` and
 `~/.local/bin/angmoo stop`. These full paths also remain valid after updating;
 the short command uses the same wrapper and does not create another data home.
@@ -104,7 +104,7 @@ one-time host-tool setup from that directory:
 sh setup.sh
 ```
 
-The 0.1.1 setup registers the command without editing PATH or shell startup files.
+The 0.1.2 setup registers the command without editing PATH or shell startup files.
 For old 0.1.0 tools, keep using the full wrapper path instead.
 
 Setup installs the platform's Python/PRoot if missing and the hash-pinned
@@ -113,7 +113,7 @@ daemon is needed. Keep its licenses and versioned upstream source notices.
 Installation and each later start are one command each:
 
 ```sh
-angmoo install --release 0.1.1
+angmoo install --release 0.1.2
 angmoo start
 ```
 
@@ -145,13 +145,13 @@ it does not discover or migrate a different custom home automatically.
 3. Back up the complete data directory, media, installation secret, host state,
    image identity records and logs to private storage. A DB file or World Package
    alone is not enough. Keep the previous image pair and tools for recovery.
-4. Download and verify the 0.1.1 tools using the manual setup procedure above.
+4. Download and verify the 0.1.2 tools using the manual setup procedure above.
    Run `sh setup.sh` from those new tools. This updates the tools and registers
    the command; it does not select a different application data home.
 5. Install the matching pair and start with the **same** recorded home:
 
    ```sh
-   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.1
+   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.2
    angmoo --home "$HOME/.local/share/angmoo-custom" start
    angmoo --home "$HOME/.local/share/angmoo-custom" status
    ```

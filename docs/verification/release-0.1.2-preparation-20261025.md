@@ -1,0 +1,73 @@
+# Angmoo 0.1.2 source preparation
+
+Date: 2026-10-25 KST. Branch: `fix/android-photo-picker-input`.
+Local baseline: `818e5ddd907a82af14b99d36c85488e496e5d354`.
+Main baseline: `da6d42f9417b060ff07c049981417600af620da6`.
+
+## Scope
+
+The seven existing commits remain intact. This preparation aligns the product
+version, own-package lock entries, runtime identity, launcher defaults and
+English/Korean installation instructions to 0.1.2. Dependency versions are not
+changed. Older release records and upgrade fixtures remain historical inputs.
+The Windows launcher accepts only the current product version and its supported
+development form; a mismatched version still fails before starting containers.
+
+The existing native container feature smoke now selects
+`runtime/test_manual_social_situation_sources.py::test_manual_situation_fts_vector_and_downstream_guards`.
+It checks real FTS5/Vec1 indexing, hydration, source currentness and downstream
+guards using a synthetic embedding provider. A skipped test cannot produce a
+passing feature receipt, even if pytest exits zero. The candidate keeps its
+original application dependencies, non-root user and disabled network.
+
+## Relevant local checks
+
+- 108 tests passed across product identity, container/public-document/runtime
+  contracts, release-candidate validation, Termux release profiles and upstream
+  identity. Two dependency deprecation warnings did not fail the run.
+- Termux readiness: three tests passed, including installed versions 0.1.0,
+  0.1.1 and 0.1.2, mismatched identity, cancellation and backend health.
+- Windows local launcher smoke passed: version mismatch refusal, repeated-start
+  idempotence, diagnostics, redaction and lifecycle locking remain checked.
+- Frontend runtime identity, TypeScript and ESLint passed. TypeScript and ESLint
+  used the installed local tool entry points because the pnpm script wrapper
+  attempted an interactive reinstall; no dependency or lockfile was regenerated.
+- Frozen backend lock verification and offline locked Cargo metadata passed.
+- Release-tag, local-runtime contract, architecture inventory/boundaries,
+  frontend architecture/design and diff whitespace checks passed.
+- Public documentation checking passed over an export of all tracked source
+  files with the exact working changes overlaid. The first in-place run tried to
+  decode historical Tauri compressed build assets named `.md`; those untracked
+  build outputs were preserved and were not treated as public source documents.
+
+The first Windows smoke exposed one escaped version pattern still accepting
+0.1.1. Correcting the pattern to the current version made the unchanged
+idempotence assertion pass. The initial root-directory unittest invocation
+could not import Termux's sibling module; the documented module layout was
+tested from `launcher/termux` instead. Neither failure was suppressed.
+
+## Reused implementation evidence
+
+Photo input, avatar refresh, Memory subject selection and default-role behavior
+are covered by [their implementation record](android-photo-input-memory-role-20261024.md).
+The subsequent preparation does not change those implementations. Existing
+Korean role records, IDs, links and historical migration outcomes are preserved;
+new roles use the English stored defaults. The old input/provider and physical
+phone limits in that record still apply.
+
+Routine reply-source work at `eecd5c8590972e6e2ef00a44aa8c29f95853aa4e` passed
+59 focused cases and 125 related cases, with one local Vec1 skip. Chat Today
+like/unlike work and its cost/transaction contracts are recorded in
+[the Chat verification](chat-today-like-contract-20261025.md): 302 distinct
+passing cases and two explained local skips. Those tests used synthetic facts
+and providers, not live AI output. The native candidate must independently run
+the selected real Vec1 case above on both architectures.
+
+## Remaining release gates
+
+This is local source evidence. PR checks, exact-head Windows path review, main
+merge, source-bound Windows/full and native container receipts, exact-EXE user
+acceptance, registry promotion and public asset verification are separate gates.
+Their status must be recorded from the actual runs and artifacts. No actual
+installed Windows or Android application, autonomous activity or user data was
+modified by these local checks, and no external AI/embedding request was made.
