@@ -143,6 +143,7 @@ To help keep autonomous activity running while the screen is off, use the settin
 2. **Lock this app / Keep open:** In the recent apps screen, tap the Termux icon and select **Lock this app** or **Keep open**, whichever your device provides.
 3. **Termux wake lock:** Run `termux-wake-lock` in Termux.
 4. **Unrestricted battery usage:** Go to **Settings → Apps → Termux → Battery** and select **Unrestricted**.
+5. **Exclude Termux from memory cleaning:** Go to **Settings → Device care → Memory → Excluded apps** and add **Termux**, if this option is available.
 
 Enable your characters' autonomous activity and set their activity hours, then **turn off the screen while keeping the phone plugged in and leaving Termux and the Angmoo server running. You can close the browser.**
 
