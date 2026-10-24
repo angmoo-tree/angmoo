@@ -2,15 +2,15 @@
 
 English | [한국어](README.ko.md)
 
-> This source targets **0.1.2**. Use its downloads after the 0.1.2 Release is published. Until then, follow the [published 0.1.1 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/README.md).
+> This source targets **0.1.3**. Use its downloads after the 0.1.3 Release is published. Until then, follow the [published 0.1.2 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.2/README.md).
 
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2">
-    <img src="https://img.shields.io/badge/release-0.1.2-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.2" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3">
+    <img src="https://img.shields.io/badge/release-0.1.3-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.3" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-GPL--3.0--only-2ea44f?style=flat-square" alt="License: GPL-3.0-only" height="20">
@@ -20,7 +20,7 @@ English | [한국어](README.ko.md)
   </a>
 </p>
 
-[Download 0.1.2](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [Contributing](CONTRIBUTING.md)
+[Download 0.1.3](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [Contributing](CONTRIBUTING.md)
 
 > **“What if my social network were filled only with people I wanted to connect with?”**
 
@@ -36,7 +36,7 @@ You manage the app and its data on your own device. AI features send the content
 
 ## Supported Models
 
-Angmoo 0.1.2 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
+Angmoo 0.1.3 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
 
 | Model | Used for | Service |
 |---|---|---|
@@ -69,7 +69,7 @@ The web interface supports English and Korean.
 
 ### Windows
 
-1. Download `Angmoo_0.1.2_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
+1. Download `Angmoo_0.1.3_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
 2. Follow the installation steps.
 3. Open Angmoo.
 
@@ -82,7 +82,7 @@ Git and Docker Compose 2.22.0 or newer are required.
 Run:
 
 ```sh
-git clone --branch release-v0.1.2 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.3 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -111,7 +111,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.2/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 The installer verifies and installs the launcher and payloads, then starts the backend and frontend. When it finishes, open **http://127.0.0.1:3000** in your phone's browser.
@@ -131,7 +131,9 @@ angmoo stop
 
 Compatibility and background execution depend on the Android device and Termux environment. Closing the browser is separate from stopping the Angmoo server, but Android power management or app termination policies may interrupt it.
 
-The 0.1.2 setup registers the short command. Existing 0.1.0 installations can still use `~/.local/bin/angmoo start` (and `status` / `stop`). The full path and short command use the same data home. See the [Termux update guide](docs/public/termux.md#update-while-keeping-the-same-data-home) before updating an existing or custom-home installation.
+The 0.1.3 setup registers the short command. Existing 0.1.0 installations can still use `~/.local/bin/angmoo start` (and `status` / `stop`). The full path and short command use the same data home. See the [Termux update guide](docs/public/termux.md#update-while-keeping-the-same-data-home) before updating an existing or custom-home installation.
+
+After an interrupted run, `angmoo start` checks and recovers unfinished log sessions before starting again. If previous processes are still alive or cannot be checked, it preserves the logs and prevents a second server. See [saved logs and diagnostics](docs/public/termux.md) before deleting anything or reinstalling.
 
 [Termux installation, runtime, and logging guide](docs/public/termux.md)
 

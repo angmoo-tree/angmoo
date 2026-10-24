@@ -140,6 +140,7 @@ def retention_files(path):
 def retention_terminal(value):
     if value.get("lifecycle_state") == "interrupted":
         return (value.get("capture_complete") is False
+                and isinstance(value.get("recovery"), dict)
                 and value.get("recovery", {}).get("basis") == "home_flock_proc_v1")
     return bool(value.get("ended_at_utc")) and value.get("lifecycle_state") in (None, "closed")
 

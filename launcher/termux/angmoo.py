@@ -41,7 +41,7 @@ MESSAGES = {
     "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
     "already_running": "Angmoo is already starting or running; use status.",
     "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
-    "not_installed": "Run angmoo install --release 0.1.2 first.",
+    "not_installed": "Run angmoo install --release 0.1.3 first.",
     "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
     "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
     "logs_missing": "No saved log session was found.",
@@ -332,23 +332,29 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         persist()
         for service in ("frontend", "backend"):
             if service in children:
+                cleanup_complete = False
                 try:
                     record = state["children"].get(service)
                     if record is None:
                         # A child whose identity could not be established must
                         # not authorize signalling an unknown process group.
                         children[service].wait(timeout=1)
+                        # Reaping the command does not prove that its unknown
+                        # process group has no descendants left.
+                        raise ValueError("process_ownership_unknown")
                     else:
                         stop_child(children[service], record, 20 if service == "frontend" else 200)
+                        cleanup_complete = True
                 except (OSError, ValueError, subprocess.TimeoutExpired):
                     state["cleanup_failures"].append({"service": service, "phase": "shutdown", "code": "owned_process_stop_failed", "observed_at_utc": utc()})
                 primary = state.get("primary_failure") or {}
                 detail = state["services"].setdefault(service, {})
-                detail.update(returncode=children[service].poll(), exit_code_scope="proot_command", ended_at_utc=utc(),
+                detail.update(returncode=children[service].poll(), exit_code_scope="proot_command",
+                              ended_at_utc=utc() if cleanup_complete else None,
                               termination_origin=(primary["termination_origin"] if primary.get("service") == service
                                                   else "sibling_failure" if primary else "user_stop"))
                 if capture:
-                    capture.emit("supervisor", "event", json.dumps({"event": "exit", "service": service, **detail}))
+                    capture.emit("supervisor", "event", json.dumps({"event": "exit" if cleanup_complete else "cleanup_incomplete", "service": service, **detail}))
         if capture:
             if capture_self:
                 sys.stdout.flush()

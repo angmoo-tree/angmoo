@@ -35,6 +35,36 @@ class RecoveryTests(unittest.TestCase):
         value.update(ended_at_utc=logs.utc(), capture_complete=True)
         logs.save_session(path, value)
 
+    def test_failed_child_cleanup_never_records_an_observed_end(self):
+        previous = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)}
+        for sig, handler in previous.items():
+            self.addCleanup(signal.signal, sig, handler)
+        child = self.spawn(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.addCleanup(child.stderr.close)
+        config = {"manifest": {"source_sha": "a" * 40, "version": "0.1.0"}}
+        with (
+            patch.object(angmoo, "installation", return_value=config),
+            patch.object(angmoo, "tools", return_value="proot-distro"),
+            patch.object(angmoo, "free_port"),
+            patch.object(angmoo, "command", return_value=["synthetic-child"]),
+            patch.object(angmoo.subprocess, "Popen", return_value=child),
+            patch.object(angmoo, "await_ready", side_effect=ValueError("service_readiness_timeout")),
+            patch.object(angmoo, "stop_child", side_effect=ValueError("process_ownership_changed")),
+        ):
+            angmoo.supervise(self.home, os.dup(self.lock.fileno()), "d" * 32)
+        state = angmoo.read_state(self.home)
+        self.assertIsNone(child.poll())
+        self.assertEqual(state["primary_failure"]["code"], "service_readiness_timeout")
+        self.assertEqual(state["cleanup_failures"][0]["code"], "owned_process_stop_failed")
+        self.assertIsNone(state["services"]["backend"]["ended_at_utc"])
+        metadata = logs.read_session(self.home / state["log_reference"])
+        self.assertIsNone(metadata["ended_at_utc"])
+        self.assertEqual(metadata["lifecycle_state"], "running")
+        self.assertFalse(metadata["capture_complete"])
+
+    def test_malformed_recovery_cannot_authorize_retention(self):
+        self.assertFalse(logs.retention_terminal({"lifecycle_state": "interrupted", "capture_complete": False, "recovery": None}))
+
     def spawn(self, program="import time; time.sleep(60)", **options):
         child = subprocess.Popen([sys.executable, "-c", program], start_new_session=True, **options)
         def cleanup():

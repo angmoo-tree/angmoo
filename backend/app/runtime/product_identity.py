@@ -3,7 +3,7 @@
 import os
 import re
 
-PRODUCT_VERSION = "0.1.2"
+PRODUCT_VERSION = "0.1.3"
 
 
 def validate_product_version() -> str:
