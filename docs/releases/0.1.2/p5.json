@@ -1,0 +1,44 @@
+{
+  "schema": "angmoo-p5.v1",
+  "source_sha": "6b3b0279d1d96a052c0b737db812a04f3c182204",
+  "windows": {
+    "sha256": "sha256:33960289a245c5633b0791c5d5828861f1bafef356c073c55d8dc18dfeebdc70",
+    "run_id": "40126725611",
+    "attempt": "1"
+  },
+  "images": {
+    "backend/linux/amd64": "sha256:84d381a2e9f85883d4531e57b39b2a5b24ce7311f479c40cb258f7abf3c0e848",
+    "frontend/linux/amd64": "sha256:0028d0597f842812436552654689cbbb38121af752cf7ee45efc3a7ae7141ac7",
+    "backend/linux/arm64": "sha256:0b7a6a115a180be3543fd0797292690e05587f77d9e7869d4d8840e2896f3cf6",
+    "frontend/linux/arm64": "sha256:68b49f878958812b56f94e7a79c77e82c3fa3179bb3ff2ecba8a522c3751af44"
+  },
+  "checks": [
+    {
+      "workflow": "ci.yml",
+      "run_id": "40126685739",
+      "attempt": "1"
+    },
+    {
+      "workflow": "local-smoke.yml",
+      "run_id": "40126685738",
+      "attempt": "1"
+    },
+    {
+      "workflow": "security.yml",
+      "run_id": "40126685758",
+      "attempt": "1"
+    }
+  ],
+  "windows_user_check": {
+    "result": "PASS",
+    "reviewer": "jingujeon",
+    "exe_sha256": "sha256:33960289a245c5633b0791c5d5828861f1bafef356c073c55d8dc18dfeebdc70",
+    "checked_at": "2026-10-24T20:40:00.745139+00:00",
+    "scope": "installation-and-data-preservation-only",
+    "evidence": "The maintainer explicitly authorized an agent-performed installation and data-preservation check of this exact 0.1.2 original. The normal File Explorer installer completed, Run Angmoo was unchecked, and physically verified payloads match the fixed source. All canonical SQLite table rows, existing canonical/graph/search files, selected language/timezone and persistent secrets were preserved. This is not a claim of direct human runtime or UI acceptance; installed-app launch, restart and real AI were not performed.",
+    "runtime_ui": "NOT_RUN",
+    "app_restart": "NOT_RUN",
+    "external_ai": "NOT_RUN"
+  },
+  "android_support": "experimental-not-certified"
+}
