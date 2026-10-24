@@ -11,6 +11,8 @@ everyday-use guides.
 - **Existing installations:** New tools can check an existing 0.1.0 installation
   against its own version information. Update instructions explain how to keep
   the same data directory, including a custom installation home.
+- **Security:** Updated PDF processing and activity-checkpoint dependencies to
+  include their latest security fixes.
 - **Documentation:** Updated the English and Korean READMEs and installation
   guides to make setup and everyday use easier to follow.
 

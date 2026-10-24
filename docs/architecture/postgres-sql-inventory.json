@@ -1572,7 +1572,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/pyproject.toml",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8c10e82e7535ab5eae7bf3f73e413d0e790eb97a68c2edc8e1669f976e1d742f",
+      "source_sha256": "a05d37a2af2790fe2d12110a157e3304b49f73ad7d460e3a1ba6c6c288c35974",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
