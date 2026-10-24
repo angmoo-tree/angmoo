@@ -27,6 +27,7 @@ TESTS = (
     "memory/test_vector_work_recovery.py::test_vector_commit_before_budget_or_ack_failure_reuses_receipt",
     "memory/test_search_diagnostics.py::test_worker_deadline_keeps_last_native_stage_and_does_not_return_late_success",
     "memory/test_search_diagnostics.py::test_cancel_preserves_last_stage_count_and_cleans_process",
+    "runtime/test_manual_social_situation_sources.py::test_manual_situation_fts_vector_and_downstream_guards",
 )
 
 

@@ -126,9 +126,15 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ).fetchone()[0]
         )
         reserved_roles = source.execute(
-            "SELECT world_id, status, version FROM world_roles "
+            "SELECT world_id, status, version, name, description FROM world_roles "
             "WHERE role_key = 'no_specific_role' ORDER BY world_id"
         ).fetchall()
+        # These are old installed data, not newly created current-version roles.
+        # Pin literals so changing current creation defaults cannot silently
+        # rewrite the predecessor or make a historical upgrade conflict.
+        assert {(row["name"], row["description"]) for row in reserved_roles} == {
+            ("역할 없음", "별도의 World 역할을 지정하지 않은 캐릭터")
+        }
         if source_version < 3:
             assert roleless_count == 4
             actual_reserved_roles = [

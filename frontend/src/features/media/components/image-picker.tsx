@@ -11,7 +11,8 @@ import styles from "./media-settings.module.css";
 import { useAuthRuntimeIdentity } from "@/hooks/use-auth-runtime-identity";
 import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
 import { PhotoPreparationError } from "../utils/photo-header";
-import { prepareUserPhoto } from "../utils/prepare-user-photo";
+import { prepareUserPhoto } from "../controllers/prepare-user-photo";
+import { prepareReferenceImage, ReferenceImageInputError } from "../controllers/prepare-reference-image";
 
 type Selection = { id: string; url: string; allowed: boolean };
 type Props = {
@@ -27,18 +28,20 @@ export function ImagePicker(props: Props) {
 const PHOTO_ERRORS = {
   photo_original_large: "원본 사진은 20MB 이하로 선택해주세요.",
   photo_unsupported: "JPG, PNG, WebP 또는 HEIF·HEIC 사진을 선택해주세요.",
-  photo_damaged: "사진을 읽지 못했어요. 손상되지 않은 사진을 다시 선택해주세요.",
+  photo_read: "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요.",
+  photo_damaged: "사진 내용을 해석하지 못했어요. 다른 사진을 선택해 주세요.",
   photo_animated: "움직이는 이미지나 동영상은 첨부할 수 없어요. 사진 한 장을 선택해주세요.",
   photo_dimensions: "사진 해상도가 너무 커요. 16,384px 이하, 전체 64메가픽셀 이하로 선택해주세요.",
   photo_codec: "이 사진 형식을 변환하지 못했어요. JPG 또는 PNG로 다시 선택해주세요.",
-  photo_timeout: "사진 준비 시간이 너무 길어 중단했어요. 더 작은 사진을 선택해주세요.",
-  photo_preparation: "첨부할 사진을 준비하지 못했어요. 더 작은 사진을 선택해주세요.",
+  photo_timeout: "사진 준비 시간이 초과됐어요. 다시 선택해 주세요.",
+  photo_preparation: "사진을 준비하지 못했어요. 다시 선택해 주세요.",
 };
 function ScopedImagePicker({ scopeKind, scopeId, value, onChange, disabled = false, requireRecognition = false, onBusyChange, renderLayout, preparationPolicy = "default" }: Props) {
   const uiText = useUiText("media");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
+  const [recognitionError, setRecognitionError] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const selected = useRef(value);
   const input = useRef<HTMLInputElement>(null);
@@ -50,11 +53,11 @@ function ScopedImagePicker({ scopeKind, scopeId, value, onChange, disabled = fal
     const operation = new AbortController(); controller.current = operation;
     const authScope = captureAuthRequestScope();
     const current = () => controller.current === operation && !operation.signal.aborted && isCurrentAuthRequestScope(authScope);
-    setBusy(true); onBusyChange?.(true); setError(null);
+    setBusy(true); onBusyChange?.(true); setError(null); setRecognitionError(false);
     let assetId: string | null = null;
     try {
-      setPreparing(preparationPolicy === "user-photo");
-      const prepared = preparationPolicy === "user-photo" ? await prepareUserPhoto(file, operation.signal) : file;
+      setPreparing(true);
+      const prepared = preparationPolicy === "user-photo" ? await prepareUserPhoto(file, operation.signal) : await prepareReferenceImage(file, operation.signal);
       if (!current()) return;
       setPreparing(false);
       const asset = await uploadImage(prepared, scopeKind, scopeId, operation.signal); assetId = asset.id;
@@ -65,10 +68,10 @@ function ScopedImagePicker({ scopeKind, scopeId, value, onChange, disabled = fal
       selected.current = next;
       onChange(next);
       if (old && old.id !== asset.id) void discardDraft(old.id).catch(() => undefined);
-      if (!state.allowed) setError(uiText("이미지를 인식할 수 없어요. 이미지 인식 설정을 확인하거나 사진을 제거해주세요."));
+      if (!state.allowed) { setRecognitionError(true); setError(uiText("이미지를 인식할 수 없어요. 이미지 인식 설정을 확인하거나 사진을 제거해주세요.")); }
     } catch (reason) {
       if (assetId && isCurrentAuthRequestScope(authScope)) void discardDraft(assetId).catch(() => undefined);
-      if (current()) setError(reason instanceof PhotoPreparationError ? uiText(PHOTO_ERRORS[reason.code]) : uiText("사진을 첨부하지 못했어요. 입력한 내용과 이전 사진은 유지돼요."));
+      if (current()) setError(reason instanceof PhotoPreparationError ? uiText(PHOTO_ERRORS[reason.code]) : reason instanceof ReferenceImageInputError ? uiText("10MB 이하의 PNG, JPG 또는 WebP 이미지를 선택해 주세요.") : uiText("사진을 첨부하지 못했어요. 입력한 내용과 이전 사진은 유지돼요."));
     } finally {
       if (controller.current === operation) { setBusy(false); setPreparing(false); onBusyChange?.(false); if (input.current) input.current.value = ""; }
     }
@@ -82,7 +85,7 @@ function ScopedImagePicker({ scopeKind, scopeId, value, onChange, disabled = fal
   </>;
   const feedback = <>
     {busy ? <><p role="status">{uiText(preparing ? "첨부할 사진을 준비하는 중…" : "사진을 업로드하고 확인하는 중…")}</p><Button type="button" variant="ghost" onClick={() => controller.current?.abort()}>{uiText("사진 준비 취소")}</Button></> : null}
-    {error ? <InlineError>{error}{requireRecognition ? <a href="/settings">{uiText("이미지 인식 설정 열기")}</a> : null}</InlineError> : null}
+    {error ? <InlineError>{error}{recognitionError ? <a href="/settings">{uiText("이미지 인식 설정 열기")}</a> : null}</InlineError> : null}
   </>;
   if (renderLayout) return renderLayout({
     trigger: <>

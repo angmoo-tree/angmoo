@@ -84,7 +84,7 @@ export function MemoryWorkspace({
   const [setting, setSetting] = useState<MemorySettingRead | null>(null);
   const [list, setList] = useState<MemoryItemListRead | null>(null);
   const [detail, setDetail] = useState<MemoryItemDetailRead | null>(null);
-  const [phase, setPhase] = useState<"loading" | "ready" | "empty-scope" | "error">("loading");
+  const [phase, setPhase] = useState<"loading" | "ready" | "empty-scope" | "empty-characters" | "choose-character" | "error">("loading");
   const [detailPhase, setDetailPhase] = useState<"idle" | "loading" | "ready" | "error">(
     initialMemoryId ? "loading" : "idle",
   );
@@ -165,6 +165,7 @@ export function MemoryWorkspace({
         const requestedWorldExists = available.some((world) => world.world_id === worldId);
         if (worldId && !requestedWorldExists) {
           setCharacters([]);
+          setSetting(null); setList(null); setDetail(null); setMemoryId("");
           setPhase("empty-scope");
           return;
         }
@@ -173,6 +174,7 @@ export function MemoryWorkspace({
           setCharacters([]);
           setWorldId("");
           setSubjectId("");
+          setSetting(null); setList(null); setDetail(null); setMemoryId("");
           setPhase("empty-scope");
           return;
         }
@@ -180,22 +182,32 @@ export function MemoryWorkspace({
           signal: controller.signal,
         });
         if (controller.signal.aborted) return;
-        setCharacters(characterRead.items);
+        const memoryCharacters = characterRead.items.filter(character => character.control_mode === "autonomous");
+        setCharacters(memoryCharacters);
         const requestedSubjectExists = characterRead.items.some(
           (character) => character.world_character_id === subjectId,
         );
         if (subjectId && !requestedSubjectExists) {
           setWorldId(selectedWorld);
+          setSetting(null); setList(null); setDetail(null); setMemoryId("");
           setPhase("empty-scope");
+          return;
+        }
+        if (subjectId && !memoryCharacters.some(character => character.world_character_id === subjectId)) {
+          setWorldId(selectedWorld);
+          setSetting(null); setList(null); setDetail(null); setMemoryId("");
+          setPhase(memoryCharacters.length ? "choose-character" : "empty-characters");
+          syncRoute(selectedWorld, subjectId);
           return;
         }
         const selectedSubject = requestedSubjectExists
           ? subjectId
-          : characterRead.items[0]?.world_character_id ?? "";
+          : memoryCharacters[0]?.world_character_id ?? "";
         setWorldId(selectedWorld);
         setSubjectId(selectedSubject);
         if (!selectedSubject) {
-          setPhase("empty-scope");
+          setSetting(null); setList(null); setDetail(null); setMemoryId("");
+          setPhase("empty-characters");
           syncRoute(selectedWorld, "");
           return;
         }
@@ -481,7 +493,8 @@ export function MemoryWorkspace({
         </label>
         <label>
           <span>{uiText("기억하는 Character")}</span>
-          <select disabled={mutationKind !== null} onChange={(event) => chooseSubject(event.target.value)} value={subjectId}>
+          <select disabled={mutationKind !== null || !characters.length} onChange={(event) => chooseSubject(event.target.value)} value={characters.some(character => character.world_character_id === subjectId) ? subjectId : ""}>
+            {!characters.some(character => character.world_character_id === subjectId) ? <option value="" disabled>{uiText("기억을 관리할 캐릭터를 선택해 주세요.")}</option> : null}
             {characters.map((character) => <option key={character.world_character_id} value={character.world_character_id}>{character.display_name}</option>)}
           </select>
         </label>
@@ -495,6 +508,8 @@ export function MemoryWorkspace({
 
       {phase === "loading" ? <MemoryState icon={<LoaderCircle className={styles.spin} />} title={uiText("기억을 불러오는 중")} /> : null}
       {phase === "empty-scope" ? <MemoryState icon={<BookOpenText />} title={uiText("관리할 수 있는 기억 범위가 없어요")} description={uiText("실행 가능한 World와 active Character를 먼저 준비해 주세요.")} /> : null}
+      {phase === "empty-characters" ? <MemoryState icon={<BookOpenText />} title={uiText("기억을 관리할 캐릭터가 없어요.")} /> : null}
+      {phase === "choose-character" ? <MemoryState icon={<BookOpenText />} title={uiText("기억을 관리할 캐릭터를 선택해 주세요.")} /> : null}
       {phase === "error" ? <MemoryState failed icon={<BrainCircuit />} title={uiText("기억을 불러오지 못했어요")} description={error ?? undefined} action={<Button compact onClick={() => { setPhase("loading"); setError(null); setRevision((value) => value + 1); }} variant="secondary">{uiText("다시 시도")}</Button>} /> : null}
 
       {phase === "ready" && list ? (

@@ -13,10 +13,6 @@ from sqlalchemy.orm import Session
 from model_fixture_support import models
 from app.core import security
 from app.runtime.social.observations import observe_source
-from app.domains.worlds.contracts import (
-    NO_SPECIFIC_ROLE_DESCRIPTION,
-    NO_SPECIFIC_ROLE_NAME,
-)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
@@ -255,8 +251,8 @@ def _seed_v2_roleless(
                     id="canonical-reserved-role-v2",
                     world_id=world.id,
                     role_key="no_specific_role",
-                    name=NO_SPECIFIC_ROLE_NAME,
-                    description=NO_SPECIFIC_ROLE_DESCRIPTION,
+                    name="역할 없음",
+                    description="별도의 World 역할을 지정하지 않은 캐릭터",
                     responsibilities=[],
                     allowed_activity_scope=[],
                     autonomous_allowed=True,

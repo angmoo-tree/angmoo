@@ -1,9 +1,15 @@
 # Offline photo preparation and Home assets (2026-10-10 LOCAL)
 
 Media owns the bounded photo header/Worker/codec path. Only World Feed and Chat opt
-into `user-photo`. Reference, creation and profile inputs keep their prior policy.
-The original File is not modified. Each picker owns one Worker, aborts/terminates it
-on supersession or unmount, and enforces 30 seconds and at most six encode attempts.
+into `user-photo`. Reference, creation and profile inputs keep their distinct format,
+size and downstream policies. All selected image/card inputs first use the neutral
+bounded reader in `lib/media/read-file-input.ts`. It consumes the original stream
+once before `size`/`lastModified` queries, slicing, decoding or Worker serialization.
+Only owned bytes cross the Worker boundary, using an ArrayBuffer transfer.
+The original File is not modified. The photo controller owns one Worker and terminates
+it on completion, supersession, cancellation or unmount. One 30-second deadline covers
+input reading through accepting the prepared result; network upload has its existing
+separate contract. Six encode attempts remain the maximum, not six new deadlines.
 
 | Boundary | Contract |
 |---|---|
@@ -31,6 +37,45 @@ ko/en feedback. No remote conversion service is used. Successful upload alone re
 the old attachment; failure preserves text and the old attachment. Chat preflight
 continues checking the actual uploaded asset and its `allowed`/thread/recognition gate.
 Selection/conversion alone does not publish, send messages or call AI.
+
+## Selected-file boundaries (2026-10-24 LOCAL)
+
+| Actual consumer | Preparation owner | Input / downstream contract |
+|---|---|---|
+| Feed and Chat `ImagePicker` | media `prepare-user-photo` | 20 MiB; existing Worker/codec policies above |
+| Character creation, character profile, World character profile, My Profile | characters `prepare-profile-media` | 5 MiB PNG/JPEG/WebP; owned Blob Bitmap; existing avatar 768×768 / banner 1024×384 crop |
+| World icon and banner | worlds `prepare-world-image` | 5 MiB PNG/JPEG/WebP; owned Blob Bitmap; existing crop and `row_version` |
+| Character and World character generation reference `ImagePicker` | media `prepare-reference-image` | 10 MiB PNG/JPEG/WebP; owned File, original bytes, no new codec/conversion |
+| Conditional user-key seed input | characters `prepare-seed-image` | 6,000,000 bytes transport ceiling (8,000,000 Base64 characters); server configured byte cap remains independent |
+| Creator card PNG / JSON | characters `prepare-card-input` | 20 MiB; raw bytes and embedded metadata preserved; existing parser/revision/registration rules |
+
+Every row has one 30-second preparation deadline and an AbortSignal. The reader owns
+at most `ceil(limit / 256 KiB)` blocks and the exact final buffer. This is a bound on
+retained input copies, not a promise about the provider's chunk allocation, decoded
+pixels, Base64 strings or total browser memory. The reader cancels/releases on failure
+without waiting indefinitely for native cleanup. Late Bitmaps are closed; cleanup
+failure cannot replace the primary error. Feature controllers map neutral read/size/
+timeout errors into their own English/Korean UI. Decode failure is separate from a
+file-provider read failure, and photo preparation failure does not suggest changing
+AI recognition settings. Card input failure occurs before creating/importing a draft.
+
+`uploadImage` accepts only the preparation result. Its FileReader reads an owned File,
+not the external picker File. Crop output checks, seed/card Base64 encoding, package
+ZIP import and workflow JSON input are distinct from first reading an image; they are
+not given the photo codec or a shared one-size limit. There is no artificial delay,
+forced file-browser fallback, page reload, cache-busting query or retry loop.
+
+## Saved profile preview
+
+`usePrivateMediaResource` keys authenticated GETs by source, auth/runtime scope and
+explicit revision. A successful avatar/banner save increments only that kind's
+revision. Stable draft URLs therefore fetch fresh bytes immediately. The last good
+preview remains while the same resource refreshes or its GET fails. The UI distinguishes
+"saved, preview unavailable" from a failed save, and its retry performs GET only.
+Source/scope changes clear the old preview; superseded GETs are aborted and late URLs
+are revoked. Replaced URLs are released after the new rendered URL is committed,
+and all owned URLs are released on unmount. Ordinary URL-only hook consumers remain
+compatible. Save conflicts do not invalidate a preview or automatically resubmit.
 
 ## Decoder source and rights
 

@@ -47,7 +47,7 @@ export function WorldCharacterProfileEditor({ profile, initialRevision, open, pe
         setBaseline(saved); setDraft(saved); setRevision(result.item.revision); onOpenChange(false);
       }
     }}>
-      <ProfileMediaUploader name={draft.display_name} avatarUrl={draft.avatar_url ?? ""} bannerUrl={draft.banner_url ?? ""} disabled={pending}
+      <ProfileMediaUploader scopeKey={profile.world_character_id} name={draft.display_name} avatarUrl={draft.avatar_url ?? ""} bannerUrl={draft.banner_url ?? ""} disabled={pending}
         onUpload={async media => {
           const result = await onUpload(revision, media);
           if (!result) throw new Error(uiText("이미지를 저장하지 못했습니다."));

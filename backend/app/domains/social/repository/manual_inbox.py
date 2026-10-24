@@ -6,6 +6,7 @@ from sqlalchemy.engine import ScalarResult
 from sqlalchemy.orm import Session
 from app.domains.social.models.manual_writes import OwnerManualInboxCandidate
 from app.domains.social.models.feed import WorldCharacterBlock
+from app.domains.social.models.posts import Post
 
 
 def _blocked(db: Session, *, row: OwnerManualInboxCandidate) -> bool:
@@ -82,7 +83,12 @@ def get_for_update(db: Session, row_id: str) -> OwnerManualInboxCandidate | None
 
 
 def get_candidate(db: Session, row_id: str) -> OwnerManualInboxCandidate | None:
-    return db.get(OwnerManualInboxCandidate, row_id)
+    return db.get(OwnerManualInboxCandidate, row_id, populate_existing=True)
+
+
+def current_source_post(db: Session, post_id: str) -> Post | None:
+    """One current source row, without loading its unrelated comments collection."""
+    return db.get(Post, post_id, populate_existing=True)
 
 
 def claimed_for_run(

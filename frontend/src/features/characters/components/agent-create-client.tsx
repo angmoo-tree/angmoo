@@ -18,6 +18,8 @@ import { isTauriDesktopRuntime, navigateDesktopProductRoute } from "@/lib/deskto
 import { studioWorldRoute, worldCharacterDirectoryRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { ProfileMediaUploader } from "@/features/characters/components/profile-media-uploader";
+import { prepareCardInput } from "../controllers/prepare-card-input";
+import { FileInputError } from "@/lib/media/read-file-input";
 import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
 import { adoptLegacyAgentDraft, completeAgentDraft, copyAgentSettings, createAgentDraft, findExistingWorldCharacter, getAgentCardMetadata, getAgentCardSource, getAgentDraft, importAgentCard, listAgents, updateAgentDraft, uploadAgentDraftMedia } from "@/features/characters/api/agents";
 import type { AgentCreationDraftRead, AgentDetailRead, CharacterCardMetadataSelection } from "@/features/characters/types/agents";
@@ -90,6 +92,9 @@ function CreationGuide({ ActivitySettings }: { ActivitySettings: ActivitySlot })
   const [confirmCancel, setConfirmCancel] = useState(false);
   const permitCommittedNavigation = useProductLeaveGuard(unsavedInput || Boolean(pendingFile) || busy);
   const requestEpoch = useRef(0);
+  const cardPreparation = useRef<AbortController | null>(null);
+  const [readingCard, setReadingCard] = useState(false);
+  useEffect(() => () => cardPreparation.current?.abort(), []);
   function acceptRegistration(result: AgentDetailRead, registeredDraft: AgentCreationDraftRead) {
     const scope = registrationScope(result, registeredDraft.target_world_id);
     setDraft({ ...registeredDraft, status: "completed" });
@@ -156,7 +161,7 @@ function CreationGuide({ ActivitySettings }: { ActivitySettings: ActivitySlot })
     const epoch = requestEpoch.current;
     setBusy(true); setError(null);
     try { await action(); }
-    catch (reason) { if (epoch === requestEpoch.current) setError(reason instanceof Error ? uiText(reason.message) : uiText("저장하지 못했습니다. 입력을 확인해주세요.")); }
+    catch (reason) { if (epoch === requestEpoch.current && !(reason instanceof DOMException && reason.name === "AbortError")) setError(reason instanceof Error ? uiText(reason.message) : uiText("저장하지 못했습니다. 입력을 확인해주세요.")); }
     finally { actionBusy.current = false; if (epoch === requestEpoch.current) setBusy(false); }
   }
   function edit(field: typeof TEXT_FIELDS[number], value: string) {
@@ -201,17 +206,22 @@ function CreationGuide({ ActivitySettings }: { ActivitySettings: ActivitySlot })
   }
   async function readCard(file: File) {
     const epoch = requestEpoch.current;
-    if (file.size > 20 * 1024 * 1024) throw new Error(uiText("20MB 이하의 PNG 또는 JSON 카드를 선택해주세요."));
+    cardPreparation.current?.abort();
+    const controller = new AbortController(); cardPreparation.current = controller;
+    setReadingCard(true);
+    let encoded: string;
+    try { encoded = await prepareCardInput(file, controller.signal); }
+    catch (reason) {
+      if (reason instanceof FileInputError) throw new Error(uiText(reason.code === "size" ? "20MB 이하의 PNG 또는 JSON 카드를 선택해주세요." : reason.code === "timeout" ? "파일 준비 시간이 초과됐어요. 다시 선택해 주세요." : "파일을 읽지 못했어요. 다시 선택해 주세요."));
+      throw reason;
+    } finally { if (epoch === requestEpoch.current && cardPreparation.current === controller) setReadingCard(false); }
+    if (epoch !== requestEpoch.current || controller.signal.aborted) return;
     let current = draft;
     if (!current) {
       current = await createAgentDraft({ target_world_id: target });
       if (epoch !== requestEpoch.current) return;
       setDraft(current); sessionStorage.setItem(storageKey, current.id);
     }
-    const encoded = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader(); reader.onerror = () => reject(new Error(uiText("파일을 읽지 못했습니다.")));
-      reader.onload = () => resolve(String(reader.result).split(",")[1]); reader.readAsDataURL(file);
-    });
     if (epoch !== requestEpoch.current) return;
     const result = await importAgentCard(current.id, current.revision, encoded);
     if (epoch !== requestEpoch.current) return;
@@ -276,6 +286,7 @@ function CreationGuide({ ActivitySettings }: { ActivitySettings: ActivitySlot })
     <h1 id="created-heading" className="text-2xl font-bold">{created.character.name} {uiText("등록 완료")}</h1>
     <p>{uiText("등록을 마쳤어요. 활동 설정은 선택 사항이며 각 카드에서 별도로 저장해요.")}</p>
     {error && <p role="alert">{error}</p>}
+    {readingCard ? <div role="status"><p>{uiText("카드 파일을 읽는 중…")}</p><Button type="button" variant="secondary" onClick={() => cardPreparation.current?.abort()}>{uiText("파일 읽기 취소")}</Button></div> : null}
     {created.registration_scope && <ActivitySettings worldId={created.registration_scope.world_id} actorId={created.registration_scope.world_character_id} onBusyChange={handleSettingsBusyChange} onActivationChange={setActivation} />}
     {!created.registration_scope && <Button variant="secondary" loading={busy} onClick={() => void perform(finish)}>{uiText("등록 결과 확인")}</Button>}
     <Button loading={busy} disabled={settingsBusy} onClick={() => void perform(returnAfterRegistration)}>{uiText("완료")}</Button>
@@ -360,7 +371,7 @@ function CreationGuide({ ActivitySettings }: { ActivitySettings: ActivitySlot })
         </details>
       </>}
       {draft && step === 3 && <>
-        <ProfileMediaUploader name={draft.name || uiText("새 앵무")} avatarUrl={draft.avatar_temp_url ?? ""} bannerUrl={draft.banner_temp_url ?? ""} disabled={busy}
+        <ProfileMediaUploader scopeKey={draft.id} name={draft.name || uiText("새 앵무")} avatarUrl={draft.avatar_temp_url ?? ""} bannerUrl={draft.banner_temp_url ?? ""} disabled={busy}
           onUpload={async (data) => { const epoch = requestEpoch.current; setBusy(true); try { const result = await uploadAgentDraftMedia(draft.id, { ...data, revision: draft.revision }); if (epoch === requestEpoch.current) setDraft(result); } finally { if (epoch === requestEpoch.current) setBusy(false); } }} />
         {(["avatar", "banner"] as const).map((kind) => draft[`${kind}_temp_url`] && <Button type="button" variant="secondary" key={kind} onClick={() => void perform(async () => {
           const epoch = requestEpoch.current;

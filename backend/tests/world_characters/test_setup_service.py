@@ -1060,7 +1060,9 @@ def test_v2_to_v3_normalizes_existing_autonomous_null_role_idempotently() -> Non
             )
         )
         assert reserved is not None
-        assert reserved.name == NO_SPECIFIC_ROLE_NAME
+        # Historical v2 -> v3 output is frozen, independent of today's defaults.
+        assert reserved.name == "역할 없음"
+        assert reserved.description == "별도의 World 역할을 지정하지 않은 캐릭터"
         assert db.scalar(
             select(func.count())
             .select_from(models.WorldRole)

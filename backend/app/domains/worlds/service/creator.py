@@ -272,13 +272,7 @@ def _sync_optional_definition(
         for item in roles:
             if item.key != reserved_roles.NO_SPECIFIC_ROLE_KEY:
                 continue
-            if not allow_system_roles or not (
-                item.name == reserved_roles.NO_SPECIFIC_ROLE_NAME
-                and item.description == reserved_roles.NO_SPECIFIC_ROLE_DESCRIPTION
-                and item.responsibilities == []
-                and item.allowed_activity_scope == []
-                and item.autonomous_allowed is True
-            ):
+            if not allow_system_roles or not reserved_roles.is_canonical_no_specific_role(item):
                 raise WorldDefinitionValidationError("reserved_world_role")
         _sync_rows(
             db,

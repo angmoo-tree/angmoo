@@ -40,7 +40,7 @@ MESSAGES = {
     "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
     "already_running": "Angmoo is already starting or running; use status.",
     "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
-    "not_installed": "Run angmoo install --release 0.1.1 first.",
+    "not_installed": "Run angmoo install --release 0.1.2 first.",
     "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
     "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
     "logs_missing": "No saved log session was found.",

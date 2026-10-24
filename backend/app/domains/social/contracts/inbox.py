@@ -50,8 +50,8 @@ class InboxMembership(Protocol):
 
 class ManualInboxReferences(Protocol):
     def get_world_character(
-        self, db: Session, world_character_id: str
+        self, db: Session, world_character_id: str, *, refresh: bool = False
     ) -> InboxWorldCharacter | None: ...
     def get_membership(
-        self, db: Session, membership_id: str
+        self, db: Session, membership_id: str, *, refresh: bool = False
     ) -> InboxMembership | None: ...

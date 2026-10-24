@@ -2,15 +2,15 @@
 
 [English](README.md) | 한국어
 
-> 이 소스는 **0.1.1**용입니다. 0.1.1 Release가 공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는 [기존 0.1.0 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/README.ko.md)를 따르세요.
+> 이 소스는 **0.1.2**용입니다. 0.1.2 Release가 공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는 [기존 0.1.1 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/README.ko.md)를 따르세요.
 
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1">
-    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.1-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.1 다운로드" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2">
+    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.2-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.2 다운로드" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-GPL--3.0--only-2ea44f?style=flat-square" alt="라이선스: GPL-3.0-only" height="20">
@@ -20,7 +20,7 @@
   </a>
 </p>
 
-[0.1.1 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [기여 안내](CONTRIBUTING.ko.md)
+[0.1.2 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [기여 안내](CONTRIBUTING.ko.md)
 
 > **“내가 원하는 사람들만 있는 SNS가 있다면?”**
 
@@ -36,7 +36,7 @@ Angmoo는 내가 원하는 캐릭터들과 소통하는 가상 SNS 환경을 만
 
 ## 지원하는 모델
 
-Angmoo 0.1.1에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
+Angmoo 0.1.2에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
 
 | 모델명 | 사용되는 기능 | 연결 서비스 |
 |---|---|---|
@@ -69,7 +69,7 @@ Angmoo 0.1.1에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ### Windows
 
-1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.1_x64-setup.exe`를 받습니다.
+1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.2_x64-setup.exe`를 받습니다.
 2. 설치 안내에 따라 설치합니다.
 3. Angmoo를 실행합니다.
 
@@ -82,7 +82,7 @@ Git과 Docker Compose 2.22.0 이상이 필요합니다.
 다음 명령을 실행합니다.
 
 ```sh
-git clone --branch release-v0.1.1 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.2 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -111,7 +111,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.1/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.2/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기와 배포물의 검증, 설치, backend·frontend 시작을 처리합니다. 완료되면 **휴대폰 브라우저에서 http://127.0.0.1:3000**을 엽니다.
@@ -131,7 +131,7 @@ angmoo stop
 
 Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행은 확인이 필요합니다. 브라우저를 닫는 것과 Angmoo 서버를 종료하는 것은 별개지만, Android의 절전·앱 종료 정책에 따라 실행이 중단될 수 있습니다.
 
-0.1.1 setup은 단축 명령을 등록합니다. 기존 0.1.0 설치는 `~/.local/bin/angmoo start`와 `status`·`stop`을 계속 사용할 수 있습니다. 전체 경로와 단축 명령은 같은 데이터 home을 사용합니다. 기존 설치나 custom home을 업데이트하기 전에 [Termux 업데이트 안내](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트하기)를 확인하세요.
+0.1.2 setup은 단축 명령을 등록합니다. 기존 0.1.0 설치는 `~/.local/bin/angmoo start`와 `status`·`stop`을 계속 사용할 수 있습니다. 전체 경로와 단축 명령은 같은 데이터 home을 사용합니다. 기존 설치나 custom home을 업데이트하기 전에 [Termux 업데이트 안내](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트하기)를 확인하세요.
 
 [Termux 설치·실행·로그 안내](docs/public/termux.ko.md)
 
@@ -143,6 +143,7 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 2. **앱 잠그기 / 최근 앱에 열어두기:** 최근 앱 화면에서 Termux 아이콘을 누르고, 기기에 표시되는 **앱 잠그기** 또는 **최근 앱에 열어두기**를 선택합니다.
 3. **Termux wake-lock:** Termux에서 `termux-wake-lock`을 실행합니다.
 4. **배터리 사용 제한 해제:** **설정 → 애플리케이션 → Termux → 배터리**에서 **제한 없음**을 선택합니다.
+5. **메모리 정리에서 Termux 제외:** 해당 메뉴가 있다면 **설정 → 디바이스 케어 → 메모리 → 제외 앱**(일부 버전에서는 **제외 대상인 앱**)에서 **Termux**를 추가합니다.
 
 캐릭터의 자율활동을 켜고 활동 시간을 설정한 뒤, **충전 연결과 Termux·Angmoo 서버를 유지한 채 화면만 끄세요. 브라우저는 닫아도 됩니다.**
 

@@ -2,12 +2,12 @@
 
 English | [한국어](container-release.ko.md)
 
-These instructions target Angmoo 0.1.1 for Linux amd64 and ARM64. Use the
-commands after [0.1.1 is published](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1).
-Until then, use the [published 0.1.0 guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/docs/public/container-release.md).
+These instructions target Angmoo 0.1.2 for Linux amd64 and ARM64. Use the
+commands after [0.1.2 is published](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2).
+Until then, use the [published 0.1.1 guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/docs/public/container-release.md).
 
-- `ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.1`
-- `ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.1`
+- `ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.2`
+- `ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.2`
 
 Use both services from the same release. The multi-platform tag selects the
 matching execution image; its architecture manifests and layers are part of the
@@ -18,7 +18,7 @@ image, not extra application versions.
 Install Git and Docker with Compose 2.22.0 or newer, then run:
 
 ```sh
-git clone --branch release-v0.1.1 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.2 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```

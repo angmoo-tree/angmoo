@@ -3,7 +3,8 @@ export const ORIGINAL_PHOTO_BYTES = 20 * 1024 * 1024;
 export const ATTACHMENT_PHOTO_BYTES = 10 * 1024 * 1024;
 export const PHOTO_REQUEST_BYTES = 14 * 1024 * 1024;
 export const INPUT_PIXELS = 64_000_000;
-export type PhotoErrorCode = "photo_original_large" | "photo_unsupported" | "photo_damaged" | "photo_animated" | "photo_dimensions" | "photo_codec" | "photo_timeout" | "photo_preparation";
+export const PHOTO_ERROR_CODES = ["photo_original_large", "photo_unsupported", "photo_damaged", "photo_read", "photo_animated", "photo_dimensions", "photo_codec", "photo_timeout", "photo_preparation"] as const;
+export type PhotoErrorCode = typeof PHOTO_ERROR_CODES[number];
 export class PhotoPreparationError extends Error {
   constructor(readonly code: PhotoErrorCode) { super(code); this.name = "PhotoPreparationError"; }
 }

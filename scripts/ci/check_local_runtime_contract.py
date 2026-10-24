@@ -36,11 +36,11 @@ EXPECTED_COMMANDS = {
 }
 EXPECTED_RELEASE_IMAGES = {
     "backend": {
-        "default_tag": "release-v0.1.1",
+        "default_tag": "release-v0.1.2",
         "repository": "ghcr.io/angmoo-tree/angmoo-backend",
     },
     "frontend": {
-        "default_tag": "release-v0.1.1",
+        "default_tag": "release-v0.1.2",
         "repository": "ghcr.io/angmoo-tree/angmoo-frontend",
     },
 }

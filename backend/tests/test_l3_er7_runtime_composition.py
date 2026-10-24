@@ -233,7 +233,7 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json() == {
-            "version": "0.1.1",
+            "version": "0.1.2",
             "source_sha": "a" * 40,
             "launch_id": "b" * 32,
             "status": "ok",

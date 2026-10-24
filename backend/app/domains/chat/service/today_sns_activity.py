@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime
 from hashlib import sha256
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -123,6 +123,7 @@ class TodaySnsActivityAssembler:
                     root_post_id=record.root_post_id,
                     source_post_id=record.source_post_id,
                     target_post_id=record.target_post_id,
+                    parent_post_id=record.parent_post_id,
                     content_complete=not truncated,
                     truncated=truncated,
                     subjective_context=subjective,

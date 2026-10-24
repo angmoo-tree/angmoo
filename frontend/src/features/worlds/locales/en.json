@@ -247,5 +247,10 @@
   "World 삭제 중…": "Deleting World…",
   "삭제를 마치지 못했어요. 정리를 다시 시도해주세요.": "Deletion could not finish. Retry the cleanup.",
   "삭제 다시 시도": "Retry deletion",
-  "패키지 내보내기는 World 구성을 보관하는 기능이며, 전체 활동 기록 백업은 아니에요.": "Package export preserves the World configuration; it is not a complete backup of activity history."
+  "패키지 내보내기는 World 구성을 보관하는 기능이며, 전체 활동 기록 백업은 아니에요.": "Package export preserves the World configuration; it is not a complete backup of activity history.",
+  "사진을 읽지 못했어요. 사진 목록에서 다시 선택해 주세요.": "The photo could not be read. Select it again from your photos.",
+  "사진 내용을 해석하지 못했어요. 다른 사진을 선택해 주세요.": "The photo could not be decoded. Choose another photo.",
+  "사진 준비 시간이 초과됐어요. 다시 선택해 주세요.": "The photo took too long to prepare. Select it again.",
+  "첨부할 사진을 준비하는 중…": "Preparing your photo…",
+  "사진 준비 취소": "Cancel photo preparation"
 }

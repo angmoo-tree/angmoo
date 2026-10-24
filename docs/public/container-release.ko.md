@@ -1,12 +1,12 @@
 # Docker로 Angmoo 실행하기
 
-이 안내는 Linux amd64·ARM64용 Angmoo 0.1.1을 대상으로 합니다.
-[0.1.1 공개](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.1) 후에
+이 안내는 Linux amd64·ARM64용 Angmoo 0.1.2을 대상으로 합니다.
+[0.1.2 공개](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2) 후에
 아래 명령을 사용하세요. 공개 전에는
-[기존 0.1.0 한국어 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.0/README.ko.md)를 따르세요.
+[기존 0.1.1 한국어 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/README.ko.md)를 따르세요.
 
-- `ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.1`
-- `ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.1`
+- `ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.2`
+- `ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.2`
 
 두 서비스는 같은 릴리스로 사용합니다. 다중 플랫폼 태그가 실행 환경의 아키텍처에
 맞는 이미지를 선택합니다. 아키텍처별 manifest와 layer는 이미지의 구성 요소이며
@@ -17,7 +17,7 @@
 Git과 Compose 2.22.0 이상이 포함된 Docker를 설치한 뒤 실행하세요.
 
 ```sh
-git clone --branch release-v0.1.1 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.2 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```

@@ -20,7 +20,7 @@ class ReadinessTests(unittest.TestCase):
                             side_effect=lambda *_args, **_kwargs: io.BytesIO(json.dumps(payload).encode()))
 
     def test_current_and_previous_installed_versions_use_the_same_readiness_path(self):
-        for version in ("0.1.0", "0.1.1"):
+        for version in ("0.1.0", "0.1.1", "0.1.2"):
             for backend in (True, False):
                 with self.subTest(version=version, backend=backend), self.response(self.payload(version)):
                     self.assertTrue(processes.ready("http://fixture", self.source, self.nonce,
@@ -31,7 +31,7 @@ class ReadinessTests(unittest.TestCase):
                     self.assertEqual(observations, [{"ready": True, "code": "ready"}])
 
     def test_mismatched_or_missing_identity_is_never_ready(self):
-        for version in ("0.1.0", "0.1.1"):
+        for version in ("0.1.0", "0.1.1", "0.1.2"):
             for key, wrong in (("version", "0.1.1" if version == "0.1.0" else "0.1.0"),
                                ("source_sha", "c" * 40), ("launch_id", "d" * 32)):
                 for value in (wrong, None):

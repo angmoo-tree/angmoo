@@ -60,6 +60,9 @@ class TodaySnsActivityEntry:
     actor_id: str | None = None
     counterpart_id: str | None = None
     source_authors: tuple[tuple[str, str], ...] = ()
+    # Private canonical lineage. Provider views and historical snapshot hashes
+    # keep their existing shape; final delivery checks this against fresh facts.
+    parent_post_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None or len(self.source_revision) != 64:

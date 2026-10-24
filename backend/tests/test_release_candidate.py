@@ -46,8 +46,12 @@ def test_local_arm64_pair_does_not_relax_public_release_contract():
         validate_candidate_manifest(bad)
 
 
-@pytest.mark.parametrize("exit_code", [0, 1])
-def test_feature_staging_is_readable_after_root_owned_copy_and_keeps_nonroot_execution(tmp_path, monkeypatch, exit_code):
+@pytest.mark.parametrize("exit_code,report,accepted", [
+    (0, "1 passed\n", True),
+    (1, "1 failed\n", False),
+    (0, "1 passed, 1 skipped\n", False),
+])
+def test_feature_staging_is_readable_after_root_owned_copy_and_keeps_nonroot_execution(tmp_path, monkeypatch, exit_code, report, accepted):
     import stat
     import subprocess
     import scripts.release.feature_smoke as smoke
@@ -80,11 +84,11 @@ def test_feature_staging_is_readable_after_root_owned_copy_and_keeps_nonroot_exe
                 assert stat.S_IMODE(entry.stat().st_mode) & needed == needed
             assert (stage / "test-tools/pytest/__init__.py").is_file()
             assert args[3].endswith(":/validation")
-        return subprocess.CompletedProcess(args, exit_code if args[:2] == ["docker", "start"] else 0, "1 passed\n" if not exit_code else "1 failed\n", "")
+        return subprocess.CompletedProcess(args, exit_code if args[:2] == ["docker", "start"] else 0, report, "")
 
     monkeypatch.setattr(smoke.subprocess, "run", execute)
     monkeypatch.setattr(smoke.subprocess, "check_output", lambda *args, **kwargs: str(exit_code))
-    if exit_code:
+    if not accepted:
         with pytest.raises(ValueError, match="candidate_feature_smoke_failed"):
             smoke.run("unmodified-candidate", "linux/amd64", output)
         assert not (output / "features.json").exists()

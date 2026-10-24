@@ -50387,6 +50387,41 @@
           "after_ast": "FunctionDef(name='get_activity_plan', args=arguments(args=[arg(arg='db', annotation=Name(id='Session', ctx=Load()))], kwonlyargs=[arg(arg='character_id', annotation=Name(id='str', ctx=Load())), arg(arg='world_id', annotation=Name(id='str', ctx=Load())), arg(arg='user', annotation=Name(id='PlanOwner', ctx=Load())), arg(arg='references', annotation=Name(id='PlanReferences', ctx=Load())), arg(arg='local_date', annotation=BinOp(left=Name(id='date', ctx=Load()), op=BitOr(), right=Constant(value=None))), arg(arg='now', annotation=BinOp(left=Name(id='datetime', ctx=Load()), op=BitOr(), right=Constant(value=None))), arg(arg='clock', annotation=BinOp(left=Name(id='Clock', ctx=Load()), op=BitOr(), right=Constant(value=None)))], kw_defaults=[None, None, None, None, Constant(value=None), Constant(value=None), Constant(value=None)]), body=[Assign(targets=[Name(id='current', ctx=Store())], value=Call(func=Name(id='_aware_utc', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='resolve_clock', ctx=Load()), keywords=[keyword(arg='now', value=Name(id='now', ctx=Load())), keyword(arg='clock', value=Name(id='clock', ctx=Load()))]), attr='now_utc', ctx=Load()))])), Assign(targets=[Name(id='scope', ctx=Store())], value=Call(func=Name(id='_load_scope', ctx=Load()), args=[Name(id='references', ctx=Load())], keywords=[keyword(arg='character_id', value=Name(id='character_id', ctx=Load())), keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='user', value=Name(id='user', ctx=Load()))])), Assign(targets=[Name(id='target_date', ctx=Store())], value=BoolOp(op=Or(), values=[Name(id='local_date', ctx=Load()), Call(func=Name(id='local_activity_date', ctx=Load()), args=[Name(id='current', ctx=Load()), Attribute(value=Attribute(value=Name(id='scope', ctx=Load()), attr='environment', ctx=Load()), attr='timezone', ctx=Load())])])), Assign(targets=[Name(id='plan', ctx=Store())], value=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='DailyActivityPlan', ctx=Load())]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='DailyActivityPlan', ctx=Load()), attr='world_character_id', ctx=Load()), ops=[Eq()], comparators=[Attribute(value=Attribute(value=Name(id='scope', ctx=Load()), attr='world_character', ctx=Load()), attr='id', ctx=Load())]), Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='DailyActivityPlan', ctx=Load()), attr='local_date', ctx=Load()), ops=[Eq()], comparators=[Name(id='target_date', ctx=Load())])])])), If(test=Compare(left=Name(id='plan', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Raise(exc=Call(func=Name(id='DailyActivityPlanAbsentError', ctx=Load()), args=[Name(id='character_id', ctx=Load())]))]), Return(value=Call(func=Name(id='_plan_read', ctx=Load()), args=[Name(id='db', ctx=Load())], keywords=[keyword(arg='plan', value=Name(id='plan', ctx=Load())), keyword(arg='world_character', value=Attribute(value=Name(id='scope', ctx=Load()), attr='world_character', ctx=Load())), keyword(arg='now', value=Name(id='current', ctx=Load())), keyword(arg='reused', value=Constant(value=True))]))], returns=Attribute(value=Name(id='schemas', ctx=Load()), attr='DailyActivityPlanRead', ctx=Load()))"
         }
       ]
+    },
+    {
+      "id": "english-default-role-legacy-preservation-20261024",
+      "implementation_commit": "76e83f3db8d3dcf0e779616134529fe7aed2ebb4",
+      "reason": "New World default roles use English stored values while accepting and preserving the exact existing Korean pair; historical migrations keep their own frozen defaults. The shared supported-pair predicate is an additive current owner API.",
+      "review": "User-approved 2026-10-24 plan R000-R019; docs/verification/android-photo-input-memory-role-20261024.md records new, legacy, package, and immutable migration regressions. Preserve every historical export; allow only these exact committed definition changes.",
+      "source_blobs": {
+        "backend/app/domains/worlds/contracts.py": "ae69779868eb6e4a08c333bf9df5c96adad119d2"
+      },
+      "definitions": [
+        {
+          "source": "backend/app/domains/worlds/contracts.py",
+          "symbol": "NO_SPECIFIC_ROLE_NAME",
+          "before_ast": "Assign(targets=[Name(id='NO_SPECIFIC_ROLE_NAME', ctx=Store())], value=Constant(value='역할 없음'))",
+          "after_ast": "Assign(targets=[Name(id='NO_SPECIFIC_ROLE_NAME', ctx=Store())], value=Constant(value='No role'))"
+        },
+        {
+          "source": "backend/app/domains/worlds/contracts.py",
+          "symbol": "NO_SPECIFIC_ROLE_DESCRIPTION",
+          "before_ast": "Assign(targets=[Name(id='NO_SPECIFIC_ROLE_DESCRIPTION', ctx=Store())], value=Constant(value='별도의 World 역할을 지정하지 않은 캐릭터'))",
+          "after_ast": "Assign(targets=[Name(id='NO_SPECIFIC_ROLE_DESCRIPTION', ctx=Store())], value=Constant(value='A character with no specific World role.'))"
+        },
+        {
+          "source": "backend/app/domains/worlds/contracts.py",
+          "symbol": "is_canonical_no_specific_role",
+          "before_ast": "FunctionDef(name='is_canonical_no_specific_role', args=arguments(args=[arg(arg='role', annotation=Name(id='WorldRoleLike', ctx=Load()))]), body=[Assign(targets=[Name(id='role_key', ctx=Store())], value=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='role', ctx=Load()), Constant(value='role_key'), Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='role', ctx=Load()), Constant(value='key'), Constant(value=None)])])), Return(value=BoolOp(op=And(), values=[Compare(left=Name(id='role_key', ctx=Load()), ops=[Eq()], comparators=[Name(id='NO_SPECIFIC_ROLE_KEY', ctx=Load())]), Compare(left=Attribute(value=Name(id='role', ctx=Load()), attr='name', ctx=Load()), ops=[Eq()], comparators=[Name(id='NO_SPECIFIC_ROLE_NAME', ctx=Load())]), Compare(left=Attribute(value=Name(id='role', ctx=Load()), attr='description', ctx=Load()), ops=[Eq()], comparators=[Name(id='NO_SPECIFIC_ROLE_DESCRIPTION', ctx=Load())]), Compare(left=Attribute(value=Name(id='role', ctx=Load()), attr='responsibilities', ctx=Load()), ops=[Eq()], comparators=[List(ctx=Load())]), Compare(left=Attribute(value=Name(id='role', ctx=Load()), attr='allowed_activity_scope', ctx=Load()), ops=[Eq()], comparators=[List(ctx=Load())]), Compare(left=Attribute(value=Name(id='role', ctx=Load()), attr='autonomous_allowed', ctx=Load()), ops=[Is()], comparators=[Constant(value=True)])]))], returns=Name(id='bool', ctx=Load()))",
+          "after_ast": "FunctionDef(name='is_canonical_no_specific_role', args=arguments(args=[arg(arg='role', annotation=Name(id='WorldRoleLike', ctx=Load()))]), body=[Assign(targets=[Name(id='role_key', ctx=Store())], value=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='role', ctx=Load()), Constant(value='role_key'), Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='role', ctx=Load()), Constant(value='key'), Constant(value=None)])])), Return(value=BoolOp(op=And(), values=[Compare(left=Name(id='role_key', ctx=Load()), ops=[Eq()], comparators=[Name(id='NO_SPECIFIC_ROLE_KEY', ctx=Load())]), Call(func=Name(id='has_supported_no_specific_role_content', ctx=Load()), args=[Name(id='role', ctx=Load())])]))], returns=Name(id='bool', ctx=Load()))"
+        },
+        {
+          "source": "backend/app/domains/worlds/contracts.py",
+          "symbol": "__all__",
+          "before_ast": "Assign(targets=[Name(id='__all__', ctx=Store())], value=List(elts=[Constant(value='NO_SPECIFIC_ROLE_DESCRIPTION'), Constant(value='NO_SPECIFIC_ROLE_KEY'), Constant(value='NO_SPECIFIC_ROLE_NAME'), Constant(value='NO_SPECIFIC_ROLE_PORTABLE_REF'), Constant(value='is_canonical_no_specific_role')], ctx=Load()))",
+          "after_ast": "Assign(targets=[Name(id='__all__', ctx=Store())], value=List(elts=[Constant(value='NO_SPECIFIC_ROLE_DESCRIPTION'), Constant(value='NO_SPECIFIC_ROLE_KEY'), Constant(value='NO_SPECIFIC_ROLE_NAME'), Constant(value='NO_SPECIFIC_ROLE_PORTABLE_REF'), Constant(value='has_supported_no_specific_role_content'), Constant(value='is_canonical_no_specific_role')], ctx=Load()))"
+        }
+      ]
     }
   ]
 }

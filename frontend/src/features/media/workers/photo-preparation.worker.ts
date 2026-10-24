@@ -1,9 +1,10 @@
 import { ATTACHMENT_PHOTO_BYTES, checkPhotoDimensions, inspectPhoto, ORIGINAL_PHOTO_BYTES, PhotoPreparationError } from "../utils/photo-header";
 import { decodeHeifPrimary } from "../utils/heif-decoder";
+import type { PhotoPreparationRequest, PhotoPreparationResponse } from "../types/photo-preparation";
 
-async function prepare(file: File) {
-  if (file.size > ORIGINAL_PHOTO_BYTES) throw new PhotoPreparationError("photo_original_large");
-  const buffer = await file.arrayBuffer(), header = inspectPhoto(buffer);
+async function prepare(buffer: ArrayBuffer) {
+  if (buffer.byteLength > ORIGINAL_PHOTO_BYTES) throw new PhotoPreparationError("photo_original_large");
+  const header = inspectPhoto(buffer);
   let pixels: ImageBitmap | OffscreenCanvas | null = null;
   let canvas: OffscreenCanvas | null = null;
   try {
@@ -16,7 +17,7 @@ async function prepare(file: File) {
       pixels = await createImageBitmap(new Blob([buffer], { type: header.mime }), { imageOrientation: "from-image" });
     }
     checkPhotoDimensions(pixels.width, pixels.height);
-    if (header.mime !== "image/heif" && file.size <= ATTACHMENT_PHOTO_BYTES && pixels.width <= 4096 && pixels.height <= 4096) return new Blob([buffer], { type: header.mime });
+    if (header.mime !== "image/heif" && buffer.byteLength <= ATTACHMENT_PHOTO_BYTES && pixels.width <= 4096 && pixels.height <= 4096) return new Blob([buffer], { type: header.mime });
     let scale = Math.min(1, 4096 / pixels.width, 4096 / pixels.height), quality = 0.9;
     for (let attempt = 0; attempt < 6; attempt++) {
       const width = Math.max(1, Math.round(pixels.width * scale)), height = Math.max(1, Math.round(pixels.height * scale));
@@ -40,7 +41,11 @@ async function prepare(file: File) {
     if (canvas) { canvas.width = 0; canvas.height = 0; }
   }
 }
-self.onmessage = async (event: MessageEvent<File>) => {
-  try { self.postMessage({ blob: await prepare(event.data) }); }
-  catch (reason) { self.postMessage({ error: reason instanceof PhotoPreparationError ? reason.code : "photo_damaged" }); }
+self.onmessage = async (event: MessageEvent<PhotoPreparationRequest>) => {
+  try {
+    if (event.data?.kind !== "prepare" || !(event.data.buffer instanceof ArrayBuffer)) throw new PhotoPreparationError("photo_preparation");
+    self.postMessage({ kind: "prepared", blob: await prepare(event.data.buffer) } satisfies PhotoPreparationResponse);
+  } catch (reason) {
+    self.postMessage({ kind: "failed", error: reason instanceof PhotoPreparationError ? reason.code : "photo_damaged" } satisfies PhotoPreparationResponse);
+  }
 };

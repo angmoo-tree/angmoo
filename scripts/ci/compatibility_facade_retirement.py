@@ -128,13 +128,22 @@ class History:
         present=any(isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='__all__' for t in n.targets) for n in original.body)
         if present:
             def statements(tree):
-                return [dump(n) for n in tree.body if not isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and any((isinstance(x,ast.Name) and x.id=='__all__') or (isinstance(x,ast.alias) and (x.asname or x.name)=='__all__') for x in ast.walk(n))]
+                return [n for n in tree.body if not isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and any((isinstance(x,ast.Name) and x.id=='__all__') or (isinstance(x,ast.alias) and (x.asname or x.name)=='__all__') for x in ast.walk(n))]
             current=ast.parse((self.root/self.paths[module]).read_text(encoding='utf-8-sig'))
             # Routines originally declares its error groups with assignment +
             # +=. Preserve that exact sequence instead of rejecting the original
             # module or permitting arbitrary reassignment/append operations.
-            if statements(original)!=statements(current):
-                raise ValueError('actual owner advertised exports changed: '+module)
+            before,after=statements(original),statements(current)
+            if [dump(n) for n in before]!=[dump(n) for n in after]:
+                # A later product change may intentionally extend an owner's
+                # API. Apply the same committed, append-only AST evidence used
+                # for its other definitions; never accept arbitrary additions,
+                # removed historical exports or extra mutation statements.
+                changes,records=self.product_evidence()
+                if len(before)!=1 or len(after)!=1 or not changes.definition_matches(
+                    self.root,self.paths[module],'__all__',before[0],after[0],records=records
+                ):
+                    raise ValueError('actual owner advertised exports changed: '+module)
 
     def reference(self, module, node, bindings):
         parts = expression_path(node)
