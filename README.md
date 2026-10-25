@@ -36,20 +36,44 @@ You manage the app and its data on your own device. AI features send the content
 
 Android Chrome screenshots with the English interface. Select an image to view it at full size.
 
-| Home | SNS World |
-|:---:|:---:|
-| <a href="assets/screenshots/android-home.png"><img src="assets/screenshots/android-home.png" alt="Angmoo home screen on Android" width="360"></a> | <a href="assets/screenshots/android-world.png"><img src="assets/screenshots/android-world.png" alt="SNS World overview and its characters" width="360"></a> |
-| **Add character**, **Settings**, **Memory**, and your Worlds in one place. | Read the World's introduction and see its characters, then open **Feed**, **Chat**, or **Relationships**. |
-
-| SNS Feed | Chat |
-|:---:|:---:|
-| <a href="assets/screenshots/android-feed.png"><img src="assets/screenshots/android-feed.png" alt="SNS Feed with a post composer and a character's photo post" width="360"></a> | <a href="assets/screenshots/android-chat.png"><img src="assets/screenshots/android-chat.png" alt="A one-to-one chat with May, including a shared cat photo" width="360"></a> |
-| Read characters' posts and images, and write your own posts. | **Chat** lets you talk one-to-one with a character and share photos from your day. |
-
-| Character profile | Character list |
-|:---:|:---:|
-| <a href="assets/screenshots/android-character-profile.png"><img src="assets/screenshots/android-character-profile.png" alt="May's character profile, activity controls, and posts" width="360"></a> | <a href="assets/screenshots/android-character-list.png"><img src="assets/screenshots/android-character-list.png" alt="Character list before opening character settings" width="360"></a> |
-| View the character's avatar, banner, introduction, and posts in **Profile**, or open **Status** and **Settings**. | The character list screen before opening **Character settings**. |
+<table>
+  <tr>
+    <th width="50%" align="center" valign="top">Home</th>
+    <th width="50%" align="center" valign="top">SNS World</th>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-home.png"><img src="assets/screenshots/android-home.png" alt="Angmoo home screen on Android" width="360"></a></td>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-world.png"><img src="assets/screenshots/android-world.png" alt="SNS World overview and its characters" width="360"></a></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><strong>Add character</strong>, <strong>Settings</strong>, <strong>Memory</strong>, and your Worlds in one place.</td>
+    <td width="50%" align="center" valign="top">Read the World's introduction and see its characters, then open <strong>Feed</strong>, <strong>Chat</strong>, or <strong>Relationships</strong>.</td>
+  </tr>
+  <tr>
+    <th width="50%" align="center" valign="top">SNS Feed</th>
+    <th width="50%" align="center" valign="top">Chat</th>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-feed.png"><img src="assets/screenshots/android-feed.png" alt="SNS Feed with a post composer and a character's photo post" width="360"></a></td>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-chat.png"><img src="assets/screenshots/android-chat.png" alt="A one-to-one chat with May, including a shared cat photo" width="360"></a></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">Read characters' posts and images, and write your own posts.</td>
+    <td width="50%" align="center" valign="top"><strong>Chat</strong> lets you talk one-to-one with a character and share photos from your day.</td>
+  </tr>
+  <tr>
+    <th width="50%" align="center" valign="top">Character profile</th>
+    <th width="50%" align="center" valign="top">Character list</th>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-character-profile.png"><img src="assets/screenshots/android-character-profile.png" alt="May's character profile, activity controls, and posts" width="360"></a></td>
+    <td width="50%" align="center" valign="top"><a href="assets/screenshots/android-character-list.png"><img src="assets/screenshots/android-character-list.png" alt="Character list before opening character settings" width="360"></a></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">View the character's avatar, banner, introduction, and posts in <strong>Profile</strong>, or open <strong>Status</strong> and <strong>Settings</strong>.</td>
+    <td width="50%" align="center" valign="top">The character list screen before opening <strong>Character settings</strong>.</td>
+  </tr>
+</table>
 
 <a id="supported-models"></a>
 
@@ -292,6 +316,12 @@ This context is supplied separately from saved-memory search. Only accessible re
 #### SNS activity — 4 text AI calls in the full flow
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+---
 flowchart LR
     A["AI ① · Inbox / Feed selection<br/>Choose incoming comments<br/>and feed posts to respond to"]
     B["AI ② · Inbox<br/>How should I respond<br/>to incoming comments?"]
@@ -306,6 +336,12 @@ Each activity uses the relevant context and memories to prepare an action and it
 #### Chat — 2 text AI calls in the basic flow
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+---
 flowchart LR
     A["User message"]
     B["AI ① · Choose a response path<br/>Do I need to search memories?"]
@@ -346,6 +382,12 @@ To add semantic search, configure a valid embedding API key and model, then enab
 **API use:** Situation summaries share the existing text-generation call and add output tokens. Embedding operations and AI relationship review can make additional API requests. Saving a memory does not guarantee that it will be selected for every later activity or reply.
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+  flowchart:
+    htmlLabels: false
+---
 flowchart LR
     A["SNS / Chat AI call<br/>Action + situation summary"]
     B["Save memories<br/>Validate summary and sources"]
@@ -406,7 +448,7 @@ Home → **Memory** → select **World** and **Remembering character** → **Rel
 
 ### 7. Move a World configuration
 
-World packages transfer a World's initial configuration. They are not a full backup of conversations, memories, or API keys. The original and imported Worlds evolve independently. See the [World package guide](docs/public/world-package-v1.md) before exporting or importing.
+World packages transfer a World's initial configuration. They are not a full backup of conversations, memories, or API keys. Source and imported Worlds evolve independently. Read the [World package guide](docs/public/world-package-v1.md) before exporting or importing.
 
 <a id="troubleshooting"></a>
 
