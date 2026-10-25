@@ -87,8 +87,8 @@ def test_container_default_versions_reject_drift(tmp_path, changed) -> None:
 
 
 def test_release_tag_matches_both_application_versions() -> None:
-    assert RELEASE_TAG.expected_release_tag(ROOT) == "release-v0.1.2"
-    assert RELEASE_TAG.validate_release_tag("release-v0.1.2", ROOT) == []
+    assert RELEASE_TAG.expected_release_tag(ROOT) == "release-v0.1.3"
+    assert RELEASE_TAG.validate_release_tag("release-v0.1.3", ROOT) == []
     assert "release tag mismatch" in RELEASE_TAG.validate_release_tag(
         "v0.2.1", ROOT
     )[0]
@@ -113,15 +113,15 @@ def test_mixed_product_or_self_lock_version_is_rejected(tmp_path, changed) -> No
         if relative == changed:
             # Change only the product/self package occurrence, not dependency versions.
             if relative.endswith("uv.lock"):
-                old = 'name = "backend"\nversion = "0.1.2"'
+                old = 'name = "backend"\nversion = "0.1.3"'
             elif relative.endswith("Cargo.lock"):
-                old = 'name = "angmoo-desktop"\nversion = "0.1.2"'
+                old = 'name = "angmoo-desktop"\nversion = "0.1.3"'
             else:
-                old = '"0.1.2"'
+                old = '"0.1.3"'
             assert old in contents
-            contents = contents.replace(old, old.replace("0.1.2", "0.1.0"), 1)
+            contents = contents.replace(old, old.replace("0.1.3", "0.1.0"), 1)
         target.write_text(contents, encoding="utf-8")
-    errors = RELEASE_TAG.validate_release_tag("release-v0.1.2", tmp_path)
+    errors = RELEASE_TAG.validate_release_tag("release-v0.1.3", tmp_path)
     assert len(errors) == 1 and "product versions must be identical" in errors[0]
 
 

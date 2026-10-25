@@ -27,6 +27,7 @@ from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, 
 from processes import alive, atomic_json, await_ready, free_port, identity, session_members, stop_child
 from service_logs import Capture, create_session, launcher_hash, open_private, read_session, redact, save_session, select_session, show_logs, utc
 from log_policy import ENVIRONMENT, PolicyClock, describe, duration, new_policy
+from session_recovery import recover_sessions
 
 PROOT_VERSION = "5.10.0"
 BACKEND_READINESS_SECONDS = 180.0
@@ -40,13 +41,18 @@ MESSAGES = {
     "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
     "already_running": "Angmoo is already starting or running; use status.",
     "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
-    "not_installed": "Run angmoo install --release 0.1.2 first.",
+    "not_installed": "Run angmoo install --release 0.1.3 first.",
     "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
     "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
     "logs_missing": "No saved log session was found.",
     "service_exited_before_ready": "A service exited before it was ready. Inspect diagnostics and logs.",
     "service_readiness_timeout": "A service did not become ready in time. Inspect diagnostics and logs.",
     "logging_degraded": "Some logs could not be saved. Inspect the reported gaps.",
+    "log_recovery_active_session": "An earlier Angmoo session still has running processes. A second server was not started.",
+    "log_recovery_unverified": "Could not verify whether an earlier session has ended. A second server was not started; inspect diagnostics.",
+    "log_recovery_write_failed": "Interrupted session metadata could not be saved. No new server was started; inspect diagnostics before retrying.",
+    "log_retention_write_failed": "Log retention could not finish. No new server was started; the next start will recheck the saved cleanup record.",
+    "log_retention_receipt_invalid": "Log cleanup could not be verified. Existing data is preserved; inspect diagnostics.",
 }
 
 
@@ -87,7 +93,7 @@ def private_home(path: Path) -> Path:
 
 def lock(home: Path):
     import fcntl
-    stream = (home / "host.lock").open("a+")
+    stream = open_private(home / "host.lock", append=True)
     try:
         fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError as exc:
@@ -116,6 +122,7 @@ def install(home: Path, release: str | None, manifest_path: Path | None, candida
     manifest_path = candidate_path if local_candidate else manifest_path
     require(platform.machine() in ("aarch64", "arm64") or manifest_path is not None, "host_not_supported")
     with lock(home):
+        recover_sessions(home, read_state(home), repair=False)
         reject_survivors(home)
         if manifest_path:
             manifest_path = manifest_path.resolve()
@@ -230,7 +237,7 @@ def session_metadata(config):
 
 def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
     # The inheritable flock is held for the entire host session, including drain.
-    owner_lock = os.fdopen(fd, "a+")
+    owner_lock = os.fdopen(fd, "ab")
     children = {}
     state = {"state": "starting", "nonce": nonce, "owner": identity(os.getpid()), "children": {}}
     stopping = False
@@ -248,8 +255,15 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         config = installation(home)
         log_path = home / "logs" / nonce
         if not log_path.exists():
-            log_path = create_session(home, nonce, {**session_metadata(config), "log_policy": new_policy(nonce, "basic", 0)})
-        policy = read_session(log_path).get("log_policy") or new_policy(nonce, "basic", 0)
+            recover_sessions(home, read_state(home))
+            log_path = create_session(home, nonce, {**session_metadata(config), "log_policy": new_policy(nonce, "basic", 0),
+                                                  "lifecycle_state": "preparing", "creator_identity": state["owner"]})
+        metadata = read_session(log_path)
+        # Once spawned, only the supervisor writes session.json until it exits.
+        # start writes bootstrap-summary.json, not the supervisor's metadata.
+        metadata.update(owner_identity=state["owner"], children={})
+        save_session(log_path, metadata)
+        policy = metadata.get("log_policy") or new_policy(nonce, "basic", 0)
         policy_clock = PolicyClock(policy)
         state["log_policy"] = policy
         capture = Capture(log_path, policy=policy)
@@ -280,6 +294,8 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             children[service] = process
             capture.attach(service, process)
             state["children"][service] = identity(process.pid)
+            metadata["children"] = dict(state["children"])
+            save_session(log_path, metadata)
             detail = state["services"][service] = {"phase": "readiness", "probe_count": 0, "started_at_utc": utc()}
             phase = "readiness"
             atomic_json(home / "state.json", state)
@@ -291,6 +307,8 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             detail.update(phase="running", ready_at_utc=utc())
             capture.emit("supervisor", "event", json.dumps({"service": service, "event": "ready", "probe_count": detail["probe_count"]}))
         state["state"] = "running"
+        metadata["lifecycle_state"] = "running"
+        save_session(log_path, metadata)
         phase = "running"
         atomic_json(home / "state.json", state)
         while not stopping and not (home / f"stop-{nonce}").exists():
@@ -314,23 +332,29 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         persist()
         for service in ("frontend", "backend"):
             if service in children:
+                cleanup_complete = False
                 try:
                     record = state["children"].get(service)
                     if record is None:
                         # A child whose identity could not be established must
                         # not authorize signalling an unknown process group.
                         children[service].wait(timeout=1)
+                        # Reaping the command does not prove that its unknown
+                        # process group has no descendants left.
+                        raise ValueError("process_ownership_unknown")
                     else:
                         stop_child(children[service], record, 20 if service == "frontend" else 200)
+                        cleanup_complete = True
                 except (OSError, ValueError, subprocess.TimeoutExpired):
                     state["cleanup_failures"].append({"service": service, "phase": "shutdown", "code": "owned_process_stop_failed", "observed_at_utc": utc()})
                 primary = state.get("primary_failure") or {}
                 detail = state["services"].setdefault(service, {})
-                detail.update(returncode=children[service].poll(), exit_code_scope="proot_command", ended_at_utc=utc(),
+                detail.update(returncode=children[service].poll(), exit_code_scope="proot_command",
+                              ended_at_utc=utc() if cleanup_complete else None,
                               termination_origin=(primary["termination_origin"] if primary.get("service") == service
                                                   else "sibling_failure" if primary else "user_stop"))
                 if capture:
-                    capture.emit("supervisor", "event", json.dumps({"event": "exit", "service": service, **detail}))
+                    capture.emit("supervisor", "event", json.dumps({"event": "exit" if cleanup_complete else "cleanup_incomplete", "service": service, **detail}))
         if capture:
             if capture_self:
                 sys.stdout.flush()
@@ -342,8 +366,13 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             state["log_capture"] = coverage
             try:
                 metadata = read_session(log_path)
-                metadata.update(ended_at_utc=utc(), **coverage, primary_failure=state["primary_failure"],
+                cleanup_complete = not any(f.get("phase") == "shutdown" for f in state["cleanup_failures"])
+                metadata.update(ended_at_utc=utc() if cleanup_complete else None,
+                                lifecycle_state="closed" if cleanup_complete else "running",
+                                **coverage, primary_failure=state["primary_failure"],
                                 cleanup_failures=state["cleanup_failures"], services=state["services"])
+                if not cleanup_complete:
+                    metadata["capture_complete"] = False
                 save_session(log_path, metadata)
             except (OSError, ValueError) as exc:
                 state["cleanup_failures"].append(failure_record(exc, "supervisor", "logging", started))
@@ -355,14 +384,18 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
 def start(home: Path, *, log_mode="basic", log_duration=None) -> None:
     seconds = duration(log_mode, log_duration)
     tools()
-    config = installation(home)
     with lock(home) as owner_lock:
+        config = installation(home)
+        recovered = recover_sessions(home, read_state(home))
+        if recovered["recovered"]:
+            print("Recovered interrupted log sessions. Their logs may be incomplete.")
         reject_survivors(home)
         free_port(8080)
         free_port(3000)
         nonce = uuid.uuid4().hex
         policy = new_policy(nonce, log_mode, seconds)
-        path = create_session(home, nonce, {**session_metadata(config), "log_policy": policy})
+        path = create_session(home, nonce, {**session_metadata(config), "log_policy": policy,
+                                          "lifecycle_state": "preparing", "creator_identity": identity(os.getpid())})
         bootstrap = Capture(path, names=("bootstrap",))
         try:
             process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "--home", str(home), "_supervise", "--fd", str(owner_lock.fileno()), "--nonce", nonce], pass_fds=(owner_lock.fileno(),), start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -370,7 +403,7 @@ def start(home: Path, *, log_mode="basic", log_duration=None) -> None:
             bootstrap.emit("bootstrap", "error", str(exc))
             coverage = bootstrap.close()
             metadata = read_session(path)
-            metadata.update(ended_at_utc=utc(), **coverage,
+            metadata.update(ended_at_utc=utc(), lifecycle_state="closed", **coverage,
                             primary_failure=failure_record(exc, "supervisor", "spawn", time.monotonic()))
             save_session(path, metadata)
             raise
@@ -400,13 +433,16 @@ def await_start(home, path, nonce, process):
                 print(json.dumps(state.get("primary_failure"), ensure_ascii=False), file=sys.stderr)
                 raise ValueError(state.get("error", "service_start_failed"))
         if process.poll() is not None:
-            state = {"state": "failed", "nonce": nonce, "error": "supervisor_exited", "log_reference": "logs/" + nonce,
+            state = {**(state if state.get("nonce") == nonce else {}),
+                     "state": "failed", "nonce": nonce, "error": "supervisor_exited", "log_reference": "logs/" + nonce,
                      "primary_failure": {"service": "supervisor", "phase": "bootstrap", "observed_at_utc": utc(),
                                          "returncode": process.returncode, "exit_code_scope": "supervisor", "original_error_observed": False},
                      "log_capture": {"capture_complete": False}}
             atomic_json(home / "state.json", state)
             metadata = read_session(path)
-            metadata.update(ended_at_utc=utc(), primary_failure=state["primary_failure"], capture_complete=False)
+            # Supervisor death does not establish child death. Leave the
+            # session unfinished for the locked recovery pass on next start.
+            metadata.update(primary_failure=state["primary_failure"], capture_complete=False)
             save_session(path, metadata)
             raise ValueError("supervisor_exited")
         time.sleep(0.5)

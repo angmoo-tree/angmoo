@@ -12,13 +12,15 @@ from scripts.release.prepare import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-@pytest.mark.parametrize("modern", [False, True])
-def test_fixed_product_tools_match_their_own_bootstrap_allowlist(tmp_path, modern):
+@pytest.mark.parametrize("profile", ["legacy", "modern", "recovery"])
+def test_fixed_product_tools_match_their_own_bootstrap_allowlist(tmp_path, profile):
     tools = tmp_path / "launcher/termux"
     tools.mkdir(parents=True)
     names = {*LEGACY_TERMUX_FILES, "LICENSE"}
-    if modern:
+    if profile != "legacy":
         names.add("command_registration.py")
+    if profile == "recovery":
+        names.add("session_recovery.py")
     for name in names - {"LICENSE"}:
         (tools / name).write_text("frozen source " + name)
     (tmp_path / "LICENSE").write_text("frozen license")

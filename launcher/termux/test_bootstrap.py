@@ -107,6 +107,15 @@ class BootstrapTests(unittest.TestCase):
                     bootstrap.install_and_start(Path("stage"), Path("private"))
                 self.assertEqual(run.call_count, successful_steps + 1)
 
+    def test_installed_images_and_start_failure_are_separate(self):
+        with patch.object(bootstrap.subprocess, "run") as run:
+            verified = subprocess.CompletedProcess([], 0, stdout="registered\n")
+            run.side_effect = [verified] * 3 + [subprocess.CalledProcessError(9, "synthetic start")]
+            with self.assertRaisesRegex(bootstrap.InstallError, r"installation_complete_start_failed \(exit=9\)") as error:
+                bootstrap.install_and_start(Path("stage"), Path("private"))
+            self.assertIn("Existing data is preserved", str(error.exception))
+            self.assertEqual(run.call_count, 4)
+
     def test_bad_archive_in_main_preserves_existing_files_and_never_runs_setup(self):
         with tempfile.TemporaryDirectory() as root, contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
             sentinel = Path(root) / "user-data"

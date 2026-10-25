@@ -66,12 +66,33 @@ def open_private(path, *, append=False):
 
 
 def save_session(path, value):
+    save_private_json(path, "session", value)
+
+
+def save_private_json(path, name, value):
+    checked(path, directory=True)
     raw = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
     if len(raw) > 256 * 1024:
         raise ValueError("log_metadata_too_large")
-    with open_private(path / "session.tmp") as stream:
+    destination = path / (name + ".json")
+    if destination.exists():
+        checked(destination)
+    with open_private(path / (name + ".tmp")) as stream:
         stream.write(raw)
-    (path / "session.tmp").replace(path / "session.json")
+        stream.flush()
+        os.fsync(stream.fileno())
+    (path / (name + ".tmp")).replace(destination)
+    sync_directory(path)
+
+
+def sync_directory(path):
+    # Linux and native Termux support directory fsync. A failure is reported;
+    # atomic process-crash recovery is not a promise about damaged storage.
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def read_session(path):
@@ -104,43 +125,149 @@ def session_started(path):
     return datetime.fromisoformat(read_session(path)["started_at_utc"])
 
 
+def retention_files(path):
+    checked(path, directory=True)
+    allowed = {"session.json", "session.tmp", "bootstrap-summary.json", "policy-state.json", "policy-state.tmp"} | {
+        s + ".jsonl" + suffix for s in SERVICES for suffix in ("", ".1", ".2")}
+    files = []
+    for file in path.iterdir():
+        if file.name not in allowed:
+            raise ValueError("log_retention_unknown_file")
+        files.append(checked(file))
+    return files
+
+
+def retention_terminal(value):
+    if value.get("lifecycle_state") == "interrupted":
+        return (value.get("capture_complete") is False
+                and isinstance(value.get("recovery"), dict)
+                and value.get("recovery", {}).get("basis") == "home_flock_proc_v1")
+    return bool(value.get("ended_at_utc")) and value.get("lifecycle_state") in (None, "closed")
+
+
+def finish_pruning(root, receipt):
+    """Resume only our exact, private, prevalidated rename; never a data path."""
+    identifier = receipt["target"]
+    if not isinstance(identifier, str) or not SESSION_ID.fullmatch(identifier):
+        raise ValueError("log_retention_receipt_invalid")
+    old, pending = root / identifier, root / (".pruning-" + identifier)
+    if old.exists() and pending.exists():
+        raise ValueError("log_retention_receipt_invalid")
+    if old.exists():
+        if receipt["phase"] != "prepared" or not retention_terminal(read_session(old)):
+            raise ValueError("log_retention_active_session")
+        retention_files(old)
+        old.rename(pending)
+        sync_directory(root)
+    elif not pending.exists() and receipt["phase"] == "prepared":
+        raise ValueError("log_retention_receipt_invalid")
+    receipt["phase"] = "pruning"
+    save_private_json(root, ".retention", receipt)
+    if pending.exists():
+        files = retention_files(pending)
+        if (pending / "session.json").exists():
+            value = read_session(pending)
+            if value.get("launch_id") != identifier or not retention_terminal(value):
+                raise ValueError("log_retention_receipt_invalid")
+        # Keep identity metadata until last. The receipt also covers a crash
+        # between removing the last file and removing the directory.
+        for file in sorted(files, key=lambda p: p.name == "session.json"):
+            checked(file).unlink()
+        pending.rmdir()
+        sync_directory(root)
+    if identifier not in receipt["removed"]:
+        receipt["removed"].append(identifier)
+    receipt.update(phase="complete", target=None)
+    save_private_json(root, ".retention", receipt)
+
+
+def resume_retention(root, identifier):
+    receipt = {"schema": "angmoo-log-retention.v1", "phase": "complete", "target": None,
+               "removed": [], "for_launch": identifier, "session_created": False}
+    file = root / ".retention.json"
+    if file.exists():
+        checked(file)
+        if file.stat().st_size > 256 * 1024:
+            raise ValueError("log_retention_receipt_invalid")
+        prior = json.loads(file.read_text(encoding="utf-8"))
+        if (not isinstance(prior, dict) or prior.get("schema") != receipt["schema"]
+                or prior.get("phase") not in ("prepared", "pruning", "complete")
+                or not isinstance(prior.get("removed"), list) or len(prior["removed"]) > 32
+                or not all(isinstance(i, str) and SESSION_ID.fullmatch(i) for i in prior["removed"])
+                or type(prior.get("session_created")) is not bool):
+            raise ValueError("log_retention_receipt_invalid")
+        if prior["phase"] != "complete":
+            finish_pruning(root, prior)
+        if not prior["session_created"]:
+            receipt["removed"] = prior["removed"]
+    # Unknown leftovers must not be adopted. Their files remain untouched.
+    if any(p.name.startswith(".pruning-") for p in root.iterdir()):
+        raise ValueError("log_retention_receipt_invalid")
+    return receipt
+
+
+def prepared_session(root, path):
+    """Recover mkdir-before-metadata interruption using our bounded receipt.
+
+    No log writer can be spawned before create_session returns. Still defer
+    every write until the caller has established process absence.
+    """
+    file = checked(root / ".retention.json")
+    if file.stat().st_size > 256 * 1024:
+        raise ValueError("log_recovery_unverified")
+    receipt = json.loads(file.read_text(encoding="utf-8"))
+    if (receipt.get("schema") != "angmoo-log-retention.v1" or receipt.get("phase") != "complete"
+            or receipt.get("for_launch") != path.name or receipt.get("session_created") is not False
+            or any(p.name != "session.tmp" for p in retention_files(path))):
+        raise ValueError("log_recovery_unverified")
+    return receipt["pending_session"]
+
+
 def create_session(home, identifier, metadata):
+    try:
+        return _create_session(home, identifier, metadata)
+    except OSError as exc:
+        raise ValueError("log_retention_write_failed") from exc
+
+
+def _create_session(home, identifier, metadata):
     if not SESSION_ID.fullmatch(identifier):
         raise ValueError("log_session_invalid")
     root = home / "logs"
     root.mkdir(mode=0o700, exist_ok=True)
     checked(root, directory=True)
+    receipt = resume_retention(root, identifier)
     sessions = [p for p in root.iterdir() if SESSION_ID.fullmatch(p.name)]
-    removed = []
+    if len(sessions) > 32:
+        raise ValueError("log_retention_limit")
+    removed = receipt["removed"]
     # Retention removes only known regular files in completed, owned sessions.
     sizes = {}
     for path in sessions:
-        checked(path, directory=True)
-        files = list(path.iterdir())
-        for file in files:
-            checked(file)
+        files = retention_files(path)
         sizes[path] = sum(p.stat().st_size for p in files)
     sessions.sort(key=session_started)
-    while sessions and (len(sessions) >= SESSION_LIMIT or sum(sizes.values()) > TOTAL_BYTES - 17 * 1024 * 1024):
+    overhead = sum(checked(p).stat().st_size for p in (root / ".retention.json", root / ".retention.tmp") if p.exists())
+    while sessions and (len(sessions) >= SESSION_LIMIT or sum(sizes.values()) + overhead > TOTAL_BYTES - 17 * 1024 * 1024):
         old = sessions[0]
-        if not read_session(old).get("ended_at_utc"):
+        if not retention_terminal(read_session(old)):
             raise ValueError("log_retention_active_session")
-        files = list(old.iterdir())
-        allowed = {"session.json", "session.tmp", "bootstrap-summary.json", "policy-state.json", "policy-state.tmp"} | {s + ".jsonl" + suffix for s in SERVICES for suffix in ("", ".1", ".2")}
-        if any(p.name not in allowed for p in files):
-            raise ValueError("log_retention_unknown_file")
-        for file in files:
-            checked(file).unlink()
-        old.rmdir()
-        removed.append(old.name)
+        receipt.update(phase="prepared", target=old.name)
+        save_private_json(root, ".retention", receipt)
+        finish_pruning(root, receipt)
         sessions.pop(0)
         sizes.pop(old)
-    path = root / identifier
-    path.mkdir(mode=0o700)
     value = {"schema": "angmoo-host-logs.v1", "launch_id": identifier,
              "started_at_utc": utc(), "ended_at_utc": None, "capture_complete": False,
              "retention_pruned_sessions": removed, **metadata}
+    receipt["pending_session"] = value
+    save_private_json(root, ".retention", receipt)
+    path = root / identifier
+    path.mkdir(mode=0o700)
     save_session(path, value)
+    receipt["session_created"] = True
+    receipt.pop("pending_session")
+    save_private_json(root, ".retention", receipt)
     return path
 
 

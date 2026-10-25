@@ -118,7 +118,13 @@ jobs:
         run: |
           python -m venv "$RUNNER_TEMP/angmoo-host-tools"
           "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m pip install --require-hashes --only-binary=:all: --no-deps -r launcher/termux/requirements.txt
-          "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m unittest discover -s launcher/termux -p 'test_*.py'
+          # Termux owns an app UID; hosted runner daemons share the runner UID
+          # but can deny procfs reads. Give lifecycle tests their own procfs
+          # namespace, then drop back to the runner UID. Keep the real process,
+          # permission-error and unknown-owner guards; never skip those tests.
+          sudo unshare --mount --pid --fork --mount-proc --kill-child \
+            setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
+            "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m unittest discover -s launcher/termux -p 'test_*.py'
       - name: Compile and materialize the embedded baseline
         run: |
           uv run python -m compileall -q app

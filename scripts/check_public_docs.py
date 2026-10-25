@@ -28,8 +28,8 @@ REQUIRED_MARKERS = {
     "README.md": (
         "English | [한국어](README.ko.md)",
         "The English documents are the canonical source",
-        'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2"',
-        'alt="Download Angmoo 0.1.2"',
+        'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3"',
+        'alt="Download Angmoo 0.1.3"',
         "## Features",
         "## Install and run",
         "## Limitations",
@@ -46,8 +46,8 @@ REQUIRED_MARKERS = {
     "README.ko.md": (
         "[English](README.md) | 한국어",
         "영어 문서를 기준으로 합니다",
-        'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2"',
-        'alt="Angmoo 0.1.2 다운로드"',
+        'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3"',
+        'alt="Angmoo 0.1.3 다운로드"',
         "## 주요 기능",
         "## 설치하고 실행하기",
         "## 한계",

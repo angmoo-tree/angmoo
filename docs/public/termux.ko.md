@@ -6,10 +6,10 @@ Android에서 Docker를 실행하는 방식은 아닙니다. PRoot-Distro가 두
 유지합니다. 기존 앱 진입점을 실행하며 앱 라이브러리 재설치, 이미지 수정,
 포트·환경 파일 수동 편집을 요구하지 않습니다.
 
-**대상 버전:** 이 안내는 0.1.2용입니다.
-[Angmoo 0.1.2](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.2)이
+**대상 버전:** 이 안내는 0.1.3용입니다.
+[Angmoo 0.1.3](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3)이
 공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는
-[기존 0.1.1 설치 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.1/docs/public/termux.ko.md)를 따르세요.
+[기존 0.1.2 설치 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.2/docs/public/termux.ko.md)를 따르세요.
 Android는 계속 실험 지원입니다. Linux ARM64·QEMU 검사는 실제 휴대폰의
 전원 관리·백그라운드 실행·성능 인증이 아닙니다.
 
@@ -30,7 +30,7 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.2/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기 ZIP 다운로드, `RELEASE-SHA256SUMS` 대조, 압축 해제, 최초 준비,
@@ -54,7 +54,7 @@ angmoo stop
 
 ## 단축 명령 등록과 기존 0.1.0 설치
 
-0.1.2 도구에는 단축 명령 등록이 포함됩니다. 공개된 0.1.0 도구는
+0.1.3 도구에는 단축 명령 등록이 포함됩니다. 공개된 0.1.0 도구는
 `~/.local/bin/angmoo start`, `~/.local/bin/angmoo status`, `~/.local/bin/angmoo stop`을
 사용합니다. 업데이트 후에도 전체 경로는 유효합니다. 단축 명령은 같은 wrapper를
 사용하므로 새로운 데이터 home을 만들지 않습니다.
@@ -99,7 +99,7 @@ Termux 내부 전용 저장소에 압축을 풀고 해당 폴더에서 최초 �
 sh setup.sh
 ```
 
-0.1.2 setup은 PATH나 셸 초기화 파일을 수정하지 않고 명령을 등록합니다.
+0.1.3 setup은 PATH나 셸 초기화 파일을 수정하지 않고 명령을 등록합니다.
 기존 0.1.0 도구를 계속 사용한다면 전체 wrapper 경로를 사용하세요.
 
 준비 도구는 없는 Python·PRoot를 플랫폼 패키지로 설치하고, 해시를 고정한
@@ -108,7 +108,7 @@ PRoot-Distro 5.10.0을 전용 가상 환경에 설치합니다. root·Docker dae
 이후 설치와 시작은 각각 한 명령입니다.
 
 ```sh
-angmoo install --release 0.1.2
+angmoo install --release 0.1.3
 angmoo start
 ```
 
@@ -139,13 +139,13 @@ backend에만 데이터 경로를 연결합니다. Android 공유 저장소로 �
 3. 전체 데이터 디렉터리, 미디어, 설치 비밀값, 실행기 상태, 이미지 식별 기록과 로그를
    전용 저장소에 백업합니다. DB 파일 하나나 World Package만으로는 부족합니다.
    복구에 필요한 이전 이미지 쌍과 도구도 보존합니다.
-4. 위 수동 설치 절차로 0.1.2 도구를 내려받아 검증하고 새 도구 폴더에서
+4. 위 수동 설치 절차로 0.1.3 도구를 내려받아 검증하고 새 도구 폴더에서
    `sh setup.sh`를 실행합니다. 도구 갱신과 명령 등록 단계이며 다른 데이터 home을
    선택하는 작업이 아닙니다.
 5. 기록한 **같은 home**으로 이미지 쌍을 설치하고 실행합니다.
 
    ```sh
-   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.2
+   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.3
    angmoo --home "$HOME/.local/share/angmoo-custom" start
    angmoo --home "$HOME/.local/share/angmoo-custom" status
    ```
@@ -223,3 +223,21 @@ supervisor 초기 실행 중 로그 누락 여부도 포함됩니다.
 각각 1 MiB 파일 2개를 유지합니다. 전체는 최대 4개 세션·64 MiB입니다. 순환 삭제·긴 줄 생략·
 수집 큐 초과·디스크 오류는 기록 공백으로 남기며 완전 수집으로 표시하지 않습니다.
 로그 조회에는 서비스 실행·설치된 배포물·제품 DB 접근이 필요하지 않습니다.
+
+Android나 강제 종료로 로그에 종료 기록이 남지 않았다면, 다음 `angmoo start`가
+설치 경로의 실행 잠금 아래 이전 프로세스를 확인합니다. 모두 종료된 것이 확인되면
+해당 세션을 중단된 실행으로 기록하고 새 시작을 계속합니다. 알 수 없는 종료 시각을
+만들어 넣거나 로그가 완전히 수집됐다고 표시하지 않습니다. 기존 최대 4개 세션 보존
+정책은 유지하므로, 정상 종료 또는 중단이 확인된 오래된 세션은 보존 정책에 따라
+정리될 수 있습니다. 진단에 필요한 로그는 별도로 복사해 보관하세요.
+
+이전 프로세스가 살아 있거나 확인할 수 없으면 두 번째 서버를 시작하지 않습니다.
+기존 로그와 데이터를 유지하고 `angmoo diagnostics`를 확인하세요. 검사를 통과하려고
+로그 폴더를 삭제하거나 앱 데이터를 초기화하지 마세요. 이름 변경이나 삭제 도중
+로그 정리가 중단되면 다음 시작에서 저장된 정리 기록을 다시 확인합니다. 이전 실행기는
+복구된 중단 세션을 이해하지 못하므로 버전 내리기를 복구 절차로 사용하지 않습니다.
+
+`installation_complete_start_failed`는 이미지 설치는 끝났지만 자동 시작에 실패했다는
+뜻입니다. 앞서 나온 오류와 `angmoo diagnostics`를 확인하고, 원인을 해결한 뒤 같은
+데이터 home에서 `angmoo start`를 다시 실행하세요. 파일을 다시 내려받거나 캐릭터·API 키를
+삭제할 필요는 없습니다.
