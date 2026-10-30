@@ -1,11 +1,34 @@
 import argparse
 import importlib.util
+import os
 from pathlib import Path
 import pytest
 
 path=Path(__file__).resolve().parents[3]/'launcher/migrate/docker_migrate.py'
 spec=importlib.util.spec_from_file_location('docker_migrate',path)
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+
+
+def test_private_credentials_are_complete_private_and_never_replaced(tmp_path):
+    root=tmp_path/'owned';module.private_directory(root)
+    path=root/'database-connection'
+    mask=os.umask(0)
+    try:module.write_private_once(path,'synthetic first value')
+    finally:os.umask(mask)
+    assert path.read_text()=='synthetic first value'
+    if os.name!='nt':assert path.stat().st_mode&0o777==0o600
+    with pytest.raises(FileExistsError):module.write_private_once(path,'different value')
+    assert path.read_text()=='synthetic first value'
+    assert list(root.iterdir())==[path]
+
+
+def test_private_credential_failure_does_not_publish_partial_file(tmp_path,monkeypatch):
+    path=tmp_path/'not-published'
+    def failed(_):raise OSError('synthetic sync failure')
+    monkeypatch.setattr(module.os,'fsync',failed)
+    with pytest.raises(OSError,match='synthetic sync failure'):
+        module.write_private_once(path,'synthetic value')
+    assert not path.exists() and not list(tmp_path.iterdir())
 
 
 class Docker:

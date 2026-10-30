@@ -1,8 +1,10 @@
 """Fail closed before operating on this disposable local experiment's resources."""
 from __future__ import annotations
 import json
+import os
 from pathlib import Path
 import subprocess
+import tempfile
 from urllib.parse import urlsplit
 
 RUN_ID = 'angmoo-pg-20261027-run01'
@@ -12,6 +14,17 @@ PORTS = {'postgres':15414,'backend':18114,'frontend':13114}
 
 class GuardError(ValueError):
     pass
+
+
+def write_private_once(path:Path,body:str)->None:
+    """Publish an owned experiment secret with private mode from its first byte."""
+    descriptor,temporary=tempfile.mkstemp(prefix='.'+path.name+'-',dir=path.parent)
+    try:
+        with os.fdopen(descriptor,'wb') as stream:
+            stream.write(body.encode('utf-8'));stream.flush();os.fsync(stream.fileno())
+        os.link(temporary,path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 def require_owned_root(root: Path) -> Path:
     root = root.absolute()

@@ -1,7 +1,7 @@
 """Run the pinned ARM64 PostgreSQL image in a private Termux PRoot tree."""
 from __future__ import annotations
 import argparse,hashlib,json,os,pathlib,secrets,socket,subprocess,time
-from guard import RUN_ID,SOURCE_SHA,require_owned_root,owned_path
+from guard import RUN_ID,SOURCE_SHA,require_owned_root,owned_path,write_private_once
 
 ROOT=pathlib.Path.home()/'angmoo-pg-experiments/20261027-run01'
 PORT=15414
@@ -72,8 +72,7 @@ def init():
         password=secrets.token_urlsafe(32)
         for name,value in [('password',password+'\n'),('pgpass',f'127.0.0.1:{PORT}:*:{ROLE}:{password}\n')]:
             p=owned_path(base,'secrets/'+name)
-            with p.open('x') as f:f.write(value)
-            p.chmod(0o600)
+            write_private_once(p,value)
     else:
         assert (base/'secrets/pgpass').is_file() and password_path.stat().st_mode&0o077==0
     version=run('postgres','--version');user=run('id')

@@ -42,4 +42,6 @@ schema v5와 제품 버전 0.1.4는 다릅니다. 동결한 SQLite schema 41은 
 
 Windows는 전용 loopback 포트와 실제 클러스터 경로·system ID를 확인해 제어하며 다른 PostgreSQL을 채택하지 않습니다. Docker DB 포트는 서비스 네트워크 안에 두고 Termux는 loopback에 연결합니다. 자격 증명은 비밀 파일에 저장하며 이미지 계층이나 명령줄 비밀번호로 넣지 않습니다.
 
+서비스를 다시 시작할 수 있도록 DB 접속 비밀번호는 소유자만 접근하는 로컬 파일에 저장합니다. 이 파일 형식 자체가 비밀번호를 암호화하지는 않으므로 비밀값 폴더와 백업을 비공개로 보관하세요. Docker 이전 도구는 완전히 기록한 파일을 공개하고 기존 자격 증명을 덮어쓰지 않습니다. 기본 접근 모델은 [PostgreSQL 비밀번호 파일 보호](https://www.postgresql.org/docs/17/libpq-pgpass.html)를 참고하세요.
+
 지원하는 0.1.3 전환은 [이전 안내](postgresql-migration.ko.md)를 참고하세요. 과거 SQLite 문서의 PRAGMA·FTS5·Vec1 명령은 PostgreSQL 운영 절차가 아닙니다.

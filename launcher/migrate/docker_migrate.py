@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 import secrets
 import subprocess
+import tempfile
 import time
 from urllib.parse import quote
 from uuid import uuid4
@@ -104,6 +105,22 @@ def private_directory(path):
     if os.name=='nt':
         import getpass
         subprocess.run(['icacls',str(path),'/inheritance:r','/grant:r',getpass.getuser()+':(OI)(CI)F'],check=True,capture_output=True)
+
+
+def write_private_once(path,body):
+    """Publish a complete 0600 file inside an already private directory.
+
+    Windows inherits the migration directory's owner-only DACL. Hard-link
+    publication refuses an existing destination instead of replacing a key.
+    """
+    path=Path(path)
+    descriptor,temporary=tempfile.mkstemp(prefix='.'+path.name+'-',dir=path.parent)
+    try:
+        with os.fdopen(descriptor,'wb') as stream:
+            stream.write(body.encode('utf-8'));stream.flush();os.fsync(stream.fileno())
+        os.link(temporary,path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def wait_ready(docker,container,command,seconds=120):
@@ -232,7 +249,7 @@ def migrate(docker,source,args,ask=input):
     for key,body in {'postgres-password':owner_password,'owner-dsn':'postgresql+psycopg://angmoo_owner:'+quote(owner_password,safe='')+'@postgres:5432/angmoo',
                      'runtime-dsn':'postgresql+psycopg://angmoo_runtime:'+quote(runtime_password,safe='')+'@postgres:5432/angmoo'}.items():
         path=credentials/key
-        if not resume:path.write_text(body+'\n',encoding='utf-8');path.chmod(0o600)
+        if not resume:write_private_once(path,body+'\n')
     labels=['--label','io.angmoo.installation='+installation_id]
     images={key:docker.json('image','inspect',state['images'][key] if resume else getattr(args,key+'_image'))[0]
         for key in ('backend','postgres','frontend')}

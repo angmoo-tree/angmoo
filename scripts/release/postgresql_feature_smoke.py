@@ -4,6 +4,7 @@ from pathlib import Path
 from launcher.termux.payload import require
 from scripts.release.candidate import ROOT
 from scripts.release.feature_smoke import test_tools
+from launcher.migrate.docker_migrate import write_private_once
 
 TESTS=('postgresql/test_release_migration_integration.py','postgresql/test_vector_contracts.py',
     'postgresql/test_fulltext_contracts.py','postgresql/test_checkpoint_contracts.py',
@@ -19,8 +20,8 @@ def run(backend,postgres,platform,output):
         return subprocess.run(['docker',*args],check=True,capture_output=True,text=True,encoding='utf-8',**kwargs).stdout.strip()
     with tempfile.TemporaryDirectory(prefix=name) as directory:
         root=Path(directory);stage=root/'validation';stage.mkdir();stage.chmod(0o755)
-        (root/'password').write_text(password);(root/'password').chmod(0o600)
-        (root/'fixture.env').write_text('ANGMOO_EXPERIMENT_DATABASE_URL='+dsn+'\nANGMOO_TEST_ADMIN_DSN='+dsn+'\n')
+        write_private_once(root/'password',password)
+        write_private_once(root/'fixture.env','ANGMOO_EXPERIMENT_DATABASE_URL='+dsn+'\nANGMOO_TEST_ADMIN_DSN='+dsn+'\n')
         ignore=shutil.ignore_patterns('__pycache__','*.pyc','.pytest_cache')
         shutil.copytree(ROOT/'backend/tests',stage/'tests',ignore=ignore)
         shutil.copytree(tooling,stage/'test-tools',ignore=ignore)

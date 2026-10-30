@@ -1,8 +1,17 @@
-import json,tempfile,unittest
+import json,os,tempfile,unittest
 from pathlib import Path
-from guard import GuardError,MARKER,RUN_ID,SOURCE_SHA,owned_path,require_dsn,require_local_image
+from guard import GuardError,MARKER,RUN_ID,SOURCE_SHA,owned_path,require_dsn,require_local_image,write_private_once
 
 class Boundaries(unittest.TestCase):
+    def test_private_secret_publication_keeps_the_first_value(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/'fixture'
+            write_private_once(path,'synthetic first value')
+            if os.name!='nt':self.assertEqual(path.stat().st_mode&0o777,0o600)
+            with self.assertRaises(FileExistsError):write_private_once(path,'different value')
+            self.assertEqual(path.read_text(),'synthetic first value')
+            self.assertEqual(list(Path(d).iterdir()),[path])
+
     def test_foreign_paths_and_owner_are_rejected(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)

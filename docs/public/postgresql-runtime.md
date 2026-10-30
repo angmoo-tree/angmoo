@@ -44,4 +44,6 @@ Application data includes media, the original encryption secret, runtime DSN and
 
 Windows uses its own loopback port and verifies the actual cluster path and system ID before controlling it. It does not adopt an unrelated PostgreSQL server. Docker keeps the DB port inside the service network; Termux binds it to loopback. Credentials are stored in private files and do not enter image layers or command-line passwords.
 
+Database connection passwords use owner-restricted local files so the services can restart. This file format does not encrypt those passwords; keep the secret directory and backups private. The Docker migration tool publishes complete files without replacing existing credentials. See [PostgreSQL password-file protection](https://www.postgresql.org/docs/17/libpq-pgpass.html) for the underlying access model.
+
 See [migration](postgresql-migration.md) for the supported 0.1.3 transition. Historical SQLite documents retain their original scope; their PRAGMA, FTS5 and Vec1 commands are not PostgreSQL operating instructions.

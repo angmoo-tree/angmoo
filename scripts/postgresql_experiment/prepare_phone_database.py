@@ -5,7 +5,7 @@ recorded as phone-g4-target-prepared.json. Migration and serving are separate.
 """
 import json,os,urllib.parse
 import phone_app,phone_pg
-from guard import RUN_ID,SOURCE_SHA,owned_path
+from guard import RUN_ID,SOURCE_SHA,owned_path,write_private_once
 
 
 def prepare():
@@ -21,8 +21,7 @@ def prepare():
     password=owned_path(root,'secrets/password').read_text().strip()
     dsn='postgresql+psycopg://'+phone_pg.ROLE+':'+urllib.parse.quote(password,safe='')+'@127.0.0.1:15414/angmoo_pg_run01'
     path=owned_path(root,'secrets/app-dsn')
-    with path.open('x') as f:f.write(dsn+'\n')
-    path.chmod(0o600)
+    write_private_once(path,dsn+'\n')
     return {'state':'TARGET_STAGED','extensions':['vector','pg_trgm'],'database':'angmoo_pg_run01'}
 
 
