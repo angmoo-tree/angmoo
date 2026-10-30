@@ -125,7 +125,7 @@ jobs:
           sudo unshare --mount --pid --fork --mount-proc --kill-child \
             setpriv --reuid="$(id -u)" --regid="$(id -g)" --init-groups \
             "$RUNNER_TEMP/angmoo-host-tools/bin/python" -m unittest discover -s launcher/termux -p 'test_*.py'
-      - name: Compile and materialize the embedded baseline
+      - name: Compile and materialize the SQLite input compatibility baseline
         run: |
           uv run python -m compileall -q app
           mkdir -p ./.ci
@@ -235,12 +235,69 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
 
+  postgresql:
+    needs: [impact]
+    if: needs.impact.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.7-pg17-trixie@sha256:7a7e9f22015b67edb4bef5c59daeebcd7e74bfa570df6ce60ae01237c8648a84
+        env:
+          POSTGRES_USER: angmoo_pg_run01_admin
+          POSTGRES_PASSWORD: synthetic-pg-ci-only
+          POSTGRES_DB: angmoo_pg_run01
+        ports: ['15414:5432']
+        options: >-
+          --health-cmd "pg_isready -U angmoo_pg_run01_admin -d angmoo_pg_run01"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PYTHONPATH: backend
+      ANGMOO_DENY_EXTERNAL_NETWORK: '1'
+      ANGMOO_SOURCE_SHA: ${{ github.sha }}
+      ANGMOO_EXPERIMENT_DATABASE_URL: postgresql+psycopg://angmoo_pg_run01_admin:synthetic-pg-ci-only@127.0.0.1:15414/angmoo_pg_run01
+      ANGMOO_TEST_ADMIN_DSN: postgresql+psycopg://angmoo_pg_run01_admin:synthetic-pg-ci-only@127.0.0.1:15414/angmoo_pg_run01
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7
+        with:
+          version: '0.12.5'
+          python-version: '3.13'
+          enable-cache: false
+      - run: uv sync --frozen --project backend
+      - name: Set bounded server resources before fixture creation
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec "$PG_CONTAINER" psql -U angmoo_pg_run01_admin -d angmoo_pg_run01 -c "ALTER SYSTEM SET max_connections=28"
+          docker exec "$PG_CONTAINER" psql -U angmoo_pg_run01_admin -d angmoo_pg_run01 -c "ALTER SYSTEM SET max_pred_locks_per_transaction=256"
+          docker restart "$PG_CONTAINER"
+          for i in $(seq 1 30); do docker exec "$PG_CONTAINER" pg_isready -U angmoo_pg_run01_admin -d angmoo_pg_run01 && break; sleep 1; done
+      - name: Prepare owned real PostgreSQL fixture
+        run: uv run --project backend python scripts/ci/prepare_postgresql_tests.py
+      - name: PostgreSQL runtime, search, concurrency, recovery and 0.1.3 conversion
+        run: |
+          mkdir -p artifacts/postgresql-ci
+          uv run --project backend python -m pytest backend/tests/postgresql -q --junitxml=artifacts/postgresql-ci/junit.xml
+          python -c "import xml.etree.ElementTree as E; suites=E.parse('artifacts/postgresql-ci/junit.xml').getroot().iter('testsuite'); values=list(suites); assert sum(int(s.get('tests','0')) for s in values)>0 and sum(int(s.get('skipped','0')) for s in values)==0"
+      - name: Keep database and test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: postgresql-contracts-${{ github.sha }}-${{ github.run_attempt }}
+          path: artifacts/postgresql-ci/junit.xml
+          include-hidden-files: true
+          if-no-files-found: error
+
   backend:
     if: always()
     needs:
     - impact
     - backend-preflight
     - backend-tests
+    - postgresql
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

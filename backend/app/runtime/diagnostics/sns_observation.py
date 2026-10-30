@@ -442,7 +442,7 @@ class SNSAttempt:
         if kind == "relationship_validation":
             self.emit("relationship_validation", lane=code(payload.get("lane")), details={
                 "revision": payload.get("revision") if payload.get("revision") in {
-                    "social-context-currentness.v1", "social-context-currentness.legacy.v1"} else None,
+                    "social-context-initial-input.v1", "social-context-currentness.v1", "social-context-currentness.legacy.v1"} else None,
                 "outcome": payload.get("outcome") if payload.get("outcome") in {
                     "valid", "valid_legacy_facts", "no_facts", "unavailable", "disabled", "invalid"} else None,
                 "reason": payload.get("reason") if payload.get("reason") in {
@@ -498,6 +498,9 @@ class SNSAttempt:
 
 def _scheduler_snapshot(data_root: Path, manifest: dict) -> dict:
     """Small, read-only scheduler inventory for a once-per-minute heartbeat."""
+    if (data_root/'runtime/postgresql-runtime.json').exists():
+        from app.runtime.diagnostics.postgresql_snapshot import scheduler_snapshot
+        return scheduler_snapshot(data_root,manifest)
     started = monotonic()
     try:
         root = data_root.resolve()

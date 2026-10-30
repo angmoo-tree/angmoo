@@ -16,6 +16,24 @@ from app.domains.memory.repository.situation_validation import restore_context
 from app.runtime.memory.situation_sources import SituationSources
 
 
+def test_delivery_index_preserves_exact_entry_binding_and_replaced_context(durable_stack):
+    db, scope, _, _ = durable_stack
+    row, _ = delivered_reply(db, scope)
+    context = restore_context(db, row)
+    source = context.sources[0]
+    original = context.proof_for(source)
+    assert original.origin == 'situation_delivered'
+    assert context.proof_for(replace(source, payload_path='/forged')) is None
+    # Replacing immutable values must not inherit either cached sources or proof.
+    changed = replace(source, delivery_payload_digest='0' * 64)
+    replaced = replace(context, manifest=replace(context.manifest, sources=(changed,), version=2),
+        result_sources=(changed,))
+    assert replaced.sources == (changed,)
+    assert replaced.proof_for(source) is None
+    assert replaced.proof_for(changed) is None  # Invalid input cannot fall through to result.
+    assert context.proof_for(source) == original
+
+
 @pytest.mark.parametrize("field", ["ordinal", "source_id", "role", "target_key", "payload_path", "ranges", "source_digest", "call_identity"])
 def test_persisted_manifest_tampering_is_not_a_delivery_proof(durable_stack, field):
     db, scope, setting, memory = durable_stack
@@ -70,7 +88,7 @@ def test_only_actual_path_fragment_and_exact_persisted_entry_grant_observation(d
 
 
 @pytest.mark.parametrize("change", ["body", "hidden", "visibility", "participant"])
-def test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration(durable_stack, change):
+def test_later_original_changes_do_not_revoke_owned_experience(durable_stack, change):
     from app.domains.world_characters.models import WorldCharacter
     db, scope, setting, memory = durable_stack
     row, reply = delivered_reply(db, scope)
@@ -92,8 +110,8 @@ def test_delivery_proof_does_not_override_current_privacy_at_apply_or_hydration(
     else:
         db.get(WorldCharacter, reply.author_world_character_id).status = "inactive"
     db.commit()
-    assert reader.revalidate(request, (ranked,)) == ()
-    assert reader.hydrate(request, selected).records == ()
+    assert reader.revalidate(request, (ranked,))
+    assert reader.hydrate(request, selected).records
     evidence = db.scalar(select(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id == item.id,
         MemoryItemEvidence.source_id == reply.id))
     assert evidence.observation_id is None
@@ -129,7 +147,7 @@ def test_inbox_delivery_lineage_is_shared_by_recall_prior_hotbrief_and_relations
     assert item.id in review_ids()
     assert SituationSources(db).validate(context, prior, now=NOW).state == "available"
     reply.report_hidden_at = NOW; db.commit()
-    assert canonical.revalidate_candidates(scope=scope, candidates=(ranked.candidate,), now=NOW) == ()
-    assert item.id not in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
-    assert item.id not in review_ids()
-    assert SituationSources(db).validate(context, prior, now=NOW).state == "forbidden"
+    assert canonical.revalidate_candidates(scope=scope, candidates=(ranked.candidate,), now=NOW)
+    assert item.id in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
+    assert item.id in review_ids()
+    assert SituationSources(db).validate(context, prior, now=NOW).state == "available"

@@ -8,6 +8,7 @@ import threading
 import time
 from typing import Callable
 from app.core.sqlite_concurrency import is_sqlite_contention
+from app.core.postgresql_concurrency import connection_unavailable, PostgresCommitOutcomeUnknown
 
 from app.domains.relationships.contracts.outbox import (OutboxCapacityError, OutboxPort, ProjectionWorkItem)
 from app.domains.relationships.contracts.projection import (
@@ -23,6 +24,13 @@ from app.runtime.graph_projection.metrics import graph_metrics
 
 
 logger = logging.getLogger(__name__)
+
+
+def _canonical_unavailable(exc):
+    # An unknown acknowledgement retains the durable claim. A later claim/load
+    # reconciles it; do not spend a graph retry or publish the command blindly.
+    return (isinstance(exc, (OutboxCapacityError, PostgresCommitOutcomeUnknown))
+            or is_sqlite_contention(exc) or connection_unavailable(exc))
 
 
 ProjectionStore = RelationshipProjectionPort
@@ -111,7 +119,7 @@ class GraphProjectionWorker:
         try:
             return self._process_claim(item)
         except Exception as exc:
-            if not (isinstance(exc, OutboxCapacityError) or is_sqlite_contention(exc)):
+            if not _canonical_unavailable(exc):
                 raise
             # load/ack/failure recording may all contend. Do not turn canonical
             # pressure into a poison payload or spend another graph attempt.
@@ -174,7 +182,7 @@ class GraphProjectionWorker:
             )
             graph_degraded = True
         except Exception as exc:
-            if isinstance(exc, OutboxCapacityError) or is_sqlite_contention(exc):
+            if _canonical_unavailable(exc):
                 raise
             error_class = "internal_error"
             status = self._finalize_failure(
@@ -220,7 +228,7 @@ class GraphProjectionWorker:
                 status = self._finalize_failure(item.id, error_class="shutdown_interrupted", terminal=False)
                 results.append(_ProjectionItemResult(status=status))
             except Exception as exc:
-                if isinstance(exc, OutboxCapacityError) or is_sqlite_contention(exc):
+                if _canonical_unavailable(exc):
                     results.append(_ProjectionItemResult(status="storage_busy", graph_degraded=True))
                 else:
                     errors.append(exc)
@@ -316,7 +324,7 @@ class GraphProjectionWorker:
                 if canonical_recovery and not result.canonical_busy:
                     canonical_recovery = self._outbox.has_unfinished()
             except Exception as exc:
-                if not (isinstance(exc, OutboxCapacityError) or is_sqlite_contention(exc)):
+                if not _canonical_unavailable(exc):
                     raise
                 # Keep the registered worker alive. Any claimed commands retain
                 # their existing lease/finalize fence and expire normally.

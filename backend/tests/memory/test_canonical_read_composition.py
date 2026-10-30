@@ -46,7 +46,7 @@ def test_character_summary_reads_use_the_current_session_without_committing(runt
         assert observer.get(Character, "recall-counterpart-character").one_liner == original
 
 
-def test_document_hydration_revalidates_evidence_in_its_current_session(runtime_factory):
+def test_document_hydration_keeps_saved_evidence_despite_current_source_change(runtime_factory):
     _, _, _, message_id, item_id = _accept_chat_memory(runtime_factory)
     with runtime_factory() as observer:
         original = observer.get(source_models.MessageMessage, message_id).content
@@ -66,6 +66,7 @@ def test_document_hydration_revalidates_evidence_in_its_current_session(runtime_
         runtime_factory, source_reader_factory=reader, now_factory=lambda: NOW
     ).documents_for_item_ids((item_id,))
     assert calls == [message_id]
-    assert documents == {item_id: ()}
+    assert documents[item_id]
+    assert any(document.text == original for document in documents[item_id])
     with runtime_factory() as observer:
         assert observer.get(source_models.MessageMessage, message_id).content == original

@@ -37,7 +37,10 @@ def connect(world_id: str, data: TopicKeyRequest, db: Session = Depends(get_db),
 async def regenerate(world_id: str, data: TopicRegenerateRequest, world_character_id: str | None = None,
                      db: Session = Depends(get_db), user=Depends(get_current_user), topics=Depends(recommendation_workflows)):
     try:
-        return await topics.regenerate(db, world_id=world_id, owner_id=user.id,
+        from app.core.async_session import release_request_read
+        owner_id = await release_request_read(db, lambda: user.id,
+            error_code="topic_preparation_request_has_pending_writes")
+        return await topics.regenerate(db, world_id=world_id, owner_id=owner_id,
             world_character_id=world_character_id, request_id=data.request_id)
     except (TopicPreparationError, CredentialResolutionError) as exc:
         translate_error(exc)

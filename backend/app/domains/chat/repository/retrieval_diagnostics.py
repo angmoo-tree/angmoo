@@ -7,6 +7,30 @@ from app.domains.chat.models import ChatRetrievalDiagnostic
 from app.contracts.retrieval_observation import MAX_BYTES, Observation
 
 
+def save_postgresql(engine, observation: Observation) -> bool:
+    """Capture after the authoritative commit, using its pool but no business locks.
+
+    READ COMMITTED is limited to this disposable table. A transaction advisory
+    lock serializes its bounded retention scan; a busy writer skips this capture
+    instead of delaying chat. The next changed observation can try again.
+    """
+    from time import monotonic
+    from sqlalchemy import text
+    from app.core.postgresql_deadline import read_deadline
+    deadline = monotonic() + .25
+    with engine.connect().execution_options(isolation_level="READ COMMITTED") as connection:
+        with connection.begin(), read_deadline(connection, deadline):
+            connection.exec_driver_sql("SET LOCAL lock_timeout='50ms'")
+            connection.exec_driver_sql("SET LOCAL statement_timeout='250ms'")
+            # App-owned namespace, shared only by retrieval diagnostic writers.
+            if not connection.scalar(text('SELECT pg_try_advisory_xact_lock(1886221416, 1)')):
+                return False
+            with Session(connection) as db:
+                save(db, observation)
+                db.commit()
+    return True
+
+
 def save(db: Session, observation: Observation) -> None:
     payload = json.dumps(observation.payload(), ensure_ascii=True, separators=(",", ":"))
     size = len(payload.encode())

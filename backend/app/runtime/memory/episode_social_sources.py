@@ -115,6 +115,10 @@ def build_episode_social_sources(session, *, scope, identities):
             "self" if details[(kind, identifier)].evidence.actor_world_character_id == scope.subject_world_character_id else "observed_counterpart",
             details[(kind, identifier)].text, total_characters=len(details[(kind, identifier)].text),
             actor_label=labels.get(details[(kind, identifier)].evidence.actor_world_character_id),
+            actor_id=details[(kind, identifier)].evidence.actor_world_character_id,
+            counterpart_id=details[(kind, identifier)].evidence.counterpart_world_character_id,
+            observation_id=details[(kind, identifier)].evidence.observation_id,
+            source_event_id=details[(kind, identifier)].evidence.source_event_id,
             occurred_at=(details[(kind, identifier)].evidence.source_created_at.replace(tzinfo=UTC)
                 if details[(kind, identifier)].evidence.source_created_at.tzinfo is None
                 else details[(kind, identifier)].evidence.source_created_at).isoformat())

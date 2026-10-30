@@ -8,7 +8,7 @@ from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
 def selected_event_entries(command, bundle, payload, scope):
     selected = [(index, item) for index, item in enumerate(bundle.items)
         if item.kind is EvidenceKind.TODAY_SNS_ACTIVITY
-        and item.locator is not None and item.locator.source_type == "SOCIAL_EVENT"]
+        and item.locator is not None]
     if not selected:
         return {}
     today, request, preflight = command.today_sns_snapshot, command.request, command.preflight

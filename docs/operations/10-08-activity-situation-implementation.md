@@ -1,5 +1,7 @@
 # 10-08 Chat·SNS 상황기억 구현 및 로컬 검증 기록
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 ## 범위와 판정
 
 workspace의 `10-08 Chat·SNS 상황기억 영속 접수와 일일·종료 일괄 저장·색인 코드 구현 세부 계획.md` I00–I49를 구현한다. 코드·자동 회귀·합성 성능 측정·실제 AI 품질·사용자 확인은 각각 구분한다.

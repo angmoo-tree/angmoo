@@ -28,6 +28,12 @@ def bundle_manifest_hash(bundle: EpisodeBundle) -> str:
     }
     if bundle.environment is not None:
         manifest["environment"] = bundle.environment.to_dict()
+    if any(m.actor_id or m.counterpart_id or m.observation_id or m.source_event_id
+            for unit in bundle.source_refs().values() for m in unit.members):
+        manifest["source_authorities"] = [(ref, [(m.actor_id, m.counterpart_id, m.observation_id, m.source_event_id)
+            for m in unit.members]) for ref, unit in bundle.source_refs().items()]
+    if any(p.experience_snapshot is not None for p in bundle.prior_episodes):
+        manifest["prior_experiences"] = [(p.item_id, p.experience_snapshot) for p in bundle.prior_episodes]
     if bundle.activities:
         manifest["activities"] = [asdict(a) for a in bundle.activities]
         manifest["excerpts"] = [{"unit": u.unit_key, "members": [

@@ -122,51 +122,22 @@ def main() -> int:
     workflow = (ROOT / ".github" / "workflows" / "windows-installer.yml").read_text(
         encoding="utf-8"
     )
-    for required in (
-        "build:installer",
-        "build_desktop_release_metadata.py",
-        "angmoo-installer.spdx.json",
-        "angmoo-installer.provenance.json",
-        "THIRD_PARTY_NOTICES.md",
-        "release-candidate-backup.json",
-        "angmoo-desktop.exe",
-        "runtime\\sidecar.endpoint.json",
-        "check_windows_gui_subsystems.py",
-        "Get-MpThreat",
-        "installed_prelaunch_scan",
-        "installed_postrun_scan",
-        "angmoo-sidecar.exe",
-        "angmoo-windows-defender-evidence",
-        "check_er6_desktop_supply_chain.py",
-        "run_er6_defender_trigger_matrix.ps1",
-        "er6-defender-trigger-matrix.json",
-        "build_er6_localappdata_lifecycle_fixture.py",
-        "test_l3_er6_interactive_remove_data.py",
-        "er6-localappdata-lifecycle.zip",
-        "localappdata-migration-v1.json",
-        "silent_uninstall_preserved_data",
-        "reinstall_reused_data",
-        "interactive_full_delete = 'user_gate_required'",
-        "Get-MpThreatDetection",
-        "NoNewDefenderDetection",
-        "legacy_launcher_secret_merge",
-        "product_root_actual_name",
-        "installer_payload_digest_parity_pass",
-        "build_installer_fixtures.py",
-        "installer-fixtures-first",
-        "installer-fixtures-second",
-        "installer-fixtures-recovery",
-        "installer-fixtures-payload",
-        "predecessor-payload.zip",
-        "name: windows-installer-build",
-        "name: windows-installer-clean-install",
-        "windows-installer-supported-upgrade",
-        "windows-installer-failure-recovery",
-        "SUPPORTED_UPGRADE_RESULT",
-        "FAILURE_RECOVERY_RESULT",
-        "windows_installer_required_matrix_pass",
-    ):
-        _require(required in workflow, f"installer workflow contract missing: {required}")
+    qualification = (ROOT / 'scripts/ci/run_windows_postgresql_qualification.py').read_text(encoding='utf-8')
+    scan = (ROOT / 'scripts/ci/run_windows_postgresql_qualification.ps1').read_text(encoding='utf-8')
+    for required in ('build:installer','build_desktop_release_metadata.py','angmoo-installer.spdx.json',
+        'angmoo-installer.provenance.json','THIRD_PARTY_NOTICES.md','release-candidate-backup.json',
+        'check_windows_gui_subsystems.py','check_er6_desktop_supply_chain.py','run_er6_defender_trigger_matrix.ps1',
+        'er6-defender-trigger-matrix.json','name: windows-installer-build','name: windows-installer-clean-install',
+        'windows-installer-supported-upgrade','windows-installer-failure-recovery','windows_installer_required_matrix_pass',
+        'windows_postgresql_coverage.py','run_windows_postgresql_qualification.ps1'):
+        _require(required in workflow, f'installer workflow contract missing: {required}')
+    for required in ('OLD_EXE_SHA','windows_pg_hosted_only','windows_pg_existing_installation_refused',
+        'LOCAL_POSTGRESQL','--migrate-sqlite','interrupted_after_canonical','windows_pg_source_changed_after_conversion',
+        'windows_pg_silent_uninstall_deleted_data','windows_pg_actual_host_cleanup_failed'):
+        _require(required in qualification, f'PostgreSQL qualification missing: {required}')
+    for required in ('Get-MpThreat','Get-MpThreatDetection','installed_postrun_scan','Start-MpScan',
+        'Get-FileHash','interactive_full_delete=','user_gate_required'):
+        _require(required in scan, f'installer security qualification missing: {required}')
 
     sidecar_build = (ROOT / "desktop" / "scripts" / "build-sidecar.ps1").read_text(
         encoding="utf-8"
@@ -187,8 +158,10 @@ def main() -> int:
             required in sidecar_build.replace("\\", "/"),
             f"packaged embedded migration manifest missing: {required}",
         )
-    _require("--exclude-module psycopg" in sidecar_build, "legacy PostgreSQL driver must be excluded from product sidecar")
-    _require("--hidden-import psycopg" not in sidecar_build, "legacy PostgreSQL driver must not be a hidden import")
+    _require("--exclude-module psycopg" not in sidecar_build, "PostgreSQL driver cannot be excluded from the official sidecar")
+    for marker in ('--collect-all psycopg','--collect-all psycopg_binary','--hidden-import sqlalchemy.dialects.postgresql.psycopg','build_windows_postgresql.py'):
+        _require(marker in sidecar_build, 'required PostgreSQL sidecar resource missing: '+marker)
+    _require(bundle['resources'].get('resources/postgresql/')=='postgresql/', 'native PostgreSQL resource directory must be bundled')
 
     defender_matrix = (
         ROOT / "scripts" / "ci" / "run_er6_defender_trigger_matrix.ps1"

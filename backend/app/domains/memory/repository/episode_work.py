@@ -1,6 +1,6 @@
 """Durable per-bundle attempt receipts on the existing maintenance job lane.
 
-The bundle table retains source identities and progress, never copies raw text.
+The bundle table retains the exact delivered input, identities and progress.
 The original batch-v2 physical_calls constraint remains unchanged; episode
 calls are counted in these bundle receipts rather than misusing its three-call
 counter for an entire day. Runtime/API must aggregate this lane explicitly.

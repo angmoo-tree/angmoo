@@ -31,7 +31,7 @@ def fixture(db):
     return reader, request, candidate, details
 
 
-def test_episode_validation_hydration_preserves_missing_summary_with_partial_status(memory_session):
+def test_episode_hydration_keeps_saved_originals_after_live_source_disappears(memory_session):
     reader, request, candidate, details = fixture(memory_session)
     validated = reader.revalidate(request, (candidate,))
     assert len(validated) == 1
@@ -40,10 +40,10 @@ def test_episode_validation_hydration_preserves_missing_summary_with_partial_sta
     hydrated, receipts = hydration.records, hydration.sources
     assert len(hydrated) == 1
     payload = json.loads(hydrated[0].text)
-    assert payload["partial"]
+    assert not payload["partial"]
     assert payload["situation"] == validated[0].text
-    assert payload["source_statuses"]["missing"] == 2
-    assert receipts[0].status is RecallAxisStatus.PARTIAL
+    assert payload["source_statuses"]["verified"] == 2
+    assert receipts[0].status is RecallAxisStatus.READY
     assert candidate.candidate.memory_item_id not in hydrated[0].text
     assert "POST:0" not in hydrated[0].text
 
@@ -61,6 +61,21 @@ def test_candidate_version_hash_and_scope_are_not_granted_by_projection(memory_s
     assert reader.hydrate(request, accepted) == ((), ())
     hydration = reader.hydrate(request, accepted)
     assert hydration.records == () and hydration.sources == ()
+
+
+def test_private_thread_delivery_is_rechecked_against_canonical_item(memory_session):
+    from app.domains.chat.models import MessageThread
+    reader,request,candidate,_=fixture(memory_session)
+    limited=replace(request,allowed_thread_ids=('current-thread',))
+    assert len(reader.revalidate(limited,(candidate,)))==1  # Public memory remains available.
+    memory_session.add(MessageThread(id='foreign-thread',requester_id='memory-owner',character_id='subject-character'))
+    memory_session.commit()
+    item=memory_session.get(MemoryItem,candidate.candidate.memory_item_id)
+    item.thread_id='foreign-thread'
+    memory_session.commit()
+    assert reader.revalidate(limited,(candidate,))==()
+    # Even a stale or forged projection with matching revision/hash cannot deliver it.
+    assert reader.revalidate(replace(request,allowed_thread_ids=()),(candidate,))==()
 
 
 def test_episode_interval_and_participants_use_all_linked_sources(memory_session):

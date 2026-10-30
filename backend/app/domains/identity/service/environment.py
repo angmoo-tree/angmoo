@@ -28,15 +28,23 @@ class EnvironmentConflict(ValueError):
     pass
 
 
-def lock_environment_admission(db, owner_id: str | None = None) -> None:
-    """Serialize detector activation with supported job/quota admission.
+def lock_environment_admission(db, owner_id: str | None = None, *, exclusive: bool = False) -> None:
+    """Fence environment activation without serializing independent PG jobs.
 
-    A no-op UPDATE is a SQLite write lock and a PostgreSQL row lock. It neither
-    commits nor changes revisions; the caller retains the short transaction.
+    Admissions share a row lock; configuration mutation keeps the no-op UPDATE.
+    The writer's new MVCC version forces a stale admission snapshot to retry
+    after waiting for activation, without changing any business revisions.
+    Quota owners still enforce limits in the same serializable transaction.
     """
-    statement = update(InstallationIdentity).where(InstallationIdentity.bootstrap_state == "claimed")
+    postgres = db.get_bind().dialect.name == "postgresql"
+    shared = postgres and not exclusive
+    statement = (select(InstallationIdentity.singleton_key) if shared else update(InstallationIdentity))
+    statement = statement.where(InstallationIdentity.bootstrap_state == "claimed")
     if owner_id is not None:
         statement = statement.where(InstallationIdentity.owner_user_id == owner_id)
+    if shared:
+        db.execute(statement.with_for_update(read=True)).all()
+        return
     db.execute(statement.values(
         bootstrap_state=InstallationIdentity.bootstrap_state,
         updated_at=InstallationIdentity.updated_at,
@@ -144,7 +152,7 @@ def apply_environment_report(db, owner_id: str, data: EnvironmentReport, *, sess
                              now=None, on_timezone_change=None) -> EnvironmentRead:
     """Caller-owned canonical mutation and DTO; no nested commit or postcommit read."""
     now = utc_instant(now or datetime.now(UTC))
-    lock_environment_admission(db, owner_id)
+    lock_environment_admission(db, owner_id, exclusive=True)
     existing = read_environment(db, owner_id, now=now)
     if data.preferred_language is None and data.timezone is None:
         return existing

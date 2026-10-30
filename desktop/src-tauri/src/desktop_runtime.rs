@@ -26,6 +26,25 @@ const HEALTH_FAILURE_LIMIT: u8 = 15;
 // Defender enabled that took about 20 seconds on the ER6 user machine, so the
 // previous 12-second budget falsely declared a healthy sidecar crashed.
 const ENDPOINT_READY_ATTEMPTS: usize = 600;
+// First PG initialization and SQLite migration finish before the endpoint can
+// be published. A copied 0.1.3 installation took over 60 seconds on Windows;
+// use the same bounded 240-second allowance as packaged Windows qualification.
+const INITIAL_SETUP_READY_ATTEMPTS: usize = 2400;
+
+fn endpoint_ready_attempts(data_root: &std::path::Path, migrate_sqlite: bool) -> usize {
+    if migrate_sqlite || !data_root.join("postgresql/cluster/PG_VERSION").is_file() {
+        INITIAL_SETUP_READY_ATTEMPTS
+    } else {
+        ENDPOINT_READY_ATTEMPTS
+    }
+}
+
+fn postgresql_resource_argument(path: &std::path::Path) -> String {
+    // Tauri can return a verbatim Windows resource path. initdb probes postgres
+    // through cmd.exe, which cannot execute its canonicalized //?/C:/... form.
+    // Simplify only paths whose ordinary Windows spelling has identical meaning.
+    dunce::simplified(path).to_string_lossy().into_owned()
+}
 
 #[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -295,6 +314,73 @@ fn health_failure_is_terminal(consecutive_failures: u8) -> bool {
     consecutive_failures >= HEALTH_FAILURE_LIMIT
 }
 
+#[cfg(windows)]
+fn confirm_postgresql_migration(root: &std::path::Path) -> Result<bool, String> {
+    if !root.join("canonical/current-generation.json").is_file()
+        || root
+            .join("postgresql-appdata/runtime/postgresql-runtime.json")
+            .is_file()
+    {
+        return Ok(false);
+    }
+    use windows::Win32::Globalization::GetUserDefaultUILanguage;
+    use windows::Win32::Storage::FileSystem::GetDiskFreeSpaceExW;
+    use windows::Win32::UI::WindowsAndMessaging::{IDYES, MB_ICONQUESTION, MB_YESNO, MessageBoxW};
+    use windows::core::PCWSTR;
+    let korean = unsafe { GetUserDefaultUILanguage() } & 0x03ff == 0x12;
+    fn size(path: &std::path::Path) -> Result<u64, String> {
+        if !path.exists() { return Ok(0); }
+        let metadata=std::fs::symlink_metadata(path).map_err(|_| "desktop_postgresql_space_check_failed".to_owned())?;
+        use std::os::windows::fs::MetadataExt;
+        if metadata.file_attributes() & 0x400 != 0 { return Err("desktop_postgresql_source_link_refused".to_owned()); }
+        if metadata.is_file() { return Ok(metadata.len()); }
+        let mut total=0u64;
+        for entry in std::fs::read_dir(path).map_err(|_| "desktop_postgresql_space_check_failed".to_owned())? {
+            total=total.saturating_add(size(&entry.map_err(|_| "desktop_postgresql_space_check_failed".to_owned())?.path())?);
+        }
+        Ok(total)
+    }
+    let mut bytes=0u64;
+    for name in ["canonical","media","secrets","runtime","search","graph"] { bytes=bytes.saturating_add(size(&root.join(name))?); }
+    let required=bytes.saturating_mul(3).saturating_add(512*1024*1024);
+    let path: Vec<u16>=root.to_string_lossy().encode_utf16().chain(Some(0)).collect();
+    let mut free=0u64;
+    unsafe { GetDiskFreeSpaceExW(PCWSTR(path.as_ptr()),Some(&mut free),None,None) }
+        .map_err(|_| "desktop_postgresql_space_check_failed".to_owned())?;
+    let backup = root.join("postgresql-migration/work/D0");
+    let message = if korean {
+        format!(
+            "기존 Angmoo 0.1.3 데이터를 PostgreSQL로 이전합니다.\n원본과 완료된 결과는 보존합니다.\n백업 위치: {}\n필요 공간: {} MiB / 여유 공간: {} MiB\n\n이전을 시작하거나 중단된 이전을 재개하시겠습니까?",
+            backup.display(),required/1048576,free/1048576
+        )
+    } else {
+        format!(
+            "Migrate existing Angmoo 0.1.3 data to PostgreSQL.\nThe source and completed results will be preserved.\nBackup: {}\nRequired: {} MiB / available: {} MiB\n\nStart or resume the migration?",
+            backup.display(),required/1048576,free/1048576
+        )
+    };
+    let message: Vec<u16> = message.encode_utf16().chain(Some(0)).collect();
+    let title: Vec<u16> = "Angmoo 0.1.4".encode_utf16().chain(Some(0)).collect();
+    let accepted = unsafe {
+        MessageBoxW(
+            None,
+            PCWSTR(message.as_ptr()),
+            PCWSTR(title.as_ptr()),
+            MB_YESNO | MB_ICONQUESTION,
+        )
+    } == IDYES;
+    if !accepted {
+        return Err("desktop_postgresql_migration_cancelled".to_owned());
+    }
+    if free<required { return Err("desktop_postgresql_space_low".to_owned()); }
+    Ok(true)
+}
+
+#[cfg(not(windows))]
+fn confirm_postgresql_migration(_root: &std::path::Path) -> Result<bool, String> {
+    Ok(false)
+}
+
 pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> {
     verify_packaged_sidecar()?;
     let generation = {
@@ -316,9 +402,23 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
     let launch_id = Uuid::new_v4().simple().to_string();
     let product_paths = ProductDataPaths::resolve(&app)?;
     product_paths.prepare_runtime_owned_directories()?;
+    let migrate_sqlite = match confirm_postgresql_migration(&product_paths.root) {
+        Ok(value) => value,
+        Err(error) => {
+            if let Ok(mut runtime)=state.0.lock() { runtime.status=DesktopRuntimeStatus::stopped(); }
+            return Err(error);
+        }
+    };
+    let postgresql_root = app
+        .path()
+        .resource_dir()
+        .map_err(|_| "desktop_postgresql_resources_missing")?
+        .join("postgresql");
+    let postgresql_argument = postgresql_resource_argument(&postgresql_root);
     let legacy_data_root = product_paths.legacy_preview_root;
     let data_root = product_paths.root;
     let runtime_root = product_paths.runtime;
+    let ready_attempts = endpoint_ready_attempts(&data_root, migrate_sqlite);
     let parent_pid = process::id().to_string();
     let data_root_argument = data_root.to_string_lossy().into_owned();
     let legacy_data_root_argument = legacy_data_root.to_string_lossy().into_owned();
@@ -340,7 +440,15 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
             &launch_id,
             "--runtime-profile",
             ProductDataPaths::runtime_profile(),
+            "--postgresql-root",
+            &postgresql_argument,
         ])
+        .args(if migrate_sqlite {
+            vec!["--migrate-sqlite"]
+        } else {
+            vec![]
+        })
+        .env("ANGMOO_SOURCE_SHA",env!("ANGMOO_BUILD_COMMIT"))
         .env("DESKTOP_LAUNCH_TOKEN", &token)
         .env("DESKTOP_ALLOWED_ORIGIN", DESKTOP_ORIGIN);
     let (mut receiver, child) = command
@@ -360,7 +468,7 @@ pub fn start(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
         let managed = app_handle.state::<DesktopRuntimeState>();
         let mut ready: Option<EndpointMetadata> = None;
         let mut fatal_code: Option<&'static str> = None;
-        for _ in 0..ENDPOINT_READY_ATTEMPTS {
+        for _ in 0..ready_attempts {
             let terminated = drain_sidecar_events(&mut receiver, &mut fatal_code);
             match read_endpoint_metadata(&endpoint_path, &launch_id) {
                 Ok(Some(endpoint)) => {
@@ -520,6 +628,86 @@ pub fn retry(app: AppHandle, state: &DesktopRuntimeState) -> Result<(), String> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn first_database_setup_has_a_separate_bounded_readiness_budget() {
+        let root = std::env::temp_dir().join(format!("angmoo-pg-readiness-{}", Uuid::new_v4().simple()));
+        assert_eq!(endpoint_ready_attempts(&root, false), 2400);
+        fs::create_dir_all(root.join("postgresql/cluster")).unwrap();
+        fs::write(root.join("postgresql/cluster/PG_VERSION"), "17\n").unwrap();
+        assert_eq!(endpoint_ready_attempts(&root, false), 600);
+        assert_eq!(endpoint_ready_attempts(&root, true), 2400);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn postgresql_resources_use_shell_compatible_windows_paths() {
+        for ordinary in [
+            r"C:\Users\example\AppData\Local\Angmoo\app\postgresql",
+            r"E:\Angmoo test\한글 경로\postgresql",
+        ] {
+            assert_eq!(postgresql_resource_argument(ordinary.as_ref()), ordinary);
+            let verbatim = format!(r"\\?\{ordinary}");
+            assert_eq!(postgresql_resource_argument(verbatim.as_ref()), ordinary);
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn postgresql_resource_paths_preserve_special_windows_semantics() {
+        for path in [
+            r"\\?\C:\special.\postgresql",
+            r"\\?\C:\NUL\postgresql",
+            r"\\?\UNC\server\share\postgresql",
+        ] {
+            assert_eq!(postgresql_resource_argument(path.as_ref()), path);
+        }
+        let long = format!(r"\\?\C:\{}\postgresql", "component\\".repeat(30));
+        assert_eq!(postgresql_resource_argument(long.as_ref()), long);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "requires ANGMOO_TEST_PG_RESOURCES and an unused ANGMOO_TEST_PG_WORK_ROOT"]
+    fn postgresql_initdb_accepts_tauri_verbatim_resource_path() {
+        let resources = fs::canonicalize(
+            std::env::var_os("ANGMOO_TEST_PG_RESOURCES").expect("native PostgreSQL resources"),
+        )
+        .unwrap();
+        let work = PathBuf::from(
+            std::env::var_os("ANGMOO_TEST_PG_WORK_ROOT").expect("isolated, unused work directory"),
+        );
+        assert!(!work.exists(), "test must never reuse a data directory");
+        fs::create_dir_all(&work).unwrap();
+        let password = work.join("initdb-password");
+        fs::write(&password, Uuid::new_v4().simple().to_string()).unwrap();
+        let initialize = |resource_argument: &str, name: &str| {
+            process::Command::new(PathBuf::from(resource_argument).join("bin/initdb.exe"))
+                .args(["-D"])
+                .arg(work.join(name))
+                .args(["-U", "angmoo_test", "--encoding=UTF8", "--locale=C", "--auth=scram-sha-256"])
+                .arg(format!("--pwfile={}", password.display()))
+                .output()
+                .unwrap()
+        };
+        let verbatim = resources.to_str().unwrap();
+        assert!(verbatim.starts_with(r"\\?\"));
+        // Reproduce the installed failure before exercising the actual launch argument.
+        let failed = initialize(verbatim, "control-cluster");
+        assert!(!failed.status.success(), "verbatim path must reproduce initdb's child probe failure");
+        let argument = postgresql_resource_argument(&resources);
+        assert!(!argument.starts_with(r"\\?\"));
+        let success = initialize(&argument, "cluster");
+        fs::remove_file(password).unwrap();
+        assert!(
+            success.status.success(),
+            "initdb failed: {}",
+            String::from_utf8_lossy(&success.stderr)
+        );
+        assert_eq!(fs::read_to_string(work.join("cluster/PG_VERSION")).unwrap().trim(), "17");
+        assert!(!work.join("cluster/postmaster.pid").exists());
+    }
 
     #[test]
     fn public_status_never_contains_sidecar_path_or_arbitrary_command() {

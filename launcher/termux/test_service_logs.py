@@ -136,7 +136,7 @@ def readiness(process, *args, backend, **kwargs):
     if not backend:
         process.wait(timeout=5)
         raise ValueError('service_exited_before_ready')
-with patch.object(angmoo,'installation',return_value={'manifest':{'source_sha':'a'*40,'version':'0.1.0'}}), patch.object(angmoo,'tools',return_value='unused'), patch.object(angmoo,'free_port'), patch.object(angmoo,'command',side_effect=command), patch.object(angmoo,'await_ready',side_effect=readiness):
+with patch.object(angmoo,'installation',return_value={'manifest':{'source_sha':'a'*40,'version':'0.1.0'},'containers':{'backend':'fixture-backend','frontend':'fixture-frontend'}}), patch.object(angmoo,'tools',return_value='unused'), patch.object(angmoo,'free_port'), patch.object(angmoo,'command',side_effect=command), patch.object(angmoo,'await_ready',side_effect=readiness):
     angmoo.supervise(Path(sys.argv[1]),int(sys.argv[2]),'b'*32,capture_self=True)
 '''
         with angmoo.lock(self.home) as owned:

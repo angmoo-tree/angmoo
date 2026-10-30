@@ -127,6 +127,11 @@ def _reserve_public_action(
                 "signature": signature,
                 "result": existing.result or {},
             }
+        if existing.status in {"pending", "storage_retry_wait"} and (existing.result or {}).get("_delivery"):
+            return existing, None
+        if existing.status == "storage_attention":
+            from app.runtime.social.delivery_recovery import DeliveryRecoveryRequired
+            raise DeliveryRecoveryRequired("activity_storage_needs_attention")
         return None, {
             "status": "blocked",
             "action_type": action_type,
@@ -395,10 +400,15 @@ def _execute_planned_action(
             reused["writer_validation"] = writer_validation
         return reused
     assert execution is not None
+    execution_id = execution.id
+    if relationship_validator is not None and ctx.db.get_bind().dialect.name == "postgresql":
+        from app.runtime.social.delivery_recovery import begin
+        begin(ctx.db, execution_id, action=action, writing=writing)
     try:
         action_result = None
         def publish_current():
-            nonlocal action_result
+            nonlocal action_result, execution
+            execution = ctx.db.get(_model_AgentPublicActionExecution, execution_id, populate_existing=True)
             if relationship_validator is not None:
                 relationship_validator()
             if action.get("interaction_intent") == "ordinary_comment":
@@ -537,16 +547,23 @@ def _execute_planned_action(
                 action_result["writer_validation"] = writer_validation
             return action_result
         if relationship_validator is not None:
-            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            from app.core.activity_transactions import activity_write
             # Reservation already owns its commit; close its subsequent read.
             if ctx.db.in_transaction():
                 ctx.db.commit()
-            return run_sqlite_session_immediate(ctx.db, publish_current, require_clean=True)
+            return activity_write(ctx.db, publish_current, require_clean=True)
         result = publish_current()
         ctx.db.commit()
         return result
     except Exception as exc:
         ctx.db.rollback()
+        from app.core.postgresql_concurrency import retryable, PostgresCommitOutcomeUnknown
+        if retryable(exc) or isinstance(exc, PostgresCommitOutcomeUnknown):
+            from app.runtime.social.delivery_recovery import defer, DeliveryStorageWait, DeliveryRecoveryRequired
+            delay = defer(ctx.db, execution_id, unknown=isinstance(exc, PostgresCommitOutcomeUnknown))
+            if delay is not None:
+                raise DeliveryStorageWait(delay) from exc
+            raise DeliveryRecoveryRequired("activity_storage_needs_attention") from exc
         from app.domains.relationships.contracts.social_context import SocialContextValidationError
         if isinstance(exc, SocialContextValidationError):
             _finish_execution(ctx, execution, status="failed", result=None, failure_class=str(exc))

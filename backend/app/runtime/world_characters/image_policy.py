@@ -24,7 +24,7 @@ def write(service, *, world_id, world_character_id, user, data):
     try:
         changes = data.model_dump(exclude_unset=True, exclude={"expected_revision"})
         from app.domains.identity.service.environment import lock_environment_admission
-        lock_environment_admission(service.db, user.id)
+        lock_environment_admission(service.db, user.id, exclusive=True)
         actor, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True,
             basic=not bool({"vision_limit", "vision_enabled"} & changes.keys()))
         if "generation_settings" in changes:

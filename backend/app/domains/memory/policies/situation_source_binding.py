@@ -37,7 +37,7 @@ def resolve_parent_binding(context, original, basis, *, captured_at, now):
     resolved = replace(parent, payload_path=original.payload_path, ordinal=original.ordinal,
         role=original.role, target_key=original.target_key, delivery_payload_digest=original.delivery_payload_digest)
     binding = SituationSourceBinding(context.manifest_digest, original.ordinal, PARENT_BINDING_POLICY,
-        stable_digest(original.to_dict()), child.ordinal, child.source_id, child.source_digest,
+        stable_digest(original.to_dict(version=2)), child.ordinal, child.source_id, child.source_digest,
         resolved, utc_instant(now).isoformat(), "")
     return replace(binding, resolution_digest=stable_digest(binding.material()))
 
@@ -48,7 +48,7 @@ def verify_parent_binding(context, binding):
     child = candidate_child(context, original) if original is not None else None
     resolved = binding.resolved_source
     if (binding.manifest_id != context.manifest_digest or original is None or child is None
-        or binding.original_entry_digest != stable_digest(original.to_dict())
+        or binding.original_entry_digest != stable_digest(original.to_dict(version=2))
         or (binding.basis_ordinal, binding.basis_source_id, binding.basis_source_digest)
             != (child.ordinal, child.source_id, child.source_digest)
         or (resolved.ordinal, resolved.payload_path, resolved.role, resolved.target_key, resolved.world_id,

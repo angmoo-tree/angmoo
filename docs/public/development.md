@@ -1,79 +1,57 @@
 # Contributor development
 
-The official contributor profile is `CONTRIBUTOR_EMBEDDED`. It uses the same
-SQLite canonical store, FTS5 search, LadybugDB projection, and in-process
-scheduler/projector semantics as the installed product.
+The official `CONTRIBUTOR_POSTGRESQL` profile runs one backend process with
+PostgreSQL canonical persistence, full-text search, exact pgvector retrieval,
+LadybugDB projection and in-process scheduler/projector.
 
 ## Docker-first workflow
 
-From the repository root:
+Use Git, Docker with a Linux engine, and Compose 2.23.0 or newer. From the root:
 
-```powershell
+```sh
 docker compose -f compose.yml -f compose.dev.yml up --watch
+docker compose -f compose.yml -f compose.dev.yml logs --tail 100 postgres backend frontend
+docker compose -f compose.yml -f compose.dev.yml down
 ```
 
-This starts:
+Open <http://127.0.0.1:3000>. Frontend HMR and backend sync/restart use these
+same services. The private PostgreSQL container is not exposed on the host.
+The DB, application media/secrets and DB bootstrap credentials use separate
+volumes. `down` preserves them; do not add `--volumes` when data is needed.
+The legacy SQLite volume is mounted read-only to refuse an accidental update
+without the [migration tool](postgresql-migration.md).
 
-- `frontend`: Next.js dev server, HMR, compile and route logs;
-- `backend`: FastAPI reload, API/runtime logs, SQLite, LadybugDB, scheduler, and
-  projector.
+## Focused verification
 
-Open <http://127.0.0.1:3000>. Use the browser DevTools for frontend console and
-network diagnostics. Use `docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend`
-for container logs.
+Use synthetic fixtures and fake providers. Run related tests for the actual
+change rather than every backend/frontend test. PostgreSQL integration tests
+require an explicitly owned disposable DB. `scripts/ci/prepare_postgresql_tests.py`
+refuses a nonempty fixture. CI uses a private synthetic credential, never a
+personal connection string. Do not point its explicit test DSN at a user DB.
 
-Choose deterministic checks for the changed behavior inside the pinned containers.
-The following backend command is an example for Chat changes, not the default
-required suite for every edit. Select the actual affected test files:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q tests/chat
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
+```sh
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
-docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm build
+docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
 ```
 
-Run build or CI-policy checks when those consumers are affected. Wider remote
-requirements follow [CI validation](../operations/ci-validation.md); focused local
-checks do not bypass them. Documentation-only changes need content/link review.
+Run the relevant domain/runtime tests, schema upgrade, cancellation, authorization,
+conflict or migration cases as needed. Wider hosted checks follow
+[CI validation](../operations/ci-validation.md). Local checks do not waive them.
 
-The contributor named volume is separate from installed
-`%LOCALAPPDATA%\Angmoo`. Parent `DATABASE_URL`, `NEO4J_URI`, graph-provider, or
-external-worker settings do not change the typed Docker profile.
+## Storage and architecture changes
 
-## Optional Docker + Host Tauri dev
+New schema changes belong to the versioned PostgreSQL schema owner. Preserve
+SQLite 41 as an explicit 0.1.3 input, and keep original snapshots/secrets intact.
+No historical hosted Alembic chain or Neo4j service is used by this runtime.
+Read [runtime](postgresql-runtime.md), [migration](postgresql-migration.md),
+[backend architecture](../../backend/ARCHITECTURE.md) and the frontend
+[architecture](../../frontend/ARCHITECTURE.md)/[design](../../frontend/DESIGN.md).
 
-General feature development uses the host browser. A contributor changing the
-actual Phone window, native drag/resize, wide windows, or sidecar host lifecycle
-may run a host Tauri dev process that loads the Docker frontend and connects to
-the same Docker backend.
+## Native window development
 
-This is platform-shell development, not a second frontend, backend, or database
-implementation. It must use the checkout's contributor endpoint and must never
-read or write installed-user data. The host must provide the repository-pinned
-Rust/Tauri prerequisites and the target OS WebView runtime.
-
-Windows is the current reference shell environment and is also verified by
-Windows Actions. macOS host development and app/DMG packaging require a future
-target-OS contract; they are not claimed by this document.
-
-## Native maintainer fallback
-
-Maintainers may run Next.js and FastAPI natively for focused debugging, with an
-explicit checkout-local data root. This is a convenience fallback, not the
-cross-platform Quickstart or a different runtime profile.
-
-## SQLite-only boundary
-
-PostgreSQL and Neo4j are not contributor runtime services, and the repository
-does not ship a PostgreSQL offline importer. Schema changes target the current
-SQLite baseline and explicit SQLite generation lifecycle. Historical Alembic
-revisions remain provenance evidence and are not an alternate runtime chain.
-
-Neo4j has no development runtime. LadybugDB tests use frozen ER3 direct,
-reverse, evidence, World-scope, and bounded-path parity fixtures.
-
-Use synthetic data and fake providers. Never place credentials, APP_SECRET,
-private content, personal runtime data, or raw logs in commits, Issues, or pull
-requests.
+Use [Windows Host Tauri dev](windows-host-tauri-dev.md) for window/drag/resize or
+host lifecycle changes. It loads the Docker frontend and same DB/API, with a
+separate repository-local WebView profile. It must never touch installed data.
+Native installer validation separately builds the pinned Windows PostgreSQL
+resources. macOS packaging is not covered. Keep credentials, raw logs, private
+content and World Packages out of Git, public CI and Issues.

@@ -74,6 +74,14 @@ def _canonical_read_deadline(db):
     """Bound this Session's SQLite statements without owning its transaction."""
     from app.contracts.read_deadline import current_read_deadline
     deadline = current_read_deadline.get()
+    if deadline is not None and db.get_bind().dialect.name == "postgresql":
+        from app.core.postgresql_deadline import read_deadline
+        try:
+            with read_deadline(db.connection(),deadline):
+                yield
+        except TimeoutError as exc:
+            raise SocialContextValidationError("canonical_read_deadline") from exc
+        return
     if deadline is None or db.get_bind().dialect.name != "sqlite":
         yield
         return

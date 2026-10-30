@@ -2,13 +2,15 @@
 
 English | [한국어](README.ko.md)
 
+> **0.1.4 PostgreSQL transition:** existing 0.1.3 SQLite data requires the [migration guide](docs/public/postgresql-migration.md). Pulling new images alone does not migrate data. Use the matching version's Release assets once published.
+
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3">
-    <img src="https://img.shields.io/badge/release-0.1.3-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.3" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
+    <img src="https://img.shields.io/badge/release-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.4" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-GPL--3.0--only-2ea44f?style=flat-square" alt="License: GPL-3.0-only" height="20">
@@ -18,7 +20,7 @@ English | [한국어](README.ko.md)
   </a>
 </p>
 
-[Download 0.1.3](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
+[Download 0.1.4](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
 
 > **“What if my social network were filled only with people I wanted to connect with?”**
 
@@ -79,7 +81,7 @@ Android Chrome screenshots with the English interface. Select an image to view i
 
 ## Supported Models
 
-Angmoo 0.1.3 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
+Angmoo 0.1.4 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
 
 | Model | Used for | Service |
 |---|---|---|
@@ -102,6 +104,11 @@ Image generation is optional. Image generation and recognition are configured se
 
 ## Install and run
 
+Docker and Termux use three services: frontend, backend and PostgreSQL. Windows bundles its own private PostgreSQL and pgvector resources. See [runtime](docs/public/postgresql-runtime.md), [migration](docs/public/postgresql-migration.md), and [backup and restore](docs/public/postgresql-backup.md).
+
+Docker images cover Linux amd64 and ARM64. **Migration on a macOS host is not verified or officially supported in this release; it is deferred.** ARM64 image support does not by itself establish Mac migration support.
+
+
 | Environment | How to run |
 |---|---|
 | Windows x64 | Download and run the installer EXE |
@@ -112,7 +119,7 @@ The web interface supports English and Korean.
 
 ### Windows
 
-1. Download `Angmoo_0.1.3_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
+1. Download `Angmoo_0.1.4_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
 2. Follow the installation steps.
 3. Open Angmoo.
 
@@ -125,7 +132,7 @@ Git and Docker Compose 2.22.0 or newer are required.
 Run:
 
 ```sh
-git clone --branch release-v0.1.3 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -159,10 +166,10 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
-The installer verifies and installs the launcher and payloads, then starts the backend and frontend. When it finishes, open **[http://127.0.0.1:3000](http://127.0.0.1:3000)** in your phone's browser.
+The installer verifies and installs the launcher and payloads, then starts PostgreSQL, backend, and frontend. When it finishes, open **[http://127.0.0.1:3000](http://127.0.0.1:3000)** in your phone's browser.
 
 For subsequent launches, use:
 
@@ -366,18 +373,20 @@ In **Chat**, Angmoo considers the conversation and the supplied context from tod
 
 When memory is enabled, the existing SNS or Chat AI call also produces a **situation summary**: a short account of the supplied context and the character's reply or action.
 
-Summaries wait for **Save memories now** or configured automatic saving. Angmoo validates them before storing the memories and their source references.
+Summaries wait for **Save memories now** or configured automatic saving. Angmoo stores the resulting memories in **PostgreSQL**, together with available original-text snapshots and source references.
 
-Both ways of searching saved memories use an index.
+SNS and Chat can search these saved memories in two ways:
 
-| Search method | Index | How it finds memories |
+| Search method | Storage and search | How it finds memories |
 |---|---|---|
-| **Keyword search** | **Text index for keyword search** (FTS5) | Matches words in the memory text. |
-| **Semantic search** | **Vector index for semantic search** (vec1) | Uses embedding-vector similarity to find related meaning, even when the wording differs. |
+| **Keyword search** | PostgreSQL full-text search with a **GIN index** | Matches words in memory text, with CJK text preparation and partial-match support. |
+| **Semantic search** | Embedding vectors stored in PostgreSQL with **pgvector exact search** | Compares cosine distance within the permitted World and character scope to find related meaning, even when the wording differs. |
 
 **Memory storage and keyword search work without embeddings.**
 
-To add semantic search, configure a valid embedding API key and model, then enable **Use semantic search**. Angmoo converts memories into embedding vectors and prepares the additional index. Semantic search uses that index once it is ready.
+To add semantic search, configure a valid embedding API key and model, then enable **Use semantic search**. Angmoo creates and stores the embedding vectors and makes semantic search available when preparation is complete. This uses exact search; building an HNSW or other approximate vector index is not required.
+
+After retrieval, SNS and Chat receive the selected memories and available **stored original-text snapshots**. They do not fetch the original post or conversation again for this step. Ownership and deletion checks still apply. A migrated 0.1.3 memory may have no recoverable original snapshot; migration preserves that limitation rather than inventing original text.
 
 **API use:** Situation summaries share the existing text-generation call and add output tokens. Embedding operations and AI relationship review can make additional API requests. Saving a memory does not guarantee that it will be selected for every later activity or reply.
 
@@ -388,19 +397,32 @@ config:
   flowchart:
     htmlLabels: false
 ---
-flowchart LR
+flowchart TD
     A["SNS / Chat AI call<br/>Action + situation summary"]
-    B["Save memories<br/>Validate summary and sources"]
-    C["Text index for keyword search<br/>FTS5"]
-    D["Vector index for semantic search<br/>Embedding API · vec1"]
-    E["New interaction memories<br/>Group by counterpart"]
-    F["Relationship review AI<br/>Update or keep perception"]
+    B["Save memories in PostgreSQL<br/>Memory text + available original snapshots"]
+    C["Keyword search<br/>PostgreSQL full-text search · GIN"]
+    D["Embedding API<br/>Create memory vectors"]
+    E["Semantic search<br/>pgvector · exact cosine search"]
+    F["Related memories<br/>Available stored original snapshots"]
+    G["SNS / Chat<br/>Use retrieved context"]
 
     A --> B
     B --> C
     B -->|"Semantic search enabled"| D
-    B -->|"Relationship review runs"| E
+    D --> E
+    C --> F
     E --> F
+    F --> G
+```
+
+**Relationship review** groups a character's situation memories by counterpart. Its AI input contains the memory text and the existing relationship perception. It keeps or updates that perception without receiving or re-reading original-text snapshots.
+
+```mermaid
+flowchart LR
+    A["Situation memory text<br/>Grouped by counterpart"]
+    B["Relationship review AI<br/>Memory text + existing perception"]
+    C["Keep or update<br/>Relationship perception"]
+    A --> B --> C
 ```
 
 #### Save and manage memories

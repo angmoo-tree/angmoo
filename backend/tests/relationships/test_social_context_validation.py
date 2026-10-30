@@ -1,4 +1,4 @@
-"""Frozen input receipts, fresh SQLite truth and strictly bounded legacy proof."""
+"""Compatibility for saved pre-initial-input policies, including strict legacy proof."""
 from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta, timezone
@@ -11,17 +11,21 @@ from sqlalchemy.orm import Session
 from model_fixture_support import models
 from app.models import Base
 from app.domains.relationships.contracts.social_context import (
-    CURRENTNESS_REVISION, LEGACY_CURRENTNESS, MAX_RECEIPT_BYTES,
+    PREVIOUS_CURRENTNESS as CURRENTNESS_REVISION, LEGACY_CURRENTNESS, MAX_RECEIPT_BYTES,
     RelationshipValidationBinding, RelationshipValidationReceipt, SocialContextItem,
     SocialContextValidationError,
 )
-from app.domains.relationships.policies.social_context_validation import facts_digest, receipt_for_snapshot
+from app.domains.relationships.policies.social_context_validation import facts_digest, receipt_for_snapshot as current_receipt
 from app.domains.relationships.service.social_context_validation import SocialContextValidationService
 from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
 from app.domains.relationships.policies.graph_recall import _relationship_record
 from runtime.test_activity_relationship_validation import relation_case
 
 pytestmark = pytest.mark.usefixtures("deny_external_network")
+
+
+def receipt_for_snapshot(*args, **kwargs):
+    return replace(current_receipt(*args, **kwargs), revision=CURRENTNESS_REVISION)
 
 
 @pytest.mark.parametrize("code,reason", [(5, "canonical_database_busy"), (6, "canonical_database_error"),

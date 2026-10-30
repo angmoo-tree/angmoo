@@ -25,6 +25,12 @@ def source_reader(db: Session) -> MemorySourceEvidenceReaderPort:
     return SqlAlchemyMemorySourceEvidenceReader(db)
 
 
+def prepare_memory_reads(db, scope, item_ids, source_reader):
+    """One read-only inspector operation; never cache across requests/commits."""
+    from app.runtime.chat.memory_evidence import ChatMemoryEvidenceRead
+    return ChatMemoryEvidenceRead(db, scope, item_ids, source_reader)
+
+
 def today_reader(db: Session) -> TodaySnsActivityReaderPort:
     return SqlAlchemyTodaySocialActivityReader(db)
 

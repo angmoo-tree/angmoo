@@ -17,7 +17,8 @@ def embedding_material(session, scope, credential_id=None, *, revision=None):
         return material
     except Exception as exc:
         from app.core.sqlite_concurrency import is_sqlite_contention
-        if is_sqlite_contention(exc):
+        from app.core.postgresql_concurrency import retryable
+        if is_sqlite_contention(exc) or retryable(exc):
             raise
         raise MemoryValidationError("memory_embedding_credential_unavailable") from None
 
@@ -35,12 +36,28 @@ class MemoryQueryEmbedder:
         self._factory = session_factory
         self._repository_factory = repository_factory
 
+    async def _read(self, operation, *, deadline):
+        from app.core.async_session import session_call
+        from app.core.postgresql_deadline import read_deadline
+        from app.core.postgresql_reads import retry_read, begin_owned_read
+        # The owner is never connected on the event loop. Each read attempt
+        # owns a fresh snapshot, which is closed in its worker before returning.
+        with self._factory() as owner:
+            if owner.get_bind().dialect.name != 'postgresql':
+                return operation(owner)
+            def attempt():
+                with self._factory() as session:
+                    with read_deadline(session.connection(), deadline):
+                        begin_owned_read(session.connection())
+                        return operation(session)
+            return await session_call(owner, lambda: retry_read(attempt, deadline=deadline))
+
     async def query(self, request, *, deadline):
         from time import monotonic
         from app.domains.memory.contracts.embedding import embedding_text, EMBEDDING_DIMENSIONS
         from app.providers.registry import get_embedding_adapter
         from app.providers.contracts import EmbeddingRequest
-        with self._factory() as session:
+        def prepare(session):
             repository = self._repository_factory(session)
             config = repository.read(request.scope)
             scope_setting = repository.memory.get_scope_setting(request.scope)
@@ -48,8 +65,18 @@ class MemoryQueryEmbedder:
                 return None
             if config.profile != request.profile:
                 raise MemoryValidationError("memory_embedding_profile_changed")
-            revision = validate_embedding_credential(session, request.scope)
+            from app.domains.identity.service.world_credentials import find
+            binding = find(session, owner_id=request.scope.owner_id, world_id=request.scope.world_id,
+                world_character_id=request.scope.subject_world_character_id, purpose="embedding")
+            if binding is None:
+                raise MemoryValidationError("memory_embedding_credential_unavailable")
+            revision = binding.revision
             material = embedding_material(session, request.scope, revision=revision)
+            return config, revision, material
+        prepared = await self._read(prepare, deadline=deadline)
+        if prepared is None:
+            return None
+        config, revision, material = prepared
         # The canonical session is closed before network IO begins.
         remaining = min(30.0, deadline-monotonic())
         if remaining <= 0:
@@ -60,13 +87,14 @@ class MemoryQueryEmbedder:
             response = await get_embedding_adapter(config.provider, config.model).embed_measured(EmbeddingRequest(material.reveal(), config.model,
                 embedding_text(request.search_text, query=True), EMBEDDING_DIMENSIONS), timeout_seconds=remaining)
         try:
-            with self._factory() as session:
+            def validate(session):
                 current = self._repository_factory(session).read(request.scope)
                 if current != config:
                     raise MemoryValidationError("memory_embedding_settings_changed")
                 current_material = embedding_material(session, request.scope, revision=revision)
                 if current_material.fingerprint != material.fingerprint:
                     raise MemoryValidationError("memory_embedding_credential_changed")
+            await self._read(validate, deadline=deadline)
         except Exception as exc:
             # A rejected late response still consumed an actual provider request.
             exc.physical_attempts = response.physical_attempts

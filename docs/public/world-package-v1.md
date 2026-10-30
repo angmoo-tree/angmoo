@@ -58,7 +58,7 @@ The package must not contain:
 - posts, comments, chats, private messages, memory, or social events;
 - generated setup candidates, activity plans, execution state, scheduler leases, or jobs;
 - relationship state, evidence, outbox rows, or LadybugDB files;
-- SQLite databases, logs, absolute local paths, or runtime metadata.
+- SQLite files, PostgreSQL data directories or dumps, logs, absolute local paths, or runtime metadata.
 
 Import creates fresh local database identities and starts with empty runtime,
 activity, social-history, and relationship state. The source and imported World
@@ -99,8 +99,11 @@ paths:
 - Docker contributor development;
 - Windows Host Tauri dev backed by the contributor Docker data volume.
 
-The storage location differs, but export and import always use SQLite as the
+The storage location differs, but 0.1.4 export and import use PostgreSQL as the
 canonical source and create rebuildable LadybugDB projection state locally.
+The package format is unchanged. A World Package is a scoped content transfer,
+not a full DB migration or an installation backup; use the
+[0.1.3 migration guide](postgresql-migration.md) for that transition.
 Stopping or updating a runtime preserves its data. Commands that explicitly
 delete a Docker volume or select remove-data uninstall are separate destructive
 operations and are never part of package import.

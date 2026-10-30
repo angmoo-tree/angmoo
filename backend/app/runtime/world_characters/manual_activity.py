@@ -4,6 +4,16 @@ from app.domains.world_characters.service.management import WorldManagementError
 
 
 async def run_world_character_now(service, *, world_id, world_character_id, user, data, workflows):
+    try:
+        return await _run_world_character_now(service, world_id=world_id,
+            world_character_id=world_character_id, user=user, data=data, workflows=workflows)
+    except BaseException:
+        # This includes scope/readiness failures before the Routine admission.
+        service.db.rollback()
+        raise
+
+
+async def _run_world_character_now(service, *, world_id, world_character_id, user, data, workflows):
     db = service.db
     lock_environment_admission(db, user.id)
     role, _ = service._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)

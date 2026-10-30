@@ -98,10 +98,10 @@ def test_mixed_32_one_call_skipped_private_inputs_still_limit_every_saved_episod
     assert work.calls == 1 and work.state == "completed"
     packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db))
     assert len(packets.read(scope=batch.setting.scope, item_ids=(item.id,), now=now)) == 1
-    # Even an unused public input belongs to the immutable access intersection.
+    # Source removal does not revoke the saved private experience.
     db.get(Post, "modern-post-30").deleted_at = now
     db.commit()
-    assert packets.read(scope=batch.setting.scope, item_ids=(item.id,), now=now) == ()
+    assert len(packets.read(scope=batch.setting.scope, item_ids=(item.id,), now=now)) == 1
     assert db.get(MemoryItem, item.id).summary == "Original public experience"
 
 
@@ -143,7 +143,7 @@ def test_split_public_leaf_retains_private_root_and_every_root_source(response_s
     assert len({item.thread_id for item in items}) == 1 and items[0].thread_id is not None
     db.get(Post, "modern-post-30").deleted_at = now; db.commit()
     packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db))
-    assert packets.read(scope=batch.setting.scope, item_ids=tuple(item.id for item in items), now=now) == ()
+    assert len(packets.read(scope=batch.setting.scope, item_ids=tuple(item.id for item in items), now=now)) == 2
 
 
 def test_explicit_key_revoke_during_selector_rejects_late_result(response_session, deny_external_network):

@@ -116,6 +116,7 @@ export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVers
     {!draft || !saved ? <Button variant="secondary" compact disabled={disabled} onClick={() => setRevision((value) => value + 1)}>{failed ? uiText("설정 다시 불러오기") : uiText("설정 불러오는 중")}</Button> : <>
       <MemoryConsolidationControls timezone={saved.timezone} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} subjectName={subjectName}
         scopeVersion={scopeVersion} version={saved.version} profileVersion={saved.profile_version}
+        recoveryDisabled={disabled || busy}
         disabled={disabled || busy || !saved.memory_enabled || !saved.ai_enabled || !credentialReady} dirty={credentialDirty || draft.ai_enabled !== saved.ai_enabled || draft.shutdown_enabled !== saved.shutdown_enabled || draft.schedule_enabled !== saved.schedule_enabled || draft.local_time !== saved.local_time || draft.model_id !== saved.model_id || draft.thinking_level !== saved.thinking_level}
         acquire={acquire} release={release} onCompleted={onCompleted} />
       <fieldset disabled={disabled || busy}>

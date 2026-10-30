@@ -79,8 +79,8 @@ def expand_page(projection):
                 if rows.get(identifier, "") not in closed:
                     for generation in generations:
                         enqueue(session, generation, identifier, rows.get(identifier, ""), change=root)
-                session.execute(text("""INSERT OR IGNORE INTO memory_vector_changes
-                    (root_sequence,source_kind,source_key) VALUES (:root,'memory',:item)"""), dict(root=root, item=identifier))
+                session.execute(text("""INSERT INTO memory_vector_changes
+                    (root_sequence,source_kind,source_key) VALUES (:root,'memory',:item) ON CONFLICT DO NOTHING"""), dict(root=root, item=identifier))
             change.cursor = ids[-1] if ids else cursor
             if len(ids) < 64:
                 change.state = "done"

@@ -1,5 +1,7 @@
 # SNS 4회 호출 구조 구현·검증과 기본 전환 보류 기록
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 작성일: 2026-09-26. 사용자 계획의 IC-0~IC-13 실행 기록이다. **새 계약 버전 2를 구현했지만 신규 실행 기본값은 1로 유지한다.** 로컬 코드·자동 회귀와 실제 AI 구성요소 비교를 구분하며, 신규 기본 전환·설치·운영 품질 완료를 선언하지 않는다.
 
 위 판정은 최초 구현 직후의 기록이다. 이후 사용자의 별도 전환 요청과 자연 활동 관찰 결과는 [9절](#9-후속-기본-전환과-자연-활동-관찰)에 시간 순으로 기록한다.

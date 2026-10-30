@@ -43,12 +43,15 @@ def test_new_session_apply_recall_hydrate_and_currentness(response_session, monk
         context = restore_context(db, receipt)
         manual = tuple(s for s in context.sources if s.source_type == "SOCIAL_EVENT")
         assert len(manual) == len(transitions)
+        from app.domains.memory.repository.experience import validate_captured_sources
+        captured_access = dict((source.source_id, access) for source, access in
+            validate_captured_sources(db, context, (), receipt, now=now))
         for source in manual:
-            access = SituationSources(db).validate(context, source, now=now)
-            assert access.state == "available" and not access.evidence.visible
+            access = captured_access[source.source_id]
+            assert access.state == "available" and access.proof_origin == "stored_experience"
             assert db.get(SocialEvent, source.source_id).retrieval_status == "audit_only"
         raw_manifest = DeliveredInputManifest.from_dict(db.get(MemorySituationManifest, receipt.manifest_id).payload)
-        assert raw_manifest.version == 2
+        assert raw_manifest.version == 3
         # A bare manifest is not a restored durable proof, including old v1.
         for unproven in (raw_manifest, replace(raw_manifest, version=1)):
             assert SituationSources(db).validate(unproven, manual[0], now=now).state == "forbidden"
@@ -93,10 +96,9 @@ def test_new_session_apply_recall_hydrate_and_currentness(response_session, monk
     with factory() as db:
         db.get(Post, post_id).report_hidden_at = datetime.now(UTC)
         db.commit()
-    assert reader.revalidate(request, (ranked,)) == ()
-    assert reader.hydrate(request, records).records == ()
-    with pytest.raises(ValueError):
-        reader.assert_current(delivered, (item_id,))
+    assert reader.revalidate(request, (ranked,))
+    assert reader.hydrate(request, records).records
+    reader.assert_current(delivered, (item_id,))
     with factory() as db:
         assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
         assert db.scalar(select(func.count()).select_from(MemorySituationReceipt)) == 1

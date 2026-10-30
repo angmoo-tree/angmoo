@@ -1,25 +1,18 @@
-"""Read saved episodes and verify their counterpart through canonical evidence."""
+"""Review owned situation summaries, without reading original texts or snapshots."""
 
 from datetime import UTC, datetime
 from collections import defaultdict
 from sqlalchemy import select, exists, or_
-from sqlalchemy.orm import aliased
-
-from app.core.ids import uuid7_string
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
 from app.domains.memory.models.batch import MemoryBatchSetting
 from app.domains.memory.models.activity_configuration import MemorySubjectProfile
 from app.domains.memory.models.episode import MemoryEpisodeInfo
-from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemorySituationReceipt, MemoryActivitySituationSource
-from app.domains.memory.repository.situation_reads import situation_origin
-from app.domains.memory.service.items import memory_evidence_blocked_code
-from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo, MemorySituationReceipt
 from app.domains.relationships.contracts.daily_review import manifest_digest
 from app.domains.relationships.models.personalization import RelationshipReviewMemoryReceipt
 from app.domains.relationships.service.personalized_metrics import interpreted_policy, _utc
 from app.domains.world_characters.models import WorldCharacter
-from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 
 def _digest(item):
@@ -28,91 +21,71 @@ def _digest(item):
 
 def resolve_memory_batch(db, *, scope, items, activation, now):
     from app.domains.memory.contracts.access_validation import MemoryAccessValidation
-    from app.domains.memory.repository.access_batch import prepare_access
-    reader = RuntimeEpisodeDetailReader(db)
+    from app.domains.memory.repository.access_batch import prepare_representation, collection
+    from app.domains.memory.repository.experience import prepare
     validation = MemoryAccessValidation(db, now)
-    # One synchronous read operation only. No receipt writes/autoflush may
-    # invalidate the shared canonical rows before this operation returns.
+    # Current memory rights and stored participant metadata only. In particular,
+    # prepare_access would hydrate snapshots intended for SNS/Chat recall.
     with db.no_autoflush:
-        prepare_access(db, items, now, reader=reader, validation=validation)
+        prepare_representation(validation, items)
+        prepare(db, items, now, validation=validation, include_snapshots=False)
+        collection(validation, "review_participants", MemoryItemEvidence, MemoryItemEvidence.memory_item_id,
+            [item.id for item in items if item.counterpart_world_character_id is None])
+        infos = [validation.get(MemoryActivitySituationInfo, item.id) for item in items
+            if item.counterpart_world_character_id is None]
+        sequences = [info.receipt_sequence for info in infos if info is not None]
+        # Select the participant scalar, never the receipt's input/output text.
+        counterparts = dict(db.execute(select(MemorySituationReceipt.sequence,
+            MemorySituationReceipt.result["counterpart_id"].as_string()).join(MemoryScopeSettingModel,
+                MemoryScopeSettingModel.id == MemorySituationReceipt.scope_setting_id).where(
+                    MemorySituationReceipt.sequence.in_(sequences),
+                    MemoryScopeSettingModel.owner_id == scope.owner_id,
+                    MemoryScopeSettingModel.world_id == scope.world_id,
+                    MemoryScopeSettingModel.subject_world_character_id == scope.subject_world_character_id)).all()) if sequences else {}
         return _resolve_memory_batch(db, scope=scope, items=items, activation=activation,
-            now=now, reader=reader, validation=validation)
+            now=now, validation=validation, counterparts=counterparts)
 
 
-def _resolve_memory_batch(db, *, scope, items, activation, now, reader, validation):
-    evidence = list(db.scalars(select(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id.in_([item.id for item in items]))))
-    by_item = defaultdict(list)
-    for row in evidence:
-        by_item[row.memory_item_id].append(row)
-    identities = tuple(dict.fromkeys((row.source_type, row.source_id) for row in evidence))
-    sources = reader.read_sources(scope=scope, identities=identities)
-    resolved = []
+def _resolve_memory_batch(db, *, scope, items, activation, now, validation, counterparts):
+    from app.domains.memory.repository.experience import accessible
+    resolved=[]
     for item in items:
-        from app.domains.memory.repository.episode_privacy import currently_accessible
-        if not currently_accessible(db, reader, scope, item, now, validation=validation):
-            resolved.append((None, {"memory_id": item.id, "digest": _digest(item)}, "source_unavailable_or_changed"))
-            continue
-        situation = situation_origin(db, item, validation=validation)
+        payload={"memory_id":item.id,"summary":item.summary,"digest":_digest(item),
+            "occurred_at":item.valid_from.isoformat()}
+        if not accessible(db,scope,item,now,validation=validation,check_snapshot=False):
+            resolved.append((None,payload,"memory_unavailable_or_changed"));continue
+        target=item.counterpart_world_character_id
+        situation=validation.get(MemoryActivitySituationInfo,item.id)
+        occurred=item.valid_from
         if situation is not None:
-            receipt = db.get(MemorySituationReceipt, situation.receipt_sequence)
-            target = receipt.result.get("counterpart_id")
-            cores = list(db.scalars(select(MemoryActivitySituationSource).where(
-                MemoryActivitySituationSource.memory_item_id == situation.memory_item_id)))
-            participants = {identifier for core in cores for identifier in (core.source.get("actor_id"), core.source.get("counterpart_id")) if identifier}
-            reason = None
-            if target is None or target == scope.subject_world_character_id or target not in participants:
-                reason = "counterpart_ambiguous_or_missing"
-            elif _utc(situation.occurred_at) < _utc(activation):
-                reason = "no_post_activation_experience"
-            payload = {"memory_id": item.id, "summary": item.summary, "digest": _digest(item),
-                "source_refs": sorted({f"{core.source['source_type']}:{core.source['source_id']}" for core in cores}),
-                "occurred_at": situation.occurred_at.isoformat()}
-            resolved.append((target, payload, reason))
-            continue
-        rows = by_item[item.id]
-        counterpart_ids = set()
-        reason = None
-        has_new_experience = False
-        for row in rows:
-            current = sources.get((row.source_type, row.source_id))
-            canonical = None if current is None else current.evidence
-            if (canonical is None or row.source_world_id != scope.world_id
-                or memory_evidence_blocked_code(scope=scope, source_type=MemorySourceTypeV1(row.source_type), source_id=row.source_id, evidence=canonical)
-                or canonical.source_digest != row.source_digest):
-                reason = "source_unavailable_or_changed"
-                break
-            has_new_experience |= _utc(row.source_created_at) >= _utc(activation)
-            counterpart = canonical.counterpart_world_character_id
-            if counterpart and counterpart != scope.subject_world_character_id:
-                counterpart_ids.add(counterpart)
-        if not rows or not has_new_experience:
-            reason = reason or "no_post_activation_experience"
-        if len(counterpart_ids) != 1:
-            reason = reason or "counterpart_ambiguous_or_missing"
-        target = next(iter(counterpart_ids)) if len(counterpart_ids) == 1 else None
-        if item.counterpart_world_character_id and item.counterpart_world_character_id != target:
-            reason = reason or "counterpart_conflict"
-        if not item.summary.strip() or len(item.summary) > 2000:
-            reason = reason or "memory_summary_invalid"
-        payload = {"memory_id": item.id, "summary": item.summary, "digest": _digest(item),
-            "source_refs": sorted(f"{r.source_type}:{r.source_id}" for r in rows),
-            "occurred_at": item.valid_from.isoformat()}
-        resolved.append((target, payload, reason))
+            target=target or counterparts.get(situation.receipt_sequence)
+            occurred=situation.occurred_at
+        if target is None:
+            candidates={v for row in validation.collections.get(("review_participants",item.id),())
+                if row.source_world_id==scope.world_id
+                for v in (row.actor_world_character_id,row.target_world_character_id)
+                if v and v!=scope.subject_world_character_id}
+            target=next(iter(candidates)) if len(candidates)==1 else None
+        reason=None
+        if target is None or target==scope.subject_world_character_id:
+            reason="counterpart_ambiguous_or_missing"
+        elif _utc(occurred)<_utc(activation):
+            reason="no_post_activation_experience"
+        elif not item.summary.strip() or len(item.summary)>2000:
+            reason="memory_summary_invalid"
+        payload["occurred_at"]=occurred.isoformat()
+        resolved.append((target,payload,reason))
     return resolved
 
 
 def episode_lineage_ids(scope):
-    # Owner corrections create replacement IDs while retaining the original
-    # episode row. Follow that canonical chain; do not relabel arbitrary memories.
-    lineage = select(MemoryItem.id.label("id")).where(
-            or_(exists(select(MemoryEpisodeInfo.memory_item_id).where(MemoryEpisodeInfo.memory_item_id == MemoryItem.id)),
-                exists(select(MemoryActivitySituationInfo.memory_item_id).where(MemoryActivitySituationInfo.memory_item_id == MemoryItem.id))),
-            MemoryItem.owner_id == scope.owner_id, MemoryItem.world_id == scope.world_id,
-            MemoryItem.subject_world_character_id == scope.subject_world_character_id).cte("relationship_episode_lineage", recursive=True)
-    previous = aliased(MemoryItem)
-    return lineage.union(select(previous.superseded_by_id.label("id")).join(lineage, previous.id == lineage.c.id).where(
-        previous.superseded_by_id.is_not(None), previous.owner_id == scope.owner_id,
-        previous.world_id == scope.world_id, previous.subject_world_character_id == scope.subject_world_character_id))
+    # Every correction/combination owns direct metadata after migration.
+    return select(MemoryItem.id.label("id")).where(
+        or_(MemoryItem.memory_kind == "AUTOBIOGRAPHICAL_EVENT",
+            exists(select(MemoryEpisodeInfo.memory_item_id).where(MemoryEpisodeInfo.memory_item_id==MemoryItem.id)),
+            exists(select(MemoryActivitySituationInfo.memory_item_id).where(MemoryActivitySituationInfo.memory_item_id==MemoryItem.id))),
+        MemoryItem.owner_id==scope.owner_id,MemoryItem.world_id==scope.world_id,
+        MemoryItem.subject_world_character_id==scope.subject_world_character_id).cte("relationship_episode_lineage")
 
 
 def collect_new_review_memories(db, *, setting, now, excluded=None):
@@ -187,8 +160,9 @@ class ReviewMemoryReferences:
                 MemoryItem.status == "active", MemoryItem.deleted_at.is_(None), MemoryItem.superseded_by_id.is_(None),
                 MemoryItem.valid_from <= now, or_(MemoryItem.pinned_at.is_not(None), MemoryItem.valid_until.is_(None), MemoryItem.valid_until > now)).execution_options(populate_existing=True)))
             expected = {m["memory_id"]: m["digest"] for m in page}
-            if len(items) != len(page) or any(expected[item.id] != _digest(item) for item in items):
+            if len(items) != len(expected) or any(expected[item.id] != _digest(item) for item in items):
                 raise ValueError("relationship_review_memory_changed")
-            for target, _, reason in resolve_memory_batch(self.db, scope=scope, items=items, activation=policy.activated_at, now=now):
-                if reason or target != work.target_world_character_id:
+            resolved=resolve_memory_batch(self.db,scope=scope,items=items,activation=policy.activated_at,now=now)
+            for target, payload, reason in resolved:
+                if reason is not None or target!=work.target_world_character_id:
                     raise ValueError("relationship_review_evidence_changed")

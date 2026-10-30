@@ -1,4 +1,4 @@
-"""Durable input identity without duplicating originals or private thought text."""
+"""Durable exact input copies, restored without consulting live sources."""
 
 from dataclasses import asdict
 from datetime import datetime
@@ -22,9 +22,10 @@ def episode_input_manifest(bundle):
             "occurred_at": value.occurred_at.isoformat(), "thread_id": value.thread_id,
             "coverage": value.coverage, "thought_reference": value.thought_reference,
             "legacy_present": value.legacy_subjective_context is not None,
-            "members": [{**{key: part for key, part in asdict(member).items() if key != "text" and (modern or key not in excerpt_fields)},
+            "legacy_subjective_context": value.legacy_subjective_context, "thought": asdict(value.thought),
+            "members": [{**{key: part for key, part in asdict(member).items() if modern or key not in excerpt_fields},
                          "characters": len(member.text)} for member in value.members]}
-    return {"version": ACTIVITY_INPUT_VERSION if modern else "episode-input.v1", "bundle_ref": bundle.bundle_ref,
+    return {"snapshot_version": 1, "version": ACTIVITY_INPUT_VERSION if modern else "episode-input.v1", "bundle_ref": bundle.bundle_ref,
         **({"policy": bundle.policy_version, "activities": [asdict(a) for a in bundle.activities]} if modern else {}),
         "scope": asdict(bundle.scope), "activation_epoch": bundle.activation_epoch,
         "cutoff_sequence": bundle.cutoff_sequence, "manifest_hash": bundle_manifest_hash(bundle),
@@ -34,11 +35,9 @@ def episode_input_manifest(bundle):
 
 
 def restore_episode_input(manifest, *, scope, detail_reader):
-    """Re-read exact ranges and thoughts; a changed input cannot reuse a job.
-
-    Persisted manifests are bounded control data. Database exceptions propagate;
-    missing/changed source data is a stable conflict, not a new empty prompt.
-    """
+    """Restore the persisted input; old references alone require reprocessing."""
+    if not isinstance(manifest, dict) or manifest.get("snapshot_version") != 1:
+        raise MemoryConflictError("episode_manifest_snapshot_unavailable")
     modern = isinstance(manifest, dict) and manifest.get("version") == ACTIVITY_INPUT_VERSION
     if (not isinstance(manifest, dict) or manifest.get("version") not in {"episode-input.v1", ACTIVITY_INPUT_VERSION}
         or modern and manifest.get("policy") != ACTIVITY_POLICY_VERSION
@@ -51,44 +50,18 @@ def restore_episode_input(manifest, *, scope, detail_reader):
         units = [*new, *context]
         if any(not 1 <= len(row["members"]) <= 100 for row in units):
             raise ValueError()
-        identities = tuple(dict.fromkeys((m["source_type"], m["source_id"]) for u in units for m in u["members"]))
-        references = tuple(dict.fromkeys(u["thought_reference"] for u in units if u["thought_reference"]))
-        sources = detail_reader.read_sources(scope=scope, identities=identities)
-        thoughts = detail_reader.read_thoughts(scope=scope, references=references)
-
         def restore(value):
             members = []
-            legacy = None
             for frozen in value["members"]:
-                identity = frozen["source_type"], frozen["source_id"]
-                current = sources.get(identity)
-                if current is None or memory_evidence_blocked_code(scope=scope,
-                    source_type=MemorySourceTypeV1(identity[0]), source_id=identity[1], evidence=current.evidence):
-                    raise MemoryConflictError("episode_manifest_source_unavailable")
-                start, count = frozen["start_offset"], frozen["characters"]
-                if (type(start) is not int or type(count) is not int or start < 0 or count < 0
-                    or start + count > len(current.text)
-                    or current.evidence.source_digest != frozen["source_digest"]
-                    or frozen["total_characters"] is not None and frozen["total_characters"] != len(current.text)):
-                    raise MemoryConflictError("episode_manifest_source_changed")
                 fields = {key: part for key, part in frozen.items() if key != "characters"}
-                raw = current.text[start:start + count]
-                if modern and frozen.get("segments"):
-                    fields["segments"] = tuple(tuple(segment) for segment in frozen["segments"])
-                    if sha256(current.text.encode("utf-8")).hexdigest() != frozen["whole_hash"]:
-                        raise MemoryConflictError("episode_manifest_source_changed")
-                    raw = "".join(current.text[left:right] for left, right in fields["segments"])
-                    if len(raw) != count:
-                        raise MemoryConflictError("episode_manifest_source_changed")
-                members.append(EpisodeSourceMember(**fields, text=raw))
-                if value["legacy_present"] and current.evidence.actor_world_character_id == scope.subject_world_character_id:
-                    legacy = legacy or current.evidence.subjective_context
-            ref = value["thought_reference"]
-            if ref and ref not in thoughts:
-                raise MemoryConflictError("episode_manifest_thought_missing")
+                if not isinstance(fields.get("text"), str) or len(fields["text"]) != frozen["characters"]:
+                    raise ValueError("episode_manifest_snapshot_invalid")
+                fields["segments"] = tuple(tuple(segment) for segment in fields.get("segments", ()))
+                members.append(EpisodeSourceMember(**fields))
             return EpisodeSourceUnit(value["key"], value["revision"], scope, value["kind"],
                 datetime.fromisoformat(value["occurred_at"]), tuple(members), value["thread_id"],
-                thoughts.get(ref, ActivityThought()), ref, value["coverage"], legacy)
+                ActivityThought(**value["thought"]), value["thought_reference"], value["coverage"],
+                value.get("legacy_subjective_context"))
 
         bundle = EpisodeBundle(manifest["bundle_ref"], scope, tuple(restore(value) for value in new),
             tuple(restore(value) for value in context), tuple(EpisodePriorCandidate(**value) for value in manifest["prior"]),

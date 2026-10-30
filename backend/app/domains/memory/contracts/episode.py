@@ -40,6 +40,10 @@ class EpisodeSourceMember:
     omitted_characters: int = 0
     excerpt_policy: str | None = None
     whole_hash: str | None = None
+    actor_id: str | None = None
+    counterpart_id: str | None = None
+    observation_id: str | None = None
+    source_event_id: str | None = None
 
     def __post_init__(self) -> None:
         if (self.source_type not in MemorySourceTypeV1.values() or not self.source_id
@@ -99,6 +103,7 @@ class EpisodePriorCandidate:
     item_id: str
     item_version: int
     summary: str
+    experience_snapshot: dict | None = None
 
     def __post_init__(self):
         if (not self.item_id or isinstance(self.item_version, bool) or self.item_version < 1

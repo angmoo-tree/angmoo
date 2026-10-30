@@ -40,6 +40,49 @@ from app.runtime.graph_projection.process_client import borrow_process_graph_cli
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def test_known_previous_lease_waits_for_safe_handover_without_early_ready():
+    registry=ComponentObservationRegistry()
+    async def scenario():
+        release=asyncio.Event()
+        async def scheduler(stop, listener):
+            listener('waiting_lease')
+            await release.wait()
+            listener('ready'); await stop.wait()
+        def projector(stop, listener): listener('ready'); stop.wait(2)
+        manager=SingleBackendRuntimeComponents(scheduler_runner=scheduler,projector_runner=projector,
+            registry=registry,startup_timeout_seconds=.1,scheduler_lease_wait_seconds=1,shutdown_timeout_seconds=1)
+        task=asyncio.create_task(manager.start())
+        try:
+            await asyncio.sleep(.2)
+            assert not task.done()
+            assert {r.name:r.state for r in registry.snapshot()}['scheduler'] is RuntimeComponentState.DEGRADED
+            release.set(); await asyncio.wait_for(task,1)
+            assert {r.name:r.state for r in registry.snapshot()}['scheduler'] is RuntimeComponentState.READY
+        finally:
+            release.set(); await manager.stop()
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize('state,budget',[('degraded',.1),('waiting_lease',.25)])
+def test_startup_grace_is_specific_and_bounded(state,budget):
+    async def scenario():
+        async def scheduler(stop, listener):
+            listener(state)
+            while not stop.is_set():
+                listener(state)  # Repeated notices cannot renew the deadline.
+                try: await asyncio.wait_for(stop.wait(),.01)
+                except TimeoutError: pass
+        def projector(stop, listener): listener('ready'); stop.wait(2)
+        manager=SingleBackendRuntimeComponents(scheduler_runner=scheduler,projector_runner=projector,
+            startup_timeout_seconds=.1,scheduler_lease_wait_seconds=.25,shutdown_timeout_seconds=1)
+        entered=asyncio.get_running_loop().time()
+        with pytest.raises(SingleBackendRuntimeStartupError,match='scheduler_component_start_timeout'):
+            await asyncio.wait_for(manager.start(),1.5)
+        elapsed=asyncio.get_running_loop().time()-entered
+        assert elapsed>=budget and elapsed<1.5
+    asyncio.run(scenario())
+
+
 def _base_status() -> ApplicationRuntimeStatus:
     return ApplicationRuntimeStatus(
         installation_state=InstallationState.READY,

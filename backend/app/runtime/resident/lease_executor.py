@@ -30,6 +30,10 @@ class SchedulerLeaseExecutor:
             raise RuntimeError("scheduler_lease_executor_closed")
         submitted = monotonic()
         deadline = kwargs.pop("queue_deadline", None)
+        deadline_timeout = kwargs.pop("deadline_timeout", None)
+        caller = asyncio.current_task()
+        cancellation_count = caller.cancelling() if caller else 0
+        finished_at = [None]
         policy = None
         if deadline is not None and operation in {"heartbeat", "finish_tick"}:
             policy = SqliteRetryPolicy(max_attempts=12 if operation == "heartbeat" else 4,
@@ -49,7 +53,12 @@ class SchedulerLeaseExecutor:
             with lease_operation_scope(observation):
                 if self._coordinator is None:
                     self._coordinator = self._factory()
-                return getattr(self._coordinator, operation)(**kwargs)
+                try:
+                    return getattr(self._coordinator, operation)(**kwargs)
+                finally:
+                    # Record on the worker, before Future completion. Event-loop
+                    # delivery may be delayed even when the DB finished on time.
+                    finished_at[0] = monotonic()
 
         future = self._queue.submit(execute)
         with self._lock:
@@ -74,6 +83,19 @@ class SchedulerLeaseExecutor:
         try:
             return await asyncio.shield(waiter)
         except asyncio.CancelledError:
+            if (operation == "heartbeat" and deadline_timeout is not None
+                    and deadline_timeout.expired() and caller is not None
+                    and caller.cancelling() == cancellation_count + 1
+                    and deadline is not None and finished_at[0] is not None
+                    and finished_at[0] <= deadline and future.done()
+                    and not future.cancelled() and future.exception() is None):
+                # Only this call's deadline cancellation can adopt an already
+                # committed result. External cancellation and late/unknown writes
+                # still drain/fence normally. The caller rechecks lease safety.
+                logger.info("scheduler_heartbeat_delivery_delayed operation_id=%s completed_ms=%.3f delivery_ms=%.3f",
+                    observation.operation_id, (finished_at[0] - submitted) * 1000,
+                    (monotonic() - submitted) * 1000)
+                return future.result()
             future.cancel()  # A queued call cancels; a running call remains tracked.
             observation.record({"caller_cancelled": True, "worker_state":
                 "cancelled" if future.cancelled() else "running" if future.running() else "done"})
@@ -107,4 +129,5 @@ async def lease_call(coordinator: Any, operation: str, **kwargs: Any) -> Any:
     # Compatibility for direct private-helper tests. Product runners always
     # receive the executor above and never run a lease operation on the loop.
     kwargs.pop("queue_deadline", None)
+    kwargs.pop("deadline_timeout", None)
     return getattr(coordinator, operation)(**kwargs)

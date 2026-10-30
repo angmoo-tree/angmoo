@@ -23,9 +23,9 @@ def configure_world_deletion(app, composition):
         # scoped deletion API acknowledges vector removal before completion.
         hybrid.erase_items(identifiers)
         from app.domains.memory.repository.vector_erasure import erase
-        from app.core.sqlite_concurrency import run_sqlite_session_immediate
+        from app.core.database_transactions import database_write
         with sessions() as db:
-            run_sqlite_session_immediate(db, lambda: erase(db, identifiers), require_clean=True)
+            database_write(db, lambda: erase(db, identifiers), require_clean=True)
 
     def graph_cleanup(world_id):
         if composition is None:

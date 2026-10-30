@@ -1,7 +1,7 @@
 # Angmoo backend
 
 The FastAPI backend owns local identity, Worlds, characters, SNS, Chat, memories
-and relationships. SQLite is canonical; FTS5, vector search and LadybugDB are
+and relationships. PostgreSQL is canonical; full-text search, pgvector exact search and LadybugDB are
 derived search/projection facilities. The scheduler and projector run within the same supported embedded application.
 
 ## Develop
@@ -22,7 +22,9 @@ For released application installation, use [README](../README.md).
 - `app/main.py`: the single app factory and public profile.
 - `app/domains/`: HTTP and business behavior by owner.
 - `app/runtime/`: resource lifetime and cross-owner composition.
-- `app/runtime/migrations/`: supported embedded SQLite upgrades.
+- `app/runtime/persistence/postgresql_schema.py`: current schema and upgrades.
+- `app/runtime/postgresql_installation.py`: supported 0.1.3 SQLite input migration.
+- `app/runtime/migrations/`: frozen legacy SQLite input compatibility.
 - `tests/`: business, runtime, adapter and migration regressions.
 
 The contributor launcher and installed sidecar call `create_public_app` with

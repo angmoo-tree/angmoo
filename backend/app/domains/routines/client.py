@@ -62,15 +62,38 @@ def preparation_response_schema(source: dict, *, initial: bool):
     return schema
 
 
+class PreparationReservation:
+    """One finite DB reservation, with optional cancellation-safe async handoff."""
+
+    def __init__(self, operation, *, execute_async=None):
+        self.operation, self.execute_async = operation, execute_async
+
+    def __call__(self):
+        return self.operation()
+
+    async def run_async(self):
+        if self.execute_async is None:
+            return self.operation()
+        return await self.execute_async(self.operation)
+
+
+def _reservation(operation):
+    return operation if isinstance(operation, PreparationReservation) else PreparationReservation(operation)
+
+
 class PreparationTracker(direct_llm.RunLlmTracker):
     """Reserve durable and evaluation budgets before every physical request."""
 
     def __init__(self, reserve: Callable[[], None]):
         super().__init__(max_calls=2)
-        self.reserve = reserve
+        self.reserve = _reservation(reserve)
 
     def next_provider_call_order(self) -> int:
         self.reserve()
+        return super().next_provider_call_order()
+
+    async def reserve_provider_call_order(self) -> int:
+        await self.reserve.run_async()
         return super().next_provider_call_order()
 
 
@@ -96,7 +119,7 @@ async def generate_daily_preparation(*, material, character_id: str, source: dic
     language_instruction = preparation_language_instruction(source, fields=fields)
 
     async def before_retry(_attempt):
-        reserve_json_retry()
+        await _reservation(reserve_json_retry).run_async()
 
     def validate(value):
         from app.domains.routines.service.daily_preparation import validate_plan, compose_generated_plan

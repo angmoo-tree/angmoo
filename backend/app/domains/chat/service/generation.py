@@ -4,6 +4,8 @@ from __future__ import annotations
 from app.contracts.name_binding import NameBindingError
 from app.contracts.environment import EnvironmentSnapshot
 from app.domains.identity.service.environment import lock_environment_admission, snapshot
+from app.core.database_transactions import database_write, postgres_db_unit
+from app.core.async_session import session_call
 import asyncio
 import json
 
@@ -18,7 +20,7 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
@@ -93,6 +95,28 @@ class GenerationService:
 
     @observe_admission
     def accept_world_message(
+        self, db, user, world_id, thread_id, data,
+    ) -> schemas.WorldChatMessageAcceptRead:
+        bind = db.get_bind()
+        if (bind.dialect.name == "postgresql" and isinstance(bind, Engine)
+                and not data.attachment_asset_id):
+            # This unit mutates one locked thread and its message/request; first
+            # memory-policy initialization has its own existing scope row fence.
+            # The thread's MVCC fence owns active-request/idempotency decisions; shared
+            # owner/World/role/environment fences retain revocation semantics.
+            # A stable snapshot avoids unrelated threads' SSI predicate conflicts.
+            # Images/retries can reserve cross-thread quotas and keep SERIALIZABLE.
+            result = database_write(db,
+                lambda: self._accept_world_message(db, user, world_id, thread_id, data),
+                postgres_isolation="REPEATABLE READ")
+        else:
+            result = self._accept_world_message(db, user, world_id, thread_id, data)
+        if result.outcome == "accepted":
+            capture.admit((user.id, world_id, thread_id), result.response_request.request_id)
+        return result
+
+    @postgres_db_unit
+    def _accept_world_message(
         self,
         db: Session,
         user: ChatUser,
@@ -100,7 +124,7 @@ class GenerationService:
         thread_id: str,
         data: schemas.WorldChatMessageCreate,
     ) -> schemas.WorldChatMessageAcceptRead:
-        thread = self._mutation_thread(db, user, world_id, thread_id)
+        thread = self._mutation_thread(db, user, world_id, thread_id, admission=True)
         content = data.content.strip()
         if not content and not data.attachment_asset_id:
             raise MessageValidationError("메시지 내용을 입력해 주세요.")
@@ -171,7 +195,6 @@ class GenerationService:
         )
         finish_session(db)
         db.refresh(message)
-        capture.admit((user.id, world_id, thread_id), record.request_id)
         return schemas.WorldChatMessageAcceptRead(
             outcome="accepted",
             user_message=schemas.MessageMessageRead.model_validate(message),
@@ -180,6 +203,15 @@ class GenerationService:
 
     @observe_admission
     def retry_world_response(
+        self, db, user, world_id, thread_id, data,
+    ) -> schemas.WorldChatMessageAcceptRead:
+        result = self._retry_world_response(db, user, world_id, thread_id, data)
+        if result.outcome == "accepted":
+            capture.admit((user.id, world_id, thread_id), result.response_request.request_id)
+        return result
+
+    @postgres_db_unit
+    def _retry_world_response(
         self,
         db: Session,
         user: ChatUser,
@@ -187,7 +219,7 @@ class GenerationService:
         thread_id: str,
         data: schemas.WorldChatRetryCreate,
     ) -> schemas.WorldChatMessageAcceptRead:
-        thread = self._mutation_thread(db, user, world_id, thread_id)
+        thread = self._mutation_thread(db, user, world_id, thread_id, admission=True)
         idempotency_key = data.idempotency_key.strip()
         existing = db.scalar(
             select(models.ChatResponseRequest).where(
@@ -241,8 +273,24 @@ class GenerationService:
         self._validate_request_names(db, user, thread, SqlAlchemyResponseLifecycleRepository(db).get_request(prior.request_id))
         # Retry the admitted input, including historical namespaces. Current
         # World edits must not replace a saved name or introduce a new snapshot.
-        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy")
+        from app.domains.chat.contracts.input_receipt import RETRY_KEYS, ROUTING_KEY, ROUTING_STARTED
+        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding", "_world_credential", "chat_identity_context.v1", "_situation_policy", "_initial_reference_input", *RETRY_KEYS)
             if key in prior_metadata}
+        from app.domains.chat.contracts.initial_input import UNAVAILABLE_KEY, assert_available
+        try:
+            assert_available(prior_metadata)
+        except RetrievalContractError:
+            # Preserve the loss even when old-policy diagnostics are not copied
+            # to the new attempt. The admitted attempt terminates without AI.
+            retry_metadata[UNAVAILABLE_KEY] = True
+        # An explicitly rejected Router output acquired no reference result.
+        # A user retry may interpret the same saved input again. An interrupted
+        # or missing committed result remains ambiguous and must fail closed.
+        diagnostic = prior_metadata.get("router_diagnostic")
+        if (prior_metadata.get("failure_class") == "router_schema_rejected"
+                and isinstance(diagnostic, dict) and diagnostic.get("repair_exhausted") is True
+                and ROUTING_KEY not in prior_metadata and "_initial_reference_input" in prior_metadata):
+            retry_metadata[ROUTING_STARTED] = False
         if prior_protocol is not None:
             retry_metadata[SELECTION_PROTOCOL_KEY] = prior_protocol
         if prior_protocol == TEMPORAL_SELECTION_PROTOCOL:
@@ -307,7 +355,7 @@ class GenerationService:
         thread_id: str,
         request_id: str,
     ) -> schemas.WorldChatGenerationRequestRead:
-        self._mutation_thread(db, user, world_id, thread_id)
+        self._read_thread(db, user, world_id, thread_id)
         row = db.get(models.ChatResponseRequest, request_id)
         if row is None or row.thread_id != thread_id:
             raise MessageNotFoundError("응답 요청을 찾을 수 없습니다.")
@@ -319,7 +367,7 @@ class GenerationService:
     def get_latest_world_response_request(
         self, db: Session, user: ChatUser, world_id: str, thread_id: str
     ) -> schemas.WorldChatLatestRequestRead:
-        self._mutation_thread(db, user, world_id, thread_id)
+        self._read_thread(db, user, world_id, thread_id)
         row = request_repository._latest_request_row(db, thread_id)
         record = (
             None
@@ -333,18 +381,30 @@ class GenerationService:
             response_request=None if record is None else self._record_read(db, record)
         )
 
-    def _mutation_thread(
-        self, db: Session, user: ChatUser, world_id: str, thread_id: str
-    ) -> models.MessageThread:
-        lock_environment_admission(db, user.id)
+    def _read_thread(self, db, user, world_id, thread_id):
         self.thread_service._require_world_chat_owner_scope(db, user.id, world_id)
+        thread = self.thread_service._get_owned_world_thread(db, user, world_id, thread_id)
+        self.thread_service._world_thread_read(db, thread, include_messages=False)
+        return thread
+
+    def _mutation_thread(
+        self, db: Session, user: ChatUser, world_id: str, thread_id: str, *, admission=False
+    ) -> models.MessageThread:
+        # Accepted requests already own an immutable environment snapshot.
+        # Revalidation needs thread/scope fences, not a global admission write.
+        if admission:
+            lock_environment_admission(db, user.id)
+        # Acquire installation scope before thread in both admission and
+        # validation, so concurrent admission cannot invert the lock order.
+        self.thread_service._require_world_chat_owner_scope(db, user.id, world_id, lock_scope=True)
         # Serialize admission with model PATCH before taking its model snapshot.
         thread = self.thread_service._get_owned_world_thread(
-            db, user, world_id, thread_id, lock_thread=True
+            db, user, world_id, thread_id, lock_thread=True, advance_admission=admission
         )
-        self.thread_service._world_thread_read(
-            db, thread, include_messages=False, lock_scope=True
-        )
+        # Admission needs the same participant/owner/block checks, not a UI DTO.
+        # Reading the latest message here adds an unrelated SERIALIZABLE read
+        # dependency immediately before INSERT (relation-wide on small tables).
+        self.thread_service._world_thread_participants(db, thread, lock_scope=True)
         return thread
 
     def _request_names(self, db, user, thread):
@@ -450,11 +510,17 @@ class GenerationService:
         retryable: bool,
         reason: ResponseTerminalReason,
     ) -> AsyncIterator[GenerationEvent]:
+        events = await session_call(db, lambda: self._persist_pre_workflow_failure(db, record,
+            failure_class=failure_class, retryable=retryable, reason=reason))
+        for event in events:
+            yield event
+
+    @postgres_db_unit
+    def _persist_pre_workflow_failure(self, db, record, *, failure_class, retryable, reason):
         lifecycle = SqlAlchemyResponseLifecycleRepository(db)
         record = lifecycle.get_request(record.request_id)
         if record.state in TERMINAL_STATES:
-            yield self._terminal_event(record)
-            return
+            return (self._terminal_event(record),)
         now = datetime.now(UTC)
         record = lifecycle.acquire_lease(
             request_id=record.request_id,
@@ -467,13 +533,11 @@ class GenerationService:
         accepted = self._event(record, GenerationEventType.ACCEPTED, 0)
         lifecycle.accept_event(fence, accepted, now=datetime.now(UTC))
         finish_session(db)
-        yield accepted
         record = SqlAlchemyResponseLifecycleRepository(db).get_request(
             record.request_id
         )
         if record.state in TERMINAL_STATES:
-            yield self._terminal_event(record)
-            return
+            return (self._terminal_event(record),)
         failed = self._event(
             record,
             GenerationEventType.FAILED,
@@ -493,7 +557,7 @@ class GenerationService:
             now=datetime.now(UTC),
         )
         finish_session(db)
-        yield failed
+        return accepted, failed
 
     def _terminal_event(self, record) -> GenerationEvent:
         if record.state is ResponseRequestState.COMMITTED:
@@ -556,19 +620,19 @@ class GenerationService:
         memory_recall_service: CanonicalRecallService | None,
         runtime_settings: Settings = settings,
     ) -> AsyncIterator[GenerationEvent]:
-        thread = self._mutation_thread(db, user, world_id, thread_id)
+        thread = await session_call(db, lambda: self._mutation_thread(db, user, world_id, thread_id))
         repository = SqlAlchemyResponseLifecycleRepository(db)
-        record = repository.get_request(request_id)
+        record = await session_call(db, lambda: repository.get_request(request_id))
         if record.thread_id != thread.id:
             raise MessageNotFoundError("응답 요청을 찾을 수 없습니다.")
-        record = self._recover_if_expired(db, record)
+        record = await session_call(db, lambda: self._recover_if_expired(db, record))
         if record.state in TERMINAL_STATES:
             yield self._terminal_event(record)
             return
         if record.state is not ResponseRequestState.ACCEPTED:
             raise MessageInFlightError("이 응답은 이미 처리 중입니다.")
-        message = db.get(models.MessageMessage, record.user_message_id)
-        responding_character = get_responding_character(db, thread.character_id)
+        message, responding_character = await session_call(db, lambda: (
+            db.get(models.MessageMessage, record.user_message_id), get_responding_character(db, thread.character_id)))
         if message is None or message.role != "user" or responding_character is None:
             async for event in self._fail_before_workflow(
                 db,
@@ -580,7 +644,7 @@ class GenerationService:
                 yield event
             return
         try:
-            self._validate_request_names(db, user, thread, record)
+            await session_call(db, lambda: self._validate_request_names(db, user, thread, record))
             configuration = self._request_configuration(thread, record.node_state)
             protocol = read_selection_protocol(record.node_state)
             if protocol == TEMPORAL_SELECTION_PROTOCOL:
@@ -619,8 +683,8 @@ class GenerationService:
                 yield event
             return
         try:
-            base_material = self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
-                world_id=thread.world_id, actor_id=thread.responding_world_character_id)
+            base_material = await session_call(db, lambda: self.workflows.resolve_credential(db, record.node_state, owner_id=user.id,
+                world_id=thread.world_id, actor_id=thread.responding_world_character_id))
         except MessageCredentialRequiredError:
             async for event in self._fail_before_workflow(
                 db,
@@ -650,14 +714,35 @@ class GenerationService:
             purpose=base_material.purpose,
             _secret=base_material.reveal(),
         )
+        from app.domains.chat.contracts.initial_input import INPUT_KEY, read as read_initial_input, assert_available
+        frozen_input = None
+        try:
+            assert_available(record.node_state)
+        except RetrievalContractError:
+            async for event in self._fail_before_workflow(db, record,
+                    failure_class='initial_input_unavailable', retryable=False,
+                    reason=ResponseTerminalReason.CONTRACT_INVALID):
+                yield event
+            return
+        if INPUT_KEY in record.node_state:
+            try:
+                frozen_input = read_initial_input(record.node_state[INPUT_KEY],
+                    request_scope_hash=record.request_scope_hash, response_slot_id=record.response_slot_id,
+                    scope=(user.id, world_id, thread.id, thread.requester_world_character_id, thread.responding_world_character_id))
+            except RetrievalContractError:
+                async for event in self._fail_before_workflow(db, record,
+                        failure_class='initial_input_invalid', retryable=False,
+                        reason=ResponseTerminalReason.CONTRACT_INVALID):
+                    yield event
+                return
         image_observation = None
-        if self.images is not None and not record.node_state.get("_image_excluded"):
+        if frozen_input is None and self.images is not None and not record.node_state.get("_image_excluded"):
             try:
                 remaining = max(0.1, (record.deadline_at - datetime.now(UTC)).total_seconds())
                 async with asyncio.timeout(remaining):
                     image_observation = await self.images.observation(db, user.id, thread.id, message.id)
-                self._mutation_thread(db, user, world_id, thread_id)
-                record = repository.get_request(request_id)
+                await session_call(db, lambda: self._mutation_thread(db, user, world_id, thread_id))
+                record = await session_call(db, lambda: repository.get_request(request_id))
                 if record.state in TERMINAL_STATES:
                     yield self._terminal_event(record)
                     return
@@ -669,33 +754,35 @@ class GenerationService:
                     reason=ResponseTerminalReason.RETRIEVAL_FAILURE):
                     yield event
                 return
-        message_context = self.images.message_context(message.content, image_observation) if self.images else message.content
-        image_evidence = self.images.evidence(user.id, thread.id, image_observation) if self.images else None
-        execution = self.workflows.build(
+        message_context = (frozen_input.user_message if frozen_input else
+            self.images.message_context(message.content, image_observation) if self.images else message.content)
+        image_evidence = (frozen_input.image_evidence if frozen_input else
+            self.images.evidence(user.id, thread.id, image_observation) if self.images else None)
+        execution = await session_call(db, lambda: self.workflows.build(
             db,
             material,
             memory_recall_service=memory_recall_service,
             runtime_settings=runtime_settings,
             lifecycle=repository,
             world_id=world_id,
-        )
+        ))
         character_labels = execution.character_labels
         from app.domains.chat.contracts.chat_identity_context import ChatIdentityContext
         identity = ChatIdentityContext.read(record.node_state)
         if identity is not None:
-            identity.assert_scope(user.id, world_id, thread.id, thread.requester_world_character_id,
-                thread.responding_world_character_id)
+            await session_call(db, lambda: identity.assert_scope(user.id, world_id, thread.id, thread.requester_world_character_id,
+                thread.responding_world_character_id))
             character_labels.update(identity.names)
         workflow = execution.workflow
-        router_context, response_context = _recent_context(
-            db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id, identity=identity
-        )
+        router_context, response_context = ((frozen_input.router_context, frozen_input.response_context)
+            if frozen_input else await session_call(db, lambda: _recent_context(
+                db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id, identity=identity)))
         environment = EnvironmentSnapshot.from_dict(record.node_state.get("_environment"))
-        today_sns_snapshot = None
-        world = get_character_entry_world(db, world_id)
-        if world is not None and thread.responding_world_character_id is not None:
+        today_sns_snapshot = frozen_input.today_sns_snapshot if frozen_input else None
+        world = None if frozen_input else await session_call(db, lambda: get_character_entry_world(db, world_id))
+        if frozen_input is None and world is not None and thread.responding_world_character_id is not None:
             try:
-                today_sns_snapshot = TodaySnsActivityAssembler(
+                today_sns_snapshot = await session_call(db, lambda: TodaySnsActivityAssembler(
                     self.workflows.today_reader(db)
                 ).assemble(
                     owner_id=user.id,
@@ -705,39 +792,41 @@ class GenerationService:
                     character_labels=character_labels,
                     label_reader=lambda ids: self.workflows.character_names(db, world_id, ids),
                     now=fixed_time.instant if protocol == TEMPORAL_SELECTION_PROTOCOL else datetime.now(UTC),
-                )
+                ))
             except Exception as exc:
                 logger.warning(
                     "p8_l_r_today_sns_snapshot_unavailable request_id=%s failure_type=%s",
                     record.request_id,
                     type(exc).__name__,
                 )
-        command = ResponseWorkflowCommand(
-            request=record,
-            preflight=RetrievalPreflightCommand(
-                request_id=record.request_id,
-                owner_id=user.id,
-                world_id=world_id,
-                thread_id=thread.id,
-                requester_world_character_id=thread.requester_world_character_id or "",
-                responding_world_character_id=thread.responding_world_character_id
-                or "",
-                user_message=message_context,
-                image_context=image_evidence.context if image_evidence else None,
-                environment=environment,
-            ),
-            profile=(profiles._world_response_profile(configuration) if configuration is not None
-                else profiles._response_profile(responding_character)),
-            router_context=router_context,
-            response_context=response_context,
-            character_labels=character_labels,
-            today_sns_snapshot=today_sns_snapshot,
-            graph_projection_enabled=runtime_settings.graph_projection_enabled,
-            name_binding_validator=lambda: self._validate_request_input(db, user, thread, record, message.id, image_evidence),
-            image_evidence=image_evidence,
-            chat_identity=identity,
-            identity_labels=lambda ids: self.workflows.character_names(db, world_id, ids),
-        )
+        def build_command():
+            return ResponseWorkflowCommand(
+                request=record,
+                preflight=RetrievalPreflightCommand(
+                    request_id=record.request_id,
+                    owner_id=user.id,
+                    world_id=world_id,
+                    thread_id=thread.id,
+                    requester_world_character_id=thread.requester_world_character_id or "",
+                    responding_world_character_id=thread.responding_world_character_id
+                    or "",
+                    user_message=message_context,
+                    image_context=image_evidence.context if image_evidence else None,
+                    environment=environment,
+                ),
+                profile=(frozen_input.profile if frozen_input else profiles._world_response_profile(configuration) if configuration is not None
+                    else profiles._response_profile(responding_character)),
+                router_context=router_context,
+                response_context=response_context,
+                character_labels=character_labels,
+                today_sns_snapshot=today_sns_snapshot,
+                graph_projection_enabled=runtime_settings.graph_projection_enabled,
+                name_binding_validator=lambda: self._validate_request_input(db, user, thread, record, message.id, image_evidence),
+                image_evidence=image_evidence,
+                chat_identity=identity,
+                identity_labels=lambda ids: self.workflows.character_names(db, world_id, ids),
+            )
+        command = await session_call(db, build_command)
         async for event in workflow.run(command):
             yield event
 

@@ -3,8 +3,10 @@ from datetime import UTC, datetime
 from app.domains.memory.repository import consolidation_preparation as preparation
 from app.domains.memory.repository import consolidation_requests as receipts
 from app.domains.memory.service.batch_preparation import deliver_candidates, enqueue_scope
+from app.core.database_transactions import postgres_db_unit
 
 
+@postgres_db_unit
 def submit(*, scope, db, workflows, data):
     try:
         repository = workflows.batch_repository(db)
@@ -100,7 +102,8 @@ def prepare_requests(session, *, dependencies, now):
     session.commit()
 
 
-def retry(*, scope, db, workflows, request_id, key):
+@postgres_db_unit
+def retry(*, scope, db, workflows, request_id, key, mode=None, expected_revision=None):
     repo = workflows.batch_repository(db)
     repo.memory.validate_scope(scope)
     setting = repo.memory.get_scope_setting(scope)
@@ -110,9 +113,9 @@ def retry(*, scope, db, workflows, request_id, key):
         from sqlalchemy import select
         from app.domains.memory.models.consolidation_request import MemoryConsolidationJob
         jobs = tuple(db.scalars(select(MemoryConsolidationJob.job_id).where(MemoryConsolidationJob.request_id == root.id)))
-        if workflows.generation_policy != "activity_situation":
+        if workflows.generation_policy != "activity_situation" and mode not in {"cancel_remaining", "close_without_retry"}:
             repo.retry_failed(scope, idempotency_key=key, now=datetime.now(UTC), request_job_ids=jobs)
-        if root.state == "paused" and workflows.generation_policy != "activity_situation":
+        if root.state == "paused" and workflows.generation_policy != "activity_situation" and mode not in {"cancel_remaining", "close_without_retry"}:
             # Re-admit the same frozen cutoff against explicitly confirmed current settings.
             from app.domains.memory.models.batch import MemoryBatchSetting
             from app.domains.memory.models.activity_configuration import MemorySubjectProfile
@@ -121,7 +124,7 @@ def retry(*, scope, db, workflows, request_id, key):
             root.scope_version, root.settings_version, root.profile_version = setting.version, config.execution_version, profile.version
             root.state, root.last_code = "preparing", None
         if workflows.consolidation_followup:
-            workflows.consolidation_followup(db).retry(scope, row)
+            workflows.consolidation_followup(db).command(scope, row, mode=mode, key=key, expected_revision=expected_revision)
         db.commit()
         return read(scope=scope, db=db, workflows=workflows, request_id=request_id)
     except Exception:

@@ -80,6 +80,15 @@ def _runtime_error_backoff(
     character_id: str | None = None,
     credential_id: str | None = None,
 ) -> RuntimeBackoff | None:
+    from app.core.postgresql_concurrency import (
+        PostgresRetryExhausted, PostgresPoolExhausted, PostgresDeadlineExceeded,
+        PostgresCommitOutcomeUnknown, sqlstate,
+    )
+    # Database units own their bounded replay. A storage deadline/unknown
+    # commit must never be mistaken for a provider timeout and replay AI work.
+    if isinstance(exc, (PostgresRetryExhausted, PostgresPoolExhausted,
+            PostgresDeadlineExceeded, PostgresCommitOutcomeUnknown)) or sqlstate(exc) is not None:
+        return None
     raw = str(exc).strip()
     lowered = raw.lower()
     uppered = raw.upper()

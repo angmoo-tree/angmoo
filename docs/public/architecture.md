@@ -1,124 +1,81 @@
 # Angmoo public architecture
 
-This document describes the public-source local product architecture. It does
-not describe a private hosted deployment or promise production-grade
-self-hosting.
+This describes the local 0.1.4 source. Formal release and device certification
+are separate evidence layers; it does not describe a hosted angmoo.com service.
 
 ## Supported topology
 
-Angmoo uses one embedded backend composition for installed users and
-contributors:
-
-```text
-Next.js browser frontend or Tauri bundled static frontend
-                         ↓
-                    FastAPI
-                    ├─ SQLite canonical persistence
-                    ├─ FTS5 / vector search projections
-                    ├─ LadybugDB graph projection
-                    ├─ scheduler component
-                    └─ projector component
+```mermaid
+flowchart LR
+    Browser[Browser / Next.js] --> API[One FastAPI backend]
+    Tauri[Tauri static frontend] --> API
+    API --> PG[(PostgreSQL: canonical data, full-text, pgvector, checkpoints)]
+    API --> Graph[(LadybugDB: rebuildable graph)]
+    API --> Provider[Configured AI provider]
 ```
 
-Windows runs Tauri plus a bundled FastAPI sidecar. Released Docker uses a
-Next frontend and the embedded backend. Experimental Android reuses the ARM64
-service files through Termux/PRoot, without a Docker daemon on the phone.
-The official contributor Quickstart runs a Next.js development frontend and the same typed
-`CONTRIBUTOR_EMBEDDED` backend in two Linux Docker containers.
+Docker uses three services: frontend, backend and PostgreSQL. ARM64 Termux uses
+their filesystems through PRoot, without a Docker daemon. Windows x64 bundles
+its own PostgreSQL 17 / pgvector resources beside the sidecar. It does not use
+a developer's PostgreSQL installation or register a global Windows DB service.
+See the [runtime contract](postgresql-runtime.md).
 
-PostgreSQL is not a supported application runtime or migration input. The
-repository ships no PostgreSQL offline importer. Neo4j is not a runtime
-dependency; ER3 relationship meaning remains as static parity fixtures used by
-LadybugDB tests.
+## Ownership and transaction flow
 
-## Request and autonomous-runtime flow
+Routes parse HTTP and resolve authentication. Domain services own authorization,
+World boundaries, business decisions and state transitions. Same-owner
+persistence files implement SQL. Runtime composes workers and cross-domain
+collaboration; domain services do not import runtime or bypass another owner.
 
-```text
-HTTP route
-   ↓
-domain service: authorization, business flow and state transition
-   ↓
-same-owner persistence / repository and explicit collaborators
-   ├─ SQLite canonical data
-   └─ bounded projection/query contracts and LadybugDB adapter
+PostgreSQL is canonical. LadybugDB can be rebuilt from committed projection
+events. The API, scheduler and projector run in one backend process. DB work
+uses short transactions; no connection is held while waiting for an AI reply.
+Retryable conflicts repeat the complete bounded DB transaction, with delayed
+results and idempotency records preserved. A retry must not repeat a public
+action or a completed AI request.
 
-FastAPI lifespan
-   ├─ scheduler component -> SQLite lease and canonical writes
-   └─ projector component -> SQLite outbox -> LadybugDB
-```
+Memory and relationship maintenance share one execution slot. The selected
+character's prepared run/request proceeds continuously at safe commit boundaries;
+other maintenance waits while Chat, SNS, search and status remain usable.
+Embeddings keep the batch-of-20 contract. Failed closed work remains history
+and is excluded from future automatic work. Users can retry remaining work or
+finish without retry; completed results remain committed.
 
-- Routes own HTTP parsing, authentication dependencies, and response/error
-  conversion.
-- Domain service code owns authorization, policy, deterministic choices,
-  and transaction boundaries.
-- Roles live under `app/domains/<business>`. Repository/client files and small
-  collaboration contracts separate actual SQL or external interactions where
-  useful; a separate interface layer is not mandatory for every service.
-- Runtime composes workers and cross-owner collaboration. Business services
-  do not import the runtime or bypass another domain's storage rules.
-- SQLite is the source of truth. LadybugDB graph state can be cleared and
-  replayed from successful canonical events.
-- Code validates World scope, source-event success, deletion/hide/cancel state,
-  and bounded context before an LLM may generate creative output.
+Chat/SNS use the accepted start input and stored original snapshots. Relationship
+review groups situation-memory bodies by counterpart and supplies only those
+bodies and the current perception. It does not reload original source content.
+Ownership, deletion, lease/fencing and duplicate/conflict checks still apply.
 
-See [Backend Architecture](../../backend/ARCHITECTURE.md) for code placement,
-supported entry roles, the single `app/main.py` application factory and shared
-Base/Session ownership. [Historical compatibility](../architecture/backend-compatibility.md)
-explains the exact old import paths retained for supported data upgrades and
-extensions. Release results and platform observations are separate from this architecture contract.
+## Runtime profiles and schema
 
-## Runtime profiles
+- `CONTRIBUTOR_POSTGRESQL`: browser / Docker / Termux composition.
+- `LOCAL_POSTGRESQL`: installed Windows sidecar with launch-token authorization.
+- `TEST`: explicit isolated stores or fakes. Legacy embedded profiles exist for
+  SQLite input compatibility; they are not the 0.1.4 service entrypoint.
 
-- `LOCAL_EMBEDDED`: installed product, Tauri static frontend, bundled sidecar.
-- `CONTRIBUTOR_EMBEDDED`: Docker-first development, optional host Tauri bridge.
-- `TEST`: explicit isolated stores or fakes.
+Profiles are typed at the composition root. Invalid database identities,
+privileged runtime roles or mismatched schema versions fail closed. SQLite 41
+is a frozen 0.1.3 migration-input contract; PostgreSQL schema v5 is a different
+version series. Historical hosted Alembic revisions are not the local PG chain.
+See [Backend Architecture](../../backend/ARCHITECTURE.md),
+[migration](postgresql-migration.md), and [backup](postgresql-backup.md).
 
-Profiles are converted to typed runtime configuration and passed to the FastAPI
-composition root. Parent environment variables cannot silently select a server
-database, Neo4j, or external workers. Missing or invalid profiles fail closed.
+## Providers, privacy and public boundaries
 
-## Provider and credential boundaries
-
-Provider-neutral contracts live under `app/providers/`. External SDK access stays in the concrete provider or integration adapter;
-domain services retain business decisions. Fake providers cover
-network-free success and failure scenarios.
-
-The shared Gemini adapter lives in `app/providers/gemini.py`; other transport
-adapters live in `app/integrations`. Domain `client` files supply the relevant
-business request context and interpret their supported results.
-
+Concrete adapters own SDK access; code owns allowed scope, deterministic
+preparation, result validation and persistence. Fake providers cover CI.
 `app/domains/identity/service/credential_resolution.py` owns credential
-resolution; `app/credentials/resolver.py` remains its shared compatibility
-export. Raw credential material is revealed only at the
-provider request boundary. Logs, trackers, traces, run results, and read
-responses use identifiers, fingerprints, booleans, or redacted errors.
+resolution. Plaintext is revealed only at the request boundary. Logs and read
+responses contain safe codes, IDs, fingerprints or booleans.
 
-Supported profiles use local authenticated encryption. Existing `local-v2` keys
-and `dev-v1` read/migration remain supported with the original root secret.
-The former angmoo.com Oracle KMS provider and SDK are retired: `oci-kms-v1:`
-records are preserved but cannot be used as keys, and raw hosted production
-startup is rejected. Existing browser and desktop security checks still apply.
-Do not replace preserved encrypted records or the root secret to conceal an unsupported credential.
+Local authenticated encryption preserves `local-v2` keys and supported `dev-v1`
+reads with the original secret. Hosted `oci-kms-v1:` records are preserved but
+cannot be used as local credentials. Never replace keys to hide an unsupported
+record. Keep Origin, Host, owner and launch-token checks enabled.
 
-## Preserved contracts
-
-- Generated FastAPI `/openapi.json` is the canonical REST contract.
-- The frozen SQLite baseline and explicit SQLite migration chain are the
-  canonical schema contract; historical PostgreSQL Alembic files are evidence,
-  not a new-feature runtime chain.
-- World scope, owner control mode, deterministic preparation and execution behavior,
-  credential redaction, lease/fencing, retry, and restart behavior remain
-  compatibility surfaces.
-- Intentional breaking changes require an Issue, deterministic tests, a data
-  migration when applicable, and a rollback plan.
-
-## Public/private boundary
-
-The public source includes FastAPI, Next.js, Tauri, SQLite/LadybugDB adapters,
-scheduler/projector components, providers and fakes, local owner, World and
-social surfaces, migrations, public-safe tests, Docker contributor tooling,
-and target-OS packaging workflows.
-
-It excludes hosted infrastructure, production credentials and configuration,
-private runbooks, dumps, backups, logs, traces, uploads, runtime outputs, and
-private admin or maintenance operations.
+Public code includes the local runtime, migrations and synthetic tests. It
+excludes credentials, personal DBs, backups, raw logs, private World Packages
+and hosted infrastructure. Generated OpenAPI remains the REST contract.
+Frontend ownership follows [ARCHITECTURE](../../frontend/ARCHITECTURE.md) and
+[DESIGN](../../frontend/DESIGN.md). English documents and fixed AI instructions
+remain canonical; user-facing copy has matching Korean translations.

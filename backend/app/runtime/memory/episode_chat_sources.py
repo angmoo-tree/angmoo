@@ -117,6 +117,9 @@ def read_episode_chat_page(session, *, scope: MemoryScope, thread_id: str,
                     source_digest=evidence.source_digest, role=role, text=text,
                     total_characters=len(text),
                     actor_label=labels.get(evidence.actor_world_character_id),
+                    actor_id=evidence.actor_world_character_id,
+                    counterpart_id=evidence.counterpart_world_character_id,
+                    observation_id=evidence.observation_id, source_event_id=evidence.source_event_id,
                     occurred_at=(evidence.source_created_at.replace(tzinfo=UTC) if evidence.source_created_at.tzinfo is None else evidence.source_created_at).isoformat(),
                 ))
             if len(members) != 2:

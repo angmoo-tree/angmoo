@@ -72,9 +72,9 @@ impl ProductDataPaths {
 
     pub const fn runtime_profile() -> &'static str {
         if cfg!(debug_assertions) {
-            "CONTRIBUTOR_EMBEDDED"
+            "CONTRIBUTOR_POSTGRESQL"
         } else {
-            "LOCAL_EMBEDDED"
+            "LOCAL_POSTGRESQL"
         }
     }
 

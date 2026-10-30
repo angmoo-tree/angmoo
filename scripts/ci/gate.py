@@ -18,7 +18,7 @@ def expected_jobs(gate: str, selection: dict) -> list[str]:
     if not selection["jobs"][gate]:
         return []
     if gate == "backend":
-        return ["backend-preflight", "backend-tests"]
+        return ["backend-preflight", "backend-tests", "postgresql"]
     if gate == "windows-installer":
         jobs = ["release-candidate", "installed-runtime-smoke"]
         if selection["windows"] == "full":

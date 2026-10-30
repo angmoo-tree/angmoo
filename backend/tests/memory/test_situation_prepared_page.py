@@ -56,6 +56,30 @@ def test_prepared_material_change_rolls_back_cursor_and_memory(tmp_path, mutatio
     engine.dispose()
 
 
+def test_failed_receipt_is_not_readmitted_and_cancelled_run_fences_late_page(tmp_path):
+    from sqlalchemy.orm import sessionmaker
+    from app.domains.memory.models.items import MemoryScopeSettingModel
+    from app.domains.memory.repository.situation_runs import require_run_fence
+    from app.domains.memory.exceptions import MemoryConflictError
+    engine,run_id,token,sequence,_=setup(tmp_path)
+    with Session(engine) as db:
+        run=db.get(MemorySituationApplyRun,run_id)
+        run.state,run.error_code='error','situation_apply_failed'
+        db.commit()
+        row=db.get(MemoryScopeSettingModel,run.scope_setting_id)
+        from app.domains.memory.contracts.scope import MemoryScope
+        from app.runtime.memory.composition import memory_repository
+        setting=memory_repository(db).get_scope_setting(MemoryScope(row.owner_id,row.world_id,row.subject_world_character_id))
+        for key in ('new-manual-request','new-automatic-request'):
+            new=request_run(db,setting,trigger='manual',request_key=key,expected_version=1,now=NOW)
+            assert new.run_id is None and new.result_code=='empty'
+        db.commit()
+        with pytest.raises(MemoryConflictError,match='fence_lost'):
+            require_run_fence(db,run_id,token,NOW)
+        assert db.get(MemorySituationReceipt,sequence).state=='pending'
+    engine.dispose()
+
+
 def test_prepare_hash_work_does_not_hold_writer_and_apply_skips_reparsing(tmp_path, monkeypatch):
     engine, run_id, token, sequence, _ = setup(tmp_path)
     from app.domains.memory.repository import situation_validation
@@ -80,4 +104,27 @@ def test_prepare_hash_work_does_not_hold_writer_and_apply_skips_reparsing(tmp_pa
         db.commit()
         assert db.get(MemorySituationReceipt, sequence).state == "applied"
         assert db.get(MemorySituationApplyRun, run_id).cursor == sequence
+    engine.dispose()
+
+
+def test_postgresql_deadline_defers_memory_without_advancing_cursor(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from sqlalchemy.orm import sessionmaker
+    from app.core.postgresql_concurrency import PostgresDeadlineExceeded
+    from app.runtime.memory import situation_runtime as module
+    engine, run_id, token, sequence, _ = setup(tmp_path)
+    sessions = sessionmaker(engine, expire_on_commit=False)
+    runtime = module.SituationRuntime(sessions)
+    monkeypatch.setattr(module, "datetime", SimpleNamespace(now=lambda *_:NOW, fromisoformat=__import__("datetime").datetime.fromisoformat))
+    runtime.result_basis = SimpleNamespace(prepare=lambda page: {})
+    def delayed(*args, **kwargs):
+        raise PostgresDeadlineExceeded("postgresql_writer_execution_deadline")
+    monkeypatch.setattr(module, "apply_page", delayed)
+    assert runtime._apply_claimed(run_id, token) == "situation_storage_busy"
+    with sessions() as db:
+        run = db.get(MemorySituationApplyRun, run_id)
+        assert run.state == "deferred" and run.error_code == "situation_storage_busy"
+        assert run.lease_token is None and run.cursor < sequence
+        assert db.get(MemorySituationReceipt, sequence).state == "pending"
+        assert db.scalar(select(MemoryItem.id)) is None
     engine.dispose()

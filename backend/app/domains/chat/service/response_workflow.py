@@ -4,6 +4,7 @@ from __future__ import annotations
 from app.core.work_observation import scope as observation_scope, contextual
 
 import asyncio
+from anyio import CancelScope
 import logging
 from hashlib import sha256
 from app.domains.chat.service.social_context_inspector import social_context_inspector as _social_context_inspector
@@ -148,6 +149,23 @@ class ResponseGenerationWorkflowService:
         progress = None
         lease_token = f"lease-{uuid4().hex}"
         try:
+            # Own the response before validating its stored input, so a damaged
+            # admitted packet can be durably terminated under the same CAS.
+            now = datetime.now(UTC)
+            record = await self._database_unit(lambda: self._lifecycle.acquire_lease(
+                request_id=record.request_id,
+                lease_token=lease_token,
+                now=now,
+                lease_expires_at=min(
+                    record.deadline_at,
+                    now + timedelta(seconds=command.lease_seconds),
+                ),
+            ), lifecycle_only=True)
+            from app.domains.chat.contracts.initial_input import INPUT_KEY, restore as restore_initial_input, assert_available
+            assert_available(record.node_state)
+            input_restored = INPUT_KEY in record.node_state
+            if input_restored:
+                command = restore_initial_input(command, record.node_state[INPUT_KEY])
             from app.contracts.name_binding import read_name_binding, NameBindingError
             from app.domains.characters.service.prompt_persona import request_persona, request_activity_thought
             name_binding = read_name_binding(record.node_state)
@@ -174,22 +192,25 @@ class ResponseGenerationWorkflowService:
                     command.preflight.responding_world_character_id, command.preflight.requester_world_character_id):
                     raise NameBindingError("name_binding_scope_invalid")
                 if command.name_binding_validator:
-                    command.name_binding_validator()
+                    await self._call_database(command.name_binding_validator)
                 persona = request_persona(command.profile, name_binding)
-                command = replace(command, profile=replace(command.profile,
-                    name=persona["name"], worldview=persona["description"],
-                    **{key: persona[key] for key in ("one_liner", "personality", "speech_style",
-                        "character_background", "topic_preferences", "safety_rules")}))
+                if not input_restored:
+                    command = replace(command, profile=replace(command.profile,
+                        name=persona["name"], worldview=persona["description"],
+                        **{key: persona[key] for key in ("one_liner", "personality", "speech_style",
+                            "character_background", "topic_preferences", "safety_rules")}))
                 observe("name_binding", policy_version=name_binding.policy_version,
                     binding_digest=name_binding.digest, profile_version=name_binding.user_profile_version,
                     fields=persona["name_binding"]["fields"])
             if self._recall_mode is not ChatRecallMode.LEGACY:
                 if self._social_context_provider is None:
                     raise RetrievalContractError("chat_social_context_provider_required")
-                snapshot = self._social_context_provider.prepare(GraphRecallScope(
+                if input_restored and command.social_snapshot is None:
+                    raise RetrievalContractError("chat_initial_social_input_unavailable")
+                snapshot = command.social_snapshot or await self._call_database(lambda: self._social_context_provider.prepare(GraphRecallScope(
                     command.preflight.owner_id, command.preflight.world_id,
                     command.preflight.responding_world_character_id,
-                ), counterpart_id=command.preflight.requester_world_character_id)
+                ), counterpart_id=command.preflight.requester_world_character_id))
                 command = replace(command, recall_mode=self._recall_mode, social_snapshot=snapshot)
                 if identity is not None:
                     identity = identity.extend({item.relationship.target_world_character_id: item.display_name for item in snapshot.items})
@@ -205,21 +226,9 @@ class ResponseGenerationWorkflowService:
                 raise RetrievalContractError(
                     "response_workflow_today_validator_required"
                 )
-            now = datetime.now(UTC)
-            record = self._lifecycle.acquire_lease(
-                request_id=record.request_id,
-                lease_token=lease_token,
-                now=now,
-                lease_expires_at=min(
-                    record.deadline_at,
-                    now + timedelta(seconds=command.lease_seconds),
-                ),
-            )
-            self._unit_of_work.checkpoint()
             fence = self._fence(record)
             accepted = self._event(record, GenerationEventType.ACCEPTED, sequence=0)
-            self._lifecycle.accept_event(fence, accepted, now=datetime.now(UTC))
-            self._unit_of_work.checkpoint()
+            await self._database_unit(lambda: self._lifecycle.accept_event(fence, accepted, now=datetime.now(UTC)), lifecycle_only=True)
             yield accepted
 
             progress = ResponseExecutionProgress(record, record.call_tracker)
@@ -242,6 +251,8 @@ class ResponseGenerationWorkflowService:
                 social_context_provider=self._social_context_provider,
                 thought_finalizer=thought_finalizer,
                 situation_memory=self._situation_memory,
+                database_call=self._call_database,
+                database_unit=self._database_unit,
             )
             try:
                 state = await self._graph_executor.run(
@@ -261,7 +272,7 @@ class ResponseGenerationWorkflowService:
             if name_binding is not None:
                 from app.domains.characters.service.prompt_persona import render_names
                 if command.name_binding_validator:
-                    command.name_binding_validator()
+                    await self._call_database(command.name_binding_validator)
                 rendered = render_names(response.text, name_binding, output=True,
                     recipient_id=command.preflight.requester_world_character_id, limit=16000)
                 response = replace(response, text=rendered.text)
@@ -271,7 +282,7 @@ class ResponseGenerationWorkflowService:
                     final_sha256=sha256(response.text.encode()).hexdigest(),
                     applied=rendered.replacements > 0, **rendered.receipt())
             workflow_recipe = state["workflow_recipe"]
-            record = self._transition(
+            record = await self._transition(
                 record,
                 ResponseRequestState.RESPONSE_STREAMING,
                 node_state={
@@ -287,7 +298,7 @@ class ResponseGenerationWorkflowService:
 
             sequence = record.last_emitted_sequence
             if command.social_snapshot is not None:
-                self._social_context_provider.assert_current(command.social_snapshot)
+                await self._call_database(lambda: self._social_context_provider.assert_usable(command.social_snapshot))
             for delta in character_response_deltas(response.text):
                 sequence += 1
                 event = self._event(
@@ -296,30 +307,26 @@ class ResponseGenerationWorkflowService:
                     sequence=sequence,
                     payload={"text": delta},
                 )
-                self._lifecycle.accept_event(
+                await self._database_unit(lambda: self._lifecycle.accept_event(
                     self._fence(record),
                     event,
                     now=datetime.now(UTC),
-                )
-                self._unit_of_work.checkpoint()
+                ), lifecycle_only=True)
                 record = _with_sequence(record, sequence)
                 yield event
                 await asyncio.sleep(0)
 
-            if (
-                command.today_sns_snapshot is not None
-                and self._today_snapshot_validator is not None
-            ):
-                self._today_snapshot_validator.assert_current(
-                    command.today_sns_snapshot
-                )
-            record = self._transition(record, ResponseRequestState.COMMITTING)
+            # Today is reference content captured for this response. New SNS
+            # events, midnight or edits do not change that delivered input.
+            record = await self._transition(record, ResponseRequestState.COMMITTING)
             await progress.assert_memories_current(bundle)
-            with observation_scope(chat_stage="response_finalize"):
+            committing_record = record
+            def persist_response():
+                record = committing_record
                 if command.name_binding_validator:
                     command.name_binding_validator()
                 if command.social_snapshot is not None:
-                    self._social_context_provider.assert_current(command.social_snapshot)
+                    self._social_context_provider.assert_usable(command.social_snapshot)
                 sequence = record.last_emitted_sequence + 1
                 completed = self._event(
                     record,
@@ -371,25 +378,38 @@ class ResponseGenerationWorkflowService:
                 )
                 if self._situation_memory is not None:
                     self._situation_memory.admit(command, committed, response)
-                self._unit_of_work.checkpoint()
+                return committed, completed
+            with observation_scope(chat_stage="response_finalize"):
+                committed, completed = await self._database_unit(persist_response)
+            record = committed
+            after_commit = getattr(self._unit_of_work, "response_committed", None)
+            if after_commit is not None:
+                await self._call_database(lambda: after_commit(committed.request_id))
             if command.request.node_state.get("_situation_policy") is None:
                 with observation_scope(chat_stage="post_commit"):
-                    self._propose_memory_after_commit(command, committed)
+                    await self._call_database(lambda: self._propose_memory_after_commit(command, committed))
             yield completed
         except asyncio.CancelledError as exc:
-            with observation_scope(chat_stage="cancel_or_failure"):
+            def settle_cancellation():
                 self._unit_of_work.rollback()
-            record = self._after_rollback(record)
-            self._cancel_if_active(
-                record, tracker=getattr(exc, "call_tracker", None) or (None if progress is None else progress.call_tracker),
-                graph_diagnostic=graph_failure_diagnostic(exc),
-            )
+                current_record = self._after_rollback(record)
+                self._cancel_if_active(
+                    current_record, tracker=getattr(exc, "call_tracker", None) or (None if progress is None else progress.call_tracker),
+                    graph_diagnostic=graph_failure_diagnostic(exc),
+                )
+                return current_record
+            # A disconnected HTTP stream cancels every subsequent await in its
+            # AnyIO scope. Finish this finite DB-only cleanup before propagating
+            # cancellation. One handoff also survives repeated Task.cancel():
+            # session_call drains the whole rollback/fence/terminal-save unit.
+            with observation_scope(chat_stage="cancel_or_failure"), CancelScope(shield=True):
+                record = await self._call_database(settle_cancellation)
             raise
         except Exception as exc:
             with observation_scope(chat_stage="cancel_or_failure"):
-                self._unit_of_work.rollback()
+                await self._call_database(self._unit_of_work.rollback)
             observe("workflow_failed", status="failed")
-            record = self._after_rollback(record)
+            record = await self._call_database(lambda: self._after_rollback(record))
             async for event in self._fail(
                 record, exc, tracker=None if progress is None else progress.call_tracker
             ):
@@ -449,7 +469,7 @@ class ResponseGenerationWorkflowService:
                 committed.request_id,
             )
 
-    def _transition(
+    async def _transition(
         self,
         record: ResponseRequestRecord,
         target: ResponseRequestState,
@@ -462,7 +482,7 @@ class ResponseGenerationWorkflowService:
         merged_node_state = dict(record.node_state)
         if node_state is not None:
             merged_node_state.update(node_state)
-        updated = self._lifecycle.transition(
+        updated = await self._database_unit(lambda: self._lifecycle.transition(
             self._fence(record),
             target=target,
             route=route,
@@ -470,9 +490,26 @@ class ResponseGenerationWorkflowService:
             node_state=merged_node_state,
             call_tracker=call_tracker,
             now=datetime.now(UTC),
-        )
-        self._unit_of_work.checkpoint()
+        ), lifecycle_only=True)
         return updated
+
+    async def _call_database(self, operation):
+        call = getattr(self._unit_of_work, "call", None)
+        return await call(operation) if call is not None else operation()
+
+    async def _database_unit(self, operation, *, lifecycle_only=False):
+        return await self._call_database(lambda: self._run_database_unit(operation, lifecycle_only=lifecycle_only))
+
+    def _run_database_unit(self, operation, *, lifecycle_only=False):
+        # The opt-in is restricted to existing request-row CAS operations.
+        # Message/relationship/memory finalization uses the default owner.
+        run = getattr(self._unit_of_work, "run_lifecycle_unit", None) if lifecycle_only else None
+        run = run or getattr(self._unit_of_work, "run_database_unit", None)
+        if run is not None:
+            return run(operation)
+        result = operation()
+        self._unit_of_work.checkpoint()
+        return result
 
     @contextual(chat_stage="cancel_or_failure")
     async def _fail(
@@ -485,10 +522,19 @@ class ResponseGenerationWorkflowService:
         if record.state in TERMINAL_STATES:
             return
         failure_class, retryable, reason = _classify_failure(exc)
+        target = ResponseRequestState.FAILED
+        if datetime.now(UTC) >= record.deadline_at:
+            target = ResponseRequestState.TIMED_OUT
+            failure_class, retryable = "deadline_exceeded", True
+            reason = ResponseTerminalReason.DEADLINE_EXCEEDED
+        facts = _safe_failure_facts(exc)
+        logger.warning("chat_workflow_failed request_id=%s state=%s error=%s sqlstate=%s sites=%s",
+            record.request_id, record.state.value, facts["error_class"], facts["sqlstate"], facts["sites"])
         observe(
             "workflow_failed",
             status="failed",
             reason=failure_class,
+            failure_code=facts["error_class"],
             validation_code=str(exc)
             if isinstance(exc, ResponseExecutionError)
             else None,
@@ -512,7 +558,9 @@ class ResponseGenerationWorkflowService:
             sequence=sequence,
             payload={"failure_class": failure_class, "retryable": retryable},
         )
-        try:
+        failed_record = record
+        def persist_failure():
+            record = failed_record
             self._lifecycle.accept_event(
                 self._fence(record),
                 event,
@@ -521,7 +569,7 @@ class ResponseGenerationWorkflowService:
             record = _with_sequence(record, sequence)
             self._lifecycle.mark_terminal(
                 self._fence(record),
-                target=ResponseRequestState.FAILED,
+                target=target,
                 reason=reason,
                 retryable=retryable,
                 failure_class=failure_class,
@@ -533,9 +581,14 @@ class ResponseGenerationWorkflowService:
                 or record.call_tracker,
                 now=datetime.now(UTC),
             )
-            self._unit_of_work.checkpoint()
+            if self._situation_memory is not None:
+                # Memory delivery has failed/cancelled outcomes; the Chat
+                # lifecycle separately carries its more specific timed_out state.
+                self._situation_memory.record_terminal(record,"failed",reason=failure_class)
+        try:
+            await self._database_unit(persist_failure, lifecycle_only=True)
         except Exception:
-            self._unit_of_work.rollback()
+            await self._call_database(self._unit_of_work.rollback)
             raise exc
         yield event
 
@@ -545,7 +598,9 @@ class ResponseGenerationWorkflowService:
     ) -> None:
         if record.state in TERMINAL_STATES:
             return
-        try:
+        cancelled_record = record
+        def persist_cancel():
+            record = cancelled_record
             sequence = record.last_emitted_sequence + 1
             event = self._event(
                 record,
@@ -568,7 +623,10 @@ class ResponseGenerationWorkflowService:
                 graph_diagnostic=graph_diagnostic,
                 now=datetime.now(UTC),
             )
-            self._unit_of_work.checkpoint()
+            if self._situation_memory is not None:
+                self._situation_memory.record_terminal(record,"cancelled",reason="client_disconnected")
+        try:
+            self._run_database_unit(persist_cancel, lifecycle_only=True)
         except Exception:
             self._unit_of_work.rollback()
 
@@ -638,8 +696,28 @@ def _classify_failure(
     from app.contracts.name_binding import NameBindingError
     from app.domains.chat.contracts.recall_currentness import RecallEvidenceChanged
     from app.domains.chat.exceptions import ChatSituationEvidenceError
+    from app.domains.relationships.contracts.social_context import SocialContextValidationError
+    from app.core.postgresql_concurrency import PostgresCommitOutcomeUnknown
+    from app.core.sqlite_concurrency import is_sqlite_contention
+    from sqlalchemy.exc import DBAPIError, TimeoutError as PoolTimeout
+    if isinstance(exc, RetrievalContractError) and str(exc).startswith("chat_initial_"):
+        # Repeating a request cannot recover an absent or corrupt admitted
+        # input. Never offer an endless retry that silently seeks fresher data.
+        return "initial_input_unavailable", False, ResponseTerminalReason.CONTRACT_INVALID
+    if isinstance(exc, PostgresCommitOutcomeUnknown):
+        return "storage_commit_uncertain", False, ResponseTerminalReason.COMMIT_CONFLICT
+    if is_sqlite_contention(exc) or isinstance(exc, PoolTimeout):
+        return "storage_unavailable", True, ResponseTerminalReason.COMMIT_CONFLICT
+    if isinstance(exc, DBAPIError):
+        return "storage_failure", False, ResponseTerminalReason.COMMIT_CONFLICT
     if isinstance(exc, ChatSituationEvidenceError):
         return "situation_evidence_contract_invalid", False, ResponseTerminalReason.CONTRACT_INVALID
+    if isinstance(exc, SocialContextValidationError):
+        if exc.reason == "visibility_lost":
+            return "social_context_access_revoked", False, ResponseTerminalReason.POLICY_DENIED
+        if exc.reason in {"canonical_database_busy", "canonical_read_deadline", "canonical_read_error", "canonical_database_error"}:
+            return "storage_unavailable", True, ResponseTerminalReason.RETRIEVAL_FAILURE
+        return "initial_input_invalid", False, ResponseTerminalReason.CONTRACT_INVALID
     if isinstance(exc, RecallEvidenceChanged):
         return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, NameBindingError):
@@ -681,6 +759,27 @@ def _classify_failure(
         failure_class = "generation_failed"
         retryable = True
     return failure_class, retryable, reason
+
+
+def _safe_failure_facts(exc: BaseException) -> dict:
+    """Structural evidence only; never stringify SQL, parameters or provider text."""
+    import re
+    current, seen, sites, state = exc, set(), [], None
+    for _ in range(4):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        raw = getattr(getattr(current, "orig", current), "sqlstate", None)
+        if isinstance(raw, str) and re.fullmatch(r"[A-Z0-9]{5}", raw):
+            state = state or raw
+        trace = current.__traceback__
+        while trace is not None:
+            path = trace.tb_frame.f_code.co_filename.replace("\\", "/")
+            if "/app/" in path:
+                sites.append(f"{path.rsplit('/app/',1)[1]}:{trace.tb_lineno}:{trace.tb_frame.f_code.co_name}")
+            trace = trace.tb_next
+        current = current.__cause__ or current.__context__
+    return {"error_class": type(exc).__name__, "sqlstate": state, "sites": sites[-8:]}
 
 
 def _provider_failure_diagnostic(exc: BaseException) -> dict[str, Any] | None:

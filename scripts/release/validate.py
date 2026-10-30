@@ -9,7 +9,7 @@ import subprocess
 import sys
 import uuid
 
-from launcher.termux.payload import digest_file, read_manifest, require, verify_archive
+from launcher.termux.payload import digest_file, read_manifest, require, verify_archive, services_for
 from scripts.ci.check_container_images import _history, validate_history, validate_image_document
 from scripts.release.candidate import ROOT, write_json, loaded_image, candidate_ref
 from scripts.release.scan import scan
@@ -18,7 +18,9 @@ from scripts.release.scan import scan
 def validate(manifest_path: Path, architecture: str) -> None:
     manifest = read_manifest(manifest_path, require_all=False)
     pair = [i for i in manifest["images"] if i["platform"] == "linux/" + architecture]
-    require({i["service"] for i in pair} == {"backend", "frontend"}, "candidate_pair_missing")
+    services=services_for(manifest['version'])
+    modern='postgres' in services
+    require({i["service"] for i in pair} == set(services), "candidate_pair_missing")
     output = manifest_path.parent / f"validation-{architecture}"
     output.mkdir(parents=True, exist_ok=True)
     refs = []
@@ -36,7 +38,10 @@ def validate(manifest_path: Path, architecture: str) -> None:
         subprocess.run(["docker", "tag", imported, ref], check=True)
         refs.append(ref)
         if item["service"] == "backend":
-            args = ["--mount", f"type=bind,source={ROOT / 'scripts/release/native_smoke.py'},target=/tmp/native_smoke.py,readonly", "--env", "PYTHONPATH=/app", "--entrypoint", "python", ref, "/tmp/native_smoke.py"]
+            native='native_postgresql.py' if modern else 'native_smoke.py'
+            args = ["--mount", f"type=bind,source={ROOT / 'scripts/release' / native},target=/tmp/native_smoke.py,readonly", "--env", "PYTHONPATH=/app", "--entrypoint", "python", ref, "/tmp/native_smoke.py"]
+        elif item['service']=='postgres':
+            args=['--entrypoint','sh',ref,'-ec',"postgres --version; test -f /usr/share/postgresql/17/extension/vector.control; test -f /usr/lib/postgresql/17/lib/vector.so"]
         else:
             args = ["--workdir", "/app/app", "--entrypoint", "node", ref, "-e", "const s=require(require.resolve('sharp',{paths:[require.resolve('next/package.json')]})); s({create:{width:2,height:2,channels:3,background:'red'}}).png().toBuffer().then(b=>{if(!b.length)process.exit(1);console.log(JSON.stringify({status:'PASS',architecture:process.arch,sharp:s.versions.sharp,node:process.version}))})"]
         result = subprocess.run(["docker", "run", "--rm", "--platform", item["platform"], "--network", "none", *args], check=True, text=True, stdout=subprocess.PIPE)
@@ -48,7 +53,10 @@ def validate(manifest_path: Path, architecture: str) -> None:
     by_service = {item["service"]: candidate_ref(item) for item in pair}
     from scripts.release.feature_smoke import run as feature_smoke
     from scripts.release.upstream_smoke import run as upstream_smoke
-    feature_smoke(by_service["backend"], "linux/" + architecture, output)
+    if modern:
+        from scripts.release.postgresql_feature_smoke import run as pg_feature_smoke
+        pg_feature_smoke(by_service['backend'],by_service['postgres'],'linux/'+architecture,output)
+    else:feature_smoke(by_service["backend"], "linux/" + architecture, output)
     upstream_smoke(by_service["frontend"], by_service["backend"], "linux/" + architecture, output,
                    expected_version=manifest["version"])
     env = {**os.environ, "ANGMOO_CI_PLATFORM": "linux/" + architecture, "ANGMOO_VERSION": manifest["version"]}

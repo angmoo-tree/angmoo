@@ -133,6 +133,10 @@ class RunLlmTracker:
         self.provider_call_order_in_run += 1
         return self.provider_call_order_in_run
 
+    async def reserve_provider_call_order(self) -> int:
+        """Await durable admission, when needed, before a physical provider call."""
+        return self.next_provider_call_order()
+
     def record_wait(
         self,
         *,
@@ -818,12 +822,6 @@ async def generate_text(
             })) if tracker.observer is not None else None,
         )
     async def _invoke(call_order, provider_call_order, checked_request):
-        # Admission and its final fence have completed. Let the workflow record
-        # this exact physical input without changing the legacy start callback.
-        if on_request_submission is not None:
-            on_request_submission(checked_request)
-        if on_request_start is not None:
-            on_request_start(call_order)
         request = replace(checked_request, diagnostic_callback=make_request(call_order, provider_call_order).diagnostic_callback)
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
@@ -852,8 +850,14 @@ async def generate_text(
             checked_request = await request_preparer(checked_request)
             if before_provider_request is not None:
                 await before_provider_request()
+        # Local admission/receipt failures are not provider attempts. Preserve
+        # their typed cause and never send or retry an AI request for them.
+        if on_request_submission is not None:
+            on_request_submission(checked_request)
         call_order = tracker.next_call_order()
-        provider_call_order = tracker.next_provider_call_order()
+        provider_call_order = await tracker.reserve_provider_call_order()
+        if on_request_start is not None:
+            on_request_start(call_order)
         started = time.perf_counter()
         try:
             async with asyncio.timeout(timeout_seconds):

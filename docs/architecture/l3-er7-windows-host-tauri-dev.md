@@ -12,8 +12,8 @@ Windows host Tauri shell
                          ▼
 Docker contributor stack
 ├─ frontend: Next.js dev, HMR, browser/Tauri WebView source
-└─ backend: CONTRIBUTOR_EMBEDDED
-   ├─ SQLite + FTS5
+└─ backend: CONTRIBUTOR_POSTGRESQL
+   ├─ PostgreSQL keyword search + pgvector exact search
    ├─ LadybugDB
    ├─ scheduler in process
    └─ projector in process

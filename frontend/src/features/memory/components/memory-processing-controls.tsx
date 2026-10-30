@@ -6,7 +6,8 @@ import { Field, Input } from "@/components/ui/form-controls";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
-import { getMemoryProcessing, saveMemoryProcessing, savePendingMemories, MemoryApiError } from "../api/memory-client";
+import { getMemoryProcessing, saveMemoryProcessing, savePendingMemories, commandMemoryProcessing, MemoryApiError } from "../api/memory-client";
+import type { MaintenanceAction } from "../types/consolidation-contract";
 import type { MemoryProcessingSetting, MemoryProcessingUpdate, MemorySaveRequest } from "../types/memory-processing-contract";
 import styles from "./memory-workspace.module.css";
 import { MemoryUnsavedExperiencesControls } from "./memory-unsaved-experiences";
@@ -18,6 +19,8 @@ const labels: Record<MemoryProcessingSetting["status"], string> = {
   accepted: "기억 저장을 기다리고 있어요.", applying: "접수한 경험을 기억으로 저장하고 있어요.",
   saved: "기억 저장을 마쳤어요. 검색 자료는 이어서 준비합니다.",
   partial_error: "일부 경험을 저장하지 못했어요. 저장된 기억은 유지됩니다.",
+  closed: "완료된 결과와 실패 이력을 보존하고 종료했습니다.",
+  cancelled: "남은 정리를 중단했습니다. 완료된 결과는 유지됩니다.",
 };
 type Props = { worldId: string; subjectId: string; disabled: boolean;
   acquire: () => boolean; release: () => void; onCompleted: () => void };
@@ -26,12 +29,13 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
   const uiText = useUiText("memory"), formatDate = useUiDateFormatter();
   const [saved, setSaved] = useState<MemoryProcessingSetting | null>(null);
   const [draft, setDraft] = useState<ReturnType<typeof editable> | null>(null);
-  const [busy, setBusy] = useState<"save" | "settings" | null>(null);
+  const [busy, setBusy] = useState<"save" | "settings" | "command" | null>(null);
   const [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [conflict, setConflict] = useState<MemoryProcessingSetting | null>(null);
   const [revision, setRevision] = useState(0);
   const lifetime = useRef<AbortController | null>(null), lock = useRef(false), generation = useRef(0);
   const pending = useRef<MemorySaveRequest | null>(null), update = useRef<MemoryProcessingUpdate | null>(null);
+  const recovery = useRef<{mode: MaintenanceAction; key: string; revision: number; runId: string} | null>(null);
   const baseline = useRef<MemoryProcessingSetting | null>(null), completion = useRef<string | null | undefined>(undefined);
   const draftRef = useRef<typeof draft>(null);
   function changeDraft(value: NonNullable<typeof draft>) { draftRef.current = value; setDraft(value); }
@@ -108,6 +112,25 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
     }
   }
 
+  async function recover(mode: MaintenanceAction) {
+    if (!saved?.run_id || lock.current || disabled || !acquire()) return;
+    lock.current = true; generation.current += 1;
+    const signal = lifetime.current?.signal;
+    setBusy("command"); setError("");
+    if (recovery.current?.mode !== mode || recovery.current?.runId !== saved.run_id)
+      recovery.current = {mode, key: crypto.randomUUID(), revision: saved.revision ?? 0, runId: saved.run_id};
+    const request = recovery.current;
+    try {
+      const value = await commandMemoryProcessing(worldId, subjectId, request.runId,
+        {mode, idempotency_key: request.key, expected_revision: request.revision}, signal);
+      if (!signal?.aborted) { setSaved(value); recovery.current = null; }
+    } catch {
+      if (!signal?.aborted) setError(uiText("복구 요청을 완료하지 못했어요. 상태를 확인한 뒤 다시 시도해 주세요."));
+    } finally {
+      lock.current = false; release(); if (!signal?.aborted) setBusy(null);
+    }
+  }
+
   if (!saved || !draft) return <div role="status"><p>{error || uiText("설정 불러오는 중")}</p>
     {error && <Button compact variant="secondary" onClick={() => setRevision(v => v + 1)}>{uiText("설정 다시 불러오기")}</Button>}</div>;
   return <div className="grid gap-4" data-memory-processing>
@@ -116,8 +139,12 @@ export function MemoryProcessingControls({ worldId, subjectId, disabled, acquire
       <Button disabled={disabled || busy !== null || !saveAvailable} loading={busy === "save"}
         loadingLabel={uiText("요청 중")} onClick={() => void perform("save")}>{uiText("지금 기억 저장")}</Button>
     </div>
-    <p role="status">{uiText(!running && saved.pending_count === 0 && saved.blocked_count === 0
+    <p role="status">{uiText(["idle", "saved"].includes(saved.status) && saved.pending_count === 0 && saved.blocked_count === 0
       ? "현재 저장하지 못한 경험이나 저장 대기가 없어요." : labels[saved.status])}</p>
+    <div className="flex flex-wrap gap-2">{saved.actions?.map(mode => <Button key={mode} variant="secondary"
+      disabled={disabled || busy !== null} onClick={() => void recover(mode)}>{uiText(({
+        resume_storage: "받은 결과 저장 재개", regenerate_failed: "실패한 부분 다시 판단", resume_remaining: "남은 작업 재개",
+        cancel_remaining: "남은 정리 중단", close_without_retry: "재시도 없이 종료"})[mode])}</Button>)}</div>
     <MemoryUnsavedExperiencesControls worldId={worldId} subjectId={subjectId} processing={saved}
       disabled={disabled || busy !== null} acquire={acquire} release={release} onCompleted={onCompleted} onProcessing={setSaved} />
     <fieldset disabled={disabled || busy !== null} className="grid gap-3">

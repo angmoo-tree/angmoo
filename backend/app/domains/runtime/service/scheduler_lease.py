@@ -35,8 +35,14 @@ class SchedulerLeaseService:
         self._session_factory = session_factory
         self._installation_reader = installation_reader
 
-    def acquire(self, *, owner_id: str, ttl_seconds: int) -> SchedulerLeaseSnapshot:
+    def _write(self, operation):
         with self._session_factory() as db:
+            result = operation(db)
+            db.commit()
+            return result
+
+    def acquire(self, *, owner_id: str, ttl_seconds: int) -> SchedulerLeaseSnapshot:
+        def operation(db):
             _advisory_xact_lock(db)
             now = _database_now(db)
             installation = self._installation_reader(db)
@@ -58,7 +64,10 @@ class SchedulerLeaseService:
             ):
                 db.rollback()
                 raise SchedulerLeaseHeldError("scheduler lease is already held")
-            elif row.lease_owner_id != owner_id:
+            elif (row.lease_owner_id != owner_id
+                    or row.lease_expires_at is None
+                    or aware_utc(row.lease_expires_at) <= now
+                    or row.state != SchedulerLeaseState.ACTIVE.value):
                 row.fencing_epoch += 1
             row.lease_owner_id = owner_id
             row.state = SchedulerLeaseState.ACTIVE.value
@@ -69,14 +78,14 @@ class SchedulerLeaseService:
             row.next_tick_at = now
             row.last_error_code = None
             row.shutdown_requested_at = None
-            db.commit()
-            db.refresh(row)
             return _snapshot(row)
+
+        return self._write(operation)
 
     def heartbeat(
         self, *, owner_id: str, fencing_epoch: int, ttl_seconds: int
     ) -> SchedulerLeaseSnapshot:
-        with self._session_factory() as db:
+        def operation(db):
             row, now = _locked_current_lease(
                 db,
                 owner_id=owner_id,
@@ -95,9 +104,9 @@ class SchedulerLeaseService:
             row.lease_expires_at = now + timedelta(seconds=ttl_seconds)
             row.last_observed_at = now
             row.state = SchedulerLeaseState.ACTIVE.value
-            db.commit()
-            db.refresh(row)
             return _snapshot(row)
+
+        return self._write(operation)
 
     def begin_tick(
         self,
@@ -107,7 +116,7 @@ class SchedulerLeaseService:
         ttl_seconds: int,
         interval_seconds: int,
     ) -> SchedulerTickPermit:
-        with self._session_factory() as db:
+        def operation(db):
             row, now = _locked_current_lease(
                 db,
                 owner_id=owner_id,
@@ -129,8 +138,9 @@ class SchedulerLeaseService:
                 row.last_tick_finished_at = None
                 row.last_tick_result = None
                 row.last_error_code = None
-            db.commit()
             return permit
+
+        return self._write(operation)
 
     def finish_tick(
         self,
@@ -142,7 +152,7 @@ class SchedulerLeaseService:
         result: SchedulerTickResult,
         error_code: str | None = None,
     ) -> SchedulerLeaseSnapshot:
-        with self._session_factory() as db:
+        def operation(db):
             row, now = _locked_current_lease(
                 db,
                 owner_id=owner_id,
@@ -154,12 +164,12 @@ class SchedulerLeaseService:
             row.last_tick_finished_at = aware_utc(finished_at)
             row.last_tick_result = result.value
             row.last_error_code = error_code
-            db.commit()
-            db.refresh(row)
             return _snapshot(row)
 
+        return self._write(operation)
+
     def release(self, *, owner_id: str, fencing_epoch: int) -> SchedulerLeaseSnapshot:
-        with self._session_factory() as db:
+        def operation(db):
             _advisory_xact_lock(db)
             row = lease_repository.locked_row(db)
             now = _database_now(db)
@@ -176,9 +186,9 @@ class SchedulerLeaseService:
             row.lease_expires_at = now
             row.lease_owner_id = None
             row.next_tick_at = None
-            db.commit()
-            db.refresh(row)
             return _snapshot(row)
+
+        return self._write(operation)
 
     def read(self) -> SchedulerLeaseSnapshot | None:
         with self._session_factory() as db:

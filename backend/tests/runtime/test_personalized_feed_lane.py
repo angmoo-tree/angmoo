@@ -105,13 +105,10 @@ def test_feed_planner_failed_retry_keeps_delivery_but_has_no_public_effect(monke
                     "identity": {"activity_id": ctx.run_id},
                     "shared_context": {"current_state": read_state(
                         db, world_id=actor.world_id, actor_id=actor.id)}})
-            if failure == "guard_change":
-                assert "activity_source_changed" in str(caught.value)
-                assert len(calls) == 1
-            else:
-                assert isinstance(caught.value, direct_llm.DirectLlmJsonError)
-                assert caught.value.attempt_count == 2
-                assert len(calls) == 2
+            # Editing reference prose cannot stop a retry; invalid model output can.
+            assert isinstance(caught.value, direct_llm.DirectLlmJsonError)
+            assert caught.value.attempt_count == 2
+            assert len(calls) == 2
             assert db.scalar(select(func.count(PostLike.id))) == 0
             assert db.scalar(select(RecommendationDelivery)).state == "delivered"
     asyncio.run(scenario())

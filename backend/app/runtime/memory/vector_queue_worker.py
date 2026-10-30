@@ -172,7 +172,35 @@ def retire_page(projection):
         run_sqlite_session_immediate(session, remove, require_clean=True)
 
 
+def postgres_idle(projection):
+    """One durable snapshot proves an idle cycle; wake/poll still owns liveness.
+
+    This is only an optimization of the empty cycle. Every admission, proof,
+    claim, retry, audit and retirement still runs through the existing paths.
+    """
+    from sqlalchemy import and_, exists
+    from app.domains.memory.models.activity_configuration import MemoryIndexPreparation
+    now = time()
+    with projection._factory() as session:
+        if session.get_bind().dialect.name != 'postgresql':
+            return False
+        ready = exists().where(MemoryVectorMaintenance.generation == projection.generation,
+            MemoryVectorMaintenance.phase == 'ready', MemoryVectorMaintenance.due_at > now)
+        changes = exists().where(MemoryVectorChange.state == 'pending')
+        work = exists().where(MemoryVectorWork.generation == projection.generation,
+            or_(MemoryVectorWork.state.in_(('pending', 'running', 'retry', 'blocked')),
+                and_(MemoryVectorWork.state == 'scheduled', MemoryVectorWork.due_at <= now)))
+        preparing = exists().where(MemoryIndexPreparation.state == 'running')
+        retiring = select(MemoryVectorWork.item_id).join(MemoryVectorMaintenance,
+            MemoryVectorMaintenance.generation == MemoryVectorWork.generation).where(
+                MemoryVectorMaintenance.phase == 'retired').exists()
+        return bool(session.scalar(select(and_(ready, ~changes, ~work, ~preparing, ~retiring))))
+
+
 async def tick(projection):
+    if projection.status == "ready" and projection._on_clean_cycle is None:
+        if await projection._canonical.call(postgres_idle, projection):
+            return False
     await projection._prepare_page()
     await projection._canonical.call(bootstrap_page, projection)
     # Cap expansion per turn and interleave delivery so a hot producer cannot

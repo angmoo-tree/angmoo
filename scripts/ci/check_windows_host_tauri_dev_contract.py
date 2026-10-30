@@ -113,12 +113,12 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
     if contract.get("host", {}).get("architectures") != ["x86_64"]:
         errors.append("only the verified Windows x64 host may pass preflight")
     docker = contract.get("docker", {})
-    if docker.get("services") != ["backend", "frontend"]:
-        errors.append("bridge must reuse exactly backend and frontend")
-    if docker.get("backend_profile") != "CONTRIBUTOR_EMBEDDED":
-        errors.append("bridge must reuse CONTRIBUTOR_EMBEDDED")
+    if docker.get("services") != ["postgres", "backend", "frontend"]:
+        errors.append("bridge must reuse postgres, backend and frontend")
+    if docker.get("backend_profile") != "CONTRIBUTOR_POSTGRESQL":
+        errors.append("bridge must reuse CONTRIBUTOR_POSTGRESQL")
     for key, expected in (
-        ("persistence", "sqlite"),
+        ("persistence", "postgresql"),
         ("graph", "ladybug"),
         ("scheduler", "in-process"),
         ("projector", "in-process"),

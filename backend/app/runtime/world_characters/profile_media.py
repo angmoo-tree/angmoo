@@ -8,7 +8,7 @@ from app.integrations.media.files import media_url_to_path
 
 def upload_profile_media(service, *, world_id, world_character_id, user, data):
     db = service.db
-    lock_environment_admission(db, user.id)
+    lock_environment_admission(db, user.id, exclusive=True)
     role, character = service._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
     if role.version != data.expected_revision:
         db.rollback()

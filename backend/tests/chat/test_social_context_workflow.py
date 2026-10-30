@@ -23,6 +23,7 @@ class SnapshotProvider:
         self.snapshot = None
         self.validations = 0
         self.changed = False
+        self.revoked = False
 
     def prepare(self, scope, *, counterpart_id=None):
         self.snapshot = SocialContextService(lambda q: GraphRecallResult(
@@ -30,11 +31,11 @@ class SnapshotProvider:
         )).prepare(scope, labels={}, counterpart_id=counterpart_id)
         return self.snapshot
 
-    def assert_current(self, snapshot):
-        assert snapshot is self.snapshot
+    def assert_usable(self, snapshot):
+        assert snapshot == self.snapshot  # Replay restores an equal typed value.
         self.validations += 1
-        if self.changed:
-            raise SocialContextChangedError("social_context_changed")
+        if self.revoked:
+            raise SocialContextChangedError("social_context_access_revoked")
 
 
 class SocialRouter(_Router):
@@ -60,7 +61,8 @@ def test_identical_snapshot_reaches_both_consumers_without_preparation_ai(respon
     assert stored.node_state["social_snapshot"]["snapshot_id"] == snapshots.snapshot.snapshot_id
 
 
-def test_change_during_generation_prevents_first_public_delta(response_session):
+@pytest.mark.parametrize("revoked", [False, True])
+def test_reference_change_keeps_input_but_access_revocation_prevents_public_delta(response_session, revoked):
     route = RetrievalRoute.CURRENT_CONTEXT
     record = _request(response_session, route)
     response_session.commit()
@@ -69,14 +71,15 @@ def test_change_during_generation_prevents_first_public_delta(response_session):
     async def generate(request):
         result = await original(request)
         snapshots.changed = True
+        snapshots.revoked = revoked
         return result
     generator.generate = generate
     workflow = _workflow(response_session, route, generator, router=SocialRouter(route))
     workflow._recall_mode = ChatRecallMode.SOCIAL_BASELINE
     workflow._social_context_provider = snapshots
     events = asyncio.run(_collect(workflow.run(_command(record))))
-    assert GenerationEventType.DELTA not in [e.event_type for e in events]
-    assert workflow._lifecycle.get_request(record.request_id).committed_assistant_message_id is None
+    assert (GenerationEventType.DELTA in [e.event_type for e in events]) is not revoked
+    assert (workflow._lifecycle.get_request(record.request_id).committed_assistant_message_id is not None) is not revoked
 
 
 def test_current_relationship_inspector_is_private_and_not_a_graph_tool_result(response_session):
@@ -145,7 +148,8 @@ def test_hybrid_search_text_is_required_only_for_canonical_and_bound_to_intent_h
         parse_control_selection("", (replace(call, arguments_json=json.dumps(args)),), options=options)
 
 
-def test_hybrid_toolnode_completes_with_two_generation_calls_and_no_planner(response_session):
+@pytest.mark.parametrize("explicit_retry", [False, True])
+def test_hybrid_toolnode_completes_with_two_generation_calls_and_no_planner(response_session, explicit_retry):
     from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
     from app.runtime.chat.retrieval_tools import ToolPlanningService
     from app.domains.memory.contracts.hybrid_recall import HybridRecallResult, HybridEmbeddingUsage, RecallAxisReceipt, RecallAxisStatus
@@ -176,9 +180,59 @@ def test_hybrid_toolnode_completes_with_two_generation_calls_and_no_planner(resp
     from chat.test_response_supervisor import RecordingExecutor
     executor = RecordingExecutor()
     workflow._graph_executor = executor
+    if explicit_retry:
+        from chat.test_p8_l_p_evidence_response_streaming import CharacterResponseGeneratorError
+        generator.failure = CharacterResponseGeneratorError("fixture_failure", retryable=True)
     events = asyncio.run(_collect(workflow.run(_command(record))))
+    if explicit_retry:
+        assert events[-1].event_type is GenerationEventType.FAILED
+        from chat.test_p8_l_p_evidence_response_streaming import generation_service, WorldChatRetryCreate, models
+        prior = workflow._lifecycle.get_request(record.request_id)
+        accepted = generation_service.retry_world_response(response_session,
+            response_session.get(models.User, "p-owner"), "p-world", "p-thread",
+            WorldChatRetryCreate(failed_request_id=record.request_id, idempotency_key="same-first-input-retry"))
+        record = workflow._lifecycle.get_request(accepted.response_request.request_id)
+        from app.domains.chat.contracts.initial_input import INPUT_KEY
+        assert record.node_state[INPUT_KEY] == prior.node_state[INPUT_KEY]
+        generator.failure = None
+        generator.requests.clear()
+        async def forbidden(*args, **kwargs):
+            pytest.fail("Retry must reuse acquired routing and memory, without another read or AI search")
+        workflow._router.route = forbidden
+        hybrid.execute = forbidden
+        workflow._social_context_provider.prepare = lambda *args, **kwargs: pytest.fail("social reprepare")
+        command = _command(record)
+        command = replace(command, profile=replace(command.profile, name="Changed after first attempt"))
+        events = asyncio.run(_collect(workflow.run(command)))
+        assert generator.requests[0].profile.name == _command(record).profile.name
     assert events[-1].event_type is GenerationEventType.COMPLETED, executor.observation
     stored = workflow._lifecycle.get_request(record.request_id)
     assert stored.call_tracker["logical_total"] == 2
     assert stored.node_state["canonical_metrics"]["planner_logical_calls"] == 0
     assert hybrid.calls == 1 and len(generator.requests) == 1
+    # Replaying the same logical response slot must not run routing or recall again.
+    from app.domains.chat.contracts.input_receipt import ROUTING_KEY, CANONICAL_KEY, routing_for_request
+    from app.domains.chat.service.canonical_retrieval import CanonicalRetrievalCommand
+    from datetime import UTC, datetime, timedelta
+    replay_record = replace(stored, request_id="replay-request")
+    routing = routing_for_request(stored.node_state[ROUTING_KEY], replay_record)
+    command = CanonicalRetrievalCommand(user_message=_command(record).preflight.user_message,
+        image_context=None, intent=routing.intent, resolved=routing.resolved,
+        call_tracker=routing.call_tracker, thread_id=record.thread_id,
+        initial_result=stored.node_state[CANONICAL_KEY], response_slot_id=stored.response_slot_id,
+        request_scope_hash=stored.request_scope_hash)
+    from app.runtime.chat.retrieval_tools import RetrievalToolExecution, active_tool_execution
+    from types import SimpleNamespace
+    async def resume():
+        execution = RetrievalToolExecution()
+        execution.bind(routing, SimpleNamespace(command=SimpleNamespace(recall_mode=ChatRecallMode.SOCIAL_HYBRID),
+            assert_active=lambda state: None), {"routing": routing})
+        token = active_tool_execution.set(execution)
+        try:
+            return await workflow._canonical.plan_and_execute(command,
+                now=datetime.now(UTC), deadline_at=datetime.now(UTC) + timedelta(minutes=1))
+        finally:
+            active_tool_execution.reset(token)
+    replay = asyncio.run(resume())
+    assert replay.request_id == replay.recall.request_id == "replay-request"
+    assert hybrid.calls == 1

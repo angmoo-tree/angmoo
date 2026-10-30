@@ -385,7 +385,25 @@ try {
                 throw 'installer_promoted_digest_mismatch'
             }
             Remove-OwnedDirectory $staging
-            Remove-OwnedDirectory $backup
+            $candidateManifest = Get-Content -LiteralPath (Join-Path $app 'installer-payload.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+            $identity = if (Test-Path -LiteralPath $backup) { Get-CandidateIdentity $backup } else { $null }
+            if ($candidateManifest.schema_version -eq 3 -and $identity -and $identity.product_version -eq '0.1.3') {
+                # First-launch confirmation has not necessarily happened yet.
+                # Keep the verified predecessor outside installer replacement
+                # slots so a repair cannot erase the SQLite rollback payload.
+                if (-not (Test-VerifiedPayload $backup)) { throw 'installer_verified_backup_invalid' }
+                $archiveRoot = Join-Path $script:productRoot 'postgresql-migration\previous-payload'
+                New-Item -ItemType Directory -Force -Path $archiveRoot | Out-Null
+                Assert-NoReparsePoint $archiveRoot -Recursive
+                $archive = [IO.Path]::GetFullPath((Join-Path $archiveRoot $identity.payload_generation))
+                if (Test-Path -LiteralPath $archive) { $archive += '-' + [guid]::NewGuid().ToString('N') }
+                if (-not $archive.StartsWith($archiveRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                    throw 'installer_previous_payload_archive_conflict'
+                }
+                [IO.Directory]::Move($backup, $archive)
+            } else {
+                Remove-OwnedDirectory $backup
+            }
             Write-State 'complete' 'retired'
             Write-Diagnostic 'installer_payload_transaction_pass' 'finalize' $app
             Write-Output 'installer_payload_transaction_finalized'

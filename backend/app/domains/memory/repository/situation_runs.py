@@ -29,7 +29,15 @@ def next_due(now, local_time, timezone):
         raise MemoryValidationError("situation_schedule_invalid") from None
 
 
-def get_or_create_settings(session, setting_id, *, timezone, now):
+def get_or_create_settings(session, setting_id, *, timezone, now, initialize_only=False):
+    # Activity admission only needs the processing row to exist. Its frozen
+    # activation is checked again by admit() under the scope writer fence.
+    # Updating an already initialized scope here needlessly conflicts with
+    # concurrent memory application. Mutating settings/requests keep the fence.
+    if initialize_only and session.get_bind().dialect.name == "postgresql":
+        existing = session.get(MemorySituationProcessingSetting, setting_id)
+        if existing is not None:
+            return existing
     session.execute(update(MemoryScopeSettingModel).where(MemoryScopeSettingModel.id == setting_id).values(id=MemoryScopeSettingModel.id, updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
     row = session.get(MemorySituationProcessingSetting, setting_id)
     if row is None:
@@ -79,7 +87,7 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
         compatible_legacy = work_kind == "pending_apply" and old.request_digest == legacy_digest
         if old.request_digest != digest and not compatible_legacy:
             raise MemoryConflictError("situation_request_conflict")
-        _resume_error(session, old.run_id)
+        # A replayed scheduler tick must never revive an owner's failed work.
         return old
     if config.version != expected_version or current.version != setting.version:
         raise MemoryConflictError("situation_settings_version_conflict")
@@ -93,14 +101,13 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
         raise MemoryConflictError("situation_shutdown_disabled")
     active = session.scalar(select(MemorySituationApplyRun).where(
         MemorySituationApplyRun.scope_setting_id == setting.id,
-        MemorySituationApplyRun.state.in_(("pending", "running", "deferred", "error")),
+        MemorySituationApplyRun.state.in_(("pending", "running", "deferred")),
         # An unsupported revision is a terminal error, not a retryable lease.
         or_(MemorySituationApplyRun.error_code.is_(None), MemorySituationApplyRun.error_code != "situation_validation_revision_unsupported"),
     ).order_by(MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1))
     if active is not None:
         if (active.work_kind != work_kind or active.settings_snapshot.get("receipt_sequence") != receipt_sequence):
             raise MemoryConflictError("situation_scope_busy")
-        _resume_error(session, active.id)
         digest = digest_for(active.settings_snapshot.get("validation_revision", LEGACY_VALIDATION_REVISION))
     if receipt_sequence is not None:
         target = session.get(MemorySituationReceipt, receipt_sequence, populate_existing=True)
@@ -113,6 +120,8 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
     pending = select(func.max(MemorySituationReceipt.sequence)).where(
         MemorySituationReceipt.scope_setting_id == setting.id,
         MemorySituationReceipt.state == ("blocked" if work_kind == "blocked_recheck" else "pending"))
+    if work_kind == "pending_apply":
+        pending = pending.where(failure_free_receipt())
     if receipt_sequence is not None:
         pending = pending.where(MemorySituationReceipt.sequence == receipt_sequence)
     if cutoff_at is not None:
@@ -143,17 +152,6 @@ def request_run(session, setting, *, trigger, request_key, expected_version, now
     return receipt
 
 
-def _resume_error(session, run_id):
-    # An explicit retry reuses its durable cutoff. It never starts a replacement
-    # run over arrivals accepted after that cutoff.
-    if run_id:
-        old_run = session.get(MemorySituationApplyRun, run_id, populate_existing=True)
-        _require_supported_revision(old_run)
-        session.execute(update(MemorySituationApplyRun).where(
-            MemorySituationApplyRun.id == run_id, MemorySituationApplyRun.state == "error",
-        ).values(state="deferred", error_code=None, lease_token=None, lease_until=None))
-
-
 def _require_supported_revision(run):
     from app.domains.memory.contracts.activity_situation import SUPPORTED_VALIDATION_REVISIONS
     if (run is not None and run.state in {"pending", "running", "deferred", "error"}
@@ -179,3 +177,17 @@ def require_run_fence(session, run_id, token, now):
         or row.lease_until is None or utc_instant(row.lease_until) <= utc_instant(now)):
         raise MemoryConflictError("situation_run_fence_lost")
     return row
+
+
+def failure_free_receipt(*, own_run_id=None):
+    """Failed frozen ranges remain recoverable, never implicitly re-admitted."""
+    from sqlalchemy import exists
+    from sqlalchemy.orm import aliased
+    failed = aliased(MemorySituationApplyRun)
+    clauses = [failed.scope_setting_id == MemorySituationReceipt.scope_setting_id,
+        failed.state == "error", or_(failed.error_code.is_(None), failed.error_code != "maintenance_cancelled"),
+        failed.cursor < MemorySituationReceipt.sequence,
+        failed.cutoff_sequence >= MemorySituationReceipt.sequence]
+    if own_run_id:
+        clauses.append(failed.id != own_run_id)
+    return ~exists(select(failed.id).where(*clauses))

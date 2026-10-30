@@ -1,5 +1,8 @@
 # 수동 기억·관계 정리 통합 실행 — 구현과 검증
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+> Current memory/relationship requests share one maintenance slot, use character/request rounds, and preserve manual-only failed-item retry and close-without-retry history. The current [recovery contract](../architecture/maintenance-recovery-postgresql-experiment.md) supersedes old scheduling details.
+
 > 기준일: 2026-09-22 / MC0–MC10 로컬 구현·검증·인계 완료
 > 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `65c97262cb384093f1c0bde2c801a9129b385087`
 > 실제 Docker/AI 확인은 에이전트에게 위임한 검증이다. 인간의 관계 품질 USER CHECK와 구분한다.

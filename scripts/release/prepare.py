@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import zipfile
 
-from launcher.termux.payload import REPOSITORY, SOURCE, VERSION, digest_file, read_manifest, require
+from launcher.termux.payload import REPOSITORY, SOURCE, VERSION, digest_file, read_manifest, require, services_for
 from scripts.ci.check_release_tag import validate_release_tag
 from scripts.release.candidate import ROOT, write_json
 from scripts.release.github import GitHub, successful_images
@@ -37,8 +37,9 @@ def termux_files(root: Path) -> tuple[str, ...]:
     legacy = {*LEGACY_TERMUX_FILES, "LICENSE"}
     modern = legacy | {"command_registration.py"}
     recovery = modern | {"session_recovery.py"}
-    require(isinstance(names, set) and names in (legacy, modern, recovery), "termux_tools_profile_invalid")
-    additions = ("command_registration.py", "session_recovery.py")
+    postgresql = recovery | {'migrate.py','postgres_host.py','prepare_proot.py'}
+    require(isinstance(names, set) and names in (legacy, modern, recovery, postgresql), "termux_tools_profile_invalid")
+    additions = ("command_registration.py", "session_recovery.py",'migrate.py','postgres_host.py','prepare_proot.py')
     for name in additions:
         require((directory / name).is_file() == (name in names), "termux_tools_profile_mixed")
     return LEGACY_TERMUX_FILES + tuple(name for name in additions if name in names)
@@ -111,6 +112,9 @@ def validate_p5(github, report: dict, manifest: dict, windows: dict):
     user = report.get("windows_user_check", {})
     require(user.get("result") == "PASS" and user.get("reviewer") == "jingujeon" and user.get("exe_sha256") == windows["exe"]["sha256"] and isinstance(user.get("evidence"), str) and len(user["evidence"]) >= 20 and user.get("checked_at"), "p5_user_evidence_missing")
     require(report.get("android_support") == "experimental-not-certified", "p5_android_support_unverified")
+    if 'postgres' in services_for(manifest['version']):
+        from scripts.release.postgresql_acceptance import validate
+        validate(report.get('postgresql_adoption'),manifest['source_sha'])
 
 
 def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, windows_artifact: str,
@@ -159,6 +163,21 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
     subprocess.run(["gh", "attestation", "verify", str(unique(windows_dir, exe["name"])), "--bundle", str(bundle_files[0]), "--repo", REPOSITORY, "--signer-workflow", f"{REPOSITORY}/.github/workflows/windows-installer.yml", "--source-digest", source, "--deny-self-hosted-runners"], check=True)
     for name in (*WINDOWS_FILES, exe["name"]):
         shutil.copyfile(unique(windows_dir, name), stage / name)
+    if 'postgres' in services_for(manifest['version']):
+        tools=json.loads(unique(windows_dir,'angmoo-migration-tools.json').read_text())
+        require(tools.get('schema')=='angmoo-migration-tools.v1' and tools.get('source_sha')==source,
+                'migration_tool_source_mismatch')
+        require(set(tools.get('files',{}))=={'angmoo-migrate.exe','angmoo-migrate.py'},'migration_tool_assets_invalid')
+        for name,digest in tools['files'].items():
+            path=unique(windows_dir,name)
+            require(digest_file(path)=='sha256:'+digest,'migration_tool_hash_mismatch')
+            shutil.copyfile(path,stage/name)
+        shutil.copyfile(unique(windows_dir,'angmoo-migration-tools.json'),stage/'angmoo-migration-tools.json')
+        for name in ('angmoo-postgresql-sources.zip','postgresql-resources.json'):
+            shutil.copyfile(unique(windows_dir,name),stage/name)
+        for stem in ('postgresql-migration','postgresql-backup','postgresql-runtime'):
+            for locale,suffix in (('en',''),('ko','.ko')):
+                shutil.copyfile(product_root/'docs/public'/(stem+suffix+'.md'),stage/(stem+'.'+locale+'.md'))
     shutil.copyfile(bundle_files[0], stage / "windows-installer.attestation.jsonl")
     # Package only the reviewed adapter, not arbitrary artifact scripts or data.
     package_termux_tools(stage / "angmoo-termux-tools.zip", root=product_root)
@@ -194,12 +213,12 @@ def prepare(*, source: str, tag: str, windows_run: str, windows_attempt: str, wi
     if remote_source == source:
         publication["tag"] = "READY"
     indexes = {}
-    for service in ("backend", "frontend"):
+    for service in services_for(manifest['version']):
         remote = registry_document(f"ghcr.io/{REPOSITORY}-{service}:{tag}")
         if remote:
             check_index(remote[1], [i for i in manifest["images"] if i["service"] == service])
             indexes[service] = remote[0]
-    if len(indexes) == 2:
+    if len(indexes) == len(services_for(manifest['version'])):
         publication["images"] = "READY"
     manifest.update(windows=validation, candidate_producer={"run_id": candidate_run, "attempt": candidate_attempt, "artifact_id": candidate_artifact}, windows_producer={"run_id": windows_run, "attempt": windows_attempt, "artifact_id": windows_artifact}, indexes=indexes)
     manifest["assets"] = [{"name": p.name, "size": p.stat().st_size, "sha256": digest_file(p)} for p in sorted(stage.iterdir())]

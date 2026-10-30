@@ -51,7 +51,9 @@ class SqlAlchemyHybridCanonicalReader:
                     reason = "scope"
                 elif item.version != ranked.version:
                     reason = "version"
-                elif ranked.candidate.kind not in request.kinds or (request.thread_id is not None and item.thread_id != request.thread_id):
+                elif (ranked.candidate.kind not in request.kinds
+                      or (request.thread_id is not None and item.thread_id != request.thread_id)
+                      or (request.allowed_thread_ids is not None and item.thread_id is not None and item.thread_id not in request.allowed_thread_ids)):
                     reason = "filter"
                 else:
                     continue
@@ -59,7 +61,8 @@ class SqlAlchemyHybridCanonicalReader:
             items = tuple(item for item in rows.values() if item.id not in scope_rejected and item_retrievable(item, now) and any(
                 ranked.candidate.memory_item_id == item.id and ranked.version == item.version
                 and ranked.candidate.kind in request.kinds for ranked in candidates)
-                and (request.thread_id is None or item.thread_id == request.thread_id))
+                and (request.thread_id is None or item.thread_id == request.thread_id)
+                and (request.allowed_thread_ids is None or item.thread_id is None or item.thread_id in request.allowed_thread_ids))
             validation = prepare_access(session, items, now, reader=reader)
             evidence = {}
             for row in session.scalars(select(MemoryItemEvidence).where(

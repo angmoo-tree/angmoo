@@ -17,7 +17,7 @@ def validate_build_defaults(root: Path, version: str) -> list[str]:
     errors = []
     development = yaml.safe_load((root / "compose.dev.yml").read_text(encoding="utf-8"))
     expected_dev = "${ANGMOO_VERSION:-" + version + "-dev}"
-    for service in ("backend", "frontend"):
+    for service in ("backend", "frontend", "postgres"):
         source = (root / f"Dockerfile.{service}").read_text(encoding="utf-8")
         defaults = re.findall(r"^ARG VERSION=(\S+)\s*$", source, re.MULTILINE)
         if defaults != [version]:
@@ -47,7 +47,7 @@ def validate_contract(root: Path = ROOT) -> list[str]:
         errors.extend(uploads(doc, name))
     compose = yaml.safe_load((root / "compose.yml").read_text(encoding="utf-8"))
     ci = yaml.safe_load((root / "compose.ci.yml").read_text(encoding="utf-8"))
-    for service in ("backend", "frontend"):
+    for service in ("backend", "frontend", "postgres"):
         expected = "ghcr.io/angmoo-tree/angmoo-" + service + ":${ANGMOO_IMAGE_TAG:-" + tag + "}"
         if compose["services"][service].get("image") != expected:
             errors.append(f"image selection must be separate from product version: {service}")

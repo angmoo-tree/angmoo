@@ -28,7 +28,11 @@ def validate_startup_security(config: Settings = settings) -> None:
             raise StartupSecurityError("unsafe_app_secret")
         if config.credential_encryption_provider != "local":
             raise StartupSecurityError("unsafe_credential_provider")
-        if not config.database_url.startswith("sqlite+pysqlite:///"):
+        from urllib.parse import urlsplit
+        uri=urlsplit(config.database_url)
+        local_postgresql=(uri.scheme=='postgresql+psycopg' and uri.hostname in {'127.0.0.1','::1'}
+            and bool(uri.username) and bool(uri.password) and bool(uri.path.strip('/')))
+        if not config.database_url.startswith("sqlite+pysqlite:///") and not local_postgresql:
             raise StartupSecurityError("local_database_required")
         launch_token = config.desktop_launch_token
         if launch_token is None or len(launch_token) < 32:

@@ -62,7 +62,8 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     }
     const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
       accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
-      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null, workflow_version: 1, followup: "relationships",
+      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null, workflow_version: 2, followup: "relationships",
+      revision: 0, actions: manualPolls < 4 ? ["cancel_remaining"] : [], requires_new_ai_call: false,
       flow_state: manualPolls < 4 ? "relationship_running" : "completed",
       relationship: { state: manualPolls < 4 ? "running" : "completed", request_id: "manual-receipt",
         target_count: manualPolls < 4 ? null : 1, memory_count: manualPolls < 4 ? null : 2,

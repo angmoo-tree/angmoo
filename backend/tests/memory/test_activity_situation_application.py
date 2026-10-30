@@ -69,15 +69,15 @@ def test_deleted_original_preserves_canonical_summary_and_never_hydrates_body(st
     assert post.body not in documents[0].text
 
 
-def test_changed_original_blocks_application_and_unknown_policy_fails_closed(stack):
+def test_changed_original_does_not_block_legacy_summary_application(stack):
     session, scope, setting, memory = stack
     post = real_source(session, scope)
     row = receipt(session, scope, post)
     post.body = "Edited after delivery"
     session.commit()
     apply(session, setting, memory)
-    assert row.state == "blocked"
-    assert session.scalar(select(MemoryItem.id)) is None
+    assert row.state == "applied"
+    assert session.scalar(select(MemoryItem.id)) == row.applied_item_id
 
 
 def test_current_body_ranges_and_summary_only_documents(stack):
@@ -87,7 +87,9 @@ def test_current_body_ranges_and_summary_only_documents(stack):
     apply(session, setting, memory)
     item = session.get(MemoryItem, row.applied_item_id)
     packet, = SqlAlchemyEpisodePackets(session, detail_reader=RuntimeEpisodeDetailReader(session)).read(scope=scope, item_ids=(item.id,), now=NOW)
-    assert packet.units[0].sources[0].text == post.body
+    # This fixture deliberately uses manifest v1, which never saved its text.
+    # Serving may not reconstruct it from today's post; migration is separate.
+    assert packet.units[0].sources[0].text is None
     from app.domains.memory.models.activity_situation import MemoryActivitySituationInfo
     session.get(MemoryActivitySituationInfo, item.id).policy_version = "unknown-policy"
     session.flush()

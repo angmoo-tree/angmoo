@@ -2,13 +2,15 @@
 
 [English](README.md) | 한국어
 
+> **0.1.4 PostgreSQL 전환:** 기존 0.1.3 SQLite 데이터는 [이전 안내](docs/public/postgresql-migration.ko.md)를 따라야 합니다. 이미지만 업데이트하면 이전되지 않으며, 정식 공개된 해당 버전의 Release 파일을 사용하세요.
+
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3">
-    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.3-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.3 다운로드" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
+    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.4 다운로드" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-GPL--3.0--only-2ea44f?style=flat-square" alt="라이선스: GPL-3.0-only" height="20">
@@ -18,7 +20,7 @@
   </a>
 </p>
 
-[0.1.3 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
+[0.1.4 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
 
 > **“내가 원하는 사람들만 있는 SNS가 있다면?”**
 
@@ -79,7 +81,7 @@ Android Chrome의 영어 화면입니다. 사진을 누르면 원본 크기로 �
 
 ## 지원하는 모델
 
-Angmoo 0.1.3에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
+Angmoo 0.1.4에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
 
 | 모델명 | 사용되는 기능 | 연결 서비스 |
 |---|---|---|
@@ -102,6 +104,11 @@ Angmoo 0.1.3에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ## 설치하고 실행하기
 
+Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. Windows는 전용 PostgreSQL·pgvector 자원을 동봉합니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
+
+Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에서의 이전 검증·공식 지원은 이번 릴리즈에 포함하지 않고 후속으로 둡니다.** ARM64 이미지 지원만으로 Mac의 데이터 이전까지 지원하는 것은 아닙니다.
+
+
 | 환경 | 실행 방법 |
 |---|---|
 | Windows x64 | 설치 EXE를 내려받아 실행 |
@@ -112,7 +119,7 @@ Angmoo 0.1.3에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ### Windows
 
-1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.3_x64-setup.exe`를 받습니다.
+1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.4_x64-setup.exe`를 받습니다.
 2. 설치 안내에 따라 설치합니다.
 3. Angmoo를 실행합니다.
 
@@ -125,7 +132,7 @@ Git과 Docker Compose 2.22.0 이상이 필요합니다.
 다음 명령을 실행합니다.
 
 ```sh
-git clone --branch release-v0.1.3 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -159,10 +166,10 @@ pkg update && pkg install -y python curl proot
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
-설치기는 실행기와 배포물을 검증·설치한 뒤 백엔드와 프론트엔드를 시작합니다. 완료되면 **휴대폰 브라우저에서** [http://127.0.0.1:3000](http://127.0.0.1:3000) 주소를 엽니다.
+설치기는 실행기와 배포물을 검증·설치한 뒤 PostgreSQL·백엔드·프론트엔드를 시작합니다. 완료되면 **휴대폰 브라우저에서** [http://127.0.0.1:3000](http://127.0.0.1:3000) 주소를 엽니다.
 
 다음부터는 설치 명령을 반복하지 않고 실행합니다.
 
@@ -366,18 +373,20 @@ flowchart LR
 
 기억을 켜면 기존 SNS·**채팅** AI 호출에서 **상황 요약도 함께 생성**합니다. 실제로 제공된 맥락과 캐릭터의 응답·행동을 짧게 정리한 내용입니다.
 
-요약은 저장 대기로 모입니다. **지금 기억 저장**이나 설정한 자동 저장이 실행되면, 검증을 거쳐 기억과 원문 근거를 저장합니다.
+요약은 저장 대기로 모입니다. **지금 기억 저장**이나 설정한 자동 저장이 실행되면, 기억 본문과 이용 가능한 원문 스냅샷·출처 연결을 **PostgreSQL**에 저장합니다.
 
-저장된 기억을 찾는 두 검색 방식은 각각 인덱스를 사용합니다.
+SNS와 Chat은 저장된 기억을 다음 두 방식으로 검색할 수 있습니다.
 
-| 검색 방식 | 사용하는 인덱스 | 찾는 방식 |
+| 검색 방식 | 사용하는 저장·검색 방식 | 찾는 방식 |
 |---|---|---|
-| **키워드 검색** | **키워드 검색용 인덱스**(FTS5) | 기억의 텍스트에 있는 단어를 바탕으로 검색합니다. |
-| **의미 검색** | **의미 검색용 벡터 인덱스**(vec1) | 임베딩 벡터의 유사도를 바탕으로, 표현이 달라도 의미가 가까운 기억을 찾습니다. |
+| **키워드 검색** | PostgreSQL 전문검색과 **GIN 인덱스** | 기억 본문의 단어를 검색하며, 한국어 등 CJK 전처리와 부분 일치 보완을 적용합니다. |
+| **의미 검색** | PostgreSQL에 저장한 임베딩 벡터와 **pgvector 정확 검색** | 허용된 World·캐릭터 범위에서 코사인 거리를 비교해, 표현이 달라도 의미가 가까운 기억을 찾습니다. |
 
 **임베딩을 설정하지 않아도 기억 저장과 키워드 검색은 사용할 수 있습니다.**
 
-의미 검색을 추가하려면 사용 가능한 임베딩 API 키와 모델을 설정하고 **의미 검색 사용**을 켜세요. 기억을 임베딩 벡터로 변환해 인덱스를 추가로 준비하며, 준비된 인덱스로 의미 검색을 수행합니다.
+의미 검색을 추가하려면 사용 가능한 임베딩 API 키와 모델을 설정하고 **의미 검색 사용**을 켜세요. 임베딩 벡터를 생성·저장하고 준비가 끝나면 의미 검색을 사용할 수 있습니다. 정확 검색을 사용하므로 HNSW 같은 근사 벡터 인덱스를 별도로 구축할 필요는 없습니다.
+
+검색 후 SNS·Chat에는 선택된 기억과 이용 가능한 **저장된 원문 스냅샷**을 전달합니다. 이 단계에서 원래 게시물이나 대화를 다시 조회하지 않으며, 소유권·삭제 상태 확인은 유지합니다. 0.1.3에서 이전한 기억에는 복원할 수 있는 원문이 없을 수 있고, 이전 도구는 없는 원문을 만들어 넣지 않습니다.
 
 **API 사용:** 상황 요약을 위해 별도의 텍스트 AI 호출을 추가하지는 않지만, 기존 응답의 출력 토큰은 늘어납니다. 임베딩과 AI 관계 정리에는 추가 API 요청이 발생할 수 있습니다. 저장된 기억이 모든 활동이나 답변에서 반드시 선택되는 것은 아닙니다.
 
@@ -388,19 +397,32 @@ config:
   flowchart:
     htmlLabels: false
 ---
-flowchart LR
+flowchart TD
     A["SNS·Chat AI 호출<br/>응답·행동 + 상황 요약"]
-    B["기억 저장<br/>요약·근거 검증 후 보관"]
-    C["키워드 검색용 인덱스<br/>FTS5"]
-    D["의미 검색용 벡터 인덱스<br/>임베딩 API · vec1"]
-    E["새 상호작용 기억<br/>상대별로 묶기"]
-    F["관계 정리 AI<br/>인식 갱신 또는 유지"]
+    B["PostgreSQL에 기억 저장<br/>기억 본문 + 이용 가능한 원문 스냅샷"]
+    C["키워드 검색<br/>PostgreSQL 전문검색 · GIN"]
+    D["임베딩 API<br/>기억 벡터 생성"]
+    E["의미 검색<br/>pgvector · 코사인 거리 정확 검색"]
+    F["관련 기억<br/>이용 가능한 저장 원문 스냅샷"]
+    G["SNS·Chat<br/>검색한 맥락 활용"]
 
     A --> B
     B --> C
     B -->|"의미 검색 설정 시"| D
-    B -->|"관계 정리 실행 시"| E
+    D --> E
+    C --> F
     E --> F
+    F --> G
+```
+
+**관계 정리**는 캐릭터의 상황기억을 상대별로 묶고, 기억 본문과 기존 관계 인식을 AI 입력으로 사용합니다. 원문 스냅샷을 전달하거나 원문을 다시 조회하지 않고 관계 인식을 유지하거나 갱신합니다.
+
+```mermaid
+flowchart LR
+    A["상황기억 본문<br/>상대별로 묶기"]
+    B["관계 정리 AI<br/>기억 본문 + 기존 관계 인식"]
+    C["관계 인식<br/>유지 또는 갱신"]
+    A --> B --> C
 ```
 
 #### 기억 저장하고 관리하기

@@ -135,7 +135,7 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
     ) -> tuple[MemoryItemRecord, ...]:
         if limit < 1 or limit > MAX_HOT_BRIEF_SOURCE_ITEMS:
             raise MemoryConflictError("memory_hot_brief_limit_invalid")
-        self._require_setting(setting)
+        self._require_setting(setting, for_update=self._session.get_bind().dialect.name != 'postgresql')
         rows = self._hot_brief_rows(setting=setting, now=now, limit=limit)
         return tuple(self._to_item(row) for row in rows)
 
@@ -148,7 +148,8 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
         contract_version: str,
         now: datetime,
     ) -> MemoryHotBriefRecord:
-        self._require_setting(setting)
+        postgres = self._session.get_bind().dialect.name == 'postgresql'
+        self._require_setting(setting, for_update=not postgres)
         normalized_summary = summary.strip()
         if not normalized_summary or len(normalized_summary) > MAX_HOT_BRIEF_SUMMARY_LENGTH:
             raise MemoryConflictError("memory_hot_brief_summary_invalid")
@@ -161,9 +162,28 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
                 setting=setting,
                 now=now,
                 limit=MAX_HOT_BRIEF_SOURCE_ITEMS,
-                for_update=True,
+                for_update=not postgres,
             )
         )
+        if postgres:
+            # Expensive provenance validation above remains in this SERIALIZABLE
+            # transaction, but does not hold the scope's exclusive writer.
+            # Publish under a real MVCC fence: canonical writers also read this
+            # scope, so an intervening insert (including an unselected phantom)
+            # and this publication form an SSI conflict instead of a lost dirty
+            # flag. A plain late SELECT FOR UPDATE would not establish it.
+            self._session.execute(update(MemoryScopeSettingModel).where(
+                MemoryScopeSettingModel.id == setting.id).values(
+                    updated_at=MemoryScopeSettingModel.updated_at)
+                .execution_options(memory_scope_lock_only=True))
+            self._require_setting(setting)
+            identifiers = tuple(item.id for item in current_items)
+            locked = tuple(self._session.scalars(select(MemoryItem).where(
+                MemoryItem.id.in_(identifiers)).with_for_update()
+                .execution_options(populate_existing=True))) if identifiers else ()
+            if sorted((row.id, row.version) for row in locked) != sorted(
+                (item.id, item.version) for item in current_items):
+                raise MemoryConflictError('memory_hot_brief_source_version_conflict')
         expected_refs = tuple((item.id, item.version) for item in expected_source_items)
         current_refs = tuple((item.id, item.version) for item in current_items)
         if expected_refs != current_refs:
@@ -323,14 +343,21 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
         from app.domains.memory.models.episode import MemoryEpisodeInfo
         from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
         from app.domains.memory.repository.episode_privacy import currently_accessible
+        from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+        from app.domains.memory.repository.access_batch import prepare_access
+        # All roots belong to this one synchronous read. Shared ancestors must
+        # not be expanded again for each item. A subsequent read/write fence
+        # creates a new context and rechecks permissions and versions.
+        validation = MemoryAccessValidation(self._session, now)
         result, offset = [], 0
         while len(result) < limit:
             page = tuple(self._session.scalars(statement.offset(offset).limit(100)))
             if not page:
                 break
             offset += len(page)
+            prepare_access(self._session, page, now, reader=self._source_reader, validation=validation)
             for item in page:
-                if not currently_accessible(self._session, self._source_reader, setting.scope, item, now):
+                if not currently_accessible(self._session, self._source_reader, setting.scope, item, now, validation=validation):
                     continue
                 result.append(item)
                 if len(result) == limit:

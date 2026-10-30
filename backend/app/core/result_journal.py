@@ -108,7 +108,9 @@ class ResultJournal:
             if (len(files) - int(path.exists()) >= self.MAX_FILES or
                 sum(p.stat().st_size for p in files if p != path) + size > self.MAX_TOTAL):
                 raise ResultJournalError("result_journal_capacity")
-            write_json(path, envelope)
+            # Rejected provider text may contain an unpaired surrogate. Escape
+            # its code point losslessly rather than failing to preserve it.
+            write_json(path, envelope, ensure_ascii=True)
 
     def remove(self, world_id, item_id, *, expected_payload=None):
         with self._world(world_id) as directory:
@@ -124,6 +126,21 @@ class ResultJournal:
                     raise ResultJournalError("result_journal_corrupt") from None
             path.unlink(missing_ok=True)
             return True
+
+    def quarantine(self, world_id, item_id, payload, *, reason):
+        """Keep unusable evidence outside replay, with the same privacy fences."""
+        with self._world(world_id) as directory:
+            if (directory / "closed.json").exists():
+                raise ResultJournalError("result_journal_world_closed")
+            rejected = ResultJournal(self.root.parent, self.root.name + "-rejected")
+            previous = rejected.read(world_id, item_id)
+            entry = {"reason": reason, "record": payload}
+            if previous and previous.get("record") != payload:
+                entry["history"] = [*previous.get("history", []), {k: v for k, v in previous.items() if k != "history"}]
+            elif previous:
+                entry = previous
+            rejected.write(world_id, item_id, entry)
+            self._path(directory, item_id).unlink(missing_ok=True)
 
     def close_world(self, world_id):
         with self._world(world_id) as directory:

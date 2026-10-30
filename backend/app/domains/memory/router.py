@@ -33,6 +33,7 @@ from app.domains.memory.policies.retention import DEFAULT_MEMORY_RETENTION_DAYS
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.schemas.batch import (
     MemoryBatchRetry,
+    MemoryWorkflowCommand,
     MemoryBatchSettingRead,
     MemoryBatchSettingUpdate,
 )
@@ -126,6 +127,18 @@ def save_memory_situations(world_id: str, subject_id: str, data: MemorySaveReque
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return situation_management.save_now(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/processing-runs/{run_id}/command", response_model=MemoryProcessingRead)
+def command_memory_processing(world_id: str, subject_id: str, run_id: str, data: MemoryWorkflowCommand,
+    request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return situation_management.command(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, run_id=run_id, data=data)
     except Exception as exc:
         _raise_memory_mutation_error(exc)
 
@@ -446,11 +459,27 @@ def read_memory_batch_progress(world_id: str, subject_id: str, request: Request,
 
 @router.post("/memory/batch-run/{request_id}/retry")
 def retry_memory_relationship_batch(world_id: str, subject_id: str, request_id: str,
-    data: MemoryBatchRetry, request: Request, db: Session = Depends(get_db),
+    data: MemoryWorkflowCommand, request: Request, db: Session = Depends(get_db),
     user: User = Depends(get_current_user), workflows: MemoryWorkflows = Depends(get_memory_workflows)):
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return consolidation_requests.retry(scope=_scope(user, world_id, subject_id), db=db,
-            workflows=workflows, request_id=request_id, key=data.idempotency_key)
+            workflows=workflows, request_id=request_id, key=data.idempotency_key,
+            mode=data.mode, expected_revision=data.expected_revision)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.post("/memory/batch-run/{request_id}/cancel")
+def cancel_memory_relationship_batch(world_id: str, subject_id: str, request_id: str,
+    data: MemoryWorkflowCommand, request: Request, db: Session = Depends(get_db),
+    user: User = Depends(get_current_user), workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        if data.mode not in {"cancel_remaining", "close_without_retry"}:
+            raise MemoryValidationError("memory_workflow_action_unavailable")
+        return consolidation_requests.retry(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, request_id=request_id, key=data.idempotency_key,
+            mode=data.mode, expected_revision=data.expected_revision)
     except Exception as exc:
         _raise_memory_mutation_error(exc)

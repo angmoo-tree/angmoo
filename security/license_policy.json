@@ -210,6 +210,48 @@
         "Redistribution must include corresponding source for the shipped library and its compiled dependencies. See docs/operations/local-photo-codec.md."
       ],
       "source": "https://github.com/catdad-experiments/libheif-js/tree/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg",
+      "version": "3.3.6",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg-binary",
+      "version": "3.3.6",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg-pool",
+      "version": "3.3.3",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
     }
   ],
   "bundled_content": [
@@ -303,6 +345,30 @@
       "license_expression": "GPL-3.0-only",
       "source": "https://github.com/termux/proot-distro/blob/v5.10.0/LICENSE",
       "note": "Unmodified host tool installed separately; its license and corresponding source remain available upstream."
+    },
+    {
+      "name": "PostgreSQL Windows native server",
+      "source_path": "scripts/windows-postgresql.lock.json",
+      "reference": "\"postgresql\": \"17.11\"",
+      "license_expression": "PostgreSQL",
+      "source": "https://www.postgresql.org/about/licence/",
+      "distribution_boundary": "Private Windows runtime resources from the pinned EDB PostgreSQL 17.11 archive. Preserve server_license.txt and commandlinetools_3rd_party_licenses.txt; no global service is installed."
+    },
+    {
+      "name": "pgvector native extension",
+      "source_path": "scripts/windows-postgresql.lock.json",
+      "reference": "\"pgvector\": \"0.8.7\"",
+      "license_expression": "PostgreSQL",
+      "source": "https://github.com/pgvector/pgvector/blob/v0.8.7/LICENSE",
+      "distribution_boundary": "PostgreSQL server extension 0.8.7, distinct from the Python pgvector package. Linux uses the pinned image; Windows builds from hash-verified source and includes pgvector-LICENSE.txt."
+    },
+    {
+      "name": "PRoot Termux private host helper recipe",
+      "source_path": "launcher/termux/prepare_proot.py",
+      "reference": "VERSION='5.1.107.101'",
+      "license_expression": "GPL-2.0-or-later",
+      "source": "https://github.com/termux/proot/tree/v5.1.107.101",
+      "distribution_boundary": "Termux Play Store compatibility helper built privately from pinned upstream source with the published SysV and loader patch recipe. The source archive, patch and build receipt stay available in the installation home; packaged system PRoot is not replaced."
     }
   ],
   "actions": [

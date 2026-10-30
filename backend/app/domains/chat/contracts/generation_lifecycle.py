@@ -191,7 +191,7 @@ _TRANSITIONS: dict[ResponseRequestState, frozenset[ResponseRequestState]] = {
         }
     ),
     ResponseRequestState.COMMITTING: frozenset(
-        {ResponseRequestState.COMMITTED, ResponseRequestState.FAILED}
+        {ResponseRequestState.COMMITTED, ResponseRequestState.FAILED, ResponseRequestState.TIMED_OUT}
     ),
 }
 

@@ -10,3 +10,8 @@ services:
     image: angmoo-frontend-ci:${ANGMOO_CI_IMAGE_TAG:-ci}
     platform: ${ANGMOO_CI_PLATFORM:-linux/amd64}
     pull_policy: never
+
+  postgres:
+    image: angmoo-postgres-ci:${ANGMOO_CI_IMAGE_TAG:-ci}
+    platform: ${ANGMOO_CI_PLATFORM:-linux/amd64}
+    pull_policy: never

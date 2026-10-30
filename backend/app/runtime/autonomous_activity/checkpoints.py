@@ -7,6 +7,12 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 @asynccontextmanager
 async def activity_checkpointer(data_directory: Path, *, busy_ms: int | None = None):
+    from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+    store=bound_store(data_directory)
+    if store is not None:
+        async with store.saver() as saver:
+            yield saver
+        return
     directory = (data_directory / "runtime" / "activity").resolve()
     directory.mkdir(parents=True, exist_ok=True)
     async with AsyncSqliteSaver.from_conn_string(str(directory / "activity-checkpoints.sqlite")) as saver:
@@ -26,6 +32,9 @@ def backup_checkpoint(data_directory: Path, destination: Path):
     Canonical and checkpoint backups must be paired while activity scheduling is
     quiesced. This function never resets data or deletes unfinished work.
     """
+    from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+    if bound_store(data_directory) is not None:
+        raise ValueError('postgresql_backup_requires_whole_database_snapshot')
     import sqlite3
     source = data_directory.resolve() / "runtime" / "activity" / "activity-checkpoints.sqlite"
     if not source.is_file():
@@ -43,6 +52,11 @@ def backup_checkpoint(data_directory: Path, destination: Path):
 
 def erase_activity_checkpoint(data_directory: Path, activity_id: str) -> None:
     """Use the SDK's exact-thread erasure and fence a late checkpoint writer."""
+    from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+    store=bound_store(data_directory)
+    if store is not None:
+        store.erase(activity_id)
+        return
     from langgraph.checkpoint.sqlite import SqliteSaver
     from app.runtime.migrations.generation import EmbeddedUpgradeLock
     if not activity_id or len(activity_id) > 100:

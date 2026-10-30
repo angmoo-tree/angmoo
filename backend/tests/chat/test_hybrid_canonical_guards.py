@@ -25,7 +25,8 @@ def command(*, operations=("search_memory_items",), aggregation=None, enabled=Tr
         request_id="request", canonical_operation_allowlist=operations,
         memory_enabled=enabled, absolute_time_from=None, absolute_time_to=None,
         caps=RetrievalHardCaps(timeout_ms=timeout_ms))
-    return SimpleNamespace(intent=intent, resolved=resolved, call_id="call", call_tracker={})
+    return SimpleNamespace(intent=intent, resolved=resolved, thread_id="current-thread", call_id="call", call_tracker={},
+        initial_result=None, response_slot_id="slot", request_scope_hash="c" * 64)
 
 
 @pytest.mark.parametrize("operations,aggregation,enabled,reason", [
@@ -52,6 +53,7 @@ def test_allowed_document_kinds_and_resolved_deadline_reach_actual_search_port()
     class Hybrid:
         async def execute(self, request, *, deadline):
             assert request.kinds == (RecallDocumentKind.MEMORY_ITEM,)
+            assert request.allowed_thread_ids == ("current-thread",)
             assert 0 < deadline-monotonic() <= 4.0
             return HybridRecallResult(request.request_id, request.call_id, request.envelope_hash,
                 request.scope, RecallAxisStatus.READY, (), tuple(

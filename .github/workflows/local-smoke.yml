@@ -85,7 +85,7 @@ jobs:
         run: |
           uv sync --frozen --directory backend
           pnpm --dir frontend install --frozen-lockfile
-      - name: Run embedded Local OSS vertical smoke
+      - name: Check preserved SQLite input compatibility with a synthetic fixture
         shell: bash
         run: |
           set -euo pipefail

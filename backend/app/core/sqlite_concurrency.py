@@ -90,6 +90,10 @@ def run_sqlite_immediate(
     interleaving while keeping the lock lifetime explicit and short.
     """
 
+    if engine.dialect.name == "postgresql":
+        from app.core.postgresql_concurrency import POSTGRES_UNIT_RETRY, transact
+        return transact(engine, operation, retry_policy=retry_policy or POSTGRES_UNIT_RETRY,
+            sleep=sleep, monotonic=monotonic, observer=observer, deadline=deadline)
     if engine.dialect.name != "sqlite":
         raise SqliteConcurrencyError("SQLite writer received a non-SQLite engine")
     policy = retry_policy or SqliteRetryPolicy()
@@ -232,6 +236,9 @@ def require_read_only_session(session: Session, *, error_code: str) -> None:
     Other dialects conservatively require the caller to close its transaction.
     This check never commits or rolls back the caller's work.
     """
+    if session.get_bind().dialect.name == "postgresql":
+        from app.core.postgresql_concurrency import require_read_only
+        return require_read_only(session, error_code)
     if session.new or session.dirty or session.deleted:
         raise RuntimeError(error_code)
     if session.in_transaction():
@@ -264,6 +271,10 @@ def run_sqlite_session_immediate(
     """
 
     bind = session.get_bind()
+    if bind.dialect.name == "postgresql":
+        from app.core.postgresql_concurrency import POSTGRES_UNIT_RETRY, session_transact
+        return session_transact(session, operation, retry_policy=retry_policy or POSTGRES_UNIT_RETRY,
+            sleep=sleep, monotonic=monotonic, observer=observer, require_clean=require_clean)
     if bind.dialect.name != "sqlite":
         raise SqliteConcurrencyError("SQLite writer received a non-SQLite session")
     if require_clean and session.in_transaction():
@@ -375,6 +386,11 @@ def sqlite_session_attempt(session: Session):
     An external effect cannot be rolled back by SQLite. The durable owner must
     reconcile its journal after an exception; this context NEVER retries it.
     """
+    if session.get_bind().dialect.name == "postgresql":
+        from app.core.postgresql_concurrency import session_attempt
+        with session_attempt(session):
+            yield session
+        return
     if session.in_transaction():
         raise SqliteConcurrencyError("sqlite_writer_requires_clean_session")
     bind = session.get_bind()
@@ -559,6 +575,9 @@ def _is_busy_error(exc: BaseException) -> bool:
 
 def is_sqlite_busy(exc: BaseException) -> bool:
     """Only SQLite BUSY (including SNAPSHOT), never LOCKED or generic SQL errors."""
+    from app.core.postgresql_concurrency import retryable
+    if retryable(exc):
+        return True
     if isinstance(exc, SqliteBusyRetryExhausted):
         return True
     code, _ = sqlite_error_identity(exc)
@@ -574,7 +593,11 @@ def is_sqlite_busy(exc: BaseException) -> bool:
 
 def is_sqlite_contention(exc: BaseException) -> bool:
     """Retryable canonical admission; saturation stays distinct from DB BUSY."""
-    return isinstance(exc, (SqliteTaskQueueFull, PoolCheckoutTimeout)) or is_sqlite_busy(exc)
+    from app.core.postgresql_concurrency import PostgresDeadlineExceeded
+    # This typed deadline is raised only after the owned transaction aborts.
+    # The elapsed budget is exhausted: defer to the durable worker, do not
+    # replay provider/filesystem work or an unknown COMMIT outcome.
+    return isinstance(exc, (SqliteTaskQueueFull, PoolCheckoutTimeout, PostgresDeadlineExceeded)) or is_sqlite_busy(exc)
 
 
 __all__ = [

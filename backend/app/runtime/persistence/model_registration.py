@@ -4,6 +4,10 @@ from app.models import Base
 
 
 def install_canonical_write_fences(target, connection, **kwargs):
+    if connection.dialect.name == "postgresql":
+        from app.runtime.persistence.postgresql_triggers import install
+        install(connection,target)
+        return
     if connection.dialect.name == "sqlite" and "world_deletion_requests" in inspect(connection).get_table_names():
         from app.runtime.world_deletion.fences import install_fences
         install_fences(connection, metadata=target)
@@ -38,6 +42,7 @@ def register_models() -> MetaData:
     import app.domains.memory.models.vector_work  # noqa: F401
     import app.domains.memory.models.daypart  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.items  # noqa: F401 - explicit ORM registration
+    import app.domains.memory.models.experience  # noqa: F401 - immutable experience copies
     import app.domains.memory.models.episode  # noqa: F401 - explicit ORM registration
     import app.domains.operations.models  # noqa: F401 - explicit ORM registration
     import app.domains.relationships.models.points  # noqa: F401 - explicit ORM registration

@@ -16,10 +16,15 @@ from app.domains.memory.contracts.source_queries import MemorySourceQueries, Sou
 class SqlAlchemyMemorySourceEvidenceReader:
     """Translate canonical rows into a bounded eligibility snapshot."""
 
-    def __init__(self, session: Session, *, queries: MemorySourceQueries, situation_validator=None) -> None:
+    def __init__(self, session: Session, *, queries: MemorySourceQueries, situation_validator=None, situation_preparer=None) -> None:
         self._session = session
         self._queries = queries
         self._situation_validator = situation_validator
+        self._situation_preparer = situation_preparer
+
+    def prepare_situation_sources(self, contexts, *, validation):
+        if self._situation_preparer is not None:
+            self._situation_preparer(contexts, validation=validation)
 
     def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
         if self._situation_validator is None:

@@ -88,6 +88,11 @@ def confirm_situation(adapter, state, lane, target, receipt):
 
 
 async def resume(adapter, state, lane):
+    from app.core.async_session import session_call
+    return await session_call(adapter.ctx.db, lambda: _resume(adapter, state, lane))
+
+
+def _resume(adapter, state, lane):
     effects = committed_executions(adapter, state, lane,
         partial=state["stage"] == "Execute" and bool(state.get("failure")))
     if effects is None:

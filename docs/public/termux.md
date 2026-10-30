@@ -1,181 +1,83 @@
-# Experimental ARM64 reuse with Termux
+# Run Angmoo with ARM64 Termux / PRoot
 
-This adapter reuses the **same validated ARM64 backend and frontend images**.
-Docker is not required on Android. PRoot-Distro imports each OCI filesystem
-separately, preserving the backend Debian/Python and frontend Debian/Node bases.
-It runs the existing app entrypoints; it does not install another app dependency
-set, patch the images, or require editing ports or environment files.
+English | [한국어](termux.ko.md)
 
-**Version:** these instructions target 0.1.3. Use its downloads only after
-[Angmoo 0.1.3](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3)
-is published. Until then, use the
-[published 0.1.2 instructions](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.2/docs/public/termux.md).
-Android support remains experimental. Linux ARM64 or QEMU checks do not certify
-phone power management, background execution or performance.
+Version 0.1.4 reuses the validated ARM64 frontend, backend and PostgreSQL image
+filesystems through PRoot. No Docker daemon is needed on Android. Assets below
+become available after formal publication. Android support remains experimental:
+Linux/QEMU success does not certify screen-off/background behavior. A prior
+Samsung Android 14 observation included child-process termination despite a
+wake lock and battery-optimization exclusion.
 
-On the tested Samsung Android 14 device, the system terminated a Termux child
-process during screen-off use even with a partial wake lock and battery
-optimization exclusion. These settings do not guarantee continuous operation.
-This is a device-specific observation, not a universal Android memory limit.
-Closing the browser does not itself stop the server; Android may still interrupt it.
+## First installation
 
-## First install and start: two commands
-
-Install Termux on a supported ARM64 Android device, then enter these two commands.
-The second downloads the installer from the official versioned Release before
-running it. A missing release never falls back to another version or main code.
+Use private Termux storage on an ARM64 device.
 
 ```sh
-pkg update && pkg install -y python curl proot
+pkg update && pkg install -y python curl proot clang make libandroid-shmem
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py
+python "$HOME/install-angmoo.py"
 ```
 
-```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
-```
-
-The installer downloads the tools ZIP, checks `RELEASE-SHA256SUMS`, extracts it,
-sets up host tools, installs the images and starts backend/frontend in order.
-The release producer embeds the exact ZIP SHA-256 and size in the installer;
-both that binding and the checksum entry must match before tools code runs.
-Existing image architecture/source/version/digest checks, data preservation,
-duplicate-process protection and port checks remain in the existing launcher.
-A failed step prevents later steps. No shell startup files are edited.
-
-The initial installer's trust source is the official GitHub Release HTTPS URL
-above. Its own SHA-256 is also in `RELEASE-SHA256SUMS` for separate review and
-verification. This is not release-signature verification or Android certification.
-
-On success, open **http://127.0.0.1:3000**. After `Command ready: angmoo`,
-subsequent use needs only these commands, in the current or a new Termux shell:
+The installer verifies version/source/digests and starts all three services.
+Its pinned tools ZIP hash/size and `RELEASE-SHA256SUMS` must agree before code
+runs. The initial installer is trusted through the official HTTPS Release URL;
+this is not separate release-signature verification or Android certification.
+Open http://127.0.0.1:3000 when ready.
 
 ```sh
 angmoo start
 angmoo status
+angmoo diagnostics
 angmoo stop
+angmoo restart
 ```
 
-## Command registration and existing 0.1.0 installations
+Startup orders PostgreSQL readiness, backend, then frontend; shutdown reverses
+that order. App ports default to 8080/3000; DB uses loopback 5432. A foreign
+listener is not adopted or killed. Inspect logs on failure; do not delete data.
 
-Command registration is included in the 0.1.3 tools. Published 0.1.0 tools
-still use `~/.local/bin/angmoo start`, `~/.local/bin/angmoo status` and
-`~/.local/bin/angmoo stop`. These full paths also remain valid after updating;
-the short command uses the same wrapper and does not create another data home.
+## Existing 0.1.3 data
 
-With reviewed tools containing `command_registration.py`, normal `sh setup.sh`
-also registers `$PREFIX/bin/angmoo` as a link to the existing
-`$HOME/.local/bin/angmoo` wrapper. After `Command ready: angmoo`, current and new
-Termux shells can use `angmoo start`, `angmoo status` and `angmoo stop`. No alias
-or shell startup-file edit is needed. Internal installation calls still use the
-verified full path, and readiness is reported only after both services are ready.
-
-For an already complete installation, run this from the reviewed **new tools**
-directory to register only the command:
+Verify/extract the new tools ZIP and checksum, run `sh setup.sh` to update the
+launcher, then:
 
 ```sh
-sh setup.sh --register-command-only
-```
-
-This mode does not run pkg/pip, replace tool or image files, restart services, or
-read application data, keys or logs. It uses a private setup lock to coordinate
-installers. Do not rerun the whole first-install bootstrap merely to register an
-existing custom-home installation. Keep its existing home when using commands:
-
-```sh
-angmoo --home "$HOME/.local/share/angmoo-custom" status
-```
-
-An existing link to the same wrapper is reused. A different command, modified
-wrapper, unsafe prefix, or command shadowing earlier in PATH is an error; setup
-does not overwrite it. An incomplete installation cannot use register-only.
-`setup_busy` means another setup owns the lock. Let it finish before retrying.
-Inspect the conflicting command before making changes; the original full path
-remains available when that installation is intact. Native Termux detection is
-required for prefix registration; a non-Termux validation environment retains
-the full-path workflow. No power-management setting is changed.
-
-## Manual setup and controlled validation
-
-To review the individual steps, download `angmoo-termux-tools.zip`
-from the official `angmoo-tree/angmoo` release and verify its entry in
-`RELEASE-SHA256SUMS`. Extract it into Termux private storage, then perform the
-one-time host-tool setup from that directory:
-
-```sh
-sh setup.sh
-```
-
-The 0.1.3 setup registers the command without editing PATH or shell startup files.
-For old 0.1.0 tools, keep using the full wrapper path instead.
-
-Setup installs the platform's Python/PRoot if missing and the hash-pinned
-PRoot-Distro 5.10.0 wheel in a private virtual environment. No root or Docker
-daemon is needed. Keep its licenses and versioned upstream source notices.
-Installation and each later start are one command each:
-
-```sh
-angmoo install --release 0.1.3
+angmoo migrate --release 0.1.4 --language en
 angmoo start
 ```
 
-Open **http://127.0.0.1:3000** in the Android browser. Backend uses loopback 8080.
-If another process owns either port, start refuses to adopt or kill that process.
-`angmoo status` and `angmoo diagnostics` read safe identity/state only. Stop and
-restart with `angmoo stop` / `angmoo restart`; backend may take up to 200 seconds
-to drain. These commands preserve data. Do not kill Termux during a write.
+The original stays intact. Backup, conversion and verification use a sibling
+`<old-home>-postgresql`; selection changes only after success. Keep the same
+explicit `--home` for a custom installation. Follow
+[migration, resume and rollback](postgresql-migration.md). A normal `install`
+does not overwrite SQLite data. Private PG experiments are not supported inputs.
 
-Host state and data live under `~/.local/share/angmoo`, mode 0700, outside either
-rootfs. Only backend receives the data mount. Do not move this directory to
-shared Android storage. Neither credentials nor data go into the images.
-Keep both service payloads on the same version/source. A failed import does not
-select the partial pair or erase the prior install. If owned processes survive an interrupted session, the launcher refuses to
-start a second backend and reports the state through diagnostics.
+## Host tools and data
 
-## Update while keeping the same data home
+PRoot-Distro 5.10.0 is hash-pinned in a private Python environment. Play Store
+Termux builds a pinned upstream PRoot with the SysV shared-memory helper in the
+installation's private tools directory. It does not replace packaged PRoot,
+global settings or app-image files. Source/patch/binary hashes are recorded in
+`records/proot-build.json`. Short private IPC scratch directories under
+`.cache/angmoo-pg` have installation ownership markers; they are not databases.
 
-Use this controlled sequence for an existing installation, especially one with
-a custom home. The two-command first-install bootstrap uses the default home;
-it does not discover or migrate a different custom home automatically.
+PGDATA, media, secrets and retained-result journals stay outside image rootfs.
+Keep the home private (0700), not on `/sdcard`. Follow the
+[complete backup/restore guide](postgresql-backup.md); a DB file alone is not
+enough. Do not attach an older image to new PG data or remove originals/backups
+before verification.
 
-1. Record the existing home, version/source, active image pair and session with
-   the existing wrapper's `status` and `diagnostics` commands. Include
-   `--home "$HOME/.local/share/angmoo-custom"` when that is the actual home.
-2. Stop that installation normally with the same `--home` and `stop`. Confirm
-   both services have stopped before backing up. Do not terminate Termux to
-   bypass a cleanup failure.
-3. Back up the complete data directory, media, installation secret, host state,
-   image identity records and logs to private storage. A DB file or World Package
-   alone is not enough. Keep the previous image pair and tools for recovery.
-4. Download and verify the 0.1.3 tools using the manual setup procedure above.
-   Run `sh setup.sh` from those new tools. This updates the tools and registers
-   the command; it does not select a different application data home.
-5. Install the matching pair and start with the **same** recorded home:
+## Registration and candidate validation
 
-   ```sh
-   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.3
-   angmoo --home "$HOME/.local/share/angmoo-custom" start
-   angmoo --home "$HOME/.local/share/angmoo-custom" status
-   ```
-
-   Replace the example with your recorded path. For the default installation,
-   it is `$HOME/.local/share/angmoo`. Keep that same path for every command.
-6. Confirm the version/source, characters and existing data before deleting any
-   backup. If installation or readiness fails, keep its diagnostics and logs;
-   do not reset data or force an unmatched pair to start. Stop owned services
-   normally before restoring the previous tools/image selection. Restore a
-   complete stopped-data backup if a supported data rollback is necessary;
-   do not assume arbitrary older images can read newer data.
-
-New tools check the version from the verified installed manifest, so querying
-an existing 0.1.0 pair still works. A different version, source or launch identity
-is rejected; receiving HTTP 200 alone does not mean the services are ready.
-
-## Local candidate validation
+`setup.sh` registers `angmoo` through the existing wrapper without changing
+shell startup files. From reviewed new tools, use `sh setup.sh --register-command-only`
+only to register an already complete installation. A conflicting command or
+modified wrapper is not overwritten. Direct migration from 0.1.0 is not supported.
 
 Maintainers can use `install --candidate-manifest` with a separate `--home`
-for an explicitly validated ARM64 backend/frontend pair. Do not mix candidate
-and release data roots or change image validation to make a test start.
-See [candidate import](../operations/release-candidate-import.md) for identity
-checks. Local or emulated validation is not a physical-phone certification.
+for three same-source candidates. Keep local checks, hosted CI and physical
+device observations distinct.
 
 ## Saved service logs
 

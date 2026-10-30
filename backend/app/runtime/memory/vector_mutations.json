@@ -840,5 +840,38 @@
     "kind": "users",
     "key": "{row}.id",
     "epoch": "'owner:' || {row}.id"
+  },
+  {
+    "table": "memory_experience_snapshots",
+    "columns": [
+      "memory_item_id",
+      "scope_setting_id",
+      "policy_version",
+      "content_digest"
+    ],
+    "kind": "memory",
+    "key": "{row}.memory_item_id",
+    "epoch": "(SELECT 'world:' || world_id FROM memory_scope_settings WHERE id={row}.scope_setting_id)"
+  },
+  {
+    "table": "memory_experience_dependencies",
+    "columns": [
+      "memory_item_id",
+      "origin_memory_id",
+      "scope_setting_id"
+    ],
+    "kind": "memory",
+    "key": "{row}.memory_item_id",
+    "epoch": "(SELECT 'world:' || world_id FROM memory_scope_settings WHERE id={row}.scope_setting_id)"
+  },
+  {
+    "table": "memory_experience_tombstones",
+    "columns": [
+      "scope_setting_id",
+      "memory_item_id"
+    ],
+    "kind": "memory",
+    "key": "{row}.memory_item_id",
+    "epoch": "(SELECT 'world:' || world_id FROM memory_scope_settings WHERE id={row}.scope_setting_id)"
   }
 ]

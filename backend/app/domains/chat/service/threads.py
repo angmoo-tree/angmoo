@@ -43,6 +43,7 @@ from app.domains.chat.repository.threads import (
 from app.domains.chat.service import profiles
 from app.domains.chat.service.message_pages import encode_message_cursor, decode_message_cursor, committed_evidence_summary
 from app.domains.chat.service.settings import MessageSettingsService
+from app.core.database_transactions import postgres_db_unit
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.world_characters.service.configuration import (
     configuration_for_actor,
@@ -207,6 +208,7 @@ class ThreadService:
             create_or_get_capability="available",
         )
 
+    @postgres_db_unit
     def create_or_get_world_thread(
         self,
         db: Session,
@@ -321,6 +323,7 @@ class ThreadService:
             raise
         return schemas.WorldChatThreadCreateRead(outcome="created", thread=thread_read)
 
+    @postgres_db_unit
     def update_world_thread_model(
         self,
         db: Session,
@@ -354,6 +357,7 @@ class ThreadService:
         db.commit()
         return read
 
+    @postgres_db_unit
     def delete_world_thread(
         self, db: Session, user: ChatUser, world_id: str, thread_id: str
     ) -> schemas.WorldChatThreadDeleteRead:
@@ -815,16 +819,27 @@ class ThreadService:
         *,
         lock_thread: bool = False,
         include_deleted: bool = False,
+        advance_admission: bool = False,
     ) -> models.MessageThread:
-        statement = select(models.MessageThread).where(
+        conditions = [
             models.MessageThread.id == thread_id,
             models.MessageThread.requester_id == user.id,
             models.MessageThread.world_id == world_id,
             models.MessageThread.world_scope_status == "resolved",
-        )
+        ]
         if not include_deleted:
-            statement = statement.where(models.MessageThread.deleted_at.is_(None))
-        if lock_thread and self._is_postgresql_session(db):
+            conditions.append(models.MessageThread.deleted_at.is_(None))
+        statement = select(models.MessageThread).where(*conditions)
+        if advance_admission and self._is_postgresql_session(db):
+            if not lock_thread:
+                raise ValueError("chat_admission_requires_thread_lock")
+            # Every new/retried admission advances the tuple's MVCC version,
+            # including retry of an old message which does not change the last
+            # message timestamp. A waiting snapshot must restart, then see the
+            # committed active request. Merely SELECT FOR UPDATE is insufficient.
+            statement = update(models.MessageThread).where(*conditions).values(
+                updated_at=models.MessageThread.updated_at).returning(models.MessageThread)
+        elif lock_thread and self._is_postgresql_session(db):
             statement = statement.with_for_update()
         thread = db.scalar(statement)
         if thread is None:

@@ -1,4 +1,7 @@
 {
+  "기억 요약은 보존되어 있지만 당시 원문은 남아 있지 않습니다.": "The memory summary is preserved, but its original text was not retained.",
+  "당시 기억에 보관한 원문입니다. 이후 글의 수정·삭제와 별개로 보존됩니다.": "This text was saved with the experience. Later edits or deletion of the post do not change this copy.",
+  "내용을 읽었지만 예정한 반응은 실행되지 않았습니다.": "The content was read, but the planned response was not executed.",
   "부하가 한 번에 몰리지 않도록 기억 정리와 일일 관계 정리는 시간을 띄워 예약하는 것을 권장해요. 실행 시각은 직접 설정할 수 있어요.": "To help spread the workload, schedule memory consolidation and daily relationship review at different times. You can choose the times.",
   "답변 당시 관계": "Relationship provided for this reply",
   "현재도 동일": "Still unchanged",
@@ -452,5 +455,16 @@
   "요청 결과를 확인하지 못했어요. 다시 저장하기 전에 현재 상태를 확인해 주세요.": "The request result could not be confirmed. Check the current settings before submitting again.",
   "다시 불러오기": "Reload settings",
   "기억을 관리할 캐릭터가 없어요.": "There are no characters whose memories you can manage.",
-  "기억을 관리할 캐릭터를 선택해 주세요.": "Choose a character to manage their memories."
+  "기억을 관리할 캐릭터를 선택해 주세요.": "Choose a character to manage their memories.",
+  "남은 정리를 중단했습니다. 완료된 결과는 유지됩니다.": "Remaining work was stopped. Completed results were kept.",
+  "완료된 결과와 실패 이력을 보존하고 종료했습니다.": "Closed without retrying. Completed results and failure history were kept.",
+  "실패한 항목은 자동으로 다시 실행하지 않습니다.": "Failed items will not run again automatically.",
+  "다시 판단하면 AI 이용 비용이 발생할 수 있습니다.": "Reviewing again may incur AI provider charges.",
+  "받은 결과 저장 재개": "Resume saving the received result",
+  "실패한 부분 다시 판단": "Review failed items again",
+  "남은 작업 재개": "Resume remaining work",
+  "남은 정리 중단": "Stop remaining work",
+  "재시도 없이 종료": "Close without retrying",
+  "복구 요청을 완료하지 못했어요. 상태를 확인한 뒤 다시 시도해 주세요.": "The recovery request could not be completed. Check the status and try again.",
+  "관계 정리 일부 실패 · 직접 복구 필요": "Some relationship reviews failed. Manual recovery is needed."
 }

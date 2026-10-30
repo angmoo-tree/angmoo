@@ -20,8 +20,8 @@ The domain-oriented layout draws on [FastAPI Best Practices](https://github.com/
 
 Angmoo extends this layout for local data, autonomous activity, and AI processing.
 `runtime` connects services and resource lifetimes; `integrations` owns technical transport and conversion;
-`credentials` connects existing credential contracts. Local persistence uses embedded SQLite and its
-migrations. The reference's Alembic examples are not installation steps for Angmoo users.
+`credentials` connects existing credential contracts. Local persistence uses PostgreSQL and the versioned schema in `runtime/persistence/postgresql_schema.py`.
+SQLite is read only by the supported 0.1.3 offline migration path and compatibility tests. The reference's Alembic examples are not installation steps for Angmoo users.
 
 ### Reading order
 
@@ -434,21 +434,15 @@ World Package import, for example, applies several models and lineage together. 
 
 A Session is not a global object shared by concurrent work. Do not reuse a completed request's Session in a background task. Do not hold a write transaction open while waiting for external AI. Recheck current permissions, version, and lease when applying results.
 
-### 7.1 SQLite waits, retries, and completion records
+### 7.1 PostgreSQL transactions, bounded retries, and completion records
 
-- Retry only expected `SQLITE_BUSY` failures within the allowed policy. Do not classify `SQLITE_LOCKED`, permission/path/corruption errors, or arbitrary `TimeoutError` instances as lock contention.
-- Finish rollback and connection cleanup between attempts. Share one monotonic deadline from the first attempt; do not grant a fresh budget on each retry.
+Retry `40001` serialization failures and supported transient deadlocks by rerunning the complete DB transaction, including the reads and checks that decide the write. Roll back and return the connection before waiting. Keep one monotonic deadline and the operation's bounded attempt policy; do not wrap another retry loop around it.
 
-Lease operations use a dedicated `LeaseOperation`. Heartbeat has at most 12 attempts within a total of 2 seconds;
-tick completion has at most 4 attempts within a total of 2 seconds. The actual lease expiration and cleanup
-reserve may require an earlier stop.
+A received AI result and its DB application have separate lifetimes. Preserve a valid draft before retrying storage; a storage retry must not repeat the provider call or a committed public action. An uncertain commit requires reconciliation against the same idempotency key and effect receipt. Invalid output, configuration errors and permission failures are not transient DB contention.
 
-Ordinary writes have a separate policy of at most 4 attempts within 0.25 seconds. The lease executor has
-one worker, capacity for 4 operations, and a maximum queue wait of 1 second. Do not nest BUSY retry loops in other layers.
+The main pool retains up to 10 connections and permits 5 overflow connections; the checkpoint pool permits 2 and direct connections are bounded at 2. Pools open lazily. The runtime role permits 20 connections; the server budget is 28 including 3 administrator reservations and operating headroom. A reservation does not create a session. See `core/postgresql_capacity.py`.
 
-Tick completion fixes the logical tick and actual completion time, then checks owner, epoch, expiration, and tick CAS.
-A late record must not complete the next tick or rerun a successful activity. Database instrumentation collects
-bounded measurements in memory and summarizes them after connection cleanup; do not add diagnostic DB writes at every stage.
+Lease renewal and tick completion retain ownership, epoch, expiration and CAS checks. Instrument bounded queue, acquisition, SQL, commit and cleanup measurements without adding a diagnostic DB write at every stage. Memory and relationship maintenance share one execution slot and continue the selected character's prepared work at safe short-transaction boundaries. SNS, Chat and retrieval remain available.
 
 ## 8. HTTP, validation, and asynchronous execution
 
@@ -462,7 +456,7 @@ Call asynchronous I/O with `await`. Calling a synchronous helper inside `async d
 
 ## 9. Canonical data, retrieval, and AI
 
-SQLite stores canonical data and management state. FTS5, vector projections, and LadybugDB relationship graphs are derived data. A search hit does not establish current read permission or deletion state; recheck the canonical World's scope, observation scope, and visibility.
+PostgreSQL stores canonical data, management state and checkpoints. PostgreSQL full-text/trigram indexes, pgvector exact-cosine projections and LadybugDB relationship graphs are derived data. A search hit does not establish current read permission or deletion state; recheck the canonical World's scope, observation scope, and visibility.
 
 The LLM interprets allowed context and produces plans, summaries, and character responses. Code determines actual IDs, permissions, allowed operations, persistence eligibility, and call limits. Do not execute model-generated SQL or Cypher directly. Validate the plan and use an allowed executor.
 
@@ -518,27 +512,13 @@ times. Identical settings or unrelated edits must not create extra writes, new a
 
 ## 12. Memory retrieval and result application
 
-Distinguish SQLite canonical data from FTS5, vector, and LadybugDB results. A hit does not prove current
+Distinguish PostgreSQL canonical data from full-text, pgvector and LadybugDB results. A hit does not prove current
 permissions, deletion state, revision, visibility, or observation scope. Check canonical state during hydration
 and before final delivery or persistence. Distinguish empty results, retrieval not selected, unavailable, and timeout.
 
-`MemoryHybridRuntime` shares FTS and vector reader pools. Home/Feed queries and app startup do not create
-search processes. Authenticated visible Chat or accepted SNS activity reads saved settings, closes the read
-transaction, then requests preparation. A preparation signal is not a search, embedding call, key check, or business write.
+The official PostgreSQL runtime uses `PostgresMemoryHybridRuntime` in the single backend process. It does not start the legacy SQLite retrieval processes. Return read connections before provider I/O and keep request cancellation/deadlines separate from pool capacity. The former SQLite process/IPC preparation rules remain in compatibility code and historical ADRs; they are not PostgreSQL runtime defaults.
 
-Each axis has at most 2 processes and 8 FIFO waiters. Processes starting, executing, being reclaimed, or in
-quarantine still count toward capacity. The shared control executor has 4 threads and 2 preparation slots.
-`runtime/memory/preparation_budget.py` owns the preparation budget: 30 seconds per process, 60 seconds
-per round, and a 30-second cooldown for another request. These are separate from retrieval budgets.
-Experimental relaxed values do not become release defaults.
-
-BOOT precedes module loading; READY describes process preparation. READY does not mean an index is
-usable. Reuse requires request-cleanup acknowledgement. Timeout, invalid IPC, or uncertain cleanup retires
-the process and channel; capacity is not returned until actual OS termination is confirmed. Generation
-replacement drains existing readers before attaching new ones.
-
-Reuse covers the interpreter and loaded code. SQLite connections, snapshots, cancellation handlers, and
-request context end with each request. Cancelling one request does not cancel unassigned shared preparation.
+Chat and SNS freeze accepted starting input and deliver stored original snapshots with selected memories. Do not silently fetch current original content to replace those snapshots. Relationship review groups situation-memory bodies by counterpart and supplies only those bodies and the existing relationship perception to the model; it does not fetch or validate original snapshots. Preserve ownership, deletion, lease, duplicate and conflict fences.
 
 Current social-hybrid Chat retrieval allows at most 20 seconds, bounded by the parent's remaining time and
 response reserve. Selected SNS batch retrieval shares a 30-second budget measured before queue entry,
@@ -618,8 +598,9 @@ secret. Do not interpret an unavailable historical hosted credential as a new ke
 RuntimeConfig to `create_public_app`. Do not confuse the public profile of `app.main:public_app` with
 general factory defaults or create a duplicate factory.
 
-Keep installed-user, Docker, development, and TEST data roots separate. Embedded SQLite upgrades use
-backup, staging, manifest/schema/FK/integrity validation, promotion, and failure recovery. Do not modify
+Keep installed-user, Docker, development, and TEST data roots separate. Supported 0.1.3 SQLite migration uses
+immutable backup, staging, explicit type/state conversion, schema/FK/content checks and selection after verification.
+PostgreSQL schema changes use the owner-only schema initializer; serving uses a restricted runtime role. Do not modify
 frozen predecessors or Alembic history. File moves alone do not increment the schema. Follow the
 [retention policy](../docs/operations/embedded-retention.md) for generations, use pins, maintenance locks, secrets, and media.
 
@@ -639,7 +620,7 @@ parent/child or parallel durations.
 
 ## 17. Validation and detailed contracts
 
-Select checks for the changed domain, callers, and failure boundaries. Use fake providers, isolated SQLite,
+Select checks for the changed domain, callers, and failure boundaries. Use fake providers, isolated PostgreSQL and frozen SQLite input fixtures,
 fixed clocks, and cancellation/resume scenarios. Changes to shared DB behavior, app factories, migrations,
 or packaging need appropriately broader consumer coverage. Required remote coverage follows the
 [CI policy](../docs/operations/ci-validation.md).
@@ -655,7 +636,9 @@ for investigating earlier migrations, not a substitute for routine feature valid
 
 - [Domain boundaries](../docs/architecture/backend-domains.md)
 - [Supported historical and extension compatibility paths](../docs/architecture/backend-compatibility.md)
-- [SQLite recovery and received results](../docs/operations/sqlite-recovery.md)
+- [PostgreSQL migration](../docs/public/postgresql-migration.md)
+- [PostgreSQL backup and recovery](../docs/public/postgresql-backup.md)
+- [Legacy SQLite recovery and received results](../docs/operations/sqlite-recovery.md)
 - [Local runtime](../docs/public/local-runtime.md)
 - [LangGraph nodes](../docs/public/adding-langgraph-node.md), [provider adapters](../docs/public/adding-provider.md)
 

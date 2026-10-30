@@ -1,4 +1,4 @@
-"""Run the clean-clone and restart smoke for the two-service embedded stack."""
+"""Run the clean-clone and restart smoke for the three-service PostgreSQL stack."""
 
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ import uuid
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_SERVICES = {"backend", "frontend"}
-EMBEDDED_VOLUME = "angmoo_contributor_embedded_data"
+EXPECTED_SERVICES = {"backend", "frontend", "postgres"}
+POSTGRES_VOLUME = "angmoo_postgresql_data"
 
 
 def classify_runtime_failure(text: str) -> str:
@@ -114,8 +114,8 @@ def _runtime_health(harness: ComposeHarness) -> dict[str, Any]:
     output = harness.run("exec", "-T", "backend", "python", "-c", command).stdout
     payload = json.loads(output)
     assert payload["status"] == "ok"
-    assert payload["profile"] == "CONTRIBUTOR_EMBEDDED"
-    assert payload["persistence"] == "sqlite"
+    assert payload["profile"] == "CONTRIBUTOR_POSTGRESQL"
+    assert payload["persistence"] == "postgresql"
     assert payload["graph"] == "ladybug"
     assert payload["components"] == {"scheduler": "ready", "projector": "ready"}
     return payload
@@ -138,45 +138,33 @@ def _provider_call_count(harness: ComposeHarness) -> int:
         "contributor-diagnostics",
     ).stdout
     payload = json.loads(output)
-    assert payload["runtime_profile"] == "CONTRIBUTOR_EMBEDDED"
-    assert payload["persistence_provider"] == "sqlite"
+    assert payload["runtime_profile"] == "CONTRIBUTOR_POSTGRESQL"
+    assert payload["persistence_provider"] == "postgresql"
     assert payload["graph_provider"] == "ladybug"
     return int(payload["provider_usage"]["recent_call_count"])
 
 
-def _write_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
-    command = (
-        "import sqlite3; "
-        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
-        "c=sqlite3.connect(p); "
-        "c.execute(\"INSERT INTO site_operation_settings"
-        "(key,value,updated_by_user_id,updated_at) VALUES (?, ?, NULL, CURRENT_TIMESTAMP)\", "
-        f"({marker!r}, {marker!r})); "
-        "c.commit(); c.close()"
-    )
-    harness.run("exec", "-T", "backend", "python", "-c", command)
+def _marker(harness, statement, marker):
+    command=("from pathlib import Path; from sqlalchemy import text; "
+        "from app.database import create_database_engine; "
+        "from app.runtime.postgresql_installation import read_dsn; "
+        "e=create_database_engine(read_dsn(Path('/var/lib/angmoo/secrets/postgresql-runtime-dsn'))); "
+        "c=e.connect(); tx=c.begin(); "
+        f"r=c.execute(text({statement!r}),{{'key':{marker!r}}}); "
+        "print(r.scalar() if r.returns_rows else r.rowcount); tx.commit(); c.close(); e.dispose()")
+    return harness.run("exec","-T","backend","python","-c",command).stdout.strip()
 
 
-def _sqlite_marker_exists(harness: ComposeHarness, marker: str) -> bool:
-    command = (
-        "import sqlite3; "
-        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
-        "c=sqlite3.connect(p); "
-        f"print(c.execute('SELECT COUNT(*) FROM site_operation_settings WHERE key=? AND value=?', ({marker!r}, {marker!r})).fetchone()[0]); "
-        "c.close()"
-    )
-    return harness.run("exec", "-T", "backend", "python", "-c", command).stdout.strip() == "1"
+def _write_postgresql_marker(harness,marker):
+    _marker(harness,"INSERT INTO site_operation_settings(key,value,updated_by_user_id,updated_at) VALUES(:key,:key,NULL,CURRENT_TIMESTAMP)",marker)
 
 
-def _delete_sqlite_marker(harness: ComposeHarness, marker: str) -> None:
-    command = (
-        "import sqlite3; "
-        "p='/var/lib/angmoo/canonical/generations/contributor-v1/angmoo.sqlite3'; "
-        "c=sqlite3.connect(p); "
-        f"c.execute('DELETE FROM site_operation_settings WHERE key=?', ({marker!r},)); "
-        "c.commit(); c.close()"
-    )
-    harness.run("exec", "-T", "backend", "python", "-c", command)
+def _postgresql_marker_exists(harness,marker):
+    return _marker(harness,"SELECT COUNT(*) FROM site_operation_settings WHERE key=:key AND value=:key",marker)=="1"
+
+
+def _delete_postgresql_marker(harness,marker):
+    _marker(harness,"DELETE FROM site_operation_settings WHERE key=:key",marker)
 
 
 def run_smoke(*, tag: str, project: str, port: int, development: bool, report_path: Path | None = None) -> None:
@@ -196,7 +184,7 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
         harness.run(*up_arguments)
         cold_start = time.monotonic() - started
         if _service_names(harness) != EXPECTED_SERVICES:
-            raise RuntimeError("runtime_state_stale: two-service topology mismatch")
+            raise RuntimeError("runtime_state_stale: three-service topology mismatch")
         report = {"cold_start_seconds": round(cold_start, 3)}
         if report_path:
             # Capture before launching diagnostics: Docker retains only a short
@@ -230,10 +218,10 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
                 report["memory_sample"] = [json.loads(line) for line in stats.splitlines() if line.strip()]
             harness.run("exec", "-T", "backend", "python", "-c", "from pathlib import Path; Path('/var/lib/angmoo/media/release-fixture').write_bytes(b'synthetic-media')")
         marker = f"browser-run-{uuid.uuid4().hex}"
-        _write_sqlite_marker(harness, marker)
+        _write_postgresql_marker(harness, marker)
         volumes = harness.run("config", "--volumes").stdout.splitlines()
-        if EMBEDDED_VOLUME not in volumes:
-            raise RuntimeError("runtime_state_stale: embedded volume missing")
+        if POSTGRES_VOLUME not in volumes:
+            raise RuntimeError("runtime_state_stale: PostgreSQL volume missing")
 
         stopped = time.monotonic()
         harness.run("stop", "--timeout", "200" if report_path else "30")
@@ -242,9 +230,9 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
         harness.run("up", "-d", "--wait", "--wait-timeout", "300")
         report["restart_seconds"] = round(time.monotonic() - restarted, 3)
         _runtime_health(harness)
-        if not _sqlite_marker_exists(harness, marker):
-            raise RuntimeError("sqlite_write_lost: canonical marker did not survive restart")
-        _delete_sqlite_marker(harness, marker)
+        if not _postgresql_marker_exists(harness, marker):
+            raise RuntimeError("postgresql_write_lost: canonical marker did not survive restart")
+        _delete_postgresql_marker(harness, marker)
         if _provider_call_count(harness) != 0:
             raise RuntimeError("provider_call_regression: restart called a provider")
         digest_after = _secret_digest(harness)
@@ -252,13 +240,13 @@ def run_smoke(*, tag: str, project: str, port: int, development: bool, report_pa
             raise RuntimeError("secret_mismatch: APP_SECRET changed after restart")
         if report_path:
             harness.run("exec", "-T", "backend", "python", "-c", "from pathlib import Path; assert Path('/var/lib/angmoo/media/release-fixture').read_bytes()==b'synthetic-media'")
-            report.update(status="PASS", provider_calls=0, sqlite_restart=True, media_restart=True, secret_restart=True)
+            report.update(status="PASS", provider_calls=0, postgresql_restart=True, media_restart=True, secret_restart=True)
             report_path.parent.mkdir(parents=True, exist_ok=True)
             report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         mode = "contributor-development" if development else "browser-production"
         print(
-            f"Embedded container smoke passed: mode={mode} "
-            f"services=2 volume={EMBEDDED_VOLUME} sqlite_write_stable=true "
+            f"PostgreSQL container smoke passed: mode={mode} "
+            f"services=3 volume={POSTGRES_VOLUME} postgresql_write_stable=true "
             "ladybug_ready=true scheduler_ready=true projector_ready=true "
             "provider_calls=0 restart_secret_stable=true"
         )

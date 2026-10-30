@@ -17,7 +17,7 @@ from app.domains.memory.models.activity_situation import (
 def active_run(session, setting_id):
     return session.scalar(select(MemorySituationApplyRun).where(
         MemorySituationApplyRun.scope_setting_id == setting_id,
-        MemorySituationApplyRun.state.in_(("pending", "running", "deferred", "error")),
+        MemorySituationApplyRun.state.in_(("pending", "running", "deferred")),
     ).order_by(MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1))
 
 

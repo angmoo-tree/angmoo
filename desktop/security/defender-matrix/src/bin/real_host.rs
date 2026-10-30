@@ -9,6 +9,9 @@ fn main() {
                 .ok_or("matrix_real_sidecar_path_missing")?;
             let runtime_root = env::var_os("ANGMOO_DEFENDER_MATRIX_RUNTIME_ROOT")
                 .ok_or("matrix_runtime_root_missing")?;
+            let postgresql_root = env::var_os("ANGMOO_DEFENDER_MATRIX_POSTGRESQL_ROOT")
+                .ok_or("matrix_postgresql_root_missing")?;
+            let postgresql_root = PathBuf::from(postgresql_root).to_string_lossy().into_owned();
             let parent_pid = std::process::id().to_string();
             let runtime_root = PathBuf::from(runtime_root);
             let data_root = runtime_root
@@ -38,7 +41,10 @@ fn main() {
                     "--launch-id",
                     "er6-defender-matrix",
                     "--runtime-profile",
-                    "LOCAL_EMBEDDED",
+                    "LOCAL_POSTGRESQL",
+                    "--postgresql-root",
+                    &postgresql_root,
+                    "--validation",
                 ])
                 .env(
                     "DESKTOP_LAUNCH_TOKEN",

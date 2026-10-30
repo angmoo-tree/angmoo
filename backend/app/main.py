@@ -120,6 +120,7 @@ def create_lifespan(
     runtime_disposer: Callable[[], None] | None = None,
     memory_runtime=None,
     memory_hybrid_runtime=None,
+    validation_mode=False,
 ) -> LifespanHandler:
     @asynccontextmanager
     async def runtime_lifespan(runtime_app: FastAPI) -> AsyncIterator[None]:
@@ -162,17 +163,17 @@ def create_lifespan(
                 from app.runtime.autonomous_activity.binding import register
                 register(activity_runtime_binding)
                 binding_registered = True
-            if maintenance is not None:
+            if maintenance is not None and not validation_mode:
                 await maintenance.start()
             if component_manager is not None:
                 await component_manager.start()
-            if memory_runtime is not None:
+            if memory_runtime is not None and not validation_mode:
                 await memory_runtime.start()
             if memory_hybrid_runtime is not None:
                 await memory_hybrid_runtime.start()
-            if media_runtime is not None and getattr(runtime_app.state, "media_worker_enabled", False):
+            if media_runtime is not None and not validation_mode and getattr(runtime_app.state, "media_worker_enabled", False):
                 await media_runtime.start()
-            if deletion_worker is not None:
+            if deletion_worker is not None and not validation_mode:
                 await deletion_worker.start()
             yield
         finally:
@@ -206,6 +207,9 @@ def create_lifespan(
                             if configuration_registered:
                                 unregister_hosted_configuration(extension.settings_provider, extension.prompt_provider)
                         finally:
+                            composition = getattr(runtime_app.state, "runtime_composition", None)
+                            if composition is not None and composition.checkpoint_store is not None:
+                                await composition.checkpoint_store.close()
                             if runtime_disposer is not None:
                                 runtime_disposer()
             if shutdown_error is not None:
@@ -264,7 +268,8 @@ def create_app(
                     model=material["model_id"], thinking_level=material["thinking_level"],
                     credential_id=material["credential_binding"]["credential_id"],
                     credential_revision=material["credential_binding"]["revision"], relationship=True),
-                canonical_work=lambda function, *args: memory_runtime.run_canonical(function, *args))
+                canonical_work=lambda function, *args: memory_runtime.run_canonical(function, *args),
+                media_root=composition.config.data_paths.media)
             memory_runtime = MemoryBatchRuntime(
                 composition.session_factory,
                 lambda owner, model, thinking: memory_provider(
@@ -280,6 +285,7 @@ def create_app(
                     credential_revision=batch.credential_revision),
                 episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
                 idle_work=relationship_review.tick,
+                relationship_work=relationship_review,
             )
             runtime_settings = composition.settings
             from app.domains.world_packages.storage.import_media import (
@@ -342,11 +348,14 @@ def create_app(
                 composition.memory_recall_projection.start()
 
             if runtime_lifespan is None:
+                from app.runtime.postgresql_runtime import validation_components
                 runtime_lifespan = create_lifespan(
                     extension,
                     security_validator=lambda: validate_startup_security(runtime_settings),
                     session_factory=composition.session_factory,
                     component_manager_factory=lambda: (
+                        validation_components(runtime_settings,composition.session_factory)
+                        if runtime_config.validation_mode else
                         create_single_backend_runtime_components(
                             runtime_settings,
                             session_factory=composition.session_factory,
@@ -357,6 +366,7 @@ def create_app(
                     runtime_disposer=dispose_runtime,
                     memory_runtime=memory_runtime,
                     memory_hybrid_runtime=composition.memory_hybrid_runtime,
+                    validation_mode=runtime_config.validation_mode,
                 )
         runtime_app = FastAPI(
             title=runtime_settings.project_name,
@@ -534,7 +544,7 @@ def runtime_health(request: Request) -> dict[str, object]:
             observed = observations.get(component)
             if observed is None or observed.state not in allowed:
                 raise RuntimeError(f"{component}_not_ready")
-            if component == "scheduler":
+            if component == "scheduler" and not runtime_config.validation_mode:
                 from app.runtime.resident.scheduler import scheduler_is_ready
                 if observed.state != RuntimeComponentState.READY or not scheduler_is_ready(composition.settings):
                     raise RuntimeError("scheduler_not_ready")
@@ -555,7 +565,9 @@ def runtime_health(request: Request) -> dict[str, object]:
         **runtime_identity(),
         "status": "ok",
         "profile": runtime_config.profile.value,
-        "persistence": "sqlite",
+        "persistence": composition.engine.dialect.name,
+        "validation_mode": runtime_config.validation_mode,
+        "automatic_activity": "suspended" if runtime_config.validation_mode else "enabled",
         "graph": "ladybug",
         "components": {
             name: observations[name].state.value for name in ("scheduler", "projector")

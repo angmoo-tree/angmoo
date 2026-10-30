@@ -100,6 +100,7 @@ class RelationshipReviewWork(Base):
     error_code: Mapped[str | None] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    maintenance: Mapped[dict[str, Any]] = mapped_column(JSON_DOCUMENT, default=dict, server_default="{}")
 
 
 class RelationshipReviewMemoryReceipt(Base):

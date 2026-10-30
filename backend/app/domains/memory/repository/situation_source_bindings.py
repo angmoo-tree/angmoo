@@ -46,7 +46,7 @@ def prepare_bindings(session, context, validator, *, captured_at, now):
         session.add(MemorySituationSourceBinding(manifest_id=binding.manifest_id, entry_ordinal=binding.entry_ordinal,
             resolution_policy=binding.resolution_policy, original_entry_digest=binding.original_entry_digest,
             basis_ordinal=binding.basis_ordinal, basis_source_id=binding.basis_source_id,
-            basis_source_digest=binding.basis_source_digest, resolved_source=binding.resolved_source.to_dict(),
+            basis_source_digest=binding.basis_source_digest, resolved_source=binding.resolved_source.to_dict(version=2),
             resolved_at=datetime.fromisoformat(binding.resolved_at), resolution_digest=binding.resolution_digest))
         session.flush()
         bindings.append(binding)

@@ -8,7 +8,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlsplit
-from sqlalchemy import and_, or_, delete, select, update, func
+from sqlalchemy import and_, or_, delete, select, update, func, cast, String
 from sqlalchemy.exc import IntegrityError
 from app.core.ids import uuid7_string
 from app.domains.worlds.models import World
@@ -117,7 +117,7 @@ class ScopedWorldErasure:
         # Idempotent pages use an exact PK anti-join, not offsets on shrinking data.
         recorded = select(Item.id).where(Item.request_id == request.id, Item.kind == "row",
             func.json_extract(Item.reference, "$.table") == name,
-            *[func.json_extract(Item.reference, f"$.pk.{c.name}") == c for c in table.primary_key]).correlate(table).exists()
+            *[func.json_extract(Item.reference, f"$.pk.{c.name}") == (cast(c,String) if db.get_bind().dialect.name=="postgresql" else c) for c in table.primary_key]).correlate(table).exists()
         rows = db.execute(select(table).where(self.inventory.predicate(name, request.world_id), ~recorded)
             .order_by(*table.primary_key).limit(limit)).mappings().all()
         for row in rows:

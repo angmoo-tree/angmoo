@@ -1,155 +1,55 @@
-# Local embedded runtime contract
+# Local PostgreSQL runtime contract
 
-Angmoo uses the same persistence, graph and lifecycle contracts across its supported runtimes. Installed
-users and contributors differ only in how the frontend and backend are
-packaged; they do not use different databases or worker topologies.
+The 0.1.4 local product uses PostgreSQL as its canonical store. The complete
+platform, connection, search and maintenance contract is in
+[PostgreSQL runtime](postgresql-runtime.md).
 
-## Canonical components
+## Platforms
 
-```text
-frontend
-   ↓
-FastAPI backend
-├─ SQLite canonical store
-├─ FTS5 / vector search projections
-├─ LadybugDB graph projection
-├─ scheduler component
-└─ projector component
-```
+| Environment | Composition | Persistent state |
+| --- | --- | --- |
+| Docker amd64 / ARM64 | frontend, backend, PostgreSQL | PGDATA, application data, bootstrap credentials |
+| Termux ARM64 | three image filesystems through PRoot | selected home, PGDATA, app data, protected credentials |
+| Windows x64 | Tauri, sidecar, bundled native PostgreSQL | per-user Angmoo data root and private DB cluster |
 
-SQLite is the only canonical relational source. LadybugDB is rebuilt from
-successful canonical events and is never an independent source of truth. The
-scheduler and projector are supervised in the FastAPI process; there are no
-external scheduler or projector services.
+The backend keeps scheduler/projector in process. LadybugDB is a replayable
+projection; a graph outage does not roll back committed social/relationship
+writes. Pending projection work remains available for recovery. UI and
+diagnostics distinguish degraded/rebuilding/failed from a healthy empty graph.
 
-The supported typed profiles described here are:
+## Lifecycle and data ownership
 
-- `LOCAL_EMBEDDED`: Tauri static frontend and bundled FastAPI sidecar.
-- `CONTRIBUTOR_EMBEDDED`: Docker or optional host development frontend with
-  the same SQLite/LadybugDB storage and in-process backend behavior.
-- `TEST`: isolated SQLite/LadybugDB or explicitly supplied fakes.
+Start PostgreSQL and verify readiness before backend; start frontend after
+backend readiness. Stop in reverse order, allowing commits and clean DB stop.
+Only processes and clusters whose installation identity has been verified can
+be controlled. Never remove PID/lock files merely because readiness failed.
 
-There is no supported PostgreSQL/Neo4j server runtime or
-`DOCKER_COMPATIBILITY` profile, and no supported PostgreSQL offline importer.
-Neo4j parity is retained as static ER3 fixtures, not as a server, driver, JVM,
-or second query implementation.
+Use separate data for contributors, tests and installed users. Windows data
+does not become a Docker bind mount. Default uninstall keeps data; explicit
+data removal is a separate user action. A DB server already running on a
+developer's machine is not reused or stopped by the installed application.
 
-## Contributor Docker topology
+Normal PG serving never falls back to SQLite. Existing 0.1.3 data requires
+[explicit migration](postgresql-migration.md). Legacy embedded profiles and
+SQLite generations remain only for supported input/recovery tests. Private
+experimental PostgreSQL v3/v4/v5 data is outside the official input support.
 
-The official cross-platform contributor command is:
+## Security and recovery
 
-```powershell
-docker compose -f compose.yml -f compose.dev.yml up --watch
-```
+DB credentials, the root application secret, media and retained-result journals
+are protected persistent data. They are never baked into images or frontend
+assets. Docker DB ports are private; Windows/Termux bind DB to loopback.
+Origin, Host, browser-session and desktop launch-token checks remain enforced.
 
-It starts exactly two Linux containers:
+Use [backup and restore](postgresql-backup.md) to preserve the whole installation.
+Returning to the preserved 0.1.3 environment does not backport PG changes.
+Diagnostics are read-only and redact credentials and content. A final `ready`
+sample does not prove absence of errors during prior activity.
 
-```text
-host browser -> frontend: Next.js dev, HMR, frontend logs
-                         ↓
-                backend: CONTRIBUTOR_EMBEDDED
-                         ├─ FastAPI reload and logs
-                         ├─ SQLite + FTS5
-                         ├─ LadybugDB
-                         ├─ scheduler
-                         └─ projector
-```
+## Platform-shell development
 
-Only the frontend is published to the host, at `127.0.0.1:3000` by default.
-Changing `ANGMOO_PORT` may move that loopback port. Angmoo never kills another
-listener or silently chooses a new port.
-
-Contributor state is stored in the Docker named volume
-`angmoo_contributor_embedded_data`, under these logical directories:
-
-```text
-canonical/
-graph/
-media/
-secrets/
-runtime/
-logs/
-```
-
-Compose never mounts or copies installed-user `%LOCALAPPDATA%\Angmoo` data.
-Parent `DATABASE_URL`, `NEO4J_URI`, graph-provider, or external-worker variables
-cannot change the typed contributor profile.
-
-Normal shutdown preserves the named volume:
-
-```powershell
-docker compose -f compose.yml -f compose.dev.yml down
-```
-
-`--volumes` is a separate destructive reset and must be intentional. Removing
-PostgreSQL or Neo4j services from Compose never prunes an old
-`angmoo_postgresql_data`, `angmoo_neo4j_data`, or `angmoo_neo4j_logs` volume.
-
-## Released Docker and experimental Android
-
-Released Docker runs the backend/frontend pair from the same version, with user
-data outside the images. Follow [container installation](container-release.md).
-Android ARM64 reuses the service files through Termux/PRoot; it does not run a
-Docker daemon. Follow [Termux](termux.md). OS power and memory policies can
-interrupt that runtime even if the browser is closed normally.
-
-Termux command registration belongs to `launcher/termux`. A native
-`$PREFIX/bin/angmoo` link selects the existing launcher wrapper; it does not
-change the runtime profile, data directory or running services. The
-[development-tools registration procedure](termux.md#command-registration-in-the-development-source)
-is separate from the published 0.1.0 installer.
-
-## Installed product topology
-
-The Windows installed product runs the Tauri host and bundled FastAPI sidecar.
-It does not require Docker, Node, Python, PostgreSQL, Neo4j, or a JVM on the
-user's system. Its data remains under `%LOCALAPPDATA%\Angmoo`, with the `app`
-payload lifetime separated from canonical user data.
-
-The contributor named volume and installed product root must never be shared.
-Default uninstall preserves user data; explicit remove-data remains a separate
-interactive action.
-
-## Optional platform-shell development
-
-General feature work uses Docker and the host browser. Contributors changing
-the actual Phone window, drag/resize, wide windows, or sidecar host lifecycle
-may connect a host Tauri dev process to the same Docker stack. This is not a
-second runtime architecture and must not use installed-user data.
-
-The implemented Windows path is:
-
-```powershell
-.\scripts\dev\desktop-preflight.ps1
-.\scripts\dev\desktop-dev.ps1
-```
-
-It loads the Docker frontend at `127.0.0.1:3000`, never starts a host sidecar,
-and writes only the repository-local `.angmoo-dev/webview` profile. The complete
-support, safety, and screen-check contract is in
-[`windows-host-tauri-dev.md`](windows-host-tauri-dev.md).
-
-Windows packaging has target-OS Actions workflows. A workflow definition is
-not evidence that an arbitrary candidate has passed. macOS packaging is
-not claimed as implemented until a separate target-OS plan and validation pass.
-
-## State, privacy, and recovery
-
-Runtime state uses `stopped`, `starting`, `healthy`, `degraded`, `blocked`,
-`stale_state`, and `stopping`. Human and JSON diagnostics use stable reason
-codes without secrets or stack traces.
-
-LadybugDB is a replayable projection, not the canonical write store. During a
-graph outage, successful SQLite social and relationship writes remain committed
-while the projection outbox stays available for recovery. Diagnostics and the
-relationship UI distinguish degraded, rebuilding, and failed from a healthy
-empty graph and expose only safe pending, processing, and dead-letter counts.
-After recovery, World replay restores the six typed graph queries.
-
-`APP_SECRET`, provider credentials, local content, and media never enter image
-build arguments, image layers, tracked environment files, frontend containers,
-or logs. Status and doctor may report only safe metadata.
-
-Rollback uses Git commits/tags, prior installer artifacts, SQLite generations,
-atomic migration markers, and preserved secrets/media. Angmoo does not keep a
-second PostgreSQL/Neo4j runtime merely as a rollback path.
+General development uses Docker and the browser. Native window work may use
+the [Windows Host Tauri bridge](windows-host-tauri-dev.md), which points to
+that same Docker backend and a repository-local WebView profile. It does not
+start an installed sidecar or read installed data. macOS packaging requires
+its own target-OS contract and is not claimed here.

@@ -1,5 +1,7 @@
 # ADR: Angmoo embedded local runtime transition boundary
 
+> **Legacy scope:** this records the SQLite runtime through 0.1.3 and preserved migration input. For 0.1.4 use [PostgreSQL runtime](../public/postgresql-runtime.md), [migration](../public/postgresql-migration.md), and [backup](../public/postgresql-backup.md). Historical findings below remain unchanged.
+
 - Status: accepted target, gated implementation
 - Decision baseline: `db1c32510f66cee20a3e64a01e85c5ea8753d77e`
 - Issue: [#97](https://github.com/angmoo-tree/angmoo/issues/97)

@@ -383,6 +383,15 @@ angmoo_finalize_abort:
 
 !macro NSIS_HOOK_PREUNINSTALL
   StrCpy $AngmooFullDeleteConfirmed 0
+  IfFileExists "$INSTDIR\postgresql\angmoo-resources.json" 0 angmoo_uninstall_pg_stopped
+  nsExec::ExecToStack '"$INSTDIR\angmoo-sidecar.exe" --installer-postgresql-stop --data-root "$LOCALAPPDATA\Angmoo" --legacy-data-root "$LOCALAPPDATA\com.angmoo.desktop" --runtime-root "$LOCALAPPDATA\Angmoo\runtime" --payload-manifest "$INSTDIR\installer-payload.json"'
+  Pop $R7
+  Pop $R6
+  ${If} $R7 <> 0
+    SetErrorLevel 51
+    Quit
+  ${EndIf}
+angmoo_uninstall_pg_stopped:
   IfSilent angmoo_keep_local_data 0
   ${If} $UpdateMode = 1
     Goto angmoo_keep_local_data
@@ -403,6 +412,9 @@ angmoo_finalize_abort:
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\runtime" angmoo_runtime
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\logs" angmoo_logs
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\webview" angmoo_webview
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql" angmoo_postgresql
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql-appdata" angmoo_postgresql_appdata
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql-migration" angmoo_postgresql_migration
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\com.angmoo.desktop" angmoo_legacy
 
   ; Set this only after the user said Yes and every target was validated. The
@@ -415,6 +427,12 @@ angmoo_finalize_abort:
   ; window between validation and deletion.
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\canonical" angmoo_delete_canonical
   RMDir /r "$LOCALAPPDATA\Angmoo\canonical"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql" angmoo_delete_postgresql
+  RMDir /r "$LOCALAPPDATA\Angmoo\postgresql"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql-appdata" angmoo_delete_postgresql_appdata
+  RMDir /r "$LOCALAPPDATA\Angmoo\postgresql-appdata"
+  !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\postgresql-migration" angmoo_delete_postgresql_migration
+  RMDir /r "$LOCALAPPDATA\Angmoo\postgresql-migration"
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\graph" angmoo_delete_graph
   RMDir /r "$LOCALAPPDATA\Angmoo\graph"
   !insertmacro ANGMOO_VERIFY_NOT_REPARSE "$LOCALAPPDATA\Angmoo\search" angmoo_delete_search

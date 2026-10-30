@@ -1,4 +1,4 @@
-"""Canonical SQLite facts, rather than a new ranking, fence consumed SNS inputs."""
+"""Initial reference content stays fixed while current permissions fence effects."""
 import asyncio
 from copy import deepcopy
 from dataclasses import replace
@@ -96,7 +96,8 @@ def _state(case, snapshot):
     return {"identity": {"activity_id": case.ctx.run_id, "world_id": case.actor.world_id,
         "actor_id": case.actor.id}, "stage": "BuildDecisionContext",
         "candidates": [{"target_id": "post-target", "counterpart_id": "world-character-author",
-            "relationship": snapshot.prompt_view(), "source_revisions": {}, "images": []}]}
+            "relationship": snapshot.prompt_view(), "source_revisions": {}, "images": []}],
+        "lane_data": {"post-target": {"post_id": "post-target"}}}
 
 
 @pytest.mark.parametrize("stage", ["BuildDecisionContext", "RecallSelected"])
@@ -145,7 +146,8 @@ def test_t25_multiple_candidates_share_one_guard_deadline(relation_case, monkeyp
     from app.contracts.read_deadline import current_read_deadline
     from app.domains.relationships.service.social_context_validation import SocialContextValidationService
     case = relation_case
-    lane, state = _lane(case), _new_state(case)
+    from app.contracts.relationship_currentness import PREVIOUS_CURRENTNESS
+    lane, state = _lane(case), _new_state(case, policy=PREVIOUS_CURRENTNESS)
     second = deepcopy(state["candidates"][0])
     second["target_id"] = "second-target"
     state["candidates"].append(second)
@@ -170,14 +172,16 @@ def test_t25_multiple_candidates_share_one_guard_deadline(relation_case, monkeyp
     assert current_read_deadline.get() is None
 
 
-def _new_state(case, snapshot=None):
+def _new_state(case, snapshot=None, *, policy=CURRENTNESS_REVISION):
     snapshot = snapshot or case.snapshot(case.relations)
     state = _state(case, snapshot)
-    state["identity"][CURRENTNESS_POLICY_KEY] = CURRENTNESS_REVISION
+    state["identity"][CURRENTNESS_POLICY_KEY] = policy
     binding = RelationshipValidationBinding(case.ctx.run_id, "feed", "post-target", "world-character-author")
-    state["relationship_validation_receipts"] = {"post-target": receipt_for_snapshot(snapshot,
-        scope=case.scope, binding=binding).to_dict()}
+    state["relationship_validation_receipts"] = {"post-target": replace(receipt_for_snapshot(snapshot,
+        scope=case.scope, binding=binding), revision=policy).to_dict()}
     state["selections"] = [{"target_id": "post-target"}]
+    from app.runtime.autonomous_activity.initial_input import seal
+    state.update(seal(state, {}))
     return state
 
 
@@ -237,7 +241,7 @@ def test_t14_real_langgraph_checkpoint_preserves_hidden_receipts_and_input(tmp_p
     assert "relationship_validation_receipts" not in json.dumps(request)
 
 
-def test_t15_inbox_change_refreshes_selected_prompt_and_receipt_together(relation_case, monkeypatch):
+def test_t15_inbox_change_preserves_selected_prompt_and_receipt(relation_case, monkeypatch):
     from app.runtime.autonomous_activity.combined_lanes import CombinedFeedLane
     from app.runtime.autonomous_activity import inputs
     from app.integrations.direct_llm import RunLlmTracker
@@ -255,19 +259,18 @@ def test_t15_inbox_change_refreshes_selected_prompt_and_receipt_together(relatio
     loaded = asyncio.run(lane.load(state))
     assert loaded["relationship_validation_receipts"]
     assert run.result["feed_preparation"]["relationship_validation_receipts"] == loaded["relationship_validation_receipts"]
-    loaded = {**loaded, **state, "selections": [{"target_id": "post-target"}], "stage": "BuildDecisionContext"}
+    loaded = {**state, **loaded, "selections": [{"target_id": "post-target"}], "stage": "BuildDecisionContext"}
     previous = deepcopy(loaded)
     case.rows[0].version += 1; case.rows[0].affinity += 1; case.db.commit()
     refreshed = asyncio.run(lane.refresh_selected(loaded))
     assert loaded == previous
     assert refreshed["candidates"][0]["target_id"] == "post-target"
-    assert refreshed["relationship_validation_receipts"]["post-target"] != previous["relationship_validation_receipts"]["post-target"]
+    assert refreshed["relationship_validation_receipts"]["post-target"] == previous["relationship_validation_receipts"]["post-target"]
     asyncio.run(lane.guard(refreshed))
     restored = __import__("json").loads(__import__("json").dumps(refreshed))
     asyncio.run(lane.guard(restored))
     case.rows[0].view_version += 1; case.db.commit()
-    with pytest.raises(ValueError, match="activity_relationship_changed"):
-        asyncio.run(lane.guard(restored))
+    asyncio.run(lane.guard(restored))
 
 
 @pytest.mark.parametrize("point", ["before_sdk", "json_retry"])
@@ -277,7 +280,8 @@ def test_t16_final_submission_guard_stops_real_provider_boundary(relation_case, 
     from app.runtime.autonomous_activity import provider as transport
     from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
     case = relation_case
-    lane, state = _lane(case), _new_state(case)
+    from app.contracts.relationship_currentness import PREVIOUS_CURRENTNESS
+    lane, state = _lane(case), _new_state(case, policy=PREVIOUS_CURRENTNESS)
     calls = []
     class Adapter:
         capabilities = ProviderCapabilities(structured_json=True)
@@ -321,11 +325,17 @@ def test_t17_inbox_executor_rejects_change_after_writer_and_commits_no_effect(re
         blocker_world_character_id=case.actor.id, blocked_world_character_id="world-character-author"))
     case.db.commit()
     before = case.db.scalar(select(func.count(models.PostLike.id)))
-    with pytest.raises(ValueError, match="activity_relationship_changed"):
+    if change == "block":
+      with pytest.raises(ValueError, match="activity_relationship_changed"):
         _execute_planned_action(case.ctx, action={"action_type": "like", "post_id": "post-target"},
             scope="inbox", index=0, writing={}, relationship_validator=lane.effect_relationship_validator(state, "post-target"))
-    assert case.db.scalar(select(func.count(models.PostLike.id))) == before
-    assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == "succeeded"))
+      assert case.db.scalar(select(func.count(models.PostLike.id))) == before
+      assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == "succeeded"))
+    else:
+      result = _execute_planned_action(case.ctx, action={"action_type": "like", "post_id": "post-target"},
+            scope="inbox", index=0, writing={}, relationship_validator=lane.effect_relationship_validator(state, "post-target"))
+      assert result["status"] == "succeeded"
+      assert case.db.scalar(select(func.count(models.PostLike.id))) == before + 1
 
 
 def test_t18_completed_effect_replay_does_not_validate_changed_historical_facts(relation_case):
@@ -333,7 +343,7 @@ def test_t18_completed_effect_replay_does_not_validate_changed_historical_facts(
     lane, state = _lane(case), _new_state(case)
     lane.lane = "inbox"
     state["decision"] = {"decisions": [{"target_id": "post-target", "action": "like", "brief": "Acknowledge"}]}
-    state["lane_data"] = {"post-target": {"post_id": "post-target"}}
+    state["lane_data"].update({"post-target": {"post_id": "post-target"}})
     from app.domains.routines.policies.execution_results import _brief_hash, _action_signature
     brief = _brief_hash("Acknowledge", None)
     row = models.AgentPublicActionExecution(run_id=case.ctx.run_id, character_id=case.ctx.character.id,
@@ -363,8 +373,7 @@ def test_t22_routine_uses_frozen_source_relations_but_solo_adds_no_reads(relatio
             binding=RelationshipValidationBinding(case.ctx.run_id, "routine", counterpart, counterpart)).to_dict()}}
     lane.validate_relationships(state)
     case.rows[0].view_version += 1; case.db.commit()
-    with pytest.raises(ValueError, match="routine_relationship_changed"):
-        lane.validate_relationships(state)
+    lane.validate_relationships(state)
     monkeypatch.setattr("app.runtime.autonomous_activity.routine.validate_relationship", lambda *a, **kw: pytest.fail("solo relation read"))
     lane.validate_relationships({"identity": state["identity"], "decision_context": {"relationships": {}}})
 
@@ -424,8 +433,8 @@ def test_t17_t18_feed_final_boundary_and_committed_reuse(relation_case, monkeypa
     elif change == "claim": case.db.get(models.WorldCharacterFeedObservation, state["lane_data"]["_feed"]["observation_ids"][0]).claim_token = "changed"
     elif change == "source": case.db.get(models.Post, "post-target").body += " edited"
     case.db.commit()
-    if change != "none":
-        reason = "feed_claim_changed" if change == "claim" else "activity_source_changed" if change == "source" else "activity_relationship_changed"
+    if change == "claim":
+        reason = "feed_claim_changed"
         with pytest.raises(ValueError, match=reason):
             asyncio.run(lane.execute(state))
         assert case.db.scalar(select(func.count(models.PostLike.id))) == 0

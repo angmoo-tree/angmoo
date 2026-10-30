@@ -60,32 +60,29 @@ class SqlAlchemyEpisodeHybridReader:
             return result
 
     def assert_current(self, result, delivered_ids):
-        """A fresh bounded read, independent of the earlier resolve's memo/time."""
+        """Current memory rights; the first retrieved text/version stays fixed."""
         if not delivered_ids:
             return
         snapshot = result.validation_snapshot
-        originals = {row.memory_item_id: row for row in result.records}
-        if (snapshot is None or snapshot.scope != result.scope
-                or not set(delivered_ids) <= originals.keys()):
+        originals = {row.memory_item_id:row for row in result.records}
+        if snapshot is None or snapshot.scope != result.scope or not set(delivered_ids) <= originals.keys():
             raise RecallCurrentnessError("memory_delivery_binding_changed")
+        expected = {identifier:(version,digest) for identifier,version,digest in snapshot.item_revisions}
         now = self.clock()
         with self.factory() as db:
-            validation = MemoryAccessValidation(db, now)
-            rows = {row.id: row for row in db.scalars(select(MemoryItem).where(
-                MemoryItem.id.in_(snapshot.seed_memory_ids)))}
-            seeds = tuple(CanonicalRecallRecord(f"memory-item:{identifier}", RecallDocumentKind.MEMORY_ITEM,
-                identifier, rows[identifier].summary, _aware(rows[identifier].valid_from),
-                memory_item_id=identifier, metadata={"item_version": str(rows[identifier].version)})
-                for identifier in snapshot.seed_memory_ids if identifier in rows)
-            # Retain the original traversal and packet budgets. Removing unseen
-            # packets before budgeting would change the delivered excerpts.
-            fresh = self._hydrate(db, result, seeds, now, validation)
-            self._observe(validation)
-            if replace(fresh.validation_snapshot, captured_at=snapshot.captured_at) != snapshot:
-                raise RecallCurrentnessError("memory_delivery_followup_changed")
-            current = {row.memory_item_id: row for row in fresh.records}
-            if any(current.get(identifier) != originals[identifier] for identifier in delivered_ids):
-                raise RecallCurrentnessError("memory_delivery_source_changed")
+            from app.domains.memory.repository.experience import guard_metadata, rights_columns
+            rows = {row.id:row for row in db.scalars(select(MemoryItem).options(rights_columns()).where(MemoryItem.id.in_(delivered_ids)))}
+            rights = guard_metadata(db,result.scope,tuple(rows.values()),now,captured=True)
+            for identifier in delivered_ids:
+                item = rows.get(identifier)
+                if (item is None or identifier not in expected
+                    or originals[identifier].metadata.get('item_version') != str(expected[identifier][0])
+                    or identifier not in rights
+                    or (item.thread_id is not None and snapshot.allowed_thread_ids is not None
+                        and item.thread_id not in snapshot.allowed_thread_ids)):
+                    raise RecallCurrentnessError("memory_delivery_binding_changed")
+                if originals[identifier].metadata.get("snapshot_digest","") != rights[identifier]:
+                    raise RecallCurrentnessError("memory_delivery_snapshot_changed")
 
     def _revalidate(self, db, request, candidates, now, validation):
         if len(candidates) > 50:
@@ -123,6 +120,7 @@ class SqlAlchemyEpisodeHybridReader:
             and ranked.version == item.version
             and ranked.content_hash == sha256(item.summary.encode()).hexdigest()
             for ranked in candidates) and (request.thread_id is None or item.thread_id == request.thread_id)
+            and (request.allowed_thread_ids is None or item.thread_id is None or item.thread_id in request.allowed_thread_ids)
             and (matching is None or item.id in matching)
             and (request.counterpart_world_character_id is None
                  or item.counterpart_world_character_id == request.counterpart_world_character_id
@@ -158,6 +156,8 @@ class SqlAlchemyEpisodeHybridReader:
                 or item.id in seen or (matching is not None and item.id not in matching)):
                 continue
             if request.thread_id is not None and item.thread_id != request.thread_id:
+                continue
+            if request.allowed_thread_ids is not None and item.thread_id is not None and item.thread_id not in request.allowed_thread_ids:
                 continue
             material = evidence_by_item.get(item.id, ())
             if request.counterpart_world_character_id is not None and not (
@@ -207,8 +207,17 @@ class SqlAlchemyEpisodeHybridReader:
             and snapshots[row.memory_item_id].summary == row.text)
         candidate_reader = SqlAlchemyEpisodeCandidates(db, source_reader=self.details(db))
         updates = candidate_reader.collect_followups(scope=request.scope, seed_ids=ids, now=now)
+        prior_snapshot = getattr(request, 'validation_snapshot', None)
+        allowed_threads = (prior_snapshot.allowed_thread_ids if prior_snapshot is not None
+                           else getattr(request, 'allowed_thread_ids', None))
+        visible_ids = updates.item_ids
+        if allowed_threads is not None:
+            visible = set(db.scalars(select(MemoryItem.id).where(
+                MemoryItem.id.in_(updates.item_ids),
+                (MemoryItem.thread_id.is_(None) | MemoryItem.thread_id.in_(allowed_threads)))))
+            visible_ids = tuple(identifier for identifier in updates.item_ids if identifier in visible)
         packets = SqlAlchemyEpisodePackets(db, detail_reader=self.details(db)).read(
-            scope=request.scope, item_ids=updates.item_ids, now=now, validation=validation)
+            scope=request.scope, item_ids=visible_ids, now=now, validation=validation)
         packets = tuple(replace(packet, followup_truncated=updates.truncated) for packet in packets)
         delivery = bounded_episode_packets(episode_provider_view(packets))
         lineage("hydrate", "count", count=len(packets))
@@ -231,6 +240,10 @@ class SqlAlchemyEpisodeHybridReader:
             metadata = {"item_version": str(item.version), "memory_kind": item.memory_kind,
                 "episode_packet": "v1", "partial": str(value["partial"]).lower(),
                 "followup_truncated": str(updates.truncated).lower()}
+            from app.domains.memory.repository.experience import read_snapshot
+            experience=read_snapshot(db,item,validation=validation)
+            metadata["snapshot_digest"]=experience.content_digest if experience else ""
+            metadata["snapshot_status"]=experience.status if experience else "snapshot_unavailable"
             # Only source refs actually retained after packet budgeting.
             retained = {source.get("reference", source.get("ref")) for unit in value["units"] for source in unit["sources"]}
             times = [_aware(source.occurred_at) for unit in packet.units for source in unit.sources
@@ -254,5 +267,6 @@ class SqlAlchemyEpisodeHybridReader:
             scope=request.scope, seed_memory_ids=ids,
             hydrated_memory_ids=updates.item_ids,
             item_revisions=updates.item_revisions, link_probes=updates.link_probes,
-            traversal_truncated=updates.truncated, captured_at=now)
+            traversal_truncated=updates.truncated, captured_at=now, allowed_thread_ids=allowed_threads,
+            memory_snapshot_digests=tuple((r.memory_item_id,r.metadata["snapshot_digest"]) for r in output))
         return HybridHydrationResult(tuple(output), tuple(receipts), snapshot)

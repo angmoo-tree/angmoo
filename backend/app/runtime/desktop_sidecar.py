@@ -164,6 +164,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--launch-id", required=True)
     parser.add_argument("--runtime-profile", required=True)
+    parser.add_argument("--postgresql-root", type=Path)
+    parser.add_argument("--migrate-sqlite", action="store_true")
+    parser.add_argument("--validation", action="store_true", help=argparse.SUPPRESS)
     return parser.parse_args()
 
 
@@ -174,6 +177,7 @@ def _parse_installer_args() -> argparse.Namespace:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--installer-data-preflight", action="store_true")
     mode.add_argument("--installer-data-upgrade", action="store_true")
+    mode.add_argument("--installer-postgresql-stop", action="store_true")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--legacy-data-root", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, required=True)
@@ -184,7 +188,7 @@ def _parse_installer_args() -> argparse.Namespace:
 
 def _is_installer_mode() -> bool:
     return any(
-        argument in {"--installer-data-preflight", "--installer-data-upgrade"}
+        argument in {"--installer-data-preflight", "--installer-data-upgrade", "--installer-postgresql-stop"}
         for argument in sys.argv[1:]
     )
 
@@ -350,11 +354,27 @@ def _run_installer_operation(
         preflight_installer_embedded_data,
     )
 
+    manifest=json.loads(args.payload_manifest.read_text(encoding='utf-8'))
+    if manifest.get('schema_version')==3 and (data_root/'postgresql/installation.json').is_file():
+        # The installer owns app shutdown. A verified Angmoo cluster may still
+        # outlive a crashed sidecar; stop only that cluster before replacing
+        # native resources. This never converts SQLite without user consent.
+        from app.runtime.windows_postgresql import NativePostgres
+        NativePostgres(data_root/'postgresql',args.payload_manifest.parent/'postgresql').stop()
+    if getattr(args,'installer_postgresql_stop',False):
+        return {'status':'stopped','postgresql':'owned_cluster_stopped_or_absent'}
     before = preflight_installer_embedded_data(
         data_root=data_root,
         payload_manifest=args.payload_manifest,
     )
     compatibility_context["before"] = before
+    if manifest.get('schema_version')==3:
+        # Data conversion requires the first
+        # launch's explicit user confirmation and common converter, not NSIS.
+        payload=before.public_payload()
+        payload['status']='compatible'
+        payload['postgresql_migration']='first_launch_confirmation_required'
+        return payload
     if args.installer_data_preflight:
         payload = before.public_payload()
         payload["status"] = "compatible"
@@ -507,8 +527,9 @@ def main() -> int:
     ownership.acquire()
     from app.config import settings
     from app.runtime.migrations.canonical_retention import ServingRetentionOwner
+    native_postgres = None
     retention_owner = ServingRetentionOwner(args.data_root,
-        enabled=settings.CANONICAL_GENERATION_RETENTION_ENABLED)
+        enabled=settings.CANONICAL_GENERATION_RETENTION_ENABLED and runtime_profile is not RuntimeProfile.LOCAL_POSTGRESQL)
     try:
         from app.runtime.migrations.local_app_data import (
             LegacyLocalAppDataMigration,
@@ -522,15 +543,25 @@ def main() -> int:
                 process_alive=_process_alive,
             ).migrate_if_needed()
         retention_owner.acquire()
-        runtime_config = _build_embedded_runtime_config(
-            args.data_root.resolve(),
-            ownership.runtime_root,
-            profile=runtime_profile,
-            desktop_launch_token=token,
-            desktop_allowed_origin=origin,
-            retention_owner=retention_owner,
-        )
+        if runtime_profile is RuntimeProfile.LOCAL_POSTGRESQL:
+            if args.postgresql_root is None:raise ValueError('desktop_postgresql_resources_required')
+            from app.runtime.windows_postgresql import prepare
+            from app.runtime.postgresql_runtime import build_config
+            from app.runtime.postgresql_installation import read_dsn
+            native_postgres, pg_data = prepare(args.data_root.resolve(),args.postgresql_root,allow_migration=args.migrate_sqlite)
+            runtime_config = build_config(pg_data,read_dsn(pg_data/'secrets/postgresql-runtime-dsn'),
+                frontend_origin=origin,desktop_launch_token=token,validation_mode=getattr(args,'validation',False))
+        else:
+            runtime_config = _build_embedded_runtime_config(
+                args.data_root.resolve(),
+                ownership.runtime_root,
+                profile=runtime_profile,
+                desktop_launch_token=token,
+                desktop_allowed_origin=origin,
+                retention_owner=retention_owner,
+            )
     except BaseException:
+        if native_postgres is not None:native_postgres.stop()
         retention_owner.close()
         ownership.release()
         raise
@@ -593,8 +624,11 @@ def main() -> int:
                 if runtime_app is not None:
                     runtime_app.state.dispose_runtime()
             finally:
-                retention_owner.close()
-                ownership.release()
+                try:
+                    if native_postgres is not None:native_postgres.stop()
+                finally:
+                    retention_owner.close()
+                    ownership.release()
 
 
 def _stable_fatal_code(exc: Exception) -> str:

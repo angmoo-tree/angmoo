@@ -5,7 +5,8 @@ from uuid import uuid4
 import logging
 from time import monotonic
 from sqlalchemy import select, update, or_, exists
-from app.core.sqlite_concurrency import is_sqlite_contention, run_sqlite_session_immediate
+from app.core.sqlite_concurrency import is_sqlite_contention
+from app.core.database_transactions import database_write
 
 from app.core.calendar import utc_instant
 from app.domains.memory.contracts.activity_situation import stable_digest
@@ -23,7 +24,9 @@ class SituationRuntime:
     def __init__(self, session_factory, *, data_root=None):
         self.session_factory = session_factory
         from app.runtime.memory.situation_result_basis import CheckpointResultBasis
-        self.result_basis = CheckpointResultBasis(data_root / "runtime/activity/activity-checkpoints.sqlite" if data_root is not None else None)
+        from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+        checkpoint_store=bound_store(data_root) if data_root is not None else None
+        self.result_basis = CheckpointResultBasis(data_root / "runtime/activity/activity-checkpoints.sqlite" if data_root is not None and checkpoint_store is None else None,store=checkpoint_store)
         self.quit_identity = None
 
     @observation.observed("situation_due_admission")
@@ -71,14 +74,14 @@ class SituationRuntime:
                         request_key=self.quit_identity if shutdown else "daily:" + stable_digest(utc_instant(config.next_due_at).isoformat()),
                         expected_version=config.version, now=now)
                 try:
-                    run_sqlite_session_immediate(db, prepare_setting, require_clean=True)
+                    database_write(db, prepare_setting, require_clean=True)
                 except MemoryConflictError as exc:
                     if str(exc) != "situation_scope_busy":
                         raise
 
-    def tick(self):
+    def tick(self, run_id=None):
         try:
-            return self._tick()
+            return self._tick(run_id)
         except Exception as exc:
             if not is_sqlite_contention(exc):
                 raise
@@ -87,18 +90,31 @@ class SituationRuntime:
             return "situation_storage_busy"
 
     @observation.observed("situation_claim")
-    def _tick(self):
+    def candidate(self):
+        """One immutable run identity; never return an ORM row to async code."""
+        now = datetime.now(UTC)
+        with self.session_factory() as db:
+            row = db.execute(select(MemorySituationApplyRun.id, MemorySituationApplyRun.created_at,
+                MemoryScopeSettingModel.world_id, MemoryScopeSettingModel.subject_world_character_id)
+                .join(MemoryScopeSettingModel, MemoryScopeSettingModel.id == MemorySituationApplyRun.scope_setting_id)
+                .where(MemorySituationApplyRun.state.in_(("pending", "running", "deferred")),
+                    or_(MemorySituationApplyRun.lease_until.is_(None), MemorySituationApplyRun.lease_until <= now))
+                .order_by(MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1)).first()
+            return None if row is None else dict(kind="memory", id=row[0], accepted_at=utc_instant(row[1]), world_id=row[2], actor_id=row[3])
+
+    def _tick(self, selected_run_id=None):
         now = datetime.now(UTC)
         with self.session_factory() as db:
             run_info = db.execute(select(MemorySituationApplyRun.id, MemoryScopeSettingModel.world_id, MemoryScopeSettingModel.subject_world_character_id).join(MemoryScopeSettingModel, MemoryScopeSettingModel.id == MemorySituationApplyRun.scope_setting_id).where(
                 MemorySituationApplyRun.state.in_(("pending", "running", "deferred")),
                 (MemorySituationApplyRun.lease_until.is_(None)) | (MemorySituationApplyRun.lease_until <= now),
-            ).order_by(MemorySituationApplyRun.attempts, MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1)).first()
+                *([MemorySituationApplyRun.id == selected_run_id] if selected_run_id else []),
+            ).order_by(MemorySituationApplyRun.created_at, MemorySituationApplyRun.id).limit(1)).first()
             if run_info is None:
                 return "memory_batch_queue_empty"
             run_id, world_id, actor_id = run_info
             db.rollback()
-            token = run_sqlite_session_immediate(db,
+            token = database_write(db,
                 lambda: claim_run(db, run_id, now=now), require_clean=True)
         if token is None:
             return "situation_claim_conflict"
@@ -117,7 +133,7 @@ class SituationRuntime:
                 prepared_at = monotonic()
                 try:
                     with self.session_factory() as db:
-                        run_sqlite_session_immediate(db, lambda: apply_page(db, memory_repository(db), PreparedSituationSources(db, result_basis=basis),
+                        database_write(db, lambda: apply_page(db, memory_repository(db), PreparedSituationSources(db, result_basis=basis),
                             run_id=run_id, token=token, now=datetime.now(UTC), page_size=1, prepared=prepared), require_clean=True)
                     observation.emit("page", boundary="committed", run_id=run_id, receipt_ids=[str(row[0]) for row in prepared.admissions])
                     logging.getLogger(__name__).info("situation_page run=%s count=%s bytes=%s prepare_ms=%.3f apply_elapsed_ms=%.3f",
@@ -145,15 +161,33 @@ class SituationRuntime:
 
     def _release(self, run_id, token, *, state, code):
         with self.session_factory() as db:
-            run_sqlite_session_immediate(db, lambda: db.execute(update(MemorySituationApplyRun).where(
-                MemorySituationApplyRun.id == run_id, MemorySituationApplyRun.lease_token == token).values(
-                    state=state, error_code=code, lease_token=None, lease_until=None)), require_clean=True)
+            def release():
+                run = db.get(MemorySituationApplyRun, run_id, populate_existing=True, with_for_update=True)
+                if run is None or run.lease_token != token:
+                    return
+                due = None
+                control = dict(run.maintenance or {})
+                new_state, new_code = state, code
+                if code in {"situation_storage_busy", "situation_preparation_stale"}:
+                    from random import uniform
+                    first = datetime.fromisoformat(control.get("storage_first", datetime.now(UTC).isoformat()))
+                    first = first.replace(tzinfo=UTC) if first.tzinfo is None else first
+                    rounds = control.get("storage_rounds", 0)+1
+                    control.update(storage_first=first.isoformat(), storage_rounds=rounds)
+                    if rounds >= 3 or (datetime.now(UTC)-first).total_seconds() >= 120:
+                        new_state, new_code = "error", "situation_storage_retry_exhausted"
+                        control["hold"] = "manual"
+                    else:
+                        due = min(first+timedelta(seconds=120), datetime.now(UTC)+timedelta(seconds=(5,15)[rounds-1]+uniform(0,1)))
+                run.state, run.error_code = new_state, new_code
+                run.lease_token, run.lease_until, run.maintenance = None, due, control
+            database_write(db, release, require_clean=True)
 
     def fence(self):
         with self.session_factory() as db:
             result = db.execute(update(MemorySituationApplyRun).where(MemorySituationApplyRun.state == "running").values(
                 state="deferred", lease_token=None, lease_until=None, error_code="situation_shutdown_deferred"))
             unfinished = db.scalar(select(MemorySituationApplyRun.id).where(
-                MemorySituationApplyRun.state != "completed").limit(1)) is not None
+                MemorySituationApplyRun.state.in_(("pending", "running", "deferred"))).limit(1)) is not None
             db.commit()
             return result.rowcount > 0 or unfinished

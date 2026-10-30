@@ -8,6 +8,31 @@ from google.genai import errors as google_errors
 from app.integrations import direct_llm as direct_llm
 
 
+@pytest.mark.parametrize("boundary", ["submission", "start"])
+def test_local_input_failure_is_not_normalized_or_retried_as_provider_error(monkeypatch, boundary):
+    from app.providers.contracts import ProviderCapabilities
+    adapter = SimpleNamespace(capabilities=ProviderCapabilities(structured_json=True))
+    async def forbidden(*args, **kwargs):
+        pytest.fail("local input failure must not dispatch or sleep")
+    adapter.generate_text = forbidden
+    adapter.normalize_error = lambda *args, **kwargs: pytest.fail("not a provider error")
+    monkeypatch.setattr(direct_llm, "get_provider_adapter", lambda *args: adapter)
+    monkeypatch.setattr(direct_llm.asyncio, "sleep", forbidden)
+    direct_llm._RATE_LIMITER._buckets.clear()
+    failure = ValueError("synthetic_local_input_failure")
+    def reject(*args):
+        raise failure
+    tracker = direct_llm.RunLlmTracker(max_calls=3)
+    context = direct_llm.DirectLlmCallContext(credential_id="local-guard", character_id="char-1",
+        agent_run_id="run-1", node="Writer", lane="writer", provider="google", model="gemini-3.1-flash-lite")
+    with pytest.raises(ValueError) as caught:
+        asyncio.run(direct_llm.generate_text(api_key="synthetic", context=context, tracker=tracker,
+            system_prompt="system", user_prompt="user", **{
+                "on_request_submission" if boundary == "submission" else "on_request_start": reject}))
+    assert caught.value is failure
+    assert tracker.summary()["calls"] == []
+
+
 def test_generate_content_config_sets_thinking_level() -> None:
     config = direct_llm._generate_content_config(
         model="gemini-3.1-flash-lite",

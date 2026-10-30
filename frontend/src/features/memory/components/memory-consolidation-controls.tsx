@@ -7,7 +7,7 @@ import { useUiText } from "@/hooks/use-ui-text";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getMemoryConsolidation, startMemoryConsolidation, retryMemoryConsolidation, MemoryApiError } from "@/features/memory/api/memory-client";
-import { workflowActive, type ConsolidationProgress, type ConsolidationStart, type FlowState } from "@/features/memory/types/consolidation-contract";
+import { workflowActive, type MaintenanceAction, type ConsolidationProgress, type ConsolidationStart, type FlowState } from "@/features/memory/types/consolidation-contract";
 
 const labels: Record<ConsolidationProgress["state"], string> = {
   preparing: "정리할 경험을 확인하고 있어요", queued: "기억 정리를 기다리고 있어요",
@@ -21,11 +21,14 @@ const flowLabels: Record<FlowState, string> = {
   memory_running: "기억 정리 중", memory_failed: "기억 정리를 마치지 못해 관계 정리를 기다리고 있어요",
   memory_only_completed: "사용자 캐릭터의 관계는 대신 판단하지 않아요",
   relationship_waiting: "관계 정리 대기", relationship_running: "관계 정리 중",
-  relationship_retry_needed: "관계 정리 재시도 대기", relationship_paused: "관계 정리를 위한 설정 확인 필요",
+  relationship_retry_needed: "관계 정리 일부 실패 · 직접 복구 필요", relationship_paused: "관계 정리를 위한 설정 확인 필요",
   completed: "관계 정리 완료", no_work: "새로 정리할 내용이 없습니다.", no_relationship_work: "관계 정리 대상 없음",
+  cancelled: "남은 정리를 중단했습니다. 완료된 결과는 유지됩니다.",
+  closed: "완료된 결과와 실패 이력을 보존하고 종료했습니다.",
 };
 type Props = {
   worldId: string; subjectId: string; subjectName: string; disabled: boolean; dirty: boolean;
+  recoveryDisabled: boolean;
   timezone: string;
   version: number; profileVersion: number; scopeVersion: number;
   acquire: () => boolean; release: () => void; onCompleted: () => void;
@@ -101,11 +104,22 @@ export function MemoryConsolidationControls(props: Props) {
       } else setError(uiText("관계 정리를 요청하지 못했어요. 연결과 저장된 AI 설정을 확인해 주세요."));
     } finally { if (alive.current && scopeGeneration === generation.current) setBusy(false); props.release(); }
   }
-  async function retry() {
+  const mutation = useRef<{key: string; mode: MaintenanceAction; revision: number; requestId: string} | null>(null);
+  async function retry(mode: MaintenanceAction) {
     if (!progress || busy || !props.acquire()) return;
     setBusy(true); setError("");
-    try { await retryMemoryConsolidation(worldId, subjectId, progress.request_id, crypto.randomUUID()); }
-    catch { if (alive.current) setError(uiText("재시도를 요청하지 못했어요. 저장된 설정을 확인해 주세요.")); }
+    const currentGeneration = generation.current;
+    if (mutation.current?.mode !== mode || mutation.current?.requestId !== progress.effective_request_id)
+      mutation.current = {key: crypto.randomUUID(), mode, revision: progress.revision ?? 0, requestId: progress.effective_request_id};
+    try {
+      const request = mutation.current;
+      const result = await retryMemoryConsolidation(worldId, subjectId, request.requestId, request.key, mode, request.revision);
+      if (alive.current && currentGeneration === generation.current) { setProgress(result.progress); mutation.current = null; }
+    }
+    catch (reason) {
+      if (reason instanceof MemoryApiError && reason.status === 409) mutation.current = null;
+      if (alive.current && currentGeneration === generation.current) setError(uiText("재시도를 요청하지 못했어요. 저장된 설정을 확인해 주세요."));
+    }
     finally { if (alive.current) setBusy(false); props.release(); }
   }
   const running = progress !== null && workflowActive(progress);
@@ -121,7 +135,12 @@ export function MemoryConsolidationControls(props: Props) {
     {progress?.flow_state === "completed" && progress.relationship?.projection_pending ? <p>{uiText("관계 저장은 완료됐습니다. 관계도 반영을 기다리고 있어요.")}</p> : null}
     {progress?.relationship?.next_attempt_at ? <p>{uiText("자동 재시도 예정:")}{formatDate(progress.relationship.next_attempt_at)} ({props.timezone}{uiText("). 다시 시도해도 API 대기 시간은 유지됩니다.")}</p> : null}
     {progress?.last_code === "memory_capacity_reached" ? <p role="alert">{uiText("기억 저장 한도에 도달해 새 기억 정리를 멈췄습니다. 저장 공간을 확보한 뒤 남은 정리를 다시 시도해 주세요.")}</p> : null}
-    {progress?.followup && ["memory_failed", "relationship_retry_needed", "relationship_paused"].includes(progress.flow_state ?? "") ? <Button variant="secondary" disabled={props.disabled || props.dirty || busy} onClick={() => void retry()}>{uiText("남은 정리 다시 시도")}</Button> : null}
+    {(progress?.relationship?.failed_count ?? 0) > 0 ? <p>{uiText("실패한 항목은 자동으로 다시 실행하지 않습니다.")}</p> : null}
+    {progress?.requires_new_ai_call ? <p>{uiText("다시 판단하면 AI 이용 비용이 발생할 수 있습니다.")}</p> : null}
+    <div className="flex flex-wrap gap-2">{progress?.actions?.map(mode => <Button key={mode} variant="secondary"
+      disabled={props.recoveryDisabled || busy || ((mode === "regenerate_failed" || mode === "resume_remaining") && (props.disabled || props.dirty))} onClick={() => void retry(mode)}>
+      {uiText(({resume_storage: "받은 결과 저장 재개", regenerate_failed: "실패한 부분 다시 판단", resume_remaining: "남은 작업 재개",
+        cancel_remaining: "남은 정리 중단", close_without_retry: "재시도 없이 종료"})[mode])}</Button>)}</div>
     {readError || error ? <p role="alert">{readError || error}</p> : null}
   </div>;
 }

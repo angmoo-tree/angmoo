@@ -49,7 +49,7 @@ def _dependencies(projection, item_id, proof):
                 if not current(session, proof):
                     return False
                 for insert, identifier, (kind, key) in operations[start:start + 64]:
-                    sql = ("INSERT OR IGNORE INTO memory_vector_dependencies(item_id,source_kind,source_key) VALUES (:item,:kind,:key)" if insert
+                    sql = ("INSERT INTO memory_vector_dependencies(item_id,source_kind,source_key) VALUES (:item,:kind,:key) ON CONFLICT DO NOTHING" if insert
                         else "DELETE FROM memory_vector_dependencies WHERE item_id=:item AND source_kind=:kind AND source_key=:key")
                     session.execute(text(sql), dict(item=identifier, kind=kind, key=key))
                 return True
@@ -76,7 +76,7 @@ def prepare(projection, item_id, documents, credential_revision):
     if outcome is not None:
         if outcome == "disabled":
             return outcome
-        world_id = next((key[6:] for key, _ in proof.epochs if key.startswith("world:")), None)
+        world_id = next((key[len("experience:world:"):] for key, _ in proof.epochs if key.startswith("experience:world:")), None)
         receipt = projection.journal.read(world_id, item_id) if world_id else None
         for index in projection._retained_indexes():
             factory = getattr(index, "effect_connection", None)

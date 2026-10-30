@@ -19,7 +19,7 @@ from app.domains.chat.models import MessageAttachment
 def erase(service, *, world_id, world_character_id, user, data):
     db = service.db
     try:
-        lock_environment_admission(db, user.id)
+        lock_environment_admission(db, user.id, exclusive=True)
         role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True)
         stored = db.get(WorldCharacterConfiguration, role.id)
         if not data.consent or stored is None or data.confirmed_name != stored.profile.get("display_name"):

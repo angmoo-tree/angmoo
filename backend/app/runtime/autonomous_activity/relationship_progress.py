@@ -14,6 +14,11 @@ PRIVATE_KEY = "_relationship_effect_progress"
 
 
 def enabled(state):
+    from app.contracts.relationship_currentness import CURRENTNESS_POLICY_KEY, CURRENTNESS_REVISION
+    if state.get('identity', {}).get(CURRENTNESS_POLICY_KEY) == CURRENTNESS_REVISION:
+        # Frozen reference facts need no before/after relationship rereads.
+        # The public-action execution receipt still fences every actual effect.
+        return False
     policy = state.get("identity", {}).get(EFFECT_PROGRESS_KEY)
     if policy not in {None, EFFECT_PROGRESS_REVISION}:
         raise SocialContextValidationError("effect_policy_invalid")

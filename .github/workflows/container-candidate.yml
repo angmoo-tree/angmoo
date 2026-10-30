@@ -31,7 +31,8 @@ jobs:
         run: |
           python -m scripts.release.candidate build --service backend --platform "linux/$ARCH" --output artifacts/release-candidate
           python -m scripts.release.candidate build --service frontend --platform "linux/$ARCH" --output artifacts/release-candidate
-          python -m scripts.release.candidate combine "artifacts/release-candidate/backend-$ARCH.candidate.json" "artifacts/release-candidate/frontend-$ARCH.candidate.json" --platform "linux/$ARCH" --output "artifacts/release-candidate/candidate-$ARCH.json"
+          python -m scripts.release.candidate build --service postgres --platform "linux/$ARCH" --output artifacts/release-candidate
+          python -m scripts.release.candidate combine "artifacts/release-candidate/backend-$ARCH.candidate.json" "artifacts/release-candidate/frontend-$ARCH.candidate.json" "artifacts/release-candidate/postgres-$ARCH.candidate.json" --platform "linux/$ARCH" --output "artifacts/release-candidate/candidate-$ARCH.json"
           python -m scripts.release.candidate load "artifacts/release-candidate/candidate-$ARCH.json"
       - name: Validate exact imported payloads
         env:
@@ -61,7 +62,7 @@ jobs:
           pattern: candidate-${{ github.sha }}-${{ github.run_attempt }}-*
           merge-multiple: true
           path: artifacts/release-candidate
-      - name: Require both validated service pairs
+      - name: Require six validated platform payloads
         run: |
           python -m scripts.release.candidate combine artifacts/release-candidate/candidate-amd64.json artifacts/release-candidate/candidate-arm64.json --output artifacts/release-candidate/candidate.json
           python -c "from scripts.release.github import successful_images; from launcher.termux.payload import read_manifest; successful_images(read_manifest(__import__('pathlib').Path('artifacts/release-candidate/candidate.json')))"

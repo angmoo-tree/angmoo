@@ -273,9 +273,9 @@ def test_retry_preserves_provider_backoff_and_completed_parts(memory_session, mo
     work.next_attempt_at = deadline
     db.commit()
     before = work.next_attempt_at
-    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex)
+    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex, mode="regenerate_failed", expected_revision=0)
     assert work.next_attempt_at == before
-    assert service.read(scope=scope, db=db, workflows=workflows)["progress"]["flow_state"] == "relationship_retry_needed"
+    assert service.read(scope=scope, db=db, workflows=workflows)["progress"]["flow_state"] == "relationship_running"
 
 
 def test_capacity_allows_empty_memory_stage_but_blocks_new_generation(memory_session, monkeypatch):
@@ -333,7 +333,7 @@ def test_failed_memory_jobs_block_followup_and_retry_is_request_scoped(memory_se
     from app.domains.memory.repository.batch import SqlAlchemyMemoryBatchRepository
     requested = []
     monkeypatch.setattr(SqlAlchemyMemoryBatchRepository, "retry_failed", lambda self, scope, **kwargs: requested.extend(kwargs["request_job_ids"]))
-    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex)
+    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex, mode="regenerate_failed", expected_revision=0)
     assert set(requested) == ({"failed", "success"} if partial else {"failed"})
     assert db.get(MemoryMaintenanceJob, "unrelated").status == "failed"
     if partial:
@@ -369,5 +369,121 @@ def test_progress_counts_all_roots_and_preserves_partial_success(memory_session,
     assert value["relationship"]["memory_count"] == 45
     assert value["relationship"]["target_count"] == 2
     assert value["relationship"]["completed_count"] == value["relationship"]["kept_count"] == 1
-    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex)
+    service.retry(scope=scope, db=db, workflows=workflows, request_id=result["request_id"], key=uuid4().hex, mode="regenerate_failed", expected_revision=0)
     assert all(db.get(RelationshipReviewWork, identifier).status == "applied" for identifier in roots[:-1])
+
+
+def test_owner_can_close_failed_review_without_retry_or_erasing_failure(memory_session, monkeypatch):
+    db=memory_session
+    scope,_,workflows,data=setup(db)
+    memories(db,scope,monkeypatch)
+    result=service.submit(scope=scope,db=db,workflows=workflows,data=data)
+    finish_memory(db,result["request_id"])
+    advance_manual_requests(db,datetime.now(UTC));db.commit()
+    request=db.get(RelationshipReviewRequest,result["request_id"])
+    work=db.get(RelationshipReviewWork,request.work_ids[0])
+    work.status,work.error_code,work.maintenance="failed","relationship_review_storage_text_invalid",{"hold":"manual"}
+    db.commit()
+    value=service.read(scope=scope,db=db,workflows=workflows)["progress"]
+    assert set(value["actions"])=={"regenerate_failed","close_without_retry"}
+    key=uuid4().hex
+    closed=service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=key,
+        mode="close_without_retry",expected_revision=value["revision"])["progress"]
+    assert closed["flow_state"]=="closed" and closed["actions"]==[]
+    db.refresh(work)
+    assert work.status=="failed" and work.error_code=="relationship_review_storage_text_invalid"
+    assert work.maintenance["hold"]=="closed" and work.maintenance["history"]
+    assert closed["relationship"]["closed_count"]==1
+    # A replay remains idempotent, and later scheduler advancement cannot reopen it.
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=key,
+        mode="close_without_retry",expected_revision=value["revision"])
+    advance_manual_requests(db,datetime.now(UTC));db.commit()
+    assert db.get(RelationshipReviewRequest,result["request_id"]).state=="closed"
+    receipt=db.get(RelationshipReviewMemoryReceipt,db.scalar(select(RelationshipReviewMemoryReceipt.id)))
+    assert receipt.status=="excluded" and receipt.reason=="owner_closed_failure"
+
+
+def test_old_revision_cannot_retry_after_user_closed(memory_session,monkeypatch):
+    db=memory_session
+    scope,_,workflows,data=setup(db)
+    result=service.submit(scope=scope,db=db,workflows=workflows,data=data)
+    request=db.get(RelationshipReviewRequest,result["request_id"])
+    request.state="paused";db.commit()
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,
+        mode="close_without_retry",expected_revision=0)
+    from app.domains.memory.exceptions import MemoryConflictError
+    with pytest.raises(MemoryConflictError,match="revision_conflict"):
+        service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,
+            mode="regenerate_failed",expected_revision=0)
+
+
+def test_cancel_during_provider_fences_late_result_and_resume_keeps_same_work(memory_session,monkeypatch):
+    from app.domains.relationships.service.daily_review import run_review_step
+    from test_relationship_daily_review import References
+    db=memory_session
+    scope,_,workflows,data=setup(db)
+    memories(db,scope,monkeypatch)
+    result=service.submit(scope=scope,db=db,workflows=workflows,data=data)
+    finish_memory(db,result["request_id"])
+    advance_manual_requests(db,datetime.now(UTC));db.commit()
+    request=db.get(RelationshipReviewRequest,result["request_id"])
+    identifier=request.work_ids[0]
+    calls=[]
+    class CancelProvider:
+        async def review(self,payload,**kwargs):
+            calls.append(1)
+            closed=service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,
+                mode="cancel_remaining",expected_revision=0)["progress"]
+            assert closed["flow_state"]=="cancelled"
+            return {"decision":"keep","memory_refs":[]}
+    outcome=asyncio.run(run_review_step(sessionmaker(db.bind,expire_on_commit=False),work_id=identifier,
+        references_factory=lambda session:References(),provider_factory=lambda base:CancelProvider(),received={}))
+    assert outcome=="lease_lost" and calls==[1]
+    db.expire_all()
+    row=db.get(RelationshipReviewWork,identifier)
+    assert row.status=="failed" and row.result is None and row.maintenance["hold"]=="cancelled"
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,
+        mode="resume_remaining",expected_revision=1)
+    assert db.get(RelationshipReviewWork,identifier).status=="pending"
+    assert request.work_ids==[identifier]
+
+
+def test_cancel_resume_preserves_ready_result_instead_of_regenerating(memory_session,monkeypatch):
+    db=memory_session
+    scope,_,workflows,data=setup(db)
+    memories(db,scope,monkeypatch)
+    result=service.submit(scope=scope,db=db,workflows=workflows,data=data)
+    finish_memory(db,result["request_id"])
+    advance_manual_requests(db,datetime.now(UTC));db.commit()
+    request=db.get(RelationshipReviewRequest,result["request_id"])
+    row=db.get(RelationshipReviewWork,request.work_ids[0])
+    saved={"decision":"keep","memory_refs":[]}
+    row.status,row.result="ready",saved;db.commit()
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,mode="cancel_remaining",expected_revision=0)
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,mode="resume_remaining",expected_revision=1)
+    assert row.status=="ready" and row.result==saved
+
+
+def test_split_storage_recovery_restores_received_child_and_unclaimed_root(memory_session,monkeypatch):
+    from app.domains.relationships.service.review_payloads import new_work
+    from app.domains.relationships.service.review_recovery import fail
+    db=memory_session
+    scope,_,workflows,data=setup(db)
+    memories(db,scope,monkeypatch)
+    result=service.submit(scope=scope,db=db,workflows=workflows,data=data)
+    finish_memory(db,result["request_id"])
+    advance_manual_requests(db,datetime.now(UTC));db.commit()
+    request=db.get(RelationshipReviewRequest,result["request_id"])
+    root=db.get(RelationshipReviewWork,request.work_ids[0]);root.phase="final"
+    child=new_work(db,world_id=root.world_id,actor_id=root.actor_world_character_id,target_id=root.target_world_character_id,
+        period_key=root.period_key,part_key="storage-child",phase="partial",manifest=root.manifest,
+        view_version=root.expected_view_version,parent_id=root.id)
+    child.status,child.lease_token,child.attempts="running","received-token",1
+    child.maintenance={"storage_rounds":3,"received_lease":"received-token"}
+    fail(db,child,"relationship_storage_retry_exhausted",now=datetime.now(UTC))
+    request.state="partial_failed";db.commit()
+    value=service.read(scope=scope,db=db,workflows=workflows)["progress"]
+    assert "resume_storage" in value["actions"] and "regenerate_failed" not in value["actions"]
+    service.retry(scope=scope,db=db,workflows=workflows,request_id=result["request_id"],key=uuid4().hex,mode="resume_storage",expected_revision=0)
+    assert root.status=="pending" and root.lease_token is None
+    assert child.status=="running" and child.lease_token=="received-token" and child.attempts==1

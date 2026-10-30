@@ -72,9 +72,15 @@ def test_invalid_manual_input_never_dispatches(manual_routine, monkeypatch, capl
         case.provider.situation_snapshot = replace(case.provider.situation_snapshot,
             scope=replace(case.provider.situation_snapshot.scope, owner_id="other"))
     case.db.commit()
-    with pytest.raises(ValueError, match="situation_.*"):
-        asyncio.run(submit(case))
-    assert adapter.requests == []
+    historical_only = {"reply_deleted", "reply_hidden", "reply_private", "parent_deleted",
+        "parent_hidden", "parent_private", "parent_link", "author"}
+    if change in historical_only:
+        assert asyncio.run(submit(case)) == {"ok": True}
+        assert len(adapter.requests) == 1
+    else:
+        with pytest.raises(ValueError):
+            asyncio.run(submit(case))
+        assert adapter.requests == []
     assert case.reply.body not in caplog.text
     assert "undelivered invention" not in caplog.text
     assert "synthetic" not in caplog.text
@@ -92,8 +98,11 @@ def test_final_binding_reads_current_rows_even_with_an_existing_identity_map(man
     case.db.execute(update(table).where(table.id == identifier).values(**values),
         execution_options={"synchronize_session": False})
     case.db.commit()
-    with pytest.raises(ValueError, match="situation_.*"):
-        freeze(case)
+    if changed == "body":
+        assert freeze(case).sources
+    else:
+        with pytest.raises(ValueError):
+            freeze(case)
 
 
 @pytest.mark.parametrize("mode", ["none", "event", "mixed"])
@@ -134,7 +143,14 @@ def test_partial_excerpt_keeps_only_delivered_range_and_distinct_paths(manual_ro
     assert len({s.ordinal for s in manifest.sources}) == len(manifest.sources)
     case.reply.body = "changed" + case.reply.body
     case.db.commit()
-    with pytest.raises(RoutineSourceBindingError, match="situation_source_not_admitted"):
+    assert freeze(case) == manifest
+
+
+def test_transmitted_source_projection_cannot_borrow_an_existing_identifier(manual_routine):
+    case = manual_routine
+    assert case.payload["context"]["source_manifest"]
+    case.payload["context"]["source_manifest"][0]["excerpt"] = "unrelated fabricated input"
+    with pytest.raises(ValueError, match="situation_source_not_admitted"):
         freeze(case)
 
 

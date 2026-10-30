@@ -37,7 +37,8 @@ def test_old_and_new_memory_union_uses_core_counterpart_and_keeps_deleted_new_su
     new = db.get(MemoryItem, row.applied_item_id)
     assert new is not None
     old = MemoryItem(id="historical-episode", owner_id=scope.owner_id, world_id=scope.world_id,
-        subject_world_character_id=scope.subject_world_character_id, summary="이전 방식의 저장된 경험",
+        subject_world_character_id=scope.subject_world_character_id,
+        counterpart_world_character_id=post.author_world_character_id, summary="이전 방식의 저장된 경험",
         memory_kind="AUTOBIOGRAPHICAL_EVENT", status="active", confidence=1, salience=.5,
         created_at=NOW, valid_from=NOW, valid_until=NOW+timedelta(days=180))
     db.add(old)
@@ -58,7 +59,7 @@ def test_old_and_new_memory_union_uses_core_counterpart_and_keeps_deleted_new_su
     db.commit()
     resolved = resolve_memory_batch(db, scope=scope, items=[new, old], activation=NOW-timedelta(days=1), now=NOW)
     assert resolved[0][0] == post.author_world_character_id and resolved[0][2] is None
-    assert resolved[1][2] == "source_unavailable_or_changed"
+    assert resolved[1][0] == post.author_world_character_id and resolved[1][2] is None
 
 
 def test_manual_relationship_freeze_waits_only_for_accepted_same_scope_cutoff(stack):
@@ -72,7 +73,8 @@ def test_manual_relationship_freeze_waits_only_for_accepted_same_scope_cutoff(st
     # Pending activities are not a request: relationship reads must not flush them.
     require_application_complete(db, setting.id)
     request_run(db, setting, trigger="manual", request_key="relation-order-0001", expected_version=1, now=NOW)
-    root = SimpleNamespace(manifest={"base": {"setting_id": setting.id}})
+    from app.domains.relationships.policies.daily_review import REVIEW_INPUT_POLICY
+    root = SimpleNamespace(manifest={"input_policy": REVIEW_INPUT_POLICY, "base": {"setting_id": setting.id}})
     for operation in (lambda: require_application_complete(db, setting.id),
         lambda: refresh_review_inputs(db, root), lambda: ReviewMemoryReferences(db).revalidate(root)):
         with pytest.raises(ValueError, match="relationship_memory_application_pending"):

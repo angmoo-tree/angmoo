@@ -69,10 +69,10 @@ def test_complete_cutoff_read_does_not_hold_writer_and_rechecks_consent(tmp_path
         collections.append(sum(map(len, grouped.values())))
         return grouped
     monkeypatch.setattr(preparation, "collect_new_review_memories", collect)
-    original_writer = preparation.run_sqlite_session_immediate
+    original_writer = preparation.database_write
     def write(db, operation, **kwargs):
         return original_writer(db, operation, observer=writer_facts.append, **kwargs)
-    monkeypatch.setattr(preparation, "run_sqlite_session_immediate", write)
+    monkeypatch.setattr(preparation, "database_write", write)
     preparation.prepare_due_reviews(factory, NOW+timedelta(seconds=1))
     assert collections == [152]
     with factory() as db:

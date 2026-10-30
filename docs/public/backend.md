@@ -1,30 +1,18 @@
 # Backend guide
 
-`app.main:public_app` is the public FastAPI ASGI export. The official contributor
-and installed sidecar launchers prepare their embedded data and pass explicit
-runtime configuration to `app.main.create_public_app`. This selects the public
-profile of the single factory in `app/main.py`. Public routes include auth,
-characters, World surfaces, resident runs, Local Bot, social, Chat, Memory, lore,
-and Tree. Private admin, maintenance, and agent-tools operations are not
-registered.
+The FastAPI application is composed in `app/main.py`. Domain routes own HTTP,
+domain services own policy and state transitions, same-owner persistence files
+own storage, and runtime owns composition. Read
+[Backend Architecture](../../backend/ARCHITECTURE.md) before changing code.
 
-The generated `/openapi.json` is the canonical REST contract. Domain routers
-parse requests, use authentication dependencies, and convert responses and
-errors. Domain services own authorization, business flow, and transaction
-participation. Persistence stays with that domain's service or repository;
-multi-owner runtime collaboration preserves the caller's Session and existing
-commit/rollback contract. See [Backend Architecture](../../backend/ARCHITECTURE.md)
-for actual role locations.
+PostgreSQL is the canonical 0.1.4 store, including activity checkpoints, keyword
+search and exact pgvector retrieval. LadybugDB is rebuildable. The official
+entrypoint is `python -m app.runtime.postgresql_server`; deployment prepares a
+protected marker/DSN and current schema before serving. Never supply a personal
+DB to tests or use the runtime role for schema migration.
 
-SQLite is the canonical Local store. Supported schema upgrades use the explicit
-embedded SQLite migration chain under `app/runtime/migrations`, with generation
-validation and failure recovery. Historical PostgreSQL Alembic revisions remain
-unchanged as provenance; they are not the Local bootstrap or a second runtime
-migration chain. Preserve existing revision and embedded migration bodies, and
-verify supported predecessor upgrades when adding a schema change. See
-[Local runtime](local-runtime.md) and [Contributor development](development.md).
-
-Select tests for the affected behavior, callers and failure boundaries. Shared
-runtime or data changes require broader coverage; remote selection follows
-[CI validation](../operations/ci-validation.md). Network-facing provider behavior
-must be represented by a fake or mock in contributor CI.
+See [development](development.md), [runtime](postgresql-runtime.md),
+[SQLite 0.1.3 migration](postgresql-migration.md), and
+[backup and restore](postgresql-backup.md). Frozen SQLite and historical hosted
+Alembic files are compatibility/provenance evidence, not the current PG chain.
+Select tests for affected behavior and report local, CI and user checks separately.

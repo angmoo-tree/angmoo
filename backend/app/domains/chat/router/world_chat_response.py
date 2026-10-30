@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -211,6 +212,15 @@ def stream_world_response_events(
     )
     runtime_settings = settings if composition is None else composition.settings
 
+    def scope_is_deleting() -> bool:
+        from app.domains.worlds.service.deletion import is_deleting
+        from app.database import SessionLocal
+        sessions = composition.session_factory if composition is not None else SessionLocal
+        # A fresh check still fences every public chunk. Own the short session
+        # wholly on the worker so connection/SQL waits cannot block the loop.
+        with sessions() as scope_db:
+            return is_deleting(scope_db, world_id)
+
     async def encoded() -> AsyncIterator[bytes]:
         events = generation_service.stream_world_response(
             db,
@@ -225,11 +235,7 @@ def stream_world_response_events(
         if track:
             events = track(world_id, events)
         async for event in events:
-            from app.domains.worlds.service.deletion import is_deleting
-            from app.database import SessionLocal
-            sessions = composition.session_factory if composition is not None else SessionLocal
-            with sessions() as scope_db:
-                deleting = is_deleting(scope_db, world_id)
+            deleting = await run_in_threadpool(scope_is_deleting)
             if deleting:
                 await events.aclose()
                 return  # No synthetic success/terminal event for a deleted scope.

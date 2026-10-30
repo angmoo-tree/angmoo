@@ -608,7 +608,7 @@ def _close_open_beat_claims(
 
 def reclaim_frozen_beat(db, *, beat_id, binding, claim_run_id, now, claim_expires_at):
     """Reacquire only the same still-current beat using its existing retry budget."""
-    from app.core.sqlite_concurrency import run_sqlite_session_immediate
+    from app.core.activity_transactions import activity_write
     if db.in_transaction():
         raise ActivityRuntimeConflictError("routine_reclaim_requires_clean_session")
     def operation():
@@ -628,4 +628,4 @@ def reclaim_frozen_beat(db, *, beat_id, binding, claim_run_id, now, claim_expire
             trigger_kind=beat.trigger_kind, idempotency_key=beat.idempotency_key, claim_run_id=claim_run_id,
             claim_expires_at=claim_expires_at, source_event_ids=beat.source_event_ids,
             skipped_tick_count=beat.skipped_tick_count, state_schema_version=beat.state_schema_version, now=now, commit=False).row
-    return run_sqlite_session_immediate(db, operation, require_clean=True)
+    return activity_write(db, operation, require_clean=True)

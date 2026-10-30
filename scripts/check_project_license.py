@@ -21,6 +21,9 @@ EXPECTED_SCOPE_KEYS = {"application", "world_packages", "runtime_data", "third_p
 EXPECTED_CONDITIONAL_REVIEWS = {
     ("python", "certifi"),
     ("python", "orjson"),
+    ("python", "psycopg"),
+    ("python", "psycopg-binary"),
+    ("python", "psycopg-pool"),
     ("node", "caniuse-lite"),
     ("node", "libheif-js"),
 }

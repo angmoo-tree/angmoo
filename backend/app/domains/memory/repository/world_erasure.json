@@ -597,6 +597,58 @@
           ]
         }
       ]
+    },
+    "memory_experience_snapshots": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_experience_dependencies": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_experience_tombstones": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "memory_experience_inputs": {
+      "joins": [
+        {
+          "columns": [
+            "scope_setting_id"
+          ],
+          "target_table": "memory_scope_settings",
+          "target_columns": [
+            "id"
+          ]
+        }
+      ]
     }
   }
 }

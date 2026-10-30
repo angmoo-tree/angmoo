@@ -52,9 +52,12 @@ def validate_image_document(
     if not isinstance(config, dict):
         return [f"image Config is missing: {image}"]
 
+    is_postgres = image.rsplit('/',1)[-1].split(':',1)[0] in {'angmoo-postgres','angmoo-postgres-ci','angmoo-postgres-candidate'}
     user = str(config.get("User") or "").strip().lower()
-    if user in {"", "0", "root", "0:0", "root:root"}:
+    if not is_postgres and user in {"", "0", "root", "0:0", "root:root"}:
         errors.append(f"runtime image must use a non-root user: {image}")
+    if is_postgres and (config.get("Entrypoint") != ["/usr/local/bin/angmoo-postgres-entrypoint"] or config.get("Cmd") != ["postgres"]):
+        errors.append(f"PostgreSQL must use the reviewed privilege-dropping entrypoint: {image}")
 
     labels = config.get("Labels") or {}
     if not isinstance(labels, dict):
@@ -63,7 +66,7 @@ def validate_image_document(
         "org.opencontainers.image.source": EXPECTED_SOURCE,
         "org.opencontainers.image.revision": expected_revision,
         "org.opencontainers.image.version": expected_version,
-        "org.opencontainers.image.licenses": "GPL-3.0-only",
+        "org.opencontainers.image.licenses": "GPL-3.0-only AND PostgreSQL" if is_postgres else "GPL-3.0-only",
     }
     for key, expected in expected_labels.items():
         if labels.get(key) != expected:

@@ -54,6 +54,9 @@ class CanonicalRetrievalCommand:
     call_id: str | None = None
     image_context: str | None = None
     chat_identity: ChatIdentityContext | None = None
+    initial_result: dict | None = None
+    response_slot_id: str | None = None
+    request_scope_hash: str | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:

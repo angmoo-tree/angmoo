@@ -12,7 +12,7 @@ function validateProcessing(value: MemoryProcessingSetting, worldId: string, sub
     [value.pending_count, value.blocked_count, value.applied_count].some(n => !Number.isSafeInteger(n) || n < 0) ||
     [value.memory_enabled, value.daily_enabled, value.shutdown_apply_enabled].some(v => typeof v !== "boolean") ||
     !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) || typeof value.timezone !== "string" ||
-    !["idle", "accepted", "applying", "saved", "partial_error"].includes(value.status) ||
+    !["idle", "accepted", "applying", "saved", "partial_error", "closed", "cancelled"].includes(value.status) ||
     ![null, "accepted", "empty"].includes(value.result) ||
     (value.resolved_request_key != null && (typeof value.resolved_request_key !== "string" || value.resolved_request_key.length < 8 || value.resolved_request_key.length > 128)) ||
     [value.rejected_count, value.skipped_count].some(n => n !== undefined && (!Number.isSafeInteger(n) || n < 0)) ||
@@ -247,6 +247,8 @@ function episodeDetailMatches(value: unknown): boolean {
   if (typeof value !== "object") return false;
   const v = value as Record<string, unknown>;
   return ["episode_v1", "activity_situation_v1", "legacy_summary"].includes(String(v.representation)) &&
+    (v.snapshot_status == null || ["historical_snapshot", "partial_snapshot", "snapshot_unavailable"].includes(String(v.snapshot_status))) &&
+    (v.experience_state == null || ["action_succeeded", "observed_action_failed"].includes(String(v.experience_state))) &&
     typeof v.partial === "boolean" && Number.isInteger(v.omitted_units) && Number(v.omitted_units) >= 0 &&
     Number.isInteger(v.followup_count) && Number(v.followup_count) >= 0 &&
     Array.isArray(v.units) && v.units.every((unit: unknown) => {
@@ -260,6 +262,7 @@ function episodeDetailMatches(value: unknown): boolean {
           if (!source || typeof source !== "object") return false;
           const s = source as Record<string, unknown>;
           return typeof s.role === "string" && ["verified", "missing", "changed", "unavailable"].includes(String(s.status)) &&
+            [s.author_label, s.author_role, s.occurred_at].every(field => field == null || typeof field === "string") &&
             (s.status === "verified" ? typeof s.text === "string" : s.text == null);
         });
     });
@@ -569,7 +572,7 @@ function errorDetail(payload: unknown, fallback: string) {
 }
 
 
-import { consolidationStates, flowStates, type ConsolidationCapability, type ConsolidationProgress, type ConsolidationStart } from "@/features/memory/types/consolidation-contract";
+import { consolidationStates, flowStates, maintenanceActions, type ConsolidationCapability, type ConsolidationProgress, type ConsolidationStart } from "@/features/memory/types/consolidation-contract";
 
 function validateConsolidation(value: ConsolidationProgress) {
   if (!value || typeof value.request_id !== "string" || typeof value.effective_request_id !== "string" ||
@@ -578,7 +581,9 @@ function validateConsolidation(value: ConsolidationProgress) {
     throw new MemoryApiError(502, "memory_progress_invalid");
   if (value.followup !== undefined) {
     const r = value.relationship;
-    if (value.workflow_version !== 1 || value.followup !== "relationships" || !value.flow_state || !flowStates.includes(value.flow_state) ||
+    if (value.workflow_version !== 2 || !Number.isInteger(value.revision) || !Array.isArray(value.actions) ||
+        value.actions.some(a => !maintenanceActions.includes(a)) ||
+        value.followup !== "relationships" || !value.flow_state || !flowStates.includes(value.flow_state) ||
         !r || typeof r.request_id !== "string" || typeof r.state !== "string" ||
         ![r.target_count, r.memory_count].every(n => n === null || Number.isInteger(n) && n >= 0) ||
         ![r.completed_count, r.changed_count, r.kept_count].every(n => Number.isInteger(n) && n >= 0))
@@ -602,8 +607,20 @@ export async function startMemoryConsolidation(worldId: string, subjectId: strin
   return validateConsolidation(read);
 }
 
-export async function retryMemoryConsolidation(worldId: string, subjectId: string, requestId: string, key: string) {
-  await requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/batch-run/${encodeURIComponent(requestId)}/retry`,
-    { method: "POST", body: JSON.stringify({ idempotency_key: key }) });
+export async function retryMemoryConsolidation(worldId: string, subjectId: string, requestId: string, key: string,
+  mode: import("../types/consolidation-contract").MaintenanceAction, expectedRevision: number) {
+  const action = mode === "cancel_remaining" || mode === "close_without_retry" ? "cancel" : "retry";
+  return requestMemoryMutation<{scope: {world_id: string; subject_world_character_id: string}; progress: ConsolidationProgress}>(`${scopePath(worldId, subjectId)}/memory/batch-run/${encodeURIComponent(requestId)}/${action}`,
+    { method: "POST", body: JSON.stringify({ idempotency_key: key, mode, expected_revision: expectedRevision }) }).then(read => {
+      if (!matchesScope(read.scope, worldId, subjectId)) throw new MemoryApiError(502, "memory_progress_scope_mismatch");
+      return {...read, progress: validateConsolidation(read.progress)};
+    });
+}
+
+export async function commandMemoryProcessing(worldId: string, subjectId: string, runId: string, data: {
+  mode: import("../types/consolidation-contract").MaintenanceAction; idempotency_key: string; expected_revision: number;
+}, signal?: AbortSignal) {
+  return requestMemoryMutation<MemoryProcessingSetting>(`${scopePath(worldId, subjectId)}/memory/processing-runs/${encodeURIComponent(runId)}/command`,
+    { method: "POST", body: JSON.stringify(data), signal }).then(value => validateProcessing(value, worldId, subjectId));
 }
 import { evidenceLimitationsMatch, relationshipFieldsMatch } from "../utils/chat-evidence-presentation";

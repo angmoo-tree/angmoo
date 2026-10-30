@@ -1,7 +1,6 @@
 """Run memory search -> dependent detail against isolated real SQLite and FTS5."""
 import asyncio
 import json
-from collections import Counter
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -146,7 +145,7 @@ def test_real_search_detail_and_crg_input(runtime_factory, tmp_path, monkeypatch
     assert all(r.reference.startswith("memory-") for r in first.result.records)
     assert len(second.result.records) == 2
     assert set(second.query.source_references) == {"source:POST:dependency-post-0", "source:POST:dependency-post-1"}
-    assert Counter(reads) == {"dependency-post-0": 2, "dependency-post-1": 2}
+    assert reads == []  # Recall uses the captured experience, never current source rows.
     assert all("원문전용상세" in r.text for r in second.result.records)
     result = SimpleNamespace(request_id=context.request_id, execution=execution, metrics=SimpleNamespace(short_circuit_reason=None))
     bundle = EvidenceBundleAssembler().canonical(request_scope_hash="b" * 64, result=result)
@@ -183,7 +182,7 @@ def test_real_search_detail_and_crg_input(runtime_factory, tmp_path, monkeypatch
 
 
 @pytest.mark.parametrize("change", ["deleted", "hidden", "digest"])
-def test_detail_revalidates_sources_changed_after_search(runtime_factory, tmp_path, change):
+def test_detail_preserves_captured_sources_changed_after_search(runtime_factory, tmp_path, change):
     scope, _, _ = _seed_posts(runtime_factory)
     recall, reads = _recall(runtime_factory, tmp_path)
 
@@ -206,8 +205,9 @@ def test_detail_revalidates_sources_changed_after_search(runtime_factory, tmp_pa
     plan, context = _plan(scope)
     execution = CanonicalRetrievalPlanExecutor(ChangingRecall()).execute(plan, context, now=NOW)
     assert len(execution.steps[0].result.records) == 2
-    assert [r.canonical_source_id for r in execution.steps[1].result.records] == ["dependency-post-1"]
-    assert Counter(reads) == {"dependency-post-0": 2, "dependency-post-1": 2}
+    assert {r.canonical_source_id for r in execution.steps[1].result.records} == {"dependency-post-0", "dependency-post-1"}
+    assert all("원문전용상세" in r.text for r in execution.steps[1].result.records)
+    assert reads == []
 
 
 @pytest.mark.parametrize("scope_field", ["owner_id", "world_id", "subject_world_character_id"])

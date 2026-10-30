@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from datetime import UTC, datetime
 from sqlalchemy.orm import Session
+from app.core.database_transactions import postgres_db_unit
 
 from app.domains.memory.contracts.management import MemoryWorkflows
 from app.providers.registry import MESSAGE_GOOGLE_MODELS
@@ -58,6 +59,7 @@ def read_memory_batch_setting(
 
 
 
+@postgres_db_unit
 def update_memory_batch_setting(
     *,
     scope: MemoryScope,
@@ -88,6 +90,7 @@ def update_memory_batch_setting(
 
 
 
+@postgres_db_unit
 def retry_memory_batch(
     *,
     scope: MemoryScope,
@@ -140,6 +143,7 @@ def read_memory_setting(
 
 
 
+@postgres_db_unit
 def update_memory_setting(
     *,
     scope: MemoryScope,
@@ -243,6 +247,7 @@ def read_memory_item(
 
 
 
+@postgres_db_unit
 def update_memory_pin(
     *,
     scope: MemoryScope,
@@ -281,6 +286,7 @@ def update_memory_pin(
 
 
 
+@postgres_db_unit
 def correct_memory_item(
     *,
     scope: MemoryScope,
@@ -321,6 +327,7 @@ def correct_memory_item(
 
 
 
+@postgres_db_unit
 def delete_memory_item(
     *,
     scope: MemoryScope,

@@ -1,14 +1,13 @@
 """Capture final Chat delivery and participate before its existing checkpoint."""
 from datetime import UTC, datetime
+from dataclasses import asdict
 from hashlib import sha256
 from app.domains.chat.models import MessageMessage
 from app.core.calendar import utc_instant
 
 from app.domains.chat.contracts.evidence_bundle import EvidenceLocatorKind
-from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotChangedError
 from app.domains.chat.exceptions import ChatSituationEvidenceError
 from app.domains.chat.service.today_situation_delivery import selected_event_entries
-from app.domains.relationships.contracts.source_event_evidence import SourceEventBasis
 from app.domains.memory.exceptions import SituationSourceAdmissionError, SituationDeliveryBindingError
 from app.domains.memory.contracts.activity_situation import (
     DeliveredInputManifest, CommittedActivityResult, CommittedEffect, stable_digest,
@@ -19,6 +18,7 @@ from app.domains.memory.service.situation_policy import restore
 from app.domains.memory.repository.situation_admission import admit
 from app.domains.memory.policies.situation_output import parse_description
 from app.runtime.memory.situation_sources import SituationSources
+from app.runtime.memory.captured_delivery import captured_entry
 
 
 class ChatSituationMemory:
@@ -26,10 +26,18 @@ class ChatSituationMemory:
         self.session = session
 
     def freeze(self, command, bundle, payload):
-        # Capturing delivery is read-only and never flushes a caller's pending
-        # writes. Each invocation owns fresh, bounded canonical facts.
+        # Content comes from the first admitted input. Current rights and the
+        # response lease are checked separately by the response unit of work.
         with self.session.no_autoflush:
             return self._freeze(command, bundle, payload)
+
+    def record_input(self, manifest, state):
+        from app.domains.memory.repository.experience_inputs import record_input
+        return record_input(self.session,manifest,state)
+
+    def record_terminal(self, request, state, *, reason):
+        from app.domains.memory.repository.experience_inputs import record_terminal
+        record_terminal(self.session,f"chat:{request.request_scope_hash}",state,reason=reason)
 
     def _freeze(self, command, bundle, payload):
         snapshot = restore(command.request.node_state.get("_situation_policy"))
@@ -37,39 +45,39 @@ class ChatSituationMemory:
             raise ValueError("situation_snapshot_required")
         sources = SituationSources(self.session)
         selected = selected_event_entries(command, bundle, payload, snapshot.scope)
-        references = {index: SourceEventBasis(entry.source_id, entry.event_type, entry.actor_id,
-            entry.counterpart_id, entry.source_post_id, entry.target_post_id,
-            entry.root_post_id, entry.parent_post_id, entry.source_revision) for index, entry in selected.items()}
-        if references:
-            # Fresh populate_existing reads must not overwrite uncommitted
-            # caller edits. The response UoW checkpoints before this boundary;
-            # an unfinished edit must be resolved by its owner, never here.
-            if self.session.dirty or self.session.deleted:
-                raise ChatSituationEvidenceError("situation_today_pending_changes")
-            message = self.session.get(MessageMessage, command.request.user_message_id, populate_existing=True)
-            if message is None or message.thread_id != command.request.thread_id:
-                raise ChatSituationEvidenceError("situation_today_thread_invalid")
-        facts = sources.prepare_manual_events(ref.event_id for ref in references.values()) if references else None
+        if (snapshot.scope.owner_id, snapshot.scope.world_id, snapshot.scope.subject_world_character_id) != (
+                command.preflight.owner_id, command.preflight.world_id, command.preflight.responding_world_character_id):
+            raise ChatSituationEvidenceError("situation_chat_scope_invalid")
+        if command.request.thread_id != command.preflight.thread_id:
+            raise ChatSituationEvidenceError("situation_chat_thread_invalid")
+        if payload.get("frozen_evidence") != bundle.provider_payload():
+            raise ChatSituationEvidenceError("situation_chat_payload_invalid")
         entries = []
         payload_digest = stable_digest(payload)
-        def add(kind, identifier, delivered, path, *, role="core", basis=None, event_reference=None):
+        def add(kind, identifier, delivered, path, *, role="core", basis=None,
+                version="initial-input.v1", actor=None, occurred_at=None):
             try:
-                entry = sources.describe(snapshot.scope, kind=kind, identifier=identifier,
-                    delivered=delivered, path=path, role=role, ordinal=len(entries),
-                    target=command.request.response_slot_id if role == "core" else None,
-                    private_thread=command.request.thread_id, relationship_basis=basis,
-                    manual_event_reference=event_reference, capture_validation=facts,
-                    delivery=FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest))
+                delivery = FinalDeliveredFragment.capture(payload, path=path, text=delivered, payload_digest=payload_digest)
+                if kind in {"IMAGE_ASSET", "IMAGE_INTERPRETATION"}:
+                    entry = sources.describe(snapshot.scope, kind=kind, identifier=identifier,
+                        delivered=delivered, path=path, role=role, ordinal=len(entries),
+                        private_thread=command.request.thread_id, delivery=delivery)
+                else:
+                    entry = captured_entry(snapshot.scope, kind=kind, identifier=identifier,
+                        delivery=delivery, ordinal=len(entries), role=role, basis=basis,
+                        target=command.request.response_slot_id if role == "core" else None,
+                        thread=command.request.thread_id if kind == "CHAT_MESSAGE" else None,
+                        version=version, actor=actor, occurred_at=occurred_at,
+                        source_digest=version if isinstance(version, str) and len(version) == 64 else None)
             except SituationDeliveryBindingError as exc:
                 raise ChatSituationEvidenceError("situation_today_binding_invalid") from exc
-            except SituationSourceAdmissionError as exc:
-                raise TodaySnsSnapshotChangedError("situation_today_source_changed") from exc
             entries.append(entry)
         latest = payload["latest_user_message"]
         if isinstance(latest, dict) and latest["content"] != f"{latest['name']}: {command.preflight.user_message}":
             raise ValueError("situation_chat_presentation_changed")
         add("CHAT_MESSAGE", str(command.request.user_message_id), command.preflight.user_message,
-            "/latest_user_message/content" if isinstance(latest, dict) else "/latest_user_message")
+            "/latest_user_message/content" if isinstance(latest, dict) else "/latest_user_message",
+            actor=command.preflight.requester_world_character_id)
         for index, context in enumerate(command.response_context):
             if context.source_id is None:
                 raise ValueError("situation_context_identity_missing")
@@ -77,17 +85,21 @@ class ChatSituationMemory:
             expected = f"{presented['name']}: {context.content}" if "name" in presented else context.content
             if presented["content"] != expected:
                 raise ValueError("situation_chat_presentation_changed")
-            add("CHAT_MESSAGE", context.source_id, context.content, f"/recent_context/{index}/content")
+            add("CHAT_MESSAGE", context.source_id, context.content, f"/recent_context/{index}/content",
+                actor=(command.preflight.responding_world_character_id if context.role == "assistant"
+                       else command.preflight.requester_world_character_id))
         for index, item in enumerate(bundle.items):
             locator = item.locator
             if locator is None:
                 raise ValueError("situation_evidence_identity_missing")
             if locator.kind is EvidenceLocatorKind.MEMORY_ITEM:
                 add("MEMORY_ITEM", locator.source_id, payload["frozen_evidence"]["items"][index]["text"],
-                    f"/frozen_evidence/items/{index}/text", role="prior")
+                    f"/frozen_evidence/items/{index}/text", role="prior", version=locator.source_revision)
             elif locator.kind is EvidenceLocatorKind.CANONICAL_SOURCE:
+                event = selected.get(index)
                 add(locator.source_type, locator.source_id, payload["frozen_evidence"]["items"][index]["text"],
-                    f"/frozen_evidence/items/{index}/text", role="background", event_reference=references.get(index))
+                    f"/frozen_evidence/items/{index}/text", role="background", version=locator.source_revision,
+                    actor=event.actor_id if event else None, occurred_at=item.occurred_at)
             elif locator.kind in {EvidenceLocatorKind.GRAPH_RELATIONSHIP, EvidenceLocatorKind.IMAGE_ASSET}:
                 basis = None
                 if locator.kind is EvidenceLocatorKind.GRAPH_RELATIONSHIP:
@@ -117,7 +129,7 @@ class ChatSituationMemory:
                 add("RELATIONSHIP", item.relationship.relationship_state_id,
                     payload["social_context"]["context"], "/social_context/context", role="background", basis=basis)
         return DeliveredInputManifest(f"chat:{command.request.request_scope_hash}", snapshot,
-            payload_digest, tuple(entries), private_thread_id=command.request.thread_id, version=2)
+            payload_digest, tuple(entries), private_thread_id=command.request.thread_id, version=3)
 
     def admit(self, command, committed, response):
         if command.request.node_state.get("_situation_policy") is None:
@@ -137,6 +149,7 @@ class ChatSituationMemory:
             ("reply",), (CommittedEffect("reply", "CHAT_MESSAGE", identifier, "succeeded"),),
             response.situation_output_digest or "", sha256(response.text.encode()).hexdigest(),
             utc_instant(self.session.get(MessageMessage, int(identifier)).created_at), counterpart_id=command.preflight.requester_world_character_id,
-            thought_reference=f"chat:{identifier}" if response.activity_thought else None, result_sources=(result_source,))
+            thought_reference=f"chat:{identifier}" if response.activity_thought else None, result_sources=(result_source,),
+            thought=asdict(response.activity_thought) if response.activity_thought else None)
         draft = response.situation_draft or parse_description(None, target_key=result.target_key)
         admit(self.session, manifest=response.situation_manifest, draft=draft, result=result, now=datetime.now(UTC))

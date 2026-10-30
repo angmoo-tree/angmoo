@@ -2,6 +2,7 @@
 from dataclasses import asdict
 from datetime import datetime
 from sqlalchemy import select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.domains.memory.contracts.activity_situation import (
     CommittedActivityResult, DeliveredInputManifest, SituationDraft, SituationPolicySnapshot, stable_digest,
@@ -37,8 +38,9 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
           result: CommittedActivityResult, now: datetime) -> MemorySituationReceipt | None:
     """Receipt failure aborts the activity transaction. A deleted scope is a no-op.
 
-    The scope row lock also serializes duplicate admissions before reading their
-    unique identities. No IntegrityError blanket catch can hide a failed writer.
+    PostgreSQL shares the policy guard across independent admissions. Unique
+    constraints arbitrate duplicate identities, with content checked on reuse.
+    The caller still owns the effect and receipt in one transaction.
     """
     snapshot = manifest.snapshot
     if draft.target_key != result.target_key:
@@ -53,16 +55,34 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
     if draft.status == "valid" and valid.status != "valid":
         raise MemoryValidationError("situation_draft_invalid")
     payload = asdict(result)
+    if manifest.version < 3:
+        payload.pop("thought",None)
+        payload.pop("experience_state",None)
+        payload.pop("failure_reason",None)
+        if result.experience_state != "action_succeeded":
+            raise MemoryValidationError("situation_failure_requires_snapshot")
     payload["result_sources"] = [entry.to_dict(version=manifest.version) for entry in result.result_sources]
     payload["occurred_at"] = result.occurred_at.isoformat()
     content_digest = stable_digest({"manifest": manifest.to_dict(), "draft": asdict(draft), "result": payload})
-    locked = session.execute(update(MemoryScopeSettingModel).where(
+    postgres = session.get_bind().dialect.name == "postgresql"
+    scope_predicates = (
         MemoryScopeSettingModel.id == snapshot.setting_id,
         MemoryScopeSettingModel.owner_id == snapshot.scope.owner_id,
         MemoryScopeSettingModel.world_id == snapshot.scope.world_id,
         MemoryScopeSettingModel.subject_world_character_id == snapshot.scope.subject_world_character_id,
-    ).values(id=MemoryScopeSettingModel.id, updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
-    if locked.rowcount != 1:
+    )
+    if postgres:
+        # A real policy UPDATE/delete must wait until this effect commits. A
+        # shared lock creates no fake policy revision or needless SSI writer.
+        # Stale snapshots still raise 40001 through the caller's bounded retry.
+        found = session.scalar(select(MemoryScopeSettingModel.id).where(
+            *scope_predicates).with_for_update(read=True)) is not None
+    else:
+        locked = session.execute(update(MemoryScopeSettingModel).where(
+            *scope_predicates).values(id=MemoryScopeSettingModel.id,
+                updated_at=MemoryScopeSettingModel.updated_at).execution_options(memory_scope_lock_only=True))
+        found = locked.rowcount == 1
+    if not found:
         if session.get(MemoryScopeSettingModel, snapshot.setting_id) is not None:
             raise MemoryConflictError("situation_scope_mismatch")
         return None
@@ -77,19 +97,40 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
             raise MemoryConflictError("situation_receipt_content_conflict")
         return previous
     manifest_digest = stable_digest(manifest.to_dict())
-    stored = session.scalar(select(MemorySituationManifest).where(
+    manifest_query = select(MemorySituationManifest).where(
         MemorySituationManifest.scope_setting_id == snapshot.setting_id,
         MemorySituationManifest.call_identity == manifest.call_identity,
-    ))
+    )
+    stored = session.scalar(manifest_query)
     if stored is None:
-        stored = MemorySituationManifest(id=manifest_digest, scope_setting_id=snapshot.setting_id,
+        manifest_values = dict(id=manifest_digest, scope_setting_id=snapshot.setting_id,
             call_identity=manifest.call_identity, content_digest=manifest_digest,
             payload=manifest.to_dict(), created_at=now)
-        session.add(stored)
-        session.flush()
-    elif stored.content_digest != manifest_digest:
+        if postgres:
+            stored = session.scalar(pg_insert(MemorySituationManifest).values(**manifest_values)
+                .on_conflict_do_nothing(constraint="uq_situation_manifest_call")
+                .returning(MemorySituationManifest))
+            if stored is None:
+                stored = session.execute(manifest_query).scalar_one()
+        else:
+            stored = MemorySituationManifest(**manifest_values)
+            session.add(stored)
+            session.flush()
+    if stored.content_digest != manifest_digest:
         raise MemoryConflictError("situation_manifest_content_conflict")
-    if manifest.version == 2:
+    if manifest.version >= 3:
+        from app.domains.memory.models.experience import MemoryExperienceInput
+        journal=session.scalar(select(MemoryExperienceInput).where(
+            MemoryExperienceInput.manifest_id==manifest_digest).with_for_update())
+        if journal is not None:
+            if journal.state != "effect_committed":
+                journal.state="failed" if result.experience_state=="observed_action_failed" else "effect_committed"
+            outcome={"logical_activity_id":result.logical_activity_id,"lane":result.lane,
+                "target_key":result.target_key,"effects":payload["effects"],
+                "experience_state":result.experience_state,"failure_reason":result.failure_reason}
+            journal.outcome={"targets":{**journal.outcome.get("targets",{}),result.target_key:outcome}}
+            journal.updated_at=now
+    if manifest.version >= 2:
         payload["_admission"] = {"draft": asdict(draft), "manifest_digest": manifest_digest,
             "result_digest": stable_digest(payload)}
     setting = session.get(MemoryScopeSettingModel, snapshot.setting_id, populate_existing=True)
@@ -98,13 +139,27 @@ def admit(session, *, manifest: DeliveredInputManifest, draft: SituationDraft,
         or epoch.scope_setting_id != setting.id or epoch.closed_at is not None)
     code = "situation_activation_closed" if inactive else result.eligibility_code or draft.error_code
     state = "skipped" if inactive or code == "situation_no_action" else "blocked" if code or draft.status != "valid" else "pending"
-    row = MemorySituationReceipt(scope_setting_id=setting.id, logical_activity_id=result.logical_activity_id,
+    receipt_values = dict(scope_setting_id=setting.id, logical_activity_id=result.logical_activity_id,
         lane=result.lane, target_key=result.target_key, manifest_id=stored.id,
         policy_version=snapshot.policy_version, activation_epoch=snapshot.activation_epoch,
         scope_version=snapshot.scope_version, content_digest=content_digest,
         description=draft.description if draft.status == "valid" else None,
         description_status=draft.status, result=payload, occurred_at=result.occurred_at,
         captured_at=now, state=state, error_code=code)
+    if postgres:
+        row = session.scalar(pg_insert(MemorySituationReceipt).values(**receipt_values)
+            .on_conflict_do_nothing(constraint="uq_situation_activity_target")
+            .returning(MemorySituationReceipt))
+        if row is None:
+            row = session.execute(select(MemorySituationReceipt).where(
+                MemorySituationReceipt.scope_setting_id == setting.id,
+                MemorySituationReceipt.logical_activity_id == result.logical_activity_id,
+                MemorySituationReceipt.lane == result.lane,
+                MemorySituationReceipt.target_key == result.target_key)).scalar_one()
+        if row.content_digest != content_digest:
+            raise MemoryConflictError("situation_receipt_content_conflict")
+        return row
+    row = MemorySituationReceipt(**receipt_values)
     session.add(row)
     session.flush()
     return row

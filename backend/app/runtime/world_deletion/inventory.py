@@ -13,7 +13,7 @@ OWNERS = ("routines", "world_characters", "relationships", "characters", "memory
 
 
 class ErasureInventory:
-    def __init__(self, metadata=None):
+    def __init__(self, metadata=None, *, legacy_snapshot_schema=False):
         self.tables = (Base.metadata if metadata is None else metadata).tables
         root = Path(__file__).resolve().parents[2] / "domains"
         self.rules = {}
@@ -22,6 +22,10 @@ class ErasureInventory:
             if payload["owner"] != owner or payload["version"] != 1:
                 raise ValueError("world_erasure_inventory_invalid")
             self.rules.update(payload["tables"])
+        if legacy_snapshot_schema or (metadata is not None and metadata.info.get("angmoo_frozen_sqlite")):
+            from app.runtime.persistence.experience_migration import TABLES
+            for name in TABLES-set(self.tables):
+                self.rules.pop(name,None)
         if not set(self.rules).issubset(self.tables):
             raise ValueError("world_erasure_metadata_incomplete")
 
@@ -35,7 +39,7 @@ class ErasureInventory:
         """
         metadata = MetaData()
         metadata.reflect(bind=connection)
-        return cls(metadata)
+        return cls(metadata, legacy_snapshot_schema=connection.dialect.name == "sqlite")
 
     def predicate(self, name, world_id, *, table=None):
         t = self.tables[name] if table is None else table

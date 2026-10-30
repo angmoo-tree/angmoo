@@ -1,0 +1,7 @@
+{
+  "schema": "angmoo-psycopg-source.v1",
+  "version": "3.3.6",
+  "commit": "a67654d1e7afbf9b3a619557838f62de1c790e7c",
+  "url": "https://codeload.github.com/psycopg/psycopg/zip/a67654d1e7afbf9b3a619557838f62de1c790e7c",
+  "sha256": "bb91252a28fdfecbc029cfc96a7ebe3ca8dc54f98d96f6d51495e0d9b180d4ca"
+}

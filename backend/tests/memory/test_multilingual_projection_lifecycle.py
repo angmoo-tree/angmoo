@@ -71,7 +71,8 @@ def test_cancel_restart_reconciles_offline_correction_and_deletion_before_search
         assert hits[0].snippet == "The coffee meeting for A-17 was cancelled."
         assert not second_index.search(MemoryRecallSearchQuery(scope, "약속", (RecallDocumentKind.MEMORY_ITEM,), 10))
         with second_index._connect(second_index.database_path) as connection:
-            assert connection.execute("SELECT searchable FROM memory_recall_documents WHERE memory_item_id=?", ("padding-00000",)).fetchone() in (None, (0,))
+            row=connection.execute("SELECT searchable FROM memory_recall_documents WHERE memory_item_id=?", ("padding-00000",)).fetchone()
+            assert row is None or row[0]==0
         assert second_index.doctor().healthy
     finally:
         resumed.stop()

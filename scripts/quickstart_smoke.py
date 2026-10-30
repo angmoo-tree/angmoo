@@ -100,17 +100,38 @@ def _bootstrap_local_session(
     )
 
     resolved_data_root = data_root.resolve()
-    if not (resolved_data_root / "canonical").is_dir():
+    postgresql_marker=resolved_data_root / 'runtime/postgresql-runtime.json'
+    if not postgresql_marker.exists() and not (resolved_data_root / "canonical").is_dir():
         raise SmokeError("local session bootstrap data root is not initialized")
 
     now = datetime.now(UTC)
     user_id = f"user-{uuid4().hex}"
     post_id = f"post-{uuid4().hex}"
     token = security.create_token()
-    database = SqliteCanonicalDatabase(
-        StaticRuntimeDataPath(resolved_data_root),
-        settings=SqliteCanonicalSettings(generation=CONTRIBUTOR_GENERATION),
-    )
+    if postgresql_marker.exists():
+        from types import SimpleNamespace
+        from app.database import create_database_engine,create_session_factory
+        from app.runtime.postgresql_installation import read_dsn
+        from app.runtime.persistence.postgresql_schema import metadata
+        metadata()
+        engine=create_database_engine(read_dsn(resolved_data_root/'secrets/postgresql-runtime-dsn'))
+        database=SimpleNamespace(session=create_session_factory(engine),open=lambda:None,close=engine.dispose)
+    else:
+        # A migration fixture must keep the old schema and generation intact.
+        # Opening the current runtime wrapper here would perform current DDL
+        # before the migration test has observed the official 0.1.3 source.
+        import json
+        from types import SimpleNamespace
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        pointer=json.loads((resolved_data_root/'canonical/current-generation.json').read_text())
+        generation=pointer.get('generation',pointer.get('active_generation'))
+        if not generation or '/' in generation or '\\' in generation:
+            raise SmokeError('local session bootstrap generation is invalid')
+        sqlite_path=resolved_data_root/'canonical/generations'/generation/'angmoo.sqlite3'
+        if not sqlite_path.is_file():raise SmokeError('local session bootstrap database is absent')
+        engine=create_engine('sqlite+pysqlite:///'+sqlite_path.as_posix())
+        database=SimpleNamespace(session=sessionmaker(engine),open=lambda:None,close=engine.dispose)
     database.open()
     try:
         with database.session() as db:

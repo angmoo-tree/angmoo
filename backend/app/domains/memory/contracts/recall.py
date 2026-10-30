@@ -90,6 +90,7 @@ class MemoryRecallSearchQuery:
     lexical_policy: MemoryRecallLexicalPolicy = field(default=MemoryRecallLexicalPolicy.LEGACY_STRICT_V1, kw_only=True)
     image_base_text: str | None = field(default=None, kw_only=True)
     image_hint: str | None = field(default=None, kw_only=True)
+    allowed_thread_ids: tuple[str, ...] | None = field(default=None, kw_only=True)
 
 
 class MemoryRecallSearchIncomplete(RuntimeError):
@@ -176,6 +177,8 @@ class MemoryRecallDoctor:
     rollback_available: bool
     healthy: bool
     tokenizer_strategy: str
+    provider: str = "sqlite_fts5"
+    full_text_available: bool | None = None
 
 
 class MemoryRecallPreparing(RuntimeError):

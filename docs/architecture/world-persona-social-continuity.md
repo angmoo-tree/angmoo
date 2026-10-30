@@ -1,5 +1,7 @@
 # World replies, persona text, and approved activity continuity
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 Status: implementation and validation in progress. This change must stop before
 merging `main`; CI, contributor checks, installed-app USER CHECK, merge, and
 release are separate gates.

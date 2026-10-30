@@ -660,8 +660,8 @@ class EvidenceBundleAssembler:
     def today_event_entry(cls, item: EvidenceItem, snapshot: TodaySnsActivitySnapshot) -> TodaySnsActivityEntry:
         """Bind a selected event to the same pure projection used at assembly.
 
-        This is preparation evidence, not permission. Runtime must compare it
-        with fresh canonical facts before admitting a manual event.
+        This is preparation evidence. Current response permission is a separate
+        gate; an edited/deleted original does not rewrite this captured input.
         """
         entries = [entry for entry in snapshot.entries if entry.opaque_reference == item.opaque_reference]
         if len(entries) != 1:
@@ -673,8 +673,8 @@ class EvidenceBundleAssembler:
                 or item.occurred_at != expected.occurred_at
                 or item.author_identities != expected.author_identities
                 or item.display_projection != expected.display_projection
-                or entry.source_type != "social_event"
-                or not entry.actor_id or not entry.source_post_id or not entry.root_post_id):
+                or not entry.actor_id
+                or entry.source_type == "social_event" and (not entry.source_post_id or not entry.root_post_id)):
             raise ChatSituationEvidenceError("situation_today_projection_invalid")
         return entry
 

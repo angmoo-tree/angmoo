@@ -4,7 +4,7 @@ import json
 from app.providers.contracts import ProviderRequest
 from app.domains.relationships.contracts.daily_review import ReviewNeedsSplit
 from app.providers.registry import get_provider_adapter
-from app.domains.relationships.policies.daily_review import REVIEW_INSTRUCTIONS, fits_input
+from app.domains.relationships.policies.daily_review import REVIEW_INSTRUCTIONS, fits_input, prompt_payload
 
 
 class DirectRelationshipReviewProvider:
@@ -14,6 +14,9 @@ class DirectRelationshipReviewProvider:
         self.usage = None
 
     async def review(self, payload, *, partial, timeout):
+        # The provider boundary independently excludes snapshots, raw sources,
+        # numeric scores, personas and credential/authorization metadata.
+        payload = prompt_payload(payload)
         if not fits_input(payload):
             raise ValueError("relationship_review_input_exceeds_budget")
         self.validate_credential()

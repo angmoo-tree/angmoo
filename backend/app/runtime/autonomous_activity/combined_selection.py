@@ -20,7 +20,7 @@ def independent_input_failure(exc):
     if isinstance(exc, ActivityRelationshipValidationError):
         return exc.failure_scope == "lane"
     return isinstance(exc, ValueError) and str(exc) in {
-        "activity_source_changed", "activity_proposal_changed", "feed_target_stale", "feed_affordance_changed", "feed_claim_changed"}
+        "activity_source_changed", "activity_target_unavailable", "activity_proposal_changed", "feed_target_stale", "feed_affordance_changed", "feed_claim_changed"}
 
 
 class CombinedSelection:
@@ -40,7 +40,13 @@ class CombinedSelection:
                 result = await port.on_error(exc)
                 prepared[lane] = {"candidates": [], "preparation_error": result}
         from app.runtime.media.social_context import allocate
+        from app.runtime.autonomous_activity.initial_input import seal, assert_integrity
+        for item in prepared.values():
+            assert_integrity({**state, **item})
         allocate([candidate for value in prepared.values() for candidate in value.get("candidates", [])])
+        # This allocation limits the first delivery; it does not read newer data.
+        prepared = {lane: {**item, **seal({**state, **item}, {})}
+                    for lane, item in prepared.items()}
         return {"prepared_lanes": prepared}
 
     def request(self, state):
@@ -127,8 +133,8 @@ class CombinedSelection:
                         raise SelectionInputInvalid(exc, lane=lane, submitted=submitted) from exc
                     raise ActivityRetryGuardError(exc) from exc
         feed = prepared["feed"]
-        delivery = self.adapters["feed"].delivery({**feed, "identity": state["identity"]})
         try:
+            delivery = self.adapters["feed"].delivery({**feed, "identity": state["identity"], "stage": "TargetSelector"})
             result = await self.adapters["inbox"].provider.call(
                 node="CombinedTargetSelector", lane="inbox_feed_selector", system=SELECTOR_INSTRUCTIONS +
                     "\nSelect Inbox and Feed independently from their own lists, using the same start-of-activity context. "

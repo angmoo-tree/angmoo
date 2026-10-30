@@ -22,7 +22,8 @@ class Provider:
         self.calls.append(payload)
         if self.fail_next:
             self.fail_next = False
-            raise TimeoutError()
+            from app.providers.contracts import ProviderError
+            raise ProviderError("unavailable", failure_class="provider_unavailable", provider_code=503, retryable=True)
         refs = [m['memory_id'] for m in payload.get('memories', [])]
         if not refs:
             refs = list(dict.fromkeys(r for p in payload['partial_results'] for r in p['memory_refs']))

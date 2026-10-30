@@ -18,7 +18,7 @@ import tempfile
 import time
 
 from launcher.termux.payload import (
-    PLATFORMS, REPOSITORY, SERVICES, digest_file, inspect_oci, read_manifest,
+    PLATFORMS, REPOSITORY, SERVICES, services_for, digest_file, inspect_oci, read_manifest,
     require, verify_archive,
 )
 from scripts.ci.check_release_tag import expected_release_tag
@@ -61,7 +61,7 @@ def build(output: Path, service: str, platform: str, builder: str | None) -> Pat
     build_seconds = time.monotonic() - started
     image = inspect_oci(archive, service=service, platform=platform, source=source, version=version)
     image["build_seconds"] = round(build_seconds, 3)
-    base = re.search(r"ARG (?:PYTHON|NODE)_IMAGE=(.+)", (ROOT / f"Dockerfile.{service}").read_text())[1]
+    base = re.search(r"ARG (?:PYTHON|NODE|POSTGRES)_IMAGE=(.+)", (ROOT / f"Dockerfile.{service}").read_text())[1]
     base_index = json.loads(run("docker", "buildx", "imagetools", "inspect", "--raw", base, capture=True))
     base_child = next(d for d in base_index["manifests"] if d.get("platform", {}).get("os") == "linux" and d.get("platform", {}).get("architecture") == arch)
     image["base_manifest_digest"] = base_child["digest"]
@@ -73,7 +73,7 @@ def build(output: Path, service: str, platform: str, builder: str | None) -> Pat
         "created_at": datetime.now(timezone.utc).isoformat(),
         "producer": {"run_id": os.environ.get("GITHUB_RUN_ID"), "attempt": os.environ.get("GITHUB_RUN_ATTEMPT")},
         "locks": {name: digest_file(ROOT / name) for name in ("backend/uv.lock", "frontend/pnpm-lock.yaml")},
-        "bases": {s: re.search(r"ARG (?:PYTHON|NODE)_IMAGE=(.+)", (ROOT / f"Dockerfile.{s}").read_text())[1] for s in SERVICES},
+        "bases": {s: re.search(r"ARG (?:PYTHON|NODE|POSTGRES)_IMAGE=(.+)", (ROOT / f"Dockerfile.{s}").read_text())[1] for s in SERVICES},
         "tools": {"docker": run("docker", "--version", capture=True), "buildx": run("docker", "buildx", "version", capture=True)},
         "images": [image], "publication": {"state": "NOT_PUBLISHED"},
         "android": "NOT_RUN", "proot": "NOT_RUN",
@@ -163,7 +163,7 @@ def combine(paths: list[Path], output: Path, platform: str | None = None) -> Non
     from launcher.termux.payload import validate_manifest
     validate_manifest(result, require_all=platform is None)
     if platform:
-        require({(i["service"], i["platform"]) for i in result["images"]} == {(s, platform) for s in SERVICES}, "candidate_pair_missing")
+        require({(i["service"], i["platform"]) for i in result["images"]} == {(s, platform) for s in services_for(result['version'])}, "candidate_pair_missing")
     write_json(output, result)
 
 

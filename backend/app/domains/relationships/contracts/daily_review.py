@@ -29,8 +29,11 @@ def manifest_digest(value: dict) -> str:
 
 
 def validate_review_result(value: object, *, partial: bool, allowed_refs: set[str]) -> dict:
+    from app.core.storage_values import require_storage_text
     if not isinstance(value, dict):
         raise ValueError("relationship_review_result_invalid")
+    fields = ("memory_refs", "findings", "uncertainty") if partial else ("decision", "memory_refs", "relationship_label", "perception") if value.get("decision") == "update" else ("decision", "memory_refs")
+    require_storage_text({key: value.get(key) for key in fields})
     refs = value.get("memory_refs")
     if not isinstance(refs, list) or len(refs) > 64 or any(not isinstance(ref, str) or ref not in allowed_refs for ref in refs):
         raise ValueError("relationship_review_result_refs_invalid")

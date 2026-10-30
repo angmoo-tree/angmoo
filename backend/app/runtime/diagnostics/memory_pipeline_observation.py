@@ -23,7 +23,7 @@ _CODE = re.compile(r"[A-Za-z0-9_./:@+\-]{1,240}\Z")
 TEXT = frozenset({"world_id", "actor_id", "run_id", "receipt_id", "item_id", "content_hash", "profile", "generation",
     "batch_id", "logical_id", "attempt_id", "span_id", "parent_span_id", "queue_id", "task_id", "operation", "writer",
     "database_id", "purpose", "reason", "outcome", "boundary", "transport", "endpoint", "event", "occurred_at",
-    "credential_alias", "result", "stage", "sqlite_name"})
+    "credential_alias", "result", "stage", "sqlite_name", "sqlstate"})
 NUMBERS = frozenset({"monotonic_ns", "version", "receipt_sequence", "cursor", "cutoff", "byte_size", "input_count",
     "response_count", "dimension", "status_code", "credential_revision", "desired_revision", "applied_revision", "change_sequence",
     "group_size", "planned_wait_ms", "attempt", "max_attempts", "acquire_ms", "transaction_ms", "attempt_ms", "total_ms", "retry_delay_ms",
@@ -136,7 +136,7 @@ class MemoryPipelineObserver:
                 return
             if actor is None:
                 # Competing writers carry timing only; unscoped memory does not.
-                if value.get("event") not in {"sqlite", "sqlite_attempt", "queue", "stage", "wait"}:
+                if value.get("event") not in {"sqlite", "sqlite_attempt", "postgresql", "postgresql_attempt", "queue", "stage", "wait"}:
                     return
                 database = value.get("database_id")
                 if database and database != manifest["database_id"]:
@@ -219,7 +219,7 @@ class MemoryPipelineObserver:
         health.update(schema=CAPABILITY, process_instance_id=self.process_id, session_id=manifest["session_id"],
             heartbeat_at=datetime.now(UTC).isoformat(), queued=self.queue.qsize(), source_digest=self.source_digest,
             transport_support=["google-genai-2.17-httpx-public-hooks"], unsupported_transports=["aiohttp", "other_providers"],
-            writer_support="bounded_sqlite_helpers_vec1_fts", writer_coverage="partial_plain_session_and_external_processes_unobserved")
+            writer_support="bounded_sqlite_and_postgresql_helpers", writer_coverage="partial_plain_session_and_external_processes_unobserved")
         try:
             atomic_json(session_path(self.root, manifest["session_id"]) / "memory-pipeline" / f"health-{self.process_id}.json", health)
         except OSError:

@@ -26,7 +26,8 @@ def fixture(db):
         return {}
     lane = CombinedFeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(),
         hybrid_service=None, guard=guard, ledger=RecoveryLedger(db, ctx.run_id))
-    state = {"identity": {"activity_id": ctx.run_id, "contract_version": 2}, "shared_context": {}}
+    state = {"identity": {"activity_id": ctx.run_id, "contract_version": 2,
+        "world_id": actor.world_id, "actor_id": actor.id}, "shared_context": {}}
     return lane, state, run, post
 
 
@@ -78,6 +79,8 @@ def test_writer_only_repair_preserves_decision_and_durable_budget(monkeypatch):
             requests = []
             async def generate(**kwargs):
                 requests.append(kwargs)
+                from types import SimpleNamespace
+                kwargs['on_request_submission'](SimpleNamespace(user_prompt=kwargs['user_prompt']))
                 return kwargs["validator"]({"replies": [{"task_id": "canonical-p", "body": "힘내세요!"}]})
             monkeypatch.setattr(transport, "generate_json", generate)
             monkeypatch.setattr(transport, "_api_key", lambda _: "synthetic")

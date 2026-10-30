@@ -1,5 +1,7 @@
 # L3-ER7 typed embedded runtime composition
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 ER7 promotes the embedded runtime proven by the Windows installer work to the
 single official local architecture. Runtime selection is explicit and
 fail-closed:

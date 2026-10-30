@@ -42,10 +42,10 @@ def test_detail_owner_off_and_receipt_only_revalidates_delivered_material(respon
     db.get(MessageMessage, done.committed_assistant_message_id).content = "나중에 수정된 답변"
     db.flush()
     summary, changed = episode_receipt_view(db, scope, item_id, now, receipt)
-    assert changed["partial"]
-    assert any(s["status"] == "changed" for u in changed["units"] for s in u["sources"])
+    assert not changed["partial"]
+    assert all(s["status"] == "verified" for u in changed["units"] for s in u["sources"])
     assert "나중에 수정된 답변" not in json.dumps(changed, ensure_ascii=False)
-    assert changed["units"][0]["thought"]["status"] == "invalid"
+    assert changed["units"][0]["thought"]["status"] == "recorded"
 
 
 def test_public_sns_never_uses_private_chat_episode(response_session):

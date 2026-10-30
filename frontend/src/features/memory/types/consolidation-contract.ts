@@ -3,14 +3,18 @@ export type ConsolidationProgress = {
   request_id: string; effective_request_id: string; kind: string; accepted_at: string;
   state: typeof consolidationStates[number]; saved_count: number; remaining_count: number;
   job_count: number; completed_job_count: number; last_code: string | null;
-  workflow_version?: 1; followup?: "relationships"; flow_state?: FlowState;
+  workflow_version?: 2; followup?: "relationships"; flow_state?: FlowState;
+  revision?: number; actions?: MaintenanceAction[]; requires_new_ai_call?: boolean;
   relationship?: { state: string; request_id: string; target_count: number | null; memory_count: number | null;
     completed_count: number; changed_count: number; kept_count: number; excluded_memory_count?: number;
+    failed_count?: number; closed_count?: number;
     projection_pending?: boolean; retryable?: boolean; next_attempt_at?: string | null; wait_reason?: string | null;
     last_code: string | null; completed_at: string | null };
 };
 export const flowStates = ["memory_running", "memory_failed", "memory_only_completed", "relationship_waiting", "relationship_running",
-  "relationship_retry_needed", "relationship_paused", "completed", "no_work", "no_relationship_work"] as const;
+  "relationship_retry_needed", "relationship_paused", "completed", "no_work", "no_relationship_work", "cancelled", "closed"] as const;
+export const maintenanceActions = ["resume_storage", "regenerate_failed", "resume_remaining", "cancel_remaining", "close_without_retry"] as const;
+export type MaintenanceAction = typeof maintenanceActions[number];
 export type FlowState = typeof flowStates[number];
 export type ConsolidationCapability = { relationships: boolean; reason: string | null };
 export type ConsolidationStart = {
@@ -20,5 +24,5 @@ export type ConsolidationStart = {
 export const consolidationActive = (state: ConsolidationProgress["state"]) =>
   ["preparing", "queued", "waiting_for_chat", "ai_running", "applying"].includes(state);
 export const workflowActive = (value: ConsolidationProgress) => value.flow_state
-  ? ["memory_running", "relationship_waiting", "relationship_running", "relationship_retry_needed"].includes(value.flow_state)
+  ? ["memory_running", "relationship_waiting", "relationship_running"].includes(value.flow_state)
   : consolidationActive(value.state);

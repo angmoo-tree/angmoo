@@ -47,9 +47,22 @@ class ReadProgress:
     def phase_end(self, sql_count, completed):
         with self.lock:
             name, started, initial = self.active
-            if len(self.phases) < 2:
-                self.phases.append(CanonicalPhaseReceipt(name, (monotonic()-started)*1000, sql_count-initial, completed))
+            self.phases = self._merge_phase(self.phases,
+                CanonicalPhaseReceipt(name, (monotonic()-started)*1000, sql_count-initial, completed))
             self.active = None
+
+    @staticmethod
+    def _merge_phase(phases, receipt):
+        # Retries retain cumulative cost; completion describes the latest
+        # attempt of that phase. Keep the existing two-stage public contract.
+        rows=list(phases)
+        for index,old in enumerate(rows):
+            if old.stage==receipt.stage:
+                rows[index]=CanonicalPhaseReceipt(old.stage,old.elapsed_ms+receipt.elapsed_ms,
+                    old.sql_count+receipt.sql_count,receipt.completed)
+                return rows
+        if len(rows)<2:rows.append(receipt)
+        return rows
 
     def finish(self, counters):
         with self.lock:
@@ -59,9 +72,10 @@ class ReadProgress:
         with self.lock:
             current = self.ended or monotonic()
             phases = list(self.phases)
-            if self.active is not None and len(phases) < 2:
+            if self.active is not None:
                 name, started, initial = self.active
-                phases.append(CanonicalPhaseReceipt(name, (current-started)*1000, self.counters[0]-initial, False))
+                phases=self._merge_phase(phases,
+                    CanonicalPhaseReceipt(name, (current-started)*1000, self.counters[0]-initial, False))
             started = self.started
             return CanonicalReadReceipt(self.stage,
                 None if started is None else (started-self.submitted)*1000,

@@ -2,6 +2,8 @@
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
+from app.core.activity_transactions import activity_write
+from app.core.async_session import session_call
 
 from app.contracts.activity_thought import THOUGHT_PROMPT, parse_activity_thought
 from app.domains.routine_posts import schemas
@@ -61,6 +63,11 @@ class RoutineLane:
 
     async def guard(self, state):
         await self.scope_guard({**state, "_lane": "routine"})
+        return await session_call(self.ctx.db, lambda: self._guard_sync(state))
+
+    def _guard_sync(self, state):
+        from app.runtime.autonomous_activity.initial_input import assert_integrity
+        assert_integrity(state)
         if state.get("lane_data", {}).get("prepared") and self.prepared is None:
             from app.runtime.autonomous_activity.routine_resume import restore_prepared
             self.prepared = restore_prepared(self.ctx, state["lane_data"]["prepared"], self.tracker)
@@ -76,18 +83,18 @@ class RoutineLane:
                 self.ctx.db.rollback()
                 beat = reclaim_frozen_beat(self.ctx.db, beat_id=beat_id, binding=frozen["beat_binding"],
                     claim_run_id=self.ctx.run_id, now=datetime.now(UTC), claim_expires_at=datetime.now(UTC)+timedelta(minutes=10))
-            if beat.status == "claimed" and beat.claim_run_id == self.ctx.run_id:
-                beat.claim_expires_at = datetime.now(UTC) + timedelta(minutes=10)
-                self.ctx.db.commit()
-            elif beat.status != "succeeded":
-                raise ValueError("routine_claim_lost")
+            def renew_beat():
+                current = self.ctx.db.get(type(beat), beat.id, populate_existing=True)
+                if current.status == "claimed" and current.claim_run_id == self.ctx.run_id:
+                    current.claim_expires_at = datetime.now(UTC) + timedelta(minutes=10)
+                elif current.status != "succeeded":
+                    raise ValueError("routine_claim_lost")
+            activity_write(self.ctx.db, renew_beat)
         if state.get("decision_context") and state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             if self.completed_publication():
                 return {}  # Own effects may have changed the historical input.
-            from app.runtime.autonomous_activity.routine_sources import source_manifest
-            expected = state["decision_context"]
-            if plain(source_manifest(self.ctx, self.prepared)) != expected.get("source_manifest", []):
-                raise ValueError("routine_source_changed")
+            from app.runtime.autonomous_activity.routine_sources import validate_source_access
+            validate_source_access(self.ctx, self.prepared, state.get("lane_data", {}).get("prepared", {}))
             self.validate_relationships(state)
         return {}
 
@@ -132,9 +139,8 @@ class RoutineLane:
         def validate():
             if self.claim_validator is not None:
                 self.claim_validator()
-            from app.runtime.autonomous_activity.routine_sources import source_manifest
-            if plain(source_manifest(self.ctx, self.prepared)) != state.get("decision_context", {}).get("source_manifest", []):
-                raise ValueError("routine_source_changed")
+            from app.runtime.autonomous_activity.routine_sources import validate_source_access
+            validate_source_access(self.ctx, self.prepared, state.get("lane_data", {}).get("prepared", {}))
             self.validate_relationships(state)
         return validate
 
@@ -142,13 +148,31 @@ class RoutineLane:
         from app.config import settings
         if settings.DAILY_PREPARATION_ENABLED:
             from types import SimpleNamespace
-            from app.runtime.daily_preparation import read_preparation
-            status = read_preparation(self.ctx.db, character_id=self.ctx.character.id,
+            from app.runtime.daily_preparation import read_preparation, ensure_preparation
+            args = dict(character_id=self.ctx.character.id,
                 world_id=self.actor.world_id, user=SimpleNamespace(id=self.ctx.user_id), now=self.ctx.run_started_at)
+            status = await session_call(self.ctx.db, lambda: read_preparation(self.ctx.db, **args))
+            if status.plan_state in {"pending", "waiting"}:
+                # A resumed parent can reach this lane without LoadContext.
+                # Preparation owns its Session and idempotent date/request claim;
+                # never restart completed lanes or regenerate a ready plan.
+                from app.core.sqlite_concurrency import require_read_only_session
+                def release_read():
+                    require_read_only_session(self.ctx.db, error_code="routine_preparation_has_pending_writes")
+                    self.ctx.db.rollback()
+                await session_call(self.ctx.db, release_read)
+                # Use the live clock for preparation's provider lease/deadline,
+                # just as a fresh LoadContext does; never freeze it to run start.
+                await ensure_preparation(self.ctx.db, **{key: value for key, value in args.items() if key != "now"})
+                self.ctx.db.expire_all()
+                status = await session_call(self.ctx.db, lambda: read_preparation(self.ctx.db, **args))
             if status.plan_state != "ready":
                 return {"candidates": [], "lane_data": {"skipped": {
                     "status": "deferred", "reason": status.reason_code or "daily_plan_pending",
                     "public_action_count": 0}}}
+        return await session_call(self.ctx.db, lambda: self._load_sync(state))
+
+    def _load_sync(self, state):
         from app.runtime.autonomous_activity.routine_resume import freeze_prepared
         prepared = prepare_routine_activity(self.ctx, tracker=self.tracker, observe_inputs=False, output_policy=self.output_policy)
         if isinstance(prepared, dict):
@@ -165,10 +189,20 @@ class RoutineLane:
         context = prepared.context
         candidate = Candidate(target_id=context.item.id, text=context.item.title + " " + context.item.activity_seed,
             source_ids=[], allowed_actions=["post"])
-        return {"candidates": [candidate.model_dump()], "lane_data": {"prepared": freeze_prepared(prepared, allow_reclaim=state.get("identity", {}).get(RECOVERY_POLICY_KEY) == RECOVERY_REVISION)},
-            "selections": [{"target_id": candidate.target_id}]}
+        frozen = freeze_prepared(prepared, allow_reclaim=state.get("identity", {}).get(RECOVERY_POLICY_KEY) == RECOVERY_REVISION)
+        from app.runtime.autonomous_activity.routine_sources import source_manifest, capture_source_bindings
+        frozen["source_bindings"] = capture_source_bindings(self.ctx, prepared)
+        manifest = plain(source_manifest(self.ctx, prepared))
+        from app.runtime.autonomous_activity.routine_reference import restore
+        prepared.context = restore(prepared.context, frozen["reference_input"])
+        from app.runtime.autonomous_activity.initial_input import seal
+        return seal(state, {"candidates": [candidate.model_dump()], "lane_data": {"prepared": frozen, "_metric_sources": manifest},
+            "selections": [{"target_id": candidate.target_id}]})
 
     async def query(self, state):
+        return await session_call(self.ctx.db, lambda: self._query_sync(state))
+
+    def _query_sync(self, state):
         context = self.prepared.context
         previous = context.previous_post
         from app.domains.characters.service.prompt_persona import request_persona_text
@@ -186,12 +220,15 @@ class RoutineLane:
         refreshed = {}
         if any(value.get("packets") and target not in state.get("memory_validations", {})
                for target, value in state.get("memories", {}).items()):
-            refreshed = split_validation(await self.retriever.selected(
-                activity_id=state["identity"]["activity_id"],
-                targets=state["candidates"], queries=state["queries"]))
+            raise ValueError("activity_initial_memory_input_unavailable")
+        return await session_call(self.ctx.db, lambda: self._context_sync(state, refreshed))
+
+    def _context_sync(self, state, refreshed):
         from app.runtime.autonomous_activity.routine_sources import source_manifest
         from app.runtime.relationships.social_metrics import source_prompt
-        manifest = source_manifest(self.ctx, self.prepared)
+        if "_metric_sources" not in state["lane_data"]:
+            raise ValueError("activity_initial_source_input_unavailable")
+        manifest = state["lane_data"]["_metric_sources"]
         relations, receipts = {}, {}
         for row in manifest:
             if row["target_ref"] not in relations:
@@ -326,6 +363,12 @@ class RoutineLane:
         return {"drafts": [draft], "writer_input_receipts": [receipt]}
 
     async def execute(self, state):
+        # Prepared ORM objects and claim callbacks remain owned by this lane.
+        # Hand the whole finite stage over sequentially and drain on cancel;
+        # neither another Session nor the async caller may use them meanwhile.
+        return await session_call(self.ctx.db, lambda: self._execute_sync(state))
+
+    def _execute_sync(self, state):
         from app.contracts.activity_thought import ActivityThought
         plan = self.validated_plan(state)
         data = dict(state["drafts"][0])
@@ -366,6 +409,9 @@ class RoutineLane:
             relationship_validator=self.effect_relationship_validator(state)))]}
 
     async def settle(self, state):
+        return await session_call(self.ctx.db, lambda: self._settle_sync(state))
+
+    def _settle_sync(self, state):
         from app.runtime.relationships.social_metrics import stage_sources
         from app.runtime.relationships.experience_metrics import apply_pending_metrics
         decision = state["decision"]
@@ -392,7 +438,7 @@ class RoutineLane:
         key = identity_key(state["identity"]["activity_id"], "routine", "decision")
         evidence = "routine_beat:" + self.prepared.beat.id
         evidence_keys = {r["post_id"]: identity_key("post", r["post_id"], r["revision"]) for r in manifest}
-        from app.core.sqlite_concurrency import run_sqlite_session_immediate
+        from app.core.activity_transactions import activity_write
         proposal = StateUpdate.model_validate(decision["state_update"]) if decision["state_update"] else None
         if self.ctx.db.in_transaction():
             self.ctx.db.commit()
@@ -401,12 +447,12 @@ class RoutineLane:
                 self.claim_validator()
             from app.domains.social.models.posts import Post
             from app.domains.routines.models.plans import ActivityBeat
-            from app.runtime.relationships.experience_metrics import post_revision
+            from sqlalchemy import select
             current_keys = {r["post_id"]: evidence_keys[r["post_id"]] for r in manifest
-                if (post := self.ctx.db.get(Post, r["post_id"], populate_existing=True)) is not None
+                if (post := self.ctx.db.execute(select(Post.id, Post.world_id, Post.deleted_at,
+                    Post.report_hidden_at, Post.visibility).where(Post.id == r["post_id"])).first()) is not None
                 and post.world_id == self.actor.world_id and post.deleted_at is None
-                and post.report_hidden_at is None and post.visibility == "public"
-                and post_revision(post) == r["revision"]}
+                and post.report_hidden_at is None and post.visibility == "public"}
             current_beat = self.ctx.db.get(ActivityBeat, self.prepared.beat.id, populate_existing=True)
             beat_evidence = {evidence} if (current_beat is not None
                 and current_beat.world_id == self.actor.world_id
@@ -418,13 +464,14 @@ class RoutineLane:
                 proposal=proposal, judged_at=datetime.fromisoformat(decision["judged_at"]),
                 source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision.get("state_source_refs", [])] or [evidence],
                 valid_source_keys={*beat_evidence, *current_keys.values()})
-        outcome = run_sqlite_session_immediate(self.ctx.db, settle_current_state,
+        outcome = activity_write(self.ctx.db, settle_current_state,
             require_clean=True, observer=write_event("S3"))
         return {"settlement": {"state": outcome}}
 
     async def finalize(self, state):
         if state.get("failure"):
-            self.release_failed(state["failure"].get("reason", "writer_invalid"))
+            await session_call(self.ctx.db,
+                lambda: self.release_failed(state["failure"].get("reason", "writer_invalid")))
         result = (state.get("executions") or [state.get("lane_data", {}).get("skipped", {})])[0]
         return {"result": {"path": "routine", "status": "failed" if state.get("failure") else result.get("status", "no_action"),
             "failure": state.get("failure"),

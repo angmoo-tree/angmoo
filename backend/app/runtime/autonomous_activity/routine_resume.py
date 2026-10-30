@@ -17,6 +17,7 @@ from app.runtime.routine_posts.sqlalchemy_runtime import PreparedRoutine
 
 def freeze_prepared(prepared, *, allow_reclaim=False):
     context = prepared.context
+    from app.runtime.autonomous_activity.routine_reference import capture
     frozen = plain({"refs": {name: getattr(context, name).id if getattr(context, name) else None for name in (
             "world", "membership", "world_character", "profile", "plan", "item", "episode", "previous_beat", "previous_post")},
         "beat_binding": {"episode_id":prepared.beat.episode_id, "idempotency_key":prepared.beat.idempotency_key,
@@ -32,17 +33,20 @@ def freeze_prepared(prepared, *, allow_reclaim=False):
         "eligible_event_count": context.eligible_event_count, "overflow_reason_counts": context.overflow_reason_counts,
         "prompt_comment_chars": context.prompt_comment_chars,
         "output_contract": context.output_contract, "state_schema_version": context.state_schema_version,
-        "thought_policy": context.thought_policy})
+        "thought_policy": context.thought_policy, "reference_input": capture(context)})
     if not allow_reclaim:
         frozen.pop("beat_binding")
     return frozen
 
 
 def restore_prepared(ctx, frozen, tracker):
+    if "reference_input" not in frozen:
+        raise ValueError("routine_initial_input_unavailable")
     models = {"world": World, "membership": WorldMembership, "world_character": WorldCharacter,
         "profile": WorldCommunityProfile, "plan": DailyActivityPlan, "item": DailyActivityPlanItem,
         "episode": ActivityEpisode, "previous_beat": ActivityBeat, "previous_post": Post}
-    records = {key: ctx.db.get(model, frozen["refs"][key], populate_existing=True) if frozen["refs"][key] else None for key, model in models.items()}
+    records = {key: ctx.db.get(model, frozen["refs"][key], populate_existing=True)
+        if frozen["refs"][key] and not key.startswith("previous") else None for key, model in models.items()}
     if any(records[name] is None for name in models if not name.startswith("previous") and (name != "profile" or frozen["refs"].get("profile"))):
         raise ValueError("routine_resume_source_missing")
     actor, world = records["world_character"], records["world"]
@@ -70,6 +74,8 @@ def restore_prepared(ctx, frozen, tracker):
         eligible_event_count=frozen["eligible_event_count"], overflow_reason_counts=frozen["overflow_reason_counts"],
         prompt_comment_chars=frozen["prompt_comment_chars"], common_state=frozen.get("common_state"),
         output_contract=policy.output_contract, state_schema_version=policy.state_schema_version, thought_policy=policy.thought_policy)
+    from app.runtime.autonomous_activity.routine_reference import restore
+    context = restore(context, frozen["reference_input"])
     opening = frozen["opening_claim"]
     opening = OpeningClaim(**{**opening, "expires_at": datetime.fromisoformat(opening["expires_at"])}) if opening else None
     joint = ctx.db.get(JointActivity, frozen["joint_id"]) if frozen["joint_id"] else None

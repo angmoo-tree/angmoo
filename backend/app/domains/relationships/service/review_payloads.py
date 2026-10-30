@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app.core.ids import uuid7_string
 from app.domains.relationships.contracts.daily_review import manifest_digest
 from app.domains.relationships.models.personalization import RelationshipReviewWork
-from app.domains.relationships.policies.daily_review import partition_review_inputs
+from app.domains.relationships.policies.daily_review import partition_review_inputs, prompt_base, prompt_payload, REVIEW_INPUT_POLICY
 
 
 def review_children(db, work_id):
@@ -30,22 +30,22 @@ def verified_result(work):
     return result
 
 def build_payload(db, work):
+    if root_work(db, work).manifest.get("input_policy") != REVIEW_INPUT_POLICY:
+        raise ValueError("relationship_review_input_policy_changed")
     if manifest_digest(work.manifest) != work.manifest_digest:
         raise ValueError("relationship_review_manifest_changed")
     if work.phase == "direct":
-        return {**work.manifest["base"], "memories": work.manifest["memories"]}
+        return prompt_payload({**work.manifest["base"], "memories": work.manifest["memories"]})
     if work.phase == "partial":
-        return work.manifest["payload"]
+        return prompt_payload(work.manifest["payload"])
     children = review_children(db, work.id)
     if not children or any(child.status != "ready" for child in children):
         return None
-    base = work.manifest["base"]
-    source_map = {memory["memory_id"]: memory["source_refs"] for memory in root_work(db, work).manifest["memories"]}
+    base = prompt_base(work.manifest["base"])
     entries = []
     for child in children:
         result = verified_result(child)
-        entries.append({"part_id": child.id, **result, "source_refs": sorted({
-            source for ref in result["memory_refs"] for source in source_map.get(ref, [])})})
+        entries.append({"part_id": child.id, **result})
     parts = partition_review_inputs(base, entries, key="partial_results")
     if len(parts) == 1:
         return parts[0]
@@ -57,7 +57,7 @@ def build_payload(db, work):
         group_ids = {entry["part_id"] for entry in payload["partial_results"]}
         reducer = new_work(db, world_id=work.world_id, actor_id=work.actor_world_character_id,
             target_id=work.target_world_character_id, period_key=work.period_key,
-            part_key=f"reduce-{uuid7_string()}", phase="reduce", manifest={"base": base},
+            part_key=f"reduce-{uuid7_string()}", phase="reduce", manifest={"input_policy": REVIEW_INPUT_POLICY, "base": base},
             view_version=work.expected_view_version, parent_id=work.id)
         for child in children:
             if child.id in group_ids:

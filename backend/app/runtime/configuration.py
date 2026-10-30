@@ -38,6 +38,9 @@ class RuntimeConfigurationError(RuntimeError):
 
 
 class RuntimeProfile(StrEnum):
+    EXPERIMENT_POSTGRESQL = "EXPERIMENT_POSTGRESQL"
+    CONTRIBUTOR_POSTGRESQL = "CONTRIBUTOR_POSTGRESQL"
+    LOCAL_POSTGRESQL = "LOCAL_POSTGRESQL"
     LOCAL_EMBEDDED = "LOCAL_EMBEDDED"
     CONTRIBUTOR_EMBEDDED = "CONTRIBUTOR_EMBEDDED"
     TEST = "TEST"
@@ -65,7 +68,7 @@ class RuntimeConfig:
     profile: RuntimeProfile
     data_paths: RuntimeDataPaths
     generation: str
-    database_url: str
+    database_url: str = field(repr=False)
     app_secret_file: Path
     graph_provider: RuntimeGraphProvider
     graph_database_root: Path | None
@@ -76,6 +79,7 @@ class RuntimeConfig:
     api_docs_enabled: bool = False
     signup_enabled: bool = False
     seed_demo_data: bool = False
+    validation_mode: bool = False
     # An acquired serving-process capability, never an environment preference.
     # Diagnostics and default factories leave it absent and cannot prune DBs.
     serving_retention_owner: ServingRetentionOwner | None = field(
@@ -85,7 +89,13 @@ class RuntimeConfig:
     def __post_init__(self) -> None:
         if not self.generation.strip():
             raise RuntimeConfigurationError("runtime_generation_required")
-        if not self.database_url.startswith("sqlite+pysqlite:///"):
+        if self.profile is RuntimeProfile.EXPERIMENT_POSTGRESQL:
+            from app.runtime.postgresql_experiment import validate_config
+            validate_config(self)
+        elif self.profile in {RuntimeProfile.CONTRIBUTOR_POSTGRESQL, RuntimeProfile.LOCAL_POSTGRESQL}:
+            from app.runtime.postgresql_runtime import validate_config
+            validate_config(self)
+        elif not self.database_url.startswith("sqlite+pysqlite:///"):
             raise RuntimeConfigurationError("embedded_sqlite_required")
         if self.graph_provider is not RuntimeGraphProvider.LADYBUG:
             raise RuntimeConfigurationError("embedded_ladybug_required")
@@ -94,7 +104,7 @@ class RuntimeConfig:
         if self.component_mode is not RuntimeComponentMode.IN_PROCESS:
             raise RuntimeConfigurationError("embedded_components_required")
         if (
-            self.profile is RuntimeProfile.LOCAL_EMBEDDED
+            self.profile in {RuntimeProfile.LOCAL_EMBEDDED, RuntimeProfile.LOCAL_POSTGRESQL}
             and (
                 not self.desktop_launch_token
                 or len(self.desktop_launch_token) < 32
@@ -104,6 +114,8 @@ class RuntimeConfig:
 
     @property
     def database_path(self) -> Path:
+        if self.profile in {RuntimeProfile.EXPERIMENT_POSTGRESQL, RuntimeProfile.CONTRIBUTOR_POSTGRESQL, RuntimeProfile.LOCAL_POSTGRESQL}:
+            raise RuntimeConfigurationError("postgresql_has_no_sqlite_database_path")
         return (
             self.data_paths.canonical
             / "generations"
@@ -169,6 +181,9 @@ def settings_from_runtime_config(
         RuntimeProfile.LOCAL_EMBEDDED: "local",
         RuntimeProfile.CONTRIBUTOR_EMBEDDED: "development",
         RuntimeProfile.TEST: "test",
+        RuntimeProfile.EXPERIMENT_POSTGRESQL: "development",
+        RuntimeProfile.CONTRIBUTOR_POSTGRESQL: "development",
+        RuntimeProfile.LOCAL_POSTGRESQL: "local",
     }[config.profile]
     values.update(
         {
@@ -212,6 +227,7 @@ class RuntimeComposition:
     memory_recall_service: CanonicalRecallService
     memory_hybrid_runtime: MemoryHybridRuntime
     generation_use_pin: object | None = None
+    checkpoint_store: object | None = None
 
     def dispose(self, *, release_pin: bool = True) -> None:
         stop_error = None
@@ -222,6 +238,9 @@ class RuntimeComposition:
                 except BaseException as exc:
                     stop_error = stop_error or exc
         finally:
+            if self.checkpoint_store is not None:
+                from app.runtime.autonomous_activity.postgresql_checkpoints import unregister
+                unregister(self.config.data_paths.root, self.checkpoint_store)
             self.engine.dispose()
             if release_pin and stop_error is None and self.generation_use_pin is not None:
                 self.generation_use_pin.close()
@@ -235,6 +254,9 @@ def compose_runtime(
     base_settings: Settings | None = None,
 ) -> RuntimeComposition:
     runtime_settings = settings_from_runtime_config(config, base=base_settings)
+    if config.profile in {RuntimeProfile.EXPERIMENT_POSTGRESQL, RuntimeProfile.CONTRIBUTOR_POSTGRESQL, RuntimeProfile.LOCAL_POSTGRESQL}:
+        from app.runtime.postgresql_runtime import compose
+        return compose(config, runtime_settings)
     from app.runtime.migrations.canonical_retention import GenerationUsePin
     pin = GenerationUsePin(config.data_paths.root, f"generations/{config.generation}").acquire()
     engine = None

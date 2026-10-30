@@ -1,5 +1,7 @@
 # SNS 고정 관계 입력의 SQLite 원본 재검증 구현·검증 기록
 
+> 역사적 구현·검증 기록이다. 2026-10-29 격리 실험에서 신규 판단의 참고 내용 최신성 정책은 [시작 입력 계약](../operations/initial-reference-inputs.ko.md)으로 변경한다. 아래 당시 결과는 새 정책의 수용 근거로 합산하지 않는다.
+
 - 작업일: 2026-10-04, Asia/Seoul
 - 구현 브랜치: `feat/0.1.0-release-readiness`
 - 시작 HEAD: `7011cfb96c5af9b1265026c52e3ed58fa7d943d7`, 시작 작업 폴더 clean

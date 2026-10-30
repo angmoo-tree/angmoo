@@ -24,3 +24,18 @@ class SqlAlchemySchedulerLeaseRepository(SchedulerLeaseService):
         super().__init__(
             session_factory, installation_reader=read_installation_identity
         )
+
+    def _write(self, operation):
+        with self._session_factory() as db:
+            if db.get_bind().dialect.name != "postgresql":
+                return super()._write(operation)
+            from app.core.postgresql_concurrency import session_transact
+            from app.core.sqlite_concurrency import SqliteRetryPolicy
+            from app.runtime.persistence.lease_operation import current_lease_operation, LeaseOperation
+            context = current_lease_operation() or LeaseOperation("direct", None)
+            return session_transact(db, lambda: operation(db), require_clean=True,
+                retry_policy=context.retry_policy or SqliteRetryPolicy(
+                    max_attempts=12, maximum_elapsed_seconds=2.0,
+                    initial_delay_seconds=.05, maximum_delay_seconds=.2),
+                deadline=context.deadline, observer=context.record,
+                retry_pool_checkout=True)

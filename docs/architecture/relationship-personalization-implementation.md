@@ -1,5 +1,7 @@
 # 관계 개인화: 구현 구조와 검증·운영 인계
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 > **2026-09-22 FP 후속:** Feed가 좋아요와 일반 댓글 메타데이터를 함께 반환한 경우의 제한적 보정을 구현했다.
 > 선택 행동은 보존하고 두 댓글 필드만 정리한 후 기존 검증을 적용한다. 관계 지표는 기존 전달·근거·중복 검증 경로를 유지한다.
 > 생각 ON/OFF·지표 유무를 포함한 raw JSON → 실제 C안 실행 회귀 및 관련 테스트 **118 PASS**.

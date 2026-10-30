@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1.7
+ARG POSTGRES_IMAGE=pgvector/pgvector:0.8.7-pg17-trixie@sha256:7a7e9f22015b67edb4bef5c59daeebcd7e74bfa570df6ce60ae01237c8648a84
+FROM ${POSTGRES_IMAGE} AS runtime
+ARG VCS_REF=unknown
+ARG VERSION=0.1.4
+LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.licenses="GPL-3.0-only AND PostgreSQL"
+COPY --chmod=0555 scripts/docker/postgres-entrypoint.sh /usr/local/bin/angmoo-postgres-entrypoint
+HEALTHCHECK --interval=5s --timeout=5s --start-period=20s --retries=24 CMD pg_isready -U angmoo_owner -d angmoo
+ENTRYPOINT ["/usr/local/bin/angmoo-postgres-entrypoint"]
+CMD ["postgres"]

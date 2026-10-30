@@ -20,6 +20,7 @@ tag="${ANGMOO_CI_IMAGE_TAG:-${short_revision}}"
 project="${ANGMOO_CI_PROJECT:-angmoo-l0-${short_revision}}"
 backend_image="angmoo-backend-ci:${tag}"
 frontend_image="angmoo-frontend-ci:${tag}"
+postgres_image="angmoo-postgres-ci:${tag}"
 report_root="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/angmoo-l0-container-${short_revision}"
 mkdir -p "$report_root"
 
@@ -39,14 +40,17 @@ docker build \
   --tag "$frontend_image" \
   .
 
+docker build --file Dockerfile.postgres --build-arg "VCS_REF=${revision}" --build-arg "VERSION=${version}" --tag "$postgres_image" .
+
 python scripts/ci/check_container_images.py \
   --image "$backend_image" \
   --image "$frontend_image" \
+  --image "$postgres_image" \
   --revision "$revision" \
   --version "$version" \
   --report "$report_root/images.json"
 
-python -m scripts.release.scan --image "$backend_image" --image "$frontend_image" --output "$report_root"
+python -m scripts.release.scan --image "$backend_image" --image "$frontend_image" --image "$postgres_image" --output "$report_root"
 
 ANGMOO_CI_IMAGE_TAG="$tag" python scripts/ci/run_l0_container_smoke.py \
   --tag "$tag" \

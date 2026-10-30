@@ -13,6 +13,7 @@ $desktopRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $repositoryRoot = (Resolve-Path (Join-Path $desktopRoot '..')).Path
 $tauriRoot = Join-Path $desktopRoot 'src-tauri'
 $releaseRoot = Join-Path $tauriRoot 'target\release'
+if ($env:CARGO_TARGET_DIR) { $releaseRoot = Join-Path ([IO.Path]::GetFullPath($env:CARGO_TARGET_DIR)) 'release' }
 if ([string]::IsNullOrWhiteSpace($HostPath)) {
     $HostPath = Join-Path $releaseRoot 'angmoo-desktop.exe'
 }
@@ -109,6 +110,10 @@ $ladybugTarget = Get-IntegerConstant `
     'LADYBUG_PROJECTION_SCHEMA_VERSION'
 $sqliteMinimum = Get-MinimumManifestVersion `
     (Join-Path $repositoryRoot 'backend\app\runtime\migrations\sqlite_versions\manifests')
+$sqliteMinimum = 41
+$sqliteTarget = 41
+$pgManifestPath = Join-Path $tauriRoot 'resources\postgresql\angmoo-resources.json'
+$pgManifestHash = Get-Sha256Hex $pgManifestPath
 # Keep the manifest inventory check even though pre-versioned Ladybug data is
 # intentionally accepted below as a replayable source.
 $null = Get-MinimumManifestVersion `
@@ -126,7 +131,8 @@ $identitySource = @(
     $hostSha256,
     $sidecarSha256,
     "sqlite:$sqliteMinimum-$sqliteTarget->$sqliteTarget",
-    "ladybug:$ladybugMinimum-$ladybugTarget->$ladybugTarget"
+    "ladybug:$ladybugMinimum-$ladybugTarget->$ladybugTarget",
+    "postgresql:5:17:$pgManifestHash"
 ) -join "`n"
 $identityBytes = [System.Text.Encoding]::UTF8.GetBytes($identitySource)
 $identityHasher = [System.Security.Cryptography.SHA256]::Create()
@@ -140,10 +146,16 @@ finally {
 }
 
 $payload = [ordered]@{
-    schema_version = 2
+    schema_version = 3
     product_version = $ProductVersion
     build_commit = $BuildCommit
     payload_generation = $payloadGeneration
+    postgresql = [ordered]@{
+        schema_version = 5
+        server_major = 17
+        source_version = '0.1.3'
+        resources_manifest_sha256 = $pgManifestHash
+    }
     embedded_data = [ordered]@{
         sqlite = [ordered]@{
             minimum_readable_version = $sqliteMinimum

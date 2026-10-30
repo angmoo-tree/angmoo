@@ -370,12 +370,14 @@ def test_not_checked_requires_fresh_access_and_never_bypasses_denial(response_se
     assert historical_read(item, RelationshipCurrentRead(False)).excerpt is None
 
 
-def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(monkeypatch):
+@pytest.mark.parametrize("async_factory", [False, True])
+def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(monkeypatch, async_factory):
     from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
     from app.integrations import direct_llm
     from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, SituationPolicySnapshot, DeliveredSourceEntry
     calls, fragments = [], []
     async def generate(**kwargs):
+        assert len(fragments) == 1
         calls.append(kwargs)
         return direct_llm.DirectLlmResponse(text="", parsed={"text": "알겠어.", "situation_description": "약속을 확인했다."}, usage={}, finish_reason="STOP")
     monkeypatch.setattr(direct_llm, "generate_text", generate)
@@ -388,7 +390,10 @@ def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(mon
             "/latest_user_message/content", "core", 0, "p-world", thread_id="p-thread", delivery_payload_digest=json_digest)
         return DeliveredInputManifest("chat:a", snapshot, json_digest, (source,), "p-thread", version=2)
     binding = RelationshipEvidenceBinding("p-owner", "p-world", "p-thread", "p-responding", "p-requester", "request", "a"*64, "slot", "generation", 1)
-    item = replace(item, situation_manifest_factory=freeze, situation_locale="ko-KR", situation_target="slot",
+    async def freeze_async(payload):
+        await asyncio.sleep(0)
+        return freeze(payload)
+    item = replace(item, situation_manifest_factory=freeze_async if async_factory else freeze, situation_locale="ko-KR", situation_target="slot",
         relationship_delivery_factory=lambda payload, prompt: capture_delivery(binding, item.evidence, None, payload, prompt))
     material = CredentialMaterial("fixture", "google", "gemini-3.1-flash-lite", "fixture", CredentialPurpose.MESSAGE_LLM, "fake")
     result = asyncio.run(DirectLlmCharacterResponseGenerator(material).generate(item))

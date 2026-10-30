@@ -9,7 +9,9 @@ from launcher.termux.payload import digest_file, require
 from scripts.ci.windows_installer_upgrade_coverage import readable_predecessors, verify_reports
 from scripts.release.candidate import write_json
 
-KINDS = {"clean-install", "failure-recovery", "upgrade-first", "upgrade-second"}
+LEGACY_KINDS = {"clean-install", "failure-recovery", "upgrade-first", "upgrade-second"}
+POSTGRESQL_KINDS = {"clean-install", "failure-recovery", "upgrade-013"}
+KINDS = LEGACY_KINDS | POSTGRESQL_KINDS
 
 
 def tested_installer(root: Path) -> dict:
@@ -23,13 +25,20 @@ def tested_installer(root: Path) -> dict:
 
 
 def aggregate(receipts: list[dict], reports: list[dict], *, source: str, run: str, attempt: str) -> dict:
-    require(len(receipts) == 4 and {r.get("kind") for r in receipts} == KINDS, "installer_jobs_missing")
+    require(bool(receipts), "installer_jobs_missing")
+    modern=receipts[0].get('exe',{}).get('name','').startswith('Angmoo_0.1.4_')
+    kinds=POSTGRESQL_KINDS if modern else LEGACY_KINDS
+    require(len(receipts) == len(kinds) and {r.get("kind") for r in receipts} == kinds, "installer_jobs_missing")
     first = receipts[0]
     for receipt in receipts:
         require(receipt.get("schema") == "angmoo-installer-test.v1" and receipt.get("status") == "PASS", "installer_job_failed")
         require((receipt.get("source_sha"), str(receipt.get("run_id")), str(receipt.get("attempt"))) == (source, run, attempt), "installer_receipt_identity_mismatch")
         require(receipt.get("exe") == first["exe"] and receipt.get("artifact_id") == first["artifact_id"], "installer_tested_bytes_differ")
-    coverage = verify_reports(reports, versions=readable_predecessors(), source_sha=source, run_id=run, run_attempt=attempt, profile="full")
+    if modern:
+        from scripts.ci.windows_postgresql_coverage import verify_reports as verify_postgresql
+        coverage=verify_postgresql(reports,source_sha=source,run_id=run,run_attempt=attempt,profile='full')
+    else:
+        coverage = verify_reports(reports, versions=readable_predecessors(), source_sha=source, run_id=run, run_attempt=attempt, profile="full")
     return {"schema": "angmoo-windows-release-validation.v1", "source_sha": source, "run_id": run, "attempt": attempt, "profile": "full", "status": "PASS", "exe": first["exe"], "artifact_id": first["artifact_id"], "coverage": coverage, "jobs": receipts}
 
 
@@ -51,7 +60,8 @@ def main():
         require(args.artifact_id.isdecimal(), "installer_artifact_id_invalid")
         result = {"schema": "angmoo-installer-test.v1", "source_sha": source, "run_id": run, "attempt": attempt, "kind": args.kind, "status": "PASS", "artifact_id": args.artifact_id, "exe": tested_installer(args.root)}
     else:
-        result = aggregate([json.loads(p.read_text()) for p in args.receipts.glob("*.json")], [json.loads(p.read_text(encoding="utf-8-sig")) for p in args.coverage.glob("angmoo-supported-upgrade-*.json")], source=source, run=run, attempt=attempt)
+        reports=list(args.coverage.glob('angmoo-postgresql-*.json')) or list(args.coverage.glob('angmoo-supported-upgrade-*.json'))
+        result = aggregate([json.loads(p.read_text()) for p in args.receipts.glob("*.json")], [json.loads(p.read_text(encoding="utf-8-sig")) for p in reports], source=source, run=run, attempt=attempt)
     write_json(args.output, result)
 
 

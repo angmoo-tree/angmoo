@@ -1,6 +1,12 @@
 # Embedded SNS checkpoints and canonical database generation retention
 
-This policy applies to the backend's embedded runtime. It does not add a settings screen or a separate cleanup server. Its execution boundary is the coordinator, composition, and lifespan shared by the contributor/Docker backend and Windows sidecar.
+In 0.1.4 PostgreSQL owns canonical rows and activity checkpoints. The SNS detail
+retention policy below continues through that store's saver API. The legacy
+SQLite generation policy is retained in its own section; it does not delete
+PostgreSQL data, migration D0/D1 copies, backups or prior installer payloads.
+See [PostgreSQL backup and recovery](../public/postgresql-backup.md).
+
+This policy applies to the backend's local runtime. It does not add a settings screen or a separate cleanup server. Its execution boundary is the coordinator, composition, and lifespan shared by the contributor/Docker backend and Windows sidecar.
 
 ## Detailed SNS records
 
@@ -18,11 +24,11 @@ The default batch is 50. Each cycle allows at most 500 candidates or a 5-second 
 
 For each candidate, commit a short conditional claim in an independent Session and close the canonical transaction. Delete all namespaces and writes for that thread through the public saver API `adelete_thread`, then persist a separate conditional completion marker. A failed or interrupted mark leaves the same cleanup target eligible for the next cycle.
 
-Do not recreate canonical results, usage, effects, or image intent. Defer SQLite busy failures after a bounded wait; cleanup must not stop other characters' schedulers. Backup helpers and maintenance use the same root's OS maintenance lock to prevent overlap.
+Do not recreate canonical results, usage, effects, or image intent. Defer transient PostgreSQL conflicts after bounded whole-transaction retry; cleanup must not stop other characters' schedulers. Backup helpers and maintenance use the same root's OS maintenance lock to prevent overlap.
 
 The 24-hour threshold is not an immediate deletion timer. Records may wait for a periodic cycle or remain longer because of protection or contention. Actual cleanup requires a running backend.
 
-## Automatic database copies
+## Legacy SQLite automatic database copies (0.1.3 and earlier)
 
 Write `generation-retention.json` only when creating a genuinely new clean DB or migration staging generation. Record `canonical-generation-current-previous-v1`, creation ID, exact relative path, schema, immutable migration-manifest digest, and validation/promotion confirmation state.
 
@@ -42,13 +48,13 @@ Database cleanup does not run at 1-hour intervals. It runs at the safe boundary 
 
 Deletion is limited to one verified generation directly under canonical/generations. Reject root/current/previous, symlinks/junctions/reparse points, path escape, open pins, and unknown files. Do not delete WAL/SHM separately from an open database. Atomically record removal intent in runtime outside the generation before deletion so partial removal can be retried. Cleanup failure must not turn a working current generation into startup failure, recloning, or repromotion. This policy does not remove graph/search/media data or manual backups.
 
-## Disabling cleanup and scope of application
+## Cleanup settings and legacy storage-size observations
 
 `SNS_CHECKPOINT_POLICY_ENABLED=false` stops marking newly created activities. It does not remove existing policy markers or the canonical reader.
 
 `SNS_CHECKPOINT_MAINTENANCE_ENABLED=false` stops the detail-deletion task. Completed-result readers and existing metadata remain.
 
-`CANONICAL_GENERATION_RETENTION_ENABLED=false` stops generation deletion at startup. Ownership/use pins and records of newly created generations remain in force.
+`CANONICAL_GENERATION_RETENTION_ENABLED=false` stops legacy SQLite generation deletion at startup. Official PostgreSQL serving does not run SQLite generation retention. Ownership/use pins and records of newly created generations remain in force.
 
 Stop cleanup through these settings before attempting a code downgrade or forced marker changes intended to undo deletion. Deleted details and obsolete copies are not restored automatically.
 

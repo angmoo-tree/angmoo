@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from hashlib import sha256
+from functools import cached_property
 import json
 from typing import Literal
 
@@ -15,10 +16,10 @@ DESCRIPTION_LIMIT = 1000
 DELIVERED_SOURCE_LIMIT = 256
 SITUATION_BASIS_DOCUMENT_MAX_BYTES = 8 * 1024 * 1024
 Lane = Literal["chat", "inbox", "feed", "routine"]
-VALIDATION_REVISION = "situation-validation.v6"
+VALIDATION_REVISION = "situation-validation.v7"
 MANUAL_EVENT_REVISIONS = frozenset({VALIDATION_REVISION})
-LANGUAGE_ELIGIBILITY_REVISIONS = frozenset({"situation-validation.v5", VALIDATION_REVISION})
-PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", "situation-validation.v4", "situation-validation.v5", VALIDATION_REVISION})
+LANGUAGE_ELIGIBILITY_REVISIONS = frozenset({"situation-validation.v5", "situation-validation.v6", VALIDATION_REVISION})
+PARENT_BINDING_REVISIONS = frozenset({"situation-validation.v3", "situation-validation.v4", "situation-validation.v5", "situation-validation.v6", VALIDATION_REVISION})
 LEGACY_VALIDATION_REVISION = "situation-validation.v2"
 SUPPORTED_VALIDATION_REVISIONS = frozenset({LEGACY_VALIDATION_REVISION, *PARENT_BINDING_REVISIONS})
 
@@ -105,6 +106,9 @@ class DeliveredSourceEntry:
     delivered_ranges: tuple[tuple[int, int], ...] = ()
     relationship_basis: RelationshipDeliveryBasis | None = None
     delivery_payload_digest: str | None = None
+    delivered_text: str | None = None
+    source_created_at: str | None = None
+    author_role: str | None = None
 
     def __post_init__(self):
         if (not self.source_type or not self.source_id or not self.payload_path
@@ -124,9 +128,18 @@ class DeliveredSourceEntry:
             raise ValueError("situation_relationship_basis_mismatch")
         if self.delivery_payload_digest is not None and len(self.delivery_payload_digest) != 64:
             raise ValueError("situation_delivery_digest_invalid")
+        if self.delivered_text is not None and (
+                not isinstance(self.delivered_text, str)
+                or sha256(self.delivered_text.encode()).hexdigest() != self.delivered_digest):
+            raise ValueError("situation_snapshot_digest_invalid")
+        if self.source_created_at is not None:
+            datetime.fromisoformat(self.source_created_at)
 
-    def to_dict(self, *, version=2):
+    def to_dict(self, *, version=3):
         value = asdict(self)
+        if version < 3:
+            for field in ("delivered_text", "source_created_at", "author_role"):
+                value.pop(field, None)
         if version == 1:
             value.pop("relationship_basis", None)
             value.pop("delivery_payload_digest", None)
@@ -158,6 +171,9 @@ class SituationSourceBinding:
     def material(self):
         value = asdict(self)
         value.pop("resolution_digest")
+        # Parent binding is a historical v2 protocol. New capture fields must
+        # not change a previously persisted proof's digest.
+        value["resolved_source"] = self.resolved_source.to_dict(version=2)
         return value
 
     def check_integrity(self):
@@ -177,15 +193,21 @@ class DeliveredInputManifest:
 
     def __post_init__(self):
         threads = {row.thread_id for row in self.sources if row.thread_id}
-        if (self.version not in {1, 2} or not self.call_identity or len(self.payload_digest) != 64
+        if (self.version not in {1, 2, 3} or not self.call_identity or len(self.payload_digest) != 64
                 or len(self.sources) > DELIVERED_SOURCE_LIMIT or len(threads) > 1
                 or (threads and threads != {self.private_thread_id})
                 or any(row.world_id != self.snapshot.scope.world_id for row in self.sources)
                 or len({row.ordinal for row in self.sources}) != len(self.sources)):
             raise ValueError("situation_manifest_invalid")
+        if self.version >= 3 and any(source.delivered_text is None for source in self.sources):
+            raise ValueError("situation_snapshot_text_required")
 
     def to_dict(self) -> dict:
         value = asdict(self)
+        if self.version < 3:
+            for source in value["sources"]:
+                for field in ("delivered_text", "source_created_at", "author_role"):
+                    source.pop(field, None)
         if self.version == 1:
             for source in value["sources"]:
                 source.pop("relationship_basis", None)
@@ -227,7 +249,7 @@ class SituationValidationContext:
     def snapshot(self):
         return self.manifest.snapshot
 
-    @property
+    @cached_property
     def sources(self):
         replacements = {binding.entry_ordinal: binding.resolved_source for binding in self.source_bindings}
         return tuple(replacements.get(entry.ordinal, entry) for entry in self.manifest.sources)
@@ -241,21 +263,27 @@ class SituationValidationContext:
         return self.manifest.version
 
     def proof_for(self, source):
+        return self._proofs.get(source)
+
+    @cached_property
+    def _proofs(self):
+        # These frozen values describe persisted delivery only, never current
+        # permissions or source contents. A replaced context builds fresh maps.
+        # Preserve binding > delivered input > committed result precedence,
+        # including an invalid v2 input that must not fall through to a result.
+        proofs = {}
         for binding in self.source_bindings:
-            if binding.resolved_source == source:
-                return DeliveredObservationProof(self.receipt_sequence, self.manifest_digest,
-                    source, "situation_source_binding")
+            source = binding.resolved_source
+            proofs.setdefault(source, DeliveredObservationProof(self.receipt_sequence,
+                self.manifest_digest, source, "situation_source_binding"))
         for entry in self.sources:
-            if entry == source:
-                if self.version == 2 and entry.delivery_payload_digest != self.manifest.payload_digest:
-                    return None
-                return DeliveredObservationProof(self.receipt_sequence, self.manifest_digest,
-                    entry, "situation_delivered")
+            proof = None if self.version >= 2 and entry.delivery_payload_digest != self.manifest.payload_digest else (
+                DeliveredObservationProof(self.receipt_sequence, self.manifest_digest, entry, "situation_delivered"))
+            proofs.setdefault(entry, proof)
         for entry in self.result_sources:
-            if entry == source:
-                return DeliveredObservationProof(self.receipt_sequence, self.manifest_digest,
-                    entry, "committed_result")
-        return None
+            proofs.setdefault(entry, DeliveredObservationProof(self.receipt_sequence,
+                self.manifest_digest, entry, "committed_result"))
+        return proofs
 
 
 @dataclass(frozen=True)
@@ -279,6 +307,9 @@ class CommittedActivityResult:
     counterpart_id: str | None = None
     thought_reference: str | None = None
     result_sources: tuple[DeliveredSourceEntry, ...] = ()
+    thought: dict | None = None
+    experience_state: str = "action_succeeded"
+    failure_reason: str | None = None
 
     def __post_init__(self):
         if (not self.logical_activity_id or not self.target_key
@@ -286,9 +317,17 @@ class CommittedActivityResult:
                 or self.occurred_at.tzinfo is None
                 or len(self.planned_output_digest) != 64 or len(self.final_output_digest) != 64):
             raise ValueError("situation_result_invalid")
+        if self.thought is not None:
+            from app.contracts.activity_thought import ActivityThought
+            ActivityThought(**self.thought)
+        if self.experience_state not in {"action_succeeded","observed_action_failed"}:
+            raise ValueError("situation_experience_state_invalid")
 
     @property
     def eligibility_code(self) -> str | None:
+        if self.experience_state == "observed_action_failed":
+            allowed={"feed_target_stale","activity_source_changed","feed_affordance_changed","feed_claim_changed"}
+            return None if self.planned_effects and not self.effects and self.failure_reason in allowed else "situation_failure_binding_invalid"
         if not self.planned_effects:
             return "situation_no_action"
         if any(effect.status == "unknown" for effect in self.effects):

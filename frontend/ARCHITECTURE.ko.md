@@ -473,7 +473,7 @@ Playwright의 `Page`·`Route`나 Node 서버에 종속된 fixture는 해당 실�
 
 ### 개발 환경과 관련 검사
 
-환경 설치와 공식 실행 절차는 [한국어 기여 안내](../CONTRIBUTING.ko.md)가 소유한다. 공식 기여 환경은 Docker Compose의 Next dev와 FastAPI 두 서비스이며, Windows native 창 확인은 [Host Tauri 개발 안내](../docs/public/windows-host-tauri-dev.md)의 wrapper를 사용한다. 설치형 sidecar 실행과 개발용 Docker backend를 섞지 않는다.
+환경 설치와 공식 실행 절차는 [한국어 기여 안내](../CONTRIBUTING.ko.md)가 소유한다. 공식 기여 환경은 Docker Compose의 PostgreSQL·FastAPI·Next dev 세 서비스이며, Windows native 창 확인은 [Host Tauri 개발 안내](../docs/public/windows-host-tauri-dev.md)의 wrapper를 사용한다. 설치형 sidecar 실행과 개발용 Docker backend를 섞지 않는다.
 
 저장소 root에서 공식 개발 환경의 프론트엔드 검사는 다음과 같이 실행한다.
 

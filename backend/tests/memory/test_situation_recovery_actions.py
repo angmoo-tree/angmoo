@@ -171,7 +171,7 @@ def test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit
     assert first.state == "applied" and second.state == "blocked"
 
 
-def test_recheck_failure_stays_blocked_with_revision_and_specific_reason(durable_stack):
+def test_legacy_recheck_preserves_summary_when_original_has_changed(durable_stack):
     db, scope, setting, memory = durable_stack
     post = real_source(db, scope)
     row, *_ = blocked(db, scope, post, 1)
@@ -179,10 +179,10 @@ def test_recheck_failure_stays_blocked_with_revision_and_specific_reason(durable
     db.commit()
     request = recheck(db, setting, row=row)
     consume(db, memory, request)
-    assert row.state == "blocked" and row.error_code == "situation_source_changed" and row.state_version == 2
-    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
-    assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == "rejected"
-    assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1
+    assert row.state == "applied" and row.error_code is None and row.state_version == 2
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
+    assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == "applied"
+    assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 0
 
 
 @pytest.mark.parametrize("change", ["owner_deleted", "world_archived", "subject_inactive"])
@@ -234,14 +234,16 @@ def test_recheck_does_not_rewrite_the_completed_original_save(durable_stack):
     consume(db, memory, first)
     old_run = db.get(MemorySituationApplyRun, first.run_id)
     before = (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at)
-    assert row.state == "blocked" and old_run.blocked_count == 1
+    assert row.state == "applied" and old_run.blocked_count == 0
     post.body = original_body; db.commit()
-    retry = recheck(db, setting, row=row)
-    consume(db, memory, retry)
+    with pytest.raises(MemoryConflictError,match="situation_receipt_version_conflict"):
+        recheck(db, setting, row=row)
+    db.rollback()
     assert row.state == "applied"
     db.refresh(old_run)
     assert (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at) == before
-    assert db.scalar(select(MemorySituationRecheckAttempt)).previous_run_id == first.run_id
+    assert db.scalar(select(MemorySituationRecheckAttempt)) is None
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
 
 
 def test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory(durable_stack):

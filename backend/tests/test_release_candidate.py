@@ -321,7 +321,7 @@ def test_oci_rejects_valid_attestation_for_another_execution_image(tmp_path):
 
 def test_p5_requires_exact_images_windows_and_concrete_user_check():
     from scripts.release.prepare import validate_p5
-    manifest = {"source_sha": SOURCE, "images": [{"service": s, "platform": p, "manifest_digest": "sha256:" + str(i) * 64} for i, (s, p) in enumerate(( (s, p) for s in ("backend", "frontend") for p in ("linux/amd64", "linux/arm64")))]}
+    manifest = {"version":"0.1.0", "source_sha": SOURCE, "images": [{"service": s, "platform": p, "manifest_digest": "sha256:" + str(i) * 64} for i, (s, p) in enumerate(( (s, p) for s in ("backend", "frontend") for p in ("linux/amd64", "linux/arm64")))]}
     windows = {"exe": {"sha256": "sha256:" + "a" * 64}, "run_id": "1", "attempt": "2"}
     report = {"schema": "angmoo-p5.v1", "source_sha": SOURCE, "windows": {"sha256": windows["exe"]["sha256"], "run_id": "1", "attempt": "2"}, "images": {i["service"] + "/" + i["platform"]: i["manifest_digest"] for i in manifest["images"]}, "checks": [{"workflow": f, "run_id": str(n), "attempt": "1"} for n, f in enumerate(("ci.yml", "local-smoke.yml", "security.yml"))], "windows_user_check": {"result": "PASS", "reviewer": "jingujeon", "exe_sha256": windows["exe"]["sha256"], "evidence": "Verified exact synthetic EXE in an isolated test", "checked_at": "2026-10-18T12:00:00Z"}, "android_support": "experimental-not-certified"}
     calls = []

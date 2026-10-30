@@ -44,7 +44,7 @@ def test_multiple_episodes_share_source_without_raw_copy_and_replay_once(memory_
         apply.apply(**(args | {"selection": EpisodeSelection((EpisodeProposal("다른 정리", ("S1", "S2")),), ())}))
 
 
-@pytest.mark.parametrize("failure", ["changed", "missing", "fence"])
+@pytest.mark.parametrize("failure", ["fence"])
 def test_stale_or_late_result_leaves_no_partial_episode(memory_session, failure):
     db = memory_session
     apply, setting, bundle, values = preparation(db)

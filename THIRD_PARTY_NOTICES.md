@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (77)
+## Python packages (81)
 
 - `aiosqlite 0.22.1` — OSI Approved :: MIT License
 - `alembic 1.19.0` — MIT
@@ -37,6 +37,7 @@ Package authors retain all rights granted by their respective licenses.
 - `langcodes 3.5.1` — OSI Approved :: MIT License
 - `langgraph 1.2.13` — MIT
 - `langgraph-checkpoint 4.3.0` — MIT
+- `langgraph-checkpoint-postgres 3.2.0` — MIT
 - `langgraph-checkpoint-sqlite 3.1.2` — MIT
 - `langgraph-prebuilt 1.1.0` — MIT
 - `langgraph-sdk 0.4.4` — MIT
@@ -47,9 +48,12 @@ Package authors retain all rights granted by their respective licenses.
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
-- `pgvector 0.5.0` — MIT
+- `pgvector 0.5.1` — MIT
 - `pillow 13.0.0` — MIT-CMU
 - `pluggy 1.6.0` — MIT
+- `psycopg 3.3.6` — LGPL-3.0-only
+- `psycopg-binary 3.3.6` — LGPL-3.0-only
+- `psycopg-pool 3.3.3` — LGPL-3.0-only
 - `pyasn1 0.6.4` — BSD-2-Clause
 - `pyasn1-modules 0.4.2` — BSD
 - `pycparser 3.0` — BSD-3-Clause
@@ -196,6 +200,39 @@ Package authors retain all rights granted by their respective licenses.
   - Preserve upstream license and copyright notices.
   - Keep MPL-covered file modifications available under MPL-2.0 if modified.
 
+### `python/psycopg 3.3.6`
+
+- Reported license: `LGPL-3.0-only`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.
+- Upstream license source: <https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c>
+- Recorded obligations:
+  - Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.
+  - Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.
+  - Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md.
+
+### `python/psycopg-binary 3.3.6`
+
+- Reported license: `LGPL-3.0-only`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.
+- Upstream license source: <https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c>
+- Recorded obligations:
+  - Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.
+  - Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.
+  - Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md.
+
+### `python/psycopg-pool 3.3.3`
+
+- Reported license: `LGPL-3.0-only`
+- Normalized license: `LGPL-3.0-only`
+- Distribution boundary: Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.
+- Upstream license source: <https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c>
+- Recorded obligations:
+  - Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.
+  - Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.
+  - Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md.
+
 ## Infrastructure and build tooling
 
 These services and CI tools are separate components and retain their own licenses.
@@ -210,6 +247,9 @@ These services and CI tools are separate components and retain their own license
 - **Syft SBOM generator** — `Apache-2.0`; reference `anchore/syft:v1.51.0@sha256:678bfa565b60f747aac0f8e964fe5588a24445b8d0a480e91f6efd70020dfbb0`; source <https://github.com/anchore/syft/blob/v1.51.0/LICENSE>
 - **Skopeo** — `Apache-2.0`; reference `quay.io/skopeo/stable:v1.22.0@sha256:06dd47ee861e143268f0b811cdf1f9d6509b097945de447dbcdfb668ca15364c`; source <https://github.com/containers/skopeo/blob/v1.22.0/LICENSE>
 - **PRoot-Distro** — `GPL-3.0-only`; reference `proot-distro==5.10.0`; source <https://github.com/termux/proot-distro/blob/v5.10.0/LICENSE>
+- **PostgreSQL Windows native server** — `PostgreSQL`; reference `"postgresql": "17.11"`; source <https://www.postgresql.org/about/licence/>
+- **pgvector native extension** — `PostgreSQL`; reference `"pgvector": "0.8.7"`; source <https://github.com/pgvector/pgvector/blob/v0.8.7/LICENSE>
+- **PRoot Termux private host helper recipe** — `GPL-2.0-or-later`; reference `VERSION='5.1.107.101'`; source <https://github.com/termux/proot/tree/v5.1.107.101>
 - **actions/checkout** — `MIT`; reference `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`; source <https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE>
 - **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7`; source <https://github.com/astral-sh/setup-uv/blob/c18668ad3cf93ea998bef934396af7bb5c839dc7/LICENSE>
 - **actions/setup-node** — `MIT`; reference `actions/setup-node@820762786026740c76f36085b0efc47a31fe5020`; source <https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE>

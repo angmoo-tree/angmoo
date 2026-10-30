@@ -927,6 +927,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
     async def _complete_without_provider(
         agent_id: str,
         *,
+        session_factory,
         post_id: str | None,
         timeout_seconds: int,
         message: str | None,
@@ -934,7 +935,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
     ) -> routine_schemas_runs.OpenClawAgentRunRead:
         del post_id, timeout_seconds, message
         starts.append((agent_id, start_delay_seconds))
-        with factory() as run_db:
+        with session_factory() as run_db:
             slot = run_db.get(models.AgentSlot, agent_id)
             assert slot is not None
             assert slot.status == agent_run_crud.SLOT_STATUS_RUNNING
@@ -1084,14 +1085,15 @@ def test_tick_resident_slots_staggers_claimed_runs(
     class _Slot:
         def __init__(self, agent_id: str) -> None:
             self.agent_id = agent_id
+            self.locked_by_run_id = 'pending:'+agent_id+':1'
 
     claimed = [_Slot("angmoo-1"), _Slot("angmoo-2"), _Slot("angmoo-3")]
     leases: list[int] = []
     starts: list[tuple[str, int]] = []
 
-    class _Db:
-        def expire_all(self) -> None:
-            return None
+    from sqlalchemy import text
+    engine = create_engine("sqlite:///:memory:")
+    scheduler_db = Session(engine)
 
     monkeypatch.setattr(settings, "RESIDENT_TICK_BATCH_START_SPACING_SECONDS", 10)
     monkeypatch.setattr(
@@ -1113,17 +1115,22 @@ def test_tick_resident_slots_staggers_claimed_runs(
     )
 
     def _claim(db, *, now, max_count, lease_seconds, allowed_character_ids, single_flight):
+        db.scalar(text("SELECT 1"))  # ORM refresh leaves this read transaction open.
         leases.append(lease_seconds)
         return claimed[:max_count]
 
     async def _fake_run(
         agent_id: str,
         *,
+        session_factory,
         post_id: str | None,
         timeout_seconds: int,
         message: str | None,
         start_delay_seconds: int = 0,
     ) -> routine_schemas_runs.OpenClawAgentRunRead:
+        assert not scheduler_db.in_transaction()
+        with session_factory() as child_db:
+            assert child_db.get_bind() is scheduler_db.get_bind()
         starts.append((agent_id, start_delay_seconds))
         return routine_schemas_runs.OpenClawAgentRunRead(
             run_id=f"run-{agent_id}",
@@ -1142,7 +1149,7 @@ def test_tick_resident_slots_staggers_claimed_runs(
 
     result = asyncio.run(
         agent_run_service.tick_resident_slots(
-            _Db(),
+            scheduler_db,
             routine_schemas_runs.ResidentSlotTickCreate(max_runs=5, timeout_seconds=100),
         )
     )
@@ -1154,6 +1161,8 @@ def test_tick_resident_slots_staggers_claimed_runs(
         ("angmoo-3", 20),
     ]
     assert leases == [100 + 90 + 40]
+    scheduler_db.close()
+    engine.dispose()
 
 
 def test_resident_scheduler_tick_runner_uses_configured_global_tick(
@@ -3133,8 +3142,10 @@ def test_run_now_manual_slot_does_not_preserve_previous_next_tick() -> None:
     assert "manual_next_tick_at = slot.next_tick_at if require_public_action else None" not in source
 
 
+@pytest.mark.parametrize('activity_engine', ['openclaw', 'langgraph'])
 def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
     monkeypatch: pytest.MonkeyPatch,
+    activity_engine: str,
 ) -> None:
     engine = create_engine("sqlite:///:memory:")
     _create_autonomy_capacity_tables(engine)
@@ -3197,6 +3208,31 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
         lambda *_args, **_kwargs: "",
     )
 
+    monkeypatch.setattr(settings, 'AGENT_ACTIVITY_ENGINE', activity_engine)
+    if activity_engine == 'langgraph':
+        from app.domains.memory.models.daypart import AgentDaypartMemoryEvent
+        AgentDaypartMemoryEvent.__table__.create(engine)
+        def unused_legacy_prompt(*args, **kwargs):
+            raise AssertionError('graph must build its own scoped context, not legacy prompts')
+        for name in ('_format_inbox_threads', '_format_recent_feed_sections',
+                     '_format_recent_own_posts_to_avoid', '_format_recent_activity_summary',
+                     '_format_relationship_review_candidate', '_format_social_connection_candidate',
+                     '_format_strong_social_connection_candidate', '_should_allow_resident_thread_tool'):
+            monkeypatch.setattr(agent_run_service, name, unused_legacy_prompt)
+        monkeypatch.setattr(agent_run_service.activity_profile_readiness, 'evaluate',
+            lambda *args, **kwargs: SimpleNamespace(ready=True))
+        monkeypatch.setattr(agent_run_service.agent_activity_policy, 'build_activity_policy',
+            lambda *args, **kwargs: SimpleNamespace(should_skip_llm=False))
+        monkeypatch.setattr(agent_run_service, 'current_social_search',
+            lambda: SimpleNamespace(index=object(), state=object()))
+        async def cancel_graph(ctx):
+            assert ctx.character.id == 'char-cancel'
+            assert ctx.activity_policy.should_skip_llm is False
+            assert ctx.run_id and ctx.user_id == 'user-1'
+            cancellation_calls.append('provider_setup')
+            raise asyncio.CancelledError
+        monkeypatch.setattr(agent_run_service, 'run_social_activity', cancel_graph)
+
     with Session(engine) as db:
         _add_capacity_user(db)
         _add_capacity_agent(
@@ -3222,6 +3258,7 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
                     post_id=None,
                     timeout_seconds=30,
                     message="shutdown cancellation fixture",
+                    enforce_activity_policy=activity_engine == 'langgraph',
                 )
             )
         assert cancellation_calls == ["provider_setup"]

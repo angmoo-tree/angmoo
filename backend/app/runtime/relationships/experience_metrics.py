@@ -4,7 +4,7 @@ from dataclasses import replace
 from datetime import UTC, datetime
 from hashlib import sha256
 from sqlalchemy import select
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.activity_transactions import activity_write
 
 from app.domains.chat.models import ChatResponseRequest, MessageMessage, MessageThread
 from app.domains.world_characters.models import WorldCharacter
@@ -55,10 +55,10 @@ class RuntimeExperienceReferences:
             if target.control_mode != "owner_controlled" or target.owner_user_id != thread.requester_id:
                 raise ValueError("relationship_chat_persona_invalid")
         elif source.kind == "post":
-            post = self.db.get(Post, source.key)
+            post = self.db.execute(select(Post.id, Post.world_id, Post.author_world_character_id,
+                Post.deleted_at, Post.report_hidden_at, Post.visibility).where(Post.id == source.key)).first()
             if (post is None or post.world_id != source.world_id or post.author_world_character_id != source.target_id
-                or post.deleted_at is not None or post.report_hidden_at is not None or post.visibility != "public"
-                or post_revision(post) != source.revision):
+                or post.deleted_at is not None or post.report_hidden_at is not None or post.visibility != "public"):
                 raise ValueError("relationship_post_source_invalid")
             if self.confirmed_posts.get(source.key) != source.revision:
                 # The persistent application was staged only after the runtime
@@ -106,7 +106,7 @@ def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None,
     if db.in_transaction():
         db.commit()
     frozen_keys = None if source_keys is None else tuple(source_keys)
-    return run_sqlite_session_immediate(db, lambda: _apply_pending_in_transaction(db,
+    return activity_write(db, lambda: _apply_pending_in_transaction(db,
         world_id=world_id, actor_id=actor_id, source_kind=source_kind,
         decision_key=decision_key, source_keys=frozen_keys, limit=limit),
         require_clean=True, observer=write_observer)

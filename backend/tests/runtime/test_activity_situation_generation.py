@@ -24,6 +24,8 @@ def test_combined_existing_call_preserves_base_with_bad_description(monkeypatch,
             calls = []
             async def generate(**kwargs):
                 calls.append(kwargs)
+                from types import SimpleNamespace
+                kwargs["on_request_submission"](SimpleNamespace(user_prompt=kwargs["user_prompt"]))
                 schema = kwargs["response_schema"]
                 assert list(schema["properties"])[-1] == "situations"
                 payload = {"decision": {"decisions": [{"target_id": post.id, "action": "like", "brief": "공감"}],
@@ -66,6 +68,8 @@ def test_separate_or_recovery_writer_owns_final_description_and_manifest(monkeyp
             calls = []
             async def generate(**kwargs):
                 calls.append(kwargs)
+                from types import SimpleNamespace
+                kwargs["on_request_submission"](SimpleNamespace(user_prompt=kwargs["user_prompt"]))
                 assert list(kwargs["response_schema"]["properties"])[-1] == "situations"
                 return kwargs["validator"]({"replies": [{"task_id": state["assignments"][0]["task_id"], "body": "오늘도 좋은 하루 보내세요."}],
                     "situations": [{"target_id": post.id, "description": "안부에 답글을 남기며 응원했다."}]})

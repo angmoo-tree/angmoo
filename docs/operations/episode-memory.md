@@ -1,5 +1,7 @@
 # 상황·원문·생각 기억의 전환과 복귀
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 2026-09-16: 사용자 승인으로 상황·원문·생각 기억을 기본값으로 채택했다. 생각은 thought_v1, 정리·검색은 episode_v1이 기본이다. 기존 하이브리드 검색(social_hybrid, group_or_v1, Vec1 flat, RRF)과 관계 맥락 기본은 유지한다. 2026-09-17 후속 F1~F4는 사용자 수용 기준 PASS로 확정했다. 기존 품질 이슈·미측정·후속 테스트 기록은 유지하며 CI/main/native 설치판 USER CHECK는 별도다.
 
 ## 정책과 저장

@@ -141,7 +141,7 @@ class HostTests(unittest.TestCase):
                     process.wait(timeout=5)
                     raise ValueError("service_exited_before_ready")
             try:
-                with angmoo.lock(home) as owned, patch.object(angmoo, "installation", return_value={"manifest": {"source_sha": "a"*40, "version": "0.1.0"}}), patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "free_port"), patch.object(angmoo, "command", side_effect=command), patch.object(angmoo, "await_ready", side_effect=readiness):
+                with angmoo.lock(home) as owned, patch.object(angmoo, "installation", return_value={"manifest": {"source_sha": "a"*40, "version": "0.1.0"},"containers":{"backend":"fixture-backend","frontend":"fixture-frontend"}}), patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "free_port"), patch.object(angmoo, "command", side_effect=command), patch.object(angmoo, "await_ready", side_effect=readiness):
                     angmoo.supervise(home, os.dup(owned.fileno()), "b" * 32)
                 state = angmoo.read_state(home)
                 self.assertEqual(state["state"], "failed")
@@ -167,7 +167,7 @@ class HostTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "manifest_source_invalid"):
                     angmoo.install(home, None, home / "candidate.json")
             pair = [{"platform": "linux/arm64", "archive_size": 100}] * 2
-            with patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "read_manifest", return_value={"images": pair}), patch.object(angmoo.shutil, "disk_usage", return_value=type("Disk", (), {"free": 0})()), patch.object(angmoo.subprocess, "run") as run:
+            with patch.object(angmoo, "tools", return_value="proot-distro"), patch.object(angmoo, "read_manifest", return_value={"version":"0.1.3","images": pair}), patch.object(angmoo.shutil, "disk_usage", return_value=type("Disk", (), {"free": 0})()), patch.object(angmoo.subprocess, "run") as run:
                 with self.assertRaisesRegex(ValueError, "disk_space_low"):
                     angmoo.install(home, None, home / "candidate.json")
                 run.assert_not_called()

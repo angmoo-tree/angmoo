@@ -1,174 +1,76 @@
-# Termux에서 ARM64 배포물 실험 실행
+# ARM64 Termux / PRoot로 Angmoo 실행하기
 
-**검증한 ARM64 backend·frontend 이미지와 같은 배포물**을 재사용합니다.
-Android에서 Docker를 실행하는 방식은 아닙니다. PRoot-Distro가 두 OCI
-파일시스템을 각각 가져와 backend의 Debian/Python과 frontend의 Debian/Node를
-유지합니다. 기존 앱 진입점을 실행하며 앱 라이브러리 재설치, 이미지 수정,
-포트·환경 파일 수동 편집을 요구하지 않습니다.
+[English](termux.md) | 한국어
 
-**대상 버전:** 이 안내는 0.1.3용입니다.
-[Angmoo 0.1.3](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3)이
-공개된 뒤 해당 다운로드를 사용하세요. 공개 전에는
-[기존 0.1.2 설치 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.2/docs/public/termux.ko.md)를 따르세요.
-Android는 계속 실험 지원입니다. Linux ARM64·QEMU 검사는 실제 휴대폰의
-전원 관리·백그라운드 실행·성능 인증이 아닙니다.
+0.1.4는 검증된 ARM64 frontend·backend·PostgreSQL 세 이미지의 파일시스템을
+PRoot로 실행합니다. 휴대폰에 Docker daemon은 필요하지 않습니다. 아래 배포물은
+정식 공개 후 사용할 수 있습니다. Android 지원은 실험적이며 Linux·QEMU 통과가
+화면 꺼짐·절전 중 실행을 보장하지 않습니다. 기존 Samsung Android 14 관측에서는
+wake lock과 배터리 최적화 제외 상태에서도 자식 프로세스가 종료됐습니다.
 
-시험한 Samsung Android 14 기기에서는 partial wake-lock과 배터리 최적화
-제외를 적용한 상태에서도 화면 꺼짐 중 시스템이 Termux 자식 프로세스를
-종료했습니다. 해당 설정만으로 지속 실행을 보장하지 않습니다. 특정 기기의
-관측 결과이며 모든 Android에 공통인 메모리 제한을 의미하지 않습니다.
-브라우저를 닫는 것 자체가 서버를 종료하지는 않지만 Android가 중단할 수 있습니다.
+## 처음 설치
 
-## 처음 설치하고 실행하기: 두 명령
-
-지원되는 ARM64 Android 기기에 Termux를 설치하고 아래 두 명령을 각각 실행합니다.
-두 번째 명령은 공식 버전별 Release의 설치 파일을 내려받은 뒤 실행합니다.
-아직 공개하지 않은 버전의 다운로드 실패를 다른 버전이나 main 코드로 우회하지 않습니다.
+ARM64 Termux의 비공개 저장소에서 실행합니다.
 
 ```sh
-pkg update && pkg install -y python curl proot
+pkg update && pkg install -y python curl proot clang make libandroid-shmem
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py
+python "$HOME/install-angmoo.py"
 ```
 
-```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.3/install-termux.py && python "$HOME/install-angmoo.py"
-```
-
-설치기는 실행기 ZIP 다운로드, `RELEASE-SHA256SUMS` 대조, 압축 해제, 최초 준비,
-이미지 설치, backend·frontend 시작을 차례로 처리합니다. 배포 시 설치 파일에
-고정한 ZIP의 SHA-256·크기와 체크섬 목록이 모두 일치해야 실행기 코드를 실행합니다.
-기존 이미지 아키텍처·소스·버전·digest 검증과 데이터 보존, 중복 실행·포트 검사는 유지합니다.
-어느 단계든 실패하면 후속 단계를 실행하지 않습니다. 셸 초기화 파일은 수정하지 않습니다.
-
-최초 설치 파일의 신뢰 출처는 위 공식 GitHub Release의 HTTPS 주소입니다.
-설치 파일 자체의 SHA-256도 `RELEASE-SHA256SUMS`에 포함되므로 별도 검토·대조할 수 있습니다.
-이 절차를 배포 서명 검증이나 Android 실기기 인증으로 해석하지 않습니다.
-
-성공하면 **http://127.0.0.1:3000**을 엽니다. `Command ready: angmoo`를 확인한 뒤에는
-설치 과정을 반복하지 않고 현재 셸이나 새 Termux 셸에서 아래 명령을 사용합니다.
+설치기는 버전·소스·해시를 확인하고 세 서비스를 시작합니다. tools ZIP의 고정
+해시·크기와 `RELEASE-SHA256SUMS`가 일치해야 도구를 실행합니다. 최초 installer의
+신뢰 근거는 공식 HTTPS Release이며 별도 배포 서명이나 Android 인증을 뜻하지 않습니다.
+완료되면 http://127.0.0.1:3000 을 엽니다.
 
 ```sh
 angmoo start
 angmoo status
+angmoo diagnostics
 angmoo stop
+angmoo restart
 ```
 
-## 단축 명령 등록과 기존 0.1.0 설치
+시작은 PostgreSQL 준비 확인 → backend → frontend, 종료는 역순입니다. 기본 앱
+포트는 8080·3000, DB는 loopback 5432입니다. 다른 프로세스를 채택하거나 종료해
+포트를 확보하지 않습니다. 기동 실패 시 로그를 확인하며 기존 데이터를 지우지 않습니다.
 
-0.1.3 도구에는 단축 명령 등록이 포함됩니다. 공개된 0.1.0 도구는
-`~/.local/bin/angmoo start`, `~/.local/bin/angmoo status`, `~/.local/bin/angmoo stop`을
-사용합니다. 업데이트 후에도 전체 경로는 유효합니다. 단축 명령은 같은 wrapper를
-사용하므로 새로운 데이터 home을 만들지 않습니다.
+## 기존 0.1.3 데이터 이전
 
-`command_registration.py`가 포함된 검토한 새 도구의 `sh setup.sh`는
-기존 `$HOME/.local/bin/angmoo` wrapper를 가리키는 링크를
-`$PREFIX/bin/angmoo`에 등록합니다. `Command ready: angmoo`를 확인하면
-현재·새 Termux 셸에서 `angmoo start`, `angmoo status`, `angmoo stop`을
-사용합니다. alias나 셸 초기화 파일 수정은 필요하지 않습니다. 내부 설치 호출은
-검증된 전체 경로를 유지하며 두 서비스가 준비된 뒤에만 준비 완료를 안내합니다.
-
-이미 완전하게 설치된 환경에는 검토한 **새 도구 폴더**에서 명령만 등록할 수 있습니다.
+새 tools ZIP과 checksum을 검증하고 풀어 `sh setup.sh`로 실행기만 업데이트한 뒤:
 
 ```sh
-sh setup.sh --register-command-only
-```
-
-이 모드는 pkg/pip 실행, 도구·이미지 교체, 서비스 재시작을 하지 않고 앱 데이터·키·로그를
-읽지 않습니다. 설치 간 경쟁을 막는 private setup 잠금만 사용합니다. custom home
-설치에 명령을 등록하려고 최초 설치 bootstrap 전체를 다시 실행하지 마세요.
-기존 데이터 home을 계속 지정합니다.
-
-```sh
-angmoo --home "$HOME/.local/share/angmoo-custom" status
-```
-
-같은 wrapper를 가리키는 기존 링크는 재사용합니다. 다른 명령·수정한 wrapper·안전하지
-않은 prefix·PATH 앞쪽의 동명 명령은 덮어쓰지 않고 오류로 안내합니다. 불완전한 설치에는
-등록 전용 모드를 사용할 수 없습니다. `setup_busy`는 다른 setup이 잠금을 소유한다는
-뜻이므로 그 작업이 끝난 뒤 다시 실행합니다. 충돌 대상을 먼저 확인하고 변경하세요.
-기존 설치가 온전하다면 전체 경로 실행을 유지할 수 있습니다. prefix 등록은 native
-Termux 환경을 확인한 경우에만 수행하며 비 Termux 검증 환경은 전체 경로를 사용합니다.
-이 등록은 전원 관리 설정을 변경하지 않습니다.
-
-## 수동 설치와 통제 검증
-
-단계를 직접 확인하려면 공식 `angmoo-tree/angmoo` Release에서
-`angmoo-termux-tools.zip`을 받고 `RELEASE-SHA256SUMS`의 해시를 확인하세요.
-Termux 내부 전용 저장소에 압축을 풀고 해당 폴더에서 최초 한 번 준비합니다.
-
-```sh
-sh setup.sh
-```
-
-0.1.3 setup은 PATH나 셸 초기화 파일을 수정하지 않고 명령을 등록합니다.
-기존 0.1.0 도구를 계속 사용한다면 전체 wrapper 경로를 사용하세요.
-
-준비 도구는 없는 Python·PRoot를 플랫폼 패키지로 설치하고, 해시를 고정한
-PRoot-Distro 5.10.0을 전용 가상 환경에 설치합니다. root·Docker daemon은
-필요하지 않습니다. 도구의 라이선스와 고정 버전 원본 안내를 보존하세요.
-이후 설치와 시작은 각각 한 명령입니다.
-
-```sh
-angmoo install --release 0.1.3
+angmoo migrate --release 0.1.4 --language ko
 angmoo start
 ```
 
-Android 브라우저에서 **http://127.0.0.1:3000**을 엽니다. backend는 loopback
-8080을 사용합니다. 다른 프로세스가 포트를 사용하면 해당 프로세스를 채택하거나
-종료하지 않고 시작을 거부합니다. `angmoo status`, `angmoo diagnostics`는 안전한
-실행 식별자·상태만 읽습니다. `angmoo stop`, `angmoo restart`로 종료·재시작하며
-backend 작업 종료에는 최대 200초를 기다립니다. 데이터는 보존됩니다.
-자료를 쓰는 중 Termux를 강제 종료하지 마세요.
+원본을 보존하고 `<기존-home>-postgresql`에 백업·변환·검증합니다. 성공 후에만
+선택을 전환합니다. 사용자 지정 home은 모든 명령에 같은 `--home`을 지정합니다.
+[이전·재개·복귀 사용법](postgresql-migration.ko.md)을 따르세요. 일반 `install`로
+SQLite 데이터를 덮어쓰지 않습니다. 기존 비공개 PG 실험 데이터는 지원 입력이 아닙니다.
 
-상태와 데이터는 두 rootfs 밖의 `~/.local/share/angmoo`에 0700 권한으로 둡니다.
-backend에만 데이터 경로를 연결합니다. Android 공유 저장소로 이동하지 마세요.
-자격 증명·데이터는 이미지에 넣지 않습니다. 두 서비스의 버전·소스를 일치시키며,
-가져오기 실패 시 불완전한 쌍을 선택하거나 기존 설치를 지우지 않습니다.
-이전 세션 프로세스가 남으면 backend 중복 실행을 거부하고 진단 상태를 남깁니다.
+## 호스트 도구와 데이터
 
-## 같은 데이터 home을 유지하며 업데이트하기
+PRoot-Distro 5.10.0은 해시를 고정한 전용 Python 환경에 설치합니다. Play Store
+Termux는 SysV 공유 메모리 helper를 지원하는 고정 upstream PRoot를 설치 home의
+전용 도구로 빌드합니다. 패키지 PRoot나 전역 설정, 앱 이미지 파일은 수정하지
+않습니다. 빌드 출처·패치·해시는 `records/proot-build.json`에 남습니다. 짧은 비공개
+IPC 임시 경로는 `.cache/angmoo-pg` 아래 설치별 소유권 표식으로 구분하며 DB가 아닙니다.
 
-기존 설치, 특히 custom home을 사용하는 설치에는 아래 절차를 적용하세요.
-최초 설치용 두 명령은 기본 home을 사용하며 다른 custom home을 자동으로 찾아
-연결하거나 옮기지 않습니다.
+PGDATA·미디어·비밀값·결과 저널은 rootfs 밖에 둡니다. 설치 home은 mode 0700을
+유지하고 `/sdcard` 같은 공용 저장소로 옮기지 않습니다. DB 파일만 복사하거나
+구형 이미지를 새 PG 데이터에 연결하지 마세요. [전체 백업·복원](postgresql-backup.ko.md)을
+따르고 이전 이미지·원본·백업을 검증 전에 지우지 않습니다.
 
-1. 기존 wrapper의 `status`·`diagnostics`로 home, 버전·소스, 선택한 이미지 쌍과
-   실행 세션을 기록합니다. 실제 custom home을 사용한다면
-   `--home "$HOME/.local/share/angmoo-custom"`을 포함합니다.
-2. 같은 `--home`과 `stop`으로 정상 종료하고 두 서비스가 모두 끝난 뒤 백업합니다.
-   정리 실패를 우회하려고 Termux를 강제 종료하지 마세요.
-3. 전체 데이터 디렉터리, 미디어, 설치 비밀값, 실행기 상태, 이미지 식별 기록과 로그를
-   전용 저장소에 백업합니다. DB 파일 하나나 World Package만으로는 부족합니다.
-   복구에 필요한 이전 이미지 쌍과 도구도 보존합니다.
-4. 위 수동 설치 절차로 0.1.3 도구를 내려받아 검증하고 새 도구 폴더에서
-   `sh setup.sh`를 실행합니다. 도구 갱신과 명령 등록 단계이며 다른 데이터 home을
-   선택하는 작업이 아닙니다.
-5. 기록한 **같은 home**으로 이미지 쌍을 설치하고 실행합니다.
+## 명령 등록과 후보 시험
 
-   ```sh
-   angmoo --home "$HOME/.local/share/angmoo-custom" install --release 0.1.3
-   angmoo --home "$HOME/.local/share/angmoo-custom" start
-   angmoo --home "$HOME/.local/share/angmoo-custom" status
-   ```
+`setup.sh`는 기존 wrapper에 연결된 `angmoo` 명령을 등록하며 shell 시작 파일을
+수정하지 않습니다. 이미 완성된 설치의 명령만 등록할 때는 새 도구 디렉터리에서
+`sh setup.sh --register-command-only`를 사용합니다. 다른 명령이나 수정된 wrapper를
+덮어쓰지 않습니다. 기존 0.1.0 직접 이전은 이번 지원 범위가 아닙니다.
 
-   예시 경로는 실제 기록한 경로로 바꾸세요. 기본 설치는 `$HOME/.local/share/angmoo`입니다.
-   모든 명령에서 같은 경로를 유지합니다.
-6. 버전·소스, 캐릭터와 기존 데이터를 확인하기 전에는 백업을 삭제하지 마세요.
-   설치나 준비 확인에 실패하면 진단·로그를 보존하고 데이터를 초기화하거나 서로 다른
-   이미지 쌍의 실행을 강제하지 않습니다. 이전 도구·이미지 선택을 복구하기 전에도
-   소유한 서비스를 정상 종료합니다. 지원되는 데이터 복구가 필요하면 종료 상태에서
-   만든 전체 백업을 사용하며, 임의의 과거 이미지가 새 데이터를 읽을 수 있다고 가정하지 않습니다.
-
-새 도구는 검증된 설치 manifest의 버전을 기대값으로 사용하므로 기존 0.1.0 쌍도
-조회할 수 있습니다. 다른 버전·소스·실행 세션은 거부하며 HTTP 200만으로 준비 완료로
-판단하지 않습니다.
-
-## 로컬 후보 검증
-
-관리자는 검증한 ARM64 backend·frontend 쌍을 `install --candidate-manifest`와
-별도 `--home`으로 시험할 수 있습니다. 후보와 공개판의 데이터 root를 섞거나
-기동을 위해 이미지 검증을 완화하지 않습니다. 동일성 검사는
-[후보 가져오기](../operations/release-candidate-import.md)를 참고합니다.
-로컬·에뮬레이션 성공은 실기기 인증이 아닙니다.
+관리자는 별도 `--home`에서 `install --candidate-manifest`로 동일 소스의 세 후보를
+시험할 수 있습니다. 로컬 검증을 정식 CI나 실기기 인증으로 표시하지 않습니다.
 
 ## 저장된 서비스 로그
 

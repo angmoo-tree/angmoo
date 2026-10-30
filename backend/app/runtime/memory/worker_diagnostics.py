@@ -13,6 +13,10 @@ current_worker: ContextVar[WorkerTrace | None] = ContextVar("search_worker_trace
 
 
 def failure(exc, stage=None):
+    import re
+    original=getattr(exc,'orig',exc)
+    sqlstate=getattr(original,'sqlstate',None)
+    sqlstate=sqlstate if isinstance(sqlstate,str) and re.fullmatch(r'[0-9A-Z]{5}',sqlstate) else None
     code = getattr(exc, "sqlite_errorcode", None)
     code = code if isinstance(code, int) and 0 <= code <= 65535 else None
     known = {
@@ -28,6 +32,10 @@ def failure(exc, stage=None):
     args = getattr(exc, "args", ())
     internal = known.get(args[0]) if args and isinstance(args[0], str) else None
     reason = ("cancelled" if type(exc).__name__ == "CancelledError" else
+        {'40001':'postgresql_serialization','40P01':'postgresql_deadlock','55P03':'postgresql_lock_timeout',
+         '57014':'postgresql_query_cancelled'}.get(sqlstate,'postgresql_error') if sqlstate else
+        'pool_timeout' if type(exc).__name__=='PoolTimeout' else
+        'queue_unavailable' if args and args[0]=='postgresql_search_queue_unavailable' else
         "deadline_exceeded" if isinstance(exc, TimeoutError) else
         "result_eof" if isinstance(exc, EOFError) or (stage == "result_transport" and isinstance(exc, OSError)
             and (getattr(exc, "winerror", None) in {109, 232, 233} or getattr(exc, "errno", None) == 32)) else
@@ -42,7 +50,7 @@ def failure(exc, stage=None):
     if kind not in allowed and isinstance(exc, OSError):
         kind = "OSError"
     return SearchFailure(failure_code=reason, failure_stage=stage,
-        exception_kind=kind if kind in allowed else "Unknown", sqlite_error_code=code)
+        exception_kind=kind if kind in allowed else "Unknown", sqlite_error_code=code,postgresql_sqlstate=sqlstate)
 
 
 @dataclass

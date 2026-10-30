@@ -22,8 +22,9 @@ Do not describe checks that were not run as a full-suite pass.
 
 - [ ] Focused backend tests when applicable
 - [ ] Frontend lint, typecheck, and build when applicable
-- [ ] SQLite / FTS5 / LadybugDB migration, replay, or graph checks when applicable
-- [ ] Relevant SQLite baseline, generation or installed-data migration checks when those contracts change
+- [ ] PostgreSQL / pgvector / full-text / LadybugDB checks when applicable
+- [ ] Official 0.1.3 SQLite input migration and preservation checks when those contracts change
+- [ ] Current documentation, English/Korean usage, backup/recovery and source-bound assets match the implementation
 - [ ] No production credential, personal data, raw log, or external provider call used
 - [ ] Every human commit includes a DCO 1.1 `Signed-off-by` trailer (`git commit -s`)
 - [ ] I understand accepted contributions are provided under `GPL-3.0-only` unless explicitly stated otherwise

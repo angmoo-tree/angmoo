@@ -26,13 +26,14 @@ def set_resident_slot_run_id(
 def extend_resident_slot_lease(
     db: Session, *, agent_id: str, run_id: str, lease_seconds: int
 ) -> models.AgentSlot | None:
-    slot = db.get(models.AgentSlot, agent_id)
-    if slot is None or slot.locked_by_run_id != run_id:
-        return None
-    slot.lease_expires_at = datetime.now(UTC) + timedelta(seconds=lease_seconds)
-    db.commit()
-    db.refresh(slot)
-    return slot
+    from app.core.activity_transactions import activity_write
+    def renew():
+        slot = db.get(models.AgentSlot, agent_id, populate_existing=True)
+        if slot is None or slot.locked_by_run_id != run_id:
+            return None
+        slot.lease_expires_at = datetime.now(UTC) + timedelta(seconds=lease_seconds)
+        return slot
+    return activity_write(db, renew)
 
 
 def complete_resident_slot_run(
@@ -81,7 +82,7 @@ def complete_resident_slot_run(
 
 def cancel_resident_run(db, *, agent_id, run_id, owner_id, character_id, now, reason, resolve_schedule):
     """One caller-clean, conditional writer; the scheduler before-commit fence remains active."""
-    from app.core.sqlite_concurrency import run_sqlite_session_immediate
+    from app.core.activity_transactions import activity_write
     from app.domains.routines.constants import ACTIVE_RUN_STATUSES
     if db.in_transaction():
         raise RuntimeError("cancelled_run_requires_clean_session")
@@ -102,4 +103,4 @@ def cancel_resident_run(db, *, agent_id, run_id, owner_id, character_id, now, re
         run.gateway_result = {**(run.gateway_result or {}), "status":"cancelled", "reason":str(reason), "cancelled_at":now.isoformat()}
         slot.status, slot.locked_by_run_id, slot.lease_expires_at = SLOT_STATUS_ASSIGNED_IDLE, None, None
         slot.last_run_at, slot.next_tick_at, slot.last_error = now, next_tick, str(reason)
-    return run_sqlite_session_immediate(db, operation, require_clean=True)
+    return activity_write(db, operation, require_clean=True)

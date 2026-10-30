@@ -6,7 +6,7 @@ from collections.abc import Callable
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.activity_transactions import activity_write
 from app.domains.social.contracts.observations import SocialObservationError
 from app.domains.social.models.topics import RecommendationDelivery
 from app.runtime.social import observations
@@ -53,7 +53,4 @@ def settle_delivery(db: Session, *, world_id: str, actor_id: str,
             ).execution_options(synchronize_session="fetch"))
         return row.id
 
-    if db.get_bind().dialect.name == "sqlite":
-        return run_sqlite_session_immediate(db, operation, require_clean=True, observer=observer)
-    with db.begin():
-        return operation()
+    return activity_write(db, operation, require_clean=True, observer=observer)

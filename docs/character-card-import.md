@@ -48,7 +48,7 @@ V1/V2와 V3 공통 설정을 지원한다. V3 전용 에셋·확장 실행은 �
 
 `{{char}}`와 V3 제한된 이름 표기만 치환한다. 예시의 `{{user}}`는 대화 상대이다. 나머지 동적 문구는 표시하고 검토하도록 한다. 카드에 없는 관심사·소개를 태그/첫 인사로 임의 채우지 않는다. 길이 초과는 원문을 유지하고 사용자 수정으로 해결한다.
 
-`CharacterCardSource.source_bytes`는 private SQLite 데이터다. 원본 조회는 소유자 한정이며 no-store이다. 만료된 미등록 원본은 삭제 대상이지만 등록 원본에는 자동 만료가 없다. 등록 후에는 편집한 Character 필드가 준비·SNS·Chat의 입력 원본이다.
+0.1.4의 `CharacterCardSource.source_bytes`는 비공개 PostgreSQL 데이터다. 0.1.3 SQLite 이전에서도 원본 바이트와 소유권을 보존한다. 원본 조회는 소유자 한정이며 no-store이다. 만료된 미등록 원본은 삭제 대상이지만 등록 원본에는 자동 만료가 없다. 등록 후에는 편집한 Character 필드가 준비·SNS·Chat의 입력 원본이다.
 
 가져온 PNG는 중복 정의와 기타 메타데이터를 포함한 전체 bytes로 보관한다. 표시용 WebP와 원본은 별개이며, 사용자 편집·등록 때문에 원본 PNG를 다시 작성하지 않는다. 새 가져오기의 parser provenance는 `angmoo-card-import-v2`이고 기존 저장 원본의 provenance는 조회만으로 변경하지 않는다.
 
@@ -74,7 +74,7 @@ World의 공개/참여·시간대 환경·규칙·용어 입력은 일반 폼에
 
 SQLite v21은 v20 자료를 보존하고 draft credential nullable 및 신규 참조 테이블을 추가한다. 설치된 실제 사용자 DB의 업그레이드는 이 개발 작업에서 실행하지 않는다.
 
-World 패키지는 최종 설정과 로컬 표시 이미지를 포함한다. 원본 카드·키·관계·기억은 포함하지 않는다. 아이콘은 기존 패키지 required-extension 기능의 `angmoo.world-icon.v1`으로 보존한다. 아이콘을 모르는 구 reader가 조용히 손실시키는 대신 unsupported extension으로 거부하도록 한다. 전체 설치 백업은 SQLite의 등록 카드 원본도 포함한다.
+World 패키지는 최종 설정과 로컬 표시 이미지를 포함한다. 원본 카드·키·관계·기억은 포함하지 않는다. 아이콘은 기존 패키지 required-extension 기능의 `angmoo.world-icon.v1`으로 보존한다. 아이콘을 모르는 구 reader가 조용히 손실시키는 대신 unsupported extension으로 거부하도록 한다. 전체 설치 백업은 PostgreSQL의 등록 카드 원본과 설치 비밀값·미디어를 포함한다. [이전·백업 안내](public/postgresql-backup.ko.md)를 따른다.
 
 ## 검증 경계
 

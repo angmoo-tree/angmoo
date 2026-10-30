@@ -1,6 +1,6 @@
 """One fresh, bounded writer for a review refresh or final relationship apply."""
 from datetime import timedelta
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.database_transactions import database_write
 from app.domains.relationships.models.personalization import RelationshipReviewWork
 from app.domains.relationships.service.daily_review import apply_review
 from app.runtime.relationships.review_memories import ReviewMemoryReferences
@@ -19,6 +19,9 @@ def transition(sessions, work_id, now, *, apply=False):
                 root = db.get(RelationshipReviewWork, root.parent_id)
                 if root is None:
                     return "lease_lost"
+            from app.domains.relationships.service.review_recovery import stopped
+            if stopped(root):
+                return "needs_attention"
             if application_pending(db, root.manifest["base"]["setting_id"]):
                 return "memory_application_deferred"
             try:
@@ -29,8 +32,7 @@ def transition(sessions, work_id, now, *, apply=False):
             except ValueError as exc:
                 if str(exc) == "relationship_memory_application_pending":
                     return "memory_application_deferred"
-                work.status = "failed"
-                work.error_code = str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed"
-                work.next_attempt_at = now + timedelta(minutes=5)
+                from app.domains.relationships.service.review_recovery import fail
+                fail(db, work, str(exc) if str(exc).startswith("relationship_") else "relationship_review_validation_failed", now=now)
                 return "validation_deferred"
-        return run_sqlite_session_immediate(db, write, require_clean=True)
+        return database_write(db, write, require_clean=True)

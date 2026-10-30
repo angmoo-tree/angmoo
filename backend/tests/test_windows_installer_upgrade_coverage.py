@@ -56,30 +56,22 @@ def test_native_upgrade_partition_rejects_invalid_selection(versions, part):
         coverage.partition_versions(versions, part)
 
 
-def test_native_upgrade_hosted_wiring_preserves_bounds_actions_and_exact_union():
-    document = yaml.safe_load((ROOT / ".github/workflows/windows-installer.yml").read_text(encoding="utf-8"))
-    job = document["jobs"]["windows-installer-supported-upgrade"]
-    assert job["strategy"] == {"fail-fast": False, "matrix": {"partition": ["first", "second"]}}
-    assert job["timeout-minutes"] == 30 and "continue-on-error" not in job
-    steps = job["steps"]
-    assert any("-UpgradePartition ${{ matrix.partition }}" in step.get("run", "") for step in steps)
-    upload = next(step for step in steps if step.get("name") == "Upload exact native upgrade coverage")
-    assert upload["if"] == "always()" and upload["with"]["if-no-files-found"] == "error"
-    assert upload["with"]["path"] == "${{ runner.temp }}/angmoo-supported-upgrade-${{ matrix.partition }}.json"
-    aggregate = document["jobs"]["windows-installer"]
-    assert aggregate["if"] == "always()" and aggregate["timeout-minutes"] == 5
-    assert "windows-installer-supported-upgrade" in aggregate["needs"]
-    assert any("windows_installer_upgrade_coverage.py" in step.get("run", "")
-        and '--run-attempt "$GITHUB_RUN_ATTEMPT"' in step["run"] for step in aggregate["steps"])
-    source = (ROOT / "scripts/ci/run_windows_installer_supported_upgrade.ps1").read_text(encoding="utf-8")
-    assert "--select-partition $UpgradePartition" in source
-    assert "foreach ($version in $selectedVersions)" in source
-    assert "Restore-IsolatedFixture $archive" in source
-    assert "$supportedContract.source_data_version -ne [int]$version" in source
-    assert "$completedVersions.Add([int]$version)" in source
-    assert "windows_installer_idempotent_marker_changed" in source
-    assert source.index("windows_installer_hosted_runner_only") < source.index("foreach ($required")
-    assert source.index("Assert-SyntheticFixtureArchive $Archive") < source.index("Remove-IsolatedFixture", source.index("Assert-SyntheticFixtureArchive $Archive"))
+def test_current_hosted_wiring_preserves_bounds_actions_and_exact_union():
+    document=yaml.safe_load((ROOT/'.github/workflows/windows-installer.yml').read_text())
+    job=document['jobs']['windows-installer-supported-upgrade']
+    assert 'strategy' not in job and job['timeout-minutes']==35 and 'continue-on-error' not in job
+    assert any('-Kind upgrade-013' in step.get('run','') for step in job['steps'])
+    upload=next(step for step in job['steps'] if step.get('name')=='Preserve exact qualification checks')
+    assert upload['if']=='always()' and upload['with']['if-no-files-found']=='error'
+    aggregate=document['jobs']['windows-installer']
+    assert aggregate['if']=='always()' and aggregate['timeout-minutes']==5
+    assert any('windows_postgresql_coverage.py' in step.get('run','') and '--run-attempt' in step['run']
+               for step in aggregate['steps'])
+    source=(ROOT/'scripts/ci/run_windows_postgresql_qualification.py').read_text()
+    assert source.index('windows_pg_hosted_only')<source.index('def nsis')
+    assert 'windows_pg_existing_installation_refused' in source
+    assert 'windows_pg_installer_converted_without_consent' in source
+    assert 'interrupted_after_canonical' in source
 
 
 def test_representative_smoke_cannot_claim_full_predecessor_coverage():
@@ -92,23 +84,16 @@ def test_representative_smoke_cannot_claim_full_predecessor_coverage():
         coverage.verify_reports([receipt], versions=versions, source_sha="a" * 40, run_id="123", run_attempt="1")
 
 
-@pytest.mark.parametrize("fault", ("partition", "restore", "union"))
-def test_current_matrix_checker_rejects_broken_historical_upgrade_execution(tmp_path, monkeypatch, fault):
-    monkeypatch.syspath_prepend(str(ROOT / "scripts/ci"))
+@pytest.mark.parametrize('fault',('case','recovery','union'))
+def test_current_matrix_checker_rejects_missing_pg_execution(tmp_path,monkeypatch,fault):
+    monkeypatch.syspath_prepend(str(ROOT/'scripts/ci'))
     from check_windows_installer_supported_upgrade_matrix import validate_matrix
-
-    paths = (".github/workflows/windows-installer.yml", "scripts/ci/run_windows_installer_supported_upgrade.ps1")
+    paths=('.github/workflows/windows-installer.yml','scripts/ci/run_windows_postgresql_qualification.py')
     for relative in paths:
-        target = tmp_path / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text((ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8")
-    assert 3 in validate_matrix(tmp_path)
-    relative, token = {
-        "partition": (paths[0], "-UpgradePartition ${{ matrix.partition }}"),
-        "restore": (paths[1], "Restore-IsolatedFixture $archive"),
-        "union": (paths[0], "windows_installer_upgrade_coverage.py"),
-    }[fault]
-    target = tmp_path / relative
-    target.write_text(target.read_text(encoding="utf-8").replace(token, "disabled_fixture"), encoding="utf-8")
-    with pytest.raises(ValueError, match="windows_installer_"):
-        validate_matrix(tmp_path)
+        target=tmp_path/relative;target.parent.mkdir(parents=True,exist_ok=True)
+        target.write_text((ROOT/relative).read_text())
+    assert validate_matrix(tmp_path)==(41,)
+    relative,token={'case':(paths[0],'-Kind upgrade-013'),'recovery':(paths[1],'interrupted_after_canonical'),
+                    'union':(paths[0],'windows_postgresql_coverage.py')}[fault]
+    target=tmp_path/relative;target.write_text(target.read_text().replace(token,'disabled_fixture'))
+    with pytest.raises(ValueError,match='windows_installer_'):validate_matrix(tmp_path)

@@ -19,7 +19,7 @@ function exportSearchTrace(trace: NonNullable<RetrievalDiagnosticsRead["search_t
         "nn_query_started", "result_received", "terminal_observed", "terminate_sent", "kill_sent", "joined",
         "worker_exit_code", "termination_reason", "cleanup_error_code", "eligible_vector_count", "requested_generation",
         "observed_generation", "requested_profile", "observed_schema_revision", "generation_match", "metadata_status", "stage_events_dropped"]),
-      failure: row.failure ? selectFields(row.failure, ["failure_code", "failure_stage", "exception_kind", "sqlite_error_code"]) : null,
+      failure: row.failure ? selectFields(row.failure, ["failure_code", "failure_stage", "exception_kind", "sqlite_error_code", "postgresql_sqlstate"]) : null,
     })),
     lineage: trace.lineage.slice(0, 160).map(row => selectFields(row, [
       "stage", "action", "axis", "document_ref", "identity_ref", "memory_ref", "source_ref",

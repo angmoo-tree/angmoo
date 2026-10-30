@@ -46,12 +46,18 @@ class SocialLane:
 
     async def guard(self, state):
         await self.scope_guard({**state, "_lane": self.lane})
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        await run_db_stage(self, '_guard_selected_sync', state)
+        return {}
+
+    def _guard_selected_sync(self, state):
         from app.contracts.read_deadline import bounded_read
         with bounded_read(2.0):
             self.guard_selected_inputs(state)
-        return {}
 
     def guard_selected_inputs(self, state):
+        from app.runtime.autonomous_activity.initial_input import assert_integrity
+        assert_integrity(state)
         # Committed effects can change affordances, so do not recheck old target
         # snapshots after Execute. Settlement validates its own source receipts.
         if state.get("stage") in {"TargetSelector", "PrepareImageRecall", "RecallSelected", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
@@ -63,10 +69,18 @@ class SocialLane:
                 from app.runtime.media.social_context import assert_current
                 frozen_images = state.get("image_recall_snapshots", {}).get(candidate["target_id"], {}).get("images", candidate.get("images", []))
                 assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
-                for identifier, revision in candidate["source_revisions"].items():
-                    post = self.ctx.db.get(Post, identifier, populate_existing=True)
-                    if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
-                        raise ValueError("activity_source_changed")
+                self.validate_action_target(state, candidate)
+
+    def validate_action_target(self, state, candidate):
+        # Historical conversation excerpts need no live content comparison.
+        # The concrete public-action target must still exist and be visible.
+        from sqlalchemy import select
+        identifier = state.get("lane_data", {}).get(candidate["target_id"], {}).get("post_id")
+        post = self.ctx.db.execute(select(Post.id, Post.world_id, Post.deleted_at,
+            Post.report_hidden_at, Post.visibility).where(Post.id == identifier)).one_or_none() if identifier else None
+        if (post is None or post.world_id != self.actor.world_id or post.deleted_at
+                or post.report_hidden_at or post.visibility != "public"):
+            raise ValueError("activity_target_unavailable")
 
     def validate_relationship_candidates(self, state, candidates):
         if not candidates:
@@ -175,9 +189,11 @@ class SocialLane:
                 await self.guard({**state, "stage": "TargetSelector"})
             except Exception as exc:
                 raise ActivityRetryGuardError(exc) from exc
+        from app.core.async_session import session_call
+        delivery = await session_call(self.ctx.db, lambda: self.delivery({**state, "stage": "TargetSelector"}))
         return await self.provider.select(lane=self.lane, context=state["shared_context"],
             candidates=state["candidates"], limit=INBOX_TARGET_LIMIT if self.lane == "inbox" else 1,
-            delivery=self.delivery(state), before_json_retry=before_retry)
+            delivery=delivery, before_json_retry=before_retry)
 
     def delivery(self, state):
         return None
@@ -207,14 +223,16 @@ class SocialLane:
         refreshed = {}
         if any(value.get("packets") and target not in state.get("memory_validations", {})
                for target, value in state.get("memories", {}).items()):
-            # Pre-Planner legacy checkpoint: return rebuilt evidence as real
-            # State channels, rather than mutating the guard's input dict.
-            refreshed = split_validation(await self.retriever.selected(
-                activity_id=state["identity"]["activity_id"],
-                targets=self.selected(state), queries=state["queries"]))
+            raise ValueError("activity_initial_memory_input_unavailable")
+        from app.core.async_session import session_call
+        return await session_call(self.ctx.db, lambda: self._context_sync(state, refreshed))
+
+    def _context_sync(self, state, refreshed):
         candidates = self.selected(state)
-        manifest = prepare_sources(self.ctx.db, actor=self.actor,
-            post_ids=[ref for c in candidates for ref in c["source_ids"]])
+        ids = {ref for c in candidates for ref in c["source_ids"]}
+        if "_metric_sources" not in state["lane_data"]:
+            raise ValueError("activity_initial_source_input_unavailable")
+        manifest = [row for row in state["lane_data"]["_metric_sources"] if row["post_id"] in ids]
         return {**refreshed, "decision_context": plain({**state["shared_context"],
             "images": {target: value["images"] for target, value in state.get("image_recall_snapshots", {}).items()},
             "memories": context_memories(refreshed.get("memories", state["memories"])),
@@ -227,17 +245,24 @@ class SocialLane:
                 await self.guard({**state, "stage": "ActionPlanner"})
             except Exception as exc:
                 raise ActivityRetryGuardError(exc) from exc
+        from app.core.async_session import session_call
+        delivery = await session_call(self.ctx.db, lambda: self.delivery(state))
         decision = await self.provider.plan(lane=self.lane, context=state["decision_context"],
-            candidates=self.selected(state), delivery=self.delivery(state),
+            candidates=self.selected(state), delivery=delivery,
             on_input_receipt=receipt.update, before_json_retry=before_retry)
         from app.runtime.autonomous_activity.name_binding import activity_name_binding, decision_names
-        decision = decision_names(decision, activity_name_binding(self.ctx), candidates=self.selected(state))
+        names = await session_call(self.ctx.db, lambda: activity_name_binding(self.ctx))
+        decision = decision_names(decision, names, candidates=self.selected(state))
         from app.runtime.autonomous_activity.name_binding import observe_normalization
         observe_normalization(self.tracker, lane=self.lane,
             receipts=[row["_auxiliary_normalization"] for row in decision["decisions"]])
         return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):
+        from app.core.async_session import session_call
+        return await session_call(self.ctx.db, lambda: self._validate_sync(state))
+
+    def _validate_sync(self, state):
         from app.domains.routines.policies.writer_tasks import _reply_task_id
         from functools import partial
         _reply_task_id = partial(_reply_task_id, clip=lambda value, limit: str(value or "")[:limit])
@@ -269,7 +294,8 @@ class SocialLane:
         writing = await self.provider.write(lane=self.lane, context=state["decision_context"],
             assignments=state["assignments"], on_input_receipt=receipts.append, before_provider_request=before_request)
         from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
-        names, fields = activity_name_binding(self.ctx), {}
+        from app.core.async_session import session_call
+        names, fields = await session_call(self.ctx.db, lambda: activity_name_binding(self.ctx)), {}
         # Real Provider output is already finalized once, before canonical parsing.
         # Historical/fake adapters without receipts retain the compatibility pass.
         if any("_auxiliary_normalization" not in row for row in writing.get("reply_task_results", [])):
@@ -279,6 +305,18 @@ class SocialLane:
         return {"drafts": writing.get("reply_task_results", []), "writer_input_receipts": receipts}
 
     async def execute(self, state):
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        from app.runtime.social.delivery_recovery import DeliveryStorageWait
+        import asyncio
+        while True:
+            try:
+                return await run_db_stage(self, '_execute_sync', state)
+            except DeliveryStorageWait as exc:
+                # Existing Writer checkpoints/draft receipts survive this wait.
+                # Every resumed publication rechecks scope and execution claims.
+                await asyncio.sleep(exc.seconds)
+
+    def _execute_sync(self, state):
         if self.action_executor is None and any(d["action"] != "no_action" for d in state["decision"]["decisions"]):
             raise RuntimeError("activity_action_executor_missing")
         results, used = [], {}
@@ -322,10 +360,7 @@ class SocialLane:
             from app.runtime.media.social_context import assert_current
             frozen_images = state.get("image_recall_snapshots", {}).get(target_id, {}).get("images", candidate.get("images", []))
             assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
-            for identifier, revision in candidate.get("source_revisions", {}).items():
-                post = self.ctx.db.get(Post, identifier, populate_existing=True)
-                if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
-                    raise ValueError("activity_source_changed")
+            self.validate_action_target(state, candidate)
             before = capture(self, state)
         def finish(execution, event):
             record(self, state, target_id, before, execution, event)
@@ -333,6 +368,10 @@ class SocialLane:
         return validate
 
     async def settle(self, state):
+        from app.core.async_session import session_call
+        return await session_call(self.ctx.db, lambda: self._settle_sync(state))
+
+    def _settle_sync(self, state):
         decision = state["decision"]
         key = identity_key(state["identity"]["activity_id"], self.lane, "decision")
         def write_event(unit):
@@ -347,9 +386,9 @@ class SocialLane:
         revisions = {ref: rev for c in self.selected(state) for ref, rev in c["source_revisions"].items()}
         valid = {ref for ref in valid if (post := self.ctx.db.get(Post, ref, populate_existing=True)) is not None
             and post.world_id == self.actor.world_id and not post.deleted_at and not post.report_hidden_at
-            and post.visibility == "public" and post_revision(post) == revisions[ref]}
+            and post.visibility == "public"}
         manifest = [r for r in manifest if r["post_id"] in valid]
-        # Frozen revision is revalidated by RuntimeExperienceReferences.
+        # The delivery receipt proves the frozen revision; current access is separate.
         manifest = [{**r, "created_at": datetime.fromisoformat(r["created_at"]) if isinstance(r["created_at"], str) else r["created_at"]} for r in manifest]
         now = datetime.fromisoformat(decision["judged_at"])
         from app.runtime.social.observations import observe_source
@@ -368,7 +407,7 @@ class SocialLane:
         outcome = "invalid"
         if decision["state_status"] != "invalid":
             proposal = StateUpdate.model_validate(decision["state_update"]) if decision["state_update"] else None
-            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            from app.core.activity_transactions import activity_write
             if self.ctx.db.in_transaction():
                 self.ctx.db.commit()
             def settle_current_state():
@@ -377,8 +416,7 @@ class SocialLane:
                 current_evidence = {ref: token for ref, token in evidence_keys.items()
                     if (post := self.ctx.db.get(Post, ref, populate_existing=True)) is not None
                     and post.world_id == self.actor.world_id and post.deleted_at is None
-                    and post.report_hidden_at is None and post.visibility == "public"
-                    and post_revision(post) == revisions[ref]}
+                    and post.report_hidden_at is None and post.visibility == "public"}
                 return settle_state(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
                     activity_id=state["identity"]["activity_id"], decision_key=key,
                     expected_version=state["shared_context"]["current_state"]["version"],
@@ -386,7 +424,7 @@ class SocialLane:
                     source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision["state_source_refs"]],
                     valid_source_keys=set(current_evidence.values()),
                     context_reassessment=not decision["state_source_refs"])
-            outcome = run_sqlite_session_immediate(self.ctx.db, settle_current_state,
+            outcome = activity_write(self.ctx.db, settle_current_state,
                 require_clean=True, observer=write_event("S3"))
         return {"settlement": {"state": outcome, "decision_key": key}}
 

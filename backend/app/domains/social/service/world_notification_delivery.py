@@ -2,7 +2,8 @@
 import hashlib
 import json
 from sqlalchemy import select, update
-from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from app.domains.social.models.posts import Notification
 
 
@@ -19,7 +20,8 @@ def deliver_world_notification(db, *, world_id, recipient_world_character_id, re
         recipient_character_id=recipient_character_id, actor_world_character_id=actor_world_character_id,
         actor_character_id=actor_character_id, notification_type=notification_type, post_id=post_id,
         source_post_id=source_post_id, source_social_event_id=social_event_id, data=data)
-    # SQLite is canonical. Conflict handling must not roll back the source UoW.
+    insert = postgres_insert if db.get_bind().dialect.name == "postgresql" else sqlite_insert
+    # Conflict handling must not roll back the source UoW.
     db.execute(insert(Notification).values(**values).on_conflict_do_nothing(index_elements=["delivery_key"]))
     row = db.scalar(select(Notification).where(Notification.delivery_key == key))
     for field in ("world_id", "recipient_world_character_id", "recipient_character_id", "actor_world_character_id",

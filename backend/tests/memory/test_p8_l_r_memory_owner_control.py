@@ -189,7 +189,7 @@ def test_owner_correction_revalidates_evidence_and_supersedes_old_item() -> None
         ).summary == payload["summary"]
 
 
-def test_correction_fails_closed_when_canonical_source_changed() -> None:
+def test_correction_uses_owned_experience_after_original_source_changed() -> None:
     client, engine, principal = _fixture()
     seeded = _seed(engine, principal)
     scope_path = _scope_path("q-responding")
@@ -221,8 +221,8 @@ def test_correction_fails_closed_when_canonical_source_changed() -> None:
         },
     )
 
-    assert response.status_code == 409
-    assert response.json()["detail"] == "memory_source_digest_conflict"
+    assert response.status_code == 200
+    assert response.json()["outcome"] == "updated"
 
 
 def test_delete_blocks_retrieval_immediately_is_replayable_and_scope_private() -> None:

@@ -2,64 +2,51 @@
 
 English | [한국어](container-release.ko.md)
 
-These instructions target Angmoo 0.1.3 for Linux amd64 and ARM64. Use the
-commands after [0.1.3 is published](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3).
-Until then, use the [published 0.1.2 guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.2/docs/public/container-release.md).
+This is the 0.1.4 source configuration for Linux amd64 and ARM64. The versioned
+assets become available after formal publication. Existing 0.1.3 users must
+run the [migration tool](postgresql-migration.md) before replacing their stack.
 
-- `ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.3`
-- `ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.3`
+## New installation
 
-Use both services from the same release. The multi-platform tag selects the
-matching execution image; its architecture manifests and layers are part of the
-image, not extra application versions.
-
-## Install and start
-
-Install Git and Docker with Compose 2.22.0 or newer, then run:
+Use Git, Docker with a Linux engine, and Compose 2.23.0 or newer.
 
 ```sh
-git clone --branch release-v0.1.3 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
 
-Open http://127.0.0.1:3000. The frontend is exposed on loopback; the backend and
-its embedded SQLite/search/graph components run through the supported Compose
-configuration. A Docker installation does not need separate PostgreSQL or Neo4j.
+Open http://127.0.0.1:3000. Frontend, backend and PostgreSQL use the same product
+version/source. The database port is private. PGDATA, app media/secrets and DB
+bootstrap credentials have separate persistent volumes. See the
+[runtime contract](postgresql-runtime.md).
 
-## Status, logs and stop
+## Status and stop
 
 ```sh
 docker compose ps
-docker compose logs --tail 100 backend frontend
-docker compose down
+docker compose logs --tail 100 postgres backend frontend
+docker compose stop
+docker compose up -d --wait
 ```
 
-The normal stop command preserves the named data volume. Do not add `--volumes`
-when you need the data. Image cleanup, container cleanup and volume deletion are
-different operations. Never remove a volume merely to fix a failed image pull.
+`stop` and `down` retain data. Do not use `down --volumes` when it is needed.
+Deleting an image is different from deleting a database volume.
 
-## Updates and data
+## Existing data and recovery
 
-Record the release checkout, Compose project name and data-volume binding. Before switching versions, stop through Compose and back up the complete
-data set, including the installation secret and media. Use the next release's
-actual upgrade instructions and a matching backend/frontend pair.
+The migration tool discovers actual Compose projects and volume mounts. Review
+one candidate, or select among several; manual source entry is used only when
+discovery finds none. It stops the selected source, backs it up, converts a
+copy, verifies it, then selects the new configuration. Follow the
+[migration guide](postgresql-migration.md) for commands and interrupted work.
 
-Application images and user data have separate lifetimes. Supported embedded
-migrations validate and promote data generations at startup; this is not a
-promise that every arbitrary downgrade or future version is compatible. Do not
-create a new empty project/volume and mistake it for a data-preserving upgrade.
+After migration, operate the printed `installation/compose.json`. Running `up`
+in a 0.1.3 checkout does not migrate it. New PostgreSQL changes are not merged
+back to SQLite during rollback. Keep a [complete DB/media/secret backup](postgresql-backup.md)
+before updates. A World Package is not a full installation backup.
 
-`ANGMOO_IMAGE_TAG` selects the versioned image tag. Product version and data
-schema version are separate; do not use old development values or override a
-version check to force startup. World Package export is not a full backup.
-
-## Development and release maintenance
-
-For source development use [the contributor environment](development.md), with
-its separate data volume. For candidate generation, identity and publication
-use [release publishing](../operations/release-publishing.md) and
-[candidate import](../operations/release-candidate-import.md).
-
-Android uses [Termux and PRoot](termux.md), not Docker on the phone. Linux
-ARM64 compatibility does not certify Android background or Doze behavior.
+Use separate [contributor data](development.md) for source work and
+[Termux/PRoot](termux.md) on Android without Docker. ARM64 checks are separate
+from Android power-management certification. Maintainers follow the
+[same-source release process](../operations/release-publishing.md).

@@ -20,7 +20,7 @@ $baseComposePath = Join-Path $repoRoot 'compose.yml'
 $devComposePath = Join-Path $repoRoot 'compose.dev.yml'
 $composeFiles = @('-f', $baseComposePath, '-f', $devComposePath)
 $protectedDataRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
-$protectedChildren = @('canonical', 'graph', 'media', 'secrets')
+$protectedChildren = @('canonical', 'graph', 'media', 'secrets', 'postgresql', 'postgresql-appdata', 'postgresql-migration')
 $watchProcess = $null
 
 function Get-ProtectedDataFingerprint {
@@ -58,7 +58,7 @@ function Get-ComposeRecords {
 
 function Assert-ComposeReady {
     $records = @(Get-ComposeRecords)
-    foreach ($service in @('backend', 'frontend')) {
+    foreach ($service in @('postgres', 'backend', 'frontend')) {
         $record = @($records | Where-Object { $_.Service -eq $service })
         if ($record.Count -ne 1 -or $record[0].State -ne 'running' -or $record[0].Health -ne 'healthy') {
             throw "docker_service_not_ready:$service"
@@ -70,8 +70,8 @@ function Assert-ComposeReady {
         }
     )[0]
     if (
-        $diagnostics.runtime_profile -ne 'CONTRIBUTOR_EMBEDDED' -or
-        $diagnostics.persistence_provider -ne 'sqlite' -or
+        $diagnostics.runtime_profile -ne 'CONTRIBUTOR_POSTGRESQL' -or
+        $diagnostics.persistence_provider -ne 'postgresql' -or
         $diagnostics.graph_provider -ne 'ladybug'
     ) {
         throw 'docker_backend_runtime_contract_mismatch'
@@ -83,8 +83,8 @@ function Assert-ComposeReady {
         }
     )[0]
     if (
-        $health.profile -ne 'CONTRIBUTOR_EMBEDDED' -or
-        $health.persistence -ne 'sqlite' -or
+        $health.profile -ne 'CONTRIBUTOR_POSTGRESQL' -or
+        $health.persistence -ne 'postgresql' -or
         $health.graph -ne 'ladybug' -or
         $health.components.scheduler -notin @('ready', 'running') -or
         $health.components.projector -notin @('ready', 'running')
@@ -192,7 +192,7 @@ try {
 }
 
 Write-Host 'Angmoo Windows Host Tauri dev stopped cleanly.'
-Write-Host 'Docker frontend/backend and angmoo_contributor_embedded_data were preserved.'
+Write-Host 'Docker postgres/backend/frontend and all contributor data volumes were preserved.'
 } finally {
     Exit-AngmooUtf8NativeCommandScope -State $utf8Scope
 }

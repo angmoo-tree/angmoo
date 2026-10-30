@@ -2,6 +2,7 @@
 import asyncio
 
 from sqlalchemy import select
+from app.core.activity_transactions import activity_write
 
 from app.config import settings
 from app.domains.world_characters.activity_models import ActivityGraphRun
@@ -23,6 +24,10 @@ def _blocked(reason, *, status="aborted"):
 
 
 def _bind_activity_run(ctx, actor):
+    return activity_write(ctx.db, lambda: _bind_current_activity(ctx, actor))
+
+
+def _bind_current_activity(ctx, actor):
     existing = ctx.db.get(ActivityGraphRun, ctx.run_id, populate_existing=True)
     if existing is not None and retired_identity(existing.engine, existing.contract_version):
         return existing
@@ -37,7 +42,6 @@ def _bind_activity_run(ctx, actor):
         from app.domains.memory.service.situation_policy import capture
         row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id, configuration=configuration_for_activity(ctx, actor),
             memory_policy=partial(capture, policy=settings.MEMORY_GENERATION_POLICY))
-    ctx.db.commit()
     return row
 
 

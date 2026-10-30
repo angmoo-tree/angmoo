@@ -69,7 +69,7 @@ class InstallerPayloadContract:
             raise InstallerUpdateContractError(
                 "installer_payload_manifest_invalid"
             ) from exc
-        if not isinstance(payload, dict) or int(payload.get("schema_version", 0)) != 2:
+        if not isinstance(payload, dict) or int(payload.get("schema_version", 0)) not in (2,3):
             raise InstallerUpdateContractError(
                 "installer_payload_manifest_invalid"
             )
@@ -118,6 +118,13 @@ class InstallerPayloadContract:
                 f"{ladybug.target_version}",
             )
         )
+        if payload['schema_version']==3:
+            pg=payload.get('postgresql',{})
+            if (pg.get('schema_version'),pg.get('server_major'),pg.get('source_version'),sqlite.minimum_readable_version,sqlite.maximum_readable_version)!=(5,17,'0.1.3',41,41):
+                raise InstallerUpdateContractError('installer_payload_manifest_invalid')
+            digest=pg.get('resources_manifest_sha256','')
+            if not re.fullmatch('[0-9a-f]{64}',digest):raise InstallerUpdateContractError('installer_payload_manifest_invalid')
+            identity_source+='\npostgresql:5:17:'+digest
         if hashlib.sha256(identity_source.encode("utf-8")).hexdigest() != payload_generation:
             raise InstallerUpdateContractError(
                 "installer_payload_manifest_invalid"

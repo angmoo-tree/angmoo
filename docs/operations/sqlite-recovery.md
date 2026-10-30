@@ -1,5 +1,7 @@
 # SQLite recovery and retained results
 
+> **Legacy scope:** this records the SQLite runtime through 0.1.3 and preserved migration input. For 0.1.4 use [PostgreSQL runtime](../public/postgresql-runtime.md), [migration](../public/postgresql-migration.md), and [backup](../public/postgresql-backup.md). Historical findings below remain unchanged.
+
 SQLite remains canonical. Graph, FTS and Vec1 are disposable projections, not
 alternative sources of authorization or completion. Do not reset queues, delete
 pending work, increase all busy timeouts, or regenerate paid outputs to clear a

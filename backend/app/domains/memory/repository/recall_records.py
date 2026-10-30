@@ -120,49 +120,25 @@ def _current_evidence(
     evidence: MemoryItemEvidence,
     *, session=None, now=None,
 ) -> CanonicalMemoryEvidence | None:
-    modern = False
-    if session is not None:
-        from app.domains.memory.repository.episode_privacy import currently_accessible
-        from app.domains.memory.models.episode import MemoryEpisodeInfo
-        from app.domains.memory.contracts.activity_batch import ACTIVITY_POLICY_VERSION
-        info = session.get(MemoryEpisodeInfo, item.id)
-        modern = info is not None and info.policy_version == ACTIVITY_POLICY_VERSION
-        from app.domains.memory.repository.situation_reads import situation_origin
-        modern = modern or situation_origin(session, item) is not None
-        if not currently_accessible(session, reader, scope, item, now):
-            return None
-    try:
-        source_type = MemorySourceTypeV1(evidence.source_type)
-    except ValueError:
+    # This adapter returns only immutable evidence owned by the saved memory.
+    # Missing historical text never authorizes a live-source fallback.
+    if session is None:
         return None
-    canonical = reader.read_evidence(
-        scope=scope,
-        source_type=source_type,
-        source_id=evidence.source_id,
-    )
-    if canonical is None:
+    from dataclasses import replace
+    from app.domains.memory.repository.experience import accessible, read_snapshot, stored_evidence
+    if not accessible(session, scope, item, now):
         return None
-    if (
-        canonical.source_type is not source_type
-        or canonical.source_id != evidence.source_id
-        or canonical.source_world_id != scope.world_id
-        or canonical.source_digest != evidence.source_digest
-        or not canonical.successful
-        or not canonical.visible
-        or not canonical.observed_by_subject
-        or not canonical.membership_active
-        or canonical.blocked
-    ):
+    row = read_snapshot(session, item)
+    if row is None:
         return None
-    if (
-        not modern and item.counterpart_world_character_id is not None
-        and canonical.counterpart_world_character_id
-        != item.counterpart_world_character_id
-    ):
+    source = next((s for s in row.payload["sources"] if s["source_type"] == evidence.source_type
+        and s["source_id"] == evidence.source_id and s.get("text") is not None), None)
+    if source is None:
         return None
-    if item.thread_id is not None and canonical.thread_id != item.thread_id and not (modern and canonical.thread_id is None):
-        return None
-    return canonical
+    canonical = next((e for e in stored_evidence(session,item)
+        if e.source_type.value == evidence.source_type and e.source_id == evidence.source_id), None)
+    return None if canonical is None else replace(canonical, deterministic_summary=source["text"])
+
 
 
 

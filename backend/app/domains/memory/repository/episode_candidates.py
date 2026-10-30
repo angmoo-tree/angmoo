@@ -68,7 +68,10 @@ class SqlAlchemyEpisodeCandidates:
                 if len(result) >= MAX_PRIOR_EPISODES:
                     break
                 if _item_retrievable(row, now) and self._current(scope, row, now) and len(row.summary) <= 2000:
-                    result.setdefault(row.id, EpisodePriorCandidate(row.id, row.version, row.summary))
+                    from app.domains.memory.repository.experience import read_snapshot
+                    snapshot = read_snapshot(self.session, row)
+                    result.setdefault(row.id, EpisodePriorCandidate(row.id, row.version, row.summary,
+                        snapshot.payload if snapshot is not None else None))
 
         if identities:
             linked_rows = {}

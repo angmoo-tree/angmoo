@@ -28,7 +28,16 @@ def test_explicit_retry_retains_original_cutoff(stack):
     db.commit()
     replay = request_run(db, setting, trigger="manual", request_key="first-request-001", expected_version=1, now=NOW)
     db.refresh(run)
-    assert replay.run_id == first.run_id and run.state == "deferred" and run.cutoff_sequence == cutoff
+    assert replay.run_id == first.run_id and run.state == "error" and run.cutoff_sequence == cutoff
+    # Replaying admission preserves a failure. Only the explicit owner command
+    # resumes its frozen range; ordinary requests must not silently revive it.
+    from types import SimpleNamespace
+    from app.runtime.memory_http import build_memory_workflows
+    from app.domains.memory.service.situation_management import command
+    command(scope=scope, db=db, workflows=build_memory_workflows(), run_id=run.id,
+        data=SimpleNamespace(idempotency_key="explicit-retry-command", expected_revision=0, mode="resume_storage"))
+    db.refresh(run)
+    assert run.state == "deferred" and run.cutoff_sequence == cutoff
     other = request_run(db, setting, trigger="quit", request_key="quit-request-0001", expected_version=1, now=NOW)
     assert other.run_id == run.id and run.cutoff_sequence == cutoff
 

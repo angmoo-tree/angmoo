@@ -34,14 +34,22 @@ def test_feed_owner_root_and_comment_context_use_post_reply_without_manual_claim
                 created_at=root.created_at)
             db.add(reply); db.commit()
             snapshot = enabled(db, lane)
+            state["identity"].update(world_id=lane.actor.world_id, actor_id=lane.actor.id)
             state.update(await lane.load(state))
             # The index returns both. Actual candidate policy must discard the reply.
             assert [c["target_id"] for c in state["candidates"]] == [root.id]
             state.update(generation_mode="combined", selections=[{"target_id": root.id}], decision_input_receipt={})
             # Canonical context, when provided, uses a real REPLY; it is not a
             # second root candidate or a synthetic manual-inbox identifier.
+            from app.runtime.relationships.experience_metrics import post_revision
             payload = {"selected_targets": state["candidates"], "context": {"source_manifest": [
-                {"post_id": reply.id, "excerpt": reply.body}]}}
+                {"post_id": reply.id, "excerpt": reply.body, "target_ref": author.id,
+                 "revision": post_revision(reply), "created_at": reply.created_at.isoformat()}]}}
+            from app.runtime.memory.captured_delivery import post_reference
+            from app.runtime.autonomous_activity.initial_input import seal
+            state["lane_data"]["_reference_sources"][reply.id] = post_reference(reply)
+            state["decision_context"] = payload["context"]
+            state.update(seal(state, {}))
             manifest = freeze_social_input(lane.ctx, snapshot, node="FeedDecisionDraft", payload=payload,
                 transmitted=json.dumps(payload, default=str), state=state)
             assert {(s.source_type, s.source_id) for s in manifest.sources} == {("POST", root.id), ("REPLY", reply.id)}
@@ -65,7 +73,9 @@ def test_feed_owner_root_and_comment_context_use_post_reply_without_manual_claim
             if receipts:
                 context = restore_context(db, receipts[0])
                 source = next(s for s in context.sources if s.source_type == "REPLY")
-                assert SituationSources(db).validate(context, source, now=datetime.now(UTC)).state == "available"
+                from app.domains.memory.repository.experience import validate_captured_sources
+                assert next(access for entry, access in validate_captured_sources(db, context, (), receipts[0],
+                    now=datetime.now(UTC)) if entry == source).state == "available"
                 reply.report_hidden_at = datetime.now(UTC)
                 db.commit(); db.expire_all()
                 assert SituationSources(db).validate(context, source, now=datetime.now(UTC)).state != "available"

@@ -1,6 +1,6 @@
 """Persist a received review without repeating its provider call."""
 from datetime import UTC, datetime
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.database_transactions import database_write
 from app.domains.relationships.contracts.daily_review import manifest_digest, validate_review_result
 from app.domains.relationships.models.personalization import RelationshipReviewWork
 
@@ -18,6 +18,9 @@ def persist_received(sessions, work_id, record, references_factory):
                 (record["lease"], record["attempt"], record["manifest_digest"])):
                 return "lease_lost"
             root = root_work(db, row)
+            from app.domains.relationships.service.review_recovery import stopped
+            if stopped(root) or stopped(row):
+                return "lease_lost"
             if root.manifest_digest != record["root_digest"]:
                 return "lease_lost"
             references_factory(db).revalidate(root)
@@ -38,7 +41,7 @@ def persist_received(sessions, work_id, record, references_factory):
                 "usage": record.get("usage"), "attempt": row.attempts, "result_digest": record["result_digest"]}}
             row.status, row.lease_token, row.lease_until, row.error_code = "ready", None, None, None
             return "ready"
-        return run_sqlite_session_immediate(db, apply, require_clean=True)
+        return database_write(db, apply, require_clean=True)
 
 
 def may_publish(sessions, work_id, record, now):
