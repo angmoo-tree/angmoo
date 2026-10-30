@@ -45,6 +45,7 @@ jobs:
           uv run --project backend python scripts/ci/check_windows_host_tauri_dev_contract.py
           uv run --project backend python scripts/ci/generate_architecture_inventory.py --check
           uv run --project backend python scripts/ci/generate_deferred_runtime_inventory.py --check
+          uv run --project backend python scripts/verify_embedded_runtime_inventory.py --check
       - name: Scan current repository and full history
         run: |
           uv run --directory backend python ../scripts/security_secret_scan.py --git-tree HEAD
