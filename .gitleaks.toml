@@ -665,3 +665,24 @@ regexes = [
   '''^fdfab20378fa96f8bd4e6c9c57979c9dedde7162$''',
   '''^legacy\-transition\-001$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public PostgreSQL noncredential source fingerprints at 988cb004; not runtime credentials; reviewed 2026-10-30"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)scripts/ci/check_secret_allowlist_metadata\.py$''']
+regexes = [
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '1c429e44bf84430c4f6fb0ee312f28f82fb0cc273fcd83b44f98173892812d28'\):\ \{'source_git_blob':\ '374e93d25db33eee15743afb07845a898c1d3509',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '1edc9310fee4f3227ec5cebac21768eaaf31f45e388812ae4b4e00615947560c'\):\ \{'source_git_blob':\ '74a6f983bb07f11450a34863e29889e2de9dbcd2',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '66a4a36faab996610a0dd73afdb82d065f9d71da4fed066cb80be35621f94d4d'\):\ \{'source_git_blob':\ 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '6f1524fe282ecb4c8e68092a6669e7dd42a78a26768c5985f8d179640708ac81'\):\ \{'source_git_blob':\ '374e93d25db33eee15743afb07845a898c1d3509',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '765e1bc80df1a15957d6dd1288e3a962b622a25cab47bbec7024ae63a8bc5333'\):\ \{'source_git_blob':\ 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '76ba459eb6527951dab037a25c648a083558e0a6bd4e4475ad3314f3ae5b6ac1'\):\ \{'source_git_blob':\ '6e95cec5646cd05863d866b5b0ff0b46d3515300',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ '8ae7c35eda7736b6375895954576bc625aa5b52ca0862a06e3be0929003fc77b'\):\ \{'source_git_blob':\ 'd2f56a778710d612f447f6453d9dacfc30e4a128',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ 'aa82d37d6820ba9d40c4afb0ba7b4c83dca0e266d0924fb1debe7f4a31da393f'\):\ \{'source_git_blob':\ 'd2f56a778710d612f447f6453d9dacfc30e4a128',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ 'b4be8cfdb7631ba340f88f32c54944867488eddf92af39391ca69131710ef9a2'\):\ \{'source_git_blob':\ '7558172380914f297432e4f9b254fb367c398007',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ 'c0dae2779e0cce67bc5fa24497bb5e699e4371cec71d9e33d0b5eacf40821359'\):\ \{'source_git_blob':\ 'd2f56a778710d612f447f6453d9dacfc30e4a128',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ 'ee8e07741e4b17eaceef5782c0dccbb2ae45f2591a7acd9f6f643557a8efe3c0'\):\ \{'source_git_blob':\ 'd2f56a778710d612f447f6453d9dacfc30e4a128',\s*$''',
+  '''^\s*\('backend/security/secret_scan_allowlist\.json',\ 'ff475bc505011d4141d043fcadf77bc31e608f4133d03534e78af897c066c625'\):\ \{'source_git_blob':\ 'd2f56a778710d612f447f6453d9dacfc30e4a128',\s*$''',
+]

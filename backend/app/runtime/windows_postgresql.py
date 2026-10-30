@@ -15,6 +15,8 @@ from psycopg import sql
 from sqlalchemy import URL
 from app.runtime.postgresql_installation import private_file,write_json,read_dsn,initialize,migrate,snapshot
 
+SOURCE_SECTIONS=('canonical','secrets','media','runtime','search','graph')
+
 
 def source_inventory(root):
     from app.runtime.postgresql_migration import files
@@ -23,8 +25,17 @@ def source_inventory(root):
     # the same process. Exclude only new process-ownership files before IO;
     # checkpoints, journals and every other old runtime file remain included.
     transient={'sidecar.owner.json','sidecar.endpoint.json','canonical-serving.lock'}
+    # The desktop host creates missing empty data directories before startup.
+    # Their presence changes no source bytes and must not invalidate a snapshot.
     return {name:files(root/name,exclude=transient if name=='runtime' else ())
-        for name in ('canonical','secrets','media','runtime','search','graph') if (root/name).exists()}
+        for name in SOURCE_SECTIONS}
+
+
+def _same_source_inventory(recorded,current):
+    # Retain older interrupted markers that omitted absent directories. A new
+    # file in any such directory still differs from its recorded empty list.
+    return (isinstance(recorded,dict) and not set(recorded)-set(SOURCE_SECTIONS)
+        and {name:recorded.get(name,[]) for name in SOURCE_SECTIONS}==current)
 
 
 class NativePostgres:
@@ -189,7 +200,8 @@ def prepare(data_root,resources,*,allow_migration=False):
             inventory=source_inventory(root)
             source_marker=root/'postgresql-migration/source-inventory.json'
             if source_marker.exists():
-                if json.loads(source_marker.read_text(encoding='utf-8'))!=inventory:raise ValueError('migration_native_source_changed')
+                if not _same_source_inventory(json.loads(source_marker.read_text(encoding='utf-8')),inventory):
+                    raise ValueError('migration_native_source_changed')
             else:write_json(source_marker,inventory)
             for name,rows in inventory.items():
                 for row in rows:

@@ -3118,11 +3118,11 @@
     },
     {
       "path": "backend/security/public_route_security_inventory.json",
-      "sha256": "195dfbc75ed7d5eff078d8827a7125afd35b7e7d1163847e5f5e93af7308614f"
+      "sha256": "54d5f53c096c4e97d48aa652491446da23024225302d5b856c54099c1d9ad154"
     },
     {
       "path": "backend/security/route_security_inventory.json",
-      "sha256": "cd31893e0844b3c4d846f9ddbd97cc28f4ba86bbc82ee0aace39c94556ca176e"
+      "sha256": "aefe15dd48497e188777e55ffba10ed3b91c8c589ba5a9a381677e9a47d93a53"
     },
     {
       "path": "backend/tests/chat/test_activity_situation_receipt.py",

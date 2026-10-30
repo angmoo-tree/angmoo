@@ -73,6 +73,28 @@ def test_gitleaks_postgresql_fixture_exceptions_match_only_reviewed_public_lines
         assert not re.fullmatch(pattern, line.replace("001", "002").replace("received-token", "other-token"))
 
 
+def test_gitleaks_noncredential_source_fingerprints_keep_other_lines_visible():
+    config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    entry, = (row for row in config["allowlists"]
+              if row["description"].startswith("Exact public PostgreSQL noncredential source fingerprints"))
+    path = "scripts/ci/check_secret_allowlist_metadata.py"
+    assert entry["condition"] == "AND" and entry["regexTarget"] == "line"
+    assert entry["targetRules"] == ["generic-api-key"] and len(entry["paths"]) == 1
+    assert re.search(entry["paths"][0], path)
+    assert not re.search(entry["paths"][0], "scripts/ci/private-credentials.py")
+    source = subprocess.check_output([
+        "git", "show", "988cb004c48c8dae66abd49186ae029a08a376e5:" + path
+    ], cwd=REPO_ROOT, text=True)
+    lines = [line for line in source.splitlines()
+             if "('backend/security/secret_scan_allowlist.json', '" in line]
+    assert len(lines) == len(entry["regexes"]) == 12
+    for line in lines:
+        pattern, = (pattern for pattern in entry["regexes"] if re.fullmatch(pattern, line))
+        assert pattern.startswith("^") and pattern.endswith("$")
+        assert not re.fullmatch(pattern, line + " unreviewed")
+        assert not re.fullmatch(pattern, line.replace("source_git_blob", "runtime_api_key"))
+
+
 def test_postgresql_noncredential_exceptions_are_exact_and_keep_other_dsns_visible(tmp_path):
     spec = importlib.util.spec_from_file_location(
         "postgresql_fixture_scanner", REPO_ROOT / "scripts/security_secret_scan.py"

@@ -72,6 +72,33 @@ def test_installer_harness_cannot_run_against_developer_installation(monkeypatch
     with pytest.raises(ValueError,match='hosted_only'):hosted_root()
 
 
+def test_startup_failure_diagnostics_do_not_publish_private_log_bodies(tmp_path):
+    from scripts.ci.run_windows_postgresql_qualification import failure_diagnostics
+    logs=tmp_path/'private';logs.mkdir()
+    (logs/'owned.log').write_text('ValueError: migration_native_source_changed\n'
+        'private conversation and credential material must stay private\n',encoding='utf-8')
+    value=failure_diagnostics(tmp_path/'data',logs)
+    assert value['stable_private_log_codes']==['migration_native_source_changed']
+    assert 'private conversation' not in json.dumps(value)
+    assert set(value)=={'endpoint_present','activation_present','postmaster_pid_present','stable_private_log_codes'}
+
+
+def test_native_resume_accepts_empty_directories_but_rejects_new_source_bytes(tmp_path):
+    (tmp_path/'canonical').mkdir()
+    (tmp_path/'canonical/fixture.sqlite').write_bytes(b'unchanged source')
+    before=native.source_inventory(tmp_path)
+    legacy={name:rows for name,rows in before.items() if rows}
+    (tmp_path/'search').mkdir()
+    (tmp_path/'media').mkdir()
+    assert native.source_inventory(tmp_path)==before
+    assert native._same_source_inventory(legacy,native.source_inventory(tmp_path))
+    (tmp_path/'search/new-file').write_bytes(b'new source bytes')
+    assert not native._same_source_inventory(legacy,native.source_inventory(tmp_path))
+    assert not native._same_source_inventory({**legacy,'unreviewed':[]},before)
+    (tmp_path/'canonical/fixture.sqlite').write_bytes(b'changed source')
+    assert not native._same_source_inventory(before,native.source_inventory(tmp_path))
+
+
 def test_consent_automation_cannot_run_against_developer_windows(monkeypatch):
     from scripts.ci.windows_migration_consent import accept_owned_migration_dialog
     monkeypatch.delenv('GITHUB_ACTIONS',raising=False)

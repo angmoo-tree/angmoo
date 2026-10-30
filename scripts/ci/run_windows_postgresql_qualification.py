@@ -4,7 +4,7 @@ Never run this installer harness on a developer or self-hosted machine. Reports
 contain booleans and source hashes only; databases and tokens remain private.
 """
 from __future__ import annotations
-import argparse,hashlib,json,os,secrets,shutil,sqlite3,subprocess,sys,time,urllib.error,urllib.request,uuid
+import argparse,hashlib,json,os,re,secrets,shutil,sqlite3,subprocess,sys,time,urllib.error,urllib.request,uuid
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -155,6 +155,29 @@ def wait_for_host(child,endpoint,*,timeout,confirm=None):
     raise ValueError('windows_pg_actual_host_not_ready')
 
 
+def failure_diagnostics(data,private):
+    """Publish phase flags and stable error codes, never private log bodies."""
+    result={'endpoint_present':(data/'runtime/sidecar.endpoint.json').exists(),
+        'activation_present':(data/'postgresql-appdata/runtime/postgresql-runtime.json').exists(),
+        'postmaster_pid_present':(data/'postgresql/cluster/postmaster.pid').exists()}
+    marker=data/'postgresql-migration/source-inventory.json'
+    if marker.is_file():
+        try:
+            from app.runtime.windows_postgresql import source_inventory,_same_source_inventory
+            before=json.loads(marker.read_text(encoding='utf-8'));after=source_inventory(data)
+            result['source_inventory_unchanged']=_same_source_inventory(before,after)
+            result['source_changed_sections']=[name for name in
+                ('canonical','secrets','media','runtime','search','graph')
+                if before.get(name)!=after.get(name)]
+        except Exception as exc:result['inventory_error_type']=type(exc).__name__
+    codes=set()
+    for path in private.glob('*.log'):
+        with path.open('rb') as incoming:text=incoming.read(2*1024*1024).decode('utf-8','replace')
+        codes.update(re.findall(r'(?m)^(?:ValueError|RuntimeError): ([a-z][a-z0-9_]{5,120})\r?$',text))
+    result['stable_private_log_codes']=sorted(codes)[:12]
+    return result
+
+
 def host_launch(app,data,private,*,initial=False,migration=False):
     endpoint=data/'runtime/sidecar.endpoint.json'
     require(not endpoint.exists(),'windows_pg_previous_endpoint_remains')
@@ -166,6 +189,9 @@ def host_launch(app,data,private,*,initial=False,migration=False):
             from scripts.ci.windows_migration_consent import accept_owned_migration_dialog
             wait_for_host(child,endpoint,timeout=330 if initial else 150,
                           confirm=accept_owned_migration_dialog if migration else None)
+        except Exception:
+            print(json.dumps({'qualification_diagnostics':failure_diagnostics(data,private)}),flush=True)
+            raise
         finally:
             if child.poll() is None:child.terminate();child.wait(timeout=15)
     deadline=time.monotonic()+120
