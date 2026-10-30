@@ -1,0 +1,77 @@
+name: PostgreSQL Docker Qualification
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Exact already-built main product source
+        type: string
+        required: true
+      candidate_run:
+        description: Validated six-payload Container Candidate run
+        type: string
+        required: true
+      candidate_artifact:
+        description: Complete Container Candidate artifact ID
+        type: string
+        required: true
+      windows_run:
+        description: Full Windows producer run containing the source-stamped Python tool
+        type: string
+        required: true
+      windows_attempt:
+        description: Windows producer attempt
+        type: string
+        required: true
+      windows_artifact:
+        description: Original Windows and migration-tools artifact ID
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: postgresql-docker-qualification-${{ inputs.source }}
+  cancel-in-progress: false
+jobs:
+  native-arm64:
+    if: github.repository == 'angmoo-tree/angmoo' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PRODUCT_SOURCE: ${{ inputs.source }}
+      CANDIDATE_RUN: ${{ inputs.candidate_run }}
+      CANDIDATE_ARTIFACT: ${{ inputs.candidate_artifact }}
+      WINDOWS_RUN: ${{ inputs.windows_run }}
+      WINDOWS_ATTEMPT: ${{ inputs.windows_attempt }}
+      WINDOWS_ARTIFACT: ${{ inputs.windows_artifact }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - name: Bind exact originals and create isolated official 0.1.3 input
+        run: |
+          python -m scripts.ci.prepare_docker_postgresql_qualification \
+            --source "$PRODUCT_SOURCE" --candidate-run "$CANDIDATE_RUN" --candidate-artifact "$CANDIDATE_ARTIFACT" \
+            --windows-run "$WINDOWS_RUN" --windows-attempt "$WINDOWS_ATTEMPT" --windows-artifact "$WINDOWS_ARTIFACT" \
+            --work-root "$RUNNER_TEMP/angmoo-pg-qualification"
+      - name: Qualify migration, interruption resume, restart, actual restore and rollback
+        run: |
+          python scripts/ci/qualify_docker_postgresql.py arm64 \
+            --inputs "$RUNNER_TEMP/angmoo-pg-qualification/inputs.json" \
+            --work-root "$RUNNER_TEMP/angmoo-pg-qualification"
+      - name: Preserve only sanitized qualification receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: postgresql-docker-native-arm64-${{ inputs.source }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/angmoo-pg-qualification/records/source.json
+            ${{ runner.temp }}/angmoo-pg-qualification/records/n6-docker-arm64.json
+            ${{ runner.temp }}/angmoo-pg-qualification/records/n6-docker-arm64-migrated-search.json
+          if-no-files-found: error
+          retention-days: 30

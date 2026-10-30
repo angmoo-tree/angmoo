@@ -3673,6 +3673,37 @@
     {
       "markers": {
         "driver_or_url": [
+          1,
+          11,
+          12,
+          13,
+          14,
+          24,
+          61
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/postgresql_candidate_data_probe.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "897a647e10a3cb499b4ff7e75eb903f3c39227899567ba49a0b15b06ac9b76bd",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          70,
+          76
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/prepare_docker_postgresql_qualification.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "d8dd29969c2f2f4e6d1032fbf12f84a649b130c57f039dd3327969f53386442c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           3,
           11,
           12,
@@ -3685,6 +3716,23 @@
       "path": "scripts/ci/prepare_postgresql_tests.py",
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e837d0a936e2293e509e9b85bfe621c30946ddb42a3d6329783c2f4264779846",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          11,
+          79,
+          95,
+          103,
+          104,
+          105
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/qualify_docker_postgresql.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "09f39976d5ff900d43f79c5244276d37f2706305661ce4222ce2c71901035534",
       "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
@@ -3954,12 +4002,28 @@
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "d775317a5d7f5157ac33b888116af29de3319a19711884dfec1e525228f7efb0",
       "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          6,
+          14,
+          123,
+          127,
+          139
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/workflow_policy.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "e849eb84320ec466638c401b97cb4b28fa1fc680b28fe6c748ba0f8ec26eadda",
+      "transition_pr": "PostgreSQL adoption PR #418"
     }
   ],
-  "entry_count": 244,
+  "entry_count": 248,
   "marker_counts": {
     "advisory_lock": 15,
-    "driver_or_url": 196,
+    "driver_or_url": 200,
     "jsonb": 15,
     "pgvector": 11,
     "row_lock": 61,

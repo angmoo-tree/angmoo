@@ -3,13 +3,15 @@
 UPLOAD = "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
 GUARD = "github.repository == 'angmoo-tree/angmoo'"
 MAIN = GUARD + " && github.ref == 'refs/heads/main'"
-WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml"}
+QUALIFICATION = "postgresql-docker-qualification.yml"
+WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml", QUALIFICATION}
 ARTIFACTS = {
     ("container-candidate.yml", "build-validate"): ("candidate-${{ github.sha }}-${{ github.run_attempt }}-${{ matrix.architecture }}", "artifacts/release-candidate/*.oci.tar\nartifacts/release-candidate/candidate-*.json\nartifacts/release-candidate/validation-*/*.json", 14, 0),
     ("container-candidate.yml", "candidate"): ("release-candidate-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/release-candidate/*.oci.tar\nartifacts/release-candidate/candidate.json\nartifacts/release-candidate/validation-*/*.json", 14, 0),
     ("release-images.yml", "publish-ghcr"): ("image-publication-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/image-publication/image-publication.json", 30, None),
     ("release-publish.yml", "verify"): ("release-verify-${{ github.run_id }}-${{ github.run_attempt }}", "artifacts/release-publication/prepared.json\nartifacts/release-publication/release-publication.json", 30, None),
     ("release-publish.yml", "publish"): ("release-publish-${{ github.run_id }}-${{ github.run_attempt }}", "artifacts/release-publication/prepared.json\nartifacts/release-publication/release-publication.json", 30, None),
+    (QUALIFICATION, "native-arm64"): ("postgresql-docker-native-arm64-${{ inputs.source }}-${{ github.run_id }}-${{ github.run_attempt }}", "${{ runner.temp }}/angmoo-pg-qualification/records/source.json\n${{ runner.temp }}/angmoo-pg-qualification/records/n6-docker-arm64.json\n${{ runner.temp }}/angmoo-pg-qualification/records/n6-docker-arm64-migrated-search.json", 30, None),
 }
 
 
@@ -26,13 +28,15 @@ def uploads(document, name):
             expected["compression-level"] = compression
         options = dict(found[0].get("with", {}))
         options["path"] = str(options.get("path", "")).strip()
-        condition = "always()" if name == "release-images.yml" else None
+        condition = "always()" if name in {"release-images.yml", QUALIFICATION} else None
         if options != expected or found[0].get("uses") != UPLOAD or found[0].get("if") != condition:
             errors.append("release artifact export exceeds its reviewed paths or identity")
     return errors
 
 
 def validate(document, name):
+    if name == QUALIFICATION:
+        return validate_qualification(document)
     errors = []
     jobs = document.get("jobs", {})
     events = document.get("on", document.get(True, {}))
@@ -84,4 +88,54 @@ def validate(document, name):
             errors.append("Release write must follow read-only verification")
     if document.get("concurrency", {}).get("cancel-in-progress") is not False:
         errors.append("release operations must be serialized without cancellation")
+    return errors
+
+
+def validate_qualification(document):
+    """Read-only native check of immutable originals, never a publishing lane."""
+    errors = []
+    # Other contract callers use PyYAML's YAML 1.1 loader, whose parsed `on`
+    # key is True. The source-text policy uses its independent YAML 1.2 loader
+    # and rejects an actually serialized boolean event key before calling us.
+    events = document.get("on", document.get(True, {}))
+    fields = ("source", "candidate_run", "candidate_artifact", "windows_run", "windows_attempt", "windows_artifact")
+    dispatch = events.get("workflow_dispatch", {}) if isinstance(events, dict) else {}
+    inputs = dispatch.get("inputs", {}) if isinstance(dispatch, dict) else {}
+    if (not isinstance(events, dict) or set(events) != {"workflow_dispatch"}
+            or set(inputs) != set(fields) or any(inputs[key].get("type") != "string"
+                or inputs[key].get("required") is not True or "default" in inputs[key] for key in fields if key in inputs)):
+        errors.append("native qualification requires explicit immutable-source dispatch inputs")
+    jobs = document.get("jobs", {})
+    if set(jobs) != {"native-arm64"}:
+        return errors + ["native qualification requires its single reviewed job"]
+    job = jobs["native-arm64"]
+    if (job.get("if") != MAIN or job.get("runs-on") != "ubuntu-24.04-arm"
+            or job.get("timeout-minutes") != 40
+            or job.get("permissions") != {"contents": "read", "actions": "read"}
+            or set(job) != {"if", "runs-on", "timeout-minutes", "permissions", "env", "steps"}):
+        errors.append("native qualification must remain main-only, native ARM64 and read-only")
+    expected_env = {"GH_TOKEN": "${{ github.token }}", **{
+        key: "${{ inputs." + field + " }}" for key, field in zip(
+            ("PRODUCT_SOURCE", "CANDIDATE_RUN", "CANDIDATE_ARTIFACT", "WINDOWS_RUN", "WINDOWS_ATTEMPT", "WINDOWS_ARTIFACT"), fields)}}
+    if job.get("env") != expected_env:
+        errors.append("native qualification environment must bind only the reviewed inputs")
+    steps = job.get("steps", [])
+    prepare = ('python -m scripts.ci.prepare_docker_postgresql_qualification \\\n'
+        '  --source "$PRODUCT_SOURCE" --candidate-run "$CANDIDATE_RUN" --candidate-artifact "$CANDIDATE_ARTIFACT" \\\n'
+        '  --windows-run "$WINDOWS_RUN" --windows-attempt "$WINDOWS_ATTEMPT" --windows-artifact "$WINDOWS_ARTIFACT" \\\n'
+        '  --work-root "$RUNNER_TEMP/angmoo-pg-qualification"')
+    qualify = ('python scripts/ci/qualify_docker_postgresql.py arm64 \\\n'
+        '  --inputs "$RUNNER_TEMP/angmoo-pg-qualification/inputs.json" \\\n'
+        '  --work-root "$RUNNER_TEMP/angmoo-pg-qualification"')
+    if (len(steps) != 5 or steps[0].get("uses") != "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+            or steps[0].get("with") != {"fetch-depth": 0, "persist-credentials": False}
+            or set(steps[0]) != {"uses", "with"}
+            or steps[1] != {"uses": "docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"}
+            or str(steps[2].get("run", "")).strip() != prepare
+            or str(steps[3].get("run", "")).strip() != qualify
+            or any(set(steps[index]) != {"name", "run"} for index in (2, 3))
+            or set(steps[-1]) != {"name", "if", "uses", "with"}):
+        errors.append("native qualification must execute only the reviewed source-bound preparation and check")
+    if document.get("concurrency") != {"group": "postgresql-docker-qualification-${{ inputs.source }}", "cancel-in-progress": False}:
+        errors.append("native qualification must serialize the same source without cancellation")
     return errors

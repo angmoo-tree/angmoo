@@ -27,6 +27,7 @@ EXPECTED_WORKFLOWS = {
     "release-images.yml",
     "container-candidate.yml",
     "release-publish.yml",
+    "postgresql-docker-qualification.yml",
 }
 REQUIRED_JOBS = {
     "backend",
@@ -359,6 +360,8 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
     except yaml.YAMLError as exc:
         return [f"workflow YAML is invalid: {exc}"], []
     if path.name in workflow_policy.WORKFLOWS and isinstance(document, dict):
+        if "on" not in document or any(not isinstance(key, str) for key in document):
+            errors.append("workflow event key must be the string on, not a YAML boolean")
         errors.extend(workflow_policy.validate(document, path.name))
     else:
         errors.extend(_check_triggers(document, release=False, weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
