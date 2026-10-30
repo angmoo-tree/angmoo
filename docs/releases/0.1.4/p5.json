@@ -1,0 +1,104 @@
+{
+  "schema": "angmoo-p5.v1",
+  "source_sha": "7d0cfabca490261461d4f4b7426ad16e60e4e996",
+  "windows": {
+    "sha256": "sha256:60ae465a1cb01652a6426103d902e1c1089ccc1c5f282023c5d63c5ae027562d",
+    "run_id": "41080462974",
+    "attempt": "2"
+  },
+  "images": {
+    "backend/linux/amd64": "sha256:2bdf09b761738fc82231f67940365a5bb13a2a7b147dd1a6a5d0de638d3ec1ee",
+    "frontend/linux/amd64": "sha256:f23bb5122ec7b3fadd79814c622e772aa4e0bca1d2e22b20ad1c8f7b986100e0",
+    "postgres/linux/amd64": "sha256:b6a0989502bb4b86313855bd69a58277c12dbcd545303701ea60e31991ec4640",
+    "backend/linux/arm64": "sha256:e6291e4e1f229839d5796b7428b94e8624bad0c807e58325a8b9ae3b5890f2c3",
+    "frontend/linux/arm64": "sha256:7fb5e8eea9ef6d1cf3867204dafa5bc841548d13ddf80ae00c340d93dbc6693f",
+    "postgres/linux/arm64": "sha256:f7bc64f2c12d8f4c679e2baf7dda10a994c340f04abf2345d752d2f03f11e05b"
+  },
+  "checks": [
+    {
+      "workflow": "ci.yml",
+      "run_id": "41080463006",
+      "attempt": "1"
+    },
+    {
+      "workflow": "local-smoke.yml",
+      "run_id": "41080463020",
+      "attempt": "1"
+    },
+    {
+      "workflow": "security.yml",
+      "run_id": "41080462937",
+      "attempt": "1"
+    }
+  ],
+  "windows_user_check": {
+    "result": "PASS",
+    "reviewer": "jingujeon",
+    "checked_at": "2026-10-30T21:39:04.828337+00:00",
+    "exe_sha256": "sha256:60ae465a1cb01652a6426103d902e1c1089ccc1c5f282023c5d63c5ae027562d",
+    "scope": "installation-startup-home-and-existing-data-display",
+    "evidence": "Maintainer confirmed the exact final installer installation, launch, home and existing data, then kept the app open. Agent observed Device Home ready with five existing Worlds and verified the physical installed S payload. Running-image inspection is corroborated only (stale staging mapping; matching PE headers/executable code), not a full running-identity PASS.",
+    "physical_installation_identity": "verified",
+    "independent_running_identity": "corroborated",
+    "independent_running_identity_fully_verified": false
+  },
+  "android_support": "experimental-not-certified",
+  "postgresql_adoption": {
+    "source_sha": "7d0cfabca490261461d4f4b7426ad16e60e4e996",
+    "source_version": "0.1.3",
+    "target_schema": 5,
+    "platforms": {
+      "docker-amd64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "migration": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Agent qualification of distributed EXE: official 0.1.3 copy -> target; normal three-service start; new write/restart; cold backup actually restored; old SQLite copy rollback. Native candidate fresh-feature CI also passed."
+      },
+      "docker-arm64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "migration": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Native ubuntu-24.04-arm qualification https://github.com/angmoo-tree/angmoo/actions/runs/41136047745: exact fixed-S archives and source-stamped Python tool, official 0.1.3 synthetic copy, controlled store interruption/resume, three-service boot, new Unicode write/restart, actual cold restore and old SQLite rollback. Fresh-install/current-feature native CI is from fixed-S candidate run 41081578283. Local QEMU timeout is retained; macOS is not qualified."
+      },
+      "termux-arm64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "migration": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Actual ARM64 phone: fresh install, official 0.1.3 181-table migration, new writes/restarts, 3037-entry cold restore, representative real AI, scoped keyword/exact-vector recall and queue controls; bounded limits in verification.md."
+      },
+      "windows-x64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "migration": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Source-bound hosted NSIS full clean-install/official 0.1.3 upgrade/failure-recovery matrix passed on run 41080462974 attempt 2. Maintainer also confirmed final exact-installer startup/home/existing data. Physical S installation verified; independent running identity remains corroborated, as explained in verification.md."
+      }
+    },
+    "termux_idle": {
+      "result": "PASS",
+      "seconds": 600,
+      "cpu_one_core_percent": 9.679547445357555,
+      "evidence": "Separately measured steady idle after fixed 120-second startup warmup, normal workers and unchanged <=10% one-core threshold; first startup-contaminated 14.56% measurement retained as FAIL."
+    },
+    "provider_budget": {
+      "transmissions": 14,
+      "maximum_rolling_60s": 7,
+      "minimum_interval_seconds": 5.201719760894775
+    },
+    "real_ai": {
+      "result": "PASS",
+      "evidence": "Actual migrated/restored phone copy: Chat committed, SNS completed with two replies, twenty memories plus snapshots stored, three relationship targets kept; original-provider 503/504 and test-copy-only alternate model documented. Limited semantic relevance assessment; old partial sources retained."
+    }
+  }
+}
