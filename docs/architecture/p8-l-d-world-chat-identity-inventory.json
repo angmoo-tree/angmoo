@@ -28,15 +28,10 @@
     }
   ],
   "installer_upgrade": {
-    "historical_v3_fixture_preserved": true,
-    "hosted_workflow_cases": [
-      "upgrade-013",
-      "failure-recovery"
-    ],
+    "hosted_workflow_archive": "supported-v3.zip",
     "idempotent_target_reinstall_verified": true,
     "message_survival_verified": true,
-    "required_predecessor": 41,
-    "source_product_version": "0.1.3",
+    "required_predecessor": 3,
     "supported_predecessor_present": true,
     "synthetic_fixture_has_resolved_and_ambiguous_threads": true
   },

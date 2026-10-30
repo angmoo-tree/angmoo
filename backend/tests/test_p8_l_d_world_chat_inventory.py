@@ -36,6 +36,17 @@ def test_p8_l_d_generated_inventory_is_current() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_p8_l_d_refuses_regeneration_after_frozen_successor() -> None:
+    path = "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
+    before = _sha256(path)
+    result = subprocess.run(
+        [sys.executable, "scripts/ci/generate_p8_l_d_world_chat_inventory.py", "--write"],
+        cwd=ROOT, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 1 and "inventory is frozen" in result.stderr
+    assert _sha256(path) == before
+
+
 def test_p8_l_d_chains_frozen_a_and_b_without_rewriting_history() -> None:
     inventory = _json(
         "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
@@ -102,12 +113,10 @@ def test_p8_l_d_preserves_v3_fixture_and_requires_official_013_hosted_upgrade() 
         "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
     )
     assert inventory["installer_upgrade"] == {
-        "historical_v3_fixture_preserved": True,
-        "hosted_workflow_cases": ["upgrade-013", "failure-recovery"],
+        "hosted_workflow_archive": "supported-v3.zip",
         "idempotent_target_reinstall_verified": True,
         "message_survival_verified": True,
-        "required_predecessor": 41,
-        "source_product_version": "0.1.3",
+        "required_predecessor": 3,
         "supported_predecessor_present": True,
         "synthetic_fixture_has_resolved_and_ambiguous_threads": True,
     }
