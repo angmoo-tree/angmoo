@@ -27,6 +27,7 @@ EXPECTED_WORKFLOWS = {
     "release-images.yml",
     "container-candidate.yml",
     "release-publish.yml",
+    "postgresql-docker-qualification.yml",
 }
 REQUIRED_JOBS = {
     "backend",
