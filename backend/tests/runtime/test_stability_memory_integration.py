@@ -42,6 +42,13 @@ def test_restart_same_decision_applies_each_effect_and_memory_once(relation_case
     for candidate in state["candidates"]:
         post = db.get(models.Post, candidate["target_id"])
         sources.append({"target_id": post.id, "source_ids": [post.id], "text": post.body})
+        candidate.update(source_ids=[post.id],text=post.body)
+    from app.runtime.memory.captured_delivery import post_reference, bind_candidate_sources
+    from app.runtime.autonomous_activity.initial_input import seal
+    references={row['target_id']:post_reference(db.get(models.Post,row['target_id'])) for row in sources}
+    bind_candidate_sources(state['candidates'],references)
+    state['lane_data']['_reference_sources']=references
+    state.update(seal(state,{}))
     payload = {"selected_targets": sources, "context": {}}
     manifest = freeze_social_input(lane.ctx, snapshot, node="InboxDecisionDraft", payload=payload,
         transmitted=json.dumps(payload), state=state)

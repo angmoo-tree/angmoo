@@ -319,10 +319,25 @@ def test_discard_queued_candidate_is_audited_and_never_revived_on_restart(durabl
         expected_version=1, receipt_sequence=row.sequence, expected_receipt_version=1, now=NOW)
     db.commit()
     db.expire_all()
-    assert consume(db, memory, request) == 0
-    assert row.state == "discarded" and run.skipped_count == 1 and run.applied_count == 0
+    if state == 'error':
+        with pytest.raises(MemoryConflictError,match='situation_run_fence_lost'):
+            consume(db,memory,request)
+        db.rollback()
+        assert run.applied_count == 0
+    else:
+        assert consume(db, memory, request) == 0
+        assert run.skipped_count == 1 and run.applied_count == 0
+    assert row.state == "discarded"
     attempt = db.scalar(select(MemorySituationRecheckAttempt))
-    assert attempt.outcome == "discarded" and attempt.before_version == 1 and attempt.after_version == 2
+    if state == 'error':
+        # A terminal failed run is not an active queued recheck. Its owner's
+        # discard is still durably audited by the accepted recovery request.
+        from app.domains.memory.models.activity_situation import MemorySituationRequest
+        assert attempt is None
+        assert db.get(MemorySituationRequest,(setting.id,'discard-queued-001')).result_code == 'discarded'
+        assert row.state_version == 2
+    else:
+        assert attempt.outcome == "discarded" and attempt.before_version == 1 and attempt.after_version == 2
     assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
 
 

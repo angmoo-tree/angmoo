@@ -22,7 +22,7 @@
       "-d"
     ]
   },
-  "contract_id": "angmoo-l0-docker-runtime-v1",
+  "contract_id": "angmoo-local-postgresql-runtime-v2",
   "core_modules": [
     {
       "module": "app.core.accounting",
@@ -30,6 +30,20 @@
       "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
       "removal_condition": null,
       "reason": "Pure SQL calendar-window predicates; domains retain quota SQL and transactions."
+    },
+    {
+      "module": "app.core.activity_transactions",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Short, replayable SNS database units; never wrap model or filesystem work. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.async_session",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Exclusive, cancellation-safe handoff of an owned synchronous DB stage. Domains retain authorization and business effects; runtime owns composition."
     },
     {
       "module": "app.core.atomic_json",
@@ -59,6 +73,13 @@
       "reason": "Pure quota bucket validation and overlap accounting; domains own locks and persistence."
     },
     {
+      "module": "app.core.committed_queue_wakeup",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "After-commit queue hints; durable queue reads and bounded polling own truth. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
       "disposition": "keep",
       "module": "app.core.context_clipping",
       "owner_stage": "AR-B7-DAYPART",
@@ -69,6 +90,13 @@
       "module": "app.core.context_text",
       "owner_stage": "AR-B4",
       "removal_condition": null
+    },
+    {
+      "module": "app.core.database_transactions",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Bounded, replayable database work; provider and filesystem I/O stay outside. Domains retain authorization and business effects; runtime owns composition."
     },
     {
       "disposition": "keep",
@@ -113,6 +141,55 @@
       "disposition": "keep",
       "owner_stage": "AR-B5",
       "removal_condition": null
+    },
+    {
+      "module": "app.core.postgresql_capacity",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Connection budget for one isolated Angmoo PostgreSQL backend process. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_concurrency",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Bounded PostgreSQL transactions. Only confirmed aborts may be replayed. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_connections",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Bound transient serving connections outside the two application pools. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_deadline",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Cancel a single owned PostgreSQL read without leaking timers into the pool. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_identifiers",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Pure validation shared by PostgreSQL configuration and identity storage. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_reads",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Retry a complete, owned read after confirmed PostgreSQL aborts only. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
+      "module": "app.core.postgresql_world_fence",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Short PostgreSQL shared-row fence against accepted World deletion. Domains retain authorization and business effects; runtime owns composition."
     },
     {
       "disposition": "keep",
@@ -192,11 +269,25 @@
       "removal_condition": null
     },
     {
+      "module": "app.core.storage_values",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Validate text at the untrusted-result boundary without database I/O. Domains retain authorization and business effects; runtime owns composition."
+    },
+    {
       "module": "app.core.time_meaning",
       "disposition": "keep",
       "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
       "removal_condition": null,
       "reason": "Bounded multilingual date and daypart interpretation with frozen environment values; no provider or storage."
+    },
+    {
+      "module": "app.core.transaction_retry_policy",
+      "disposition": "keep",
+      "owner_stage": "POSTGRESQL-ADOPTION-0.1.4",
+      "removal_condition": null,
+      "reason": "Shared bounded transaction retry budget, independent of database adapters. Domains retain authorization and business effects; runtime owns composition."
     },
     {
       "disposition": "keep",
@@ -213,13 +304,15 @@
     }
   ],
   "embedded_storage": {
-    "canonical": "sqlite",
+    "canonical": "postgresql",
     "graph": "ladybug",
-    "search": "fts5"
+    "search": "postgresql-fts-gin",
+    "semantic": "pgvector-exact"
   },
   "default_services": [
     "backend",
-    "frontend"
+    "frontend",
+    "postgres"
   ],
   "error_codes": [
     "container_engine_unavailable",
@@ -257,7 +350,8 @@
   "reduced_modes": {
     "core": [
       "backend",
-      "frontend"
+      "frontend",
+      "postgres"
     ]
   },
   "runtime_images": {
@@ -272,15 +366,19 @@
   },
   "release_images": {
     "backend": {
-      "default_tag": "release-v0.1.3",
+      "default_tag": "release-v0.1.4",
       "repository": "ghcr.io/angmoo-tree/angmoo-backend"
     },
     "frontend": {
-      "default_tag": "release-v0.1.3",
+      "default_tag": "release-v0.1.4",
       "repository": "ghcr.io/angmoo-tree/angmoo-frontend"
+    },
+    "postgres": {
+      "default_tag": "release-v0.1.4",
+      "repository": "ghcr.io/angmoo-tree/angmoo-postgres"
     }
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "states": [
     "blocked",
     "degraded",

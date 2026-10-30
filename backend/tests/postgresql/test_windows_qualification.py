@@ -5,7 +5,25 @@ from sqlalchemy.orm import Session
 from postgresql.test_activity_transactions import store
 from app.domains.social.models.posts import Post
 from app.runtime.postgresql_installation import private_file
-from scripts.ci.run_windows_postgresql_qualification import check_pg
+from scripts.ci.run_windows_postgresql_qualification import check_pg,interruption_environment
+
+
+def test_interruption_binds_actual_packaged_source_instead_of_inherited_or_unknown(tmp_path,monkeypatch):
+    import json
+    resources=tmp_path/'postgresql';resources.mkdir()
+    source='a'*40
+    (tmp_path/'installer-payload.json').write_text(json.dumps({'build_commit':source}))
+    monkeypatch.setenv('ANGMOO_SOURCE_SHA','b'*40)
+    assert interruption_environment(resources)['ANGMOO_SOURCE_SHA']==source
+
+
+def test_interruption_refuses_unbound_product_source(tmp_path):
+    import json
+    import pytest
+    resources=tmp_path/'postgresql';resources.mkdir()
+    (tmp_path/'installer-payload.json').write_text(json.dumps({'build_commit':'unknown'}))
+    with pytest.raises(ValueError,match='windows_pg_interruption_source_invalid'):
+        interruption_environment(resources)
 
 
 def test_installer_probe_writes_and_rereads_complete_post_rows(store, tmp_path):

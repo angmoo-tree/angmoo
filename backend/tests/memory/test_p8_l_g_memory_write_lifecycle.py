@@ -240,6 +240,8 @@ def _enabled_service(
     scope: MemoryScope,
     reader: FakeSourceReader,
 ) -> tuple[MemoryWriteLifecycleService, SqlAlchemyMemoryRepository, int]:
+    from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess
+    reader.experience_access = SqlAlchemyMemoryExperienceAccess(session)
     repository = SqlAlchemyMemoryRepository(session)
     scope_service = MemoryScopeService(repository)
     initial = scope_service.get_or_create(scope)

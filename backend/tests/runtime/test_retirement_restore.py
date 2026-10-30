@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domains.routines.models import AgentSlot
-from app.domains.routines.models.plans import ActivityBeat, ActivityEventConsumption
+from app.domains.routines.models.plans import ActivityBeat, ActivityEventConsumption, ActivityEpisode
 from app.domains.relationships.models.social import SocialEvent
 from app.domains.world_characters.activity_models import ActivityGraphRun, ActivityEnginePolicy
 from app.domains.world_characters.contracts.checkpoint_retention import RETENTION_KEY, business_result
@@ -82,7 +82,7 @@ def test_retirement_uses_real_episode_beat_event_and_slot_ownership(monkeypatch,
                 assert beat.source_post_id is None and beat.state_after_snapshot is None
                 assert consumption.status == "released" and consumption.version == 3
                 assert db.get(AgentSlot, ctx.agent_id).locked_by_run_id is None
-                assert db.get(type(episode), episode_id).next_sequence_no == beat.sequence_no + 1
+                assert db.get(ActivityEpisode, episode_id).next_sequence_no == beat.sequence_no + 1
                 assert row.result["usage"] == {"calls": 2} and RETENTION_KEY not in row.result
             assert db.get(SocialEvent, "success-before-retirement").result == "succeeded"
     try:

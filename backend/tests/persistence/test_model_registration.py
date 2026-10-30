@@ -46,7 +46,11 @@ from app.runtime.persistence.sqlite_schema import EXPECTED_CANONICAL_TABLE_COUNT
 metadata = register_models()
 configure_mappers()
 original = {mapper.class_.__tablename__: mapper.class_ for mapper in Base.registry.mappers}
-assert len(original) == len(metadata.tables) == EXPECTED_CANONICAL_TABLE_COUNT == 181
+from app.runtime.persistence.experience_tables import TABLES
+current_additions = TABLES | {'memory_maintenance_slot'}
+assert current_additions <= set(original)
+assert len(original) == len(metadata.tables) == EXPECTED_CANONICAL_TABLE_COUNT + len(current_additions)
+assert EXPECTED_CANONICAL_TABLE_COUNT == 181  # Frozen 0.1.3 input remains unchanged.
 assert {'world_deletion_requests', 'world_deletion_cleanup_items'} <= set(original)
 from app.domains.memory.models.activity_situation import SITUATION_TABLES
 assert set(SITUATION_TABLES) <= set(original)

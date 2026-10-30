@@ -198,6 +198,7 @@ def test_combined_callback_keeps_actual_node_and_selected_final_attempt(monkeypa
                     'state_update':None,'relationship_metrics':[]},'draft':{'replies':[]},
                     'situations':[{'target_id':post.id,'description':'privatedescription'}]}
                 attempt={'call_order':1,'provider_call_order':3,'json_attempt':1}
+                kwargs['on_request_submission'](SimpleNamespace(user_prompt=kwargs['user_prompt']))
                 kwargs['on_json_object'](value,attempt)
                 result=kwargs['validator'](value)
                 kwargs['on_json_validated'](value,result,attempt)

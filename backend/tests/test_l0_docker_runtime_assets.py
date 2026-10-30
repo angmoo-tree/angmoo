@@ -48,7 +48,8 @@ def test_repository_docker_runtime_assets_pass() -> None:
 def test_backend_entrypoint_uses_only_typed_embedded_runtime() -> None:
     content = (ROOT / "scripts/docker/backend-entrypoint.sh").read_text("utf-8")
     assert "contributor-api|contributor-api-dev" in content
-    assert "app.runtime.contributor_backend" in content
+    assert "app.runtime.postgresql_server" in content
+    assert "app.runtime.postgresql_installation" in content
     assert "ANGMOO_CONTRIBUTOR_DATA_ROOT" in content
     for legacy in (
         "postgresql_password",
@@ -118,11 +119,12 @@ def test_container_smoke_accepts_windows_compose_ndjson() -> None:
                     "stdout": (
                         '{"Service":"backend"}\n'
                         '{"Service":"frontend"}\n'
+                        '{"Service":"postgres"}\n'
                     )
                 },
             )()
 
-    assert smoke._service_names(Harness()) == {"backend", "frontend"}
+    assert smoke._service_names(Harness()) == {"backend", "frontend", "postgres"}
 
 
 def test_container_smoke_reads_the_canonical_app_secret_path() -> None:
@@ -131,7 +133,7 @@ def test_container_smoke_reads_the_canonical_app_secret_path() -> None:
     assert "/var/lib/angmoo/secrets/app_secret" not in content
     assert "site_operation_settings" in content
     assert "CREATE TABLE" not in content
-    assert "sqlite_write_stable=true" in content
+    assert "postgresql_write_stable=true" in content
     assert "ladybug_ready=true" in content
     assert "provider_calls=0" in content
     assert "contributor-diagnostics" in content

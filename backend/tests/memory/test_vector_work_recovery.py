@@ -58,11 +58,13 @@ def test_off_preserves_historical_source_but_removes_deleted_memory_from_all_gen
         session.commit()
     projection = MemoryVectorProjection(runtime_factory, index, provider=provider, retained_indexes=lambda: (index, second))
     assert asyncio.run(projection.sync_item(item)) == "disabled"
+    assert all(target.identity(f"memory-item:{item}") is not None for target in (index, second))
     with runtime_factory() as session:
         session.execute(update(MessageThread).values(deleted_at=datetime.now(UTC)))
         session.commit()
-    assert asyncio.run(projection.sync_item(item)) == "disabled"
-    assert all(target.identity(f"memory-item:{item}") is not None for target in (index, second))
+    # Revoked source access takes precedence over the disabled embedding setting.
+    assert asyncio.run(projection.sync_item(item)) == "source_unavailable"
+    assert all(target.identity(f"memory-item:{item}") is None for target in (index, second))
     with runtime_factory() as session:
         memory=session.get(MemoryItem,item)
         memory.status,memory.deleted_at="deleted",datetime.now(UTC)

@@ -1600,13 +1600,13 @@ def test_topic_arc_progress_past_target_date_is_ignored(monkeypatch) -> None:
 def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> None:
     monkeypatch.setattr(planned_actions, "record_activity_thought", lambda *_args, **_kwargs: None)
     def fake_reserve(_ctx, **kwargs):
-        return (
-            SimpleNamespace(
+        execution = SimpleNamespace(
+                id='synthetic-execution-'+str(kwargs.get('target_post_id')),
                 action_type=kwargs["action_type"],
                 signature=f"sig-{kwargs.get('target_post_id')}",
-            ),
-            None,
-        )
+            )
+        _ctx.db.get=lambda *_args,**_kwargs:execution
+        return execution,None
 
     def fake_finish(_ctx, execution, **kwargs):
         return {

@@ -311,22 +311,25 @@ def _installer_contract() -> dict[str, Any]:
             "supported_upgrade_world_chat_messages_changed",
         ),
     )
-    # The schema-derived runner replaces one argument per historical version.
-    # Preserve the v3 evidence, but verify today's complete execution wiring.
+    # Preserve the historical v3 fixture above. The current product accepts
+    # only the official 0.1.3/schema41 input; its hosted matrix exercises the
+    # real predecessor EXE, consent, migration and interrupted recovery.
     from check_windows_installer_supported_upgrade_matrix import validate_matrix
 
     try:
         predecessors = validate_matrix(ROOT)
     except ValueError as exc:
         raise InventoryError(str(exc)) from exc
-    if 3 not in predecessors:
-        raise InventoryError("installer v3 native execution is missing")
+    if predecessors != (41,):
+        raise InventoryError("installer official 0.1.3 native execution is missing")
     return {
-        "required_predecessor": 3,
+        "required_predecessor": 41,
+        "source_product_version": "0.1.3",
         "supported_predecessor_present": True,
         "synthetic_fixture_has_resolved_and_ambiguous_threads": True,
         "message_survival_verified": True,
-        "hosted_workflow_archive": "supported-v3.zip",
+        "historical_v3_fixture_preserved": True,
+        "hosted_workflow_cases": ["upgrade-013", "failure-recovery"],
         "idempotent_target_reinstall_verified": True,
     }
 

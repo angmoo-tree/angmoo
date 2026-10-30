@@ -27,7 +27,7 @@ def fixture(db):
     request = HybridRecallRequest("request", "call", "a" * 64, setting.scope, "연습 취소", EMBEDDING_PROFILE,
                                  (RecallDocumentKind.MEMORY_ITEM,))
     details = Details(values)
-    reader = SqlAlchemyEpisodeHybridReader(sessionmaker(db.bind), detail_reader_factory=lambda _: details, clock=lambda: NOW)
+    reader = SqlAlchemyEpisodeHybridReader(sessionmaker(db.bind), detail_reader_factory=details.bind, clock=lambda: NOW)
     return reader, request, candidate, details
 
 

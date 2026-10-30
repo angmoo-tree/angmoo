@@ -75,11 +75,14 @@ def test_large_shared_lineage_keeps_writer_free_and_final_effect_short(runtime_f
         prepared = future.result()
     assert isinstance(prepared, vector_delivery.PreparedVector)
     monkeypatch.setattr(projection._source, "documents_for_item_ids", original)
-    # Store direct prior edges, not the closure (a two-wide 32-level DAG).
+    # Snapshot migration retains the legacy DAG's owned-memory dependencies.
+    # It does not re-query original posts while preparing vectors.
     with runtime_factory() as db:
         prior_edges = db.execute(text("SELECT item_id,source_key FROM memory_vector_dependencies WHERE source_kind='memory' AND item_id!=source_key")).all()
         assert len(prior_edges) <= 2 * len(nodes)
-        assert sum(target.startswith("lineage-") for source, target in prior_edges if source == item) == 2
+        assert {target for source, target in prior_edges if source == item and target.startswith("lineage-")} == {
+            node.id for node in nodes[:-2]
+        }
     assert asyncio.run(projection.sync_item(item)) == "indexed"
     # Compare the same source/fixture inside the former critical-section shape
     # with the new final-only fence; no timing threshold or sleep is asserted.

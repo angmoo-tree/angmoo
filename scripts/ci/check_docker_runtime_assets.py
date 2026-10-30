@@ -1,4 +1,4 @@
-"""Validate the official two-service embedded Docker contributor runtime."""
+"""Validate the official three-service PostgreSQL Docker runtime."""
 
 from __future__ import annotations
 
@@ -11,8 +11,11 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_SERVICES = {"backend", "frontend"}
-EXPECTED_VOLUMES = {"angmoo_contributor_embedded_data"}
+EXPECTED_SERVICES = {"backend", "frontend", "postgres"}
+EXPECTED_VOLUMES = {
+    "angmoo_contributor_embedded_data", "angmoo_postgresql_data",
+    "angmoo_postgresql_app_data", "angmoo_postgresql_bootstrap",
+}
 FORBIDDEN_ENVIRONMENT = {
     "APP_SECRET",
     "DATABASE_URL",
@@ -39,7 +42,7 @@ def validate_resolved_compose(
         return ["release Compose config is not an object with services"]
     services: dict[str, Any] = release["services"]
     if set(services) != EXPECTED_SERVICES:
-        errors.append("official Compose must contain only backend and frontend")
+        errors.append("official Compose must contain backend, frontend and postgres")
 
     for name, service in services.items():
         if not isinstance(service, dict):
@@ -69,21 +72,28 @@ def validate_resolved_compose(
 
     backend = services.get("backend", {})
     if isinstance(backend, dict):
-        if backend.get("command") != ["contributor-api"]:
-            errors.append("backend must use the typed contributor entrypoint")
+        if backend.get("command") != ["postgresql-api"]:
+            errors.append("backend must use the typed PostgreSQL entrypoint")
         environment = backend.get("environment", {})
         if not isinstance(environment, dict) or environment.get(
             "ANGMOO_CONTRIBUTOR_DATA_ROOT"
         ) != "/var/lib/angmoo":
-            errors.append("backend embedded data root mismatch")
+            errors.append("backend application data root mismatch")
         mounts = backend.get("volumes", [])
-        if not any(
-            isinstance(mount, dict)
-            and mount.get("source") == "angmoo_contributor_embedded_data"
-            and mount.get("target") == "/var/lib/angmoo"
-            for mount in mounts
+        for source, target, readonly in (
+            ("angmoo_postgresql_app_data", "/var/lib/angmoo", False),
+            ("angmoo_postgresql_bootstrap", "/run/angmoo-bootstrap", True),
+            ("angmoo_contributor_embedded_data", "/var/lib/angmoo-legacy", True),
         ):
-            errors.append("backend embedded data volume is missing")
+            if not any(isinstance(mount, dict) and mount.get("source") == source
+                       and mount.get("target") == target
+                       and bool(mount.get("read_only")) == readonly for mount in mounts):
+                errors.append(f"backend protected volume is missing or writable: {source}")
+    postgres = services.get("postgres", {})
+    if not any(isinstance(mount, dict) and mount.get("source") == "angmoo_postgresql_data"
+               and mount.get("target") == "/var/lib/postgresql/data"
+               for mount in postgres.get("volumes", [])):
+        errors.append("PostgreSQL canonical data volume is missing")
 
     volumes = release.get("volumes", {})
     if not isinstance(volumes, dict) or set(volumes) != EXPECTED_VOLUMES:
@@ -96,20 +106,24 @@ def validate_resolved_compose(
     else:
         dev_services: dict[str, Any] = development["services"]
         if set(dev_services) != EXPECTED_SERVICES:
-            errors.append("development Compose must remain a two-service runtime")
+            errors.append("development Compose must remain a three-service runtime")
         for name in EXPECTED_SERVICES:
             service = dev_services.get(name)
             if not isinstance(service, dict) or not service.get("build"):
                 errors.append(f"development service must build locally: {name}")
                 continue
             develop = service.get("develop", {})
-            if not isinstance(develop, dict) or not develop.get("watch"):
+            if name != "postgres" and (not isinstance(develop, dict) or not develop.get("watch")):
                 errors.append(f"Compose Watch is missing: {name}")
         dev_backend = dev_services.get("backend", {})
         if isinstance(dev_backend, dict) and dev_backend.get("command") != [
-            "contributor-api-dev"
+            "postgresql-api"
         ]:
-            errors.append("development backend must enable embedded reload")
+            errors.append("development backend must use the PostgreSQL runtime")
+        watches = dev_backend.get("develop", {}).get("watch", [])
+        if not any(row.get("action") == "sync+restart" and row.get("target") == "/workspace/backend/app"
+                   for row in watches):
+            errors.append("development backend must restart after application source changes")
         dev_frontend = dev_services.get("frontend", {})
         command = dev_frontend.get("command", []) if isinstance(dev_frontend, dict) else []
         if "pnpm dev --hostname 0.0.0.0" not in " ".join(map(str, command)):
@@ -118,6 +132,8 @@ def validate_resolved_compose(
     required_files = (
         "Dockerfile.backend",
         "Dockerfile.frontend",
+        "Dockerfile.postgres",
+        "scripts/docker/postgres-entrypoint.sh",
         ".dockerignore",
         "compose.ci.yml",
         "scripts/docker/backend-entrypoint.sh",
@@ -143,17 +159,13 @@ def validate_ci_compose(document: Any) -> list[str]:
     services: dict[str, Any] = document["services"]
     errors: list[str] = []
     if set(services) != EXPECTED_SERVICES:
-        return ["CI Compose must resolve only backend and frontend"]
-    backend = services.get("backend", {})
-    if not str(backend.get("image", "")).startswith("angmoo-backend-ci:"):
-        errors.append("CI backend must use the locally built backend image")
-    if backend.get("pull_policy") != "never":
-        errors.append("CI backend must not pull an unverified registry image")
-    frontend = services.get("frontend", {})
-    if not str(frontend.get("image", "")).startswith("angmoo-frontend-ci:"):
-        errors.append("CI frontend must use the locally built frontend image")
-    if frontend.get("pull_policy") != "never":
-        errors.append("CI frontend must not pull an unverified registry image")
+        return ["CI Compose must resolve backend, frontend and postgres"]
+    for name in sorted(EXPECTED_SERVICES):
+        service = services[name]
+        if not str(service.get("image", "")).startswith(f"angmoo-{name}-ci:"):
+            errors.append(f"CI {name} must use the locally built {name} image")
+        if service.get("pull_policy") != "never":
+            errors.append(f"CI {name} must not pull an unverified registry image")
     return errors
 
 
@@ -192,7 +204,7 @@ def main() -> int:
         print(error, file=sys.stderr)
     if errors:
         return 1
-    print("Docker embedded runtime assets passed: services=2 host_ports=1")
+    print("Docker PostgreSQL runtime assets passed: services=3 host_ports=1")
     return 0
 
 

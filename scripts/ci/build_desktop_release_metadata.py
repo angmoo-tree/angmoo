@@ -323,6 +323,10 @@ def _provenance(
     }
 
 
+def _postgresql_resource_manifest() -> Path:
+    return REPOSITORY_ROOT / 'desktop/src-tauri/resources/postgresql/angmoo-resources.json'
+
+
 def main() -> int:
     args = _parser().parse_args()
     _source_identity(args.version, args.commit)
@@ -375,7 +379,7 @@ def main() -> int:
         output_root / "THIRD_PARTY_NOTICES.md",
     )
     shutil.copy2(REPOSITORY_ROOT / "LICENSE", output_root / "LICENSE")
-    resources=REPOSITORY_ROOT/'desktop/src-tauri/resources/postgresql/angmoo-resources.json'
+    resources=_postgresql_resource_manifest()
     if tuple(map(int,args.version.split('.'))) >= (0,1,4):
         if not resources.is_file():raise SystemExit('Pinned PostgreSQL resource manifest is missing')
         shutil.copyfile(resources,output_root/'postgresql-resources.json')

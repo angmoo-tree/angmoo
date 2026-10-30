@@ -2666,7 +2666,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/__init__.py",
-      "sha256": "a88d54e135e8d1ae84bcf7ec0d37bbc143ccdc087e228038b9b90b82b6e6223c"
+      "sha256": "05ef6ffd98f966540537e57090600ac1111725a8a0422f2f4a093c14c41a9ec7"
     },
     {
       "path": "backend/app/runtime/persistence/experience_migration.py",
@@ -3146,11 +3146,11 @@
     },
     {
       "path": "backend/tests/chat/test_chat_identity_delivery.py",
-      "sha256": "1866e3f11f3f76fa9d5a8d1913ca0ce9ec9973490c4094f283371d15aee34784"
+      "sha256": "65af33f2fa02c6084cd542b9513052d2a44d6e0459cdbda4e24704eff5c50954"
     },
     {
       "path": "backend/tests/chat/test_chat_identity_sources_costs.py",
-      "sha256": "f891c2c01106943a6527e125a5ffdf899bf159e55875f52835fec4e516d877a4"
+      "sha256": "aae15a00d2844ba30d4452923d091a6c54045eede5b578f16f25c6298f2b2071"
     },
     {
       "path": "backend/tests/chat/test_chat_image_input_presentation.py",
@@ -3198,7 +3198,7 @@
     },
     {
       "path": "backend/tests/chat/test_graph_failure_lifecycle.py",
-      "sha256": "029a325160e0a770c3cb92b8e00720cea1914efcd832915cf401fab7e15a15b9"
+      "sha256": "2ada01faa27fb63c68a1af9fbb7527669e1e0b33335bae2e7017f792e225fff2"
     },
     {
       "path": "backend/tests/chat/test_graph_planner_contract_feedback.py",
@@ -3214,7 +3214,7 @@
     },
     {
       "path": "backend/tests/chat/test_hybrid_admission.py",
-      "sha256": "336b1661eea65643196ec084268dcf6ec01f90dfd60a9b5648964043bf7194d7"
+      "sha256": "70516d6556001a4c916770dffe6d53f2f6a90ed75762493b448a0b95153e8ca4"
     },
     {
       "path": "backend/tests/chat/test_hybrid_canonical_guards.py",
@@ -3314,11 +3314,11 @@
     },
     {
       "path": "backend/tests/chat/test_p8_l_p_model_hotfix.py",
-      "sha256": "a82b94d804921141d6d760ed19ec29615e004a3bfefeec7e125af8adfe72830f"
+      "sha256": "f946f371685169742c55c80961d7434222fd647f8526029a00112c3d4c74f1eb"
     },
     {
       "path": "backend/tests/chat/test_recall_delivery_persistence.py",
-      "sha256": "73c55df13656ff01e207600fa0df4ab8aaed2c64a21be3353a3240c23dda1beb"
+      "sha256": "10b585815b4df152fdcdbae0a9db65fcfdf135fd430341dfa6ac574ce7d2d463"
     },
     {
       "path": "backend/tests/chat/test_recall_timeout_classification.py",
@@ -3410,11 +3410,11 @@
     },
     {
       "path": "backend/tests/chat/test_temporal_recall_fallback.py",
-      "sha256": "921dbe24d125679c56d5baa3a302d596df00a49b4c6c848a5f3ac9f4a060a3b7"
+      "sha256": "8919f07455a660c9a32e144c6badc9d6bc78b88465c182350e6a3c309892c9f6"
     },
     {
       "path": "backend/tests/chat/test_temporal_recall_response.py",
-      "sha256": "a2b530b18e68602921266b03ac458a9c2404d910a7a8d0069ca81991e24198b4"
+      "sha256": "8cd8350490d6dee17ec40fe67f6f1a57d9ffee727430b966f88cc698443fd8ec"
     },
     {
       "path": "backend/tests/chat/test_thread_repository.py",
@@ -3422,7 +3422,7 @@
     },
     {
       "path": "backend/tests/chat/test_today_like_delivery.py",
-      "sha256": "cb33de4af86a22c4b4e4d1b08dae21680be378084706428dee1bd700c1e89d55"
+      "sha256": "b23959b68ad63c5be364bb25d48691887b0caa88ee099122ddac347ce0723b92"
     },
     {
       "path": "backend/tests/chat/test_today_like_lifecycle.py",
@@ -3438,7 +3438,7 @@
     },
     {
       "path": "backend/tests/chat/test_world_chat_delete.py",
-      "sha256": "aa357c37672a55d5374528011badf4ca2cf828310f4a52949d72b537d7a4b7b5"
+      "sha256": "faf13f8bfb1dceadd6dc9c78dfe3cf75c5bc861776da65e29ceded0029b2cd9c"
     },
     {
       "path": "backend/tests/chat/test_world_chat_unlimited.py",
@@ -3498,7 +3498,7 @@
     },
     {
       "path": "backend/tests/memory/test_activity_situation_receipt.py",
-      "sha256": "c424a900ce1973a2a0c5db6bc0c80d98bcc50276224b1da4ea177a171b675918"
+      "sha256": "db19a77089e2648456be75a6d5fc41f11fc33bc5445fe7266ab8942ddb023072"
     },
     {
       "path": "backend/tests/memory/test_activity_situation_relationships.py",
@@ -3526,7 +3526,7 @@
     },
     {
       "path": "backend/tests/memory/test_canonical_source_dependencies.py",
-      "sha256": "1123bcde95bbbf386bf8a0730583d49d354a79a68ee2b7ec931dd40d7b3bb93f"
+      "sha256": "04167ece7b9d2250cca2ac1b1ba47cf251047821705a4e37b2fb37c3551b4c7a"
     },
     {
       "path": "backend/tests/memory/test_canonical_worker.py",
@@ -3558,7 +3558,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "839f81c80c26e1250960f6db7a7943213164f46647493641c6e7a02bd898cc25"
+      "sha256": "6120e6f06a8831ba870fef1876c8831edb3a5d1a1901ce452c09170415c6ffa0"
     },
     {
       "path": "backend/tests/memory/test_embedding_batch_transport.py",
@@ -3582,7 +3582,7 @@
     },
     {
       "path": "backend/tests/memory/test_episode_apply.py",
-      "sha256": "90653dbc3bc695298b70773266d73955367fb2e10c9d21e4ce33a198d5cefb2c"
+      "sha256": "8587660007338f9b2cd6b0bdbdcb989730614a9093041ac3847628317ee12cb7"
     },
     {
       "path": "backend/tests/memory/test_episode_batch_runtime.py",
@@ -3590,11 +3590,11 @@
     },
     {
       "path": "backend/tests/memory/test_episode_candidates.py",
-      "sha256": "9ed31c8c52f03a462b279e211b78d4614773e9683508f07997428126e3b47b28"
+      "sha256": "6e146690471ffea96b3c677f1b86604a0c0c5b6292fe7f226f727c43771cf761"
     },
     {
       "path": "backend/tests/memory/test_episode_chat_pipeline.py",
-      "sha256": "38fddc24c5433f949bf0fccadaf5205d80839fd6a1008ada0e9d13b7613e7611"
+      "sha256": "ae12e357564d7edf90162109c8e60064ca9467efee5b05ea71495d48c42b5853"
     },
     {
       "path": "backend/tests/memory/test_episode_contracts.py",
@@ -3602,7 +3602,7 @@
     },
     {
       "path": "backend/tests/memory/test_episode_hybrid_reader.py",
-      "sha256": "ad9038962da08fb412161b22a9257803b6d775741ed6b0df376f771c5021e6b7"
+      "sha256": "e1d98b07715fabd43d524f4f1df6e1cf8be8547f2f3ef9525779fde91bfe9cea"
     },
     {
       "path": "backend/tests/memory/test_episode_inspector.py",
@@ -3618,7 +3618,7 @@
     },
     {
       "path": "backend/tests/memory/test_episode_packet_repository.py",
-      "sha256": "e129bfc5440128e6561368426b4c46eb18cc16c2781a47f0468279d8e071f200"
+      "sha256": "d6aa3916f11057f75c6fb221e3a633cb0a3ab4615a13be0cc2d37a51d686ae36"
     },
     {
       "path": "backend/tests/memory/test_episode_packets.py",
@@ -3694,7 +3694,7 @@
     },
     {
       "path": "backend/tests/memory/test_hybrid_episode_inventory.py",
-      "sha256": "179f246b987b1d7773e6dd753a8eaf47c91bd5b4c537107a508d0eb64e42201d"
+      "sha256": "ea4d5a0dfc15df3e764168ba147ca46512b8b59f2561dba95c0fc5f04652c9ad"
     },
     {
       "path": "backend/tests/memory/test_hybrid_native_pipeline.py",
@@ -3758,7 +3758,7 @@
     },
     {
       "path": "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
-      "sha256": "37bdd59e48b626ef716df37afb2a1aada7c5b89c7018d2ab447cc06e8c0fda6b"
+      "sha256": "5d31fd619d2483834fea92c325d207fef9b826cd6d9f76511b94aac124bf9dcc"
     },
     {
       "path": "backend/tests/memory/test_p8_l_h_canonical_recall.py",
@@ -3766,7 +3766,7 @@
     },
     {
       "path": "backend/tests/memory/test_p8_l_o_memory_consolidation.py",
-      "sha256": "ee0da505d1c209e7553db3df7cfcc63f99d0d22aeacd9ae9bf0687f9cff23eb8"
+      "sha256": "b76ae4532220961de9e755d9cf1627aa2654bd680d6910e3446d902c80baed53"
     },
     {
       "path": "backend/tests/memory/test_p8_l_q_memory_read_inspector.py",
@@ -3854,7 +3854,7 @@
     },
     {
       "path": "backend/tests/memory/test_situation_embedding_delivery.py",
-      "sha256": "1fa440fb69e4ac7d017ad596bb2605236ca4a8f78cca911c2e94a90ab5d4461d"
+      "sha256": "1d9a657a60459aeae0e9e47fb03d83a767af39dd596e009f22afab123dd5d015"
     },
     {
       "path": "backend/tests/memory/test_situation_language_eligibility.py",
@@ -3874,7 +3874,7 @@
     },
     {
       "path": "backend/tests/memory/test_situation_recovery_actions.py",
-      "sha256": "efbe1415c2aff676cce1b11d6100a5473817efe72e3a4ead346396590ce5ae73"
+      "sha256": "decf6bab018570577dab6c6389219b17905629c642b0fd1d33c230d7d5d077c0"
     },
     {
       "path": "backend/tests/memory/test_situation_recovery_http.py",
@@ -3918,11 +3918,11 @@
     },
     {
       "path": "backend/tests/memory/test_vector_work_contention.py",
-      "sha256": "303c3078765220aa5467a51bedcc315a5586236e96d1d638f38291ccc2984a0a"
+      "sha256": "0ddaf4e881330d7ecb2031db98b0f0d29316c4be0f1a5ef1f63c8cc205ec67f4"
     },
     {
       "path": "backend/tests/memory/test_vector_work_recovery.py",
-      "sha256": "2e37eb194a98caa39feaf82d4404b056219d418e5eadf216a4d100c693e5aa8a"
+      "sha256": "9bf4aaae961b4dc7618b592ef0e735f7c3c4cf0d9d178a344f607b159901031b"
     },
     {
       "path": "backend/tests/memory/test_world_embedding_preparation.py",
@@ -3946,7 +3946,7 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "b632088b065da16dd716c4e0b275c08cb386c5a03e3ec8ae1328d89dbd08d6ee"
+      "sha256": "a2825ded66d1f9fb23257529e369b685c79f104eb82bdc703e42bf960ea08aa0"
     },
     {
       "path": "backend/tests/migrations/test_canonical_retention.py",

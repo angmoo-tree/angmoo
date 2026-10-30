@@ -95,6 +95,13 @@ def test_inbox_three_real_effects_are_target_scoped_and_receipt_failure_rolls_ba
             db.add(other); targets.append(other)
         db.commit()
         projections = [{"target_id": p.id, "source_ids": [p.id], "text": p.body} for p in targets]
+        from app.runtime.memory.captured_delivery import post_reference, bind_candidate_sources
+        from app.runtime.autonomous_activity.initial_input import seal
+        references = {p.id: post_reference(p) for p in targets}
+        bind_candidate_sources(projections, references)
+        state.update(candidates=projections, lane_data={p.id: {"post_id": p.id} for p in targets})
+        state['lane_data']['_reference_sources'] = references
+        state.update(seal(state, {}))
         payload = {"selected_targets": projections, "context": {}}
         manifest = freeze_social_input(lane.ctx, snapshot, node="InboxDecisionDraft", payload=payload,
             transmitted=json.dumps(payload), state=state)
@@ -165,6 +172,13 @@ def test_inbox_reply_to_reply_delivery_and_prepared_relationship_are_saved_witho
             "source_revisions": {reply.id: "fixture", root.id: "fixture"}, "parent_text": root.body,
             "relationship": social.prompt_view()}
         state["relationship_validation_receipts"] = {reply.id: receipt.to_dict()}
+        state['candidates'] = [projection]
+        from app.runtime.memory.captured_delivery import post_reference, bind_candidate_sources
+        references={row.id:post_reference(row) for row in (reply,root)}
+        bind_candidate_sources(state['candidates'],references)
+        state.setdefault('lane_data',{})['_reference_sources']=references
+        from app.runtime.autonomous_activity.initial_input import seal
+        state.update(seal(state,{}))
         payload = {"selected_targets": [projection], "context": {}}
         # The later canonical value must not replace the prepared facts.
         relation.version = 7; db.commit()
@@ -192,8 +206,16 @@ def test_inbox_reply_to_reply_delivery_and_prepared_relationship_are_saved_witho
         assert admitted.state == "applied", admitted.error_code
         restored = restore_context(db, admitted)
         source = next(source for source in restored.sources if source.source_id == reply.id)
-        access = SituationSources(db).validate(restored, source, now=now)
-        assert access.proof_origin == "situation_delivered" and access.evidence.observation_id is None
+        from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence
+        from app.domains.memory.repository.experience import read_snapshot
+        stored = read_snapshot(db, db.get(MemoryItem, admitted.applied_item_id))
+        captured = next(value for value in stored.payload['sources'] if value['source_id'] == reply.id)
+        assert captured['text'] == source.delivered_text == reply.body
+        assert captured['status'] == 'historical_snapshot'
+        evidence = db.scalar(select(MemoryItemEvidence).where(
+            MemoryItemEvidence.memory_item_id == admitted.applied_item_id,
+            MemoryItemEvidence.source_id == reply.id))
+        assert evidence.observation_id is None
         assert db.scalar(select(func.count()).select_from(WorldCharacterFeedObservation)) == 0
 
 

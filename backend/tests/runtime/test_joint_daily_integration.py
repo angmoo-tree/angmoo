@@ -116,6 +116,18 @@ def adapter(cls, ctx, ready, lane):
 
 
 async def generate_and_write(lane, state):
+    # This fixture constructs an admitted lane directly instead of calling
+    # load(). Capture its starting sources once, as the real load stage does.
+    from app.runtime.memory.captured_delivery import post_reference,bind_candidate_sources
+    from app.runtime.relationships.social_metrics import prepare_sources
+    from app.runtime.autonomous_activity.social_lane import plain
+    from app.runtime.autonomous_activity.initial_input import seal
+    references={identifier:post_reference(lane.ctx.db.get(models.Post,identifier))
+        for candidate in state['candidates'] for identifier in candidate['source_ids']}
+    bind_candidate_sources(state['candidates'],references)
+    state['lane_data']['_reference_sources']=references
+    state['lane_data']['_metric_sources']=plain(prepare_sources(lane.ctx.db,actor=lane.actor,post_ids=references))
+    state.update(seal(state,{}))
     state.update(await lane.context(state))
     state.update(await lane.plan(state))
     state.update(await lane.validate(state))

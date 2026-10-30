@@ -23,6 +23,11 @@ class Details:
     def read_thoughts(self, *, scope, references):
         return {}
 
+    def bind(self, session):
+        from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess
+        self.experience_access = SqlAlchemyMemoryExperienceAccess(session)
+        return self
+
 
 def test_episode_snapshot_keeps_captured_sources_after_originals_disappear(memory_session):
     apply, setting, bundle, values = preparation(memory_session)
@@ -30,7 +35,7 @@ def test_episode_snapshot_keeps_captured_sources_after_originals_disappear(memor
         selection=EpisodeSelection((EpisodeProposal("취소 소식에 위로했다.", ("S1", "S2")),), ()),
         setting=setting, now=NOW, revalidate=lambda _: values, job_fence=lambda: None)
     memory_session.commit()
-    reader = Details(values)
+    reader = Details(values).bind(memory_session)
     repo = SqlAlchemyEpisodePackets(memory_session, detail_reader=reader)
     complete = repo.read(scope=setting.scope, item_ids=ids, now=NOW)
     assert reader.calls == []
@@ -55,7 +60,7 @@ def test_live_source_reader_is_never_called_but_snapshot_database_errors_propaga
     apply, setting, bundle, values = preparation(memory_session)
     ids = apply.apply(bundle=bundle, selection=EpisodeSelection((EpisodeProposal("경험", ("S1", "S2")),), ()),
         setting=setting, now=NOW, revalidate=lambda _: values, job_fence=lambda: None)
-    reader = Details({key: replace(value, source_digest="c" * 64) for key, value in values.items()})
+    reader = Details({key: replace(value, source_digest="c" * 64) for key, value in values.items()}).bind(memory_session)
     repo = SqlAlchemyEpisodePackets(memory_session, detail_reader=reader)
     result = repo.read(scope=setting.scope, item_ids=ids, now=NOW)
     assert all(s.status == "verified" for u in result[0].units for s in u.sources)

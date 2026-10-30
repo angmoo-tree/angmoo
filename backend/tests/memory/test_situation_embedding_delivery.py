@@ -122,7 +122,7 @@ def test_manual_run_coalesces_eager_worker_and_maps_each_vector(runtime_factory,
             await projection.stop()
     pages, briefs = asyncio.run(run())
     assert pages == list(range(1, count + 1))
-    assert briefs == ([count] if count <= 32 else [32, count])
+    assert briefs == [count]  # The character's ready run now drains continuously.
     bodies = [json.loads(request.content)["requests"] for request in transport[0]]
     assert [len(body) for body in bodies] == expected
     with runtime_factory() as session:

@@ -139,36 +139,16 @@ def test_existing_canonical_install_skips_product_root_case_rename() -> None:
 
 def test_windows_installer_exercises_direct_in_place_upgrade() -> None:
     workflow = WINDOWS_INSTALLER_WORKFLOW.read_text(encoding="utf-8")
-
-    direct_upgrade = workflow.index(
-        "Running direct in-place installer update over the existing canonical installation"
-    )
-    explicit_uninstall = workflow.index(
-        "Running silent uninstall while preserving local data"
-    )
-
-    assert direct_upgrade < explicit_uninstall
-    assert "-ArgumentList '/S', '/UPDATE'" in workflow
-    quiesce = workflow.index("Installed data quiesce timed out after 60 seconds")
-    database_baseline = workflow.index(
-        "$databaseHashAfterFirstRun = Get-StableFileHash"
-    )
-    assert quiesce < database_baseline < direct_upgrade
-    assert (
-        "Assert-InstallFileManifest $installManifest 'direct_in_place_upgrade'"
-        in workflow
-    )
-    assert (
-        "Direct in-place installer update changed the canonical SQLite database"
-        in workflow
-    )
-    assert (
-        "Direct in-place installer update changed the canonical generation marker"
-        in workflow
-    )
-    assert "Direct in-place installer update changed APP_SECRET" in workflow
-    assert "direct_in_place_upgrade_replaced_app = $true" in workflow
-    assert "direct_in_place_upgrade_preserved_data = $true" in workflow
+    assert '-Kind upgrade-013' in workflow and '-Kind failure-recovery' in workflow
+    runner = (REPOSITORY_ROOT / 'scripts/ci/run_windows_postgresql_qualification.py').read_text()
+    # Install the official predecessor and current EXE before first-run consent;
+    # the source and new PG data are checked independently of program removal.
+    assert runner.index('nsis(old)') < runner.index('nsis(args.installer)') < runner.index('host_launch(app,data,private,initial=True')
+    for guard in ('windows_pg_official_source_hash_mismatch', 'windows_pg_installer_changed_source',
+                  'windows_pg_installer_converted_without_consent', 'windows_pg_source_changed_after_conversion',
+                  'windows_pg_silent_uninstall_deleted_data', 'windows_pg_resume_replaced_snapshot'):
+        assert guard in runner
+    assert "nsis(uninstall[0])" in runner
 
 
 @pytest.mark.parametrize(

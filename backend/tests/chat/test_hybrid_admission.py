@@ -81,7 +81,8 @@ def test_search_receives_fixed_scope_query_and_only_resolved_time_filters(expres
                 request.scope, RecallAxisStatus.READY, (), tuple(
                     RecallAxisReceipt(axis, RecallAxisStatus.READY, True, 0, 0) for axis in ("fts", "vector")),
                 (), HybridEmbeddingUsage(), 0, 0, 0)
-    command = SimpleNamespace(intent=result.intent, resolved=result.resolved, call_id="tool-1", call_tracker=result.call_tracker)
+    command = SimpleNamespace(intent=result.intent, resolved=result.resolved, call_id="tool-1", call_tracker=result.call_tracker,
+        initial_result=None, thread_id='thread-1')
     now = datetime.now(UTC)
     execution = asyncio.run(HybridCanonicalService(Search()).plan_and_execute(command, now=now, deadline_at=now+timedelta(seconds=60)))
     request = captured[0]

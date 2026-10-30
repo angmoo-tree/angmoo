@@ -24,7 +24,10 @@ def test_current_inventory_preserves_predecessor_and_runtime_contract():
     # The live successor follows the current schema; its frozen predecessor
     # attestation above stays unchanged when later additive migrations land.
     manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
-    assert value["schema"]["embedded_schema_version"] == SQLITE_SCHEMA_VERSION
+    from app.runtime.persistence.postgresql_schema import VERSION as POSTGRESQL_SCHEMA_VERSION
+    assert value["schema"]["postgresql_schema_version"] == POSTGRESQL_SCHEMA_VERSION
+    assert value["schema"]["sqlite_input_schema_version"] == SQLITE_SCHEMA_VERSION
+    assert value["contract"]["canonical_store"] == "postgresql"
     assert value["schema"]["schema_digest"] == manifest.schema_digest
     assert value["schema"]["canonical_table_count"] == manifest.canonical_table_count
     assert value["bounds"]["chat_new_turns"] == 50

@@ -402,6 +402,13 @@ def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index,
         context = restore_context(db, row)
         assert SituationSources(db).validate(context, prior, now=NOW).state == "available"
         post.report_hidden_at = NOW; db.commit()
+        # Owned snapshots survive later changes to the original post. Explicit
+        # memory deletion still revokes recall, derived indexing and prior use.
+        assert reader.hydrate(request, selected).records
+        assert source.documents_for_item_ids((item.id,))[item.id]
+        assert SituationSources(db).validate(context, prior, now=NOW).state == "available"
+        assert item.id in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
+        item.status, item.deleted_at = "deleted", NOW; db.commit()
         assert reader.hydrate(request, selected).records == ()
         assert source.documents_for_item_ids((item.id,))[item.id] == ()
         assert SituationSources(db).validate(context, prior, now=NOW).state == "forbidden"

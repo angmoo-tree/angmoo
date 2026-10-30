@@ -75,6 +75,6 @@ def test_captured_chat_survives_later_changes_but_stored_input_tampering_fails(r
         selection=EpisodeSelection((EpisodeProposal("당시 대화를 기억한다.", ("S1",)),), ()),
         setting=memory.get_scope_setting(scope), now=now,
         revalidate=lambda b: revalidate_episode_bundle(db, b), job_fence=lambda: None)
-    packet=SqlAlchemyEpisodePackets(db,detail_reader=None).read(scope=scope,item_ids=ids,now=now)[0]
+    packet=SqlAlchemyEpisodePackets(db,detail_reader=RuntimeEpisodeDetailReader(db)).read(scope=scope,item_ids=ids,now=now)[0]
     assert [s.text for u in packet.units for s in u.sources]==[m.text for u in bundle.new_units for m in u.members]
     assert packet.units[0].thought==bundle.new_units[0].thought

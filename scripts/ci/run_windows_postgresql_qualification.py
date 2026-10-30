@@ -104,6 +104,15 @@ def check_pg(data,post_id):
     finally:engine.dispose()
     return marker
 
+def interruption_environment(resources):
+    """Fault injection must use the same immutable product source as Tauri."""
+    payload=json.loads((resources.parent/'installer-payload.json').read_text(encoding='utf-8'))
+    source=payload.get('build_commit')
+    require(isinstance(source,str) and re.fullmatch(r'[0-9a-f]{40}',source) is not None,
+            'windows_pg_interruption_source_invalid')
+    return dict(os.environ,PYTHONPATH=str(ROOT/'backend'),ANGMOO_SOURCE_SHA=source)
+
+
 def interrupt(data,resources,private):
     # Fault injection is confined to the test process. The real converter commits
     # canonical data, then this owned test process is terminated before activation.
@@ -122,7 +131,7 @@ def paused(self,*args,**kwargs):
 Migration.convert=paused
 prepare(Path(DATA),Path(RESOURCES),allow_migration=True)
 '''.replace('FLAG',repr(str(flag))).replace('DATA',repr(str(data))).replace('RESOURCES',repr(str(resources))),encoding='utf-8')
-    env=dict(os.environ,PYTHONPATH=str(ROOT/'backend'))
+    env=interruption_environment(resources)
     with (private/'interruption.log').open('wb') as log:
         child=subprocess.Popen([sys.executable,str(script)],env=env,stdout=log,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)
         try:

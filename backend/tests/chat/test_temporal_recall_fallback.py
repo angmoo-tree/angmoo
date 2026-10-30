@@ -222,9 +222,16 @@ def test_time_fallback_cannot_commit_after_current_scope_changes(response_sessio
         answer = {"text": "저장되면 안 되는 늦은 응답", "thought": "기록을 확인했다.", "situation_description": "질문에 답했다."}
         return direct_llm.DirectLlmResponse(text=json.dumps(answer), parsed=answer, usage={}, finish_reason="STOP")
     monkeypatch.setattr(direct_llm, "generate_text", provider)
-    asyncio.run(f._collect(generation_service.stream_world_response(db, owner, "p-world", "p-thread", request_id,
-        memory_recall_service=SimpleNamespace(hybrid_service=EmptyHybrid()),
-        runtime_settings=Settings(_env_file=None, CHAT_RECALL_MODE="social_hybrid"))))
+    async def consume():
+        return await f._collect(generation_service.stream_world_response(db, owner, "p-world", "p-thread", request_id,
+            memory_recall_service=SimpleNamespace(hybrid_service=EmptyHybrid()),
+            runtime_settings=Settings(_env_file=None, CHAT_RECALL_MODE="social_hybrid")))
+    if change == "world_deleting":
+        from app.domains.chat.exceptions import MessageCredentialInvalidError
+        with pytest.raises(MessageCredentialInvalidError, match="world_chat_credential_changed"):
+            asyncio.run(consume())
+    else:
+        asyncio.run(consume())
     assert len(calls) == 3
     assert f.SqlAlchemyResponseLifecycleRepository(db).get_request(request_id).state.value != "committed"
     assert db.scalar(select(func.count()).select_from(f.models.MessageMessage).where(f.models.MessageMessage.role == "assistant")) == 0

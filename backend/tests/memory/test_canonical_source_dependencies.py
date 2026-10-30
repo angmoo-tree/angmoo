@@ -116,7 +116,7 @@ def _recall(factory, tmp_path):
         def read(**kwargs):
             reads.append(kwargs["source_id"])
             return reader.read_evidence(**kwargs)
-        return SimpleNamespace(read_evidence=read)
+        return SimpleNamespace(read_evidence=read, experience_access=reader.experience_access)
 
     repository = SqlAlchemyCanonicalRecallRepository(
         factory, source_reader_factory=reader_factory, character_rows=read_character_summary_rows,

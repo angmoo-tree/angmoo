@@ -4,12 +4,39 @@
     {
       "markers": {
         "driver_or_url": [
+          116
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "Dockerfile.backend",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "82fa7e3d9881fa73e26d1883d64f61afa41de2f90d084f29729c5b9b045bdef4",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          34
+        ],
+        "pgvector": [
+          2
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "Dockerfile.postgres",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "520bf103449eb88b08b4c0364d7fd323c1d0e574fe37538ec0d38109499a3d7f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           48
         ]
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260511_0003_agent_slots.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "6d49b780efc3c3c8e326a13b4afedad2ec538804a41364583286235927f94f20",
       "transition_pr": "ER2 PR G"
     },
@@ -21,7 +48,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260516_0013_agent_feed_cues.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "e21cbc208d6380f35ded1198129136c4d0c1b18341f3e59e868f0c8f83eb889a",
       "transition_pr": "ER2 PR G"
     },
@@ -33,7 +60,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260530_0034_local_agent_mode.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "15ca97a843f21890b883e5992602b1bc6ec219245a720b04368f40e0bbbb5a4d",
       "transition_pr": "ER2 PR G"
     },
@@ -47,7 +74,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260604_0037_character_lore_pgvector.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "1dafe3f55ae6bb40dc4ecdd7b642f83b31fb8b22968b589bda2f33c8efdb2782",
       "transition_pr": "ER2 PR G"
     },
@@ -59,7 +86,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260605_0038_posts_topic_metadata.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "7bcc37b2286711d7f5565789fcc327e22cdd7552866644ac15d9819f22c3ede4",
       "transition_pr": "ER2 PR G"
     },
@@ -73,7 +100,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260616_0046_messages_v1.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "7ae15de22fe71fd6a403c07256e74ef92e4cc79359030e16c2704a5cd21108ae",
       "transition_pr": "ER2 PR G"
     },
@@ -85,7 +112,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "0287d299d24b1f311bc42dd52f1db1a8ee12637bd2bdd225011ffb51f139ceb5",
       "transition_pr": "ER2 PR G"
     },
@@ -97,7 +124,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "20f3089e70651f35d72734c78dc3ca962ccc3ecdc995d54b3e45c91aac213598",
       "transition_pr": "ER2 PR G"
     },
@@ -129,7 +156,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260807_0070_world_foundation.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "044ecb158b83815076ab520906c66c42bea662989cd8afc262bba91425abbe9f",
       "transition_pr": "ER2 PR G"
     },
@@ -148,7 +175,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260808_0073_world_character_repertoire.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "ff3aa135b269c56b75c6a826875b93fb94fca809ff84eff299393a139e5e6948",
       "transition_pr": "ER2 PR G"
     },
@@ -165,7 +192,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260809_0074_daily_activity_runtime.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "7b7d7862d2a8adfeaa1a0c6da947168ed59302a086f596f31a33749f42e5d59b",
       "transition_pr": "ER2 PR G"
     },
@@ -186,7 +213,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260811_0076_world_keyword_feed.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "0baed5ebdb428c158e464efea53c4131013a0b136a7cc6eb2595817330455080",
       "transition_pr": "ER2 PR G"
     },
@@ -205,7 +232,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260811_0077_social_events_relationships.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "00ff5f8966d202c7de14aa5407de8e543bd7562a53be18a9bb73fbdff50c82c0",
       "transition_pr": "ER2 PR G"
     },
@@ -217,7 +244,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "2fc65c41f5d9ab2bdeebc33a8a5a3369ca495dc536fad8606904f3d73abefaa3",
       "transition_pr": "ER2 PR G"
     },
@@ -229,7 +256,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260815_0079_local_owner_identity.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "eefebd462d25944a973f643539aa715f1e299709782d450800d8220d5f14b259",
       "transition_pr": "ER2 PR G"
     },
@@ -241,7 +268,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260818_0081_owner_controlled_world_character.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "51aefaba031795ceae52baad1ecab9722c2d6c46a7da9d3dde4850d43862c1ed",
       "transition_pr": "ER2 PR G"
     },
@@ -255,7 +282,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "66262435a719a64d93a3485c5b3127d2d1fe521d12cee6768e919822cf9214e5",
       "transition_pr": "ER2 PR G"
     },
@@ -268,7 +295,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260916_0093_episode_memory.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "6cc7fb70603e9991aff66e546f6ce0cec1e674419b76a24e1bbd1d92d996b734",
       "transition_pr": "ER2 PR G"
     },
@@ -281,7 +308,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260917_0094_consolidation_requests.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "317e341f73910c4fb50163d5911bdc2dc7e18939b24952b7999fe051521a3c0f",
       "transition_pr": "ER2 PR G"
     },
@@ -294,7 +321,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260918_0095_social_recommendation.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "93e29a67e960e119961b5cd53cb7dbfcb213d80bed41d1e3740d78cb4b26f283",
       "transition_pr": "ER2 PR G"
     },
@@ -309,7 +336,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260923_0097_personalized_activity.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "c619e59a33d86f94def77b3cdfd16f072708384c51e961c20f3e69c104b05db0",
       "transition_pr": "ER2 PR G"
     },
@@ -324,7 +351,7 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260924_0098_observation_outbox_identity.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "fa4438dd8b0439e8655d2e93cc9838c687b7486cd76e03562ce61e72f45eef8a",
       "transition_pr": "ER2 PR G"
     },
@@ -339,9 +366,180 @@
       },
       "owner": "ER2",
       "path": "backend/alembic/versions/20260928_0101_daily_preparation.py",
-      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "removal_condition": "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
       "source_sha256": "0a1b7fbe605da41bc455cdb86b8bb14429d3af282820d84df56f154abb1663bc",
       "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          23,
+          24,
+          50
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/contracts/search_diagnostics.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f0c68f86ae6c67f71f39aea187bdcb3a2ebf14f4f03e0430dcdda4bf46b95904",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          16,
+          39
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/async_session.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "d98eaa6e046ba189126e4ee180a9d780096ee1f70244822267d93260151f619b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          11
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/committed_queue_wakeup.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "ef6a6502c00b5bc0a6fb1912375fa986ac23d2b65cd9a0dd74a931c1d6aad372",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          6,
+          14,
+          17,
+          26,
+          37
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/database_transactions.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "afb93a09f96b016356a0c520cf4f38ec484964e546e415dfb46875208e12e9de",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          21,
+          24
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_capacity.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f0656d52ac4655e556498307a349814dc8444539d01c9fe18e239901c2c60d71",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          19,
+          29,
+          33,
+          37,
+          41,
+          62,
+          98,
+          119,
+          131,
+          138,
+          146,
+          153,
+          162,
+          167,
+          178,
+          187,
+          191,
+          199,
+          201,
+          202,
+          233
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_concurrency.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "a61393be31d6eb14935a3bc85424cf29c3bfe9ff261dfa6a2dca6062b5534467",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          10,
+          12,
+          24,
+          26
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_connections.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "512eb3312ff8da667238beb8280c14655f08965536052bebf697356cdfcb08bb",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_deadline.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "590f49c0be68a141afa9d3dfc83ded6f143681e2c43414ec06cfc6e3759278dd",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          6
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_identifiers.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "3f4c397c408a6a64a8ca94069b1d0d65f2f742ecd1220ff54a724389b67c3918",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          6,
+          7,
+          34,
+          40,
+          42
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_reads.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "16806f023c1b8a6bd22280f4809ad436de7b4148731ee64ddfc66f926e011fc6",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/postgresql_world_fence.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9491bf6d932dc386b29cdd2c950638f536c318bf5bc79d3a9233a627440b0c05",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -349,11 +547,48 @@
           42
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/core/redaction.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "13e886940c090baec8a7bea84be633c53dbb953d06080210b6e45c0b0cde7cc8",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          79,
+          80,
+          225,
+          226,
+          260,
+          261,
+          375,
+          376,
+          564,
+          582
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/core/sqlite_concurrency.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "188368573a8ac9060e84c37c582ab0a7280945c99050e6db7eb2f71f6be13da1",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          14,
+          17,
+          18,
+          28
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/database.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "4fa65dbcd7a01fa49a1faf982e281ed8aae9502c3f64423ffe5a01eeff0d7e39",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -364,11 +599,11 @@
           26
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/character_lore/models.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "7ae2e19da2e7272ef85008e08122bb0947e89f6a0cb69d7ffb6ad3fba9a7961a",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -376,11 +611,11 @@
           340
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/character_lore/service/documents.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "611023887249d484a75ae7ee6f38d1d7537486baca42e7327dd39284f6606b8f",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -392,11 +627,11 @@
           47
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/character_lore/service/parser_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "8071a4adb230a974c6bf0fa46e55c9daa1d5178e3add2099550606a189a24c39",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -407,11 +642,11 @@
           162
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/characters/service/image_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "4be575103ef5de5ac832c66d3e163fa2d2f5afd6c3027b6c2becbdf5977fb677",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -420,11 +655,11 @@
           180
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -433,11 +668,27 @@
           185
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/chat/models.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "a66d5cf536f2888b512c47d7a55b69da8bef13499e013849497d2f6ae00f5cbc",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          26
+        ],
+        "driver_or_url": [
+          10,
+          19
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/chat/repository/retrieval_diagnostics.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "57712dd7dff8e45d38bff27e424a2a6ca0555a6f839eca6ed71600fd654cd4ec",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -453,28 +704,54 @@
           81
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/chat/repository/threads.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e671ad1487717a1148ed9ebc598407027a7bdaffa5619c9f0cb9ce37657ad022",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          101
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/chat/service/generation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "0ec8f7207a8f9f3337e7a4c3b108562b0ac798076caaa14323b8c0318ca5f2a7",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          700
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/chat/service/response_workflow.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "5f1a04d544a5503d3b8146e83fe354e4d7ffa355dc131f1eb45de9f62d24af6d",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
           39,
-          79,
-          827
+          80,
+          833,
+          842
         ],
         "row_lock": [
-          828
+          839,
+          843
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/chat/service/threads.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "d887b7c293a2a3a367520597c0a0840c6d40e0e0d0e1542c09260fb4d560ca58",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b08758fae06802c0c1e0431e44a2c602b8bedef8ffc3020548afa71ff1db4e2f",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -482,11 +759,11 @@
           172
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/models.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "7e5946968a440b45b9e44bedba626bfa0c2c8d5c784ff079fa367346283dc669",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -494,11 +771,11 @@
           55
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/repository/mutation_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "03eef8c3a4129545b31fd5ce5e9dbc9ee9464c3ed4cc6f033d3351cb65f79fe4",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -506,23 +783,26 @@
           646
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/service/auth.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "568afdb67d7f3bd916840c779b064437a4d1323acdbf31c5991e17b0059587ae",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          34
+          39
+        ],
+        "row_lock": [
+          46
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/service/environment.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "db43b4a57b429c4ebb4eb6bd2fbf3bbe8700453f0f2560f2293803065b8b15db",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "2447514d1a4f11fc684be8bcdce51064a6fab9779060f86afba9ffe0b527ea65",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -534,11 +814,11 @@
           199
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/service/external_verification.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "a435535059fbf647c9be15cd7a8eb78316c8ecf2a3219f363ba96510b52e171f",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -546,11 +826,11 @@
           58
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/service/local_entry.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "623e118d71e6abfd39a1149a95ecf45de12597b706048f55d01b1ef206b11f9d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -558,11 +838,11 @@
           98
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/identity/service/login_throttle.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "d00ec43bc29aed985ff2d8b6d59b274c7a86872613f4c0e9c9bb9af22403352d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -571,39 +851,63 @@
           71
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/local_bot/repository/quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e2be33d54fddfe17d7b0a63c0767f6ec5508e37c9324f388cd8e04361f6a3bd4",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
+        "driver_or_url": [
+          138,
+          151
+        ],
         "row_lock": [
-          181,
-          320
+          174,
+          182,
+          201,
+          340
         ]
       },
-      "owner": "P8-L-O",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/memory/repository/consolidation.py",
-      "removal_condition": "retain while same-scope maintenance serialization and exact hot-brief source-version fencing are required",
-      "source_sha256": "f03e2f7e38ec063669d639a19f1eaa0560ab217e8fb73aac7ecc1180fd58a009",
-      "transition_pr": "P8-L-O consolidation/hot brief"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "6a5a93e7bc18325ddf4186ea82d0dbab86745df3a75185a6ff5cd462bac2231f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          4,
+          29,
+          39
+        ],
+        "row_lock": [
+          43,
+          67
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/memory/repository/experience_inputs.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "43ec671d6d622cde69a9f0084d7620ce411a6d2b650b45ae432f40ef7c4427e9",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "row_lock": [
-          741,
-          758,
-          802,
-          872
+          720,
+          740,
+          783,
+          853
         ]
       },
-      "owner": "P8-L-G",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/memory/repository/items.py",
-      "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "3eb4595252401b78fe6cc26d3a185c0b345f1dcb76568b89ea816a89a1c6d0a8",
-      "transition_pr": "P8-L-G memory write/lifecycle"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "952f858c05ad98e99280af8c2c7afa2a0f1497395ffbf18fe9f656f4f06c2c91",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -614,11 +918,53 @@
           230
         ]
       },
-      "owner": "P8-L-G",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/memory/repository/queue.py",
-      "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "ecf34b058871ec8bc780a73049f40a4f67773304723dbfc991c173f4583ce6c4",
-      "transition_pr": "P8-L-G memory write/lifecycle"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          5,
+          41,
+          67
+        ],
+        "row_lock": [
+          79,
+          124
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/memory/repository/situation_admission.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9a7e93cd08d7bf9a38d0195c4be302b87ee82ee4ab886488af53f2298faf373f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          37
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/memory/repository/situation_runs.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c4577bb093696e16d0a7fde38928c5955d4459387a310798d00ba7b3614d6165",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          81
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/memory/service/situation_management.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "6f8a81676d2d9eb08e635a2bc2eaf8926efe5f20dd8cf22bba2b2e4a3f907dbc",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -626,11 +972,11 @@
           47
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/models/projection.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e7c7555198e0c919efc49de52b73858c09d063f93137fe8106ce9598e3f75e7d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -645,11 +991,11 @@
           30
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/models/social.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "af378a2e19d3796c7720ab1ceee3f47af9787d876abeb02b2a01b32435cd14b7",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -662,11 +1008,11 @@
           70
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/repository/events.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "2078d3a6f8eb4986b80f723ad012ae583b4a6319517d04d7af2dfa82c61d7424",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -677,11 +1023,11 @@
           48
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/repository/projection_state.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "eb8f4715476a506f1621d6a42e98dc97dc780662f27f41e50f91e1f2d1b4c0af",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -689,11 +1035,11 @@
           108
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/repository/proposals.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "dbbf91df82a6c57208214562acb856df9809283f3c7b09df58ab0bab90744b2d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -701,11 +1047,11 @@
           30
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/repository/replay.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "19164fbc638ffdcb32d0cda76b6a8fae38024a555a9eb7209b094fb4fb0175f3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -713,23 +1059,26 @@
           18
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/repository/state.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "63dd612540a5639591c6fef3b3870491627cb913234fd858d663a6a9defae7ce",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
+        "driver_or_url": [
+          82
+        ],
         "row_lock": [
-          220
+          357
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/service/daily_review.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "49359eb1a716ffe05c676bb96e92f2ac6dcbd13b5f519aecf44eda0cf77f459b",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c25b25923ef83f49a5f7f49862a63ced4eddd11d2935e2ecf456b04e97acd54c",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -742,11 +1091,23 @@
           151
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/relationships/service/personalized_metrics.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "76e7ae156dd16b1e4ec57ded2d9bd62f0b09cf1829a4e19e96315eba0e2b8910",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          69
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/relationships/service/review_history.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f196f99af6b1978706ea976cecb422c5bfd4b5161fef7558a4fc52439cd03ef0",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -762,11 +1123,11 @@
           25
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/models/plans.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e24e744d8d023d5bd542795557e4748bd8c7db397abf0d1fbf8f7693c31cd36c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -774,11 +1135,11 @@
           116
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/models/resident.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "3e62646a4f2d496e100faf3e9ffb9493fad496df7aa59a46e263c4a7a7a2383a",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -789,11 +1150,11 @@
           7
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/repository/autonomy.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "38032af51a6dd715ca234647a003088ecb073242b48777368e465302624ea28b",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -805,23 +1166,23 @@
           8
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/repository/first_greeting.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "f8514324f57dcbd780b1c37291febaf799abe2613faf294eab91df5a188c8efc",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          99
+          96
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/daily_preparation.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0d5762ce5b114a2bd37fe1ad9215a6da188d7ac8e2a95729dd62bf8fa67402ba",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "0569cc22e29e0b533f6043173f42a8efff6094ae4d2fa281cf442429379149b7",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -832,11 +1193,11 @@
           17
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/environment_schedule.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "bdb9d1bdad25cbc0923aa033ea2504a9debd3c8c9ac0a7143f68645cdfe361b9",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -855,11 +1216,11 @@
           594
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/execution/claims.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "80adb28ce4c89a75e965f5e4f10dd1299ce78da943d76805c6a00ed7a5dbf683",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "375c293a2744ce6598948c9ffb51cbc504441e62d258ae4a38292b89a712ae40",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -879,11 +1240,11 @@
           79
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/execution/lifecycle.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "d2785c4e3ffad05b71a00e5c17970e615f5bed2de93357547a715c4ec8584ac5",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -899,11 +1260,11 @@
           269
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/joint_activity/execution.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "6c939a4cc527de86902587a71c005c2f10bb23788d7f563cfe51fb6078d13071",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -915,11 +1276,11 @@
           456
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/joint_activity/planning.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c736be8fa5bd003c9aee8e271f2a75d10e80f1dbb0750b5ad0545bda80174e43",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -931,11 +1292,11 @@
           263
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/joint_reservations.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "7dd0d593d955a24a1409aea72e88101f73cfe0f16d7fa0ef4013fdc7adf69ef3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -953,11 +1314,11 @@
           406
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/joint_scheduling.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "586acf96ad63a59a82e6481467a27ef891c6a5b19371be423017639b02adb7b7",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -970,11 +1331,11 @@
           86
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/legacy_claims.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "3584078fe0a16a18acda12306d7a4453415a98972f514be002266e8890958996",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -994,11 +1355,23 @@
           103
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/lifecycle.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "3ac11daaee16811e505878a07be621e802de9047cc0783ae8e4e999dd6523c2f",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          83
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/routines/service/run_backoff.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "6e554016eb2f4f882d1028a2871f75974fe87919388edfe06257cecc6c1c6e40",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1017,11 +1390,11 @@
           267
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/slot_assignments.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "8173dd560c0b3068d58ad81592f98ae8fb35de16d43fea6993937c083709fe1a",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1034,23 +1407,23 @@
           99
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/slot_claims.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "5248393c5da62d0d43a017bc988c5f461f14edcc067e37eb910e6fa712afe795",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "row_lock": [
-          50
+          51
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/slot_leases.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0cecf577a0ba57d0882afe040cc513de661f412d5b143ededc8b898b0d6573d6",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c402301f3e9c7e33e550609d78660aff82222e754eb6f2d17e79a559dfd4e4d8",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1061,11 +1434,11 @@
           75
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/slot_pool.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "9ea5043298c5f76ab9a4dff7ae828ef03f4df1626c22b91a8ebd23eaee0fc674",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1076,11 +1449,23 @@
           40
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/routines/service/slot_recovery.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "51afbca41897bd9c6a37dd559efae814d26ddb215ed87cf1e8b19a05ff8c421b",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/runtime/contracts/status.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7a1b5b4df3e3c5f0bbd6060c2ba456c5cbb65c7f64f364e92ebb12330e885f20",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1095,11 +1480,28 @@
           34
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/runtime/repository/scheduler_lease.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c9efa2143284dd73e2ec9fcc0273d6df5f37bbc074029211d9c41677bf62fee3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          121,
+          122,
+          123,
+          145,
+          146,
+          147
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/runtime/schemas.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7393f5c082be8c31fa1e507f9060bf8a8250739a6b67978590a1d122a5bfa36f",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1107,11 +1509,11 @@
           22
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/runtime/service/sqlite_lease.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "8ad49dec95f6b48408fd179eabb8ba0c7887c2df873637996957d3aa5090c621",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1124,11 +1526,11 @@
           25
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/models/feed.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "a101e713e6f51de802564e8aad513a257b486e509a6a7dc915c081ac435b4c83",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1138,11 +1540,11 @@
           300
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/models/posts.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "8102fb755b428983f318bd11e09124e46510664fc5d367b99cc33084fd14a3cc",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1156,11 +1558,11 @@
           16
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/image_jobs.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c8cad0f232a667431a19e029848154ef3ec3b7c3bfaacf861224f767d05db8e7",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1170,11 +1572,11 @@
           113
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/manual_inbox.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "31e02016373d43e220b42cd900198621b9dcc6f8baa68f1033233e9a2233b480",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1185,11 +1587,11 @@
           91
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/media.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c022ac72d5457de57aee469118e09e9434c8340f7627be98db48d12aed4ce85c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1197,11 +1599,11 @@
           6
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/owner_reactions.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "55839c892799b456bcb0d1cf014eef3bb8510d8964204a24a3ce60b9196c40c4",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1212,11 +1614,11 @@
           317
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/posts.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "cbf0097b273a2cb24052904c5cf540f121206a5d9330430e3f8101dbd89fd338",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1225,11 +1627,24 @@
           81
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/repository/world_feed.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "cbf699a6a8bd62b75d848273aa429eb8bf33a63250cca3b6bfb2673690f44b6f",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          105,
+          106
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/social/repository/world_notifications.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "917ffe9bc911b75fd2b4105867a7d68617cd05367e49bcbda663927fa1aa1b4b",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1237,11 +1652,11 @@
           46
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/service/generation_usage.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "601623654fb8505e2fe49e4ba518be732e18bc7e298a7a737132ea099e569e2e",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1249,11 +1664,24 @@
           130
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/social/service/world_feed.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e472337775390e77a80ad164af70ba3cfe12c0f2e708f31d7bab16e9f0765ccc",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          6,
+          23
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/domains/social/service/world_notification_delivery.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7dfb2d937fbb44acde41ecbaad8e80bc48090f27e7242109a3fcaa6e363d71d5",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1270,11 +1698,11 @@
           30
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/world_characters/models.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "e2762291e71afcde00611b39517123a93f56cdd6b887d2f8dcf6622bbc106fe4",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1293,11 +1721,11 @@
           994
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "73287305754936009455936fad738f489148a58f875a44801a676ebdf94681c3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1305,11 +1733,11 @@
           21
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/world_characters/service/event_scope.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "89c8b8ac4f833ace77faa6ed7caa17f67b08ed2564940cd462b95abccfa98029",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1317,11 +1745,11 @@
           116
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/world_characters/service/lifecycle.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "cbd7f23051df044fd4c9c9e0f4a34581a411a086245d95aec5e77db487f7bea3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1329,11 +1757,11 @@
           8
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/world_characters/service/preparation_lock.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "5667ef6405cc13cb8bc99163ed70ad6ef9f760c8aef9678fa8e743b32f37c031",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1346,11 +1774,11 @@
           25
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/worlds/models.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "a526c1e97617c1431fe54ab81a9b56d16864ace48440f4a16a729304d33e3486",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1358,11 +1786,11 @@
           63
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/worlds/service/creator.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "725443a63a6464ec814cc5103b0b406aa96cc1998a313ed087800fa021bfa6cd",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1370,11 +1798,11 @@
           26
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/worlds/service/reserved_roles.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "09a5560db036706664e273b9efd56c1e385beb501fd79a38df44a1f71d269952",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1385,11 +1813,117 @@
           39
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/domains/worlds/service/scheduling.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c02660becd30353117ea6f70820c64c5fa22c3eca2b1a40eefeb20b4652d11e3",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          351
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/main.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "5065f0dd388ae2f7622a246df853f42257af1edd5faa3261afb6a203ba1b68ef",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          160,
+          161
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/checkpoint_maintenance.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "ae3fc8b69cfe27f5ad00b0664860813ee57064a917526c3ec133ef51bbc18380",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          10,
+          35,
+          37,
+          55
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/checkpoints.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "90073180c4c01781fbb87a687a846b33ecfb6301f227987e55512ba4221d3d16",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          13,
+          31
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/db_stage.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "020da4a438372051cc6d950c35c9fd537eadfc959a42842912610d97b179e1bb",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          438
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/execution.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "e3aa3ced9d9995e3346cfe5eebf6b2bcc05db66cb1ca466063914d44eaa8991e",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          78,
+          126
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/feed_effects.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "4e5927ffa109a6f8bd000e2064d0f0b967fb0541a0fc5c97057a1b94952fb3be",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          33,
+          55
+        ],
+        "driver_or_url": [
+          1,
+          6,
+          7,
+          8,
+          14,
+          15,
+          16,
+          32,
+          54,
+          74,
+          76,
+          91,
+          101
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/autonomous_activity/postgresql_checkpoints.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b0663ac2694a65db47b58cb7db41f71bdcc4dee9e32c0d9ba189101cdc44bc1f",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1397,33 +1931,531 @@
           18
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/autonomous_activity/retirement.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8577098bb50243ce72832c1caf59b65fe3785d6065da43071b2f3c76427fa8be",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "40bff4a9082ed6fbb56efc192eb5380aff343af4c1c62b586202d62f3820de99",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          11,
-          44,
-          52,
-          81,
-          151
-        ],
-        "row_lock": [
-          45,
-          56,
-          82,
-          152
+          123,
+          146,
+          157,
+          160,
+          167,
+          172,
+          191
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/chat/generation_workflows.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9b2afa5ba2bc51f89253427c64590c2a03a64fea8d589444be1d3e4d3128c452",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3,
+          13,
+          46,
+          54,
+          83,
+          153
+        ],
+        "row_lock": [
+          47,
+          58,
+          84,
+          154
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/chat/scope_queries.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "020908621ba90fcc1f85e691745d264e48df6115d0f856b8e8639dea13da85bd",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "85ef07598476f9a3f3c257d7d1b4884ec8c82e948cbf2e687b44626efe444f47",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          16,
+          23,
+          24
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/checkpoint_registry.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "45f7424e44057d1afd2e6740bde56dfb9adb0a132ee1baa0d8a89c787ca66175",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          15
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/composition_resources.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "aabce7806c51f6d20d0c67a6ba6d08e8d7d13b3f252aab2f2e2ace071222abb8",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          105,
+          106,
+          107,
+          148,
+          149
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/configuration.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "adea33ac250ce8e7bda9daad31423b5cee6594d0552fc0bd04e566903bd073a1",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          19,
+          20,
+          21,
+          73,
+          74,
+          76,
+          77,
+          88,
+          98,
+          99
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/configuration_contracts.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "6e0677cfc309ebeb9a27862fe9d224c373158e1f2630fc7826567a42b511dd28",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          167,
+          180,
+          191,
+          358,
+          362,
+          363,
+          364,
+          365,
+          376,
+          532,
+          546,
+          547,
+          548,
+          549,
+          550,
+          551,
+          552
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/desktop_sidecar.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "983e59280f20422dc081984ce43e3e5cdb955eca5867a224eb69e6c3bfdd1443",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          139,
+          222
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_observation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "04ecc4159a03286f4186293f8ea4cd79377694e7fa4c9740fa512253635d15ca",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          73
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_report.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "196fe09d848c96b6ffbc8cbfea2d565752dce32e114388ca97bcb409263cd20f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          20,
+          21
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/memory_pipeline_snapshot.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "e10a5f1bfb196b1f31ada184000fca46dd759c2d6864060d4f4fde0ff6f34648",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          4,
+          5,
+          14,
+          17,
+          18,
+          28,
+          31,
+          38,
+          56,
+          58,
+          62,
+          66
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/postgresql_snapshot.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f10a2e56cae15d0ac4cdde775ca40c956573ec96f73e554eb348e2c1073acb05",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          493,
+          494
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/sns_observation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "e8ee7b9a636df6d907d786871b9dfe97891d01af4142d3ff05f4b19630c42fd3",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          26,
+          27
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/sns_observation_report.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "002203339d10aaf2d116b5c347d8972b607d24978492c563f8324cf5bcadcf45",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          23,
+          25,
+          26,
+          28,
+          32,
+          34
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/diagnostics/status_composition.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "bcdb7a8fb7ac561f9d8dac91353b9cc9bdc1e16b6160794f54027f5bb61de6c3",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          77,
+          78
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/graph_projection/relationship_graph_read.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "58a76d35ed2fdb0abde06fdf16420e621e9c729a788557d9090fb88a7945c1ca",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          11
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/graph_projection/worker.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "365f890b7104899c2f3907968ff3a0f66f80b96b6b1a6aedfb6fd3ed942bd661",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          122,
+          127
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/installer_update.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "bce3f2fbbdb280694d768e90d03bf5f270a60ab7dd2ad320df2bc8d6e183f410",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          48,
+          49,
+          50,
+          109,
+          133,
+          135
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/canonical_worker.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "5777e30534511c486547c50f59316c1f47b17ac175d2fda7253b01e43de2267e",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          63,
+          64
+        ],
+        "row_lock": [
+          68,
+          80
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/maintenance_slot.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "684b1ab184436e44047ac1ed417c809c1075666b05c455bf12fdd5b0c8e69f22",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          2
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_epochs.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "357ac5b4a793573fb2b3a06618f9cc65c30cd6469e06e5053073fa999b07d6a5",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          3,
+          8
+        ],
+        "row_lock": [
+          33
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_generations.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "a3c411a418be953312d9878693f12f5ead7b8a7e5e28a1698253cc2f07fe4cf4",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3,
+          4
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_hybrid.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7ebdea902010bad8e6edc80bf3fecc1f5baae5884010d57192322c1e2cc6b8f0",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          10,
+          11,
+          12,
+          21,
+          53,
+          58,
+          149,
+          228,
+          230
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_recall.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "ad744cdb4595179211a91607a6ae5afb67671f80dc138495cf30c1ad575c117b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          8,
+          10,
+          11,
+          32
+        ],
+        "pgvector": [
+          1,
+          33,
+          77,
+          86,
+          110,
+          168
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_vector.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "42d939806b823caf39a5fbb568b940d3795d28b32171c7478bdb74bd501bf7f5",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          5,
+          16,
+          29,
+          39,
+          63,
+          67
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/postgresql_workers.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "725660802d5c643b4d19e91419c6f2f244e1bd37a72ed386be31ff7fbda26a46",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          72
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/recall_projection.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "2367c0611d1774c74001c4b01aadf06b7373a117a875cc81e1112700cef07910",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          165
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/situation_runtime.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b1808bcc9c13ada1fbdc1dc5e4c14bd918e817b01a7760994542fb233edb4a57",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          55
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/vector_attempts.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "dc87a5e10f3762235f09941534da4ace9cea1398b99079f2cb83d03c0b3f4a7c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          28,
+          29
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/vector_preparation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "dee13c92cb6cb47f7e37341083e75ff19f986e178fbf0f63747e46fc415ebe6b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          26,
+          27,
+          100,
+          101
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/vector_proof.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7942f91e97dd68fab1d91ba9ca226d3bb449533ffc417493b7015fdea257f010",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          185
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/vector_queue_worker.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "239f03d6ab92d00a7384c6a5a7974b546570c13ce15b6c89d27a183a1086fcf1",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          35,
+          36,
+          38,
+          53
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory/worker_diagnostics.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b279af77c4f167c2d8c646c15f2414fb3913bf5209563a8c0dd4a0f452a1dc0e",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          20,
+          41,
+          42,
+          46
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/memory_embedding_provider.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "128c0a39851af3dfe6a7545a60ace463b864ccabed7eab4ca3578b5fdd744876",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1431,11 +2463,11 @@
           3
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/migrations/__init__.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "a41a74c84aec77a000b7fa8700639cb82bdb451948c560da171002af939c7d82",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1444,11 +2476,11 @@
           228
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "5051b083eb25fdb4b40f2eb48abd155f1e41ef1c791fb50b73b20d2d418b0263",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1456,11 +2488,11 @@
           38
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "6da127c6aecec54eb483c286b11d6af8478061f7789eff774e72fe34be6efd9e",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1468,23 +2500,154 @@
           69
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/migrations/sqlite_versions/world_configuration_v28.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "dccb6b1264b1eb327c9a737ff2a3cc124f2b8857130aa4e7122ba7a484342132",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
+        "driver_or_url": [
+          1
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/migration_source_v013.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b3063736c9a1c68567118cf5cd55da84685efdc0afc70ff0240785fce828c5c8",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          7,
+          8
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/model_registration.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "280ad8b93c5fb1330d2da1277450750090806841bf4417aed4ae53e24a352d4b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/postgresql_epochs.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "2f57f35e26b6c175fe495bd2c5257ea7212c8098a8b327ec40da9a7996f77bba",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          2,
+          5,
+          12,
+          15,
+          21,
+          23
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/postgresql_identity.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "de3ad88284fd9087a555c1032cca547d3c18d9de5f7ad68c040621b8aca04828",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          2,
+          3,
+          4,
+          5,
+          9,
+          15,
+          16,
+          20,
+          25,
+          28,
+          49,
+          53,
+          56
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/postgresql_privileges.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "aa0200bdeac443606101c2cfaab54534bc8fa8f34f590d371c7132b9def3d672",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          4,
+          14,
+          19,
+          20,
+          27,
+          28,
+          34,
+          60,
+          61,
+          65,
+          68,
+          70,
+          72,
+          73,
+          89,
+          93
+        ],
+        "jsonb": [
+          4,
+          15,
+          20
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/postgresql_schema.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "12147ac08af16b34da2bfd232080e603bd54264bd7acb4046c2bf15a1ef9610b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          3,
+          70,
+          73
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/persistence/postgresql_triggers.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "a6dcfaa7fbf2e27aaf3de86b82f646b92280c891cbb43ad84c62cf0e5886fdfc",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          30,
+          32
+        ],
         "row_lock": [
           16
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/persistence/scheduler_lease.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "85327720cff06a71e7ce545e8caa4ba94f031df93fd80194071c2654200ad544",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "8bb49fe3e9423c29dd4bbb2556785d15077edddbad0fdb59b36045b2c6e671e3",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1492,40 +2655,319 @@
           80
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/persistence/sqlite_codecs.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          116,
-          117,
-          118,
-          375,
-          376,
-          377
+          107,
+          132,
+          133,
+          134,
+          391,
+          392,
+          393
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8f8c401b10d72ea3f57feb7f8dd61fb917b1a0a2e79f0ac5fc766d2f72a3ce75",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "601c1041430f86fe2f9d8727399726fa0999d331dc55eb95d434d9536e7df084",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
+          9,
+          20,
+          43
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_backend.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "df91825d69fe572aadb305b37a440d4c8ee8fc87bac22bdc1192273d50676ed1",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          10,
+          11,
+          12,
+          13,
+          19,
+          22,
+          25,
+          26,
+          27,
+          28,
+          30,
+          36,
+          37,
+          39,
+          41,
+          44,
+          46
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_configuration.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "4df21c0f4cbf3a6db758b3de90d370bd835cb4dbbce841e5b637366a4afde66b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          40
+        ],
+        "driver_or_url": [
+          10,
+          30,
+          32
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_experience_upgrade.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "a31201e314c0348275abdf169a53d44d4186735b893fa933c4c1d998fc937f34",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          7,
+          16,
+          17,
+          24,
+          25,
+          30
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_experiment.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "0be52a59d61a1f5df01231ca432f44ef4f55d7b8c380b9557dca3f7c9f31d54b",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          15,
+          16,
+          21,
+          22,
+          39,
+          50,
+          51,
+          52,
+          62,
+          93,
+          121,
+          125,
+          127,
+          128,
+          129,
+          131,
+          137,
+          146,
+          153,
+          154,
+          156,
+          177,
+          178,
+          186,
+          187,
+          188,
+          203,
+          232
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_installation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9d096bef36b1d7d441ada695761d6c867c87a0609f2117ea8b3acb5a351e5e77",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          14,
+          15,
+          18,
+          20,
+          124,
+          139,
+          146,
+          153,
+          187,
+          203,
+          232,
+          237,
+          260,
+          261,
+          276,
+          284,
+          285,
+          313
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_migration.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "5ba0d31958b217e1de78c37e9c1c9f24e22b85fb48a9b6134803b4f73b5e2787",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3,
+          4,
+          5,
+          10,
+          11,
+          45,
+          81
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_migration_checkpoints.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "19a4e0e2d3de0d4e6764fb0ceacc28be1c25fcc1f9947e8b745b929254eaa601",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          8,
+          9,
+          106,
+          109
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_migration_search.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9ec7c83f6875132aee77880de60342ff533eb65bccb2001903f38cdad57095ff",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          2,
+          17,
+          18,
+          25,
+          29,
+          30,
+          32,
+          34,
+          42,
+          43,
+          45,
+          47,
+          50,
+          51,
+          53,
+          58
+        ],
+        "jsonb": [
           26
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_runtime.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9a8277d755e7cafcdcb13614ab4c7625c9ed085110bbd21d6f44ba98a14fd7b3",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          7,
+          8,
+          12,
+          20,
+          30,
+          31,
+          37,
+          43
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/postgresql_server.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f1f5c5c9d5797f45ece1656747bb0f0418a322c9bebc28675821dcc37e490e0e",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          27
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/relationships/manual_review_worker.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "2434fa46356d20bcc47a45a5f2938163dbb02703bb2a3bd25218fd9a5c2faf5d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c33c636b620c3492a360eec383e96f8af580f16b9d9514150358a423385476bf",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          32
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/relationships/review_commands.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c292b9c329669764e706c56ba791ba89f035a8ea5492b6d4958032015495c3c8",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          19,
+          25
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/relationships/review_policy_upgrade.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "814635dd9b1892f8fbf924f90dd092af70a7ff06707c487a105f3db955e81c32",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          10
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/resident/db_stage.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "1a8f93f4f67344bcb6b9a3c6c8cffe4297432fa89cb37a40fedfaf579e774b47",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          46
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/resident/scheduler.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "df9f1727a9e9922ece1aa3a3a6d8b8cc4bdc0d89279e1e6199f01146ec42e9b2",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1533,11 +2975,11 @@
           21
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/resident/slot_references.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "b4ce267482aa923c5b567841d2b15709328edb48c963f1b629e6b7833f41849d",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1545,11 +2987,11 @@
           23
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/routines/activity_references.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "c014722b94c4fa857dbfc43553a10bf10d7a10c94e98b39b0a83c210a8a52363",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1557,11 +2999,64 @@
           44
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/routines/plan_references.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "74e601e4892ce72bfb1c4024d12e85f3aecf9c591095f953d5e682eded0d0468",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          6,
+          23,
+          26
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/search/postgresql_fts.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "08b94b76ec29d1b43155977384d3bc231cebfb622cb2fb0a01333e4de042642c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          5,
+          21,
+          22,
+          28,
+          103,
+          106,
+          109,
+          116,
+          121
+        ],
+        "row_lock": [
+          95,
+          105,
+          115
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/search/postgresql_store.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "141d5a4ce0deb0a13da3b8c7e03557ca73f0ffdc43ed984f0fb9a4cca6155948",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          198
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/search/social_projection.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "0d0124514770d9a3e194725440edd2ab40094bf6203b7e264359263d59341718",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1569,23 +3064,162 @@
           31
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/app/runtime/social/feed_observations.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1b39231e4a74644bb16b779f6cbf2865d67c3a10d5f53d020948e84badb47a6a",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "3216842ccf9095e9c4b22bdbd9723ae00ec9e8e9e53833384f873f3bb95cfffe",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
-        "pgvector": [
-          37
+        "driver_or_url": [
+          404,
+          560
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/social/planned_actions.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "1f9ee13841dd956a33f7921b5bdc29963b212bb51acb0f50672133ae7454c031",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          189
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/social/topic_preparation.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "42f6c5598c4825ffdf453a8658f8e87561d05f52da0cf61a004c23b1ee73524f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          33,
+          35
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/startup_security.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "1627f43727a7fb05e2bd91c851c1822616113b6dd9b14d2b972d3c0d66930e15",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          13,
+          14,
+          16,
+          22,
+          44,
+          48,
+          50,
+          51,
+          55,
+          60,
+          62,
+          65,
+          70,
+          75,
+          80,
+          96,
+          102,
+          105,
+          108,
+          110,
+          116,
+          119,
+          121,
+          128,
+          135,
+          137,
+          143,
+          160,
+          161,
+          163,
+          172,
+          182,
+          183,
+          184,
+          185,
+          190,
+          194,
+          197,
+          199,
+          201,
+          215,
+          218
+        ],
+        "pgvector": [
+          50
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/windows_postgresql.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b11735f345d986402d1460158c79a6ffee0f3dcf5279eabd2925e76a188295d6",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          120
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/world_deletion/canonical_erasure.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "39f782edd5b258244247c4df568b41519795c2e7513502f3dc4e14e486d970d2",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          111
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/world_deletion/worker.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "719b598ec13ce90a10ac0ca54beead79dd4e43ee81691d4f8e8367cd313fc07f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          97
+        ],
+        "driver_or_url": [
+          95
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "backend/app/runtime/world_packages/import_commit.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7cc9b86ef60b63a6dfa36308f0342fd626ff1d8790323eaaf7e00baf8368f36d",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          32,
+          33
+        ],
+        "pgvector": [
+          35,
+          41
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/pyproject.toml",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "63b57e51c5d5571b0fa6fc40dc9530b7f961f2998ff12a9274b1a9b4551ac156",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "71a0ba4033f5dc0f298122f3664f6fe84a43d7cf44e224737b7bd99b236a6cc3",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1598,48 +3232,388 @@
           36
         ]
       },
-      "owner": "ER2-ER7 legacy evidence",
+      "owner": "PostgreSQL 0.1.4",
       "path": "backend/scripts/migrate_local_credentials.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "44635b296bddea03e61a3f88525b5bec0e1e0f4a9d430ef5108b0440828f33bf",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          5
+          24
         ]
       },
-      "owner": "ER7",
+      "owner": "PostgreSQL 0.1.4",
+      "path": "compose.dev.yml",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "95e678c3f0db2d1219bb0a44b4030eb1b2bde3daea8adab41a2c6037ad29a149",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          11,
+          12,
+          44,
+          51,
+          52,
+          62,
+          100,
+          101,
+          102
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
       "path": "compose.yml",
-      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "6d85a954b5e8f3fcd353b7170f8647ec7d15df6f594c461c713037fb8bbd0183",
-      "transition_pr": "ER7 PR P"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "408b7409e7717dc49df5b037aa27ab6b7bf77612f29e46594cfa297b982e6de9",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          190,
-          191
+          53,
+          60,
+          73,
+          162,
+          163,
+          173,
+          184,
+          187,
+          249,
+          250,
+          278,
+          287,
+          295
         ]
       },
-      "owner": "ER7",
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/migrate/docker_migrate.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "f6194d17393932e23482e8b86438437af0f4860c4e848c560c03afdbc23e149d",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          223
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/angmoo.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7bd7ce69b165aa367d60c8cf6826d9e3e57c66058481aed037dd32a6d02ec1f3",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          16,
+          17,
+          18,
+          21,
+          22,
+          23,
+          34,
+          58
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/migrate.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "3a3d37f653f8507ebefc4f0dfe8fd4e189f2adde771ff45c742fad7ddd80e0df",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          157
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/payload.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "069e12b9c551af2e297dc579ef4294be868193840f214b50d81e10b2731a8512",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          23,
+          24,
+          28,
+          67,
+          68,
+          69,
+          71,
+          73,
+          74,
+          77,
+          85,
+          86,
+          88,
+          105,
+          108,
+          110,
+          113,
+          131,
+          137,
+          143,
+          149,
+          157,
+          158,
+          161,
+          164,
+          166,
+          169,
+          170
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/postgres_host.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "341354b8786f3ff0d3ec94322f06d5139c4141ed2b1d4857a52893074094826f",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          115
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/processes.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "cad349ffc25902f84c8130c25263f97b6edb200c491c9b140ce98f476a16fbfd",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          16,
+          23,
+          39,
+          52,
+          73
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "launcher/termux/test_postgresql.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "b021fb737084ebbd8574ba69d3eafd79cae89e030e45e9837ff4a593319f29d2",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          228,
+          229,
+          286,
+          287,
+          326,
+          327,
+          382,
+          384,
+          385
+        ],
+        "pgvector": [
+          229
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/build_desktop_release_metadata.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "433beb64d1528052a92bb360744dd08102b5501023877ee672f30a654c1f999c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          60,
+          69
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_container_images.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c03e1b39aeb70009104ac83ff8cbf2e511dc24da139b5d3bfb5e8c5f06e8e41c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          125,
+          126,
+          132,
+          135,
+          137,
+          161,
+          162,
+          163,
+          164
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
       "path": "scripts/ci/check_desktop_installer_contract.py",
-      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "5381a7954a2ab278f09c606da20774b3140361c33e26c78105fbf362ca1c7933",
-      "transition_pr": "ER7 PR P"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "211c9d95422a7128397e0f5943bfd66543d86ddbb140bf94d9d433e9882b7a98",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
         "driver_or_url": [
-          131
+          1,
+          16,
+          17,
+          75,
+          76,
+          84,
+          85,
+          93,
+          94,
+          96,
+          120,
+          122,
+          147,
+          207
         ]
       },
-      "owner": "ER7",
+      "owner": "PostgreSQL 0.1.4",
       "path": "scripts/ci/check_docker_runtime_assets.py",
-      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
-      "source_sha256": "5fe5e9f277e50299cd83dc78cdb9a90109c979156a1683cec1ef0634da190ae6",
-      "transition_pr": "ER7 PR P"
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "8f97cb1d544e823f426b14c6575697406cb581b23198be601f135841c5be7911",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          208,
+          209,
+          210,
+          286,
+          287,
+          288,
+          295,
+          296,
+          344,
+          345,
+          346
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_er6_desktop_supply_chain.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "964224031a8d39d167378f985ba929c950133ea265addd3acdcb6a83e37b6470",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          94
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_local_launcher_contract.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "d7c2dc4107975eac03b32f98b7982f8d654464902e9922975fe7132ba83889e2",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          94,
+          99,
+          120,
+          122,
+          173,
+          174,
+          175
+        ],
+        "pgvector": [
+          123
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_local_runtime_contract.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "8d762a34d58c9a0ec6d58d59ac7f4d9793211dada7cc6f579119065f17aedcf3",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          40,
+          41,
+          46,
+          56,
+          58,
+          60,
+          62,
+          64,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          85,
+          86,
+          87,
+          88,
+          122,
+          183,
+          186,
+          187,
+          190,
+          193,
+          211,
+          212
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_secret_allowlist_metadata.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "2a8a44d48a93e97a8811e78c81a525dcc9ca7190081d79ed3792562a57b99a6d",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          118,
+          119,
+          121,
+          149
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_windows_host_tauri_dev_contract.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "61e8e9ed6e9d8975f0810bb40edd2dcd40a937f35034b7504100e8a9414e4b05",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          33,
+          35,
+          36,
+          38,
+          39,
+          42
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "14d2c3d3325c414b97d2972d6834b9763db53b4886f25abeb4e49d2b989d611f",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1648,11 +3622,41 @@
           100
         ]
       },
-      "owner": "ER7",
+      "owner": "PostgreSQL 0.1.4",
       "path": "scripts/ci/compare_er6_sidecar_layouts.ps1",
-      "removal_condition": "embedded canonical rollback window PASS and user-approved legacy-default removal",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "9d6b074a9af687cdf2987f7c7666350a91226cebbb53ea363ef93a6093a67374",
-      "transition_pr": "ER7 PR P"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          21
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/gate.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9fcfd950e5015a975f949e8820785bdc74917cdb624fb155e70c8deb45c98ecd",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          26,
+          38,
+          62,
+          78
+        ],
+        "pgvector": [
+          78
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/generate_hybrid_episode_memory_inventory.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "026bf212507ca378e661d7d81e43515f0157cf20277c62a82ae97aadb1f297d6",
+      "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
       "markers": {
@@ -1660,22 +3664,307 @@
           149
         ]
       },
-      "owner": "P8-L-G",
+      "owner": "PostgreSQL 0.1.4",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
-      "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
       "source_sha256": "fcf29bb7f01dc294e31c53edeb32241c266f6f056d02fa1a5372bba069076a0e",
-      "transition_pr": "P8-L-G memory write/lifecycle"
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          3,
+          11,
+          12,
+          14,
+          17,
+          19
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/prepare_postgresql_tests.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "e837d0a936e2293e509e9b85bfe621c30946ddb42a3d6329783c2f4264779846",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          15,
+          320
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/run_er6_defender_trigger_matrix.ps1",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "ce8f5bd0d5e7f088a3a647b0a617ad8460f90d230d85030c2753fab85c0bcd61",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          21,
+          117,
+          118,
+          141,
+          142,
+          150,
+          151,
+          158,
+          162,
+          166,
+          221,
+          224,
+          233,
+          234,
+          235,
+          243,
+          248,
+          249
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/run_l0_container_smoke.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "52d424b2afc2a5e54203b2c808c06c764b32c9aeef66439b9d385a32263a1253",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          31
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/run_windows_postgresql_qualification.ps1",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "d6c6465f39c685ef36d22d339d49ce76cb2d8b8e02e185eaa314dd857781ee2a",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          12,
+          52,
+          53,
+          86,
+          89,
+          90,
+          91,
+          92,
+          93,
+          97,
+          98,
+          103,
+          123,
+          124,
+          144,
+          145,
+          170,
+          171,
+          172,
+          175,
+          208,
+          213,
+          214,
+          215,
+          221,
+          227,
+          230,
+          253,
+          254,
+          255,
+          258,
+          262,
+          265,
+          269,
+          272,
+          274,
+          276,
+          279,
+          282
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/run_windows_postgresql_qualification.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "67d240cbafb0d1ca2ecc5502a3442504ce0a1f8192dc2af5d2938c773d1af834",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          54
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/windows_migration_consent.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "c1d6ce7c2283c3738307358d7f3252c15130c990d044fb814f06d3f3f412fa15",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          6,
+          40
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/ci/windows_postgresql_coverage.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "372f9a5aaca2b0763e3b464f0a45bbaeb7e91cd84f2920ee5ab797142df92f45",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          26,
+          28,
+          30,
+          32,
+          35,
+          36,
+          42,
+          45,
+          54,
+          62,
+          65
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/docker/backend-entrypoint.sh",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "7cb597bf27a74ad016f6eed81f87d12eb22f9b0b7606c9c4a0e0fee903d40173",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          5,
+          8,
+          22,
+          23
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/docker/postgres-entrypoint.sh",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "9579e7e4964d6896fd17cc7c4ffcc3ca5fbed1c02ede94ab5a0cb1c67ea87b44",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          4,
+          15,
+          17
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/native_postgresql.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "5428849ef6968f86d7db03727d31bd227b2199e27214a01b8f22db0a53fb25c5",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          1,
+          12,
+          14,
+          18,
+          22,
+          26,
+          28
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/postgresql_acceptance.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "331942fc84c5c2f6bc55cb2dbaae42e15246c4c831410a969dfbad646b7a637c",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          9,
+          10,
+          11,
+          18,
+          28,
+          38,
+          47,
+          48,
+          49
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/postgresql_feature_smoke.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "73e88fa0971b7227458b9cb81d20d2aa16248cbe405ec35e6d6f6f5f5ea09c27",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          40,
+          41,
+          116,
+          117,
+          176,
+          178
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/prepare.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "fe61c196b66c5cf51b888f5392925d3b19cf83822b60bc0eb27b498e5679d263",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          41,
+          44,
+          57
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/validate.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "1fa358b9017a0db3d4901d5df52e7a0e6da4a43943e9f1329f716d37008fcb56",
+      "transition_pr": "PostgreSQL adoption PR #418"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          13,
+          14,
+          30,
+          38,
+          39,
+          63
+        ]
+      },
+      "owner": "PostgreSQL 0.1.4",
+      "path": "scripts/release/windows_receipt.py",
+      "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
+      "source_sha256": "d775317a5d7f5157ac33b888116af29de3319a19711884dfec1e525228f7efb0",
+      "transition_pr": "PostgreSQL adoption PR #418"
     }
   ],
-  "entry_count": 113,
+  "entry_count": 244,
   "marker_counts": {
-    "advisory_lock": 11,
-    "driver_or_url": 65,
-    "jsonb": 13,
-    "pgvector": 5,
-    "row_lock": 51,
+    "advisory_lock": 15,
+    "driver_or_url": 196,
+    "jsonb": 15,
+    "pgvector": 11,
+    "row_lock": 61,
     "skip_locked": 11
   },
-  "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",
+  "purpose": "Current PostgreSQL canonical storage, search, migration and runtime inventory; historical schema evidence and negative reintroduction guards retain distinct ownership",
   "schema_version": 1
 }

@@ -97,15 +97,17 @@ def test_p8_l_d_freezes_world_chat_v4_migration_and_transport_contract() -> None
     ]
 
 
-def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
+def test_p8_l_d_preserves_v3_fixture_and_requires_official_013_hosted_upgrade() -> None:
     inventory = _json(
         "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
     )
     assert inventory["installer_upgrade"] == {
-        "hosted_workflow_archive": "supported-v3.zip",
+        "historical_v3_fixture_preserved": True,
+        "hosted_workflow_cases": ["upgrade-013", "failure-recovery"],
         "idempotent_target_reinstall_verified": True,
         "message_survival_verified": True,
-        "required_predecessor": 3,
+        "required_predecessor": 41,
+        "source_product_version": "0.1.3",
         "supported_predecessor_present": True,
         "synthetic_fixture_has_resolved_and_ambiguous_threads": True,
     }
@@ -120,5 +122,4 @@ def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
-    assert result.stdout.strip().endswith(",".join(f"v{version}" for version in range(1, SQLITE_SCHEMA_VERSION)))
+    assert result.stdout.strip() == "windows_installer_supported_upgrade_matrix_contract_pass:v41"

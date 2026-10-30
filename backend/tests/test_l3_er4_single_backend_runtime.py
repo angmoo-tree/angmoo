@@ -380,15 +380,16 @@ def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
     assert borrow_process_graph_client(settings) is None
 
 
-def test_contributor_compose_uses_two_services_and_in_process_components() -> None:
+def test_contributor_compose_uses_three_services_and_in_process_components() -> None:
     payload = yaml.safe_load((ROOT / "compose.yml").read_text("utf-8"))
 
-    assert set(payload["services"]) == {"backend", "frontend"}
-    assert payload["services"]["backend"]["command"] == ["contributor-api"]
+    assert set(payload["services"]) == {"backend", "frontend", "postgres"}
+    assert payload["services"]["backend"]["command"] == ["postgresql-api"]
     assert payload["services"]["backend"]["volumes"] == [
-        "angmoo_contributor_embedded_data:/var/lib/angmoo"
+        "angmoo_postgresql_app_data:/var/lib/angmoo",
+        "angmoo_postgresql_bootstrap:/run/angmoo-bootstrap:ro",
+        "angmoo_contributor_embedded_data:/var/lib/angmoo-legacy:ro",
     ]
-    assert "postgresql" not in payload["services"]
     assert "neo4j" not in payload["services"]
     assert "scheduler" not in payload["services"]
     assert "projector" not in payload["services"]

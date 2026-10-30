@@ -23,7 +23,8 @@ def preparation(db):
         members=(EpisodeSourceMember("POST", str(i), values[("POST", str(i))].source_digest, "self", "원문"),),
     ) for i in range(2))
     bundle = EpisodeBundle("B1", scope, units, activation_epoch="test-epoch", cutoff_sequence=2)
-    return SqlAlchemyEpisodeApply(db, memory), setting, bundle, values
+    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
+    return SqlAlchemyEpisodeApply(db, memory, source_reader=RuntimeEpisodeDetailReader(db)), setting, bundle, values
 
 
 def test_multiple_episodes_share_source_without_raw_copy_and_replay_once(memory_session):
