@@ -19,6 +19,14 @@ from impact import read_plan
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def configure_test_import_paths() -> None:
+    # Tests import both the application and repository-owned qualification
+    # tools. A script entry point otherwise exposes only scripts/ci and the
+    # backend namespace, which cannot resolve scripts.ci during collection.
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "backend"))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--index", type=int, required=True)
@@ -27,9 +35,7 @@ def main() -> int:
     args = parser.parse_args()
     if Path.cwd().resolve() != (ROOT / "backend").resolve():
         raise ValueError("backend_shard_requires_backend_working_directory")
-    # Match `python -m pytest`: a script launch otherwise places scripts/ci,
-    # rather than the verified backend working directory, on sys.path.
-    sys.path.insert(0, str(ROOT / "backend"))
+    configure_test_import_paths()
     if re.fullmatch(r"[0-9a-f]{40}", args.source_sha) is None:
         raise ValueError("backend_shard_source_invalid")
     git = lambda *values: subprocess.check_output(["git", *values], cwd=ROOT, text=True).strip()

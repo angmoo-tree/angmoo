@@ -162,7 +162,7 @@ ARM64 Android 기기의 Termux에서 실행하는 실험 경로입니다. 휴대
 Termux를 설치하고 한 번 실행한 뒤, 아래 두 명령을 차례로 입력합니다.
 
 ```sh
-pkg update && pkg install -y python curl proot
+pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh

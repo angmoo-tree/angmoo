@@ -162,7 +162,7 @@ This is an experimental path for ARM64 Android devices. It runs Angmoo's ARM64 p
 Install Termux and open it once. Enter these two commands in order:
 
 ```sh
-pkg update && pkg install -y python curl proot
+pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh
