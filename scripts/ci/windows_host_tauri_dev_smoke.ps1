@@ -20,7 +20,7 @@ $base = [ordered]@{
         webview2 = $true
     }
     docker = [ordered]@{
-        services = @('backend', 'frontend')
+        services = @('backend', 'frontend', 'postgres')
         stack_state = 'absent'
         port_3000_in_use = $false
     }
@@ -70,6 +70,10 @@ function Invoke-Case {
 
 try {
     Invoke-Case 'pass-absent-stack' (Copy-Fixture) 0
+
+    $missingPostgres = Copy-Fixture
+    $missingPostgres.docker.services = @('backend', 'frontend')
+    Invoke-Case 'fail-missing-postgres' $missingPostgres 40 'compose_service_contract_mismatch'
 
     $healthy = Copy-Fixture
     $healthy.docker.stack_state = 'healthy'
@@ -125,8 +129,13 @@ try {
     $windowsSdk.tools.windows_sdk = '10.0.19041.0'
     Invoke-Case 'fail-windows-sdk' $windowsSdk 40 'windows_sdk_unsupported'
 } finally {
-    Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
+    $resolvedFixtureRoot = [IO.Path]::GetFullPath($fixtureRoot)
+    if ([IO.Path]::GetDirectoryName($resolvedFixtureRoot).TrimEnd('\') -ine [IO.Path]::GetTempPath().TrimEnd('\') -or
+        [IO.Path]::GetFileName($resolvedFixtureRoot) -notlike 'angmoo-host-tauri-*') {
+        throw 'preflight_fixture_cleanup_path_invalid'
+    }
+    Remove-Item -LiteralPath $resolvedFixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Host 'windows-host-tauri-dev-smoke: PASS cases=14'
+Write-Host 'windows-host-tauri-dev-smoke: PASS cases=15'
 exit 0

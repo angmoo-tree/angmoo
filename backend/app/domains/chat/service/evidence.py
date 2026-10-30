@@ -49,7 +49,7 @@ class EvidenceService:
         thread = self.thread_service._get_owned_world_thread(
             db, user, world_id, thread_id
         )
-        self.thread_service._world_thread_read(db, thread, include_messages=False)
+        self.thread_service._world_thread_participants(db, thread)
         row = db.get(models.ChatResponseRequest, request_id)
         if (
             row is None
@@ -83,10 +83,17 @@ class EvidenceService:
             subject_world_character_id=thread.responding_world_character_id,
         )
         source_reader = self.reads.source_reader(db)
+        memory_ids = tuple(dict.fromkeys(
+            raw["locator"]["source_id"] for raw in raw_items[:12] + current_raw[:12]
+            if isinstance(raw, dict) and isinstance(raw.get("locator"), dict)
+            and raw["locator"].get("kind") == "memory_item"
+            and isinstance(raw["locator"].get("source_id"), str)))
+        prepare = getattr(self.reads, "prepare_memory_reads", None)
+        memory_reads = prepare(db, scope, memory_ids, source_reader) if prepare and memory_ids else None
         relationship_reads, read_limitations = self._relationship_reads(
             db, scope, thread, record, snapshot, current_snapshot)
         items = [
-            self._chat_evidence_item(db, scope, raw, source_reader=source_reader, thread_id=thread.id,
+            self._chat_evidence_item(db, scope, raw, source_reader=source_reader, thread_id=thread.id, memory_reads=memory_reads,
                 relationship_read=relationship_reads.get(("items", raw.get("ref"))))
             for raw in raw_items[:12]
             if isinstance(raw, dict)
@@ -95,7 +102,7 @@ class EvidenceService:
         for raw in current_raw[:12]:
             if not isinstance(raw, dict):
                 continue
-            item = self._chat_evidence_item(db, scope, raw, source_reader=source_reader,
+            item = self._chat_evidence_item(db, scope, raw, source_reader=source_reader, memory_reads=memory_reads,
                 relationship_read=relationship_reads.get(("current_context", raw.get("ref"))))
             current_items.append(item)
         visible_items = items + current_items
@@ -169,6 +176,7 @@ class EvidenceService:
         source_reader: MemorySourceEvidenceReaderPort,
         thread_id: str | None = None,
         relationship_read=None,
+        memory_reads=None,
     ) -> schemas.WorldChatEvidenceItemRead:
         kind = raw.get("kind")
         if kind not in {
@@ -312,7 +320,7 @@ class EvidenceService:
             detail = None
             if isinstance(memory_id, str):
                 try:
-                    detail = self.reads.memory_detail(
+                    detail = memory_reads.detail(memory_id) if memory_reads is not None else self.reads.memory_detail(
                         db, source_reader, scope, item_id=memory_id
                     )
                 except MemoryNotFoundError:
@@ -338,7 +346,8 @@ class EvidenceService:
                     href = f"/memory?world={scope.world_id}&subject={scope.subject_world_character_id}&memory={memory_id}"
                     if kind == "episode_memory":
                         reader = getattr(self.reads, "memory_episode_receipt", None)
-                        receipt = None if reader is None else reader(db, scope, item_id=memory_id, text=text)
+                        receipt = (memory_reads.receipt(memory_id, text) if memory_reads is not None else
+                            None if reader is None else reader(db, scope, item_id=memory_id, text=text))
                         if receipt is None:
                             availability, href = "unavailable", None
                         else:

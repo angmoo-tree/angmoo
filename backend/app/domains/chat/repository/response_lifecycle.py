@@ -17,6 +17,7 @@ from app.domains.chat.contracts.evidence_bundle import (
 from app.domains.chat.contracts.generation_lifecycle import (
     GenerationContractError,
     GenerationEvent,
+    GenerationEventType,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
@@ -334,7 +335,13 @@ class SqlAlchemyResponseLifecycleRepository:
     ) -> SequenceOutcome:
         row = self._require(fence.request_id, populate_existing=True)
         self._assert_fence(row, fence)
-        if _as_utc(row.deadline_at) <= _as_utc(now):
+        # Expiry forbids output, not recording the owned attempt's failure.
+        # Cleanup still uses the full identity/state/lease-generation fence;
+        # a cancelled, committed or superseded attempt cannot be overwritten.
+        cleanup = event.event_type in {GenerationEventType.FAILED, GenerationEventType.CANCELLED}
+        if row.state in {state.value for state in TERMINAL_STATES}:
+            raise GenerationContractError("response_event_terminal_state")
+        if not cleanup and _as_utc(row.deadline_at) <= _as_utc(now):
             raise GenerationContractError("response_event_after_deadline")
         outcome = validate_event_sequence(
             fence,
@@ -347,7 +354,7 @@ class SqlAlchemyResponseLifecycleRepository:
             update(ChatResponseRequest)
             .execution_options(synchronize_session=False)
             .where(
-                *self._active_fenced_conditions(fence, now=now),
+                *(self._fenced_conditions(fence) if cleanup else self._active_fenced_conditions(fence, now=now)),
                 ChatResponseRequest.last_emitted_sequence
                 == row.last_emitted_sequence,
             )

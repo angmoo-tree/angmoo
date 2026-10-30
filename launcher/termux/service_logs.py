@@ -14,7 +14,7 @@ import threading
 import time
 from log_policy import acknowledge
 
-SERVICES = ("backend", "frontend", "supervisor", "bootstrap")
+SERVICES = ("backend", "frontend", "postgres", "supervisor", "bootstrap")
 MAX_LINE = 16384
 MAX_MESSAGE = 8192
 QUEUE_BYTES = 1024 * 1024
@@ -248,7 +248,7 @@ def _create_session(home, identifier, metadata):
         sizes[path] = sum(p.stat().st_size for p in files)
     sessions.sort(key=session_started)
     overhead = sum(checked(p).stat().st_size for p in (root / ".retention.json", root / ".retention.tmp") if p.exists())
-    while sessions and (len(sessions) >= SESSION_LIMIT or sum(sizes.values()) + overhead > TOTAL_BYTES - 17 * 1024 * 1024):
+    while sessions and (len(sessions) >= SESSION_LIMIT or sum(sizes.values()) + overhead > TOTAL_BYTES - 19 * 1024 * 1024):
         old = sessions[0]
         if not retention_terminal(read_session(old)):
             raise ValueError("log_retention_active_session")
@@ -304,7 +304,7 @@ class RotatingFile:
 
 class Capture:
     """One nonblocking pipe drainer and one bounded writer per supervisor."""
-    def __init__(self, path, names=("backend", "frontend", "supervisor"), *, limit=None, queue_bytes=QUEUE_BYTES, policy=None):
+    def __init__(self, path, names=("backend", "frontend", "postgres", "supervisor"), *, limit=None, queue_bytes=QUEUE_BYTES, policy=None):
         checked(path, directory=True)
         self.path, self.started = path, time.monotonic()
         self.files = {}

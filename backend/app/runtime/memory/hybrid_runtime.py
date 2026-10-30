@@ -27,7 +27,7 @@ class UnavailableVectorAxis:
 
 
 class MemoryHybridRuntime:
-    def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1", episode_only=False):
+    def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1", episode_only=False,fts_workers=None,vector_generations=None,separate_canonical_guard=False):
         self._factory = session_factory
         from app.runtime.memory.canonical_worker import DeadlineSessionFactory, CanonicalReadWorker
         canonical_sessions = DeadlineSessionFactory(session_factory)
@@ -38,7 +38,7 @@ class MemoryHybridRuntime:
         self.projection = None
         self.vector_axis = UnavailableVectorAxis()
         self.status = "stopped"
-        self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path,
+        self.fts = FtsHybridAxis(fts_workers or FtsReadWorkers(database_path=fts_index.database_path,
             settings=fts_index.settings, control=self._search_control), lexical_policy=fts_policy)
         if episode_only:
             from app.domains.memory.repository.episode_hybrid_recall import SqlAlchemyEpisodeHybridReader
@@ -48,9 +48,10 @@ class MemoryHybridRuntime:
         else:
             reader = SqlAlchemyHybridCanonicalReader(canonical_sessions, source_reader_factory=source_evidence_reader,
                 canonical=canonical_recall_repository(canonical_sessions))
-        self.canonical_worker = CanonicalReadWorker(canonical_sessions, reader)
+        self.canonical_worker = CanonicalReadWorker(canonical_sessions, reader,
+            separate_guard=separate_canonical_guard)
         self.service = HybridRecallService(fts=self.fts, vector=self, canonical=self.canonical_worker)
-        self._generations = VectorGenerations(data_paths.search / "memory-vectors", bundled_vector_index)
+        self._generations = vector_generations or VectorGenerations(data_paths.search / "memory-vectors", bundled_vector_index)
 
     async def search(self, request, *, deadline):
         if self._transition is not None:

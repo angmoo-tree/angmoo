@@ -80,7 +80,7 @@ echo %* | findstr /C:" port frontend 3000" >nul && (
 )
 echo %* | findstr /C:" ps --all --format json" >nul && (
   if "%ANGMOO_FAKE_RUNNING%"=="1" (
-    echo [{"Service":"backend","Name":"synthetic-backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","Name":"synthetic-frontend","State":"running","Health":"healthy","Image":"synthetic"}]
+    echo [{"Service":"backend","Name":"synthetic-backend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"frontend","Name":"synthetic-frontend","State":"running","Health":"healthy","Image":"synthetic"},{"Service":"postgres","Name":"synthetic-postgres","State":"running","Health":"healthy","Image":"synthetic"}]
   ) else (
     echo []
   )
@@ -105,7 +105,7 @@ try {
     $env:PATH = "$fakeRoot;$previousPath"
     $env:ANGMOO_FAKE_DOCKER_LOG = $fakeLog
     $env:ANGMOO_FAKE_RUNNING = '0'
-    $env:ANGMOO_FAKE_VERSION = '0.1.3'
+    $env:ANGMOO_FAKE_VERSION = '0.1.4'
     Push-Location $fakeRoot
     try {
         $statusPayload = & $launcher status --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
@@ -131,7 +131,7 @@ try {
     if ((Get-Content -LiteralPath $fakeLog -Raw).Contains(' up -d')) {
         throw 'launcher_product_version_mismatch_started_containers'
     }
-    $env:ANGMOO_FAKE_VERSION = '0.1.3'
+    $env:ANGMOO_FAKE_VERSION = '0.1.4'
     $startPayload = & $launcher start --json --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $startPayload.details.idempotent_no_op) {
         throw 'launcher_fake_repeated_start_was_not_idempotent'
@@ -146,7 +146,7 @@ try {
     if ($doctorPayload.details.host.docker_storage.state -ne 'ready') {
         throw 'launcher_host_storage_status_missing'
     }
-    if (@($doctorPayload.details.host.container_resources).Count -ne 2) {
+    if (@($doctorPayload.details.host.container_resources).Count -ne 3) {
         throw 'launcher_container_resource_status_missing'
     }
     $contributorStartPayload = & $launcher start --json --contributor --project-name synthetic-l2 --port 45999 | ConvertFrom-Json
@@ -239,7 +239,12 @@ try {
     $env:ANGMOO_FAKE_DOCKER_LOG = $previousFakeLog
     $env:ANGMOO_FAKE_RUNNING = $previousFakeRunning
     $env:ANGMOO_FAKE_VERSION = $previousFakeVersion
-    Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
+    $resolvedFakeRoot = [IO.Path]::GetFullPath($fakeRoot)
+    if ([IO.Path]::GetDirectoryName($resolvedFakeRoot).TrimEnd('\') -ine [IO.Path]::GetTempPath().TrimEnd('\') -or
+        [IO.Path]::GetFileName($resolvedFakeRoot) -notlike 'angmoo-launcher-*') {
+        throw 'launcher_fixture_cleanup_path_invalid'
+    }
+    Remove-Item -LiteralPath $resolvedFakeRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "windows_local_smoke=pass scripts=$(@($localScripts).Count) launcher=pass embedded=pass"

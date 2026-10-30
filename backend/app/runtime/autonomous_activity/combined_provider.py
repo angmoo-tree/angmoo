@@ -1,6 +1,7 @@
 """Compose existing request contracts; keep transport and canonical validation shared."""
 from hashlib import sha256
 import json
+from app.core.activity_transactions import activity_write
 
 from app.contracts.activity_thought import THOUGHT_PROMPT
 from app.domains.routine_posts.service.original_post import ORIGINAL_POST_INSTRUCTIONS
@@ -28,7 +29,17 @@ class RecoveryLedger:
     def reserve_normal(self, key):
         self._reserve(key, "normal_reservations", NORMAL_CALL_BUDGET)
 
+    def reserve_delivery_recovery(self, delivery):
+        def operation():
+            self._reserve_current(delivery.recovery_key, "recovery_reservations", RECOVERY_CALL_BUDGET)
+            delivery.recover_selection()
+        activity_write(self.db, operation)
+        delivery.accept_recovery()
+
     def _reserve(self, key, namespace, limit):
+        return activity_write(self.db, lambda: self._reserve_current(key, namespace, limit))
+
+    def _reserve_current(self, key, namespace, limit):
         row = self.db.get(ActivityGraphRun, self.activity_id, populate_existing=True)
         if (row is None or row.contract_version != 2 or row.engine != "personalized_graph_v2"
                 or row.status not in {"running", "waiting", "interrupted"}):
@@ -48,9 +59,7 @@ class RecoveryLedger:
         ).values(result={**metadata, namespace: [*used, key]}),
             execution_options={"synchronize_session": False})
         if updated.rowcount != 1:
-            self.db.rollback()
             raise ValueError("activity_recovery_conflict")
-        self.db.commit()
         self.db.expire(row)
 
 
@@ -112,6 +121,10 @@ class CombinedActivityProvider(ActivityProvider):
         from app.domains.world_characters.contracts.social_io import BOUNDED_ROUTINE_OUTPUT
         token_budget = self.generation_policies.sns_input_budget_policy is not None
         admission_reservation = None
+        delivery = kwargs.get("delivery")
+        delivery_recovery = getattr(delivery, "recovery_key", None)
+        if delivery_recovery and node not in {"CombinedTargetSelector", "FeedTargetSelector"}:
+            raise ValueError("feed_delivery_recovery_node_invalid")
         if (node == "RoutineActionPlanner" and self.mode == "split" and not self.repairing
                 and self.policies.routine_output_policy == BOUNDED_ROUTINE_OUTPUT):
             kwargs["max_tokens"] = ROUTINE_FIRST_OUTPUT_TOKENS
@@ -199,6 +212,9 @@ class CombinedActivityProvider(ActivityProvider):
                 self.ledger.reserve(f"{node}:writer:{signature}")
             kwargs["recover_truncation"] = False
             kwargs["json_retry_policy"] = None
+        elif delivery_recovery:
+            if not token_budget:
+                self.ledger.reserve_delivery_recovery(delivery)
         elif self.policies.routine_output_policy == BOUNDED_ROUTINE_OUTPUT:
             signature = sha256(json.dumps({"node": kwargs["node"], "payload": kwargs["payload"],
                 "schema": kwargs["schema"]}, sort_keys=True, default=str).encode()).hexdigest()
@@ -207,7 +223,19 @@ class CombinedActivityProvider(ActivityProvider):
             else:
                 self.ledger.reserve_normal(f"{kwargs['node']}:{signature}")
         admission_attempts = {}
+        delivery_recovery_admitted = not token_budget
         def reserve_admitted():
+            nonlocal delivery_recovery_admitted
+            if delivery_recovery and not delivery_recovery_admitted:
+                self.ledger.reserve_delivery_recovery(delivery)
+                delivery_recovery_admitted = True
+                return
+            if delivery_recovery and admission_reservation is None:
+                # A physical transport retry still consumes the existing
+                # bounded allowance; a resume never replenishes it.
+                key = f"{delivery_recovery}:provider_retry"
+                self.ledger.reserve(key)
+                return
             if admission_reservation is not None:
                 kind, key = admission_reservation
                 attempt = admission_attempts.get((kind, key), 0) + 1

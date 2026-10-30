@@ -39,6 +39,8 @@ class EpisodePacketSource:
     end_offset: int | None = None
     author_id: str | None = None
     occurred_at: datetime | None = None
+    author_label: str | None = None
+    author_role: str | None = None
 
     def __post_init__(self):
         if not self.reference or self.status not in {"verified", "missing", "changed", "unavailable"}:
@@ -65,6 +67,8 @@ class EpisodePacket:
     units: tuple[EpisodePacketUnit, ...]
     follows_references: tuple[str, ...] = ()
     followup_truncated: bool = False
+    experience_outcome: dict | None = None
+    snapshot_status: str = "snapshot_unavailable"
 
 
 @dataclass(frozen=True, slots=True)

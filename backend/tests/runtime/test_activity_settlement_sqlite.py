@@ -109,15 +109,23 @@ def test_observed_post_remains_state_evidence_when_relationship_manifest_is_empt
     engine.dispose()
 
 
-def test_changed_observed_post_is_not_retained_as_state_evidence(tmp_path):
+def test_changed_observed_post_keeps_initial_observation_but_deleted_post_does_not(tmp_path):
     engine, _, (identity,) = _fixture(tmp_path)
     actor_id, post_id = identity[1], identity[3]
     with Session(engine) as db:
         actor = db.get(WorldCharacter, actor_id)
+        calls = []
         observed = stage_sources(db, actor=actor, manifest=[], raw=None,
             decision_key="changed-observation", now=datetime.now(UTC),
             observed_post_ids={post_id: "old-revision"}, observation_lane="feed",
-            observe_post=lambda _ref: pytest.fail("stale post observed"))
+            observe_post=calls.append)
+        assert observed == (post_id,) and calls == [post_id]
+        db.get(Post, post_id).deleted_at = datetime.now(UTC)
+        db.commit()
+        observed = stage_sources(db, actor=actor, manifest=[], raw=None,
+            decision_key="deleted-observation", now=datetime.now(UTC),
+            observed_post_ids={post_id: "old-revision"}, observation_lane="feed",
+            observe_post=lambda _ref: pytest.fail("deleted target observed"))
         assert observed == ()
     engine.dispose()
 

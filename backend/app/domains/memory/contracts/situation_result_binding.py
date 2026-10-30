@@ -5,7 +5,7 @@ from .activity_situation import DeliveredSourceEntry, stable_digest
 
 RESULT_BINDING_REVISION = "situation-validation.v4"
 # v5 changes description eligibility, not the existing formatting proof rule.
-RESULT_BINDING_RUN_REVISIONS = frozenset({RESULT_BINDING_REVISION, "situation-validation.v5", "situation-validation.v6"})
+RESULT_BINDING_RUN_REVISIONS = frozenset({RESULT_BINDING_REVISION, "situation-validation.v5", "situation-validation.v6", "situation-validation.v7"})
 SUPPORTED_RESULT_RULES = frozenset({"social-visible-text.v1"})
 
 

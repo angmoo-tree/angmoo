@@ -405,8 +405,10 @@ def test_canonical_service_revalidates_stale_fts_candidates_and_memory_off(
     )
     assert stale.status is CanonicalRecallStatus.READY
     assert stale.candidate_count == 1
-    assert stale.excluded_count == 1
-    assert stale.records == ()
+    # This is the saved-memory source axis, not the live chat-history API.
+    assert stale.excluded_count == 0
+    assert len(stale.records) == 1
+    assert stale.records[0].text == direct.records[0].text
 
     with runtime_factory() as session:
         repository = SqlAlchemyMemoryRepository(session)

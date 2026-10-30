@@ -6,7 +6,9 @@
   "host": {
     "operating_system": "windows",
     "minimum_build": 22000,
-    "architectures": ["x86_64"],
+    "architectures": [
+      "x86_64"
+    ],
     "reference_environment": {
       "edition": "Windows 11 Home",
       "release": "25H2",
@@ -14,7 +16,14 @@
       "revision": 9168,
       "architecture": "x86_64"
     },
-    "unverified": ["windows-10", "windows-arm64", "windows-server", "wine", "wsl-gui", "macos"]
+    "unverified": [
+      "windows-10",
+      "windows-arm64",
+      "windows-server",
+      "wine",
+      "wsl-gui",
+      "macos"
+    ]
   },
   "toolchain": {
     "node_minimum": "20.9.0",
@@ -26,11 +35,18 @@
     "webview2": "evergreen-runtime"
   },
   "docker": {
-    "compose_files": ["compose.yml", "compose.dev.yml"],
-    "services": ["backend", "frontend"],
+    "compose_files": [
+      "compose.yml",
+      "compose.dev.yml"
+    ],
+    "services": [
+      "postgres",
+      "backend",
+      "frontend"
+    ],
     "frontend_url": "http://127.0.0.1:3000",
-    "backend_profile": "CONTRIBUTOR_EMBEDDED",
-    "persistence": "sqlite",
+    "backend_profile": "CONTRIBUTOR_POSTGRESQL",
+    "persistence": "postgresql",
     "graph": "ladybug",
     "scheduler": "in-process",
     "projector": "in-process",
@@ -41,7 +57,13 @@
     "cargo_feature": "contributor-docker-bridge",
     "repository_data_root": ".angmoo-dev",
     "allowed_writable_child": "webview",
-    "forbidden_processes": ["angmoo-sidecar", "postgres", "neo4j", "java", "javaw"],
+    "forbidden_processes": [
+      "angmoo-sidecar",
+      "postgres",
+      "neo4j",
+      "java",
+      "javaw"
+    ],
     "forbidden_installed_data_root": "%LOCALAPPDATA%\\Angmoo",
     "window_labels": {
       "phone": "main",

@@ -13,6 +13,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
+SUCCESSOR_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-e-world-social-chat-entry-inventory.json"
+FROZEN_OUTPUT_SHA256 = "f0f5c1e1b9bf5ddcbf86f30ccc812ce30597f1a16ca08dd61040eb9610a322a3"
+SUCCESSOR_INVENTORY_SHA256 = "8f40f852077d32f77f1a417c9726e08d02041aa0d0fb6223ade13049e3777a79"
 B_INVENTORY_PATH = ROOT / "security/p8_l_b_chat_domain_inventory.json"
 A_INVENTORY_PATH = ROOT / "security/p8_l_a_inventory.json"
 A_INVENTORY_SHA256 = (
@@ -336,6 +339,12 @@ def build_inventory() -> dict[str, Any]:
         raise InventoryError("frozen P8-L-A inventory digest drift")
     if _sha256(B_INVENTORY_PATH) != B_INVENTORY_SHA256:
         raise InventoryError("frozen P8-L-B inventory digest drift")
+    if SUCCESSOR_INVENTORY_PATH.is_file():
+        if _sha256(OUTPUT_PATH) != FROZEN_OUTPUT_SHA256:
+            raise InventoryError("frozen P8-L-D inventory digest drift")
+        if _sha256(SUCCESSOR_INVENTORY_PATH) != SUCCESSOR_INVENTORY_SHA256:
+            raise InventoryError("frozen P8-L-E successor digest drift")
+        return _json(OUTPUT_PATH)
     return {
         "schema_version": 1,
         "owner_stage": "P8-L-D",
@@ -364,6 +373,8 @@ def main() -> int:
         inventory = build_inventory()
         rendered = json.dumps(inventory, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         if args.write:
+            if SUCCESSOR_INVENTORY_PATH.is_file():
+                raise InventoryError("P8-L-D inventory is frozen after its successor")
             OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
             OUTPUT_PATH.write_text(rendered, encoding="utf-8", newline="\n")
             print(f"wrote {OUTPUT_PATH.relative_to(ROOT).as_posix()}")

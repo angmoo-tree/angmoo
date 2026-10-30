@@ -67,6 +67,43 @@ class ActivityRelationshipValidationError(SocialContextValidationError):
         self.args = ("routine_relationship_changed" if lane == "routine" else "activity_relationship_changed",)
 
 
+def relationship_failure_details(exc):
+    """Retain the specific guard failure without SQL, parameters or content."""
+    if not isinstance(exc, SocialContextValidationError):
+        return None
+    import re
+    def code(value):
+        return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,100}", value) else None
+    result = {"reason": code(exc.reason), "failure_scope": code(exc.failure_scope),
+              "error_type": code(exc.error_type)}
+    current = exc
+    for _ in range(8):
+        sqlstate = getattr(getattr(current, "orig", current), "sqlstate", None)
+        if isinstance(sqlstate, str) and re.fullmatch(r"[0-9A-Z]{5}", sqlstate):
+            result["sqlstate"] = sqlstate
+            break
+        current = getattr(current, "__cause__", None)
+        if current is None:
+            break
+    return {key: value for key, value in result.items() if value is not None}
+
+
+def stale_relationship_input(exc, *, lane, stage):
+    """A proven input change before publication is a closed, skipped decision.
+
+    Storage/visibility/receipt failures and Execute/settlement remain errors.
+    No stale decision is executed and no provider request is replayed here.
+    """
+    details = relationship_failure_details(exc)
+    return (isinstance(exc, ActivityRelationshipValidationError) and exc.lane == lane
+        and lane in {"inbox", "feed", "routine"}
+        and stage in {"TargetSelector", "PrepareImageRecall", "RecallSelected", "BuildDecisionContext",
+            "ChooseGenerationMode", "ActionPlanner", "DecisionDraft", "ValidateDecision",
+            "Writer", "ValidateDraft"}
+        and details == {"reason": exc.reason, "failure_scope": "lane"}
+        and exc.reason in {"version_changed", "view_changed", "facts_changed"})
+
+
 def shared_input(ctx, actor, world, *, environment=None):
     now = datetime.now(UTC)
     if environment is None:

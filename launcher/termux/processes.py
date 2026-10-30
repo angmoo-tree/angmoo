@@ -112,7 +112,8 @@ def probe_ready(url: str, source: str, nonce: str, *, expected_version: str, bac
         for key, expected in (("source_sha", source), ("launch_id", nonce), ("version", expected_version)):
             if payload.get(key) != expected:
                 return {"ready": False, "code": key + "_mismatch"}
-        if backend and (payload.get("status"), payload.get("persistence"), payload.get("graph")) != ("ok", "sqlite", "ladybug"):
+        persistence='postgresql' if tuple(map(int,expected_version.split('.'))) >= (0,1,4) else 'sqlite'
+        if backend and (payload.get("status"), payload.get("persistence"), payload.get("graph")) != ("ok", persistence, "ladybug"):
             return {"ready": False, "code": "backend_not_ready"}
         return {"ready": True, "code": "ready"}
     except urllib.error.HTTPError as exc:

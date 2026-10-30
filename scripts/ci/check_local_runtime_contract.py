@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTRACT = ROOT / "security/local_runtime_contract.json"
 DEFAULT_DOC = ROOT / "docs/public/local-runtime.md"
 FORBIDDEN_CORE_PREFIXES = ("app.domains", "app.integrations", "app.runtime")
-EXPECTED_DEFAULT_SERVICES = {"backend", "frontend"}
+EXPECTED_DEFAULT_SERVICES = {"backend", "frontend", "postgres"}
 EXPECTED_STATES = {
     "blocked", "degraded", "healthy", "stale_state", "starting", "stopped", "stopping"
 }
@@ -36,12 +36,16 @@ EXPECTED_COMMANDS = {
 }
 EXPECTED_RELEASE_IMAGES = {
     "backend": {
-        "default_tag": "release-v0.1.3",
+        "default_tag": "release-v0.1.4",
         "repository": "ghcr.io/angmoo-tree/angmoo-backend",
     },
     "frontend": {
-        "default_tag": "release-v0.1.3",
+        "default_tag": "release-v0.1.4",
         "repository": "ghcr.io/angmoo-tree/angmoo-frontend",
+    },
+    "postgres": {
+        "default_tag": "release-v0.1.4",
+        "repository": "ghcr.io/angmoo-tree/angmoo-postgres",
     },
 }
 EXPECTED_SUPPLY_CHAIN = {
@@ -85,14 +89,14 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
     if not isinstance(payload, dict):
         return ["contract root must be an object"]
     errors: list[str] = []
-    if payload.get("schema_version") != 1:
-        errors.append("schema_version must be 1")
-    if payload.get("contract_id") != "angmoo-l0-docker-runtime-v1":
+    if payload.get("schema_version") != 2:
+        errors.append("schema_version must be 2")
+    if payload.get("contract_id") != "angmoo-local-postgresql-runtime-v2":
         errors.append("contract_id mismatch")
     if payload.get("canonical_commands") != EXPECTED_COMMANDS:
         errors.append("canonical_commands mismatch")
     if set(payload.get("default_services", [])) != EXPECTED_DEFAULT_SERVICES:
-        errors.append("default_services must contain the two-service embedded stack")
+        errors.append("default_services must contain the three-service PostgreSQL stack")
     if set(payload.get("states", [])) != EXPECTED_STATES:
         errors.append("runtime states mismatch")
     if set(payload.get("error_codes", [])) != EXPECTED_ERROR_CODES:
@@ -113,9 +117,10 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
         errors.append("frontend host publication contract mismatch")
 
     if payload.get("embedded_storage") != {
-        "canonical": "sqlite",
+        "canonical": "postgresql",
         "graph": "ladybug",
-        "search": "fts5",
+        "search": "postgresql-fts-gin",
+        "semantic": "pgvector-exact",
     }:
         errors.append("embedded storage contract mismatch")
 
@@ -165,16 +170,16 @@ def check_repo(
     except (OSError, json.JSONDecodeError, SyntaxError) as exc:
         return [f"runtime contract cannot be read: {exc}"]
     for required in (
-        "docker compose -f compose.yml -f compose.dev.yml up --watch",
-        "angmoo_contributor_embedded_data",
-        "CONTRIBUTOR_EMBEDDED",
-        "SQLite",
+        "PostgreSQL",
+        "postgresql-runtime.md",
+        "postgresql-migration.md",
         "LadybugDB",
     ):
         if required not in document:
             errors.append(f"local runtime document is missing: {required}")
     for required_path in (
-        "Dockerfile.backend", "Dockerfile.frontend", ".dockerignore",
+        "Dockerfile.backend", "Dockerfile.frontend", "Dockerfile.postgres", ".dockerignore",
+        "scripts/docker/postgres-entrypoint.sh",
         "compose.yml", "compose.dev.yml", "compose.ci.yml",
         ".github/workflows/release-images.yml",
         "docs/public/container-release.md",

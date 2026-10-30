@@ -1,6 +1,7 @@
 """Synthetic user replies through the real writer, claim and delivery boundaries."""
 import json
 import inspect
+from copy import deepcopy
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 
@@ -82,6 +83,13 @@ def manual_routine(monkeypatch, deny_external_network, request):
         provider.situation_state = state
         payload = plain({"context": {"routine": build_routine_prompt_context(prepared.context, as_of_utc=now),
             "source_manifest": source_manifest(ctx, prepared)}}) if prepared else {}
+        if prepared:
+            from app.runtime.autonomous_activity.routine_sources import capture_source_bindings, validate_source_access
+            state["lane_data"]["prepared"]["source_bindings"] = capture_source_bindings(ctx, prepared)
+            state["decision_context"] = deepcopy(payload["context"])
+            async def permission_guard(_attempt):
+                validate_source_access(ctx, prepared, state["lane_data"]["prepared"])
+            provider.request_guard = permission_guard
         monkeypatch.setattr("app.runtime.autonomous_activity.provider._api_key", lambda _: "synthetic")
         yield SimpleNamespace(db=db, seeded=seeded, ctx=ctx, prepared=prepared, state=state,
             provider=provider, payload=payload, candidate=candidate, reply=reply, root=root, owner=owner, now=now)
@@ -120,20 +128,29 @@ async def submit(case):
     return await case.provider.call(node="RoutineDecisionDraft", lane="routine_decision_draft",
         system="Synthetic contract test.", payload=case.payload,
         schema={"type": "object", "properties": {"ok": {"type": "boolean"}}, "required": ["ok"]},
-        validator=lambda value: value, max_tokens=128)
+        validator=lambda value: value, max_tokens=128,
+        before_provider_request=getattr(case.provider, "request_guard", None))
 
 
 def freeze(case):
     from app.runtime.autonomous_activity.situation_memory import freeze_social_input
+    from app.runtime.autonomous_activity.routine_sources import validate_source_access
+    validate_source_access(case.ctx, case.prepared, case.state["lane_data"]["prepared"])
     return freeze_social_input(case.ctx, case.provider.situation_snapshot,
         node="RoutineDecisionDraft", payload=case.payload,
         transmitted=json.dumps(case.payload, ensure_ascii=False), state=case.state)
 
 
 def rebuild_input(case):
+    case.prepared.claimed_manual_source_ids = tuple(source.source_event_id
+        for source in case.prepared.context.source_events
+        if source.source_event_id.startswith("manual-inbox:"))
     case.state["lane_data"]["prepared"] = freeze_prepared(case.prepared)
+    from app.runtime.autonomous_activity.routine_sources import capture_source_bindings
+    case.state["lane_data"]["prepared"]["source_bindings"] = capture_source_bindings(case.ctx, case.prepared)
     case.payload["context"]["routine"] = plain(build_routine_prompt_context(case.prepared.context, as_of_utc=case.now))
     case.payload["context"]["source_manifest"] = plain(source_manifest(case.ctx, case.prepared))
+    case.state["decision_context"] = deepcopy(case.payload["context"])
 
 
 async def run_routine(case, monkeypatch, *, response=None):

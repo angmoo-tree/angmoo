@@ -1,6 +1,6 @@
 """Bounded manual follow-up discovery using frozen saved-memory identities."""
 from collections import defaultdict
-from sqlalchemy import select, update, or_
+from sqlalchemy import select, update, or_, func
 from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
 from app.domains.memory.models.items import MemoryScopeSettingModel, MemoryItem
 from app.domains.memory.models.batch import MemoryBatchSetting
@@ -17,17 +17,19 @@ from app.runtime.relationships.manual_review import TERMINAL
 from app.runtime.relationships.situation_ordering import application_pending
 
 
-def advance_manual_requests(db, now, *, limit=16):
+def advance_manual_requests(db, now, *, limit=16, request_id=None):
     if not 1 <= limit <= 16:
         raise ValueError("relationship_manual_page_invalid")
     ids = list(db.scalars(select(Request.memory_request_id).where(Request.canonical_request_id.is_(None),
-        Request.state.not_in(TERMINAL + ("paused",))).order_by(Request.accepted_at).limit(limit)))
+        Request.state.not_in(TERMINAL + ("paused",)),
+        *([Request.memory_request_id == request_id] if request_id else [])).order_by(Request.accepted_at, Request.memory_request_id).limit(limit)))
     for identifier in ids:
         # SQLite write reservation / PostgreSQL row lock through the same update.
         db.execute(update(Request).where(Request.memory_request_id == identifier).values(state=Request.state))
         request = db.get(Request, identifier, populate_existing=True)
         if request.state in TERMINAL + ("paused",):
             continue
+        request.maintenance = {**(request.maintenance or {}), "last_turn_at": now.isoformat()}
         if application_pending(db, request.scope_setting_id, lock=True):
             continue
         memory = db.get(MemoryConsolidationRequest, identifier)
@@ -69,8 +71,8 @@ def advance_manual_requests(db, now, *, limit=16):
             snapshot = [{"memory_id": m["memory_id"], "digest": m["digest"], "target_id": target}
                 for target, memories in grouped.items() for m in memories]
             # Include already claimed automatic work rather than treating it as no work.
-            for receipt in db.scalars(select(Receipt).where(Receipt.world_id == setting.world_id,
-                Receipt.actor_world_character_id == setting.subject_world_character_id, Receipt.status == "pending")):
+            from app.domains.relationships.service.review_history import pending_receipts
+            for receipt in pending_receipts(db, world_id=setting.world_id, actor_id=setting.subject_world_character_id):
                 snapshot.append({"memory_id": receipt.memory_id, "digest": receipt.memory_digest,
                     "target_id": receipt.target_world_character_id})
             request.snapshot = snapshot
@@ -87,10 +89,11 @@ def _plan_remaining(db, request, setting, profile, policy, now):
         request.state, request.last_code = "paused", "relationship_review_credential_unavailable"
         return
     remaining = defaultdict(list)
-    linked = set(request.work_ids)
+    from app.domains.relationships.service.review_history import active_snapshot, active_work_ids
+    linked = set(active_work_ids(request))
     waiting = False
     # Page all lookups so large requests do not exceed SQLite parameter limits.
-    snapshot = [dict(ref) for ref in request.snapshot]
+    snapshot = [dict(ref) for ref in active_snapshot(request)]
     for start in range(0, len(snapshot), 100):
         page = snapshot[start:start + 100]
         ids = [r["memory_id"] for r in page]
@@ -139,10 +142,15 @@ def _plan_remaining(db, request, setting, profile, policy, now):
                 "profile_version": profile.version, "model_id": profile.model_id, "thinking_level": profile.thinking_level})
         linked.add(root.id)
         waiting = True  # If an active root was reused, remaining refs are revisited next tick.
-    request.snapshot = snapshot
-    request.work_ids = sorted(linked)
+    # Retain the immutable historical snapshot when the upgrade recorded
+    # prior failures; their eligibility is explicit maintenance metadata.
+    if not (request.maintenance or {}).get("prior_failure_memory_ids"):
+        request.snapshot = snapshot
+    request.work_ids = sorted(linked | set((request.maintenance or {}).get("prior_failure_work_ids", [])))
     works = list(db.scalars(select(Work).where(Work.id.in_(linked))))
-    waiting |= any(w.status not in ("applied", "stale") for w in works)
-    request.state = "running" if waiting else "completed" if any(w.status == "applied" for w in works) else "no_relationship_work"
+    failed = any(w.status == "failed" and (w.maintenance or {}).get("hold") != "closed" for w in works)
+    closed = any((w.maintenance or {}).get("hold") == "closed" for w in works)
+    waiting = any(w.status not in ("applied", "stale", "failed") for w in works) or bool(remaining)
+    request.state = "running" if waiting else "partial_failed" if failed else "closed" if closed else "completed" if any(w.status == "applied" for w in works) else "no_relationship_work"
     if not waiting:
         request.completed_at = now

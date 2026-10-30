@@ -93,6 +93,7 @@ class GenerationWorker:
         self._local_work = local_work
         self.task = None
         self.stopping = False
+        self._queue_wakeup = None
         # Reserve before submission; never evict the only received copy.
         self.received_results = {}
         self._buffer_lock = Lock()
@@ -199,10 +200,14 @@ class GenerationWorker:
         if self.task is not None and not self.task.done():
             return
         self.stopping = False
+        from app.core.committed_queue_wakeup import CommittedQueueWakeup
+        self._queue_wakeup = CommittedQueueWakeup(self.sessions, {PostImageGenerationJob.__tablename__})
         self.task = asyncio.create_task(self.run())
 
     async def stop(self):
         self.stopping = True
+        if self._queue_wakeup:
+            self._queue_wakeup.close()
         if self.task:
             try:
                 await asyncio.wait_for(asyncio.shield(self.task), 15)
@@ -213,13 +218,19 @@ class GenerationWorker:
 
     async def run(self):
         while not self.stopping:
+            self._queue_wakeup.begin_poll()
+            worked = True
             try:
-                await self.tick()
+                worked = await self.tick()
             except Exception as exc:
                 code, name = sqlite_error_identity(exc)
                 logging.getLogger(__name__).warning("image_worker_local_failure type=%s stage=%s retryable_busy=%s sqlite_code=%s sqlite_name=%s",
                     type(exc).__name__, getattr(exc, "image_local_stage", "tick"), is_sqlite_contention(exc), code, name)
-            await asyncio.sleep(1)
+            if not self.stopping:
+                if worked:
+                    await asyncio.sleep(1)
+                else:
+                    await self._queue_wakeup.wait(5 if self._queue_wakeup.enabled else 1)
 
     async def _local(self, operation, *args):
         # Runtime supplies an owned bounded worker; synchronous domain fixtures
@@ -233,8 +244,10 @@ class GenerationWorker:
             raise
 
     async def tick(self):
-        for job_id in await self._local(self._pending_jobs):
+        pending = await self._local(self._pending_jobs)
+        for job_id in pending:
             await self.process(job_id)
+        return bool(pending)
 
     def _pending_jobs(self):
         with self.sessions() as db:

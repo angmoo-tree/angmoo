@@ -171,7 +171,7 @@ def test_individual_recheck_does_not_select_another_receipt_and_busy_is_explicit
     assert first.state == "applied" and second.state == "blocked"
 
 
-def test_recheck_failure_stays_blocked_with_revision_and_specific_reason(durable_stack):
+def test_legacy_recheck_preserves_summary_when_original_has_changed(durable_stack):
     db, scope, setting, memory = durable_stack
     post = real_source(db, scope)
     row, *_ = blocked(db, scope, post, 1)
@@ -179,10 +179,10 @@ def test_recheck_failure_stays_blocked_with_revision_and_specific_reason(durable
     db.commit()
     request = recheck(db, setting, row=row)
     consume(db, memory, request)
-    assert row.state == "blocked" and row.error_code == "situation_source_changed" and row.state_version == 2
-    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
-    assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == "rejected"
-    assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 1
+    assert row.state == "applied" and row.error_code is None and row.state_version == 2
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
+    assert db.scalar(select(MemorySituationRecheckAttempt)).outcome == "applied"
+    assert db.get(MemorySituationApplyRun, request.run_id).blocked_count == 0
 
 
 @pytest.mark.parametrize("change", ["owner_deleted", "world_archived", "subject_inactive"])
@@ -234,14 +234,16 @@ def test_recheck_does_not_rewrite_the_completed_original_save(durable_stack):
     consume(db, memory, first)
     old_run = db.get(MemorySituationApplyRun, first.run_id)
     before = (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at)
-    assert row.state == "blocked" and old_run.blocked_count == 1
+    assert row.state == "applied" and old_run.blocked_count == 0
     post.body = original_body; db.commit()
-    retry = recheck(db, setting, row=row)
-    consume(db, memory, retry)
+    with pytest.raises(MemoryConflictError,match="situation_receipt_version_conflict"):
+        recheck(db, setting, row=row)
+    db.rollback()
     assert row.state == "applied"
     db.refresh(old_run)
     assert (old_run.state, old_run.applied_count, old_run.blocked_count, old_run.cursor, old_run.completed_at) == before
-    assert db.scalar(select(MemorySituationRecheckAttempt)).previous_run_id == first.run_id
+    assert db.scalar(select(MemorySituationRecheckAttempt)) is None
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
 
 
 def test_discard_keeps_a_shared_manifest_and_another_receipts_canonical_memory(durable_stack):
@@ -317,10 +319,25 @@ def test_discard_queued_candidate_is_audited_and_never_revived_on_restart(durabl
         expected_version=1, receipt_sequence=row.sequence, expected_receipt_version=1, now=NOW)
     db.commit()
     db.expire_all()
-    assert consume(db, memory, request) == 0
-    assert row.state == "discarded" and run.skipped_count == 1 and run.applied_count == 0
+    if state == 'error':
+        with pytest.raises(MemoryConflictError,match='situation_run_fence_lost'):
+            consume(db,memory,request)
+        db.rollback()
+        assert run.applied_count == 0
+    else:
+        assert consume(db, memory, request) == 0
+        assert run.skipped_count == 1 and run.applied_count == 0
+    assert row.state == "discarded"
     attempt = db.scalar(select(MemorySituationRecheckAttempt))
-    assert attempt.outcome == "discarded" and attempt.before_version == 1 and attempt.after_version == 2
+    if state == 'error':
+        # A terminal failed run is not an active queued recheck. Its owner's
+        # discard is still durably audited by the accepted recovery request.
+        from app.domains.memory.models.activity_situation import MemorySituationRequest
+        assert attempt is None
+        assert db.get(MemorySituationRequest,(setting.id,'discard-queued-001')).result_code == 'discarded'
+        assert row.state_version == 2
+    else:
+        assert attempt.outcome == "discarded" and attempt.before_version == 1 and attempt.after_version == 2
     assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
 
 

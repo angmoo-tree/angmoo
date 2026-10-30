@@ -132,6 +132,7 @@ def test_provider_receipt_matches_final_trimmed_input_and_keeps_original_packet(
     async def generate(**kwargs):
         sent.update(json.loads(kwargs["user_prompt"]))
         boundary.update(system=kwargs["system_prompt"], user=kwargs["user_prompt"])
+        kwargs['on_request_submission'](SimpleNamespace(user_prompt=kwargs['user_prompt']))
         return {}
     monkeypatch.setattr(module, "generate_json", generate)
     # Mandatory language policy uses the same 64k budget. The retained packet

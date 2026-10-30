@@ -47,6 +47,6 @@ def get_runtime_status(
         canonical_generation=(
             runtime_config.generation if runtime_config is not None else None
         ),
-        persistence_provider="sqlite",
+        persistence_provider=runtime_status.persistence_provider,
         graph_provider=runtime_settings.graph_provider,
     )

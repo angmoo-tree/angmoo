@@ -98,6 +98,18 @@ WORLD_PACKAGE_REGISTRY_TABLES = (
 )
 
 
+def _historical_table_names():
+    from app.runtime.persistence.experience_tables import TABLES
+    return sorted(set(Base.metadata.tables) - TABLES - {"memory_maintenance_slot"})
+
+
+def _copy_historical_table(table_name, metadata):
+    """Keep released SQLite shapes when PostgreSQL-only controls grow."""
+    table = Base.metadata.tables[table_name].to_metadata(metadata)
+    if table_name in {"relationship_review_work", "relationship_review_requests", "memory_situation_runs"} and "maintenance" in table.c:
+        table._columns.remove(table.c.maintenance)
+
+
 def build_sqlite_baseline_metadata() -> MetaData:
     """Copy registered canonical metadata and preserve partial-index meaning.
 
@@ -106,11 +118,15 @@ def build_sqlite_baseline_metadata() -> MetaData:
     legacy ``app.models`` compatibility surface.
     """
 
-    metadata = MetaData()
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
     from app.runtime.persistence.model_registration import install_canonical_write_fences
     event.listen(metadata, "after_create", install_canonical_write_fences)
-    for table_name in sorted(Base.metadata.tables):
-        Base.metadata.tables[table_name].to_metadata(metadata)
+    # SQLite 41 is the frozen migration source, not the experimental PG schema.
+    from app.runtime.persistence.experience_tables import TABLES as experience_tables
+    for table_name in _historical_table_names():
+        if table_name in experience_tables:
+            continue
+        _copy_historical_table(table_name, metadata)
     for table in metadata.tables.values():
         for index in table.indexes:
             postgresql_where = index.dialect_options["postgresql"].get("where")
@@ -146,8 +162,8 @@ def build_sqlite_v4_metadata() -> MetaData:
         add_world_scoped_message_threads_v4_table,
     )
 
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES + SITUATION_V36_TABLES:
             continue
         if (
@@ -158,7 +174,7 @@ def build_sqlite_v4_metadata() -> MetaData:
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
-        Base.metadata.tables[table_name].to_metadata(metadata)
+        _copy_historical_table(table_name, metadata)
     add_world_scoped_message_threads_v4_table(metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V4_CANONICAL_TABLE_COUNT:
@@ -176,8 +192,8 @@ def build_sqlite_v3_metadata() -> MetaData:
         add_legacy_message_threads_table,
     )
 
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
@@ -188,7 +204,7 @@ def build_sqlite_v3_metadata() -> MetaData:
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
-        Base.metadata.tables[table_name].to_metadata(metadata)
+        _copy_historical_table(table_name, metadata)
     add_legacy_message_threads_table(metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V4_CANONICAL_TABLE_COUNT:
@@ -206,8 +222,8 @@ def build_sqlite_v5_metadata() -> MetaData:
         add_world_scoped_message_threads_v4_table,
     )
 
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
@@ -217,7 +233,7 @@ def build_sqlite_v5_metadata() -> MetaData:
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
         ):
             continue
-        Base.metadata.tables[table_name].to_metadata(metadata)
+        _copy_historical_table(table_name, metadata)
     add_world_scoped_message_threads_v4_table(metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V5_CANONICAL_TABLE_COUNT:
@@ -235,8 +251,8 @@ def build_sqlite_v6_metadata() -> MetaData:
         add_world_scoped_message_threads_v4_table,
     )
 
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
@@ -245,7 +261,7 @@ def build_sqlite_v6_metadata() -> MetaData:
             or table_name in MEMORY_BATCH_V9_TABLES
         ):
             continue
-        Base.metadata.tables[table_name].to_metadata(metadata)
+        _copy_historical_table(table_name, metadata)
     add_world_scoped_message_threads_v4_table(metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V6_CANONICAL_TABLE_COUNT:
@@ -259,8 +275,8 @@ def build_sqlite_v6_metadata() -> MetaData:
 def build_sqlite_v7_metadata() -> MetaData:
     """Return the immutable pre-subjective-context embedded inventory."""
 
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if (
@@ -268,7 +284,7 @@ def build_sqlite_v7_metadata() -> MetaData:
             or table_name in MEMORY_BATCH_V9_TABLES
         ):
             continue
-        Base.metadata.tables[table_name].to_metadata(metadata)
+        _copy_historical_table(table_name, metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V7_CANONICAL_TABLE_COUNT:
         raise RuntimeError(
@@ -280,12 +296,12 @@ def build_sqlite_v7_metadata() -> MetaData:
 
 def build_sqlite_v8_metadata() -> MetaData:
     """Immutable pre-batch settings/admission schema."""
-    metadata = MetaData()
-    for table_name in sorted(Base.metadata.tables):
+    metadata = MetaData(info={"angmoo_frozen_sqlite": True})
+    for table_name in _historical_table_names():
         if table_name in EPISODE_V13_TABLES + CONSOLIDATION_V14_TABLES + SITUATION_V31_TABLES + SITUATION_V32_TABLES + SITUATION_V35_TABLES:
             continue
         if table_name not in MEMORY_BATCH_V9_TABLES:
-            Base.metadata.tables[table_name].to_metadata(metadata)
+            _copy_historical_table(table_name, metadata)
     _copy_partial_index_predicates(metadata)
     if len(metadata.tables) != SQLITE_V8_CANONICAL_TABLE_COUNT:
         raise RuntimeError("SQLite v8 table inventory drifted")

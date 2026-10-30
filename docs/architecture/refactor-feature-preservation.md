@@ -1,5 +1,7 @@
 # Angmoo 기능 보존과 현재 코드 읽기 지도
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 ## 2026-10-15 World 내 프로필 알림
 
 현재 World 알림은 Social의 범위별 list/count/read와 홈 batch를 사용한다.

@@ -10,6 +10,7 @@ from collections import defaultdict
 from datetime import UTC, date, datetime
 import logging
 from uuid import uuid4
+from time import monotonic
 
 from sqlalchemy import exists, func, insert, or_, select, update
 
@@ -75,7 +76,7 @@ SITUATION_RECEIPTS_PER_TURN = 32
 
 
 class MemoryBatchRuntime:
-    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, activity_provider_factory=None, episode_prior_search=None, idle_work=None, data_root=None) -> None:
+    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, activity_provider_factory=None, episode_prior_search=None, idle_work=None, relationship_work=None, data_root=None) -> None:
         # Preserve safe success/attempt measurements without enabling verbose
         # SDK logging or changing application-wide log levels.
         logging.getLogger("app.domains.memory.service.batch_selection").setLevel(logging.INFO)
@@ -91,6 +92,7 @@ class MemoryBatchRuntime:
         self.activity_provider_factory = activity_provider_factory
         self.episode_prior_search = episode_prior_search
         self.idle_work = idle_work
+        self.relationship_work = relationship_work
         self.preparation = build_preparation_dependencies(generation_policy=generation_policy)
         self.stop_event = asyncio.Event()
         self.lock = asyncio.Lock()
@@ -98,6 +100,9 @@ class MemoryBatchRuntime:
         from app.runtime.memory.canonical_work import MemoryCanonicalWork
         self._canonical = MemoryCanonicalWork() if self.situations is not None else None
         self._brief_cursor = ""
+        from app.runtime.memory.maintenance_slot import MaintenanceSlot
+        self.maintenance_slot = MaintenanceSlot(session_factory)
+        self._next_brief = 0.0
 
     async def start(self) -> None:
         if self.task is not None and not self.task.done():
@@ -141,67 +146,99 @@ class MemoryBatchRuntime:
         async with self.lock:
             from app.runtime.memory.foreground_priority import chat_is_active
             if self.situations is not None:
-                applied = False
-                for _ in range(SITUATION_RECEIPTS_PER_TURN):
-                    # Each call still prepares/commits exactly one receipt and
-                    # releases its Session/lease before the next submission.
-                    result = await self._canonical.call(self._situation_tick, shutdown=shutdown)
-                    if result != "situation_page_applied":
-                        break
-                    applied = True
                 closing = shutdown or self.situations.quit_identity is not None
-                if not closing and result != "memory_foreground_deferred":
-                    await self._canonical.call(self._rebuild_situation_brief)
-                if applied and result == "memory_batch_queue_empty":
-                    return "situation_page_applied"
-                if result == "memory_batch_queue_empty" and self.idle_work is not None and not closing:
-                    return await self.idle_work()
-                return result
-            if not shutdown and self.generation_policy in {"episode_v1", "activity32"}:
-                with self.session_factory() as db:
-                    if chat_is_active(db, now=datetime.now(UTC)):
-                        from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
-                        db.execute(update(MemoryConsolidationRequest).where(
-                            MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
-                        db.commit()
-                        observation.emit("wait", boundary="deferred", reason="foreground_chat")
-                        return "memory_foreground_deferred"
-            self.prepare(shutdown=shutdown)
-            with self.session_factory() as db:
-                repository = SqlAlchemyMemoryBatchRepository(db)
-                token = uuid4().hex
-                batch = repository.claim(lease_token=token, now=datetime.now(UTC))
-                repository.commit()
-                if batch is None:
-                    if self.idle_work is not None and not shutdown:
-                        return await self.idle_work()
+                await self._canonical.call(self.situations.prepare, shutdown=closing)
+                candidates = [await self._canonical.call(self.situations.candidate)]
+                if self.relationship_work is not None and not closing:
+                    candidates.append(await self.relationship_work.candidate())
+                ready = [candidate for candidate in candidates if candidate is not None]
+                if not ready:
                     return "memory_batch_queue_empty"
-                if batch.policy_version in {"episode-selection.v1", "episode-activity-batch32.v1"}:
-                    factory = self.activity_provider_factory if batch.credential_id is not None else self.episode_provider_factory
-                    if factory is None:
-                        repository.fail(batch, code="episode_provider_unconfigured", now=datetime.now(UTC))
-                        repository.commit()
-                        return "episode_provider_unconfigured"
-                    from app.runtime.memory.episode_batch import run_episode_batch
-                    return await run_episode_batch(repository, batch,
-                        provider_factory=factory, timeout=timeout,
-                        foreground_active=None if shutdown else chat_is_active, prior_search=self.episode_prior_search)
-                reader = SqlAlchemyMemorySourceEvidenceReader(db)
-                service = MemoryBatchSelectionService(
-                    repository=repository,
-                    source_reader=reader,
-                    write_lifecycle=MemoryWriteLifecycleService(
-                        repository.memory, reader
-                    ),
-                    provider_factory=self.provider_factory,
-                )
-                result = await service.run_next(
-                    lease_token=token, timeout=timeout, claimed_batch=batch
-                )
-            return result
+                selected = min(ready, key=lambda candidate: (candidate["accepted_at"], candidate["id"]))
+                identity = {k: v for k, v in selected.items() if k != "accepted_at"}
+                token = await self._canonical.call(self.maintenance_slot.acquire, selected["kind"], identity)
+                if token is None:
+                    return "maintenance_waiting"
+                try:
+                    observation.emit("round", boundary="started", **identity)
+                    if selected["kind"] == "relationship":
+                        return await self.relationship_work.run_round(selected["id"])
+                    return await self._situation_turn(shutdown=closing, run_id=selected["id"])
+                finally:
+                    await asyncio.shield(self._canonical.call(self.maintenance_slot.release, token))
+                    observation.emit("round", boundary="released", **identity)
+            return await self._legacy_tick(shutdown=shutdown, timeout=timeout)
+
+    async def _situation_turn(self, *, shutdown, run_id):
+        applied = False
+        count = 0
+        while shutdown or not self.stop_event.is_set():
+            # Each call still prepares/commits exactly one receipt and
+            # releases its Session/lease before the next submission.
+            result = await self._canonical.call(self._situation_tick, shutdown=shutdown, run_id=run_id)
+            if result != "situation_page_applied":
+                break
+            applied = True
+            count += 1
+            if count % SITUATION_RECEIPTS_PER_TURN == 0:
+                await asyncio.sleep(0)  # Cooperate without changing the selected run.
+        else:
+            result = "situation_stopped"
+        closing = shutdown or self.situations.quit_identity is not None
+        if not closing and result != "memory_foreground_deferred" and monotonic() >= self._next_brief:
+            await self._canonical.call(self._rebuild_situation_brief)
+            self._next_brief = monotonic() + 60
+        if applied and result == "memory_batch_queue_empty":
+            return "situation_page_applied"
+        return result
+
+    async def _legacy_tick(self, *, shutdown, timeout):
+        from app.runtime.memory.foreground_priority import chat_is_active
+        if not shutdown and self.generation_policy in {"episode_v1", "activity32"}:
+            with self.session_factory() as db:
+                if chat_is_active(db, now=datetime.now(UTC)):
+                    from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
+                    db.execute(update(MemoryConsolidationRequest).where(
+                        MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
+                    db.commit()
+                    observation.emit("wait", boundary="deferred", reason="foreground_chat")
+                    return "memory_foreground_deferred"
+        self.prepare(shutdown=shutdown)
+        with self.session_factory() as db:
+            repository = SqlAlchemyMemoryBatchRepository(db)
+            token = uuid4().hex
+            batch = repository.claim(lease_token=token, now=datetime.now(UTC))
+            repository.commit()
+            if batch is None:
+                if self.idle_work is not None and not shutdown:
+                    return await self.idle_work()
+                return "memory_batch_queue_empty"
+            if batch.policy_version in {"episode-selection.v1", "episode-activity-batch32.v1"}:
+                factory = self.activity_provider_factory if batch.credential_id is not None else self.episode_provider_factory
+                if factory is None:
+                    repository.fail(batch, code="episode_provider_unconfigured", now=datetime.now(UTC))
+                    repository.commit()
+                    return "episode_provider_unconfigured"
+                from app.runtime.memory.episode_batch import run_episode_batch
+                return await run_episode_batch(repository, batch,
+                    provider_factory=factory, timeout=timeout,
+                    foreground_active=None if shutdown else chat_is_active, prior_search=self.episode_prior_search)
+            reader = SqlAlchemyMemorySourceEvidenceReader(db)
+            service = MemoryBatchSelectionService(
+                repository=repository,
+                source_reader=reader,
+                write_lifecycle=MemoryWriteLifecycleService(
+                    repository.memory, reader
+                ),
+                provider_factory=self.provider_factory,
+            )
+            result = await service.run_next(
+                lease_token=token, timeout=timeout, claimed_batch=batch
+            )
+        return result
 
     @observation.observed("situation_tick")
-    def _situation_tick(self, *, shutdown):
+    def _situation_tick(self, *, shutdown, run_id=None):
         from app.runtime.memory.foreground_priority import chat_is_active
         closing = shutdown or self.situations.quit_identity is not None
         if not closing:
@@ -209,8 +246,9 @@ class MemoryBatchRuntime:
                 if chat_is_active(db, now=datetime.now(UTC)):
                     observation.emit("wait", boundary="deferred", reason="foreground_chat")
                     return "memory_foreground_deferred"
-        self.situations.prepare(shutdown=closing)
-        return self.situations.tick()
+        if run_id is None:
+            self.situations.prepare(shutdown=closing)
+        return self.situations.tick(run_id)
 
     def _rebuild_situation_brief(self):
         from app.domains.memory.models.activity_situation import MemorySituationProcessingSetting

@@ -157,6 +157,10 @@ class CheckpointMaintenance:
 
     def _read_candidates(self, now):
         with self.session_factory() as db:
+            if db.get_bind().dialect.name=='postgresql':
+                from app.core.postgresql_deadline import read_deadline
+                with read_deadline(db.connection(),time.monotonic()+self.limits.sqlite_busy_ms/1000):
+                    return policy.candidates(db,now=now,cursor=self._cursor,limit=self.limits.batch_size)
             driver = db.connection().connection.driver_connection
             previous = driver.execute("PRAGMA busy_timeout").fetchone()[0]
             driver.execute(f"PRAGMA busy_timeout={self.limits.sqlite_busy_ms}")
@@ -223,7 +227,7 @@ class CheckpointMaintenance:
                             # Release an SDK transaction if a delete failed
                             # before its own commit; don't hold its writer lock
                             # while examining another candidate.
-                            await _finish_io(saver.conn.rollback())
+                            await _finish_io(saver.rollback_pending() if hasattr(saver,'rollback_pending') else saver.conn.rollback())
                             counts["deferred"] += 1
                             logger.warning("checkpoint_cleanup_deferred type=%s", type(exc).__name__)
                         await asyncio.sleep(0)

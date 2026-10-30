@@ -275,6 +275,10 @@ class SqliteMemoryVectorIndex:
             if value is not None:
                 where.append(clause)
                 values.append(value)
+        if query.allowed_thread_ids is not None:
+            allowed = query.allowed_thread_ids
+            where.append("(thread_id IS NULL" + (f" OR thread_id IN ({','.join('?' for _ in allowed)})" if allowed else "") + ")")
+            values.extend(allowed)
         predicate = " AND ".join(where)
         with self._connect(cancellation=cancellation, read_only=True) as connection:
             connection.execute("BEGIN")

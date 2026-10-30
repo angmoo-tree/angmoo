@@ -66,6 +66,10 @@
       "memory_episode_restrictions",
       "memory_episode_unit_evidence",
       "memory_episode_units",
+      "memory_experience_dependencies",
+      "memory_experience_inputs",
+      "memory_experience_snapshots",
+      "memory_experience_tombstones",
       "memory_hot_brief_items",
       "memory_hot_briefs",
       "memory_index_preparations",
@@ -197,6 +201,9 @@
       "memory_vector_changes",
       "memory_vector_maintenance",
       "memory_vector_validation_revisions"
+    ],
+    "retain_runtime_maintenance_control": [
+      "memory_maintenance_slot"
     ]
   },
   "character_deletion": {
@@ -259,6 +266,10 @@
       "memory_episode_restrictions",
       "memory_episode_unit_evidence",
       "memory_episode_units",
+      "memory_experience_dependencies",
+      "memory_experience_inputs",
+      "memory_experience_snapshots",
+      "memory_experience_tombstones",
       "memory_hot_brief_items",
       "memory_hot_briefs",
       "memory_index_preparations",
@@ -394,6 +405,9 @@
       "memory_vector_changes",
       "memory_vector_maintenance",
       "memory_vector_validation_revisions"
+    ],
+    "retain_runtime_maintenance_control": [
+      "memory_maintenance_slot"
     ]
   }
 }

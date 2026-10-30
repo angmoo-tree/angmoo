@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1.7
+# Build the existing pinned source stage once; identity belongs to the final
+# layer so iterative experiment code does not invalidate dependency downloads.
+ARG BASE_IMAGE=angmoo-pg-exp/backend-base:run01
+FROM ${BASE_IMAGE}
+ARG VCS_REF
+LABEL io.angmoo.experiment="angmoo-pg-20261027-run01" \
+      org.opencontainers.image.revision="${VCS_REF}"
+ENV ANGMOO_SOURCE_SHA=${VCS_REF}
+COPY --chown=angmoo:angmoo backend/app /app/app
+USER angmoo
+ENTRYPOINT ["python", "-m", "app.runtime.postgresql_backend"]
+CMD ["--data-root", "/experiment/appdata", "--dsn-file", "/experiment/secrets/app-dsn"]

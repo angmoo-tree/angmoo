@@ -72,7 +72,9 @@ def split_validation(results):
     for target, value in results.items():
         memories[target] = {key: item for key, item in value.items() if key != "validation_snapshot"}
         if value.get("validation_snapshot") is not None:
-            validations[target] = value["validation_snapshot"]
+            from app.domains.memory.contracts.activity_situation import stable_digest
+            validations[target] = {**value["validation_snapshot"],
+                "delivered_packet_digest": stable_digest(value.get("packets", []))}
     return {"memories": memories, "memory_validations": validations}
 
 

@@ -4,7 +4,8 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 
 from app.core.calendar import utc_instant
-from app.core.sqlite_concurrency import run_sqlite_session_immediate, sqlite_session_attempt
+from app.core.sqlite_concurrency import sqlite_session_attempt
+from app.core.database_transactions import database_write
 from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeletionCleanupItem as Item
 
 
@@ -98,4 +99,4 @@ def _ack(sessions, request_id, epoch, identifier, *, restore=None):
             if restore is not None:
                 restore(db)
             item.state = "done"
-        run_sqlite_session_immediate(db, apply, require_clean=True)
+        database_write(db, apply, require_clean=True)

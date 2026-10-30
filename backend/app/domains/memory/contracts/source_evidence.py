@@ -8,6 +8,7 @@ from typing import Protocol
 
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.experience_access import MemoryExperienceAccess
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +34,9 @@ class CanonicalMemoryEvidence:
 
 
 class MemorySourceEvidenceReaderPort(Protocol):
+    @property
+    def experience_access(self) -> MemoryExperienceAccess: ...
+
     def validate_situation_source(self, manifest, source, *, now, ancestors=frozenset(), validation=None): ...
     def read_evidence(
         self,

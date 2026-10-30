@@ -58,12 +58,18 @@ def test_actual_final_payload_cannot_borrow_another_binding(response_session, fi
     "source_post_id", "target_post_id", "root_post_id", "parent_post_id", "opaque_reference", "body"])
 def test_private_preparation_reference_is_not_permission(response_session, field):
     case = prepare(response_session)
+    original = freeze(case)
     entry = next(e for e in case.snapshot.entries if e.source_type == "social_event")
     forged = replace(entry, **{field: "f" * 64 if field == "source_revision" else "forged"})
     case.command = replace(case.command, today_sns_snapshot=snapshot_with(case.snapshot,
         entries=tuple(forged if e is entry else e for e in case.snapshot.entries)))
-    with pytest.raises((ChatSituationEvidenceError, TodaySnsSnapshotChangedError)):
-        freeze(case)
+    if field in {"source_post_id", "target_post_id", "root_post_id", "parent_post_id"}:
+        # These old navigation hints do not authorize a source read. The
+        # selected immutable event/text binding alone supplies the manifest.
+        assert freeze(case) == original
+    else:
+        with pytest.raises((ChatSituationEvidenceError, TodaySnsSnapshotChangedError)):
+            freeze(case)
 
 
 @pytest.mark.parametrize("field", ["owner", "world", "subject", "thread", "request", "hash", "policy"])
@@ -93,9 +99,9 @@ def test_scope_and_request_binding_are_private_and_exact(response_session, field
 
 
 @pytest.mark.parametrize("mutation", ["content", "private", "hidden", "deleted", "inactive", "block", "invalidated", "duplicate_proof", "parent"])
-def test_freeze_rechecks_source_after_preparation(response_session, mutation):
+def test_freeze_preserves_captured_input_when_original_changes(response_session, mutation):
     case = prepare(response_session, nested=mutation == "parent")
-    freeze(case)
+    captured = freeze(case)
     if mutation == "content": case.post.body = "Changed after preparation."
     elif mutation == "private": case.post.visibility = "private"
     elif mutation == "hidden": case.post.report_hidden_at = datetime.now(UTC)
@@ -114,8 +120,7 @@ def test_freeze_rechecks_source_after_preparation(response_session, mutation):
         values["evidence_kind"] = "post"
         case.db.add(SocialEventEvidence(id="duplicate-proof", **values))
     case.db.commit()
-    with pytest.raises(TodaySnsSnapshotChangedError):
-        freeze(case)
+    assert freeze(case) == captured
     assert all(e.retrieval_status == "audit_only" for e in case.events)
 
 
@@ -142,15 +147,13 @@ def test_capture_is_batched_bounded_read_only_and_keeps_pending_writes(response_
         assert not flushes and not commits and pending in db.new
         assert not db.connection().connection.driver_connection.in_transaction
         proof_reads = [s for s in sql if "FROM social_event_evidence " in s or "FROM social_event_evidence\n" in s]
-        # One shared proof batch plus the existing reader's per-event source
-        # counterpart resolution. Neither scans unrelated event history.
-        assert len(proof_reads) == count + 1
-        assert sum(" IN (" in s for s in proof_reads) == 1
-        assert len(sql) <= 25 * count + 30
+        # The accepted input already contains the original text. Its pure
+        # delivery capture must neither query old sources nor flush the caller.
+        assert proof_reads == [] and sql == []
         record_property("selected_events", count)
         record_property("capture_selects", len(sql))
-        record_property("evidence_batch_queries", 1)
-        record_property("existing_reader_evidence_queries", count)
+        record_property("evidence_batch_queries", 0)
+        record_property("existing_reader_evidence_queries", 0)
         record_property("new_dml_flushes_commits", 0)
     finally:
         event.remove(db.bind, "before_cursor_execute", statement)
@@ -202,12 +205,12 @@ def test_reference_alone_or_legacy_proof_does_not_admit_audit_only_source(respon
 @pytest.mark.parametrize("delete", [False, True])
 def test_fresh_capture_never_overwrites_or_flushes_uncommitted_source_edits(response_session, delete):
     case = prepare(response_session)
+    captured = freeze(case)
     if delete:
         case.db.delete(case.post)
     else:
         case.post.body = "Uncommitted caller edit."
-    with pytest.raises(ChatSituationEvidenceError, match="situation_today_pending_changes"):
-        freeze(case)
+    assert freeze(case) == captured
     if delete:
         assert case.post in case.db.deleted
     else:

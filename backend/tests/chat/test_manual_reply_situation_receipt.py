@@ -1,4 +1,5 @@
 """A real user reply locator survives Chat generation and atomic finalization."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 import json
 from dataclasses import replace
@@ -65,7 +66,7 @@ def test_chat_commits_real_manual_reply_evidence_and_rechecks_access(response_se
     class Generator(f._Generator):
         async def generate(self, request):
             result = await super().generate(request)
-            return replace(result, situation_manifest=request.situation_manifest_factory(_user_payload(request)),
+            return replace(result, situation_manifest=await request.situation_manifest_factory(_user_payload(request)),
                 situation_draft=parse_description("We discussed the suggestion in the earlier comment.",
                     target_key=request.situation_target), situation_output_digest=sha256(result.text.encode()).hexdigest())
 
@@ -82,7 +83,9 @@ def test_chat_commits_real_manual_reply_evidence_and_rechecks_access(response_se
     assert source.source_id != write.delivery.inbox_candidate_id
     assert any(entry.source_type == "CHAT_MESSAGE" for entry in manifest.sources)
     assert db.scalars(select(f.models.MessageMessage).where(f.models.MessageMessage.role == "assistant")).one()
-    assert SituationSources(db).validate(manifest, source, now=datetime.now(UTC)).state == "available"
+    from app.domains.memory.repository.experience import validate_captured_sources
+    assert next(access for entry, access in validate_captured_sources(db, manifest, (), receipt,
+        now=datetime.now(UTC), reader=RuntimeEpisodeDetailReader(db)) if entry == source).state == "available"
     reply.visibility = "private"
     db.commit(); db.expire_all()
     assert SituationSources(db).validate(manifest, source, now=datetime.now(UTC)).state != "available"

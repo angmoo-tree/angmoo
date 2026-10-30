@@ -823,10 +823,10 @@ def publish_routine_activity(resident_context, *, prepared, generation, relation
                     from app.core.calendar import utc_instant
                     situation_admission(db, execution, {"post_id": post.id}, utc_instant(post.created_at))
         if relationship_validator is not None:
-            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            from app.core.activity_transactions import activity_write
             if db.in_transaction():
                 db.commit()
-            reused = run_sqlite_session_immediate(db, publish_current, require_clean=True)
+            reused = activity_write(db, publish_current, require_clean=True)
         else:
             reused = publish_current()
             db.commit()

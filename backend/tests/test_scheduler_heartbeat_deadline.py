@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from threading import Event
 from time import monotonic
+from time import sleep as blocking_sleep
 from types import SimpleNamespace
 
 import pytest
@@ -141,6 +142,44 @@ def test_unsafe_lease_does_not_submit_heartbeat(tmp_path, proof_args, expected):
     with pytest.raises(expected):
         asyncio.run(scheduler._heartbeat_with_budget(Coordinator(), owner_id="owner", fencing_epoch=1,
             config=_config(tmp_path), proof=proof))
+
+
+@pytest.mark.parametrize('outcome', ['on_time', 'late', 'expired', 'offset_expired', 'external_cancel'])
+def test_worker_completion_and_loop_delivery_are_distinct(tmp_path, monkeypatch, outcome):
+    entered = Event()
+    class Coordinator:
+        def heartbeat(self, **kwargs):
+            entered.set()
+            blocking_sleep(.16 if outcome == 'late' else .01)
+            proof = _proof(seconds=-1 if outcome in {'expired', 'offset_expired'} else 45)
+            if outcome == 'offset_expired':
+                proof.lease_expires_at = proof.lease_expires_at.astimezone(timezone(timedelta(hours=9)))
+            return proof
+
+    monkeypatch.setattr(scheduler, '_lease_write_deadline', lambda **kwargs: monotonic() + .1)
+    async def scenario():
+        executor = SchedulerLeaseExecutor(Coordinator)
+        task = asyncio.create_task(scheduler._heartbeat_with_budget(executor, owner_id='owner',
+            fencing_epoch=1, config=_config(tmp_path), proof=_proof()))
+        try:
+            assert await asyncio.to_thread(entered.wait, 2)
+            # Reproduce synchronous work delaying callback delivery. The actual
+            # DB worker can finish while the asyncio loop cannot receive it.
+            blocking_sleep(.25)
+            if outcome == 'external_cancel':
+                task.cancel()
+            if outcome == 'on_time':
+                assert (await task).lease_owner_id == 'owner'
+            else:
+                expected = {'late': SchedulerHeartbeatDeadlineExceeded,
+                    'expired': SchedulerLeaseLostError, 'offset_expired': SchedulerLeaseLostError,
+                    'external_cancel': asyncio.CancelledError}[outcome]
+                with pytest.raises(expected):
+                    await task
+        finally:
+            await executor.drain(1)
+            executor.close()
+    asyncio.run(scenario())
 
 
 @pytest.mark.parametrize("location", ["idle", "active"])

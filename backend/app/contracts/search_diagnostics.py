@@ -20,7 +20,8 @@ StageName = Literal["embedding", "slot_wait", "process_start", "child_bootstrap"
 FailureCode = Literal["deadline_exceeded", "sqlite_busy", "sqlite_locked", "sqlite_error",
     "extension_integrity_failed", "extension_load_failed", "mapping_missing",
     "worker_start_failed", "worker_exited", "result_eof", "result_decode_failed",
-    "invalid_query", "cancelled", "unknown_error"]
+    "invalid_query", "cancelled", "unknown_error", "postgresql_serialization", "postgresql_deadlock",
+    "postgresql_lock_timeout", "postgresql_query_cancelled", "postgresql_error", "pool_timeout", "queue_unavailable"]
 
 
 class SafeModel(BaseModel):
@@ -46,6 +47,7 @@ class SearchFailure(SafeModel):
     exception_kind: Literal["TimeoutError", "OperationalError", "DatabaseError",
         "OSError", "MemoryVectorProjectionError", "EOFError", "ValueError", "Unknown"] = "Unknown"
     sqlite_error_code: Annotated[int, Field(strict=True, ge=0, le=65535)] | None = None
+    postgresql_sqlstate: Annotated[str, Field(pattern=r"^[0-9A-Z]{5}$")] | None = None
 
 
 class SearchTerminal(SafeModel):

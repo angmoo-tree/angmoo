@@ -1,6 +1,7 @@
 """Rank-preserving packet budget with atomic units and explicit partial coverage."""
 
 from dataclasses import asdict
+from hashlib import sha256
 import json
 
 from app.domains.memory.contracts.episode_packet import (
@@ -10,7 +11,7 @@ from app.domains.memory.contracts.episode_packet import (
 
 
 def episode_source_payload(source: EpisodePacketSource) -> dict[str, object]:
-    """The v1 delivered-source shape; canonical author metadata stays private."""
+    """Historical original with stable speaker identity from provider_view."""
     return {
         "reference": source.reference,
         "role": source.role,
@@ -18,6 +19,13 @@ def episode_source_payload(source: EpisodePacketSource) -> dict[str, object]:
         "status": source.status,
         "start_offset": source.start_offset,
         "end_offset": source.end_offset,
+        "original_kind": "historical_snapshot" if source.status == "verified" else "snapshot_unavailable",
+        "text_digest": sha256(source.text.encode()).hexdigest() if source.text is not None else None,
+        "occurred_at": source.occurred_at.isoformat() if source.occurred_at is not None else None,
+        "coordinate_system": "delivered_fragment",
+        "author_ref": source.author_id,
+        "author_label": source.author_label,
+        "author_role": source.author_role,
     }
 
 
@@ -48,6 +56,8 @@ def bounded_episode_packets(packets: tuple[EpisodePacket, ...], *, purpose: str 
         has_unverified_sources = not statuses["verified"] or any(
             statuses[s] for s in ("missing", "changed", "unavailable"))
         payload = {"ref": packet.reference, "situation": packet.summary,
+                   "experience_outcome": packet.experience_outcome,
+                   "snapshot_status": packet.snapshot_status,
                    "representation": packet.representation, "source_statuses": statuses,
                    "followup_truncated": packet.followup_truncated,
                    "follows": list(packet.follows_references), "units": [],
@@ -62,10 +72,11 @@ def bounded_episode_packets(packets: tuple[EpisodePacket, ...], *, purpose: str 
             sources = []
             unit_sources = set()
             for source in unit.sources:
-                key = (source.reference, source.start_offset, source.end_offset)
+                digest=sha256(source.text.encode()).hexdigest() if source.text is not None else None
+                key = (source.reference, source.start_offset, source.end_offset, digest, source.role, source.author_id)
                 if source.status == "verified" and (key in seen_sources or key in pending_sources or key in unit_sources):
                     sources.append({"ref": source.reference, "start_offset": source.start_offset,
-                                    "end_offset": source.end_offset, "already_in_context": True})
+                                    "end_offset": source.end_offset, "text_digest": digest, "already_in_context": True})
                 else:
                     sources.append(episode_source_payload(source))
                     # Invalid/missing material is not an original-text cache hit.

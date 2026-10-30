@@ -31,17 +31,22 @@ application backup. Review their content and license before sharing or importing
 
 ## Updates and recovery
 
-Use the official versioned installer or image pair and preserve the data root or
-Docker named volume. Supported Local upgrades use the embedded SQLite migration
-chain. Do not apply historical PostgreSQL Alembic migrations to a Local database
-or start competing backends against the same data root.
+Use the versioned installer or three-service Compose configuration. PostgreSQL
+17, pgvector and protected DB credentials are part of the installation. The
+runtime DB role has no superuser, role-creation or schema-creation privileges.
+Docker DB ports are internal; native Windows and Termux DBs bind to loopback.
+Preserve all DB, media, root-secret and credential volumes/files together.
+Official 0.1.3 SQLite input requires the explicit migration tool. Do not apply
+historical hosted Alembic revisions or start competing backends on one root.
 
 Before diagnosing an installed Windows payload or database, confirm the actual
 installation and opened paths using the project's installed-app diagnostic
 procedure. A redirected or stale path alone is not evidence of data corruption.
-Use [SQLite recovery](docs/operations/sqlite-recovery.md) for contention and
-retained-result boundaries. Diagnose unexpected termination before manually
-removing locks, pending work or data.
+Use [migration](docs/public/postgresql-migration.md) and
+[PostgreSQL backup/recovery](docs/public/postgresql-backup.md). The
+[SQLite recovery guide](docs/operations/sqlite-recovery.md) applies only to
+0.1.3 and preserved migration inputs. Diagnose termination before removing work,
+locks or data. Never publish DSNs, passwords, journals or migration exports.
 
 ## Contributor security checks
 

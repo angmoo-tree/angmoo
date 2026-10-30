@@ -69,8 +69,25 @@ class EmbeddedMemoryRecallProjection:
         self._writer = None
         self._retry_after = 0.0
         self._retry_delay = 1.0
-        self._cursor_path = index.database_path.with_name("rebuild-progress.json")
+        self._cursor_path = index.progress_path if getattr(index,'provider',None)=='postgresql' else index.database_path.with_name("rebuild-progress.json")
         self.state = MemoryRecallProjectionState.STOPPED
+
+    def _read_progress(self):
+        if hasattr(self.index, 'load_progress'):
+            return self.index.load_progress()
+        return json.loads(self._cursor_path.read_text(encoding='utf-8'))
+
+    def _write_progress(self):
+        if hasattr(self.index, 'save_progress'):
+            self.index.save_progress(self._progress)
+        else:
+            write_json(self._cursor_path, self._progress)
+
+    def _clear_progress(self):
+        if hasattr(self.index, 'save_progress'):
+            self.index.save_progress(None)
+        else:
+            self._cursor_path.unlink(missing_ok=True)
 
     @property
     def is_caught_up(self):
@@ -96,7 +113,7 @@ class EmbeddedMemoryRecallProjection:
             self.index.open()
             self._writer = self.index.rebuild_writer()
             try:
-                progress = json.loads(self._cursor_path.read_text(encoding="utf-8"))
+                progress = self._read_progress()
                 if progress["generation"] != self.index.settings.generation or progress["phase"] not in {"build", "validate", "orphans"}:
                     raise ValueError()
                 # Resume the original cursor, then reconcile all authoritative
@@ -104,7 +121,7 @@ class EmbeddedMemoryRecallProjection:
                 self._progress = progress
             except (OSError, ValueError, KeyError, TypeError):
                 self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
-            write_json(self._cursor_path, self._progress)
+            self._write_progress()
             self._listen()
             if background:
                 self._thread = Thread(target=self._rebuild_loop, name="memory-fts-rebuild", daemon=True)
@@ -133,6 +150,9 @@ class EmbeddedMemoryRecallProjection:
     def erase_memory_items(self, identifiers):
         """Serialize erasure with source reads, delayed writes and promotion."""
         with self._work():
+            if hasattr(self.index,'erase_retained'):
+                self.index.erase_retained(tuple(identifiers))
+                return
             self.index.erase_memory_items(identifiers)
             if self._writer is not None:
                 self._writer.erase_memory_items(identifiers)
@@ -155,7 +175,7 @@ class EmbeddedMemoryRecallProjection:
             if self._writer is None:
                 self._writer = self.index.rebuild_writer()
             self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
-            write_json(self._cursor_path, self._progress)
+            self._write_progress()
             self.state = MemoryRecallProjectionState.REBUILDING
 
     def _enqueue(self, item_ids=(), setting_ids=(), *, full_sync=False):
@@ -226,11 +246,11 @@ class EmbeddedMemoryRecallProjection:
                     else:
                         self.index.promote_rebuild(self._writer)
                         self._writer = None
-                        self._cursor_path.unlink(missing_ok=True)
+                        self._clear_progress()
                         self.state = MemoryRecallProjectionState.READY
                         self._retry_delay = 1.0
                         return
-                    write_json(self._cursor_path, self._progress)
+                    self._write_progress()
                     self._retry_delay = 1.0
         except Exception:
             logger.exception("memory_recall_projection_page_failed")

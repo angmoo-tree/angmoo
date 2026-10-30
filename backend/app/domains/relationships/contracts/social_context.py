@@ -9,7 +9,7 @@ import hashlib
 import json
 
 from app.contracts.relationship_currentness import (
-    CURRENTNESS_REVISION, LEGACY_CURRENTNESS, CURRENTNESS_POLICY_KEY,
+    CURRENTNESS_REVISION, PREVIOUS_CURRENTNESS, LEGACY_CURRENTNESS, CURRENTNESS_POLICY_KEY,
 )
 
 from app.domains.relationships.contracts.graph_recall import (
@@ -95,7 +95,7 @@ class SocialContextSnapshot:
 
 class SocialContextProvider(Protocol):
     def prepare(self, scope: GraphRecallScope, *, counterpart_id: str | None = None) -> SocialContextSnapshot: ...
-    def assert_current(self, snapshot: SocialContextSnapshot) -> None: ...
+    def assert_usable(self, snapshot: SocialContextSnapshot) -> None: ...
 
 
 class SocialContextChangedError(ValueError):
@@ -110,7 +110,7 @@ def read_currentness_policy(value: dict | None) -> str:
     if value is not None and type(value) is not dict:
         raise SocialContextValidationError("receipt_invalid")
     revision = (value or {}).get(CURRENTNESS_POLICY_KEY, LEGACY_CURRENTNESS)
-    if type(revision) is not str or revision not in {CURRENTNESS_REVISION, LEGACY_CURRENTNESS}:
+    if type(revision) is not str or revision not in {CURRENTNESS_REVISION, PREVIOUS_CURRENTNESS, LEGACY_CURRENTNESS}:
         raise SocialContextValidationError("receipt_invalid")
     return revision
 
@@ -183,7 +183,7 @@ class RelationshipValidationReceipt:
         for value in (self.scope.owner_id, self.scope.world_id, self.scope.subject_world_character_id):
             _receipt_reference(value, "scope")
         _receipt_reference(self.snapshot_id, "snapshot")
-        if (self.revision != CURRENTNESS_REVISION or not _digest_valid(self.input_content_hash)
+        if (self.revision not in {CURRENTNESS_REVISION, PREVIOUS_CURRENTNESS} or not _digest_valid(self.input_content_hash)
                 or self.basis not in {"facts", "no_facts", "unavailable", "disabled"}
                 or type(self.references) is not tuple or len(self.references) > 12
                 or bool(self.references) != (self.basis == "facts")

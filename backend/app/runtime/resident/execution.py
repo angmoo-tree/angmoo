@@ -4,7 +4,7 @@ import app.domains.routines.service.feed_history_values as routines_feed_history
 import app.domains.social.service.posts as social_posts_service
 import app.runtime.social.feed_history as social_feed_history_runtime
 from app.config import settings
-from app.database import SessionLocal
+from app.database import create_session_factory
 from app.core.redaction import redact_secret_text
 from app.domains.identity.repository import credentials as agent_run_crud
 from app.domains.characters.models import Character
@@ -1636,51 +1636,6 @@ async def _run_resident_slot_once(
             else None
         )
         feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
-        inbox_threads, has_inbox = _format_inbox_threads(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
-            run_id=run_id,
-            user_id=slot.assigned_user_id,
-            character_id=character.id,
-            allowed_actions=activity_policy.allowed_actions
-            if activity_policy
-            else DEFAULT_ACTIVITY_ACTIONS,
-        )
-        recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
-            run_id=run_id,
-            character_id=character.id,
-            allowed_actions=activity_policy.allowed_actions
-            if activity_policy
-            else DEFAULT_ACTIVITY_ACTIONS,
-        )
-        recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
-        )
-        recent_activity_summary = _format_recent_activity_summary(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
-        )
-        relationship_review_candidate = _format_relationship_review_candidate(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
-            character_id=character.id,
-            has_feed_cue=feed_cue is not None,
-            has_inbox=has_inbox,
-        )
-        social_connection_candidate = _format_social_connection_candidate(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
-            character_id=character.id,
-            feed_cue=feed_cue,
-            allowed_actions=activity_policy.allowed_actions
-            if activity_policy
-            else DEFAULT_ACTIVITY_ACTIONS,
-        )
-        strong_social_connection_candidate = _format_strong_social_connection_candidate(
-            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
-            character_id=character.id,
-            feed_cue=feed_cue,
-            allowed_actions=activity_policy.allowed_actions
-            if activity_policy
-            else DEFAULT_ACTIVITY_ACTIONS,
-        )
         if activity_policy and activity_policy.should_skip_llm and not (
             individual_tool_flow and activity_policy.within_active_hours
         ):
@@ -1705,32 +1660,6 @@ async def _run_resident_slot_once(
                     "reason": activity_policy.summary,
                     "activity_policy": activity_policy.to_result(),
                 },
-            )
-        run_message = message or (
-            f"{character.name}의 resident heartbeat tick입니다. "
-            "Angmoo community tools를 사용해 커뮤니티를 확인하고 "
-            "답글, 새 글, 좋아요, 관찰 중 캐릭터다운 행동 하나를 선택한 뒤 "
-            "캐릭터 상태를 저장해줘."
-        )
-        main_tool_choice: dict[str, object] | None = None
-        main_tools_allow: list[str] | None = None
-        allow_thread_tool = True
-        if enforce_activity_policy:
-            allow_thread_tool = _should_allow_resident_thread_tool(
-                feed_cue=feed_cue,
-                activity_policy=activity_policy,
-                has_inbox=has_inbox,
-                recent_feed_roots=recent_feed_roots,
-            )
-            main_tool_choice = (
-                TOOL_CHOICE_THREAD_OR_COMPLETE
-                if allow_thread_tool
-                else TOOL_CHOICE_COMPLETE_TICK
-            )
-            main_tools_allow = (
-                TOOLS_ALLOW_THREAD_OR_COMPLETE
-                if allow_thread_tool
-                else TOOLS_ALLOW_COMPLETE_TICK
             )
         routine_runs.create_agent_run(
             db,
@@ -1903,6 +1832,80 @@ async def _run_resident_slot_once(
                 character_id=character.id,
                 post_id=selected_post_id,
                 gateway_result=_safe_gateway_result(gateway_result),
+            )
+        # These prompts are consumed only by the OpenClaw path below. The
+        # personalized graph builds its scoped evidence in its own lanes.
+        # Do not perform the unused global feed/N+1 reads before that graph.
+        inbox_threads, has_inbox = _format_inbox_threads(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
+            run_id=run_id,
+            user_id=slot.assigned_user_id,
+            character_id=character.id,
+            allowed_actions=activity_policy.allowed_actions
+            if activity_policy
+            else DEFAULT_ACTIVITY_ACTIONS,
+        )
+        recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
+            run_id=run_id,
+            character_id=character.id,
+            allowed_actions=activity_policy.allowed_actions
+            if activity_policy
+            else DEFAULT_ACTIVITY_ACTIONS,
+        )
+        recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
+        )
+        recent_activity_summary = _format_recent_activity_summary(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
+        )
+        relationship_review_candidate = _format_relationship_review_candidate(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
+            character_id=character.id,
+            has_feed_cue=feed_cue is not None,
+            has_inbox=has_inbox,
+        )
+        social_connection_candidate = _format_social_connection_candidate(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
+            character_id=character.id,
+            feed_cue=feed_cue,
+            allowed_actions=activity_policy.allowed_actions
+            if activity_policy
+            else DEFAULT_ACTIVITY_ACTIONS,
+        )
+        strong_social_connection_candidate = _format_strong_social_connection_candidate(
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
+            character_id=character.id,
+            feed_cue=feed_cue,
+            allowed_actions=activity_policy.allowed_actions
+            if activity_policy
+            else DEFAULT_ACTIVITY_ACTIONS,
+        )
+        run_message = message or (
+            f"{character.name}의 resident heartbeat tick입니다. "
+            "Angmoo community tools를 사용해 커뮤니티를 확인하고 "
+            "답글, 새 글, 좋아요, 관찰 중 캐릭터다운 행동 하나를 선택한 뒤 "
+            "캐릭터 상태를 저장해줘."
+        )
+        main_tool_choice: dict[str, object] | None = None
+        main_tools_allow: list[str] | None = None
+        allow_thread_tool = True
+        if enforce_activity_policy:
+            allow_thread_tool = _should_allow_resident_thread_tool(
+                feed_cue=feed_cue,
+                activity_policy=activity_policy,
+                has_inbox=has_inbox,
+                recent_feed_roots=recent_feed_roots,
+            )
+            main_tool_choice = (
+                TOOL_CHOICE_THREAD_OR_COMPLETE
+                if allow_thread_tool
+                else TOOL_CHOICE_COMPLETE_TICK
+            )
+            main_tools_allow = (
+                TOOLS_ALLOW_THREAD_OR_COMPLETE
+                if allow_thread_tool
+                else TOOLS_ALLOW_COMPLETE_TICK
             )
         client = OpenClawGatewayClient(
             url=settings.openclaw_gateway_url,
@@ -2693,9 +2696,9 @@ async def run_claimed_temporary_resident_slot_once(
     )
 
 
-async def tick_resident_slots(
+def _prepare_resident_tick(
     db: Session, data: schemas.ResidentSlotTickCreate
-) -> schemas.ResidentSlotTickRead:
+):
     timeout_seconds = data.timeout_seconds or settings.openclaw_timeout_seconds
     now = datetime.now(UTC)
     def _recovery_next_tick_at(slot: models.AgentSlot, recovered_at: datetime) -> datetime:
@@ -2785,32 +2788,81 @@ async def tick_resident_slots(
         single_flight=settings.resident_tick_single_flight_enabled,
     )
 
+    return len(due_before), [(slot.agent_id, slot.locked_by_run_id) for slot in claimed_slots]
+
+
+def _release_prepared_slot_claims(db, prepared):
+    """Cancel only this tick's not-yet-started claims; preserve prior schedule/history."""
+    if isinstance(prepared, schemas.ResidentSlotTickRead):
+        return
+    from sqlalchemy import update
+    from app.core.activity_transactions import activity_write
+    from app.contracts.activity_cancellation import cancellation_reason
+    _, claims = prepared
+    if not claims:
+        return
+    def release():
+        for agent_id, token in claims:
+            if not token or not token.startswith('pending:'):
+                raise ValueError('resident_pending_claim_identity_invalid')
+            db.execute(update(models.AgentSlot).where(
+                models.AgentSlot.agent_id == agent_id,
+                models.AgentSlot.locked_by_run_id == token,
+                models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
+            ).values(status=routine_constants.SLOT_STATUS_ASSIGNED_IDLE,
+                locked_by_run_id=None, lease_expires_at=None,
+                last_error=str(cancellation_reason())).execution_options(synchronize_session=False))
+    activity_write(db, release, require_clean=True)
+
+
+async def tick_resident_slots(
+    db: Session, data: schemas.ResidentSlotTickCreate
+) -> schemas.ResidentSlotTickRead:
+    from app.runtime.resident.db_stage import run_slot_db_stage
+    prepared = await run_slot_db_stage(db, _prepare_resident_tick, data,
+        on_cancel=_release_prepared_slot_claims)
+    if isinstance(prepared, schemas.ResidentSlotTickRead):
+        return prepared
+    due_count, claims = prepared
+    claimed_agent_ids = [agent_id for agent_id, _ in claims]
+    timeout_seconds = data.timeout_seconds or settings.openclaw_timeout_seconds
     spacing_seconds = settings.resident_tick_batch_start_spacing_seconds
+    # Claim is committed. Refreshing the returned ORM rows opened a read
+    # transaction; it must not occupy a pool connection throughout the AI runs.
+    # Child activities own separate Sessions, but must share the runtime's
+    # engine/pool. The compatibility default can create a second, unbudgeted
+    # pool (and can point at the wrong installation in embedded profiles).
+    activity_sessions = create_session_factory(db.get_bind())
+    from app.core.sqlite_concurrency import require_read_only_session
+    require_read_only_session(db, error_code="resident_tick_has_pending_writes")
+    db.rollback()
     results = await asyncio.gather(
         *[
             _run_claimed_resident_slot_once(
-                slot.agent_id,
+                agent_id,
+                session_factory=activity_sessions,
                 post_id=data.post_id,
                 timeout_seconds=timeout_seconds,
                 message=data.message,
                 start_delay_seconds=index * spacing_seconds,
             )
-            for index, slot in enumerate(claimed_slots)
+            for index, agent_id in enumerate(claimed_agent_ids)
         ]
     )
     db.expire_all()
 
     return schemas.ResidentSlotTickRead(
-        due_count=len(due_before),
-        started_count=len(claimed_slots),
+        due_count=due_count,
+        started_count=len(claimed_agent_ids),
         results=list(results),
-        slots=list_resident_slots(db),
+        slots=await run_slot_db_stage(db, list_resident_slots),
     )
 
 
 async def _run_claimed_resident_slot_once(
     agent_id: str,
     *,
+    session_factory,
     post_id: str | None,
     timeout_seconds: int,
     message: str | None,
@@ -2818,7 +2870,7 @@ async def _run_claimed_resident_slot_once(
 ) -> schemas.OpenClawAgentRunRead:
     if start_delay_seconds > 0:
         await asyncio.sleep(start_delay_seconds)
-    with SessionLocal() as db:
+    with session_factory() as db:
         slot = slot_queries.get_agent_slot(db, agent_id)
         if slot is None:
             raise AgentSlotUnavailableError(f"slot {agent_id} does not exist")

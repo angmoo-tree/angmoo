@@ -14,11 +14,16 @@ import re
 import tarfile
 
 REPOSITORY = "angmoo-tree/angmoo"
-SERVICES = ("backend", "frontend")
+SERVICES = ("backend", "frontend", "postgres")
 PLATFORMS = ("linux/amd64", "linux/arm64")
 SHA = re.compile(r"[0-9a-f]{64}")
 SOURCE = re.compile(r"[0-9a-f]{40}")
 VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
+
+
+def services_for(version: str) -> tuple[str, ...]:
+    require(VERSION.fullmatch(version), 'manifest_version_invalid')
+    return SERVICES if tuple(map(int, version.split('.'))) >= (0, 1, 4) else ('backend', 'frontend')
 
 
 def require(condition: object, code: str) -> None:
@@ -50,10 +55,10 @@ def read_manifest(path: Path, *, require_all: bool = True) -> dict:
 
 
 def validate_candidate_manifest(value: dict) -> None:
-    """Explicit local ARM64 pair; never relax the public release contract."""
+    """Explicit local ARM64 service set; preserve the public contract."""
     validate_manifest(value, require_all=False)
     require({(i["service"], i["platform"]) for i in value["images"]} ==
-            {("backend", "linux/arm64"), ("frontend", "linux/arm64")}, "candidate_arm64_pair_required")
+            {(service, "linux/arm64") for service in services_for(value['version'])}, "candidate_arm64_pair_required")
 
 
 def validate_manifest(value: dict, *, require_all: bool = True) -> None:
@@ -82,7 +87,7 @@ def validate_manifest(value: dict, *, require_all: bool = True) -> None:
         require(isinstance(name, str) and re.fullmatch(r"[a-zA-Z0-9_.-]+\.oci\.tar", name), "manifest_archive_path_invalid")
         require(type(item.get("archive_size")) is int and item["archive_size"] > 0, "manifest_archive_size_invalid")
     if require_all:
-        require(seen == {(s, p) for s in SERVICES for p in PLATFORMS}, "manifest_platform_missing")
+        require(seen == {(s, p) for s in services_for(value['version']) for p in PLATFORMS}, "manifest_platform_missing")
 
 
 def inspect_oci(path: Path, *, service: str, platform: str, source: str, version: str) -> dict:
@@ -146,13 +151,16 @@ def inspect_oci(path: Path, *, service: str, platform: str, source: str, version
             require(labels.get("org.opencontainers.image.revision") == source, "oci_source_mismatch")
             require(labels.get("org.opencontainers.image.version") == version, "oci_version_mismatch")
             require(labels.get("org.opencontainers.image.source") == f"https://github.com/{REPOSITORY}", "oci_repository_mismatch")
-            user = config["config"].get("User")
-            require(user in ({"angmoo", "10001", "10001:10001"} if service == "backend" else {"node", "1000", "1000:1000"}), "oci_user_invalid")
-            expected_cmd = ["contributor-api"] if service == "backend" else ["node", "app/server.js"]
+            user = config["config"].get("User") or ''
+            users={'backend':{'angmoo','10001','10001:10001'},'frontend':{'node','1000','1000:1000'},'postgres':{'','root','0','0:0'}}
+            require(user in users[service], "oci_user_invalid")
+            expected_cmd = (['postgresql-api'] if 'postgres' in services_for(version) else ['contributor-api']) if service=='backend' else (['postgres'] if service=='postgres' else ['node','app/server.js'])
             require(config["config"].get("Cmd") == expected_cmd, "oci_command_invalid")
             if service == "backend":
                 require(config["config"].get("Entrypoint") == ["/usr/local/bin/angmoo-backend-entrypoint"], "oci_entrypoint_invalid")
-            require(config["config"].get("WorkingDir") == "/app", "oci_workdir_invalid")
+            if service == 'postgres':
+                require(config['config'].get('Entrypoint')==['/usr/local/bin/angmoo-postgres-entrypoint'],'oci_entrypoint_invalid')
+            require(config["config"].get("WorkingDir",'') in ({'','/'} if service=='postgres' else {'/app'}), "oci_workdir_invalid")
             found.append({
                 "service": service, "platform": platform, "source_sha": source,
                 "version": version, "repository": f"ghcr.io/{REPOSITORY}-{service}",

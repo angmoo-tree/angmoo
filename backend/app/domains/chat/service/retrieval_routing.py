@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+from inspect import isawaitable
 import re
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import UTC, date, datetime, time, timedelta
 from time import monotonic
@@ -74,13 +75,18 @@ class RetrievalRoutingService:
         policy: RetrievalPolicyResolverPort,
         caps: RetrievalHardCaps | None = None,
         recall_mode: ChatRecallMode = ChatRecallMode.LEGACY,
-        before_named_provider: Callable[[], None] | None = None,
+        before_named_provider: Callable[[], None | Awaitable[None]] | None = None,
+        database_call=None,
     ) -> None:
         self._router = router
         self._policy = policy
         self._caps = caps or RetrievalHardCaps()
         self._recall_mode = ChatRecallMode(recall_mode)
         self._before_named_provider = before_named_provider
+        self._database_call = database_call
+
+    async def _read(self, operation):
+        return await self._database_call(operation) if self._database_call is not None else operation()
 
     async def route(
         self,
@@ -103,7 +109,7 @@ class RetrievalRoutingService:
             raise RetrievalContractError("selection_protocol_mode_mismatch")
 
         # Deterministic canonical preflight happens before any provider call.
-        scope = self._policy.load_scope(command)
+        scope = await self._read(lambda: self._policy.load_scope(command))
         self._validate_scope_binding(command, scope)
         if chat_identity is not None:
             chat_identity.assert_scope(command.owner_id, command.world_id, command.thread_id,
@@ -206,9 +212,9 @@ class RetrievalRoutingService:
                 raise RetrievalContractError("recall_interpretation_hints_invalid")
             resolutions = ()
         elif named:
-            resolutions = self._policy.resolve_named_entity_mentions(scope, mentions_to_resolve, chat_identity=chat_identity)
+            resolutions = await self._read(lambda: self._policy.resolve_named_entity_mentions(scope, mentions_to_resolve, chat_identity=chat_identity))
         else:
-            resolutions = self._policy.resolve_entity_mentions(scope, mentions_to_resolve)
+            resolutions = await self._read(lambda: self._policy.resolve_entity_mentions(scope, mentions_to_resolve))
         resolution_by_ref = {item.ref: item for item in resolutions}
         resolved_references(intent, resolutions, phase="repair" if repair_used else "first", subject=scope.responding_world_character_id)
         if set(resolution_by_ref) != {entity.ref for entity in intent.entities}:
@@ -381,7 +387,9 @@ class RetrievalRoutingService:
         if request.selection_protocol in {NAME_SELECTION_PROTOCOL, ADVISORY_SELECTION_PROTOCOL, TEMPORAL_SELECTION_PROTOCOL} and self._before_named_provider is not None:
             # The existing transaction owner closes canonical admission reads;
             # no Session or commit policy belongs in the provider adapter.
-            self._before_named_provider()
+            ready = self._before_named_provider()
+            if isawaitable(ready):
+                await ready
         try:
             async with asyncio.timeout(timeout_seconds):
                 return await self._router.route(request)

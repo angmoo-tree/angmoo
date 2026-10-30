@@ -66,6 +66,7 @@ class MemorySituationApplyRun(Base):
     error_code: Mapped[str | None] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    maintenance: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
 
 
 class MemorySituationRequest(Base):

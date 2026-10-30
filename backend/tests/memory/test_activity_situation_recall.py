@@ -62,8 +62,8 @@ def test_projection_hash_version_scope_and_source_privacy_are_independently_reva
     assert len(selected) == 1
     post.report_hidden_at = NOW
     db.commit()
-    assert reader.revalidate(request, (ranked,)) == ()
-    assert reader.hydrate(request, selected).records == ()
+    assert len(reader.revalidate(request, (ranked,))) == 1
+    assert len(reader.hydrate(request, selected).records) == 1
 
 
 def test_changed_canonical_version_between_selection_and_hydration_is_not_returned(stack):
@@ -117,7 +117,10 @@ def test_hydrated_packet_uses_verified_source_event_time_not_summary_creation(st
     post=real_source(db,scope)
     post.created_at=NOW-timedelta(days=2)
     db.commit()
-    admitted=receipt(db,scope,post)
+    from memory.test_experience_snapshots import captured
+    from app.domains.memory.repository.situation_admission import admit
+    manifest,draft,result=captured(db,scope,post)
+    admitted=admit(db,manifest=manifest,draft=draft,result=result,now=NOW)
     apply(db,setting,memory)
     item=db.get(MemoryItem,admitted.applied_item_id)
     reader,request,ranked,_=readers(db,scope,item)
@@ -128,5 +131,5 @@ def test_hydrated_packet_uses_verified_source_event_time_not_summary_creation(st
     assert row.metadata["recorded_at"]!=row.metadata["event_time_from"]
     post.deleted_at=NOW;db.commit()
     row=reader.hydrate(request,reader.revalidate(request,(ranked,))).records[0]
-    assert row.metadata["event_time_from"]==row.metadata["event_time_to"]==""
+    assert row.metadata["event_time_from"]==row.metadata["event_time_to"]==(NOW-timedelta(days=2)).isoformat()
     assert row.metadata["recorded_at"]

@@ -28,7 +28,6 @@ class EpisodeSelectionService:
             bundle = restore_episode_input(work.manifest, scope=setting.scope, detail_reader=self.details)
             access_bundle = restore_episode_input(self.works.access_manifest(work, setting=setting),
                 scope=setting.scope, detail_reader=self.details)
-            self.revalidate(access_bundle)
             provider.validate_bundle(bundle)
             number = self.works.start_call(work, model_id=model_id, thinking_level=thinking_level,
                 profile_version=profile_version, now=self.clock(), job_fence=job_fence)

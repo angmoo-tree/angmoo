@@ -18,20 +18,18 @@ Angmoo는 로컬 AI 캐릭터 SNS입니다. 기여할 때는 기존 사용자 �
 
 ## 기여 환경 실행
 
-기여용 백엔드는 `CONTRIBUTOR_EMBEDDED` 프로필을 사용합니다. SQLite가 유일한
-원본 저장소이며 FTS5와 LadybugDB는 다시 만들 수 있는 파생 저장소입니다.
+기여용 백엔드는 `CONTRIBUTOR_POSTGRESQL` 프로필을 사용합니다. PostgreSQL이 유일한 원본 저장소입니다. 키워드 검색은 PostgreSQL 전문검색, 의미 검색은 pgvector 정확 검색을 사용하며 LadybugDB는 재구축 가능한 파생 저장소입니다.
 
-Git, Linux 엔진을 사용하는 Docker, Compose 2.22.0 이상을 준비하고 저장소 루트에서 실행합니다.
+Git, Linux 엔진을 사용하는 Docker, Compose 2.23.0 이상을 준비하고 저장소 루트에서 실행합니다.
 
 ```sh
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-http://127.0.0.1:3000 을 엽니다. 개발 프론트엔드와 embedded 백엔드가 실행되며
-SQLite·검색·그래프 투영은 백엔드의 로컬 구성 요소입니다. PostgreSQL·Neo4j 서버는 필요하지 않습니다.
+http://127.0.0.1:3000 을 엽니다. frontend·backend·전용 PostgreSQL 세 서비스가 실행됩니다. DB 데이터·앱 미디어와 비밀값·DB 초기 인증은 별도 영속 볼륨에 보관합니다. 기존 설치판·배포판 사용자 볼륨을 개발용으로 연결하지 않습니다. Neo4j는 필요하지 않습니다.
 
 ```sh
-docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend
+docker compose -f compose.yml -f compose.dev.yml logs --tail 100 postgres backend frontend
 docker compose -f compose.yml -f compose.dev.yml down
 ```
 
@@ -42,18 +40,18 @@ docker compose -f compose.yml -f compose.dev.yml down
 실제 native 창을 변경할 때만 [Windows Host Tauri dev](docs/public/windows-host-tauri-dev.md)를
 사용합니다. 기여 Docker와 별도 WebView 프로필을 사용하며 설치 앱의 백엔드를 하나 더 띄우지 않습니다.
 
+통합 검사는 폐기 가능한 PostgreSQL DB를 사용합니다. 명시적 시험 DSN은 소유권을 확인한 빈 합성 DB에만 연결하며 사용자 DB를 지정하지 않습니다. 스키마 변경은 PostgreSQL 버전 관리 소유자에 반영하고 0.1.3 SQLite 입력 계약은 따로 보존합니다. [이전](docs/public/postgresql-migration.ko.md)·[실행 구조](docs/public/postgresql-runtime.ko.md)를 참고하세요.
+
 ## 코드 소유권
 
 - 백엔드 도메인은 HTTP·service·model·schema·저장 역할을 소유합니다. 허용된 진입점의
   실제 소유 파일을 사용합니다. 여러 도메인의 협력은 runtime에서 조립하며, 도메인이
   runtime을 역으로 가져오거나 다른 업무의 저장 규칙을 우회하지 않습니다.
-- 호출자의 Session과 transaction 소유권을 유지합니다. AI 호출·대기·재시도 동안 SQLite
-  쓰기 transaction을 유지하지 않습니다. 늦은 결과 적용 전에 owner·scope·원본 revision·lease를 재검증합니다.
+- 호출자의 Session과 transaction 소유권을 유지합니다. AI 호출·재시도 대기 중 DB 연결이나 transaction을 점유하지 않습니다. 일시 충돌은 전체 DB transaction을 제한적으로 재시도하고 소유권·삭제·실행권·중복 방지를 유지합니다. Chat·SNS는 시작 스냅샷, 관계 검토는 상황기억 본문과 기존 인식을 사용하며 원문을 다시 조회하지 않습니다.
 - 프론트엔드 기능은 API·DTO·component·수명을 소유합니다. 기능 사이 연결은 composition의
   props·callback·slot으로 처리합니다. 실제 역할 파일을 import하며 없어진 `public.ts`·`shared`를 복원하지 않습니다.
 - Next와 static/Tauri는 같은 기능 컴포넌트를 사용합니다. 공용 UI와 통신 코드에 제품 권한이나 업무 판단을 넣지 않습니다.
-- 사용자에게 보이는 웹 문구는 영어·한국어 번역 목록에 함께 반영합니다. Termux의 고정 터미널 안내는
-  영어이며, 공개 Termux 설치 문서는 두 언어를 제공합니다.
+- 사용자에게 보이는 웹 문구는 영어·한국어 번역 목록에 함께 반영합니다. Termux 이전 안내와 공개 설치 문서도 한영으로 제공합니다. AI 고정 지침은 영어를 유지하고 이전 중 사용자 데이터를 번역하지 않습니다.
 - 새 자산·의존성에는 출처·라이선스·고지가 필요합니다. [BRANDING](BRANDING.md)을 따르고 기존 시맨틱 토큰과 공용 UI 요소를 사용합니다.
   회귀를 숨기려고 색상이나 스냅샷 기준을 완화하지 않습니다.
 

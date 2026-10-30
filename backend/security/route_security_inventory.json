@@ -1362,6 +1362,11 @@
       "module": "app.domains.memory.router",
       "endpoint": "start_memory_batch"
     },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run/{request_id}/cancel": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "cancel_memory_relationship_batch"
+    },
     "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run/{request_id}/retry": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
@@ -1371,6 +1376,11 @@
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "start_memory_embedding_preparation"
+    },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-runs/{run_id}/command": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "command_memory_processing"
     },
     "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/recheck": {
       "access": "owner-only",

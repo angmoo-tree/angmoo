@@ -187,7 +187,7 @@ def test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity(c
                      "cursor": "", "state": "pending"}] * 2
         before_rows["memory_vector_changes"] = after_rows["memory_vector_changes"]
         for row in before_rows["memory_vector_validation_revisions"]:
-            if row["scope_key"] == "world:world-a":
+            if row["scope_key"] in {"world:world-a", "experience:world:world-a"}:
                 row["revision"] += 2
         for rows in (before_rows[models.MessageThread.__tablename__], after_rows[models.MessageThread.__tablename__]):
             for row in rows:

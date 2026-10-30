@@ -54,7 +54,7 @@ class OwnerControlledIdentityService:
         try:
             from app.domains.identity.service.environment import environment_confirmed, lock_environment_admission, snapshot
             from app.domains.identity.service.local_owner import read_ui_language
-            lock_environment_admission(self._db, current_user_id)
+            lock_environment_admission(self._db, current_user_id, exclusive=True)
             if not environment_confirmed(self._db, current_user_id):
                 raise OwnerControlledIdentityConflictError("environment_not_ready")
             environment = snapshot(self._db, current_user_id)
@@ -69,7 +69,7 @@ class OwnerControlledIdentityService:
 
     def patch(self, *, world_id: str, current_user_id: str, data):
         from app.domains.identity.service.environment import lock_environment_admission
-        lock_environment_admission(self._db, current_user_id)
+        lock_environment_admission(self._db, current_user_id, exclusive=True)
         self.get(world_id=world_id, current_user_id=current_user_id)
         row = self._find_identity(world_id, current_user_id)
         character = get_character(self._db, row.character_id)
@@ -285,7 +285,7 @@ class OwnerControlledIdentityService:
         profile: OwnerControlledProfile,
     ) -> OwnerControlledIdentitySnapshot:
         from app.domains.identity.service.environment import lock_environment_admission
-        lock_environment_admission(self._db, current_user_id)
+        lock_environment_admission(self._db, current_user_id, exclusive=True)
         self._require_local_owner(current_user_id)
         self._require_owned_world_membership(world_id, current_user_id)
         self._validate_role(world_id, profile.role_key)

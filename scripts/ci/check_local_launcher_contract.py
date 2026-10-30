@@ -16,7 +16,7 @@ ROOT_WRAPPER = ROOT / "angmoo.ps1"
 PUBLIC_DOC = ROOT / "docs/public/local-launcher.md"
 
 EXPECTED_COMMANDS = ["start", "stop", "restart", "status", "logs", "doctor"]
-EXPECTED_SERVICES = {"backend", "frontend"}
+EXPECTED_SERVICES = {"backend", "frontend", "postgres"}
 EXPECTED_EXIT_CODES = {
     "success": 0,
     "invalid_argument": 2,
@@ -91,7 +91,7 @@ def validate_contract(payload: Any, *, root: Path = ROOT) -> list[str]:
         errors.append("launcher exit-code contract mismatch")
     compose = payload.get("compose", {})
     if set(compose.get("required_services", [])) != EXPECTED_SERVICES:
-        errors.append("launcher must target the two-service embedded stack")
+        errors.append("launcher must target the three-service PostgreSQL stack")
     if compose.get("release_files") != ["compose.yml"]:
         errors.append("release launcher must reuse compose.yml")
     if compose.get("contributor_files") != ["compose.yml", "compose.dev.yml"]:

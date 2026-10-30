@@ -69,11 +69,13 @@ export type MemoryItemDetailRead = MemoryItemSummaryRead & {
 
 export type EpisodeDetailRead = {
   representation: "episode_v1" | "activity_situation_v1" | "legacy_summary";
+  snapshot_status?: "historical_snapshot" | "partial_snapshot" | "snapshot_unavailable" | null;
+  experience_state?: "action_succeeded" | "observed_action_failed" | null;
   partial: boolean;
   omitted_units: number;
   followup_count: number;
   units: {
-    sources: { role: string; text: string | null; status: "verified" | "missing" | "changed" | "unavailable" }[];
+    sources: { role: string; text: string | null; status: "verified" | "missing" | "changed" | "unavailable"; author_label?: string | null; author_role?: string | null; occurred_at?: string | null }[];
     thought: { text: string | null; status: "recorded" | "missing" | "invalid"; truncated: boolean } | null;
     legacy_declaration: string | null;
   }[];

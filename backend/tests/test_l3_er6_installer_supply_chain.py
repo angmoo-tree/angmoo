@@ -86,7 +86,7 @@ def test_installer_contract_rejects_missing_frozen_migration_resources(
 
 
 def test_release_metadata_has_checksums_sbom_provenance_and_notices(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     bundle = tmp_path / "bundle"
     output = tmp_path / "metadata"
@@ -95,9 +95,18 @@ def test_release_metadata_has_checksums_sbom_provenance_and_notices(
         b"synthetic-nsis"
     )
 
-    result = _run_generator(bundle, output)
-
-    assert result.returncode == 0, result.stderr
+    spec = importlib.util.spec_from_file_location('desktop_metadata_fixture', GENERATOR)
+    generator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(generator)
+    resources = tmp_path / 'angmoo-resources.json'
+    resource_data = {'fixture': 'synthetic-native-resources', 'files': {'bin/postgres.exe': 'a' * 64}}
+    resources.write_text(json.dumps(resource_data), encoding='utf-8')
+    monkeypatch.setattr(generator, '_postgresql_resource_manifest', lambda: resources)
+    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPOSITORY_ROOT, text=True).strip()
+    monkeypatch.setattr(sys, 'argv', [str(GENERATOR), '--bundle-root', str(bundle), '--output-root',
+                                    str(output), '--version', VERSION, '--commit', commit])
+    assert generator.main() == 0
+    assert json.loads((output / 'postgresql-resources.json').read_text()) == resource_data
     sums = (output / "SHA256SUMS").read_text(encoding="ascii")
     assert INSTALLER_NAME in sums
     digest = hashlib.sha256(b"synthetic-nsis").hexdigest()
@@ -107,7 +116,7 @@ def test_release_metadata_has_checksums_sbom_provenance_and_notices(
     )
     assert sbom["spdxVersion"] == "SPDX-2.3"
     package_names = {package["name"] for package in sbom["packages"]}
-    assert {"angmoo", "ladybug", "next", "tauri"}.issubset(package_names)
+    assert {"angmoo", "ladybug", "next", "tauri", "PostgreSQL", "pgvector-native"}.issubset(package_names)
     provenance = json.loads(
         (output / "angmoo-installer.provenance.json").read_text(encoding="utf-8")
     )

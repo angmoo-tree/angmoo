@@ -119,6 +119,19 @@ def test_minimal_valid_repository_passes(tmp_path: Path) -> None:
     assert checker.check(root) == []
 
 
+def test_postgresql_review_set_still_rejects_missing_or_unreviewed_dependencies(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    path=root/'security/license_policy.json'
+    policy=json.loads(path.read_text(encoding='utf-8'))
+    original=list(policy['dependency_reviews'])
+    policy['dependency_reviews']=[row for row in original if row['name']!='psycopg']
+    path.write_text(json.dumps(policy),encoding='utf-8')
+    assert any('conditional dependency reviews must be exactly' in error for error in checker.check(root))
+    policy['dependency_reviews']=original+[dict(original[0],name='unreviewed-driver')]
+    path.write_text(json.dumps(policy),encoding='utf-8')
+    assert any('conditional dependency reviews must be exactly' in error for error in checker.check(root))
+
+
 def test_rejects_gpl_or_later_project_metadata(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "backend/pyproject.toml").write_text(

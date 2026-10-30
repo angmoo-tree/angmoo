@@ -112,11 +112,13 @@ def test_episode_evidence_survives_commit_and_rejects_provider_wait_changes(resp
         events = asyncio.run(run())
         saved = f.SqlAlchemyResponseLifecycleRepository(db).get_request(accepted.response_request.request_id)
         assert len(calls) == 2, failures
-        if change == "none":
+        if change in {"none", "hidden", "body"}:
             assert saved.state.value == "committed", failures
             stored = saved.response_metadata["_evidence_inspector_v1"]["items"]
             memory_items = [row for row in stored if row["kind"] == "episode_memory"]
-            assert len(memory_items) == 1 and memory_items[0]["time_provenance"]["kind"] == "event"
+            # The legacy fixture has no captured original timestamp. Do not
+            # infer one from a current post read merely because it still exists.
+            assert len(memory_items) == 1 and memory_items[0]["time_provenance"]["kind"] == "unknown"
             assert db.scalar(select(func.count()).select_from(MemorySituationReceipt).where(MemorySituationReceipt.lane == "chat")) == 1
             from app.domains.memory.repository.situation_runs import request_run, claim_run
             from app.domains.memory.repository.situation_apply import apply_page

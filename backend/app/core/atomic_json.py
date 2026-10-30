@@ -31,11 +31,11 @@ def locked_json(path: Path):
                 fcntl.flock(handle, fcntl.LOCK_UN)
 
 
-def write_json(path: Path, value):
+def write_json(path: Path, value, *, ensure_ascii=False):
     fd, temporary = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(value, handle, ensure_ascii=False)
+            json.dump(value, handle, ensure_ascii=ensure_ascii)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, path)

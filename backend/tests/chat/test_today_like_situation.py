@@ -41,7 +41,7 @@ def test_real_chat_adapter_commits_manual_today_events(response_session, monkeyp
         expected = len(transitions) if include_today and route is not f.RetrievalRoute.CLARIFICATION else 0
         sources = [s for s in manifest.sources if s.source_type == "SOCIAL_EVENT"]
         assert len(sources) == expected
-        assert manifest.version == 2 and manifest.private_thread_id == "p-thread"
+        assert manifest.version == 3 and manifest.private_thread_id == "p-thread"
         assert manifest.payload_digest == sha256(result.calls[0]["user_prompt"].encode()).hexdigest()
         for source in sources:
             index = int(source.payload_path.split("/")[-2])

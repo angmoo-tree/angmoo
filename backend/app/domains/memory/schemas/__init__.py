@@ -108,6 +108,9 @@ class EpisodeSourceRead(BaseModel):
     role: str
     text: str | None
     status: Literal["verified", "missing", "changed", "unavailable"]
+    author_label: str | None = None
+    author_role: str | None = None
+    occurred_at: str | None = None
 
 
 class EpisodeThoughtRead(BaseModel):
@@ -124,6 +127,8 @@ class EpisodeUnitRead(BaseModel):
 
 class EpisodeDetailRead(BaseModel):
     representation: Literal["episode_v1", "legacy_summary", "activity_situation_v1"]
+    snapshot_status: Literal["historical_snapshot", "partial_snapshot", "snapshot_unavailable"] | None = None
+    experience_state: Literal["action_succeeded", "observed_action_failed"] | None = None
     partial: bool
     omitted_units: int
     followup_count: int

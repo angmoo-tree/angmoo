@@ -135,6 +135,12 @@ def database_id(path):
 def contextual(**values):
     """Label existing work without a new transaction, task, timer or sink."""
     def decorate(function):
+        if iscoroutinefunction(function):
+            @wraps(function)
+            async def invoke_async(*args, **kwargs):
+                with scope(**values):
+                    return await function(*args, **kwargs)
+            return invoke_async
         if isasyncgenfunction(function):
             @wraps(function)
             async def stream(*args, **kwargs):
@@ -158,9 +164,10 @@ def sqlite_observed(function):
         bind = owner.get_bind() if hasattr(owner, "get_bind") else owner
         identity = database_id(bind.engine.url.database)
         label = f"{getattr(operation, '__module__', 'unknown')}.{getattr(operation, '__qualname__', type(operation).__name__)}".replace("<", "").replace(">", "")
-        with span("sqlite_writer", database_id=identity, writer=label):
+        provider = bind.dialect.name
+        with span(provider + "_writer", database_id=identity, writer=label):
             try:
                 return function(owner, operation, *args, **kwargs)
             finally:
-                emit("sqlite", boundary="cleanup_complete")
+                emit(provider, boundary="cleanup_complete")
     return wrapped

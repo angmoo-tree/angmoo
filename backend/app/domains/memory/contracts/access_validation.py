@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.experience_access import MemoryExperienceAccess
 if TYPE_CHECKING:
     from app.domains.memory.contracts.activity_situation import DeliveredSourceEntry
     from app.domains.memory.contracts.situation_validation import SituationSourceAccess
@@ -36,9 +37,11 @@ class MemoryAccessValidation:
     origins: dict[str, object | None] = field(default_factory=dict)
     runtime_sources: object | None = None
     runtime_queries: object | None = None
+    experience_access: MemoryExperienceAccess | None = None
     prepared_items: set[str] = field(default_factory=set)
     prepared_manifests: set[int] = field(default_factory=set)
     thoughts: dict[tuple[MemoryScope, str], object | None] = field(default_factory=dict)
+    packets: dict[tuple[MemoryScope, str, bool], object | None] = field(default_factory=dict)
     memo_hits: int = 0
 
     def metrics(self):

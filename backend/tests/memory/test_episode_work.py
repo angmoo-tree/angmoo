@@ -18,7 +18,9 @@ def test_durable_attempt_counter_and_application_share_one_receipt(memory_sessio
     work, = repository.plan(job_id="episode-job", setting=setting, bundles=(bundle,), candidate_ids=("candidate",),
                             now=NOW, job_fence=lambda: None)
     db.commit()
-    assert "원문" not in db.get(MemoryEpisodeBundle, work.id).manifest_json
+    stored_input=json.loads(db.get(MemoryEpisodeBundle, work.id).manifest_json)["input"]
+    assert stored_input["snapshot_version"]==1
+    assert stored_input["new"][0]["members"][0]["text"]=="원문"
     number = repository.start_call(work, model_id="model", thinking_level="high", profile_version=1, now=NOW, job_fence=lambda: None)
     db.commit()
     # A fresh repository resumes the same frozen input, not a newly grouped day.

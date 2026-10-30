@@ -5,7 +5,8 @@ from app.contracts.search_diagnostics import evidence_lineage
 from app.domains.chat.contracts.temporal_recall import ChatTimeContext, TIME_CONTEXT_KEY, TEMPORAL_SELECTION_PROTOCOL
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
+from inspect import isawaitable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any
@@ -73,7 +74,7 @@ class ResponseWorkflowSteps:
         *,
         command: ResponseWorkflowCommand,
         progress: ResponseExecutionProgress,
-        save_transition: Callable[..., ResponseRequestRecord],
+        save_transition: Callable[..., ResponseRequestRecord | Awaitable[ResponseRequestRecord]],
         router: RetrievalRoutingService,
         canonical: CanonicalRetrievalPlanningService,
         graph: GraphRetrievalPlanningService,
@@ -84,6 +85,8 @@ class ResponseWorkflowSteps:
         social_context_provider=None,
         thought_finalizer=None,
         situation_memory: ChatSituationMemoryPort | None = None,
+        database_call=None,
+        database_unit=None,
     ) -> None:
         self.command = command
         self.progress = progress
@@ -107,6 +110,8 @@ class ResponseWorkflowSteps:
         self._social_context_provider = social_context_provider
         self._thought_finalizer = thought_finalizer
         self._situation_memory = situation_memory
+        self._database_call = database_call
+        self._database_unit = database_unit
 
     def assert_active(self, state: ResponseGraphState) -> None:
         record = self.progress.record
@@ -172,11 +177,20 @@ class ResponseWorkflowSteps:
         ):
             raise ResponseExecutionError("chat_supervisor_invalid_state")
 
-    def _transition(self, record, target, **values):
+    async def _call_database(self, operation):
+        return await self._database_call(operation) if self._database_call is not None else operation()
+
+    async def _record_situation_input(self, manifest, state):
+        operation=lambda: self._situation_memory.record_input(manifest,state)
+        return await self._database_unit(operation) if self._database_unit is not None else await self._call_database(operation)
+
+    async def _transition(self, record, target, **values):
         if values.get("call_tracker") is not None:
             # Preserve attempted calls even if the following commit fails.
             self.progress.call_tracker = values["call_tracker"]
         updated = self._save_transition(record, target, **values)
+        if isawaitable(updated):
+            updated = await updated
         self.progress.record = updated
         return updated
 
@@ -196,9 +210,15 @@ class ResponseWorkflowSteps:
                 command = replace(command, chat_identity=command.chat_identity.extend(labels))
                 self.command = command
             identity_state[IDENTITY_KEY] = command.chat_identity.to_dict()
-        record = self._transition(record, ResponseRequestState.PREFLIGHTED, node_state=identity_state)
-        record = self._transition(record, ResponseRequestState.ROUTING)
-        routing = await self._router.route(
+        from app.domains.chat.contracts.initial_input import INPUT_KEY, capture
+        identity_state[INPUT_KEY] = capture(command)
+        record = await self._transition(record, ResponseRequestState.PREFLIGHTED, node_state=identity_state)
+        from app.domains.chat.contracts.input_receipt import ROUTING_KEY, ROUTING_STARTED, pack, routing_for_request
+        saved_routing = record.node_state.get(ROUTING_KEY)
+        if saved_routing is None and record.node_state.get(ROUTING_STARTED):
+            raise RetrievalContractError("chat_initial_routing_unavailable")
+        record = await self._transition(record, ResponseRequestState.ROUTING, node_state={ROUTING_STARTED: True})
+        routing = routing_for_request(saved_routing, record) if saved_routing is not None else await self._router.route(
             command.preflight,
             recent_context=command.router_context,
             **({"social_snapshot": command.social_snapshot} if command.social_snapshot is not None else {}),
@@ -213,11 +233,13 @@ class ResponseWorkflowSteps:
             now=datetime.now(UTC),
             deadline_at=record.deadline_at,
         )
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.RESOLVING,
             route=routing.intent.route,
             node_state={
+                ROUTING_KEY: pack(routing, type(routing), record),
+                "initial_routing_reused": saved_routing is not None,
                 "intent_hash": routing.intent.envelope_hash,
                 "resolved_hash": routing.resolved.envelope_hash,
                 "recall_mode": command.recall_mode.value,
@@ -244,7 +266,7 @@ class ResponseWorkflowSteps:
         record = self.progress.record
         routing = state["routing"]
         workflow_recipe = state["workflow_recipe"]
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.CURRENT_CONTEXT_READY,
         )
@@ -265,7 +287,7 @@ class ResponseWorkflowSteps:
         record = self.progress.record
         routing = state["routing"]
         workflow_recipe = state["workflow_recipe"]
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.CLARIFICATION_PREPARED,
         )
@@ -293,9 +315,15 @@ class ResponseWorkflowSteps:
         record = self.progress.record
         routing = state["routing"]
         workflow_recipe = state["workflow_recipe"]
-        record = self._transition(
+        from app.domains.chat.contracts.input_receipt import CANONICAL_KEY, RETRIEVAL_STARTED, pack
+        from app.domains.chat.service.hybrid_canonical import StoredHybridResult
+        saved_result = record.node_state.get(CANONICAL_KEY)
+        if saved_result is None and record.node_state.get(RETRIEVAL_STARTED):
+            raise RetrievalContractError("chat_initial_recall_unavailable")
+        record = await self._transition(
             record,
             ResponseRequestState.CANONICAL_PLANNING,
+            node_state={RETRIEVAL_STARTED: True},
         )
         result = await self._canonical.plan_and_execute(
             CanonicalRetrievalCommand(
@@ -306,14 +334,19 @@ class ResponseWorkflowSteps:
                 intent=routing.intent,
                 resolved=routing.resolved,
                 call_tracker=routing.call_tracker,
+                initial_result=saved_result, response_slot_id=record.response_slot_id,
+                request_scope_hash=record.request_scope_hash,
             ),
             now=datetime.now(UTC),
             deadline_at=record.deadline_at,
         )
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.OPTIONAL_RETRIEVING,
             node_state={"canonical_metrics": _safe_metrics(result.metrics),
+                "initial_recall_reused": saved_result is not None,
+                **({CANONICAL_KEY: pack(StoredHybridResult(result.recall, result.metrics, result.call_tracker),
+                    StoredHybridResult, record)} if isinstance(result, HybridCanonicalResult) else {}),
                 **({"canonical_retrieval_executed": any(axis.executed for axis in result.recall.axes)}
                     if hasattr(result, "recall") else {})},
             call_tracker=result.call_tracker,
@@ -338,9 +371,13 @@ class ResponseWorkflowSteps:
         record = self.progress.record
         routing = state["routing"]
         workflow_recipe = state["workflow_recipe"]
-        record = self._transition(
+        from app.domains.chat.contracts.input_receipt import RETRIEVAL_STARTED
+        if record.node_state.get(RETRIEVAL_STARTED):
+            raise RetrievalContractError("chat_initial_recall_unavailable")
+        record = await self._transition(
             record,
             ResponseRequestState.GRAPH_PLANNING,
+            node_state={RETRIEVAL_STARTED: True},
         )
         result = await self._graph.plan_and_execute(
             GraphRetrievalCommand(
@@ -355,13 +392,13 @@ class ResponseWorkflowSteps:
             now=datetime.now(UTC),
             deadline_at=record.deadline_at,
         )
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.OPTIONAL_RETRIEVING,
             node_state={"graph_metrics": _safe_metrics(result.metrics)},
             call_tracker=result.call_tracker,
         )
-        command = self._bind_graph_names(command, result)
+        command = await self._bind_graph_names(command, result)
         bundle = self._evidence.graph(
             request_scope_hash=record.request_scope_hash,
             result=result,
@@ -381,9 +418,13 @@ class ResponseWorkflowSteps:
         record = self.progress.record
         routing = state["routing"]
         workflow_recipe = state["workflow_recipe"]
-        record = self._transition(
+        from app.domains.chat.contracts.input_receipt import RETRIEVAL_STARTED
+        if record.node_state.get(RETRIEVAL_STARTED):
+            raise RetrievalContractError("chat_initial_recall_unavailable")
+        record = await self._transition(
             record,
             ResponseRequestState.BOTH_COORDINATING,
+            node_state={RETRIEVAL_STARTED: True},
         )
         result = await self._both.coordinate(
             BothRetrievalCommand(
@@ -400,7 +441,7 @@ class ResponseWorkflowSteps:
             deadline_at=record.deadline_at,
         )
         workflow_recipe = result.selection.selected
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.OPTIONAL_RETRIEVING,
             workflow_recipe=workflow_recipe,
@@ -419,7 +460,7 @@ class ResponseWorkflowSteps:
             },
             call_tracker=result.call_tracker,
         )
-        command = self._bind_graph_names(command, result.graph)
+        command = await self._bind_graph_names(command, result.graph)
         bundle = self._evidence.both(
             request_scope_hash=record.request_scope_hash,
             result=result,
@@ -445,12 +486,14 @@ class ResponseWorkflowSteps:
         bundle = state["bundle"]
         tracker = self.progress.call_tracker
         if command.social_snapshot is not None:
-            self._social_context_provider.assert_current(command.social_snapshot)
+            await self._call_database(lambda: self._social_context_provider.assert_usable(command.social_snapshot))
         if (
             command.today_sns_snapshot is not None
             and self._today_snapshot_validator is not None
         ):
-            self._today_snapshot_validator.assert_current(command.today_sns_snapshot)
+            from app.domains.chat.contracts.today_sns_activity import compute_today_sns_hash
+            if compute_today_sns_hash(command.today_sns_snapshot) != command.today_sns_snapshot.snapshot_hash:
+                raise RetrievalContractError('today_sns_input_integrity_invalid')
         bundle = self._evidence.with_today_sns(
             bundle,
             command.today_sns_snapshot,
@@ -460,7 +503,7 @@ class ResponseWorkflowSteps:
         if state["routing"].intent.temporal is not None:
             bundle = bundle.with_temporal_evidence()
         evidence_lineage("freeze", bundle.items)
-        record = self._transition(
+        record = await self._transition(
             record,
             ResponseRequestState.EVIDENCE_FROZEN,
             workflow_recipe=workflow_recipe,
@@ -511,7 +554,7 @@ class ResponseWorkflowSteps:
             from app.domains.chat.contracts.chat_identity_context import IDENTITY_KEY
             identifiers = tuple(dict.fromkeys(identifier for item in bundle.items
                 for _, identifier in item.author_identities if identifier not in command.chat_identity.names))
-            labels = command.identity_labels(identifiers) if identifiers and command.identity_labels else {}
+            labels = await self._call_database(lambda: command.identity_labels(identifiers)) if identifiers and command.identity_labels else {}
             identity = command.chat_identity.extend(labels)
             command = replace(command, chat_identity=identity)
             self.command = command
@@ -532,7 +575,7 @@ class ResponseWorkflowSteps:
             response_state.update({"recall_interpretation": interpretation.manifest(),
                 "hybrid_normal_generation_calls": 2, "final_response_kind": None}
             )
-        record = self._transition(record, ResponseRequestState.RESPONSE_GENERATING,
+        record = await self._transition(record, ResponseRequestState.RESPONSE_GENERATING,
             call_tracker=tracker, node_state=response_state)
         if routing.clarification is not None:
             candidates = tuple(
@@ -570,7 +613,8 @@ class ResponseWorkflowSteps:
                 situation_output_revision=(command.request.node_state.get("_situation_policy") or {}).get("output_revision"),
                 chat_identity=command.chat_identity,
                 situation_target=command.request.response_slot_id if situation else None,
-                situation_manifest_factory=(lambda payload: self._situation_memory.freeze(command, bundle, payload)) if situation else None,
+                situation_manifest_factory=(lambda payload: self._call_database(lambda: self._situation_memory.freeze(command, bundle, payload))) if situation else None,
+                situation_input_recorder=self._record_situation_input if situation else None,
                 relationship_delivery_factory=self._relationship_delivery_factory(command, bundle),
                 today_sns_manifest=(
                     None
@@ -599,7 +643,7 @@ class ResponseWorkflowSteps:
         self.progress.call_tracker = response.call_tracker
         return {**state, "phase": ResponsePhase.COMPLETE, "response": response}
 
-    def _bind_graph_names(self, command, result):
+    async def _bind_graph_names(self, command, result):
         if command.chat_identity is None or result is None or result.execution is None:
             return command
         identifiers = set()
@@ -610,7 +654,7 @@ class ResponseWorkflowSteps:
                 identifiers.update((event.actor_world_character_id, event.target_world_character_id))
         identifiers.discard(None)
         unresolved = tuple(sorted(identifiers - command.chat_identity.names.keys()))
-        labels = command.identity_labels(unresolved) if unresolved and command.identity_labels else {}
+        labels = await self._call_database(lambda: command.identity_labels(unresolved)) if unresolved and command.identity_labels else {}
         identity = command.chat_identity.extend(labels)
         command = replace(command, chat_identity=identity, character_labels={**command.character_labels, **identity.names})
         self.command = command

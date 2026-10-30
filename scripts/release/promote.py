@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import tarfile
 
-from launcher.termux.payload import REPOSITORY, digest_file, read_manifest, require, verify_archive
+from launcher.termux.payload import REPOSITORY, digest_file, read_manifest, require, verify_archive, services_for
 from scripts.ci.check_release_tag import validate_release_tag
 from scripts.release.candidate import write_json
 from scripts.release.github import GitHub, successful_images
@@ -83,9 +83,9 @@ def promote(source: str, tag: str, output: Path) -> None:
     require(auth.is_file(), "registry_auth_missing")
     receipt = {"source_sha": source, "tag": tag, "candidate_run": run["id"], "candidate_attempt": run["run_attempt"], "candidate_artifact": artifact["id"], "images": {}, "state": "PARTIAL"}
     prepared = {}
-    # Check BOTH destinations before any write. Partial upload is still possible;
+    # Check every service destination before any write. Partial upload is possible;
     # a receipt and immutable hashes make its resumption explicit.
-    for service in ("backend", "frontend"):
+    for service in services_for(manifest['version']):
         layout = output / ("oci-" + service)
         digest = assemble(manifest, service, directory, layout)
         repository = f"ghcr.io/{REPOSITORY}-{service}"

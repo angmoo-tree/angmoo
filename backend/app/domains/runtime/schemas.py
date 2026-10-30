@@ -11,6 +11,7 @@ from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
 from app.domains.runtime.contracts.status import InstallationState
 from app.domains.runtime.contracts.status import ProviderFailureClass
 from app.domains.runtime.contracts.status import RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimePersistenceProvider
 
 
 class RuntimeStatusSchema(BaseModel):
@@ -117,10 +118,13 @@ class LocalRuntimeStatusRead(RuntimeStatusSchema):
     runtime_profile: Literal[
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
+        "EXPERIMENT_POSTGRESQL",
+        "CONTRIBUTOR_POSTGRESQL",
+        "LOCAL_POSTGRESQL",
         "TEST",
     ] | None = None
     canonical_generation: str | None = None
-    persistence_provider: Literal["sqlite"] | None = None
+    persistence_provider: RuntimePersistenceProvider | None = None
     graph_provider: Literal["ladybug", "none"] | None = None
     components: list[RuntimeComponentRead] = Field(default_factory=list)
     migration: MigrationRuntimeRead
@@ -138,10 +142,13 @@ def runtime_status_read(
     runtime_profile: Literal[
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
+        "EXPERIMENT_POSTGRESQL",
+        "CONTRIBUTOR_POSTGRESQL",
+        "LOCAL_POSTGRESQL",
         "TEST",
     ] | None = None,
     canonical_generation: str | None = None,
-    persistence_provider: Literal["sqlite"] | None = None,
+    persistence_provider: RuntimePersistenceProvider | None = None,
     graph_provider: Literal["ladybug", "none"] | None = None,
 ) -> LocalRuntimeStatusRead:
     return LocalRuntimeStatusRead(

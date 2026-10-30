@@ -74,6 +74,8 @@ class MemoryVectorProjection:
         # Complete the legacy-budget handoff before bootstrap creates its
         # durable generation marker or any physical provider call is admitted.
         await self._canonical.call(self._prepare_attempts)
+        from app.runtime.memory.experience_projection import refresh_policy
+        await self._canonical.call(lambda: refresh_policy(self))
         if self._wakeup is None:
             from app.runtime.memory.vector_wakeup import VectorWakeup
             self._wakeup = VectorWakeup(self, asyncio.get_running_loop())

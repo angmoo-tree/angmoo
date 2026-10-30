@@ -4,19 +4,29 @@ x-backend-dev-build: &backend-dev-build
   target: development
   args:
     VCS_REF: ${ANGMOO_VCS_REF:-dev}
-    VERSION: ${ANGMOO_VERSION:-0.1.3-dev}
+    VERSION: ${ANGMOO_VERSION:-0.1.4-dev}
 
 services:
+  postgres:
+    image: angmoo-postgres-dev
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+      args:
+        VCS_REF: ${ANGMOO_VCS_REF:-dev}
+        VERSION: ${ANGMOO_VERSION:-0.1.4-dev}
+
   backend:
     image: angmoo-backend-dev
     pull_policy: build
     build: *backend-dev-build
-    command: ["contributor-api-dev"]
+    command: ["postgresql-api"]
     environment:
-      ANGMOO_VERSION: ${ANGMOO_VERSION:-0.1.3-dev}
+      ANGMOO_VERSION: ${ANGMOO_VERSION:-0.1.4-dev}
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./backend/app
           target: /workspace/backend/app
         - action: sync
@@ -43,7 +53,7 @@ services:
       target: development
       args:
         VCS_REF: ${ANGMOO_VCS_REF:-dev}
-        VERSION: ${ANGMOO_VERSION:-0.1.3-dev}
+        VERSION: ${ANGMOO_VERSION:-0.1.4-dev}
     command:
       ["sh", "-c", "rm -rf .next/dev && exec pnpm dev --hostname 0.0.0.0"]
     environment:

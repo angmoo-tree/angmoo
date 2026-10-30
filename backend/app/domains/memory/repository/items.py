@@ -260,6 +260,21 @@ class SqlAlchemyMemoryRepository:
             self._session.add(item)
             self._session.flush()
             self._session.add(self._new_evidence(item.id, evidence))
+            from hashlib import sha256
+            from app.domains.memory.repository.experience import store
+            # Legacy/manual admission has an already checked deterministic
+            # excerpt. Keep that exact excerpt, never infer undisclosed text.
+            excerpt = evidence.deterministic_summary
+            store(self._session,item,setting.id,({
+                "reference":f"{evidence.source_type.value}:{evidence.source_id}",
+                "source_type":evidence.source_type.value,"source_id":evidence.source_id,
+                "source_digest":evidence.source_digest,"text":excerpt,
+                "text_digest":sha256(excerpt.encode()).hexdigest(),"status":"historical_snapshot",
+                "role":"captured_excerpt","author_id":evidence.actor_world_character_id,
+                "counterpart_id":evidence.counterpart_world_character_id,
+                "occurred_at":evidence.source_created_at.isoformat(),"partial":True,
+                "coordinate_system":"captured_excerpt"},),now=now,
+                outcome={"representation":"legacy_summary","capture":"deterministic_memory_admission"})
             from app.domains.memory.repository.vector_eligibility import register_content
             register_content(self._session, item, now=now)
             candidate.status = MemoryCandidateStatus.ACCEPTED.value
@@ -353,9 +368,9 @@ class SqlAlchemyMemoryRepository:
         self._session.refresh(new_item)
         return self._to_candidate(candidate), self._to_item(new_item)
 
-    def situation_correction_evidence(self, *, scope, item_id, reader, now):
+    def situation_correction_evidence(self, *, scope, item_id, reader, now, validation=None):
         from app.domains.memory.repository.situation_reads import correction_evidence
-        return correction_evidence(self._session, reader, scope, self._require_item(scope, item_id), now)
+        return correction_evidence(self._session, reader, scope, self._require_item(scope, item_id), now, validation=validation)
 
     def correct_item_summary(
         self,
@@ -391,8 +406,6 @@ class SqlAlchemyMemoryRepository:
                 raise MemoryConflictError("memory_correction_replay_conflict")
             return self._to_item(old), self._to_item(existing), False
         from app.domains.memory.repository.situation_reads import situation_origin, copy_correction_origin
-        if not evidences and situation_origin(self._session, self._require_item(setting.scope, old_item_id)) is None:
-            raise MemoryConflictError("memory_correction_evidence_missing")
 
         old = self._require_item(setting.scope, old_item_id, for_update=True)
         if (
@@ -425,6 +438,8 @@ class SqlAlchemyMemoryRepository:
             self._session.add(replacement)
             self._session.flush()
             copy_correction_origin(self._session, old, replacement)
+            from app.domains.memory.repository.experience import copy_for_correction
+            copy_for_correction(self._session,old,replacement,now=now)
             from app.domains.memory.models.embedding import MemoryVectorEligibility
             if self._session.get(MemoryVectorEligibility, old.id) is not None:
                 from app.domains.memory.repository.vector_eligibility import register_content
@@ -612,6 +627,8 @@ class SqlAlchemyMemoryRepository:
             raise MemoryConflictError("memory_item_version_conflict")
         with self._session.begin_nested():
             self._mark_deleted(row, now=now)
+            from app.domains.memory.repository.experience import tombstone
+            tombstone(self._session,row,setting.id,now=now)
             self._invalidate_hot_briefs(setting.id, now=now)
             self._enqueue_job(
                 setting.id,
@@ -621,60 +638,22 @@ class SqlAlchemyMemoryRepository:
             self._session.flush()
         return self._to_item(row), True
 
-    def invalidate_source(
-        self,
-        *,
-        scope: MemoryScope,
-        source_type: MemorySourceTypeV1,
-        source_id: str,
-        now: datetime,
-    ) -> tuple[MemoryItemRecord, ...]:
-        setting = self._require_scope_row(scope)
-        rows = list(
-            self._session.scalars(
-                select(MemoryItem)
-                .join(
-                    MemoryItemEvidence,
-                    MemoryItemEvidence.memory_item_id == MemoryItem.id,
-                )
-                .where(
-                    *self._item_scope_predicates(scope),
-                    MemoryItem.status == MemoryItemStatus.ACTIVE.value,
-                    MemoryItemEvidence.source_type == source_type.value,
-                    MemoryItemEvidence.source_id == source_id,
-                )
-                .distinct()
-            )
-        )
-        pending_candidates = list(
-            self._session.scalars(
-                select(MemoryCandidate).where(
-                    MemoryCandidate.scope_setting_id == setting.id,
-                    MemoryCandidate.source_type == source_type.value,
-                    MemoryCandidate.source_id == source_id,
-                    MemoryCandidate.status == MemoryCandidateStatus.PENDING.value,
-                )
-            )
-        )
-        with self._session.begin_nested():
-            for candidate in pending_candidates:
-                candidate.status = MemoryCandidateStatus.REJECTED.value
-                candidate.reason_code = "memory_source_invalidated"
-                candidate.decided_at = now
-                candidate.version += 1
-            for row in rows:
-                self._mark_deleted(row, now=now)
-                self._enqueue_job(
-                    setting.id,
-                    reason="memory_source_invalidated",
-                    idempotency_key=(
-                        f"memory-item:{row.id}:source-invalidated:v{row.version}"
-                    ),
-                )
-            if rows:
-                self._invalidate_hot_briefs(setting.id, now=now)
-            self._session.flush()
-        return tuple(self._to_item(row) for row in rows)
+    def invalidate_source(self, *, scope, source_type, source_id, now):
+        """Source deletion does not erase already collected personal memories.
+
+        A pending legacy candidate has not captured an experience yet and may
+        still be rejected; saved memories have their own explicit deletion API.
+        """
+        setting=self._require_scope_row(scope)
+        for candidate in self._session.scalars(select(MemoryCandidate).where(
+                MemoryCandidate.scope_setting_id==setting.id,
+                MemoryCandidate.source_type==source_type.value,MemoryCandidate.source_id==source_id,
+                MemoryCandidate.status==MemoryCandidateStatus.PENDING.value)):
+            candidate.status=MemoryCandidateStatus.REJECTED.value
+            candidate.reason_code="memory_source_invalidated"
+            candidate.decided_at=now;candidate.version+=1
+        self._session.flush()
+        return ()
 
     def expire_due_items(
         self,
@@ -745,8 +724,8 @@ class SqlAlchemyMemoryRepository:
             raise MemoryNotFoundError("memory_scope_not_found")
         return row
 
-    def _require_setting(self, setting: MemoryScopeSetting) -> MemoryScopeSettingModel:
-        row = self._session.scalar(
+    def _require_setting(self, setting: MemoryScopeSetting, *, for_update: bool = True) -> MemoryScopeSettingModel:
+        statement = (
             select(MemoryScopeSettingModel)
             .where(
                 MemoryScopeSettingModel.id == setting.id,
@@ -755,9 +734,11 @@ class SqlAlchemyMemoryRepository:
                 MemoryScopeSettingModel.subject_world_character_id
                 == setting.scope.subject_world_character_id,
             )
-            .with_for_update()
             .execution_options(populate_existing=True)
         )
+        if for_update:
+            statement = statement.with_for_update()
+        row = self._session.scalar(statement)
         if row is None:
             raise MemoryNotFoundError("memory_scope_not_found")
         if row.version != setting.version or not row.enabled:

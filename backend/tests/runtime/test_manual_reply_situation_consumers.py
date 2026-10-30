@@ -1,4 +1,5 @@
 """Owner replies through Inbox, then Routine; canonical Chat/SNS evidence reuse."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 import json
 from copy import deepcopy
@@ -49,8 +50,9 @@ async def inbox(case, monkeypatch, action):
     case.db.commit()
     from app.runtime.autonomous_activity.combined_selection import CombinedSelection
     selection = CombinedSelection({"inbox": lane}, {"inbox": lane.ports()})
+    initial = {**case.state, "shared_context": shared}
     selected = await selection.select({"identity": case.state["identity"], "shared_context": shared,
-        "selection_mode": "combined", "prepared_lanes": {"inbox": await lane.load(case.state)}})
+        "selection_mode": "combined", "prepared_lanes": {"inbox": await lane.load(initial)}})
     state = await build_lane("inbox", lane.ports(), combined=True).ainvoke({
         "identity": case.state["identity"], "shared_context": shared, **selected["prepared_lanes"]["inbox"]})
     return lane, state, adapter
@@ -113,9 +115,12 @@ def chat_capture(case, *, kind, identifier, text):
     command = SimpleNamespace(request=SimpleNamespace(node_state={"_situation_policy": {
         "policy": SITUATION_POLICY, "snapshot": asdict(case.provider.situation_snapshot)}},
         request_scope_hash="1"*64, response_slot_id="routine-consumer-slot", thread_id=thread.id, user_message_id=message.id),
-        preflight=SimpleNamespace(user_message=message.content), response_context=(), social_snapshot=None, image_evidence=None)
+        preflight=SimpleNamespace(user_message=message.content, owner_id=case.ctx.user_id,
+            world_id=case.seeded.world.id, thread_id=thread.id, requester_world_character_id=case.owner.id,
+            responding_world_character_id=case.seeded.world_character.id),
+        response_context=(), social_snapshot=None, image_evidence=None)
     payload = {"latest_user_message": message.content, "recent_context": [],
-        "frozen_evidence": {"items": [{"text": text}]}}
+        "frozen_evidence": bundle.provider_payload()}
     return ChatSituationMemory(case.db), command, bundle, payload
 
 
@@ -130,25 +135,37 @@ def test_consumed_comment_memory_can_be_reused_by_chat_and_sns_with_lineage_chec
     chat_manifest = chat.freeze(command, bundle, payload)
     entry = next(s for s in chat_manifest.sources if s.source_type == "MEMORY_ITEM")
     reader, now = SituationSources(case.db), datetime.now(UTC)
-    assert reader.validate(chat_manifest, entry, now=now).state == "available"
+    from app.domains.memory.repository.experience import validate_captured_sources
+    receipt = SimpleNamespace(occurred_at=now, description="A captured delivery")
+    def validate(manifest, selected):
+        return next(access for source, access in validate_captured_sources(
+            case.db, manifest, (), receipt, now=now, reader=RuntimeEpisodeDetailReader(case.db)) if source == selected)
+    assert validate(chat_manifest, entry).state == "available"
     ref = episode_provider_reference("episode", f"memory-item:{item.id}")
     sns_payload = {"context": {"memories": {"target": {"packets": [{"ref": ref, "summary": item.summary}]}}}}
-    sns_state = {"memory_validations": {"target": {"item_revisions": [(item.id, item.version, sha256(item.summary.encode()).hexdigest())]}}}
+    sns_state = {"identity": case.state["identity"],
+        "memory_validations": {"target": {"item_revisions": [(item.id, item.version, sha256(item.summary.encode()).hexdigest())]}}}
     sns_manifest = freeze_social_input(case.ctx, case.provider.situation_snapshot, node="FeedDecisionDraft",
         payload=sns_payload, transmitted=json.dumps(sns_payload), state=sns_state)
     prior = next(s for s in sns_manifest.sources if s.source_type == "MEMORY_ITEM")
-    assert reader.validate(sns_manifest, prior, now=now).state == "available"
+    assert validate(sns_manifest, prior).state == "available"
     bad = replace(chat_manifest, snapshot=replace(chat_manifest.snapshot,
         scope=replace(chat_manifest.snapshot.scope, subject_world_character_id=case.owner.id)))
-    assert reader.validate(bad, entry, now=now).state != "available"
+    with pytest.raises(ValueError, match="situation_prior_memory_deleted"):
+        validate(bad, entry)
     wrong_thread = deepcopy(command)
     wrong_thread.request.thread_id = "not-the-message-thread"
     with pytest.raises(ValueError, match="situation_"):
         chat.freeze(wrong_thread, bundle, payload)
     case.reply.report_hidden_at = now
     case.db.commit(); case.db.expire_all()
-    assert reader.validate(chat_manifest, entry, now=now).state != "available"
-    assert reader.validate(sns_manifest, prior, now=now).state != "available"
+    assert validate(chat_manifest, entry).state == "available"
+    assert validate(sns_manifest, prior).state == "available"
+    item.deleted_at, item.status = now, "deleted"
+    case.db.commit()
+    for manifest, source in ((chat_manifest, entry), (sns_manifest, prior)):
+        with pytest.raises(ValueError, match="situation_prior_memory_deleted"):
+            validate(manifest, source)
 
 
 def test_chat_receives_real_reply_locator_not_inbox_candidate(manual_routine):

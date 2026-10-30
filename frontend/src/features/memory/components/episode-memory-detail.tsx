@@ -10,11 +10,15 @@ export function EpisodeMemoryDetail({ episode }: { episode: EpisodeDetailRead })
   const uiText = useUiText("memory");
   return <section aria-label={uiText("상황에 연결된 원문과 생각")}>
     <h3>{episode.representation !== "legacy_summary" ? uiText("상황에 연결된 원문과 생각") : uiText("기존 기억에 연결된 자료")}</h3>
+    {episode.snapshot_status && <p>{episode.snapshot_status === "snapshot_unavailable"
+      ? uiText("기억 요약은 보존되어 있지만 당시 원문은 남아 있지 않습니다.")
+      : uiText("당시 기억에 보관한 원문입니다. 이후 글의 수정·삭제와 별개로 보존됩니다.")}</p>}
+    {episode.experience_state === "observed_action_failed" && <p>{uiText("내용을 읽었지만 예정한 반응은 실행되지 않았습니다.")}</p>}
     {episode.partial && <p>{uiText("일부 자료만 표시합니다. 확인하지 못한 자료까지 확인된 것으로 볼 수는 없습니다.")}</p>}
     {episode.omitted_units > 0 && <p>{uiText("표시 분량을 넘어 생략한 자료 묶음: {{count}}개", {count: episode.omitted_units})}</p>}
     {episode.followup_count > 0 && <p>{uiText("이 경험은 이전 기억 {{count}}개에서 이어졌습니다.", {count: episode.followup_count})}</p>}
     <ol>{episode.units.map((unit, index) => <li key={index}>
-      {unit.sources.map((source, offset) => <p key={offset}><strong>{uiText(roleLabel[source.role] ?? uiText("원문"))}: </strong>{source.status === "verified" ? source.text : uiText(statusLabel[source.status])}</p>)}
+      {unit.sources.map((source, offset) => <p key={offset}><strong>{source.author_label ?? uiText(roleLabel[source.author_role ?? source.role] ?? uiText("원문"))}: </strong>{source.status === "verified" ? source.text : uiText(statusLabel[source.status])}</p>)}
       {unit.thought && <p><strong>{uiText("생각:")}</strong>{unit.thought.status === "recorded" ? unit.thought.text : unit.thought.status === "invalid" ? uiText("연결된 생각을 현재 확인할 수 없습니다.") : uiText("기록하지 않았습니다.")}{unit.thought.truncated && uiText("(길이 제한으로 일부만 저장됨)")}</p>}
       {unit.legacy_declaration && <p><strong>{uiText("과거 형식의 자기 관점:")}</strong>{unit.legacy_declaration}</p>}
     </li>)}</ol>

@@ -184,7 +184,8 @@ def _committed(db, *, tamper=False, with_graph=False, target_count=1, identity_m
                     GraphRecallSource.CANONICAL_FALLBACK, relationships=tuple(item.relationship for item in social.items))
                 return replace(result, execution=SimpleNamespace(results=(rows,)))
         workflow._graph = Graph()
-    workflow._social_context_provider = provider
+    from app.runtime.chat.social_context import ChatSocialContextProvider
+    workflow._social_context_provider = ChatSocialContextProvider(recall, labels)
     events = asyncio.run(f._collect(workflow.run(command)))
     return record, relation, events, captures
 
@@ -208,8 +209,8 @@ def test_valid_digest_but_wrong_identity_scope_fails_before_router_or_response_p
     async def unexpected(*args, **kwargs): calls.append("provider"); raise AssertionError("provider must not run")
     monkeypatch.setattr(f._Generator, "generate", unexpected)
     monkeypatch.setattr(f._Router, "route", unexpected)
-    with pytest.raises(NameBindingError, match="chat_identity_scope_invalid"):
-        _committed(response_session, identity_mutation=lambda raw: raw.update({field: "other-scope"}))
+    _, _, events, _ = _committed(response_session, identity_mutation=lambda raw: raw.update({field: "other-scope"}))
+    assert events[-1].event_type.value == "failed"
     assert calls == []
     stored = f.SqlAlchemyResponseLifecycleRepository(response_session).get_request("request-current_context")
     assert stored.committed_assistant_message_id is None and DELIVERY_KEY not in stored.response_metadata
@@ -370,12 +371,14 @@ def test_not_checked_requires_fresh_access_and_never_bypasses_denial(response_se
     assert historical_read(item, RelationshipCurrentRead(False)).excerpt is None
 
 
-def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(monkeypatch):
+@pytest.mark.parametrize("async_factory", [False, True])
+def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(monkeypatch, async_factory):
     from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
     from app.integrations import direct_llm
     from app.domains.memory.contracts.activity_situation import DeliveredInputManifest, SituationPolicySnapshot, DeliveredSourceEntry
     calls, fragments = [], []
     async def generate(**kwargs):
+        assert len(fragments) == 1
         calls.append(kwargs)
         return direct_llm.DirectLlmResponse(text="", parsed={"text": "알겠어.", "situation_description": "약속을 확인했다."}, usage={}, finish_reason="STOP")
     monkeypatch.setattr(direct_llm, "generate_text", generate)
@@ -388,7 +391,10 @@ def test_adapter_builds_once_and_binds_both_receipts_to_actual_serialization(mon
             "/latest_user_message/content", "core", 0, "p-world", thread_id="p-thread", delivery_payload_digest=json_digest)
         return DeliveredInputManifest("chat:a", snapshot, json_digest, (source,), "p-thread", version=2)
     binding = RelationshipEvidenceBinding("p-owner", "p-world", "p-thread", "p-responding", "p-requester", "request", "a"*64, "slot", "generation", 1)
-    item = replace(item, situation_manifest_factory=freeze, situation_locale="ko-KR", situation_target="slot",
+    async def freeze_async(payload):
+        await asyncio.sleep(0)
+        return freeze(payload)
+    item = replace(item, situation_manifest_factory=freeze_async if async_factory else freeze, situation_locale="ko-KR", situation_target="slot",
         relationship_delivery_factory=lambda payload, prompt: capture_delivery(binding, item.evidence, None, payload, prompt))
     material = CredentialMaterial("fixture", "google", "gemini-3.1-flash-lite", "fixture", CredentialPurpose.MESSAGE_LLM, "fake")
     result = asyncio.run(DirectLlmCharacterResponseGenerator(material).generate(item))

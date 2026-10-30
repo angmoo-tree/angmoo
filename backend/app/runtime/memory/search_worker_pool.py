@@ -66,6 +66,9 @@ class WorkerSlot:
 class SearchReadWorkers:
     _axis = ""
     _child_target = None  # Private synthetic fault injection; never accepted over HTTP.
+    _worker_entry = None  # A production protocol owner may reuse lifecycle only.
+    _worker_exit_reason = "memory_vector_worker_exited"
+    _progress_type = ProgressSlots
 
     def __init__(self, *, arguments, generation="v1", concurrency=2, control=None):
         if not 1 <= concurrency <= 2:
@@ -140,7 +143,7 @@ class SearchReadWorkers:
         async with asyncio.timeout(max(0, deadline - monotonic())):
             while not slot.pipe.poll():
                 if not slot.process.is_alive():
-                    raise SearchWorkerUnavailable("memory_vector_worker_exited")
+                    raise SearchWorkerUnavailable(self._worker_exit_reason)
                 await asyncio.sleep(.005)
             payload = await self._io(slot, slot.pipe.recv_bytes, MAX_MESSAGE_BYTES)
         message = pickle.loads(payload)
@@ -178,14 +181,14 @@ class SearchReadWorkers:
                 if self._stopped:
                     return
                 context = multiprocessing.get_context("spawn")
-                slot.progress = ProgressSlots(context)
+                slot.progress = self._progress_type(context)
                 slot.pipe, sender = context.Pipe(duplex=True)
                 slot.sender = sender
                 # Serialize production settings so spawn's unpickling cannot
                 # import the application before the lightweight BOOT message.
                 arguments = (pickle.dumps(self._arguments) if self._child_target is None
                              else self._arguments)
-                slot.process = context.Process(target=run_worker,
+                slot.process = context.Process(target=self._worker_entry or run_worker,
                     args=(sender, self._axis, slot.identifier, self._requested_generation,
                           arguments, slot.progress, self._child_target), daemon=True)
                 started = monotonic()

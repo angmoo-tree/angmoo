@@ -1,4 +1,4 @@
-"""Formatting recovery must prove both historic hashes and retain current guards."""
+"""New output normalization is retained; legacy mismatch never rereads originals."""
 from dataclasses import replace
 from types import SimpleNamespace
 from contextlib import closing
@@ -60,34 +60,28 @@ def consume(db, memory, request, path):
     db.commit()
 
 
-def test_real_recheck_proves_formatting_preserves_original_and_reads_without_checkpoint(durable_stack, tmp_path):
+def test_legacy_result_mismatch_stays_blocked_without_runtime_reconstruction(durable_stack, tmp_path):
     db, scope, setting, memory = durable_stack
     cp = tmp_path / "checkpoint.sqlite"
     row, post = historical(db, scope, cp)
     original = row.content_digest, stable_digest(row.result), stable_digest(db.get(MemorySituationManifest, row.manifest_id).payload)
     request = recheck(db, setting, row=row)
     consume(db, memory, request, cp)
-    assert row.state == "applied", row.error_code
-    assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding)) == 1
-    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 1
+    assert row.state == "blocked" and row.error_code == "situation_success_binding_invalid"
+    assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding)) == 0
+    assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
     assert original == (row.content_digest, stable_digest(row.result), stable_digest(db.get(MemorySituationManifest, row.manifest_id).payload))
     cp.unlink()
-    assert restore_context(db, row).receipt_sequence == row.sequence
-    from app.domains.memory.models.activity_situation import MemorySituationApplyRun
-    db.delete(db.get(MemorySituationApplyRun, request.run_id))
-    db.commit()
-    assert restore_context(db, row).receipt_sequence == row.sequence
-    assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding)) == 1
     with pytest.raises(ValueError, match="success_binding_invalid"):
-        restore_context(db, row, revision="situation-validation.v3")
+        restore_context(db, row)
     post.body += " 실제 수정"
     db.commit()
-    context = restore_context(db, row)
-    assert SituationSources(db).validate(context, context.result_sources[0], now=NOW).state == "changed"
+    with pytest.raises(ValueError, match="success_binding_invalid"):
+        restore_context(db, row)
 
 
-@pytest.mark.parametrize("failure", ["wrong-draft", "missing-checkpoint", "changed-source", "closed-epoch", "capacity", "missing-description"])
-def test_failed_rechecks_leave_no_proof_or_memory(durable_stack, tmp_path, monkeypatch, failure):
+@pytest.mark.parametrize("failure", ["wrong-draft", "missing-checkpoint", "changed-source", "closed-epoch", "missing-description"])
+def test_failed_rechecks_leave_no_proof_or_memory(durable_stack, tmp_path, failure):
     db, scope, setting, memory = durable_stack
     cp = tmp_path / "checkpoint.sqlite"
     row, post = historical(db, scope, cp, wrong=failure == "wrong-draft")
@@ -103,16 +97,28 @@ def test_failed_rechecks_leave_no_proof_or_memory(durable_stack, tmp_path, monke
         from app.domains.memory.models.batch import MemoryActivationEpoch
         db.get(MemoryActivationEpoch, row.activation_epoch).closed_at = NOW
         db.commit()
-    if failure == "capacity":
-        from app.domains.memory.exceptions import MemoryCapacityReached
-        monkeypatch.setattr("app.domains.memory.repository.situation_apply.STORAGE_LIMIT", 0)
-        with pytest.raises(MemoryCapacityReached): consume(db, memory, request, cp)
-        db.rollback()
-    else:
-        consume(db, memory, request, cp)
-        assert row.state == "blocked"
+    consume(db, memory, request, cp)
+    assert row.state == "blocked"
     assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding)) == 0
     assert db.scalar(select(func.count()).select_from(MemoryItem)) == 0
+
+
+def test_current_receipt_capacity_rolls_back_memory_and_snapshot_together(durable_stack,monkeypatch):
+    from memory.test_experience_snapshots import captured
+    from memory.test_activity_situation_application import apply
+    from app.domains.memory.exceptions import MemoryCapacityReached
+    from app.domains.memory.models.experience import MemoryExperienceSnapshot
+    db,scope,setting,memory=durable_stack
+    post=real_source(db,scope)
+    manifest,draft,result=captured(db,scope,post)
+    row=admit(db,manifest=manifest,draft=draft,result=result,now=NOW);db.commit()
+    assert row.state=='pending'
+    monkeypatch.setattr('app.domains.memory.repository.situation_apply.STORAGE_LIMIT',0)
+    with pytest.raises(MemoryCapacityReached):apply(db,setting,memory)
+    db.rollback()
+    assert row.state=='pending' and row.description==draft.description
+    assert db.scalar(select(func.count()).select_from(MemoryItem))==0
+    assert db.scalar(select(func.count()).select_from(MemoryExperienceSnapshot))==0
 
 
 @pytest.mark.parametrize("body,title", [("줄 끝  \n다음 줄\t\n\n\n마지막  ", "두\n줄"), ("문자\\n개행\\t  ", "여러  공백"), ("한글🙂\r\n끝", "제목")])
@@ -151,7 +157,7 @@ def test_missing_or_non_text_fields_are_not_coerced(field):
 
 
 @pytest.mark.parametrize("lane", ["inbox", "feed"])
-def test_reply_format_recovery_uses_exact_target_and_final_writer(durable_stack, tmp_path, lane):
+def test_legacy_reply_format_mismatch_does_not_infer_a_new_result(durable_stack, tmp_path, lane):
     from memory.test_situation_delivery_recovery import delivered_reply
     from app.domains.memory.contracts.activity_situation import DeliveredInputManifest
     from app.domains.memory.policies.situation_output import parse_description
@@ -178,8 +184,8 @@ def test_reply_format_recovery_uses_exact_target_and_final_writer(durable_stack,
         connection.execute("CREATE TABLE checkpoints(thread_id TEXT,checkpoint_ns TEXT,checkpoint_id TEXT,type TEXT,checkpoint BLOB)")
         connection.execute("INSERT INTO checkpoints VALUES(?,?,?,?,?)",("activity:"+row.logical_activity_id,lane.title()+"ActivityGraph:writer","1",kind,data))
     request=recheck(db,setting,row=row);consume(db,memory,request,cp)
-    assert row.state=="applied",row.error_code
-    assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding))==1
+    assert row.state=="blocked" and row.error_code=="situation_success_binding_invalid"
+    assert db.scalar(select(func.count()).select_from(MemorySituationResultBinding))==0
 
 
 @pytest.mark.parametrize("revision",["situation-validation.v2","situation-validation.v3"])

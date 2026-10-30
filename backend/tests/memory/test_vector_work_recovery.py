@@ -46,7 +46,7 @@ def test_vector_commit_before_budget_or_ack_failure_reuses_receipt(runtime_facto
     assert restarted.journal.read(prepared.work[0].world_id, item) == new
 
 
-def test_off_still_removes_revoked_source_from_all_retained_generations(runtime_factory, index, monkeypatch, tmp_path):
+def test_off_preserves_historical_source_but_removes_deleted_memory_from_all_generations(runtime_factory, index, monkeypatch, tmp_path):
     item, _ = setup_projection_scope(runtime_factory, monkeypatch)
     second = DurableIndex(tmp_path / "retained.sqlite3")
     second.generation = "g-" + "a" * 32
@@ -58,10 +58,18 @@ def test_off_still_removes_revoked_source_from_all_retained_generations(runtime_
         session.commit()
     projection = MemoryVectorProjection(runtime_factory, index, provider=provider, retained_indexes=lambda: (index, second))
     assert asyncio.run(projection.sync_item(item)) == "disabled"
+    assert all(target.identity(f"memory-item:{item}") is not None for target in (index, second))
     with runtime_factory() as session:
         session.execute(update(MessageThread).values(deleted_at=datetime.now(UTC)))
         session.commit()
+    # Revoked source access takes precedence over the disabled embedding setting.
     assert asyncio.run(projection.sync_item(item)) == "source_unavailable"
+    assert all(target.identity(f"memory-item:{item}") is None for target in (index, second))
+    with runtime_factory() as session:
+        memory=session.get(MemoryItem,item)
+        memory.status,memory.deleted_at="deleted",datetime.now(UTC)
+        session.commit()
+    assert asyncio.run(projection.sync_item(item)) == "ineligible"
     assert all(target.identity(f"memory-item:{item}") is None for target in (index, second))
     assert provider.calls == 2
 

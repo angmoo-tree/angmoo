@@ -3,11 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from typing import Literal
 
 from app.domains.runtime.constants import RuntimeDiagnosticCode
 
 
 RUNTIME_STATUS_SCHEMA_VERSION = "local-runtime-status-v1"
+RuntimePersistenceProvider = Literal["sqlite", "postgresql"]
 
 
 class InstallationState(StrEnum):
@@ -135,3 +137,4 @@ class ApplicationRuntimeStatus:
     owner: OwnerRuntimeStatus
     activity: ActivityRuntimeStatus
     capabilities: tuple[RuntimeCapabilityStatus, ...] = ()
+    persistence_provider: RuntimePersistenceProvider = "sqlite"

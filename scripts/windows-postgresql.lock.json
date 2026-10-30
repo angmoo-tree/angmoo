@@ -1,0 +1,11 @@
+{
+  "schema": "angmoo-windows-postgresql-lock.v1",
+  "postgresql": "17.11",
+  "pgvector": "0.8.7",
+  "windows_process_code_page": "UTF-8",
+  "minimum_windows_build": 18362,
+  "postgresql_url": "https://get.enterprisedb.com/postgresql/postgresql-17.11-1-windows-x64-binaries.zip",
+  "postgresql_sha256": "6eabdf00d2893713b75db4336a23c3fdf505f056e217ec6e2e95d901750cfea3",
+  "pgvector_url": "https://github.com/pgvector/pgvector/archive/refs/tags/v0.8.7.zip",
+  "pgvector_sha256": "7b3b8188a5cc0aa96db3c8f3fca1e78a8a612c46545065490c76448705c6b29e"
+}

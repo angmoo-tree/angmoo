@@ -182,8 +182,6 @@ class ActivityProvider:
                 "source_ids": [item.get("post_id") for item in context.get("source_manifest", [])]
                     if isinstance(context, dict) else [],
             })
-        if not token_budget:
-            record_input(user)
         dispatched = False
         async def guard_request():
             if before_provider_request is not None:
@@ -225,10 +223,17 @@ class ActivityProvider:
             dispatched = True
             if on_submission is not None:
                 on_submission()
-            record_input(request.user_prompt)
             db = getattr(self.context, "db", None)
-            if db is not None and db.in_transaction():
-                db.commit()
+            def capture():
+                record_input(request.user_prompt)
+                if db is not None and getattr(self,"situation_manifest",None) is not None:
+                    from app.domains.memory.repository.experience_inputs import record_input as persist_input
+                    persist_input(db,self.situation_manifest,"submission_uncertain")
+            if db is not None:
+                from app.core.activity_transactions import activity_write
+                activity_write(db,capture)
+            else:
+                capture()
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,

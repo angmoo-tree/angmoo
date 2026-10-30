@@ -23,19 +23,12 @@ from app.domains.memory.models.activity_situation import (
 )
 from app.domains.memory.repository.capacity import stored_count, STORAGE_LIMIT
 from app.domains.memory.repository.situation_runs import require_run_fence
-from app.domains.memory.contracts.situation_result_binding import RESULT_BINDING_RUN_REVISIONS
 from app.domains.memory.repository.vector_eligibility import register_content
 
 
-def _validate_sources(session, validator, manifest, result_sources, now):
-    from app.domains.memory.contracts.access_validation import MemoryAccessValidation
-    from app.domains.memory.contracts.situation_validation import SituationValidationPreparer
-    validation = MemoryAccessValidation(session, now)
-    with session.no_autoflush:
-        if isinstance(validator, SituationValidationPreparer):
-            validator.prepare_validation(manifest, validation=validation)
-        return [(source, validator.validate(manifest, source, now=now, validation=validation))
-            for source in (*manifest.sources, *result_sources)]
+def _validate_sources(session, validator, manifest, result_sources, now, receipt):
+    from app.domains.memory.repository.experience import validate_captured_sources
+    return validate_captured_sources(session,manifest,result_sources,receipt,now=now,reader=validator)
 
 
 @dataclass(frozen=True)
@@ -101,6 +94,9 @@ def _pending(run):
         conditions += (MemorySituationReceipt.sequence == run.settings_snapshot["receipt_sequence"],)
     if (cutoff_at := run.settings_snapshot.get("cutoff_at")) is not None:
         conditions += (MemorySituationReceipt.captured_at <= utc_instant(datetime.fromisoformat(cutoff_at)),)
+    if run.work_kind == "pending_apply":
+        from app.domains.memory.repository.situation_runs import failure_free_receipt
+        conditions += (failure_free_receipt(own_run_id=run.id),)
     return conditions
 
 
@@ -144,8 +140,7 @@ def prepare_page(session, *, run_id, token, now, page_size=1):
                     raise ValueError("situation_source_binding_invalid")
                 reader.collections[(label, key)] = values
                 collections.append((model, column.key, key, values))
-            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck" and revision in RESULT_BINDING_RUN_REVISIONS):
-                contexts.append((row.sequence, complete_context(session, admission, revision=revision, validation=reader)))
+            contexts.append((row.sequence, complete_context(session, admission, revision=revision, validation=reader)))
             admissions.append((row.sequence, admission, None))
         except MemoryConflictError:
             raise  # A preparation bound must not skip a receipt or advance the prefix.
@@ -180,19 +175,7 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
         if (run.id, run.cursor, run.cutoff_sequence, revision) != (prepared.run_id, prepared.cursor, prepared.cutoff, prepared.revision):
             raise SituationPageStale("situation_prepared_run_changed")
         _assert_prepared(session, prepared)
-    pending = (
-        MemorySituationReceipt.scope_setting_id == run.scope_setting_id,
-        MemorySituationReceipt.sequence > run.cursor,
-        MemorySituationReceipt.sequence <= run.cutoff_sequence,
-        MemorySituationReceipt.state == ("blocked" if run.work_kind == "blocked_recheck" else "pending"),
-    )
-    if run.settings_snapshot.get("receipt_sequence") is not None:
-        pending += (MemorySituationReceipt.sequence == run.settings_snapshot["receipt_sequence"],)
-    cutoff_at = run.settings_snapshot.get("cutoff_at")
-    if cutoff_at is not None:
-        # Sequence bounds protect a frozen run from later arrivals; this time
-        # bound also excludes captures after a missed daily due time.
-        pending += (MemorySituationReceipt.captured_at <= utc_instant(datetime.fromisoformat(cutoff_at)),)
+    pending = _pending(run)
     rows = list(session.scalars(select(MemorySituationReceipt).where(*pending)
         .order_by(MemorySituationReceipt.sequence).limit(page_size)))
     available_slots = None
@@ -228,12 +211,10 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                 if error:
                     raise ValueError(error)
                 admission = replace(admission, receipt=receipt)
-            # A formatting proof can only be approved in the fenced recheck
-            # savepoint below. Ordinary pending work never resolves history.
-            if not (admission.requires_result_binding and run.work_kind == "blocked_recheck"
-                    and revision in RESULT_BINDING_RUN_REVISIONS):
-                if prepared is None:
-                    complete_context(session, admission, revision=revision)
+            # Old proofs are read as persisted. Rechecking an old pending run
+            # must not reconstruct its execution/input from current sources.
+            if prepared is None:
+                complete_context(session, admission, revision=revision)
             result_sources = admission.result_sources
         except (AttributeError, ValueError, TypeError, KeyError) as exc:
             code = str(exc) if isinstance(exc, ValueError) and str(exc).startswith("situation_") else "situation_manifest_invalid"
@@ -269,18 +250,13 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                 # A failed receipt cannot leave a newly inferred binding behind.
                 # Successful bindings and memories still belong to the outer UoW.
                 with session.begin_nested():
-                    if admission.requires_result_binding:
-                        from app.domains.memory.repository.situation_result_bindings import prepare_binding
-                        prepare_binding(session, admission, validator, revision=revision, run_id=run.id, now=now)
                     manifest = dict(prepared.contexts).get(receipt.sequence) if prepared is not None else None
                     if manifest is None:
                         manifest = complete_context(session, admission, revision=revision)
-                    from app.domains.memory.repository.situation_source_bindings import prepare_bindings
-                    manifest = prepare_bindings(session, manifest, validator, captured_at=receipt.captured_at, now=now)
-                    # Bindings are canonical writes. Do not carry their earlier
-                    # permission decisions into this fresh, read-only operation.
+                    # Never infer a parent or reread a source after capture.
+                    # The immutable manifest and effect receipt own this input.
                     session.flush()
-                    access = _validate_sources(session, validator, manifest, result_sources, now)
+                    access = _validate_sources(session, validator, manifest, result_sources, now, receipt)
                     legacy_deleted = run.work_kind == "blocked_recheck" and manifest.version == 1 and any(
                         value.state == "deleted" and source.role == "core" for source, value in access)
                     if (not access or any(value.state not in {"available", "deleted"}
@@ -328,6 +304,8 @@ def apply_page(session, memory, validator: SituationSourceValidator, *, run_id, 
                             evidence_ids[identity] = evidence_id
                     session.add(MemoryActivitySituationSource(memory_item_id=item.id, ordinal=source.ordinal,
                         evidence_id=evidence_id, source=asdict(source), state=value.state))
+                from app.domains.memory.repository.experience import from_situation
+                from_situation(session,item,setting.id,manifest,receipt,now=now)
                 receipt.state, receipt.applied_item_id, receipt.applied_at, receipt.error_code = "applied", item.id, now, None
                 register_content(session, item, now=now)
                 changed_settings.add(setting.id)

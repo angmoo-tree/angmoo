@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from app.core.ids import uuid7_string
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.database_transactions import database_write
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.models.items import MemoryScopeSettingModel, MemoryItem
 from app.domains.memory.models.batch import MemoryBatchSetting
@@ -42,68 +42,26 @@ def _context(db, setting_id, now):
 
 
 def prepare_due_reviews(sessions, now):
+    """Automatic and manual triggers enter the same durable request queue."""
+    from app.domains.memory.repository.consolidation_requests import admit
+    from app.runtime.relationships.manual_review import ManualRelationshipFollowup
     with sessions() as db:
         ids = tuple(db.scalars(select(MemoryScopeSettingModel.id).where(MemoryScopeSettingModel.enabled.is_(True))
             .order_by(MemoryScopeSettingModel.id)))
     for setting_id in ids:
         with sessions() as db:
-            try:
-                context = _context(db, setting_id, now)
-            except ValueError:
-                continue
-            if context is None:
-                continue
-            setting, scope, period, base, guard = context
-            excluded = []
-            grouped = collect_new_review_memories(db, setting=setting, now=now, excluded=excluded)
-        # Values above are preparation, never authorization across Sessions.
-        for target, memories in grouped.items():
-            with sessions() as db:
-                def commit_target():
-                    current = _context(db, setting_id, now)
-                    if current is None or current[4] != guard:
-                        return
-                    existing = db.scalar(select(RelationshipReviewWork.id).where(RelationshipReviewWork.world_id == scope.world_id,
-                        RelationshipReviewWork.actor_world_character_id == scope.subject_world_character_id,
-                        RelationshipReviewWork.target_world_character_id == target,
-                        RelationshipReviewWork.period_key == period, RelationshipReviewWork.part_key == "root"))
-                    if existing:
-                        return  # Later input belongs to the next daily period.
-                    identity = review_identity_context(db, owner_id=scope.owner_id, world_id=scope.world_id,
-                        actor_id=scope.subject_world_character_id, target_id=target)
-                    fresh_base = {**base, "identity": identity}
-                    prepared = SimpleNamespace(world_id=scope.world_id, actor_world_character_id=scope.subject_world_character_id,
-                        target_world_character_id=target, manifest={"base": fresh_base, "memories": memories})
-                    ReviewMemoryReferences(db).revalidate(prepared)
-                    plan_review(db, world_id=scope.world_id, actor_id=scope.subject_world_character_id,
-                        target_id=target, period_key=period, base=fresh_base, memories=memories)
+            def write():
                 try:
-                    run_sqlite_session_immediate(db, commit_target, require_clean=True)
-                except ValueError:
-                    continue  # Re-prepare changed input next discovery; no stale root.
-        for start in range(0, len(excluded), 100):
-            page = excluded[start:start+100]
-            with sessions() as db:
-                def commit_exclusions():
                     context = _context(db, setting_id, now)
-                    if context is None or context[4] != guard:
-                        return
-                    policy = db.get(RelationshipPolicy, scope.world_id)
-                    items = list(db.scalars(select(MemoryItem).where(MemoryItem.id.in_([p[1]["memory_id"] for p in page]),
-                        MemoryItem.world_id == scope.world_id, MemoryItem.owner_id == scope.owner_id,
-                        MemoryItem.subject_world_character_id == scope.subject_world_character_id)))
-                    expected = {p[1]["memory_id"]: (p[1]["digest"], p[2]) for p in page}
-                    values = resolve_memory_batch(db, scope=scope, items=items, activation=policy.activated_at, now=now)
-                    # Validation is over before receipt writes begin.
-                    for target, payload, reason in values:
-                        if not reason or expected.get(payload["memory_id"]) != (payload["digest"], reason):
-                            continue
-                        found = db.scalar(select(RelationshipReviewMemoryReceipt.id).where(
-                            RelationshipReviewMemoryReceipt.world_id == scope.world_id,
-                            RelationshipReviewMemoryReceipt.actor_world_character_id == scope.subject_world_character_id,
-                            RelationshipReviewMemoryReceipt.memory_id == payload["memory_id"]))
-                        if found is None:
-                            db.add(RelationshipReviewMemoryReceipt(id=uuid7_string(), world_id=scope.world_id,
-                                actor_world_character_id=scope.subject_world_character_id, target_world_character_id=target,
-                                memory_id=payload["memory_id"], memory_digest=payload["digest"], status="excluded", reason=reason))
-                run_sqlite_session_immediate(db, commit_exclusions, require_clean=True)
+                except ValueError:
+                    return
+                if context is None:
+                    return
+                setting, scope, period, base, guard = context
+                row, disposition = admit(db, setting=setting, kind="scheduled",
+                    key="relationship-daily:"+period, now=now, digest=period)
+                if disposition != "accepted":
+                    return
+                row.state, row.completed_at, row.cutoff_sequence = "completed", now, 0
+                ManualRelationshipFollowup(db).admit(scope, row)
+            database_write(db, write, require_clean=True)

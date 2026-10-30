@@ -1,5 +1,6 @@
 """Inbox candidate grouping and explicit, selected-notification settlement."""
 from datetime import UTC, datetime
+from app.core.activity_transactions import activity_write
 
 from app.domains.social.models.posts import Notification
 from app.domains.social.service.activity_inbox import pending_conversations, separate_source_conversations
@@ -10,7 +11,13 @@ from app.runtime.relationships.experience_metrics import post_revision
 
 class InboxLane(SocialLane):
     async def load(self, state):
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        return await run_db_stage(self, '_load_sync', state)
+
+    def _load_sync(self, state):
         candidates, data, receipts = [], {}, {}
+        from app.runtime.memory.captured_delivery import post_reference
+        source_metadata = {}
         from app.runtime.social.langgraph_actions import proposal_for_notification
         groups = pending_conversations(self.ctx.db, actor=self.actor,
             allowed_actions=self.ctx.activity_policy.allowed_actions)
@@ -22,6 +29,8 @@ class InboxLane(SocialLane):
             allowed_actions=self.ctx.activity_policy.allowed_actions)
         for group in groups:
             posts, notifications = group["posts"], group["notifications"]
+            for source in [*posts, *([group["parent"]] if group["parent"] is not None else [])]:
+                source_metadata[source.id] = post_reference(source)
             post = posts[-1]
             key = identity_key(self.actor.id, group["counterpart_id"], group["branch_id"], *(str(n.id) for n in notifications))
             proposal = proposals.get(post.id)
@@ -49,10 +58,22 @@ class InboxLane(SocialLane):
         from app.runtime.media.social_context import snapshots, allocate
         for candidate in candidates:
             candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"], actor_id=self.actor.id)
-        return {"candidates": allocate(candidates), "lane_data": data, "relationship_validation_receipts": receipts}
+        data["_reference_sources"] = source_metadata
+        from app.runtime.memory.captured_delivery import bind_candidate_sources
+        bind_candidate_sources(candidates, source_metadata)
+        from app.runtime.relationships.social_metrics import prepare_sources
+        data["_metric_sources"] = prepare_sources(self.ctx.db, actor=self.actor, post_ids=source_metadata)
+        from app.runtime.autonomous_activity.social_lane import plain
+        data = plain(data)
+        from app.runtime.autonomous_activity.initial_input import seal
+        return seal(state, {"candidates": allocate(candidates), "lane_data": data, "relationship_validation_receipts": receipts})
 
     async def guard(self, state):
         await super().guard(state)
+        from app.core.async_session import session_call
+        return await session_call(self.ctx.db, lambda: self._guard_inbox_sync(state))
+
+    def _guard_inbox_sync(self, state):
         if state.get("stage") not in {"TargetSelector", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             return {}
         from app.runtime.social.langgraph_actions import proposal_for_notification
@@ -72,6 +93,11 @@ class InboxLane(SocialLane):
         return {}
 
     async def finalize(self, state):
+        from app.core.async_session import session_call
+        await session_call(self.ctx.db, lambda: activity_write(self.ctx.db, lambda: self._settle_notifications(state)))
+        return await super().finalize(state)
+
+    def _settle_notifications(self, state):
         from app.runtime.social.langgraph_actions import mark_notification_handled_without_public_action
         for result in state.get("executions", []):
             # Failure/retry and omitted decisions leave notifications pending.
@@ -85,5 +111,3 @@ class InboxLane(SocialLane):
                     actor_character_id=self.ctx.character.id, notification_id=identifier,
                     handling_outcome="LLM_DECIDED_NO_ACTION",
                     occurred_at=datetime.now(UTC))
-        self.ctx.db.commit()
-        return await super().finalize(state)

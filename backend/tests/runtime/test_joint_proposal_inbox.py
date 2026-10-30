@@ -76,7 +76,8 @@ def test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms(re
         assert state["lane_data"][proposal["target_id"]]["post_id"] == value.proposal_comment.id
         assert state["lane_data"][proposal["target_id"]]["notification_ids"] == [notifications[value.proposal_comment.id].id]
         assert state["lane_data"][ordinary["target_id"]]["notification_ids"] == [notifications[later.id].id]
-        assert len({alarm for data in state["lane_data"].values() for alarm in data["notification_ids"]}) == 2
+        assert len({alarm for candidate in state['candidates']
+            for alarm in state['lane_data'][candidate['target_id']]['notification_ids']}) == 2
         # Explicit no_action consumes only the selected ordinary conversation.
         asyncio.run(adapter.finalize({**state, "executions": [{"target_id": ordinary["target_id"], "status": "no_action"}],
             "selections": [{"target_id": ordinary["target_id"]}]}))
@@ -169,7 +170,8 @@ def test_notification_cap_leaves_proposal_beyond_page_pending_then_visible():
         adapter = lane(db, value)
         first = asyncio.run(adapter.load({}))
         assert all(row["activity_proposal"] is None for row in first["candidates"])
-        assert sum(len(row["notification_ids"]) for row in first["lane_data"].values()) == 10
+        assert sum(len(first["lane_data"][candidate["target_id"]]["notification_ids"])
+                   for candidate in first["candidates"]) == 10
         assert proposal_alarm.handled_at is None
         target = first["candidates"][0]["target_id"]
         asyncio.run(adapter.finalize({**first, "executions": [{"target_id": target, "status": "no_action"}]}))

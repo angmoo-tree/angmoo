@@ -19,7 +19,8 @@ from app.runtime.routine_posts import sqlalchemy_runtime
 from sqlalchemy.orm import configure_mappers
 configure_mappers()
 from app.runtime.persistence.sqlite_schema import EXPECTED_CANONICAL_TABLE_COUNT
-assert len(Base.metadata.tables) == len(Base.registry.mappers) == EXPECTED_CANONICAL_TABLE_COUNT
+from app.runtime.persistence.experience_tables import TABLES
+assert len(Base.metadata.tables) == len(Base.registry.mappers) == EXPECTED_CANONICAL_TABLE_COUNT + len(TABLES) + 1
 assert "world_character_activity_states" in Base.metadata.tables
 assert all(mapper.class_.metadata is Base.metadata for mapper in Base.registry.mappers)
 assert database._default_engine is None

@@ -23,6 +23,7 @@ class LeaseOperation:
         allowed = {"result", "attempt", "sqlite_code", "sqlite_primary_code", "sqlite_name",
                    "queue_ms", "checkout_ms", "acquire_ms", "lock_wait_ms", "transaction_ms", "attempt_ms",
                    "total_ms", "cleanup_ms", "retry_delay_ms", "caller_cancelled", "worker_state"}
+        allowed.update({"phase", "elapsed_ms", "budget_ms", "sqlstate"})
         with self._lock:
             self._facts.update({k: v for k, v in facts.items() if k in allowed})
             if facts.get("result") in {"committed", "busy", "exhausted"}:

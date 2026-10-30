@@ -110,7 +110,7 @@ def test_received_result_capacity_does_not_discard_buffer_or_resubmit(tmp_path, 
         return asyncio.run(run_review_step(factory, work_id=identifier,
             references_factory=lambda db: References(), provider_factory=lambda base: provider,
             journal=journal, received=received))
-    assert run() == run() == "local_result_pending"
+    assert run() == run() == "storage_retry_wait"
     assert identifier in received and len(provider.calls) == 1
     unavailable[0] = False
     assert run() == "ready"
@@ -124,10 +124,10 @@ def test_corrupt_received_record_never_becomes_a_new_provider_request(tmp_path):
     path = journal.root/journal._key(world)/(journal._key(identifier)+".json")
     path.write_text("corrupt")
     provider = Provider()
-    for _ in range(2):
+    for expected in ("result_journal_invalid", "needs_attention"):
         assert asyncio.run(run_review_step(factory, work_id=identifier,
             references_factory=lambda db: References(), provider_factory=lambda base: provider,
-            journal=journal, received={})) == "result_journal_invalid"
+            journal=journal, received={})) == expected
     assert not provider.calls
     engine.dispose()
 

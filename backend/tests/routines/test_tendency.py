@@ -176,7 +176,7 @@ def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
         agent_service._activate_agent_uow
     )
     assert "_ensure_activity_profile_ready(" in inspect.getsource(
-        agent_service.run_agent_now
+        manual_activity._run_agent_now
     )
 
 def test_public_activity_entrypoints_require_tendency_readiness():

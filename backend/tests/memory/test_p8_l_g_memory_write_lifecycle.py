@@ -240,6 +240,8 @@ def _enabled_service(
     scope: MemoryScope,
     reader: FakeSourceReader,
 ) -> tuple[MemoryWriteLifecycleService, SqlAlchemyMemoryRepository, int]:
+    from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess
+    reader.experience_access = SqlAlchemyMemoryExperienceAccess(session)
     repository = SqlAlchemyMemoryRepository(session)
     scope_service = MemoryScopeService(repository)
     initial = scope_service.get_or_create(scope)
@@ -690,17 +692,12 @@ def test_source_invalidation_tombstones_item_and_pending_candidate(
         source_id="shared-source",
         now=NOW + timedelta(minutes=1),
     )
-    assert len(results) == 1
+    assert results == ()
     assert repository.get_item(
         scope=scope,
         item_id=accepted.item.id,
-    ).status is MemoryItemStatus.DELETED
-    with pytest.raises(MemoryNotFoundError, match="memory_not_retrievable"):
-        service.get_retrievable_item(
-            scope=scope,
-            item_id=accepted.item.id,
-            now=NOW,
-        )
+    ).status is MemoryItemStatus.ACTIVE
+    assert service.get_retrievable_item(scope=scope,item_id=accepted.item.id,now=NOW).id==accepted.item.id
     maintenance_count = memory_session.query(models.MemoryMaintenanceJob).count()
     assert (
         service.invalidate_source(

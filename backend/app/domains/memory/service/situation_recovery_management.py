@@ -5,13 +5,13 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 
 from app.domains.memory.contracts.activity_situation import stable_digest
-from app.domains.memory.contracts.access_validation import MemoryAccessValidation
 from app.domains.memory.exceptions import MemoryConflictError, MemoryValidationError
 from app.domains.memory.models.activity_situation import MemorySituationReceipt
 from app.domains.memory.models.batch import MemoryActivationEpoch
 from app.domains.memory.repository.situation_recovery import live_scope_lease, discard
 from app.domains.memory.repository.situation_runs import request_run
 from app.domains.memory.repository.situation_validation import restore_context
+from app.domains.memory.repository.experience import validate_captured_sources
 from app.domains.memory.schemas.situation import MemoryUnsavedExperiencesRead, MemorySituationDiscardRead
 from app.domains.memory.service.situation_management import _ensure, read
 
@@ -66,22 +66,18 @@ def list_unsaved(*, scope, db, workflows, cursor=None, limit=20):
         query = query.where(MemorySituationReceipt.sequence < before)
     rows = list(db.scalars(query.where(MemorySituationReceipt.sequence <= cutoff).order_by(
         MemorySituationReceipt.sequence.desc()).limit(limit + 1)))
-    validator = workflows.situation_validator(db) if workflows.situation_validator else None
     now, items = datetime.now(UTC), []
-    validation = MemoryAccessValidation(db, now)
     discard_busy = live_scope_lease(db, setting.id, now=now)
     for row in rows[:limit]:
         visible = False
-        if validator is not None:
-            try:
-                context = restore_context(db, row)
-                entries = (*context.sources, *context.result_sources)
-                visible = context.snapshot.scope == scope and bool(entries) and all(
-                    (access := validator.validate(context, entry, now=now, validation=validation)).state in {"available", "deleted"}
-                    and not (entry.role == "prior" and access.state == "deleted")
-                    for entry in entries)
-            except (ValueError, TypeError, KeyError):
-                pass
+        try:
+            context = restore_context(db, row)
+            # Owner scope and persisted receipt integrity authorize the saved
+            # description. Later SNS/Chat changes are not memory revocations.
+            visible = context.snapshot.scope == scope and bool(validate_captured_sources(
+                db, context, context.result_sources, row, now=now, reader=workflows.situation_validator(db)))
+        except (ValueError, TypeError, KeyError):
+            pass
         epoch = db.get(MemoryActivationEpoch, row.activation_epoch)
         enabled = setting.enabled and row.scope_version == setting.version and epoch is not None and epoch.closed_at is None and epoch.scope_setting_id == setting.id
         items.append({"receipt_sequence": row.sequence, "state_version": row.state_version,

@@ -1,4 +1,5 @@
-"""Shared lineage stays bounded without retaining an authorization decision."""
+"""Migrated flat dependencies retain deletion rights without ancestor reads."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import json
 from collections import Counter
 
@@ -46,10 +47,14 @@ def lineage(stack, levels=12):
         nodes.extend(current)
         previous = current
     db.commit()
+    from app.runtime.persistence.experience_migration import migrate
+    migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources)
+    db.commit()
+    db.add_all([post,*nodes])
     return db, scope, post, nodes, reader
 
 
-def test_shared_prior_dag_validates_each_item_once_and_keeps_every_source_check(stack, monkeypatch):
+def test_migrated_prior_dag_checks_only_owned_memory_without_source_reads(stack, monkeypatch):
     db, scope, post, nodes, reader = lineage(stack)
     calls = Counter()
     original = reader.read_evidence
@@ -61,11 +66,78 @@ def test_shared_prior_dag_validates_each_item_once_and_keeps_every_source_check(
     from app.domains.memory.contracts.access_validation import MemoryAccessValidation
     validation = MemoryAccessValidation(db, NOW)
     assert currently_accessible(db, reader, scope, nodes[-1], NOW, validation=validation)
-    # Every reachable node applies its own restriction to the same fresh fact.
-    # Source rows are read once in this operation, not once per path or node.
-    assert len(validation.completed) == len(nodes) - 1
-    assert validation.memo_hits > 0
-    assert calls[post.id] == 1
+    assert len(validation.completed) == 1
+    assert validation.memo_hits == 0
+    assert calls[post.id] == 0
+
+
+def test_hotbrief_roots_share_one_read_but_recheck_after_source_change(stack, monkeypatch):
+    from app.runtime.memory.composition import memory_consolidation_repository
+    db, scope, post, nodes, reader = lineage(stack)
+    repository = memory_consolidation_repository(db)
+    repository._source_reader = reader
+    calls = Counter()
+    original = reader.read_evidence
+    def read(**values):
+        calls[values['source_id']] += 1
+        return original(**values)
+    monkeypatch.setattr(reader, 'read_evidence', read)
+    setting = stack[2]
+    items = repository.hot_brief_source_items(setting=setting, now=NOW, limit=24)
+    assert len(items) == 24
+    assert calls[post.id] == 0
+    post.body += ' source revised'
+    db.commit()
+    assert len(repository.hot_brief_source_items(setting=setting, now=NOW, limit=24)) == 24
+
+
+def test_correction_source_extraction_keeps_the_same_fresh_validation(stack, monkeypatch):
+    from app.domains.memory.repository.situation_reads import correction_evidence
+    db, scope, setting, memory = stack
+    post = real_source(db, scope)
+    admitted = receipt(db, scope, post)
+    apply(db, setting, memory)
+    item = db.get(MemoryItem, admitted.applied_item_id)
+    reader = source_evidence_reader(db)
+    contexts = []
+    original = reader.validate_situation_source
+    def validate(*args, **kwargs):
+        contexts.append(kwargs.get('validation'))
+        return original(*args, **kwargs)
+    monkeypatch.setattr(reader, 'validate_situation_source', validate)
+    assert correction_evidence(db, reader, scope, item, NOW)
+    assert contexts == []
+    post.report_hidden_at = NOW
+    db.commit()
+    assert correction_evidence(db, reader, scope, item, NOW)
+    assert contexts == []
+    from app.domains.memory.repository.experience import tombstone
+    tombstone(db,item,setting.id,now=NOW);db.commit()
+    from app.domains.memory.exceptions import MemoryConflictError
+    with pytest.raises(MemoryConflictError, match='source_unavailable'):
+        correction_evidence(db, reader, scope, item, NOW)
+    assert contexts == []
+
+
+def test_projection_batch_bounds_sql_and_rechecks_hidden_source(stack):
+    from sqlalchemy import event
+    from app.domains.memory.repository.recall import SqlAlchemyMemoryRecallDocumentSource
+    db, scope, post, nodes, reader = lineage(stack)
+    source = SqlAlchemyMemoryRecallDocumentSource(lambda: db, source_reader_factory=source_evidence_reader,
+        now_factory=lambda: NOW, episode_only=True)
+    statements = []
+    def count(*args):
+        statements.append(1)
+    event.listen(db.bind, 'before_cursor_execute', count)
+    try:
+        docs = source.documents_for_item_ids([item.id for item in nodes], session=db)
+    finally:
+        event.remove(db.bind, 'before_cursor_execute', count)
+    assert len(docs) == len(nodes) and all(docs.values())
+    assert len(statements) < 250, 'projection expanded shared sources into individual SQL reads'
+    post.report_hidden_at = NOW
+    db.commit()
+    assert all(source.documents_for_item_ids([item.id for item in nodes], session=db).values())
 
 
 @pytest.mark.parametrize("change", ["source-body", "source-hidden", "subject-inactive", "prior-version", "prior-deleted", "prior-source-digest", "cycle"])
@@ -83,6 +155,8 @@ def test_same_session_and_reader_recheck_changes_after_success(stack, change):
         nodes[0].version += 1
     elif change == "prior-deleted":
         nodes[0].status, nodes[0].deleted_at = "deleted", NOW
+        from app.domains.memory.repository.experience import tombstone
+        tombstone(db,nodes[0],stack[2].id,now=NOW)
     elif change == "prior-source-digest":
         restriction = db.get(MemoryEpisodeRestriction, nodes[0].id)
         sources = json.loads(restriction.sources_json)
@@ -92,4 +166,4 @@ def test_same_session_and_reader_recheck_changes_after_success(stack, change):
         db.get(MemoryEpisodeRestriction, nodes[0].id).priors_json = json.dumps([
             {"id": nodes[-1].id, "version": nodes[-1].version}])
     db.commit()
-    assert not currently_accessible(db, reader, scope, nodes[-1], NOW)
+    assert currently_accessible(db, reader, scope, nodes[-1], NOW) == (change not in {"subject-inactive","prior-deleted"})

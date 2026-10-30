@@ -35,10 +35,15 @@ def test_stale_preselected_feed_finishes_without_reselection_and_routine_continu
             original = execution.shared_input
             def refreshed(*args, **kwargs):
                 calls.append("context")
-                if len(calls) == 2:
-                    post.deleted_at = datetime.now(UTC)
-                    db.commit()
                 return original(*args, **kwargs)
+            from app.runtime.autonomous_activity.combined_selection import CombinedSelection
+            select_original = CombinedSelection.select
+            async def selected(self, state):
+                result = await select_original(self, state)
+                post.deleted_at = datetime.now(UTC)
+                db.commit()
+                return result
+            monkeypatch.setattr(CombinedSelection, "select", selected)
             async def no_ai(*args, **kwargs):
                 pytest.fail("invalid frozen Feed target must not trigger selection or generation")
             monkeypatch.setattr(execution, "shared_input", refreshed)
@@ -63,7 +68,7 @@ def test_stale_preselected_feed_finishes_without_reselection_and_routine_continu
                 assert result["execution_order"] == ["inbox", "feed", "routine"]
                 assert result["publish_result"]["public_action_count"] == 0
                 assert await execution.run_personalized_activity(ctx, actor=actor, run=run) == result
-                assert len(calls) == 3
+                assert len(calls) == 1  # Reference inputs are not refreshed between lanes.
             finally:
                 unregister(binding)
     asyncio.run(scenario())
@@ -82,27 +87,24 @@ def test_preselected_run_rechecks_scope_and_claim_before_any_generation(monkeypa
             run = bind_run(db, actor=actor, activity_id=ctx.run_id)
             run.contract_version = 2
             db.commit()
-            reads = 0
-            original = execution.shared_input
-            def refresh(*args, **kwargs):
-                nonlocal reads
-                reads += 1
-                result = original(*args, **kwargs)
-                if reads == 2:
-                    if change == "autonomy_off":
-                        actor.autonomous_enabled = False
-                    elif change == "execution_lease_lost":
-                        slot.lease_expires_at = datetime.now(UTC) - timedelta(seconds=1)
-                    else:
-                        from sqlalchemy import select
-                        from app.domains.social.models.feed import WorldCharacterFeedObservation
-                        claim = db.scalar(select(WorldCharacterFeedObservation))
-                        claim.claim_token = "replacement-owner-token"
-                    db.commit()
+            from app.runtime.autonomous_activity.combined_selection import CombinedSelection
+            original = CombinedSelection.select
+            async def refresh(self, state):
+                result = await original(self, state)
+                if change == "autonomy_off":
+                    actor.autonomous_enabled = False
+                elif change == "execution_lease_lost":
+                    slot.lease_expires_at = datetime.now(UTC) - timedelta(seconds=1)
+                else:
+                    from sqlalchemy import select
+                    from app.domains.social.models.feed import WorldCharacterFeedObservation
+                    claim = db.scalar(select(WorldCharacterFeedObservation))
+                    claim.claim_token = "replacement-owner-token"
+                db.commit()
                 return result
             async def no_ai(*args, **kwargs):
                 pytest.fail("scope or claim change must be checked before model generation")
-            monkeypatch.setattr(execution, "shared_input", refresh)
+            monkeypatch.setattr(CombinedSelection, "select", refresh)
             monkeypatch.setattr(ActivityProvider, "call", no_ai)
             binding = ActivityRuntimeBinding(None, tmp_path)
             register(binding)
@@ -116,8 +118,9 @@ def test_preselected_run_rechecks_scope_and_claim_before_any_generation(monkeypa
                     with pytest.raises(execution.ActivityScopeChangedError):
                         await execution.run_personalized_activity(ctx, actor=actor, run=run)
                     assert run.status == "aborted"
-                    assert "inbox" in run.result["paths"]
-                    assert "routine" not in run.result["paths"]
+                    # Selection happened, but the common execution guard aborts
+                    # before either child's side effects or AI dispatch.
+                    assert not run.result.get("paths")
             finally:
                 unregister(binding)
     asyncio.run(scenario())

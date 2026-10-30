@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Callable
+from collections.abc import Mapping, Callable, Awaitable
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -76,7 +76,8 @@ class CharacterResponseGeneratorRequest:
     situation_locale: str | None = None
     situation_output_revision: str | None = "situation-target-output.v3"
     situation_target: str | None = None
-    situation_manifest_factory: Callable[[dict], SituationDelivery] | None = field(default=None, repr=False, compare=False)
+    situation_manifest_factory: Callable[[dict], SituationDelivery | Awaitable[SituationDelivery]] | None = field(default=None, repr=False, compare=False)
+    situation_input_recorder: Callable | None = field(default=None, repr=False, compare=False)
     chat_identity: ChatIdentityContext | None = None
     relationship_delivery_factory: Callable[[dict, str], dict] | None = field(default=None, repr=False, compare=False)
 

@@ -110,7 +110,7 @@ def graph_projection(fragment):
 def restore_legacy_relationships(manifest, inspector, binding):
     """Only exact retained v2 fragments/bases, no inferred perception or latest facts."""
     restored = {}
-    if manifest is None or manifest.version != 2 or manifest.call_identity != f"chat:{binding.request_scope_hash}":
+    if manifest is None or manifest.version not in {2, 3} or manifest.call_identity != f"chat:{binding.request_scope_hash}":
         return restored
     for index, raw in enumerate(inspector.get("items", [])[:12]):
         locator = raw.get("locator") or {}

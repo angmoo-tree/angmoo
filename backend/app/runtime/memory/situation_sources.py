@@ -33,6 +33,10 @@ class SituationSources:
         self.result_basis = result_basis
         self.reader = reader if reader is not None else SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries)
 
+    @property
+    def experience_access(self):
+        return source_queries.experience_access(self.session)
+
     def prepare_manual_events(self, identifiers):
         from app.domains.memory.contracts.access_validation import MemoryAccessValidation
         validation = MemoryAccessValidation(self.session, datetime.now(UTC))
@@ -85,6 +89,9 @@ class SituationSources:
                  manual_event_reference: SourceEventBasis | None = None):
         if delivery is not None and (delivery.path != path or delivery.text != delivered):
             raise ValueError("situation_delivery_fragment_mismatch")
+        evidence = None
+        row = None
+        author_role = None
         if kind == "ROUTINE_ACTIVITY":
             row = self.session.get(DailyActivityPlanItem, identifier)
             plan = self.session.get(DailyActivityPlan, row.plan_id) if row else None
@@ -164,9 +171,12 @@ class SituationSources:
             raw, digest, version, thread = evidence.deterministic_summary, evidence.source_digest, evidence.source_digest, evidence.thread_id
             actor, counterpart = evidence.actor_world_character_id, evidence.counterpart_world_character_id
             if kind == "CHAT_MESSAGE":
-                raw = self.session.get(MessageMessage, int(identifier)).content
+                row = self.session.get(MessageMessage, int(identifier))
+                raw = row.content
+                author_role = row.role
             elif kind in {"POST", "REPLY"}:
-                raw = self.session.get(Post, identifier).body
+                row = self.session.get(Post, identifier)
+                raw = row.body
         from app.domains.memory.policies.situation_ranges import delivered_ranges
         ranges, transmitted_ranges = delivered_ranges(raw, delivered)
         return DeliveredSourceEntry(kind, identifier, version, digest, sha256(delivered.encode()).hexdigest(),
@@ -178,7 +188,11 @@ class SituationSources:
             actor_id=actor, counterpart_id=counterpart, ranges=ranges, partial=raw != delivered,
             transformation=None if raw == delivered else "bounded-context.v1", delivered_ranges=transmitted_ranges,
             relationship_basis=relationship_basis,
-            delivery_payload_digest=delivery.payload_digest if delivery is not None else None)
+            delivery_payload_digest=delivery.payload_digest if delivery is not None else None,
+            delivered_text=delivered,
+            source_created_at=(evidence.source_created_at.isoformat() if evidence is not None else
+                row.created_at.isoformat() if row is not None and getattr(row,"created_at",None) else None),
+            author_role=author_role)
 
     def validate(self, manifest, source, *, now, ancestors=frozenset(), validation=None):
         from app.domains.memory.contracts.access_validation import MemoryAccessValidation

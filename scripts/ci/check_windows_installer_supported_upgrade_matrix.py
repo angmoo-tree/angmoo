@@ -22,40 +22,25 @@ from build_windows_installer_supported_upgrade_fixture import (
 
 
 def validate_matrix(root: Path = REPOSITORY_ROOT) -> tuple[int, ...]:
-    manifest_versions = tuple(
-        version
-        for version in range(1, SQLITE_SCHEMA_VERSION + 1)
-        if load_sqlite_manifest(version).schema_version == version
-    )
-    readable_predecessors = manifest_versions[:-1]
-    if tuple(SUPPORTED_SOURCE_VERSIONS) != readable_predecessors:
-        raise ValueError(
-            "windows_installer_supported_upgrade_matrix_incomplete:"
-            f"expected={readable_predecessors}:"
-            f"actual={tuple(SUPPORTED_SOURCE_VERSIONS)}"
-        )
-    workflow = (root / ".github/workflows/windows-installer.yml").read_text(encoding="utf-8")
-    runner = (root / "scripts/ci/run_windows_installer_supported_upgrade.ps1").read_text(encoding="utf-8")
-    jobs = yaml.safe_load(workflow)["jobs"]
-    upgrade = jobs["windows-installer-supported-upgrade"]
-    if (upgrade.get("strategy") != {"fail-fast": False, "matrix": {"partition": ["first", "second"]}}
-            or upgrade.get("timeout-minutes") != 30 or "continue-on-error" in upgrade):
-        raise ValueError("windows_installer_native_partitions_invalid")
-    if not any("-UpgradePartition ${{ matrix.partition }}" in step.get("run", "")
-               for step in upgrade["steps"]):
-        raise ValueError("windows_installer_native_partition_not_executed")
-    if not any("windows_installer_upgrade_coverage.py" in step.get("run", "")
-               and '--run-attempt "$GITHUB_RUN_ATTEMPT"' in step["run"]
-               for step in jobs["windows-installer"]["steps"]):
-        raise ValueError("windows_installer_native_union_missing")
-    for token in ("--select-partition $UpgradePartition", "foreach ($version in $selectedVersions)",
-                  "Restore-IsolatedFixture $archive", "$supportedContract.source_data_version -ne [int]$version",
-                  "$completedVersions.Add([int]$version)", "windows_installer_partition_coverage_incomplete"):
-        if token not in runner:
-            raise ValueError("windows_installer_dynamic_predecessor_execution_missing")
-    if "build_installer_fixtures.py" not in workflow:
-        raise ValueError("windows_installer_fixture_generation_missing")
-    return readable_predecessors
+    # Historical SQLite deltas remain tested by their frozen fixture corpus.
+    # Current product upgrades accept only the published 0.1.3/schema41 input.
+    jobs=yaml.safe_load((root/'.github/workflows/windows-installer.yml').read_text())['jobs']
+    selected={'installed-runtime-smoke':'clean-install','windows-installer-supported-upgrade':'upgrade-013',
+              'windows-installer-failure-recovery':'failure-recovery','windows-installer-representative-upgrade':'upgrade-013'}
+    for name,kind in selected.items():
+        job=jobs[name]
+        if ('continue-on-error' in job or job.get('timeout-minutes')!=35
+                or not any('run_windows_postgresql_qualification.ps1' in step.get('run','')
+                    and '-Kind '+kind in step['run'] for step in job['steps'])):
+            raise ValueError('windows_installer_postgresql_case_not_executed')
+    if not any('windows_postgresql_coverage.py' in step.get('run','') and '--run-attempt' in step['run']
+               for step in jobs['windows-installer']['steps']):
+        raise ValueError('windows_installer_postgresql_union_missing')
+    runner=(root/'scripts/ci/run_windows_postgresql_qualification.py').read_text()
+    for token in ('OLD_EXE_SHA','0.1.3','interrupted_after_canonical','windows_pg_source_changed_after_conversion',
+                  'windows_pg_installer_converted_without_consent','windows_pg_hosted_only'):
+        if token not in runner:raise ValueError('windows_installer_postgresql_rehearsal_missing')
+    return (41,)
 
 
 def main() -> int:

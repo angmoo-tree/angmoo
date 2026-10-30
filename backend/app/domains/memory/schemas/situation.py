@@ -17,7 +17,7 @@ class MemoryProcessingRead(BaseModel):
     last_applied_at: datetime | None
     pending_count: int
     blocked_count: int
-    status: Literal["idle", "accepted", "applying", "saved", "partial_error"]
+    status: Literal["idle", "accepted", "applying", "saved", "partial_error", "closed", "cancelled"]
     applied_count: int = 0
     result: str | None = None
     resolved_request_key: str | None = None
@@ -28,6 +28,9 @@ class MemoryProcessingRead(BaseModel):
     skipped_count: int = 0
     scope_busy: bool = False
     can_recheck: bool = False
+    revision: int = 0
+    actions: list[str] = Field(default_factory=list)
+    error_code: str | None = None
 
 
 class MemoryProcessingUpdate(BaseModel):

@@ -92,7 +92,12 @@ class SqlAlchemyWorldPackageImportCommitter:
             promoted = False
             with self._session_factory() as db:
                 try:
-                    db.execute(text("BEGIN IMMEDIATE"))
+                    if db.get_bind().dialect.name == "postgresql":
+                        # One idempotency owner, without serializing unrelated imports.
+                        db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key,17))"),
+                            {"key":request.local_owner_id+":"+request.idempotency_key})
+                    else:
+                        db.execute(text("BEGIN IMMEDIATE"))
                     registry = SqlAlchemyWorldPackageRegistry(db)
                     replay = registry.find_import(
                         local_owner_id=request.local_owner_id,

@@ -52,7 +52,7 @@ def ensure_default_space(
             if initialize(db, existing):
                 db.commit()
             return existing
-        lock_environment_admission(db, owner_id)
+        lock_environment_admission(db, owner_id, exclusive=True)
         existing = _existing_space(db, owner_id)
         if existing is not None:
             initialize(db, existing)

@@ -15,7 +15,6 @@ from sqlalchemy.orm import Session
 
 from app.contracts.language import PreparationLanguageError, preparation_environment
 from app.core.ids import uuid7_string
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.domains.routines.models.preparation import ActivityPreparationJob
 from app.domains.routines.models.plans import DailyActivityPlan, DailyActivityPlanItem, ActivityEpisode
 from app.domains.routines.constants import TIMEZONE_CONTRACT_VERSION
@@ -78,10 +77,8 @@ def write_preparation(db: Session, operation):
     if db.new or db.dirty or db.deleted:
         raise PreparationConflict("preparation_session_has_pending_changes")
     db.rollback()  # Only preparation-owned reads; caller uses a separate Session.
-    if db.get_bind().dialect.name == "sqlite":
-        return run_sqlite_session_immediate(db, operation, require_clean=True)
-    with db.begin():
-        return operation()
+    from app.core.activity_transactions import activity_write
+    return activity_write(db, operation, require_clean=True)
 
 
 def _write(function):

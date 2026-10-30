@@ -19,11 +19,17 @@ from app.runtime.persistence.sqlite_database import (
     SqliteCanonicalSettings,
     SqliteSchemaMismatchError,
 )
-from app.runtime.persistence.sqlite_scheduler_lease import (
-    SqliteSchedulerLeaseRepository,
-)
 from app.runtime.persistence.sqlite_unit_of_work import SqliteUnitOfWork
 from app.runtime.persistence.sqlalchemy_unit_of_work import SqlAlchemyUnitOfWork
+
+
+def __getattr__(name):
+    # Reflection helpers are also imported in cold, historical migrations.
+    # Resolve this ORM-backed adapter only when its public export is requested.
+    if name == "SqliteSchedulerLeaseRepository":
+        from app.runtime.persistence.sqlite_scheduler_lease import SqliteSchedulerLeaseRepository
+        return SqliteSchedulerLeaseRepository
+    raise AttributeError(name)
 
 __all__ = [
     "LocalAppDataRuntimeDataPath",

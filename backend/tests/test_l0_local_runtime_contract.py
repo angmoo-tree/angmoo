@@ -35,7 +35,7 @@ def test_contract_rejects_an_extra_host_publication() -> None:
 
 def test_contract_rejects_noncanonical_embedded_storage() -> None:
     payload = deepcopy(CONTRACT)
-    payload["embedded_storage"]["canonical"] = "postgresql"
+    payload["embedded_storage"]["canonical"] = "sqlite"
 
     assert "embedded storage contract mismatch" in CHECKER.validate_contract(
         payload, root=ROOT
@@ -44,10 +44,10 @@ def test_contract_rejects_noncanonical_embedded_storage() -> None:
 
 def test_contract_rejects_incomplete_default_stack() -> None:
     payload = deepcopy(CONTRACT)
-    payload["default_services"].append("postgresql")
+    payload["default_services"].remove("postgres")
 
     assert (
-        "default_services must contain the two-service embedded stack"
+        "default_services must contain the three-service PostgreSQL stack"
         in CHECKER.validate_contract(payload, root=ROOT)
     )
 

@@ -64,7 +64,7 @@ def test_fresh_delivery_guard_rejects_only_related_changes(tmp_path, change):
                     root.deleted_at = NOW
                 writer.commit()
                 assert writer.get(MemoryItem, ids[0]).version == version
-            if change in {"none", "unrelated", "unrelated_post_body"}:
+            if change in {"none", "unrelated", "unrelated_post_body", "source", "followup"}:
                 await service.assert_current(result, ids, deadline=monotonic()+4)
             else:
                 with pytest.raises(RecallCurrentnessError):

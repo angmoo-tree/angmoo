@@ -27,7 +27,7 @@ TOOLS_SHA256 = "@ANGMOO_TOOLS_SHA256@"
 TOOLS_SIZE = "@ANGMOO_TOOLS_SIZE@"
 REPOSITORY = "angmoo-tree/angmoo"
 TOOLS_NAME = "angmoo-termux-tools.zip"
-FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE", "command_registration.py", "session_recovery.py"})
+FILES = frozenset({"angmoo.py", "payload.py", "processes.py", "service_logs.py", "log_policy.py", "requirements.txt", "setup.sh", "LICENSE", "command_registration.py", "session_recovery.py", "migrate.py", "postgres_host.py", "prepare_proot.py"})
 MAX_TOOLS_BYTES = 4 * 1024 * 1024
 
 
@@ -87,7 +87,13 @@ def install_and_start(directory: Path, home: Path) -> bool:
                                   check=True, stdout=subprocess.PIPE, text=True).stdout.strip()
     require(registration in {"registered", "not-termux"}, "command_verification_invalid",
             "Command registration could not be confirmed; later steps were not run.")
-    subprocess.run([str(launcher), "install", "--release", RELEASE], check=True)
+    prior=home/'.local/share/angmoo/installation.json'
+    import json
+    selection=home/'.local/share/angmoo/selection.json'
+    migrate_old=not selection.exists() and prior.exists() and json.loads(prior.read_text(encoding='utf-8')).get('manifest',{}).get('version')=='0.1.3' and tuple(map(int,RELEASE.split('.'))) >= (0,1,4)
+    subprocess.run([str(launcher), 'migrate' if migrate_old else 'install', "--release", RELEASE], check=True)
+    if migrate_old and not selection.exists():
+        raise InstallError('migration_cancelled','Migration was cancelled. The original installation is preserved. / 이전을 취소했습니다. 원래 설치는 보존됩니다.')
     try:
         subprocess.run([str(launcher), "start"], check=True)
     except subprocess.CalledProcessError as exc:
@@ -105,7 +111,7 @@ def main() -> int:
         require(sys.platform in {"linux", "android"} and platform.machine() in {"aarch64", "arm64"},
                 "host_not_supported", "This installer requires ARM64 Termux.")
         require(shutil.which("sh") and shutil.which("proot"), "prerequisites_missing",
-                "First run: pkg install python curl proot")
+                "First run: pkg install python curl proot clang make libandroid-shmem")
         home = Path.home()
         require(not any(p.is_symlink() for p in (home, *home.parents))
                 and not str(home.resolve()).startswith(("/sdcard", "/storage", "/mnt/media_rw")),

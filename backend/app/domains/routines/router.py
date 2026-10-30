@@ -136,7 +136,11 @@ async def request_daily_preparation(character_id: str, world_id: str, data: Dail
                                     runtime=Depends(get_daily_preparation)):
     _require_daily_preparation()
     try:
-        return await runtime.ensure(db, character_id=character_id, world_id=world_id, user=user,
+        from types import SimpleNamespace
+        from app.core.async_session import release_request_read
+        owner_id = await release_request_read(db, lambda: user.id,
+            error_code="manual_preparation_request_has_pending_writes")
+        return await runtime.ensure(db, character_id=character_id, world_id=world_id, user=SimpleNamespace(id=owner_id),
                                     request_id=data.request_id, expected_version=data.expected_version)
     except exceptions.DailyActivityPlanError as exc:
         _raise_plan_error(exc)

@@ -43,11 +43,51 @@ def source_manifest(ctx, prepared):
     return prepare_sources(ctx.db, actor=prepared.world_character, post_ids=ids)
 
 
+def capture_source_bindings(ctx, prepared):
+    result = {}
+    for source in prepared.context.source_events:
+        if not is_manual_inbox_source(source.source_event_id):
+            result[source.source_event_id] = ["SOCIAL_EVENT", source.source_event_id]
+            continue
+        identifier = source_post_id(ctx, source_id=source.source_event_id,
+            world_id=prepared.world_character.world_id, actor_id=prepared.world_character.id,
+            beat_id=prepared.beat.id)
+        reply = ctx.db.get(Post, identifier) if identifier else None
+        if (reply is None or not reply.reply_to_post_id or reply.world_id != prepared.world_character.world_id
+                or reply.author_world_character_id != source.actor_world_character_id):
+            raise RoutineSourceBindingError("routine_source_binding_missing")
+        result[source.source_event_id] = ["REPLY", identifier]
+    return result
+
+
+def validate_source_access(ctx, prepared, frozen):
+    """Current participants and claim ownership, without reading source prose."""
+    if frozen.get("beat_id") != prepared.beat.id:
+        raise RoutineSourceBindingError("routine_initial_beat_mismatch")
+    from app.domains.relationships.contracts.graph_recall import GraphRecallScope
+    from app.domains.relationships.service.social_context_validation import SocialContextValidationService
+    from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
+    from app.domains.social.models.manual_writes import OwnerManualInboxCandidate
+    from app.domains.social.utils.manual_inbox import candidate_id
+    scope = GraphRecallScope(ctx.user_id, prepared.world_character.world_id, prepared.world_character.id)
+    targets = tuple(dict.fromkeys(source.actor_world_character_id for source in prepared.context.source_events
+        if source.actor_world_character_id != scope.subject_world_character_id))
+    SocialContextValidationService(SqlAlchemyRelationshipGraphReadGateway(ctx.db)).assert_access(scope, targets)
+    for identifier in prepared.claimed_manual_source_ids:
+        row_id = candidate_id(identifier)
+        row = ctx.db.get(OwnerManualInboxCandidate, row_id, populate_existing=True) if row_id else None
+        binding = frozen.get("source_bindings", {}).get(identifier)
+        if (row is None or row.world_id != scope.world_id or row.target_world_character_id != scope.subject_world_character_id
+                or row.target_activity_beat_id != prepared.beat.id or row.claim_run_id != ctx.run_id
+                or row.status != "claimed" or binding != ["REPLY", row.source_reply_post_id]):
+            raise RoutineSourceBindingError("manual_inbox_claim_mismatch")
+
+
 def input_source_bindings(ctx, *, scope, records, state):
     """Bind final Routine excerpts to canonical sources, never candidate IDs as events.
 
-    The frozen prepared context is already durable. Resolve only transmitted manual
-    sources here, with no new checkpoint format or cache across execution fences.
+    The frozen prepared context contains the first admitted source bindings. Bind
+    only transmitted excerpts here without re-reading their current originals.
     Later memory reads use REPLY and delivery proof, not a still-active inbox claim.
     """
     try:
@@ -62,12 +102,9 @@ def input_source_bindings(ctx, *, scope, records, state):
             if source_id in seen:
                 raise RoutineSourceBindingError("routine_source_duplicate")
             seen.add(source_id)
-            if not is_manual_inbox_source(source_id):
-                bindings.append(("SOCIAL_EVENT", source_id))
-                continue
             source = frozen.get(source_id)
             refs = prepared.get("refs", {})
-            if source is None or source_id not in prepared.get("claimed_manual_source_ids", []):
+            if source is None or (is_manual_inbox_source(source_id) and source_id not in prepared.get("claimed_manual_source_ids", [])):
                 raise RoutineSourceBindingError("routine_source_binding_missing")
             if (refs.get("world") != scope.world_id
                     or ctx.user_id != scope.owner_id
@@ -83,15 +120,11 @@ def input_source_bindings(ctx, *, scope, records, state):
             expected["occurred_at"] = datetime.fromisoformat(source["occurred_at"]).isoformat()
             if record != expected:
                 raise RoutineSourceBindingError("routine_source_fragment_mismatch")
-            identifier = source_post_id(ctx, source_id=source_id, world_id=scope.world_id,
-                actor_id=scope.subject_world_character_id, beat_id=prepared["beat_id"])
-            with ctx.db.no_autoflush:
-                reply = ctx.db.get(Post, identifier)
-            if (reply is None or not reply.reply_to_post_id
-                    or reply.author_world_character_id != source["actor_world_character_id"]
-                    or _clip(reply.body, MAX_EVENT_EXCERPT_CHARS) != source["excerpt"]):
-                raise RoutineSourceBindingError("routine_source_changed")
-            bindings.append(("REPLY", identifier))
+            binding = prepared.get("source_bindings", {}).get(source_id)
+            if (not isinstance(binding, list) or len(binding) != 2
+                    or binding[0] not in {"REPLY", "SOCIAL_EVENT"} or not binding[1]):
+                raise RoutineSourceBindingError("routine_initial_source_binding_missing")
+            bindings.append(tuple(binding))
         return bindings
     except ManualInboxRuntimeError as exc:
         # The owning service emits fixed codes, not source text or SQL arguments.

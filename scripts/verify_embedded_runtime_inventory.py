@@ -151,40 +151,16 @@ def _line_numbers(text: str, pattern: re.Pattern[str]) -> list[int]:
 
 
 def _postgres_owner(path: str) -> tuple[str, str, str]:
-    if path == (
-        "backend/app/domains/memory/repository/consolidation.py"
-    ):
-        return (
-            "P8-L-O",
-            "P8-L-O consolidation/hot brief",
-            "retain while same-scope maintenance serialization and exact hot-brief "
-            "source-version fencing are required",
-        )
-    if path.startswith("backend/app/domains/memory/") or path == (
-        "scripts/ci/generate_p8_l_g_memory_write_inventory.py"
-    ):
-        return (
-            "P8-L-G",
-            "P8-L-G memory write/lifecycle",
-            "retain only while cross-provider same-scope serialization or its "
-            "negative inventory guard is required",
-        )
     if "/alembic/versions/" in path:
         return (
             "ER2",
             "ER2 PR G",
-            "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
-        )
-    if path.startswith("compose") or path.startswith("scripts/ci/"):
-        return (
-            "ER7",
-            "ER7 PR P",
-            "embedded canonical rollback window PASS and user-approved legacy-default removal",
+            "preserve immutable historical revision identity; current migration uses the explicit 0.1.3 input contract",
         )
     return (
-        "ER2-ER7 legacy evidence",
-        "ER2 PR D/E/G; Legacy Removal PR",
-        "historical revision, serialized compatibility value, or negative reintroduction guard only",
+        "PostgreSQL 0.1.4",
+        "PostgreSQL adoption PR #418",
+        "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
     )
 
 
@@ -194,10 +170,14 @@ def build_postgres_inventory() -> dict[str, Any]:
         ROOT / "backend" / "alembic",
         ROOT / "backend" / "scripts",
         ROOT / "scripts" / "ci",
+        ROOT / "scripts" / "release",
+        ROOT / "scripts" / "docker",
+        ROOT / "launcher",
         ROOT / "compose.yml",
         ROOT / "compose.dev.yml",
         ROOT / "compose.ci.yml",
         ROOT / "Dockerfile.backend",
+        ROOT / "Dockerfile.postgres",
         ROOT / "backend" / "pyproject.toml",
     )
     entries: list[dict[str, Any]] = []
@@ -234,9 +214,8 @@ def build_postgres_inventory() -> dict[str, Any]:
             for marker in sorted(POSTGRES_MARKERS)
         },
         "purpose": (
-            "Residual PostgreSQL markers retained only as historical schema "
-            "evidence, serialized compatibility values, and negative "
-            "reintroduction guards"
+            "Current PostgreSQL canonical storage, search, migration and runtime inventory; "
+            "historical schema evidence and negative reintroduction guards retain distinct ownership"
         ),
         "schema_version": 1,
     }
@@ -476,7 +455,7 @@ def _coupling_entry(path: str, component: str, markers: list[str]) -> dict[str, 
 
 def _runtime_coupling() -> list[dict[str, Any]]:
     entries = (
-        ("compose.yml", "shared", ["two-service topology", "embedded data volume", "backend health dependency"]),
+        ("compose.yml", "shared", ["three-service PostgreSQL topology", "separate canonical and application volumes", "read-only SQLite migration input", "backend health dependency"]),
         ("compose.dev.yml", "shared", ["frontend HMR", "backend reload", "contributor logs"]),
         ("backend/app/runtime/single_backend_components.py", "shared", ["in-process scheduler/projector ownership", "bounded drain"]),
         ("backend/app/runtime/resident/scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),

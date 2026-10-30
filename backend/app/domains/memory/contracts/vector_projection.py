@@ -20,6 +20,7 @@ class MemoryVectorDocument:
     thread_id: str | None = None
 
 
+
 @dataclass(frozen=True, slots=True)
 class MemoryVectorHit:
     document_id: str
@@ -39,6 +40,7 @@ class MemoryVectorQuery:
     occurred_to: datetime | None = None
     counterpart_world_character_id: str | None = None
     thread_id: str | None = None
+    allowed_thread_ids: tuple[str, ...] | None = None
 
     def __post_init__(self):
         if not 1 <= self.limit <= 50 or not self.profile:

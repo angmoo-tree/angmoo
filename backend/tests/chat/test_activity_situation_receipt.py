@@ -18,6 +18,70 @@ from app.runtime.chat.situation_memory import ChatSituationMemory
 from app.integrations.llm.character_response_generator import _user_payload
 
 
+@pytest.mark.parametrize("change", ["edit", "delete"])
+def test_chat_captured_input_survives_original_change_before_memory_application(response_session, change):
+    from datetime import UTC, datetime
+    from app.domains.memory.models.items import MemoryItem
+    from app.domains.memory.repository.experience import read_snapshot
+    from app.domains.memory.repository.situation_runs import get_or_create_settings, request_run, claim_run
+    from app.domains.memory.repository.situation_apply import apply_page
+    from app.runtime.memory.situation_sources import SituationSources
+    db=response_session
+    scope=MemoryScope("p-owner", "p-world", "p-responding")
+    memory=memory_repository(db)
+    service=MemoryScopeService(memory)
+    initial=service.get_or_create(scope)
+    setting=service.update(scope,expected_version=initial.version,enabled=True,retention_days=180)
+    record=f._request(db,f.RetrievalRoute.CURRENT_CONTEXT)
+    row=db.get(f.models.ChatResponseRequest,record.request_id)
+    policy=capture(db,owner_id=scope.owner_id,world_id=scope.world_id,actor_id=scope.subject_world_character_id,
+        environment=EnvironmentSnapshot(memory_search_locale="ko-KR"),policy="activity_situation")
+    row.node_state_json=json.dumps({**json.loads(row.node_state_json),"_situation_policy":policy})
+    db.commit()
+    command=f._command(f.SqlAlchemyResponseLifecycleRepository(db).get_request(record.request_id))
+    delivered=[]
+    class Generator(f._Generator):
+        async def generate(self,request):
+            response=await super().generate(request)
+            manifest=await request.situation_manifest_factory(_user_payload(request))
+            delivered.extend(s.delivered_text for s in manifest.sources if s.source_id==str(record.user_message_id))
+            return replace(response,situation_manifest=manifest,
+                situation_draft=parse_description("상대와 안부를 나누었다.",target_key=request.situation_target),
+                situation_output_digest=sha256(response.text.encode()).hexdigest())
+    workflow=f._workflow(db,f.RetrievalRoute.CURRENT_CONTEXT,Generator())
+    workflow._situation_memory=ChatSituationMemory(db)
+    asyncio.run(f._collect(workflow.run(command)))
+    receipt=db.scalar(select(MemorySituationReceipt))
+    assert receipt is not None and receipt.state=="pending"
+    message=db.get(f.models.MessageMessage,record.user_message_id)
+    if change=="edit":message.content="Changed after delivery."
+    else:
+        # Retire the completed request first: its existing FK deliberately
+        # protects the input while an action is live. Memory has no such FK.
+        from sqlalchemy import delete
+        db.execute(delete(f.models.ChatResponseRequest).where(
+            f.models.ChatResponseRequest.request_id==record.request_id))
+        db.delete(message)
+    db.commit()
+    now=datetime.now(UTC)
+    get_or_create_settings(db,setting.id,timezone="UTC",now=now)
+    requested=request_run(db,setting,trigger="manual",request_key="chat-snapshot-apply",expected_version=1,now=now)
+    token=claim_run(db,requested.run_id,now=now);db.commit()
+    def forbid_original(_conn,_cursor,sql,_params,_context,_many):
+        normalized=sql.lower()
+        if normalized.lstrip().startswith(("select","with")):
+            assert "from message_messages" not in normalized and "from posts" not in normalized
+    event.listen(db.bind,"before_cursor_execute",forbid_original)
+    try:
+        apply_page(db,memory,SituationSources(db),run_id=requested.run_id,token=token,now=now)
+        db.commit()
+        assert receipt.state=="applied",receipt.error_code
+        snapshot=read_snapshot(db,db.get(MemoryItem,receipt.applied_item_id))
+        assert [s["text"] for s in snapshot.payload["sources"] if s["source_id"]==str(record.user_message_id)]==delivered
+    finally:
+        event.remove(db.bind,"before_cursor_execute",forbid_original)
+
+
 @pytest.mark.parametrize("invalid,fail_insert", [(False, False), (True, False), (False, True)])
 @pytest.mark.parametrize("with_image", [False, True])
 def test_real_chat_finalize_receipt_is_atomic_and_auxiliary_errors_do_not_lose_reply(response_session, invalid, fail_insert, with_image):
@@ -55,7 +119,7 @@ def test_real_chat_finalize_receipt_is_atomic_and_auxiliary_errors_do_not_lose_r
     class Generator(f._Generator):
         async def generate(self, request):
             response = await super().generate(request)
-            return replace(response, situation_manifest=request.situation_manifest_factory(_user_payload(request)),
+            return replace(response, situation_manifest=await request.situation_manifest_factory(_user_payload(request)),
                 situation_draft=parse_description(None if invalid else "평범한 하루의 안부를 나누었다.", target_key=request.situation_target),
                 situation_output_digest=sha256(response.text.encode()).hexdigest())
     workflow = f._workflow(db, route, Generator())
@@ -151,14 +215,15 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
         async def generate(self, request):
             value = await super().generate(request)
             payload = _user_payload(request)
-            manifest = request.situation_manifest_factory(payload)
+            manifest = await request.situation_manifest_factory(payload)
             delivered.append(manifest)
             return replace(value, situation_manifest=manifest,
                 situation_draft=parse_description("상대와 오늘의 안부를 나누었다.", target_key=request.situation_target),
                 situation_output_digest=sha256(value.text.encode()).hexdigest())
     workflow = f._workflow(db, f.RetrievalRoute.CURRENT_CONTEXT, Generator(), router=Router(f.RetrievalRoute.CURRENT_CONTEXT))
     workflow._situation_memory = ChatSituationMemory(db)
-    workflow._social_context_provider = social_service
+    from app.runtime.chat.social_context import ChatSocialContextProvider
+    workflow._social_context_provider = ChatSocialContextProvider(recall, {"p-requester": "대화 상대"})
     if new_identity:
         from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
         from app.integrations.llm.character_response_generator import DirectLlmCharacterResponseGenerator
@@ -182,9 +247,11 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     assert source.relationship_basis.version == 6 and relation.version == 7
     # The same prepared metadata also survives a read-after-prepare race.
     if not new_identity:
-        race = workflow._situation_memory.freeze(command, f.EvidenceBundleAssembler().current_context(
-            request_id=record.request_id, request_scope_hash=command.request.request_scope_hash),
-            {"latest_user_message": command.preflight.user_message, "social_context": {"context": text}})
+        bundle = f.EvidenceBundleAssembler().current_context(
+            request_id=record.request_id, request_scope_hash=command.request.request_scope_hash)
+        race = workflow._situation_memory.freeze(command, bundle,
+            {"latest_user_message": command.preflight.user_message, "social_context": {"context": text},
+             "frozen_evidence": bundle.provider_payload()})
         assert next(source for source in race.sources if source.source_type == "RELATIONSHIP").relationship_basis.version == 6
     else:
         assert len(native_calls) == 1
@@ -204,10 +271,12 @@ def test_real_chat_delivers_prepared_relationship_six_and_saves_after_seven(resp
     assert receipt.state == "applied", receipt.error_code
     assert db.get(MemoryItem, receipt.applied_item_id) is not None
     assert db.scalar(select(func.count()).select_from(MemoryItemEvidence).where(MemoryItemEvidence.memory_item_id == receipt.applied_item_id)) == 2
-    assert SituationSources(db).validate(restore_context(db, receipt), source, now=now).state == "available"
+    from app.domains.memory.repository.experience import read_snapshot
+    snapshot=read_snapshot(db,db.get(MemoryItem,receipt.applied_item_id))
+    assert any(s["source_id"]==source.source_id and s["text"]==source.delivered_text for s in snapshot.payload["sources"])
     context = restore_context(db, receipt)
     original = next(entry for entry in context.sources if entry.source_id == str(record.user_message_id))
-    assert SituationSources(db).validate(context, original, now=now).state == "available"
+    assert any(s["source_id"]==original.source_id and s["text"]==raw_question for s in snapshot.payload["sources"])
     assert db.get(f.models.MessageMessage, record.user_message_id).content == raw_question
     if new_identity:
         from app.runtime.chat.message_composition import evidence_service

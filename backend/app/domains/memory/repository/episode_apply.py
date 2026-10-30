@@ -75,21 +75,24 @@ class SqlAlchemyEpisodeApply:
                 return tuple(self.session.scalars(select(MemoryEpisodeInfo.memory_item_id).where(
                     MemoryEpisodeInfo.bundle_id == prior_receipt.id).order_by(MemoryEpisodeInfo.memory_item_id)))
             access_bundle = access_bundle or bundle
-            evidence = revalidate(access_bundle)
+            # Captured fragments are historical facts. Only current memory,
+            # scope, consent and job fences are checked at application.
+            evidence = {}
             for unit in access_bundle.source_refs().values():
+                if unit.scope != bundle.scope:
+                    raise MemoryConflictError("episode_apply_scope_invalid")
                 for member in unit.members:
-                    row = evidence.get((member.source_type, member.source_id))
-                    blocked = memory_evidence_blocked_code(scope=bundle.scope, source_type=MemorySourceTypeV1(member.source_type), source_id=member.source_id, evidence=row)
-                    if blocked or row is None or row.source_digest != member.source_digest:
-                        raise MemoryConflictError("episode_apply_source_changed")
+                    evidence[(member.source_type, member.source_id)] = CanonicalMemoryEvidence(
+                        MemorySourceTypeV1(member.source_type), member.source_id, bundle.scope.world_id,
+                        member.source_digest, datetime.fromisoformat(member.occurred_at) if member.occurred_at else unit.occurred_at,
+                        member.text, True, True, True, True, False, thread_id=unit.thread_id,
+                        actor_world_character_id=member.actor_id, counterpart_world_character_id=member.counterpart_id,
+                        observation_id=member.observation_id, source_event_id=member.source_event_id)
             input_thread = private_thread_intersection(tuple(u.thread_id for u in access_bundle.source_refs().values())) if bundle.policy_version == ACTIVITY_POLICY_VERSION else bundle.new_units[0].thread_id
             for candidate in access_bundle.prior_episodes:
                 prior = self.session.get(MemoryItem, candidate.item_id, populate_existing=True)
-                from app.domains.memory.repository.episode_privacy import currently_accessible
-                current_privacy = bundle.policy_version != ACTIVITY_POLICY_VERSION or (
-                    self.source_reader is not None and prior is not None and
-                    currently_accessible(self.session, self.source_reader, bundle.scope, prior, now)
-                )
+                from app.domains.memory.repository.experience import accessible
+                current_privacy = prior is not None and accessible(self.session, bundle.scope, prior, now, reader=self.source_reader)
                 if (prior is None or prior.owner_id != bundle.scope.owner_id or prior.world_id != bundle.scope.world_id
                     or prior.subject_world_character_id != bundle.scope.subject_world_character_id
                     or prior.version != candidate.item_version or prior.summary != candidate.summary
@@ -167,6 +170,35 @@ class SqlAlchemyEpisodeApply:
                 for ref in proposal.follows_episode_refs:
                     prior = bundle.prior_episodes[int(ref[1:]) - 1]
                     self.session.add(MemoryEpisodeLink(prior_item_id=prior.item_id, following_item_id=item.id, created_at=now))
+                from app.domains.memory.repository.experience import store, inherited_dependencies
+                snapshot_sources = []
+                for unit in selected:
+                    for member in unit.members:
+                        snapshot_sources.append({"reference": f"{member.source_type}:{member.source_id}",
+                            "unit_key":unit.unit_key,
+                            "source_type":member.source_type,"source_id":member.source_id,
+                            "source_digest":member.source_digest,"source_version":unit.unit_revision,
+                            "text":member.text,"text_digest":sha256(member.text.encode()).hexdigest(),
+                            "status":"historical_snapshot","role":member.role,"author_id":member.actor_id,
+                            "counterpart_id":member.counterpart_id,
+                            "author_label":member.actor_label,"occurred_at":member.occurred_at or unit.occurred_at.isoformat(),
+                            "partial":unit.coverage != "complete", "source_ranges":list(member.segments or (
+                                (member.start_offset,member.start_offset+len(member.text)),)),
+                            "coordinate_system":"delivered_fragment", "thought":asdict(unit.thought),
+                            "thought_reference":unit.thought_reference})
+                # Copy exactly the prior fragments delivered with this input,
+                # without reopening their original source or ancestor memories.
+                for prior in access_bundle.prior_episodes:
+                    if prior.experience_snapshot is not None:
+                        snapshot_sources.extend({**s,"from_prior_memory_id":prior.item_id}
+                            for s in prior.experience_snapshot.get("sources",[]))
+                unique_sources = {}
+                for source in snapshot_sources:
+                    key=(source["reference"],source.get("text_digest"),source.get("author_id"),source.get("role"))
+                    unique_sources.setdefault(key,source)
+                store(self.session,item,setting.id,tuple(unique_sources.values()),now=now,
+                    dependencies=inherited_dependencies(self.session,[p.item_id for p in access_bundle.prior_episodes]),
+                    outcome={"bundle_id":receipt.id,"manifest_hash":manifest_hash})
                 register_content(self.session, item, now=now)
                 self.session.flush()
                 item_ids.append(item.id)

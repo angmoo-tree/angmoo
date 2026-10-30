@@ -64,12 +64,12 @@ def test_provider_split_creates_bounded_children_without_parent_memory(memory_se
     assert memory_session.scalar(select(func.count(MemoryItem.id))) == 2
 
 
-def test_changed_original_during_call_leaves_no_memory_and_retains_attempt(memory_session):
+def test_changed_original_during_call_keeps_captured_input_and_single_attempt(memory_session):
     service, works, work, setting, values = start(memory_session)
     def change():
         values[("POST", "0")] = replace(values[("POST", "0")], source_digest="f" * 64)
-    assert execute(service, work, setting, Provider(during=change)) == "episode_apply_source_changed"
+    assert execute(service, work, setting, Provider(during=change)) == "episode_selection_completed"
     pending, = works.list(job_id="episode-job", setting=setting)
     assert pending.calls == 1
-    assert pending.state == "pending"
-    assert memory_session.scalar(select(func.count(MemoryItem.id))) == 0
+    assert pending.state == "completed"
+    assert memory_session.scalar(select(func.count(MemoryItem.id))) == 1

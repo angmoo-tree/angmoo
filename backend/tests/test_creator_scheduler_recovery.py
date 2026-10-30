@@ -188,8 +188,9 @@ def test_health_rejects_registry_ready_without_a_live_proof(monkeypatch):
     config = Settings().model_copy(update={"RESIDENT_TICK_READY_PATH": "test-health-only"})
     @contextmanager
     def session(): yield SimpleNamespace(execute=lambda _q: SimpleNamespace(scalar_one=lambda: 1))
-    app = FastAPI(); app.state.runtime_composition = SimpleNamespace(session_factory=session, settings=config)
-    app.state.runtime_config = SimpleNamespace(profile=SimpleNamespace(value="public"))
+    app = FastAPI(); app.state.runtime_composition = SimpleNamespace(session_factory=session, settings=config,
+        engine=SimpleNamespace(dialect=SimpleNamespace(name="sqlite")))
+    app.state.runtime_config = SimpleNamespace(profile=SimpleNamespace(value="public"), validation_mode=False)
     app.add_api_route("/health", runtime_health)
     monkeypatch.setattr(component_workers, "borrow_runtime_graph_client", lambda _c: SimpleNamespace(verify_connectivity=lambda: None))
     component_observations.reset()

@@ -92,7 +92,7 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
         "            tests\\world_packages\\test_import_commit.py `"
     )
     assert windows_import_fixture in windows_host
-    assert windows_import_fixture in windows_installer
+    assert "tests\\world_packages\\test_import_commit.py" in windows_installer
     host_workflow = yaml.safe_load(windows_host)
     host_checkout = next(
         step
@@ -114,7 +114,7 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
     jobs = installer_workflow["jobs"]
     verification = next(
         step for step in jobs["release-candidate"]["steps"]
-        if step.get("name") == "Verify ER6 migration, restore, and installer contracts"
+        if step.get("name") == "Verify native PostgreSQL, migration input, and installer safety contracts"
     )["run"]
     # A pytest failure must stop this multi-command PowerShell step before
     # a later successful checker can replace its process exit code.
@@ -157,9 +157,9 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
         assert len(downloads) == 1
         assert downloads[0]["with"]["name"] == candidate_name
     assert "--commit $env:SOURCE_SHA" in windows_installer
-    assert "$payloadIdentity.build_commit -ne $env:SOURCE_SHA" in windows_installer
-    assert "-Mode Upgrade" in windows_installer
-    assert "-Mode Recovery" in windows_installer
+    assert "--source-sha $env:SOURCE_SHA" in (REPO_ROOT / "scripts/ci/run_windows_postgresql_qualification.ps1").read_text(encoding="utf-8")
+    assert "-Kind upgrade-013" in windows_installer
+    assert "-Kind failure-recovery" in windows_installer
     assert jobs["windows-installer"]["needs"] == [
         "impact",
         "release-candidate",
@@ -169,22 +169,27 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
         "windows-installer-representative-upgrade",
     ]
 
-    guard_index = installer_fixture.index("windows_installer_hosted_runner_only")
-    input_index = installer_fixture.index("foreach ($required")
-    delete_index = installer_fixture.index(
-        "Remove-Item -LiteralPath $productRoot -Recurse -Force"
-    )
-    fixture_check_index = installer_fixture.index("Assert-SyntheticFixtureArchive $Archive")
-    remove_fixture_index = installer_fixture.index("Remove-IsolatedFixture", fixture_check_index)
-    assert guard_index < input_index < delete_index
-    assert fixture_check_index < remove_fixture_index
-    assert "RUNNER_ENVIRONMENT -cne 'github-hosted'" in installer_fixture
-    assert "windows_installer_hosted_sentinel_invalid" in installer_fixture
-    assert "windows_installer_supported_upgrade_fixture_not_synthetic" in installer_fixture
-    for job_id in candidate_consumers[1:]:
-        native_steps = [
-            step for step in jobs[job_id]["steps"]
-            if "run_windows_installer_supported_upgrade.ps1" in str(step.get("run", ""))
-        ]
+    qualification = (REPO_ROOT / "scripts/ci/run_windows_postgresql_qualification.py").read_text(encoding="utf-8")
+    wrapper = (REPO_ROOT / "scripts/ci/run_windows_postgresql_qualification.ps1").read_text(encoding="utf-8")
+    # The current NSIS matrix owns a disposable hosted profile and synthetic
+    # source, and verifies the exact installer before invoking it.
+    for marker in (
+        "RUNNER_ENVIRONMENT -cne 'github-hosted'",
+        "windows_pg_installer_checksums_mismatch",
+        "--installer-sha256 $digest --source-sha $env:SOURCE_SHA",
+        "windows_pg_installer_changed",
+    ):
+        assert marker in wrapper
+    assert "'RUNNER_ENVIRONMENT')=='github-hosted'" in qualification
+    assert "windows_pg_existing_installation_refused" in qualification
+    assert "windows_pg_legacy_user_data_refused" in qualification
+    assert "windows_pg_private_path_invalid" in qualification
+    assert "windows_pg_official_source_hash_mismatch" in qualification
+    assert "windows_pg_empty_source_fixture" in qualification
+    assert qualification.index("data=hosted_root()") < qualification.index("nsis(args.installer)")
+    assert qualification.index("windows_pg_installer_hash_mismatch") < qualification.index("nsis(args.installer)")
+    for job_id in candidate_consumers:
+        native_steps = [step for step in jobs[job_id]["steps"]
+            if "run_windows_postgresql_qualification.ps1" in str(step.get("run", ""))]
         assert len(native_steps) == 1
-        assert "-RunSentinel $sentinel" in native_steps[0]["run"]
+        assert "-Python (Resolve-Path 'backend/.venv/Scripts/python.exe').Path" in native_steps[0]["run"]

@@ -46,8 +46,16 @@ class HybridRecallRequest:
     episode_source_kinds: tuple[RecallDocumentKind, ...] = ()
     image_base_text: str | None = None
     image_hint: str | None = None
+    # Caller-owned delivery boundary: public memories plus these private threads.
+    # None preserves non-delivery/legacy readers; () permits public memories only.
+    allowed_thread_ids: tuple[str, ...] | None = None
 
     def __post_init__(self):
+        if self.allowed_thread_ids is not None and (
+            not isinstance(self.allowed_thread_ids, tuple) or len(self.allowed_thread_ids) > 1
+            or any(not isinstance(value, str) or not value for value in self.allowed_thread_ids)
+        ):
+            raise ValueError("hybrid_private_thread_scope_invalid")
         if self.image_hint is not None and (not isinstance(self.image_hint, str) or len(self.image_hint) > 120 or not self.image_base_text or len(self.search_text) > 1000):
             raise ValueError("hybrid_image_hint_invalid")
         if (not self.request_id or not self.call_id or not _HASH.fullmatch(self.envelope_hash)
@@ -145,14 +153,16 @@ class EpisodeValidationSnapshot:
     link_probes: tuple[tuple[str, str, str], ...]
     traversal_truncated: bool
     captured_at: datetime
-    schema_version: int = 1
-    policy_version: str = "episode-followups-v1"
+    schema_version: int = 2
+    policy_version: str = "memory-experience-v1"
     traversal_limit: int = 12
     depth_limit: int = 8
+    allowed_thread_ids: tuple[str, ...] | None = None
+    memory_snapshot_digests: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self):
-        if (not isinstance(self.scope, MemoryScope) or self.schema_version != 1
-                or self.policy_version != "episode-followups-v1"
+        if (not isinstance(self.scope, MemoryScope) or self.schema_version != 2
+                or self.policy_version != "memory-experience-v1"
                 or self.traversal_limit != 12 or self.depth_limit != 8
                 or not isinstance(self.traversal_truncated, bool)
                 or self.captured_at.tzinfo is None
@@ -165,6 +175,8 @@ class EpisodeValidationSnapshot:
                        for row in self.item_revisions)
                 or any(len(row) != 3 or not all(isinstance(value, str) and value for value in row)
                        for row in self.link_probes)):
+            raise ValueError("episode_validation_snapshot_invalid")
+        if any(len(row)!=2 or not row[0] or row[1] and not _HASH.fullmatch(row[1]) for row in self.memory_snapshot_digests):
             raise ValueError("episode_validation_snapshot_invalid")
 
 

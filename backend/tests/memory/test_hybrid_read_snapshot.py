@@ -2,7 +2,7 @@
 import asyncio
 from threading import Event
 from time import monotonic
-from sqlalchemy import create_engine, text, update
+from sqlalchemy import create_engine, text, update, event
 from sqlalchemy.orm import sessionmaker
 from app.runtime.memory.canonical_worker import CanonicalReadWorker, DeadlineSessionFactory
 from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
@@ -20,12 +20,12 @@ def test_resolve_pins_snapshot_and_next_guard_sees_permission_change(tmp_path):
     engine, reader, request, candidates = build_cost_case(tmp_path / "snapshot.sqlite", count=2)
     sessions = DeadlineSessionFactory(sessionmaker(engine))
     entered, release = Event(), Event()
-    class PausedDetails(RuntimeEpisodeDetailReader):
-        def prepare_situation_sources(self, contexts, *, validation):
-            super().prepare_situation_sources(contexts, validation=validation)
+    def paused_owned_read(conn,cursor,statement,parameters,context,many):
+        if "FROM memory_scope_settings" in statement and not entered.is_set():
             entered.set()
             assert release.wait(5)
-    reader.factory, reader.details = sessions, PausedDetails
+    event.listen(engine,'after_cursor_execute',paused_owned_read)
+    reader.factory = sessions
     worker = CanonicalReadWorker(sessions, reader)
     async def run():
         task = asyncio.create_task(worker.resolve_async(request, candidates, deadline=monotonic()+8))
@@ -46,7 +46,9 @@ def test_resolve_pins_snapshot_and_next_guard_sees_permission_change(tmp_path):
             await asyncio.gather(task, return_exceptions=True)
             await worker.stop()
     try: asyncio.run(run())
-    finally: engine.dispose()
+    finally:
+        event.remove(engine,'after_cursor_execute',paused_owned_read)
+        engine.dispose()
 
 
 def test_expensive_read_does_not_block_independent_write_or_async_timers(tmp_path):

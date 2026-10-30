@@ -12,6 +12,7 @@ from sqlalchemy import select, update, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.async_session import session_call
 from app.contracts.language import PREPARATION_LANGUAGE_POLICY, preparation_environment, preparation_language_instruction
 from app.domains.characters.models import Character
 from app.domains.identity.contracts import CredentialPurpose
@@ -185,12 +186,20 @@ async def prepare_initial_world(db: Session, *, world_id: str, owner_id: str):
 
 async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: str,
                      world_character_id: str | None = None, generator=None):
-    load_scope(db, world_id=world_id, owner_id=owner_id, world_character_id=world_character_id)
+    postgres = db.get_bind().dialect.name == "postgresql"
+    if not postgres:
+        load_scope(db, world_id=world_id, owner_id=owner_id, world_character_id=world_character_id)
     # Explicit requests own their Session and short writer transactions. The same
     # actor lock fences initial daily+Topic application and manual Topic updates.
     from app.domains.routines.service.daily_preparation import write_preparation
     from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
-    with Session(db.get_bind(), expire_on_commit=False) as work:
+    work = Session(db.get_bind(), expire_on_commit=False)
+    try:
+        if postgres:
+            # All authorization is repeated in the child-owned claim; do not
+            # reopen the HTTP parent's released authentication transaction.
+            await session_call(work, lambda: load_scope(work, world_id=world_id,
+                owner_id=owner_id, world_character_id=world_character_id))
         def claim():
             if world_character_id:
                 lock_preparation_actor(work, world_character_id)
@@ -236,7 +245,7 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
         diagnostic_scope = dict(request_id=request_id, world_id=world_id,
             world_character_id=world_character_id, started_at=started_at)
         try:
-            claimed = write_preparation(work, claim)
+            claimed = await session_call(work, lambda: write_preparation(work, claim))
         except Exception as exc:
             record_failure(exc=exc, stage="admission", **diagnostic_scope)
             raise
@@ -249,22 +258,26 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
                 from app.domains.characters.service.prompt_persona import render_persona
                 from app.domains.world_characters.service.name_binding import validate_name_binding
                 from app.runtime.preparation_names import authored_topics
-                names = read_name_binding(snapshot)
-                source = dict(snapshot["source"] if snapshot is not None else scope.source)
-                if PreparationScope(world_id, world_character_id, source).digest != scope.digest:
-                    raise TopicPreparationError("source_changed")
-                environment = preparation_environment(snapshot)
-                if environment is not None:
-                    source.update(preparation_language_policy=PREPARATION_LANGUAGE_POLICY,
-                        environment=environment.to_dict())
-                if names is not None:
-                    actor, _ = owned_character(work, world_character_id, owner_id, world_id)
-                    validate_name_binding(work, names, actor=actor, owner_id=owner_id)
-                    # Daily preparation has a persona; the preserved approved-
-                    # profile source keeps its own shape and provenance.
-                    if "persona" in source:
-                        source["persona"] = render_persona(source["persona"], names)
-                work.commit()  # No request snapshot read transaction across AI.
+                def validate_input():
+                    names = read_name_binding(snapshot)
+                    source = dict(snapshot["source"] if snapshot is not None else scope.source)
+                    if PreparationScope(world_id, world_character_id, source).digest != scope.digest:
+                        raise TopicPreparationError("source_changed")
+                    environment = preparation_environment(snapshot)
+                    if environment is not None:
+                        source.update(preparation_language_policy=PREPARATION_LANGUAGE_POLICY,
+                            environment=environment.to_dict())
+                    if names is not None:
+                        actor, _ = owned_character(work, world_character_id, owner_id, world_id)
+                        validate_name_binding(work, names, actor=actor, owner_id=owner_id)
+                        # Daily preparation has a persona; the preserved approved-
+                        # profile source keeps its own shape and provenance.
+                        if "persona" in source:
+                            source["persona"] = render_persona(source["persona"], names)
+                    work.commit()  # No request snapshot read transaction across AI.
+                    return names, source
+
+                names, source = await session_call(work, validate_input)
                 stage = "generation"
                 generated = await generate_topics(material, character_id, source, tracker=tracker) if generator is None else await generator(material, character_id, source)
                 stage = "output_validation"
@@ -297,9 +310,9 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
                         prep.state, prep.applied_digest, prep.last_code = "ready", scope.digest, None
                     prep.lease_expires_at = None
                 stage = "apply"
-                write_preparation(work, apply)
+                await session_call(work, lambda: write_preparation(work, apply))
             except Exception as exc:
-                work.rollback()
+                await session_call(work, work.rollback)
                 record_failure(exc=exc, stage=stage, tracker=tracker, topic_count=topic_count, **diagnostic_scope)
                 from app.contracts.name_binding import NameBindingError
                 code = str(exc) if isinstance(exc, NameBindingError) else "generation_failed"
@@ -309,12 +322,15 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
                         RecommendationPreparation.state == "running").values(
                         state="failed", last_code=code, lease_expires_at=None))
                 try:
-                    write_preparation(work, fail)
+                    await session_call(work, lambda: write_preparation(work, fail))
                 except Exception as record_exc:
                     record_failure(exc=record_exc, stage="failure_record", **diagnostic_scope)
                     raise
         db.expire_all()
-        return read_topics(work, world_id=world_id, owner_id=owner_id, world_character_id=world_character_id)
+        return await session_call(work, lambda: read_topics(work, world_id=world_id,
+            owner_id=owner_id, world_character_id=world_character_id))
+    finally:
+        await session_call(work, work.close)
 
 
 def mark_new_subject(db, *, world_id, world_character_id=None):

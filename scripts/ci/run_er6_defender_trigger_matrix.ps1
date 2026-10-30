@@ -12,6 +12,7 @@ param(
     [string]$ActualHost,
     [Parameter(Mandatory = $true)]
     [string]$ActualSidecar,
+    [string]$PostgreSQLResources,
     [Parameter(Mandatory = $true)]
     [string]$Installer,
     [Parameter(Mandatory = $true)]
@@ -316,6 +317,7 @@ if ((Test-Path -LiteralPath $stage4Host) -and (Test-Path -LiteralPath $stage4Sid
     $process = Start-IsolatedProcess $stage4Host @() @{
         ANGMOO_DEFENDER_MATRIX_REAL_SIDECAR = $stage4Sidecar
         ANGMOO_DEFENDER_MATRIX_RUNTIME_ROOT = $stage4RuntimeRoot
+        ANGMOO_DEFENDER_MATRIX_POSTGRESQL_ROOT = [System.IO.Path]::GetFullPath($PostgreSQLResources)
     }
     $deadline = (Get-Date).AddSeconds(60)
     while ((Get-Date) -lt $deadline -and -not (Test-Path -LiteralPath $endpoint)) {

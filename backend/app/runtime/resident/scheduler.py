@@ -42,6 +42,8 @@ from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepo
 from app.runtime.persistence.sqlite_scheduler_lease import SqliteSchedulerLeaseRepository
 from app.runtime.resident.lease_executor import SchedulerLeaseExecutor, lease_call
 from app.runtime.resident.lease_errors import SchedulerHeartbeatDeadlineExceeded
+from sqlalchemy.exc import DBAPIError
+from app.core.postgresql_concurrency import connection_unavailable, PostgresCommitOutcomeUnknown
 from app.exceptions import SqliteBusyRetryExhausted, SqliteTaskQueueFull, SqliteWriteDeadlineExceeded
 from datetime import UTC, datetime
 
@@ -54,6 +56,7 @@ from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routine
 logger = logging.getLogger(__name__)
 
 SchedulerStateListener = Callable[[str], None]
+RECOVERY_BACKOFF_MAX_SECONDS = 10.0
 
 class SchedulerShutdownDrainTimeout(RuntimeError):
     pending_tasks: tuple[asyncio.Task, ...] = ()
@@ -314,7 +317,7 @@ async def run_resident_tick_scheduler(
             await asyncio.wait_for(stop.wait(), timeout=backoff)
         except TimeoutError:
             pass
-        backoff = min(10.0, backoff * 2)
+        backoff = min(RECOVERY_BACKOFF_MAX_SECONDS, backoff * 2)
 
     try:
         with lock:
@@ -354,7 +357,8 @@ async def run_resident_tick_scheduler(
                             # Even a non-lease primary failure may leave a child
                             # that did not honor cancellation. Do not finish the
                             # window or start another tick while it is alive.
-                            if getattr(exc, "pending_tasks", ()):
+                            if (getattr(exc, "pending_tasks", ()) or connection_unavailable(exc)
+                                    or isinstance(exc, PostgresCommitOutcomeUnknown)):
                                 raise
                             logger.warning("scheduler_tick_failed code=%s", type(exc).__name__)
                             result_kind, tick_error = SchedulerTickResult.FAILED, type(exc).__name__
@@ -383,8 +387,24 @@ async def run_resident_tick_scheduler(
                 except (SchedulerLeaseLostError, SchedulerLeaseHeldError) as exc:
                     if getattr(exc, "pending_tasks", ()):
                         raise
-                    observe("degraded"); recovering = True; lease = None
+                    observe("waiting_lease" if isinstance(exc, SchedulerLeaseHeldError) else "degraded")
+                    recovering = True; lease = None
                     logger.warning("scheduler_recovery code=%s owner=%s backoff_seconds=%s", type(exc).__name__, lease_owner_id, backoff)
+                    if not await lease_coordinator.drain(drain_timeout):
+                        raise SchedulerShutdownDrainTimeout("scheduler_lease_work_not_settled") from exc
+                    if not stop.is_set(): await pause()
+                except (DBAPIError, PostgresCommitOutcomeUnknown) as exc:
+                    if (not isinstance(exc, PostgresCommitOutcomeUnknown)
+                            and not connection_unavailable(exc)):
+                        raise
+                    if getattr(exc, "pending_tasks", ()):
+                        raise
+                    # Reacquire from the durable row, including its last tick
+                    # window. Never replay a begin/finish with an unknown commit
+                    # or declare a stale heartbeat ready after a DB restart.
+                    observe("degraded"); recovering = True; lease = None
+                    logger.warning("scheduler_storage_recovery code=%s backoff_seconds=%s",
+                        type(exc).__name__, backoff)
                     if not await lease_coordinator.drain(drain_timeout):
                         raise SchedulerShutdownDrainTimeout("scheduler_lease_work_not_settled") from exc
                     if not stop.is_set(): await pause()
@@ -433,7 +453,9 @@ def _lease_write_deadline(*, owner_id, fencing_epoch, config, proof=None):
         if (proof.lease_expires_at is None or proof.lease_owner_id != owner_id
                 or proof.fencing_epoch != fencing_epoch):
             raise SchedulerLeaseLostError("scheduler_heartbeat_proof_mismatch")
-        expiry = proof.lease_expires_at.replace(tzinfo=UTC)
+        expiry = proof.lease_expires_at
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=UTC)
         remaining_lease = (expiry - datetime.now(UTC)).total_seconds()
         if remaining_lease <= 0:
             raise SchedulerLeaseLostError("scheduler_heartbeat_proof_expired")
@@ -471,8 +493,20 @@ async def _heartbeat_with_budget(coordinator, *, owner_id, fencing_epoch, config
     timeout = asyncio.timeout(max(0.0, deadline - monotonic()))
     try:
         async with timeout:
-            return await lease_call(coordinator, "heartbeat", owner_id=owner_id,
-                fencing_epoch=fencing_epoch, queue_deadline=deadline)
+            snapshot = await lease_call(coordinator, "heartbeat", owner_id=owner_id,
+                fencing_epoch=fencing_epoch, queue_deadline=deadline, deadline_timeout=timeout)
+        # An on-time worker result may reach a busy loop later. A completed
+        # write alone is not permission to continue after the lease/drain margin.
+        if (snapshot.lease_owner_id != owner_id or snapshot.fencing_epoch != fencing_epoch
+                or snapshot.lease_expires_at is None):
+            raise SchedulerLeaseLostError("scheduler_heartbeat_result_mismatch")
+        expiry = snapshot.lease_expires_at
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=UTC)
+        remaining = (expiry - datetime.now(UTC)).total_seconds()
+        if remaining <= config.resident_tick_shutdown_drain_seconds + 1:
+            raise SchedulerLeaseLostError("scheduler_heartbeat_result_expired")
+        return snapshot
     except TimeoutError as exc:
         if not timeout.expired():
             raise

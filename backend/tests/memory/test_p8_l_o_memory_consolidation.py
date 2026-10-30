@@ -250,6 +250,8 @@ def _stack(
     seed_environment(session, scope.owner_id)
     session.flush()
     reader = FakeSourceReader()
+    from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess
+    reader.experience_access = SqlAlchemyMemoryExperienceAccess(session)
     repository = SqlAlchemyMemoryConsolidationRepository(session)
     initial = MemoryScopeService(repository).get_or_create(scope)
     setting = MemoryScopeService(repository).update(

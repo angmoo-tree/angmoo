@@ -25,13 +25,17 @@ def pending(projection):
 
 def credential_proof(projection, setting_id):
     with projection._factory() as db:
-        db.connection().exec_driver_sql("BEGIN")
+        if db.get_bind().dialect.name == "postgresql":
+            from app.core.postgresql_reads import begin_owned_read
+            begin_owned_read(db.connection())
+        else:
+            db.connection().exec_driver_sql("BEGIN")
         row = db.get(MemoryIndexPreparation, setting_id)
         setting = db.get(MemoryScopeSettingModel, setting_id)
         if row is None or setting is None or row.state != "running":
             return None
         scope = MemoryScope(setting.owner_id, setting.world_id, setting.subject_world_character_id)
-        epochs = revisions(db, (f"world:{scope.world_id}", f"owner:{scope.owner_id}"))
+        epochs = revisions(db, (f"experience:world:{scope.world_id}", f"experience:owner:{scope.owner_id}"))
         try:
             valid = validate_embedding_credential(db, scope, revision=row.credential_revision) == row.credential_revision
         except (MemoryValidationError, ValueError):

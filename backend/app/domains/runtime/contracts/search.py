@@ -59,6 +59,8 @@ class SearchIndexDoctor:
     digest_matches: bool
     healthy: bool
     tokenizer_strategy: str
+    provider: str = "sqlite_fts5"
+    full_text_available: bool | None = None
 
 
 @runtime_checkable

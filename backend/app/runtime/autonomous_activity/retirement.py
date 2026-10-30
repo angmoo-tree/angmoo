@@ -163,16 +163,8 @@ def transition_uow(db, *, actor_id=None, entry_run_id=None, now=None, readiness=
         if actor is None:
             raise ValueError("legacy_transition_actor_missing")
         return transition_actor(db, actor, now=now, entry_run_id=entry_run_id, readiness=readiness)
-    if db.get_bind().dialect.name == "sqlite":
-        from app.core.sqlite_concurrency import run_sqlite_session_immediate
-        return run_sqlite_session_immediate(db, apply, require_clean=True)
-    try:
-        result = apply()
-        db.commit()
-        return result
-    except BaseException:
-        db.rollback()
-        raise
+    from app.core.activity_transactions import activity_write
+    return activity_write(db, apply, require_clean=True)
 
 
 def inspect_transition(db, actor, *, now=None):

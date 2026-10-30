@@ -53,12 +53,20 @@ def test_verified_chat_original_authors_are_taken_from_original_thread_and_role(
     assert changed[identities[0]].author_id == "p-requester"  # Repository compares saved digest before exporting it.
 
 
-def test_private_episode_author_does_not_change_sns_packet_or_hash():
+def test_private_episode_author_is_opaque_without_changing_original_text():
+    from app.domains.memory.policies.episode_provider_view import episode_provider_view
     source = EpisodePacketSource("source", "user", "Original words", "verified")
     packet = EpisodePacket("memory", "Situation", "episode_v1", (EpisodePacketUnit("unit", (source,)),))
     named = replace(packet, units=(replace(packet.units[0], sources=(replace(source, author_id="private-world-character"),)),))
     for purpose in ("chat", "sns"):
-        assert bounded_episode_packets((packet,), purpose=purpose) == bounded_episode_packets((named,), purpose=purpose)
+        before = bounded_episode_packets(episode_provider_view((packet,)), purpose=purpose)
+        after = bounded_episode_packets(episode_provider_view((named,)), purpose=purpose)
+        assert 'private-world-character' not in after.text
+        original = dict(before.packets[0]['units'][0]['sources'][0])
+        attributed = dict(after.packets[0]['units'][0]['sources'][0])
+        assert original.pop('author_ref') is None
+        assert attributed.pop('author_ref').startswith('author-')
+        assert attributed == original
 
 
 def test_twenty_message_history_budget_includes_maximum_unicode_speaker_names(response_session):

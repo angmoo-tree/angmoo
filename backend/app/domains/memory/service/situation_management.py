@@ -1,6 +1,6 @@
 """Owner authorization and UoW for processing settings and explicit save."""
 from datetime import UTC, datetime
-from sqlalchemy import func, select
+from sqlalchemy import func, select, case
 from app.domains.memory.contracts.activity_situation import stable_digest
 from app.domains.memory.contracts.items import normalize_memory_idempotency_key
 from app.domains.memory.exceptions import MemoryConflictError
@@ -10,6 +10,7 @@ from app.domains.memory.repository.situation_runs import get_or_create_settings,
 from app.domains.memory.schemas.situation import MemoryProcessingRead
 from app.domains.memory.repository.situation_recovery import active_run
 from app.domains.memory.models.batch import MemoryActivationEpoch
+from app.core.database_transactions import postgres_db_unit
 
 
 def read(*, scope, db, workflows, result=None, request_key=None):
@@ -29,10 +30,15 @@ def read(*, scope, db, workflows, result=None, request_key=None):
         pending, blocked = counts.get("pending", 0), counts.get("blocked", 0) + counts.get("error", 0)
         run = (db.get(MemorySituationApplyRun, resolved.run_id) if resolved and resolved.run_id else None) if request_key is not None else db.scalar(
             select(MemorySituationApplyRun).where(MemorySituationApplyRun.scope_setting_id == setting.id)
-            .order_by(MemorySituationApplyRun.created_at.desc(), MemorySituationApplyRun.id.desc()).limit(1))
+            .order_by(case((MemorySituationApplyRun.state.in_(("pending", "running", "deferred")), 0),
+                ((MemorySituationApplyRun.state == "error") & (func.coalesce(MemorySituationApplyRun.maintenance["hold"].as_string(), "").not_in(("closed", "cancelled"))), 1), else_=2),
+                MemorySituationApplyRun.created_at.desc(), MemorySituationApplyRun.id.desc()).limit(1))
     status = "idle"
     if run:
         status = "applying" if run.state == "running" else "accepted" if run.state in {"pending", "deferred"} else "partial_error" if run.state == "error" or run.blocked_count else "saved"
+        hold = (run.maintenance or {}).get("hold")
+        if hold in {"closed", "cancelled"}:
+            status = hold
     zone = config.timezone if config else legacy.timezone if legacy else workflows.batch_repository(db).timezone(scope)
     busy = active_run(db, setting.id) is not None if setting else False
     eligible = db.scalar(select(MemorySituationReceipt.sequence).join(MemoryActivationEpoch,
@@ -52,7 +58,58 @@ def read(*, scope, db, workflows, result=None, request_key=None):
         resolved_request_key=resolved.request_key if resolved else None,
         operation=run.work_kind if run else None, run_id=run.id if run else None, run_state=run.state if run else None,
         rejected_count=run.blocked_count if run else 0, skipped_count=run.skipped_count if run else 0,
-        scope_busy=busy, can_recheck=eligible is not None and not busy)
+        scope_busy=busy, can_recheck=eligible is not None and not busy,
+        revision=(run.maintenance or {}).get("revision", 0) if run else 0,
+        actions=run_actions(run), error_code=run.error_code if run else None)
+
+
+def run_actions(run):
+    if run is None or run.state == "completed" or (run.maintenance or {}).get("hold") == "closed":
+        return []
+    if (run.maintenance or {}).get("hold") == "cancelled":
+        return ["resume_remaining"]
+    if run.state == "error":
+        return ["resume_storage", "close_without_retry"]
+    return ["cancel_remaining"]
+
+
+@postgres_db_unit
+def command(*, scope, db, workflows, run_id, data):
+    memory = workflows.batch_repository(db).memory
+    memory.validate_scope(scope)
+    setting = memory.get_scope_setting(scope)
+    row = db.get(MemorySituationApplyRun, run_id, with_for_update=True)
+    if row is None or setting is None or row.scope_setting_id != setting.id:
+        from app.domains.memory.exceptions import MemoryNotFoundError
+        raise MemoryNotFoundError("situation_run_not_found")
+    control = dict(row.maintenance or {})
+    previous = control.get("last_command", {})
+    if previous.get("key") == data.idempotency_key:
+        if previous.get("mode") != data.mode:
+            raise MemoryConflictError("memory_request_replay_conflict")
+    else:
+        if data.expected_revision != control.get("revision", 0) or data.mode not in run_actions(row):
+            raise MemoryConflictError("memory_workflow_revision_conflict")
+        now = datetime.now(UTC)
+        history = list(control.get("history", []))
+        history.append({"state": row.state, "code": row.error_code, "at": now.isoformat(), "mode": data.mode})
+        control.update(revision=data.expected_revision+1, history=history,
+            last_command={"key": data.idempotency_key, "mode": data.mode})
+        if data.mode in {"cancel_remaining", "close_without_retry"}:
+            control["hold"] = "closed" if data.mode == "close_without_retry" else "cancelled"
+            row.state = "error"
+            if data.mode == "cancel_remaining":
+                row.error_code = "maintenance_cancelled"
+            row.completed_at = now
+        else:
+            control["hold"] = None
+            control["storage_rounds"] = 0
+            control.pop("storage_first", None)
+            row.state, row.error_code, row.completed_at = "deferred", None, None
+        row.maintenance = control
+        row.lease_token = row.lease_until = None
+    db.commit()
+    return read(scope=scope, db=db, workflows=workflows)
 
 
 def _ensure(db, workflows, scope, now):
@@ -64,6 +121,7 @@ def _ensure(db, workflows, scope, now):
     return setting, config, old is None
 
 
+@postgres_db_unit
 def save_settings(*, scope, db, workflows, data):
     now = datetime.now(UTC)
     try:
@@ -93,6 +151,7 @@ def save_settings(*, scope, db, workflows, data):
     return read(scope=scope, db=db, workflows=workflows)
 
 
+@postgres_db_unit
 def save_now(*, scope, db, workflows, data):
     now = datetime.now(UTC)
     try:

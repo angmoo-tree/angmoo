@@ -33,7 +33,7 @@ run:
 ```
 
 The first command reports every prerequisite and fails closed. The second
-starts or reuses the two-service Docker contributor stack, checks runtime
+starts or reuses the three-service PostgreSQL Docker contributor stack, checks runtime
 readiness, starts Compose Watch, and opens the Windows Host Tauri main shell.
 It does not build a sidecar or start a host FastAPI process.
 
@@ -70,19 +70,21 @@ must handle the active Windows console encoding itself.
 3. Memory opens in its `memory` workspace; current World relationships remain
    inside the World route and retain scope.
 4. Closing and reopening each wide surface reuses its window label.
-5. Docker shows only healthy `frontend` and `backend` services.
-6. No host `angmoo-sidecar`, PostgreSQL, Neo4j, or Angmoo-owned JVM starts.
+5. Docker shows healthy `postgres`, `backend` and `frontend` services.
+6. No native host `angmoo-sidecar`, PostgreSQL, Neo4j, or Angmoo-owned JVM starts; PostgreSQL runs inside the contributor Docker project.
 7. Closing Host Tauri leaves the Docker stack and contributor volume intact.
 
 ## Data safety
 
 Contributor state stays in Docker named volume
-`angmoo_contributor_embedded_data`. The bridge uses only
+`angmoo_contributor_embedded_data` (application files), the project's PostgreSQL
+and bootstrap-secret volumes. The old SQLite application volume is a protected
+migration source, not a new empty 0.1.4 database. The bridge uses only
 `.angmoo-dev/webview` for its repository-local WebView profile. It never mounts,
 copies, migrates, or mutates installed-user data under
 `%LOCALAPPDATA%\Angmoo`.
 
-The launcher fingerprints installed canonical, graph, media, and secrets data
+The launcher fingerprints installed canonical, graph, media, secrets and any native PostgreSQL data
 before and after the session and fails if they change. It also refuses to run
 when an installed Angmoo or host sidecar process is active or when an Angmoo
 data-root override is present.

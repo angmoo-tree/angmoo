@@ -1038,6 +1038,10 @@ def _scope_filters(query: MemoryRecallSearchQuery) -> tuple[list[str], list[str]
     if query.thread_id is not None:
         filters.append("d.thread_id = ?")
         parameters.append(query.thread_id)
+    if query.allowed_thread_ids is not None:
+        allowed = query.allowed_thread_ids
+        filters.append("(d.thread_id IS NULL" + (f" OR d.thread_id IN ({', '.join('?' for _ in allowed)})" if allowed else "") + ")")
+        parameters.extend(allowed)
     if query.occurred_from is not None:
         filters.append("d.occurred_at >= ?")
         parameters.append(_utc_text(query.occurred_from))

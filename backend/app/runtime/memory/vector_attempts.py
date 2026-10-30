@@ -9,6 +9,10 @@ from app.domains.memory.repository import vector_attempts as store
 def import_legacy(projection):
     if projection._attempts_ready:
         return
+    if getattr(projection.index,'provider',None)=='postgresql':
+        projection.index.require_budget_receipt()
+        projection._attempts_ready=True
+        return
     for index in projection._retained_indexes():
         # Read ordinary budget tables even when Vec1's own derived schema is
         # damaged. Never create a missing old database or discard its failure.
@@ -48,10 +52,13 @@ def _import_one(projection, connection):
 def claim(projection, keys, now, *, prepared=()):
     import_legacy(projection)
     # Fail admission before paying when the local projection is already busy.
-    with projection.index._connect() as connection:
-        connection.execute("PRAGMA busy_timeout=25")
-        connection.execute("BEGIN IMMEDIATE")
-        connection.rollback()
+    if getattr(projection.index,'provider',None)=='postgresql':
+        projection.index.check_writable()
+    else:
+        with projection.index._connect() as connection:
+            connection.execute("PRAGMA busy_timeout=25")
+            connection.execute("BEGIN IMMEDIATE")
+            connection.rollback()
     with projection._factory() as session:
         def admit():
             from app.domains.memory.repository.vector_queue import owns

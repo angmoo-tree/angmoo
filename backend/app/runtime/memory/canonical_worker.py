@@ -45,6 +45,26 @@ class DeadlineSessionFactory:
         if cancelled.is_set() or monotonic() >= deadline:
             raise TimeoutError("canonical_read_deadline")
         with self.factory() as session:
+            if session.get_bind().dialect.name == "postgresql":
+                from app.core.postgresql_deadline import read_deadline
+                from app.core.postgresql_reads import begin_owned_read
+                connection = session.connection()
+                def pg_count(*_):
+                    counters[0] += 1
+                    if progress is not None:
+                        progress.update(counters)
+                event.listen(connection,"before_cursor_execute",pg_count)
+                try:
+                    with read_deadline(connection,deadline,cancelled=cancelled):
+                        begin_owned_read(connection)
+                        yield session
+                finally:
+                    event.remove(connection,"before_cursor_execute",pg_count)
+                    session.rollback()
+                    counters[1] = 1
+                    if progress is not None:
+                        progress.update(counters)
+                return
             driver, connection, timeout, listening = None, None, None, False
             def count(*_):
                 counters[0] += 1
@@ -81,9 +101,14 @@ class DeadlineSessionFactory:
 
 
 class CanonicalReadWorker:
-    def __init__(self, sessions, reader):
+    def __init__(self, sessions, reader, *, separate_guard=False):
         self.sessions, self.reader = sessions, reader
         self.queue = SqliteAsyncTaskQueue(capacity=8, closed_code="canonical_worker_closed")
+        # A final delivered-evidence guard must not sit behind new bulk recalls.
+        # Both lanes open their own fresh Session and share the existing DB pool.
+        # PostgreSQL enables one extra reader; no unbounded executor or new pool.
+        self.guard_queue = (SqliteAsyncTaskQueue(capacity=4, closed_code="canonical_worker_closed")
+                            if separate_guard else self.queue)
         self.signals = set()
 
     def axis_request(self, request):
@@ -105,7 +130,12 @@ class CanonicalReadWorker:
             try:
                 if signal.is_set() or started >= deadline:
                     raise TimeoutError("canonical_read_deadline")
-                result = getattr(self.reader, stage)(request, rows)
+                from app.core.postgresql_reads import retry_read
+                # Every reader entrypoint owns a fresh Session and validation
+                # memo. Only PostgreSQL SQLSTATE aborts retry; SQLite errors,
+                # changed evidence and provider work are never replayed here.
+                result = retry_read(lambda: getattr(self.reader, stage)(request, rows),
+                    deadline=deadline, cancelled=signal)
                 if signal.is_set() or monotonic() >= deadline:
                     raise TimeoutError("canonical_read_deadline")
                 return result
@@ -115,7 +145,8 @@ class CanonicalReadWorker:
                 del self.sessions.local.work
         try:
             async with asyncio.timeout(max(0, deadline-monotonic())):
-                result = await self.queue.call(execute)
+                queue = self.guard_queue if stage == "assert_current" else self.queue
+                result = await queue.call(execute)
             # Merge only immutable, bounded facts on the parent task. No request
             # collector/ContextVar or raw values are shared with this thread.
             report(None if progress is None else progress.receipt())
@@ -156,6 +187,10 @@ class CanonicalReadWorker:
 
     async def stop(self):
         self.queue.close()
+        if self.guard_queue is not self.queue:
+            self.guard_queue.close()
         for signal in tuple(self.signals):
             signal.set()
         await self.queue.drain()
+        if self.guard_queue is not self.queue:
+            await self.guard_queue.drain()

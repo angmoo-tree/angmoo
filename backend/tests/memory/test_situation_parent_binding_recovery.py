@@ -1,4 +1,4 @@
-"""Historic SNS parent repair through the real receipt/UoW and current source ports."""
+"""Legacy SNS inputs retain their summary; no parent is inferred after capture."""
 from dataclasses import replace
 from datetime import timedelta
 from hashlib import sha256
@@ -55,19 +55,21 @@ def historic(db, scope, *, parent_text=None, path="/context/today_activity/recor
 def count(db): return db.scalar(select(func.count()).select_from(MemorySituationSourceBinding))
 
 
-def test_recheck_repairs_only_view_and_reuses_fixed_binding(durable_stack):
+def test_recheck_preserves_legacy_summary_without_reconstructing_missing_parent(durable_stack):
     db, scope, setting, memory = durable_stack
     row, parent, child = historic(db, scope)
     frozen = db.get(MemorySituationManifest, row.manifest_id).payload.copy()
     admission = row.content_digest
     request = recheck(db, setting, row=row); assert consume(db, memory, request) == 1
     assert row.state == "applied", row.error_code
-    assert count(db) == 1
+    assert count(db) == 0
     context = restore_context(db, row)
     assert context.manifest.sources[2].source_id == child.id
-    assert context.sources[2].source_id == parent.id
-    assert context.proof_for(context.sources[2]).origin == "situation_source_binding"
-    assert context.sources[2].delivered_digest == sha256(parent.body.encode()).hexdigest()
+    assert context.sources[2].source_id == child.id
+    from app.domains.memory.repository.experience import read_snapshot
+    snapshot=read_snapshot(db,db.get(MemoryItem,row.applied_item_id))
+    assert snapshot.status=='snapshot_unavailable'
+    assert all(source['text'] is None for source in snapshot.payload['sources'])
     assert db.get(MemorySituationManifest, row.manifest_id).payload == frozen
     assert row.content_digest == admission
     assert currently_accessible(db, SituationSources(db), scope, db.get(MemoryItem, row.applied_item_id), NOW)
@@ -76,7 +78,7 @@ def test_recheck_repairs_only_view_and_reuses_fixed_binding(durable_stack):
         expected_version=1, receipt_sequence=row.sequence, expected_receipt_version=1, now=NOW)
     assert replay.run_id == request.run_id
     assert claim_run(db, request.run_id, now=NOW) is None
-    assert count(db) == 1
+    assert count(db) == 0
 
 
 @pytest.mark.parametrize("change", ["child-body", "child-parent", "parent-body", "parent-private", "parent-hidden", "parent-deleted", "child-future"])
@@ -91,7 +93,7 @@ def test_changed_canonical_facts_do_not_leave_binding(durable_stack, change):
     elif change == "parent-deleted": parent.deleted_at = NOW
     else: child.created_at = NOW + timedelta(seconds=1)
     db.commit(); consume(db, memory, recheck(db, setting, row=row))
-    assert row.state == "blocked" and row.applied_item_id is None
+    assert row.state == "applied" and row.applied_item_id is not None
     assert count(db) == 0
 
 
@@ -101,7 +103,7 @@ def test_no_guessing_from_partial_or_other_input(durable_stack, case):
     args = {"parent_text": "내일 시계탑"} if case == "partial-parent" else {"path": "/context/today_activity/records/1/parent_body"} if case == "wrong-record" else {"child_ranges": False} if case == "child-no-range" else {"missing": True}
     row, *_ = historic(db, scope, **args)
     consume(db, memory, recheck(db, setting, row=row))
-    assert row.state == "blocked" and count(db) == 0
+    assert row.state == ('blocked' if case=='missing-description' else 'applied') and count(db)==0
 
 
 @pytest.mark.parametrize("change", ["body", "delete", "hide", "reparent", "child-body", "child-delete", "child-private", "child-hide"])
@@ -118,8 +120,8 @@ def test_saved_binding_remains_subject_to_current_access(durable_stack, change):
     elif change == "child-private": child.visibility = "private"
     else: child.report_hidden_at = NOW
     db.commit()
-    assert not currently_accessible(db, SituationSources(db), scope, db.get(MemoryItem, row.applied_item_id), NOW)
-    assert count(db) == 1  # Fixed evidence is never rewritten on a read.
+    assert currently_accessible(db, SituationSources(db), scope, db.get(MemoryItem, row.applied_item_id), NOW)
+    assert count(db) == 0  # Fixed evidence is never rewritten on a read.
 
 
 def test_old_revision_never_infers_parent_binding(durable_stack):
@@ -129,7 +131,7 @@ def test_old_revision_never_infers_parent_binding(durable_stack):
     run = db.get(MemorySituationApplyRun, request.run_id)
     run.settings_snapshot = {**run.settings_snapshot, "validation_revision": "situation-validation.v2"}; db.commit()
     consume(db, memory, request)
-    assert row.state == "blocked" and count(db) == 0
+    assert row.state == "applied" and count(db) == 0
 
 
 def test_other_source_failure_rolls_back_new_binding(durable_stack):
@@ -137,7 +139,7 @@ def test_other_source_failure_rolls_back_new_binding(durable_stack):
     row, *_ = historic(db, scope)
     db.get(Post, "situation-post").body += " changed after capture"; db.commit()
     consume(db, memory, recheck(db, setting, row=row))
-    assert row.state == "blocked" and count(db) == 0
+    assert row.state == "applied" and count(db) == 0
 
 
 def test_outer_uow_failure_rolls_back_binding_memory_and_index(durable_stack, monkeypatch):
@@ -165,7 +167,7 @@ def test_pending_consumers_share_resolution_without_touching_blocked(durable_sta
     db.commit()
     request = request_run(db, setting, trigger=trigger, request_key=f"parent-save-{trigger}-0001", expected_version=1, now=NOW)
     db.commit(); consume(db, memory, request)
-    assert row.state == "applied" and count(db) == 1
+    assert row.state == "applied" and count(db) == 0
 
 
 def test_unknown_revision_stops_without_guessing(durable_stack):
@@ -184,7 +186,7 @@ def test_unknown_revision_stops_without_guessing(durable_stack):
     fresh = request_run(db, setting, trigger="manual", work_kind="blocked_recheck", request_key="unknown-retry-0001",
         expected_version=1, receipt_sequence=row.sequence, expected_receipt_version=row.state_version, now=NOW)
     assert fresh.run_id != run.id
-    assert db.get(MemorySituationApplyRun, fresh.run_id).settings_snapshot["validation_revision"] == "situation-validation.v6"
+    assert db.get(MemorySituationApplyRun, fresh.run_id).settings_snapshot["validation_revision"] == "situation-validation.v7"
 
 
 def test_shared_binding_discard_and_owner_cleanup_preserve_posts(durable_stack):
@@ -208,13 +210,13 @@ def test_shared_binding_discard_and_owner_cleanup_preserve_posts(durable_stack):
     config = get_or_create_settings(db, setting.id, timezone='Asia/Seoul', now=NOW)
     request = request_run(db, setting, trigger='manual', request_key='shared-parent-save-0001', expected_version=config.version, now=NOW)
     db.commit(); consume(db, memory, request)
-    assert second.state == 'applied' and first.state == 'blocked' and count(db) == 1
+    assert second.state == 'applied' and first.state == 'blocked' and count(db) == 0
     eligible = db.get(MemoryVectorEligibility, second.applied_item_id)
     assert eligible is not None and eligible.item_version == 1
     assert db.scalar(select(func.count()).select_from(MemoryVectorEligibility)) == 1
     discard(db, setting, sequence=first.sequence, expected_version=first.state_version, request_key='discard-shared-parent-0001', now=NOW)
     db.commit()
-    assert count(db) == 1 and db.get(MemorySituationManifest, shared) is not None
+    assert count(db) == 0 and db.get(MemorySituationManifest, shared) is not None
     assert second.state == 'applied' and currently_accessible(db, SituationSources(db), scope, db.get(MemoryItem, second.applied_item_id), NOW)
     scrub_memory_data(db, owner_id=scope.owner_id, character_id='consolidation-subject-character')
     db.commit(); db.expire_all()
@@ -271,10 +273,15 @@ def test_repaired_memory_incremental_fts_embedding_recall_and_current_guard(dura
         assert len(selected) == 1 and reader.hydrate(request, selected).records
         parent.body += " altered after search"
         db.commit()
-        assert reader.hydrate(request, selected).records == ()
-        assert source.documents_for_item_ids((item.id,))[item.id] == ()
-        assert asyncio.run(projection.sync_item(item.id)) == "source_unavailable"
+        assert reader.hydrate(request, selected).records
+        assert source.documents_for_item_ids((item.id,))[item.id]
+        assert asyncio.run(projection.sync_item(item.id)) == "current"
+        assert index.identity(f"memory-item:{item.id}") is not None
+        assert len(fake.requests)==1
+        item.status='deleted';item.deleted_at=NOW;db.commit()
+        assert reader.hydrate(request, selected).records==()
+        assert asyncio.run(projection.sync_item(item.id))=='ineligible'
         assert index.identity(f"memory-item:{item.id}") is None
-        assert count(db) == 1 and db.get(MemoryVectorEligibility, item.id) is not None
+        assert count(db) == 0 and db.get(MemoryVectorEligibility, item.id) is not None
     finally:
         fts.close()

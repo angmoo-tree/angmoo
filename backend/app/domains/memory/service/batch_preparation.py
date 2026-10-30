@@ -208,10 +208,14 @@ def rebuild_briefs(session, *, dependencies: MemoryPreparationDependencies, now:
             except MemoryDomainError:
                 continue
             items = repository.hot_brief_source_items(setting=snapshot, now=now, limit=24)
+            from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+            # One read phase for all selected roots. Never carry these facts
+            # across replace_hot_brief's separate current-version write fence.
+            validation = MemoryAccessValidation(session, now)
             valid = True
             for item in items:
                 situation_evidence = memory.situation_correction_evidence(
-                    scope=snapshot.scope, item_id=item.id, reader=reader, now=now)
+                    scope=snapshot.scope, item_id=item.id, reader=reader, now=now, validation=validation)
                 if situation_evidence is not None:
                     continue
                 evidence_rows = memory.list_item_evidence(

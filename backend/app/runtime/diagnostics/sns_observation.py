@@ -33,7 +33,7 @@ FILE_LIMIT = 4 * 1024 * 1024
 SESSION_LIMIT = 64 * 1024 * 1024
 ARTIFACT_LIMIT = 64 * 1024
 ARTIFACT_SESSION_LIMIT = 16 * 1024 * 1024
-_CODE = re.compile(r"[A-Za-z0-9_./:@-]{1,160}\Z")
+from app.runtime.diagnostics.identifiers import code, identifier
 _FIELD_PATH = re.compile(r"decisions\.\d+\.(?:target_id|action|interaction_intent|comment_purpose|proposal|proposal_response|brief)\Z")
 _NAME_FIELD_PATH = re.compile(r"(?:(?:replies|reply_task_results)\.\d+\.)?(?:title|body|topic_signature|novelty_basis)\Z")
 _PLANNER_VALIDATION_CODES = frozenset({
@@ -60,11 +60,6 @@ def utc(value: datetime | str | None) -> datetime | None:
     return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
-def code(value: Any) -> str | None:
-    if value is None:
-        return None
-    text = str(value)
-    return text if _CODE.fullmatch(text) else None
 
 
 def validation_code(value: Any) -> str | None:
@@ -75,9 +70,6 @@ def field_path(value: Any) -> str | None:
     return value if isinstance(value, str) and (value in {"decision", "draft"} or _FIELD_PATH.fullmatch(value)) else None
 
 
-def identifier(value: Any) -> str | None:
-    """IDs are backend supplied; arbitrary prose is never copied as an ID."""
-    return code(value)
 
 
 def numbers(value: Any) -> int | float | None:
@@ -442,7 +434,7 @@ class SNSAttempt:
         if kind == "relationship_validation":
             self.emit("relationship_validation", lane=code(payload.get("lane")), details={
                 "revision": payload.get("revision") if payload.get("revision") in {
-                    "social-context-currentness.v1", "social-context-currentness.legacy.v1"} else None,
+                    "social-context-initial-input.v1", "social-context-currentness.v1", "social-context-currentness.legacy.v1"} else None,
                 "outcome": payload.get("outcome") if payload.get("outcome") in {
                     "valid", "valid_legacy_facts", "no_facts", "unavailable", "disabled", "invalid"} else None,
                 "reason": payload.get("reason") if payload.get("reason") in {
@@ -498,6 +490,9 @@ class SNSAttempt:
 
 def _scheduler_snapshot(data_root: Path, manifest: dict) -> dict:
     """Small, read-only scheduler inventory for a once-per-minute heartbeat."""
+    if (data_root/'runtime/postgresql-runtime.json').exists():
+        from app.runtime.diagnostics.postgresql_snapshot import scheduler_snapshot
+        return scheduler_snapshot(data_root,manifest)
     started = monotonic()
     try:
         root = data_root.resolve()

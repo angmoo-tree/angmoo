@@ -1,4 +1,5 @@
 """Real source writers, Today capture, durable receipts and canonical access."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
 import json
@@ -69,8 +70,11 @@ def capture(db, scope, *, records=None, node="FeedDecisionDraft"):
     payload = {"context": {"today_activity": {"records": today(db, scope) if records is None else records}}}
     wire = json.dumps(payload, ensure_ascii=False, default=str)
     payload = json.loads(wire)
-    return freeze_social_input(SimpleNamespace(db=db, run_id="manual-fixture"), base.snapshot,
-        node=node, payload=payload, transmitted=wire, state={})
+    return freeze_social_input(SimpleNamespace(db=db, run_id="manual-fixture", user_id=scope.owner_id), base.snapshot,
+        node=node, payload=payload, transmitted=wire, state={
+            "identity": {"activity_id": "manual-fixture", "world_id": scope.world_id,
+                         "actor_id": scope.subject_world_character_id},
+            "shared_context": {"today_activity": {"records": json.loads(json.dumps(today(db, scope), default=str))}}})
 
 
 def receipt(db, scope, post, manifest, lane="feed"):
@@ -96,11 +100,12 @@ def test_manual_event_survives_capture_apply_recall_and_generic_access_stays_den
     assert memory_evidence_blocked_code(scope=scope, source_type=raw.source_type, source_id=source.id, evidence=raw) == "memory_source_not_visible"
     row = receipt(db, scope, post, manifest, lane)
     context = restore_context(db, row)
-    direct = SituationSources(db).validate(context, entry, now=NOW)
-    assert direct.state == "available" and not direct.evidence.visible
-    validation = MemoryAccessValidation(db, NOW)
-    prepare_sources(db, (context,), validation=validation, queries_factory=_SourceQueries)
-    assert validation.runtime_sources.validate(context, entry, now=NOW, validation=validation) == direct
+    from app.domains.memory.repository.experience import validate_captured_sources
+    direct = next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW, reader=RuntimeEpisodeDetailReader(db))
+                  if source_entry == entry)
+    assert direct.state == "available" and direct.proof_origin == "stored_experience"
+    # Historical delivery grants no permission to read the original event.
+    assert SituationSources(db).validate(context, entry, now=NOW).state == "forbidden"
     apply(db, setting, memory)
     assert row.state == "applied", row.error_code
     item = db.get(MemoryItem, row.applied_item_id)
@@ -133,7 +138,7 @@ def test_manual_post_for_author_and_outgoing_reaction(durable_stack):
 
 
 @pytest.mark.parametrize("mutation", ["root", "evidence_kind", "invalidation", "hidden", "membership", "duplicate_evidence", "private", "target", "block"])
-def test_current_source_changes_are_rejected_without_promoting_event(durable_stack, mutation):
+def test_historical_input_survives_source_changes_without_promoting_event(durable_stack, mutation):
     db, scope, *_ = durable_stack
     source, post = manual_event(db, scope)
     manifest = capture(db, scope)
@@ -161,6 +166,9 @@ def test_current_source_changes_are_rejected_without_promoting_event(durable_sta
     context = restore_context(db, row)
     access = SituationSources(db).validate(context, entry, now=NOW)
     assert access.state in {"forbidden", "changed"}
+    from app.domains.memory.repository.experience import validate_captured_sources
+    assert next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW, reader=RuntimeEpisodeDetailReader(db))
+                if source_entry == entry).state == "available"
     assert source.retrieval_status == "audit_only"
 
 
@@ -195,7 +203,7 @@ def test_no_delivery_or_legacy_revision_cannot_borrow_cached_permission(durable_
     entry = next(s for s in manifest.sources if s.source_id == source.id)
     validation = MemoryAccessValidation(db, NOW)
     reader = SituationSources(db)
-    assert reader.validate(context, entry, now=NOW, validation=validation).state == "available"
+    assert reader.validate(context, entry, now=NOW, validation=validation).state == "forbidden"
     assert reader.validate(context.manifest, entry, now=NOW, validation=validation).state == "forbidden"
     for revision in ("situation-validation.v2", "situation-validation.v3", "situation-validation.v4", "situation-validation.v5"):
         assert reader.validate(replace(context, revision=revision), entry, now=NOW, validation=validation).state == "forbidden"
@@ -238,7 +246,7 @@ def test_capture_reads_only_and_trimmed_event_has_no_manifest_entry(durable_stac
     assert not set(statements) & {"INSERT", "UPDATE", "DELETE", "REPLACE"}
 
 
-def test_source_changed_after_page_preparation_cannot_be_applied(durable_stack):
+def test_source_changed_after_page_preparation_uses_stored_experience(durable_stack):
     from app.domains.memory.repository.situation_runs import get_or_create_settings, request_run, claim_run
     from app.domains.memory.repository.situation_apply import prepare_page, apply_page
     from app.runtime.memory.situation_application_sources import PreparedSituationSources
@@ -252,7 +260,7 @@ def test_source_changed_after_page_preparation_cannot_be_applied(durable_stack):
     post.body += " changed after immutable preparation"; db.commit()
     apply_page(db, memory, PreparedSituationSources(db), run_id=request.run_id, token=token, now=NOW, prepared=page)
     db.commit()
-    assert row.state == "blocked" and db.scalar(select(MemoryItem.id)) is None
+    assert row.state == "applied" and db.scalar(select(MemoryItem.id)) is not None
 
 
 def test_nested_manual_reply_keeps_parent_root_and_cycle_guard(durable_stack):
@@ -277,7 +285,7 @@ def test_nested_manual_reply_keeps_parent_root_and_cycle_guard(durable_stack):
         capture(db, scope, records=records)
 
 
-def test_deleted_manual_source_retains_summary_without_original(durable_stack):
+def test_deleted_manual_source_keeps_delivered_snapshot_without_live_original(durable_stack):
     db, scope, setting, memory = durable_stack
     source, post = manual_event(db, scope)
     row = receipt(db, scope, post, capture(db, scope))
@@ -287,7 +295,7 @@ def test_deleted_manual_source_retains_summary_without_original(durable_stack):
     item = db.get(MemoryItem, row.applied_item_id)
     reader, request, ranked, _ = readers(db, scope, item)
     hydrated = reader.hydrate(request, reader.revalidate(request, (ranked,)))
-    assert hydrated.records and post.body not in hydrated.records[0].text
+    assert hydrated.records and post.body in hydrated.records[0].text
 
 
 def test_unlisted_visibility_and_reused_reader_still_check_fresh_facts(durable_stack):
@@ -394,9 +402,17 @@ def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index,
         context = restore_context(db, row)
         assert SituationSources(db).validate(context, prior, now=NOW).state == "available"
         post.report_hidden_at = NOW; db.commit()
+        # Owned snapshots survive later changes to the original post. Explicit
+        # memory deletion still revokes recall, derived indexing and prior use.
+        assert reader.hydrate(request, selected).records
+        assert source.documents_for_item_ids((item.id,))[item.id]
+        assert SituationSources(db).validate(context, prior, now=NOW).state == "available"
+        assert item.id in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
+        item.status, item.deleted_at = "deleted", NOW; db.commit()
         assert reader.hydrate(request, selected).records == ()
         assert source.documents_for_item_ids((item.id,))[item.id] == ()
-        assert SituationSources(db).validate(context, prior, now=NOW).state == "forbidden"
+        denied = SituationSources(db).validate(context, prior, now=NOW)
+        assert denied.state == "changed" and denied.reason == "situation_prior_changed"
         assert item.id not in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
     finally:
         fts.close()

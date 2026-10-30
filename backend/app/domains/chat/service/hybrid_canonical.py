@@ -1,5 +1,5 @@
 """Canonical ToolNode execution without a specialist Planner or fabricated plan."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from time import monotonic
 from app.contracts.retrieval_observation import observe
@@ -34,6 +34,13 @@ class HybridCanonicalResult:
 
 
 @dataclass(frozen=True, slots=True)
+class StoredHybridResult:
+    recall: HybridRecallResult
+    metrics: CanonicalPlanningMetrics
+    call_tracker: dict
+
+
+@dataclass(frozen=True, slots=True)
 class _CurrentMemoryEvidence:
     service: object
     result: HybridRecallResult
@@ -58,6 +65,17 @@ class HybridCanonicalService:
 
     async def plan_and_execute(self, command, *, now, deadline_at):
         resolved = command.resolved
+        if command.initial_result is not None:
+            from app.domains.chat.contracts.input_receipt import unpack
+            stored = unpack(command.initial_result, StoredHybridResult,
+                slot=command.response_slot_id, scope_hash=command.request_scope_hash)
+            scope = MemoryScope(resolved.owner_id, resolved.world_id, resolved.responding_world_character_id)
+            if stored.recall.scope != scope:
+                raise RetrievalContractError("chat_initial_recall_scope_invalid")
+            recall = replace(stored.recall, request_id=resolved.request_id,
+                call_id=command.call_id, envelope_hash=resolved.envelope_hash)
+            return HybridCanonicalResult(resolved.request_id, recall, stored.metrics, stored.call_tracker,
+                _CurrentMemoryEvidence(self._hybrid, recall) if recall.validation_snapshot is not None else None)
         if (command.intent.route is not RetrievalRoute.CANONICAL
             or resolved.intent_hash != command.intent.envelope_hash or not command.call_id
             or not command.intent.search_text):
@@ -88,6 +106,7 @@ class HybridCanonicalService:
                 command.intent.search_text, EMBEDDING_PROFILE, (RecallDocumentKind.MEMORY_ITEM,) if self._episode_only else kinds,
                 None if resolved.absolute_time_from is None else datetime.fromisoformat(resolved.absolute_time_from),
                 None if resolved.absolute_time_to is None else datetime.fromisoformat(resolved.absolute_time_to),
+                allowed_thread_ids=(command.thread_id,),
                 result_limit=min(12 if self._episode_only else 20, resolved.caps.row_limit),
                 episode_source_kinds=kinds if self._episode_only and RecallDocumentKind.MEMORY_ITEM not in kinds else ())
             try:

@@ -1,5 +1,6 @@
 """Version two generation adapters reuse all canonical execution and settlement ports."""
 from copy import deepcopy
+from app.core.activity_transactions import activity_write
 
 from app.runtime.autonomous_activity.combined_provider import CombinedActivityProvider
 from app.runtime.autonomous_activity.generation_contracts import parse_routine_draft, parse_social_draft
@@ -36,7 +37,9 @@ class CombinedGeneration:
         # unsolicited text is never allowed to become a public action.
         if state.get("generation_mode") == "combined" and not result["assignments"]:
             try:
-                parse_social_draft(self.pending_draft(state),
+                from app.core.async_session import session_call
+                raw = await session_call(self.ctx.db, lambda: self.pending_draft(state))
+                parse_social_draft(raw,
                     lane=self.lane, assignments=[], policy=self.provider.social_io_policy)
             except ValueError:
                 result["failure"] = {"stage": "ValidateDraft", "reason": "unsolicited_or_invalid_draft"}
@@ -66,21 +69,22 @@ class CombinedGeneration:
             return self.with_writer_situations(state, await super().write(state))
         if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
-        raw = self.pending_draft(state)
+        from app.core.async_session import session_call
+        raw = await session_call(self.ctx.db, lambda: self.pending_draft(state))
         try:
             if mode == "split":
                 return self.with_writer_situations(state, await super().write(state))
             if isinstance(self, RoutineLane):
                 from app.domains.characters.policies.authored_names import authored_routine_draft
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, observe_output
-                names, fields = activity_name_binding(self.ctx), {}
+                names, fields = await session_call(self.ctx.db, lambda: activity_name_binding(self.ctx)), {}
                 raw = authored_routine_draft(raw, names, receipt=fields)
                 observe_output(self.tracker, names, lane="routine", fields=fields)
                 drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")), name_receipt=fields)]
-                self.validate_original_draft(drafts[0])
+                await session_call(self.ctx.db, lambda: self.validate_original_draft(drafts[0]))
             else:
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
-                names, fields = activity_name_binding(self.ctx), {}
+                names, fields = await session_call(self.ctx.db, lambda: activity_name_binding(self.ctx)), {}
                 raw = social_draft_names(raw, names,
                     assignments=state["assignments"], combined=True, lane=self.lane, receipt=fields)
                 observe_output(self.tracker, names, lane=self.lane, fields=fields)
@@ -156,34 +160,47 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
         self.ctx.db.flush()
 
     async def load(self, state):
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        return await run_db_stage(self, '_load_sync', state)
+
+    def _load_sync(self, state):
+        self.reconcile_deliveries()
+        return activity_write(self.ctx.db, lambda: self.prepare_candidates(state))
+
+    def prepare_candidates(self, state):
         from app.domains.world_characters.activity_models import ActivityGraphRun
         from app.runtime.autonomous_activity.social_lane import plain
         run = self.ctx.db.get(ActivityGraphRun, self.ctx.run_id, populate_existing=True)
         saved = (run.result or {}).get("feed_preparation")
         if saved is not None:
-            self.reconcile_deliveries()
             return deepcopy(saved)
-        result = await super().load(state)
+        result = self.load_candidates(state)
         run.result = {**(run.result or {}), "feed_preparation": plain(result)}
-        self.ctx.db.commit()
         return result
 
     async def guard(self, state):
         await super().guard(state)
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        await run_db_stage(self, '_renew_feed_claims_sync', state)
+
+    def _renew_feed_claims_sync(self, state):
         data = state.get("lane_data", {}).get("_feed")
         if data and state.get("stage") in {"TargetSelector", "DecisionDraft", "Writer", "ValidateDraft", "Execute"}:
             from app.domains.social.service.world_feed import renew_owned_feed_claims
             from datetime import UTC, datetime
-            renew_owned_feed_claims(self.ctx.db, claim_tokens=data["claim_tokens"],
-                run_id=self.ctx.run_id, now=datetime.now(UTC))
-            self.ctx.db.commit()
+            activity_write(self.ctx.db, lambda: renew_owned_feed_claims(self.ctx.db, claim_tokens=data["claim_tokens"],
+                run_id=self.ctx.run_id, now=datetime.now(UTC)))
 
     async def finalize(self, state):
         result = await super().finalize(state)
-        self.reconcile_deliveries()
+        from app.core.async_session import session_call
+        await session_call(self.ctx.db, self.reconcile_deliveries)
         return result
 
     def finalize_unavailable(self, reason):
+        return activity_write(self.ctx.db, lambda: self._finalize_unavailable(reason))
+
+    def _finalize_unavailable(self, reason):
         from datetime import UTC, datetime
         from app.domains.social.contracts.world_feed import KeywordClaim
         from app.domains.social.service.world_feed import finalize_unavailable_feed_cycle
@@ -201,11 +218,14 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
         finalize_unavailable_feed_cycle(self.ctx.db, profile=self.profile(),
             cycle_key=data["cycle_key"], run_id=self.ctx.run_id, claim=KeywordClaim(**data["claim"]),
             claim_tokens=data["claim_tokens"], summary=summary, now=datetime.now(UTC))
-        self.ctx.db.commit()
         return summary
 
     async def refresh_selected(self, state):
-        """Keep selection fixed, but read post/relationship/permissions after Inbox."""
+        """Keep selected input; refresh only concrete action permissions after Inbox."""
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        return await run_db_stage(self, '_refresh_selected_sync', state)
+
+    def _refresh_selected_sync(self, state):
         from app.domains.social.models.posts import Post
         from app.domains.social.schemas.feed import WorldFeedCandidateRead
         from app.domains.social.service.world_feed import revalidate_candidate_actions
@@ -223,7 +243,7 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
             if candidate["target_id"] not in selected:
                 continue
             post = self.ctx.db.get(Post, candidate["target_id"], populate_existing=True)
-            if post is None or post_revision(post) != candidate["source_revisions"].get(post.id):
+            if post is None:
                 raise ValueError("feed_target_stale")
             current = revalidate_candidate_actions(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
                 profile=self.profile(), candidate=WorldFeedCandidateRead.model_validate(raw_by_id[post.id]),
@@ -231,9 +251,6 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
             if current is None or not current[1]:
                 raise ValueError("feed_target_stale")
             candidate["allowed_actions"] = list(current[1])
-            prompt, receipt = self.relationship_preparation(candidate["target_id"], candidate["counterpart_id"])
-            candidate["relationship"] = prompt
-            result["relationship_validation_receipts"][candidate["target_id"]] = receipt
             candidate["proposal_eligible"] = proposal_eligibility(self.ctx.db,
                 actor_world_character_id=self.actor.id, target_post_id=post.id, now=datetime.now(UTC)).eligible
         return result

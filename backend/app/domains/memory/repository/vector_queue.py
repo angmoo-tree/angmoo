@@ -19,10 +19,11 @@ def enqueue(session, generation, item_id, world_id, *, change=0, force=False):
         (generation,item_id,world_id,desired_revision,applied_revision,last_change,state,due_at,lease_until)
         VALUES (:generation,:item,:world,1,0,:change,'pending',0,0)
         ON CONFLICT(generation,item_id) DO UPDATE SET
-        desired_revision=desired_revision+1,last_change=max(last_change,excluded.last_change),
-        world_id=CASE WHEN excluded.world_id!='' THEN excluded.world_id ELSE world_id END,
+        desired_revision=memory_vector_work.desired_revision+1,
+        last_change=CASE WHEN excluded.last_change>memory_vector_work.last_change THEN excluded.last_change ELSE memory_vector_work.last_change END,
+        world_id=CASE WHEN excluded.world_id!='' THEN excluded.world_id ELSE memory_vector_work.world_id END,
         state='pending',due_at=0,claim_token=NULL,lease_until=0
-        WHERE :force OR excluded.last_change > last_change"""),
+        WHERE :force OR excluded.last_change > memory_vector_work.last_change"""),
         dict(generation=generation, item=item_id, world=world_id, change=change, force=force))
 
 

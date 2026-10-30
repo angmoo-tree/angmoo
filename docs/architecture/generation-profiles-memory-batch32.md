@@ -1,5 +1,7 @@
 # Generation profiles and Memory batches of 32
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 Issue [#319](https://github.com/angmoo-tree/angmoo/issues/319).
 Implementation, automated tests, CI, direct user verification and merge remain
 separate gates. This document specifies the product change after the original

@@ -25,8 +25,10 @@ def test_new_capture_uses_parent_id_not_action_target(durable_stack):
         "parent_post_id": parent.id, "root_post_id": parent.id,
     }]}}}
     transmitted = json.dumps(payload, ensure_ascii=False)
-    manifest = freeze_social_input(SimpleNamespace(db=db, run_id="synthetic-parent"), context.snapshot,
-        node="FeedDecisionDraft", payload=payload, transmitted=transmitted, state={})
+    manifest = freeze_social_input(SimpleNamespace(db=db, run_id="synthetic-parent", user_id=scope.owner_id), context.snapshot,
+        node="FeedDecisionDraft", payload=payload, transmitted=transmitted, state={
+            "identity": {"activity_id": "synthetic-parent", "world_id": scope.world_id,
+                         "actor_id": scope.subject_world_character_id}, "decision_context": payload["context"]})
     captured = next(source for source in manifest.sources if source.payload_path.endswith("/parent_body"))
     assert captured.source_id == parent.id and captured.source_id != payload["context"]["today_activity"]["records"][0]["target_post_id"]
     assert captured.delivery_payload_digest == manifest.payload_digest == sha256(transmitted.encode()).hexdigest()
@@ -41,7 +43,10 @@ def test_missing_parent_id_prevents_provider_dispatch(monkeypatch, memory_on, de
             if memory_on: lane.provider.situation_snapshot = enabled(db, lane)
             state.update(await lane.load(state)); lane.provider.situation_state = state
             calls = []
-            async def generate(**kwargs): calls.append(kwargs); raise AssertionError("must reject before provider")
+            async def generate(**kwargs):
+                kwargs['on_request_submission'](SimpleNamespace(user_prompt=kwargs['user_prompt']))
+                calls.append(kwargs)
+                raise AssertionError("must reject before physical provider dispatch")
             monkeypatch.setattr(transport, "generate_json", generate)
             monkeypatch.setattr(transport, "_api_key", lambda _: "synthetic")
             monkeypatch.setattr(transport, "_llm_context", lambda *a, **k: None)

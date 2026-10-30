@@ -49,6 +49,12 @@ jobs:
           subject-name: ghcr.io/angmoo-tree/angmoo-frontend
           subject-digest: ${{ steps.promote.outputs.frontend_digest }}
           push-to-registry: true
+      - name: Attest PostgreSQL index
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-name: ghcr.io/angmoo-tree/angmoo-postgres
+          subject-digest: ${{ steps.promote.outputs.postgres_digest }}
+          push-to-registry: true
       - name: Preserve publication receipt
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

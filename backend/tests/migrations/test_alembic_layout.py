@@ -158,6 +158,8 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
         def inspect_only(revisions, context):
             import app
             from app.models import Base
+            from app.runtime.persistence.experience_tables import TABLES
+            expected_tables.update(TABLES | {"memory_maintenance_slot"})
             assert Path(app.__file__).resolve() == (backend / "app/__init__.py").resolve()
             assert context.connection.dialect.name == "sqlite"
             assert context.connection.engine.url.database == ":memory:"
@@ -188,7 +190,8 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     result_data = json.loads(result.stdout)
     expected_count = len(json.loads(CHECKPOINT.read_text(encoding="utf-8"))["contracts"]["orm_tables"])
-    assert result_data == {"registered_tables": expected_count + 79, "revision_bodies_run": 0}
+    from app.runtime.persistence.experience_tables import TABLES
+    assert result_data == {"registered_tables": expected_count + 79 + len(TABLES) + 1, "revision_bodies_run": 0}
     assert not list(tmp_path.rglob("*.sqlite3"))
 
 

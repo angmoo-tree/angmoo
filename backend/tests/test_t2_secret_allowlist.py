@@ -45,6 +45,106 @@ def test_current_exact_allowlist_metadata_passes() -> None:
     assert checker.validate() == []
 
 
+def test_gitleaks_postgresql_fixture_exceptions_match_only_reviewed_public_lines():
+    config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    entries = [entry for entry in config["allowlists"]
+               if "at 6ff382a1; not a credential" in entry.get("description", "")]
+    source = "6ff382a11f7db48278c83de9a9ce044954d7fced"
+    reviewed = {
+        "backend/tests/postgresql/test_chat_storage.py": 172,
+        "backend/tests/postgresql/test_memory_owner_transactions.py": 34,
+        "backend/tests/memory/test_manual_relationship_followup.py": 481,
+    }
+    assert len(entries) == len(reviewed)
+    for path, number in reviewed.items():
+        entry, = (row for row in entries
+                  if any(re.search(pattern, path) for pattern in row["paths"]))
+        assert entry["condition"] == "AND" and entry["regexTarget"] == "line"
+        assert entry["targetRules"] == ["generic-api-key"]
+        assert len(entry["paths"]) == len(entry["regexes"]) == 1
+        assert not re.search(entry["paths"][0], "backend/production-credentials.env")
+        assert not re.search(entry["paths"][0], path + ".bak")
+        line = subprocess.check_output(["git", "show", source + ":" + path],
+                                       cwd=REPO_ROOT, text=True).splitlines()[number - 1]
+        pattern = entry["regexes"][0]
+        assert pattern.startswith("^") and pattern.endswith("$")
+        assert re.fullmatch(pattern, line)
+        assert not re.fullmatch(pattern, line + " unreviewed-value")
+        assert not re.fullmatch(pattern, line.replace("001", "002").replace("received-token", "other-token"))
+
+
+def test_gitleaks_noncredential_source_fingerprints_keep_other_lines_visible():
+    config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    entry, = (row for row in config["allowlists"]
+              if row["description"].startswith("Exact public PostgreSQL noncredential source fingerprints"))
+    path = "scripts/ci/check_secret_allowlist_metadata.py"
+    assert entry["condition"] == "AND" and entry["regexTarget"] == "line"
+    assert entry["targetRules"] == ["generic-api-key"] and len(entry["paths"]) == 1
+    assert re.search(entry["paths"][0], path)
+    assert not re.search(entry["paths"][0], "scripts/ci/private-credentials.py")
+    source = subprocess.check_output([
+        "git", "show", "988cb004c48c8dae66abd49186ae029a08a376e5:" + path
+    ], cwd=REPO_ROOT, text=True)
+    lines = [line for line in source.splitlines()
+             if "('backend/security/secret_scan_allowlist.json', '" in line]
+    assert len(lines) == len(entry["regexes"]) == 12
+    for line in lines:
+        pattern, = (pattern for pattern in entry["regexes"] if re.fullmatch(pattern, line))
+        assert pattern.startswith("^") and pattern.endswith("$")
+        assert not re.fullmatch(pattern, line + " unreviewed")
+        assert not re.fullmatch(pattern, line.replace("source_git_blob", "runtime_api_key"))
+
+
+def test_postgresql_noncredential_exceptions_are_exact_and_keep_other_dsns_visible(tmp_path):
+    spec = importlib.util.spec_from_file_location(
+        "postgresql_fixture_scanner", REPO_ROOT / "scripts/security_secret_scan.py"
+    )
+    scanner = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = scanner
+    spec.loader.exec_module(scanner)
+    allowlist = scanner.load_allowlist(checker.DEFAULT_PATH)
+    payload = json.loads(checker.DEFAULT_PATH.read_text(encoding="utf-8"))
+    entries = [row for row in payload["entries"]
+               if row.get("review_kind") == "postgresql-adoption-noncredential.v1"]
+    assert len(entries) == len(checker.POSTGRESQL_ADOPTION_ENTRIES)
+    for row in entries:
+        value = row["value"]
+        assert list(scanner.scan_text(row["path"], value, allowlist=allowlist)) == []
+        if row["path"] == "backend/security/secret_scan_allowlist.json":
+            assert list(scanner.scan_text(
+                row["path"], json.dumps(value), allowlist=allowlist
+            )) == []
+            assert {item.rule for item in scanner.scan_text(
+                row["path"], json.dumps(value + "unreviewed"), allowlist=allowlist
+            )} == {"credentialed-database-url"}
+            assert {item.rule for item in scanner.scan_text(
+                "backend/private-database.json", json.dumps(value), allowlist=allowlist
+            )} == {"credentialed-database-url"}
+        assert {item.rule for item in scanner.scan_text(
+            row["path"], value + "unreviewed", allowlist=allowlist
+        )} == {"credentialed-database-url"}
+        assert {item.rule for item in scanner.scan_text(
+            "backend/private-database.env", value, allowlist=allowlist
+        )} == {"credentialed-database-url"}
+        assert list(scanner.scan_text(
+            row["path"], value,
+            allowlist=tuple(item for item in allowlist
+                            if not (item.path == row["path"] and item.value == value))
+        ))
+    index = next(i for i, row in enumerate(payload["entries"])
+                 if row.get("review_kind") == "postgresql-adoption-noncredential.v1")
+    for field, wrong in (("path", "backend/private-database.env"),
+                         ("rule", "google-api-key"), ("value", "unreviewed"),
+                         ("source_commit", "0" * 40), ("source_git_blob", "0" * 40),
+                         ("source_path", "unreviewed.py"), ("value_sha256", "0" * 64),
+                         ("last_reviewed", "2026-10-29"), ("review_kind", "unreviewed")):
+        changed = json.loads(json.dumps(payload))
+        changed["entries"][index][field] = wrong
+        fixture = tmp_path / "changed.json"
+        fixture.write_text(json.dumps(changed), encoding="utf-8")
+        assert checker.validate(fixture)
+
+
 def test_pr365_scanner_canary_is_exact_in_value_path_rule_and_source_evidence(tmp_path):
     spec = importlib.util.spec_from_file_location("pr365_canary_scanner", REPO_ROOT / "scripts/security_secret_scan.py")
     scanner = importlib.util.module_from_spec(spec)

@@ -51,8 +51,8 @@ def test_actual_runtime_uses_async_canonical_fresh_hydration_and_owned_cleanup(t
         row, = trace_payload()["canonical_reads"]
         assert row["stage"] == "resolve" and row["status"] == "completed"
         assert row["cleaned"] and row["metrics_complete"] and row["sql_count"] > 0
-        # Hydration reuses the source proof within this single read snapshot.
-        assert row["unique_nodes"] == 1 and row["memo_hits"] == 1
+        # One owned memory is read; historical source proofs are not traversed.
+        assert row["unique_nodes"] == 1 and row["memo_hits"] == 0
         assert [phase["stage"] for phase in row["phases"]] == ["revalidate", "hydrate"]
         assert all(phase["completed"] and phase["elapsed_ms"] >= 0 for phase in row["phases"])
         assert sum(phase["sql_count"] for phase in row["phases"]) <= row["sql_count"]
@@ -61,7 +61,13 @@ def test_actual_runtime_uses_async_canonical_fresh_hydration_and_owned_cleanup(t
             db.get(Post, post_id).report_hidden_at = NOW
             db.commit()
         blocked = await runtime.service.execute(request, deadline=monotonic()+30)
-        assert blocked.records == ()  # next operation cannot reuse the previous ACL decision
+        assert len(blocked.records)==1  # Original hiding does not revoke a past experience.
+        with Session(engine) as db:
+            item=db.get(MemoryItem,document.memory_item_id)
+            item.status,item.deleted_at='deleted',NOW
+            db.commit()
+        blocked = await runtime.service.execute(request, deadline=monotonic()+30)
+        assert blocked.records == ()  # A new read does recheck current memory rights.
     async def owned():
         try:
             await run()

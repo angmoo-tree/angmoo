@@ -36,6 +36,20 @@ def routine_request(count, *, profile=COMPACT_EFFECT_WIRE):
              patch.object(settings, "ROUTINE_OUTPUT_POLICY", "enum_preserved_v1"), \
              patch.object(settings, "ACTIVITY_THOUGHT_POLICY", "thought_v1"):
             fixture = _seed(db)
+            # Prepared source events still require a real accessible counterpart.
+            # The wire fixture must not rely on a nonexistent participant.
+            from model_fixture_support import models
+            from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+            friend=models.Character(id='synthetic-friend-character',owner_id=fixture.user.id,
+                name='Synthetic friend',handle='synthetic-wire-friend',one_liner='A classmate',
+                personality='Kind',speech_style='Clear',worldview='Cooperation',
+                topic_preferences='Study',safety_rules='Safe',persona_summary='A classmate',moderation_status='active')
+            db.add(friend);db.flush()
+            role=models.WorldCharacter(id='synthetic-friend',world_id=fixture.world.id,
+                character_id=friend.id,membership_id=fixture.world_character.membership_id,status='active',
+                character_contract_hash='c'*64,world_contract_hash=fixture.world.contract_hash)
+            db.add(role);db.flush()
+            initialize_created_world_character(db,character=friend,world_character=role)
             ctx = _resident_context(db, fixture, run_id="synthetic-wire",
                 now=_utc(datetime(2026, 8, 10, 10, 5)))
             bind_run(db, actor=fixture.world_character, activity_id=ctx.run_id)

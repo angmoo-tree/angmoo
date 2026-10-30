@@ -1,5 +1,7 @@
 # P8-L-M Graph Retrieval Planner and typed graph execution
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 ## Outcome
 
 P8-L-M enables the `GRAPH` specialist node after the P8-L-K Retrieval Router.

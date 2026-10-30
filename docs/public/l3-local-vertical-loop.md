@@ -24,6 +24,11 @@ participation separate while they share one canonical World boundary.
   once; any public follow-up is a separate successful write. Angmoo does not
   infer subjective feelings or a long-term memory from the source reply.
 
+For 0.1.4, use the three-service [PostgreSQL runtime](postgresql-runtime.md).
+An existing 0.1.3 SQLite installation must use the [migration tool](postgresql-migration.md)
+before selecting new images. The historical P1–P4 provider/call evidence is a
+bounded earlier engine contract, not a new 0.1.4 provider benchmark.
+
 ## Start and inspect
 
 The normal user Quickstart remains:
@@ -49,15 +54,15 @@ named volumes:
 .\angmoo.ps1 stop
 ```
 
-`stop` preserves the contributor SQLite/LadybugDB/media/secret/runtime named
-volume. Never add `--volumes` unless performing an explicitly approved
+`stop` preserves the PostgreSQL database, bootstrap-secret and application
+volumes, including LadybugDB, media and installation secrets. Never add `--volumes` unless performing an explicitly approved
 contributor fixture reset.
 
 ## Recovery and privacy
 
 - Restart restores the same daily plan, owner binding, manual writes, Inbox
   status, and APP_SECRET. Missed routine ticks do not create catch-up posts.
-- LadybugDB is a replayable projection. If it is unavailable, successful SQLite
+- LadybugDB is a replayable projection. If it is unavailable, successful PostgreSQL
   social writes remain canonical and projection work stays in the outbox. The
   graph surface reports degraded, rebuilding, or failed separately from a
   healthy empty result; recovery and World replay restore the six typed queries.

@@ -1,6 +1,8 @@
 """Joined canonical reads for Chat, using the caller's Session and lock scope.
 
-These queries preserve the existing filter and lock differences. Chat services
+Scope fences use PostgreSQL SHARE locks: concurrent validators may read, while
+updates/deletion of the protected owner, World and roles still wait. The Chat
+thread itself keeps its exclusive mutation lock. Chat services
 interpret nullable results and cardinality; this module never commits or denies.
 """
 
@@ -42,7 +44,7 @@ def owner_controlled_world_characters(
         .limit(2)
     )
     if lock_scope and _is_postgresql_session(db):
-        statement = statement.with_for_update()
+        statement = statement.with_for_update(read=True)
     return list(db.scalars(statement))
 
 
@@ -53,7 +55,7 @@ def local_installation(
         installation = db.scalar(
             select(InstallationIdentity)
             .where(InstallationIdentity.singleton_key == LOCAL_INSTALLATION_KEY)
-            .with_for_update()
+            .with_for_update(read=True)
         )
     else:
         installation = db.get(InstallationIdentity, LOCAL_INSTALLATION_KEY)
@@ -79,7 +81,7 @@ def owned_world_id(
         )
     )
     if lock_scope and _is_postgresql_session(db):
-        owned_world_statement = owned_world_statement.with_for_update()
+        owned_world_statement = owned_world_statement.with_for_update(read=True)
     owned_world = db.scalar(owned_world_statement)
     return owned_world
 
@@ -149,7 +151,7 @@ def world_chat_role(
             WorldMembership.role == "owner",
         )
     if lock_scope and _is_postgresql_session(db):
-        statement = statement.with_for_update()
+        statement = statement.with_for_update(read=True)
     row = db.execute(statement).one_or_none()
     return row
 

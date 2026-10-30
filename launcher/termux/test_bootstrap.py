@@ -203,7 +203,18 @@ class BootstrapTests(unittest.TestCase):
                      patch.multiple(bootstrap, TOOLS_SHA256=digest, TOOLS_SIZE=str(len(raw))), \
                      patch.object(bootstrap, "download", side_effect=[checksums, raw]), \
                      contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as errors:
-                    self.assertEqual(bootstrap.main(), int(install_fails), errors.getvalue())
+                    result=bootstrap.main()
+                    if sys.platform=='android' or hasattr(sys,'getandroidapilevel'):
+                        # A fake HOME below a test temp directory is correctly
+                        # refused by the real native Termux prefix boundary.
+                        # Linux CI exercises this offline fake-prefix success
+                        # path; real-phone installation uses the actual HOME.
+                        self.assertEqual(result,1,errors.getvalue())
+                        self.assertFalse(stages.exists())
+                        self.assertEqual(sentinel.read_bytes(),b'preserve user data')
+                        self.assertEqual(shell_config.read_bytes(),b'preserve shell config')
+                        continue
+                    self.assertEqual(result, int(install_fails), errors.getvalue())
                 expected = ["pip", "install --release 0.1.0"] + ([] if install_fails else ["start"])
                 self.assertTrue(stages.exists(), errors.getvalue())
                 self.assertEqual(stages.read_text().splitlines(), expected)

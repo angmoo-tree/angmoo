@@ -92,7 +92,11 @@ def test_graph_retry_is_explicit_idempotent_and_reuses_slot_and_user_message(res
         f.generation_service.retry_world_response(response_session, owner, "p-world", "p-thread",
             f.WorldChatRetryCreate(failed_request_id=failed.request_id, idempotency_key="different-retry-key"))
     events = asyncio.run(f._collect(f._workflow(response_session, RetrievalRoute.CURRENT_CONTEXT, f._Generator()).run(f._command(new_record))))
-    assert events[-1].event_type is GenerationEventType.COMPLETED
+    # No graph result was captured before the original planner failed. A retry
+    # cannot replace that starting input with a fresh retrieval.
+    assert events[-1].event_type is GenerationEventType.FAILED
+    assert events[-1].payload == {'failure_class':'initial_input_unavailable','retryable':False}
+    assert response_session.scalar(select(func.count(f.models.MessageMessage.id)).where(f.models.MessageMessage.role == 'assistant')) == 0
     with pytest.raises(MessageServiceError):
         f.generation_service.retry_world_response(response_session, owner, "p-world", "p-thread",
             f.WorldChatRetryCreate(failed_request_id=request.request_id, idempotency_key="committed-retry-key"))

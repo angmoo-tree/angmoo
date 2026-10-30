@@ -54,6 +54,11 @@ class MemoryBatchRetry(BaseModel):
     idempotency_key: str = Field(min_length=8, max_length=128)
 
 
+class MemoryWorkflowCommand(MemoryBatchRetry):
+    expected_revision: int = Field(ge=0)
+    mode: Literal["resume_storage", "regenerate_failed", "resume_remaining", "cancel_remaining", "close_without_retry"]
+
+
 class MemoryBatchStart(BaseModel):
     followup: Literal["relationships"] | None = None
     model_config = ConfigDict(extra="forbid")

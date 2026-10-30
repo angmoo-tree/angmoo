@@ -17,6 +17,9 @@ def _open(path, until):
 
 
 def snapshot(database, manifest, *, data_root=None):
+    if data_root is not None and (Path(data_root)/'runtime/postgresql-runtime.json').is_file():
+        from app.runtime.diagnostics.postgresql_snapshot import memory_snapshot
+        return memory_snapshot(data_root,manifest)
     started = datetime.now(UTC).isoformat()
     result = {"schema": "memory-pipeline-snapshot.v1", "started_at": started, "status": "ok", "atomic_across_databases": False,
               "items": [], "receipts": [], "runs": [], "work": [], "maintenance": [], "changes": [], "brief": [], "projection": [], "truncated": False}

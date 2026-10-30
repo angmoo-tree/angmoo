@@ -290,6 +290,69 @@ def enable_automatic(db, ready, start="22:00", end="03:00"):
     update_world_settings(db, ready, active_hours_start=start, active_hours_end=end)
 
 
+@pytest.mark.parametrize("world_on,legacy_on", [(True, False), (True, True), (False, True)])
+def test_background_preparation_uses_world_intent_and_reuses_ready_plan(preparation_scope, monkeypatch, world_on, legacy_on):
+    import asyncio
+    from types import SimpleNamespace
+    from app.domains.routines.models.resident import AgentActivitySetting
+    db, world, ready, runtime = preparation_scope
+    enable_automatic(db, ready, start="08:00", end="24:00")
+    fixed = (datetime.now(UTC) + timedelta(days=7)).replace(hour=3, minute=0, second=0, microsecond=0)
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return fixed.astimezone(tz) if tz else fixed.replace(tzinfo=None)
+    monkeypatch.setattr(runtime, "datetime", Clock)
+    ready.world_character.autonomous_enabled = world_on
+    db.get(AgentActivitySetting, ready.character.id).auto_enabled = legacy_on
+    db.commit()
+    calls = []
+    async def generate(**kwargs):
+        kwargs["reserve"]()
+        calls.append(kwargs["source"])
+        return InitialPreparationOutput(daily_plan=output(), recommendation_topics=[dict(name="독서", scope="common")]), SimpleNamespace(calls=[])
+    original = runtime.ensure_preparation
+    async def ensure(db, **kwargs):
+        return await original(db, **kwargs, generator=generate)
+    monkeypatch.setattr(runtime, "ensure_preparation", ensure)
+    assert asyncio.run(runtime.prepare_due_dates(db)) == int(world_on)
+    assert asyncio.run(runtime.prepare_due_dates(db)) == 0
+    assert len(calls) == int(world_on)
+    assert db.get(AgentActivitySetting, ready.character.id).auto_enabled is legacy_on
+    status = runtime.read_preparation(db, character_id=ready.character.id, world_id=world.id, user=ready.user)
+    assert status.plan_state == ("ready" if world_on else "pending")
+
+
+@pytest.mark.parametrize("initial", ["pending", "waiting", "ready", "needs_user_action"])
+def test_routine_entry_prepares_missing_plan_without_restarting_saved_activity(preparation_scope, monkeypatch, initial):
+    import asyncio
+    from types import SimpleNamespace
+    from copy import deepcopy
+    from app.runtime.autonomous_activity import routine
+    db, world, ready, runtime = preparation_scope
+    enable_automatic(db, ready, start="08:00", end="24:00")
+    calls = []
+    status = SimpleNamespace(plan_state=initial, reason_code=None)
+    monkeypatch.setattr(runtime, "read_preparation", lambda *args, **kwargs: status)
+    async def ensure(db, **kwargs):
+        assert "now" not in kwargs  # Provider leases use the live clock.
+        assert not db.in_transaction()  # No pool slot held across provider I/O.
+        calls.append(kwargs)
+        status.plan_state = "ready"
+        return status
+    monkeypatch.setattr(runtime, "ensure_preparation", ensure)
+    monkeypatch.setattr(routine, "prepare_routine_activity", lambda *args, **kwargs: {"status":"skipped","reason":"fixture_no_due_beat"})
+    lane = object.__new__(routine.RoutineLane)
+    lane.ctx = SimpleNamespace(db=db, character=ready.character, user_id=ready.user.id, run_started_at=datetime.now(UTC))
+    lane.actor, lane.tracker, lane.output_policy = ready.world_character, None, {}
+    state = {"shared_context":{"accepted_input":"kept"}, "completed_actions":["existing-post"]}
+    before = deepcopy(state)
+    result = asyncio.run(lane.load(state))
+    assert len(calls) == int(initial in {"pending", "waiting"})
+    assert state == before
+    assert result["lane_data"]["skipped"]["reason"] == ("daily_plan_pending" if initial == "needs_user_action" else "fixture_no_due_beat")
+
+
 def test_automatic_midnight_same_date_reuse_and_hours(preparation_scope):
     import asyncio
     from types import SimpleNamespace

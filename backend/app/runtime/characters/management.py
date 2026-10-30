@@ -1087,7 +1087,21 @@ def _build_agent_detail(
     recent_activity = activity_logs.list_recent_activity(
         db, character.id, limit=recent_activity_limit
     )
-    policy = agent_activity_policy.build_activity_policy(db, character_id=character.id)
+    from app.domains.routines.exceptions import ActivityRuntimeValidationError
+    from app.domains.routines.contracts.activity_policy import ActivityPolicy
+    unavailable = False
+    try:
+        policy = agent_activity_policy.build_activity_policy(db, character_id=character.id)
+    except ActivityRuntimeValidationError as exc:
+        if exc.reason_code not in {'world_character_binding_invalid', 'world_character_inactive',
+                'world_scope_not_ready', 'world_configuration_missing'}:
+            raise
+        # Retained profiles remain readable after their World role is removed.
+        # This presentation result never grants execution or changes admission.
+        unavailable = True
+        policy = ActivityPolicy(within_active_hours=False, allowed_actions=(),
+            blocked_reasons={action: exc.reason_code for action in routine_constants.POLICY_ACTION_NAMES},
+            next_tick_at=datetime.now(UTC), summary=exc.reason_code)
     last_activity_at = recent_activity[0].created_at if recent_activity else None
     manual_run_available_at = (
         _manual_run_available_at(db, character.owner_id) if character.owner_id else None
@@ -1120,10 +1134,10 @@ def _build_agent_detail(
             setting=setting,
         ),
         activity_summary=activity_presentation.build_activity_summary(
-            db, character=character, setting=setting, slot=slot, policy=policy,
+            db, character=character, setting=setting, slot=None if unavailable else slot, policy=policy,
             last_activity_at=last_activity_at,
-            manual_run_available_at=manual_run_available_at,
-            first_greeting_available_at=first_greeting_available_at,
+            manual_run_available_at=None if unavailable else manual_run_available_at,
+            first_greeting_available_at=None if unavailable else first_greeting_available_at,
             reads=build_activity_presentation_reads(),
         ),
         recent_activity=[

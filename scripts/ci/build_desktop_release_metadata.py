@@ -225,6 +225,12 @@ def _spdx(
             }
         )
     components = _locked_components()
+    native=json.loads((REPOSITORY_ROOT/'scripts/windows-postgresql.lock.json').read_text())
+    for name,key,license_id in (('PostgreSQL','postgresql','PostgreSQL'),('pgvector-native','pgvector','PostgreSQL')):
+        components.append({'SPDXID':_component_id('native',name,native[key]),'name':name,'versionInfo':native[key],
+            'downloadLocation':native[key+'_url'],'checksums':[{'algorithm':'SHA256','checksumValue':native[key+'_sha256']}],
+            'filesAnalyzed':False,'licenseConcluded':license_id,'licenseDeclared':license_id,'copyrightText':'NOASSERTION',
+            'sourceInfo':'Pinned native Windows server resources bundled beside the sidecar; resource manifest is bound in installer-payload.json.'})
     relationships.extend(
         {
             "spdxElementId": app_id,
@@ -277,6 +283,8 @@ def _provenance(
         REPOSITORY_ROOT / "frontend" / "pnpm-lock.yaml",
         REPOSITORY_ROOT / "desktop" / "package-lock.json",
         REPOSITORY_ROOT / "desktop" / "src-tauri" / "Cargo.lock",
+        REPOSITORY_ROOT / "scripts/windows-postgresql.lock.json",
+        REPOSITORY_ROOT / "security/psycopg-source-lock.json",
     ]
     return {
         "_type": "https://in-toto.io/Statement/v1",
@@ -313,6 +321,10 @@ def _provenance(
             },
         },
     }
+
+
+def _postgresql_resource_manifest() -> Path:
+    return REPOSITORY_ROOT / 'desktop/src-tauri/resources/postgresql/angmoo-resources.json'
 
 
 def main() -> int:
@@ -367,6 +379,10 @@ def main() -> int:
         output_root / "THIRD_PARTY_NOTICES.md",
     )
     shutil.copy2(REPOSITORY_ROOT / "LICENSE", output_root / "LICENSE")
+    resources=_postgresql_resource_manifest()
+    if tuple(map(int,args.version.split('.'))) >= (0,1,4):
+        if not resources.is_file():raise SystemExit('Pinned PostgreSQL resource manifest is missing')
+        shutil.copyfile(resources,output_root/'postgresql-resources.json')
     print(
         json.dumps(
             {

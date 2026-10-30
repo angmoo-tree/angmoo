@@ -14,6 +14,7 @@ from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.identity.service.environment import lock_environment_admission
 from app.domains.worlds.service import require_world_read_access, require_creator_access
 from app.domains.world_characters.contracts.scheduling import ActivityScheduleUpdater, SCHEDULE_FIELDS
+from app.core.database_transactions import postgres_db_unit
 
 
 class WorldManagementError(ValueError):
@@ -27,6 +28,7 @@ class WorldCharacterManagementService:
         self.db, self.queries, self.references = db, queries, references
         self.schedule_updates = schedule_updates
 
+    @postgres_db_unit
     def dashboard(self, *, world_id, user):
         world = require_world_read_access(self.db, world_id=world_id, user=user)
         rows = self.queries.public_profile_rows(self.db, world_id)
@@ -125,6 +127,7 @@ class WorldCharacterManagementService:
             raise WorldManagementError("world_character_forbidden", 403)
         return role, character
 
+    @postgres_db_unit
     def activity_settings(self, *, world_id, world_character_id, user):
         role, _ = self._basic_owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
         value = effective_configuration(self.db, world_character_id=role.id)
@@ -172,7 +175,7 @@ class WorldCharacterManagementService:
 
     def patch_profile(self, *, world_id, world_character_id, user, data):
         try:
-            lock_environment_admission(self.db, user.id)
+            lock_environment_admission(self.db, user.id, exclusive=True)
             role, character = self._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
             stored = self.db.get(WorldCharacterConfiguration, role.id)
             if stored is None:
@@ -210,7 +213,7 @@ class WorldCharacterManagementService:
 
     def _save_settings(self, *, world_id, world_character_id, user, changes, expected_revision, basic=False):
         try:
-            lock_environment_admission(self.db, user.id)
+            lock_environment_admission(self.db, user.id, exclusive=True)
             authorize = self._basic_owned_role if basic else self._owned_role
             role, _ = authorize(world_id=world_id, world_character_id=world_character_id, user=user)
             if role.control_mode != "autonomous":
@@ -239,7 +242,7 @@ class WorldCharacterManagementService:
 
     def set_autonomy(self, *, world_id, world_character_id, user, data, enabled):
         try:
-            lock_environment_admission(self.db, user.id)
+            lock_environment_admission(self.db, user.id, exclusive=True)
             role, _ = self._owned_role(world_id=world_id, world_character_id=world_character_id, user=user)
             if role.control_mode != "autonomous":
                 raise WorldManagementError("owner_controlled_activity_not_available", 403)

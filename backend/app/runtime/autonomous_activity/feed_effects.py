@@ -71,6 +71,22 @@ def execute(lane, state):
         from app.domains.social.models.feed import WorldCharacterFeedObservation
         observations = [db.get(WorldCharacterFeedObservation, key) for key in state["lane_data"]["_feed"]["observation_ids"]]
         observation = next(row for row in observations if row.post_id == candidate.post_id)
+        reserved = workflows.executions.get_public_action_execution_by_signature(db, signature)
+        if reserved is not None and reserved.status == "storage_attention":
+            from app.runtime.social.delivery_recovery import DeliveryRecoveryRequired
+            raise DeliveryRecoveryRequired("activity_storage_needs_attention")
+        if db.get_bind().dialect.name == "postgresql":
+            if reserved is None:
+                reserved = workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
+                    character_id=lane.ctx.character.id, signature=signature, scope="world_keyword_feed",
+                    action_type=decision.selected_action, target_post_id=candidate.post_id,
+                    target_profile_type="character" if raw["action"] == "follow" else None,
+                    target_profile_id=candidate.author_character_id if raw["action"] == "follow" else None,
+                    brief_hash=_brief_hash(decision.brief), world_id=lane.actor.world_id,
+                    actor_world_character_id=lane.actor.id, feed_observation_id=observation.id,
+                    interaction_intent=decision.interaction_intent, comment_purpose=decision.comment_purpose)
+            from app.runtime.social.delivery_recovery import begin
+            begin(db, reserved.id, action=raw, writing={"draft": draft.model_dump(mode="json") if draft else None})
         try:
             def publish_current():
                 prior = committed(lane, state, raw)
@@ -79,7 +95,7 @@ def execute(lane, state):
                 validate = lane.effect_relationship_validator(state, raw["target_id"])
                 validate()
                 with deferred_commits():
-                    row = workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
+                    row = workflows.executions.get_public_action_execution_by_signature(db, signature) or workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
                         character_id=lane.ctx.character.id, signature=signature, scope="world_keyword_feed",
                         action_type=decision.selected_action, target_post_id=candidate.post_id,
                         target_profile_type="character" if raw["action"] == "follow" else None,
@@ -101,12 +117,19 @@ def execute(lane, state):
                     if getattr(validate, "finish", None):
                         validate.finish(row, applied.event)
                 return row, "succeeded"
-            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            from app.core.activity_transactions import activity_write
             if db.in_transaction():
                 db.commit()
-            row, status = run_sqlite_session_immediate(db, publish_current, require_clean=True)
-        except Exception:
+            row, status = activity_write(db, publish_current, require_clean=True)
+        except Exception as exc:
             db.rollback()
+            from app.core.postgresql_concurrency import retryable, PostgresCommitOutcomeUnknown
+            if reserved is not None and (retryable(exc) or isinstance(exc, PostgresCommitOutcomeUnknown)):
+                from app.runtime.social.delivery_recovery import defer, DeliveryStorageWait, DeliveryRecoveryRequired
+                delay = defer(db, reserved.id, unknown=isinstance(exc, PostgresCommitOutcomeUnknown))
+                if delay is not None:
+                    raise DeliveryStorageWait(delay) from exc
+                raise DeliveryRecoveryRequired("activity_storage_needs_attention") from exc
             raise
         results.append({"target_id": raw["target_id"], "status": status, "execution_id": row.id})
     return results

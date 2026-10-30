@@ -4,7 +4,8 @@ from __future__ import annotations
 from app.domains.chat.contracts.temporal_recall import TEMPORAL_ADMISSION_REVISION
 
 import json
-from collections.abc import Callable
+from inspect import isawaitable
+from collections.abc import Awaitable, Callable
 from hashlib import sha256
 from app.domains.relationships.policies.interpretation_prompt import METRIC_INSTRUCTIONS, with_metric_schema
 
@@ -33,7 +34,7 @@ class DirectLlmCharacterResponseGenerator:
     """Write one answer from a frozen bundle without any retrieval authority."""
 
     def __init__(self, material: CredentialMaterial, *, thought_enabled: bool = False, relationship_enabled: bool = False,
-                 before_named_provider: Callable[[], None] | None = None) -> None:
+                 before_named_provider: Callable[[], None | Awaitable[None]] | None = None) -> None:
         if material.purpose is not CredentialPurpose.MESSAGE_LLM:
             raise ValueError("character_response_message_credential_required")
         self._material = material
@@ -73,6 +74,8 @@ class DirectLlmCharacterResponseGenerator:
         payload = _user_payload(request)
         user_prompt = _user_prompt(request, thought_enabled=self._thought_enabled, relationship_enabled=self._relationship_enabled, payload=payload)
         manifest = request.situation_manifest_factory(payload) if situation_enabled else None
+        if isawaitable(manifest):
+            manifest = await manifest
         relationship_delivery = request.relationship_delivery_factory(payload, user_prompt) if request.relationship_delivery_factory else None
         if manifest is not None:
             from dataclasses import replace
@@ -86,8 +89,14 @@ class DirectLlmCharacterResponseGenerator:
             and self._before_named_provider is not None):
             # Final source capture may read SQLite. The runtime's existing UoW
             # closes those reads after capture, before the actual network await.
-            self._before_named_provider()
+            ready = self._before_named_provider()
+            if isawaitable(ready):
+                await ready
         try:
+            if manifest is not None and request.situation_input_recorder is not None:
+                recorded=request.situation_input_recorder(manifest,"submission_uncertain")
+                if isawaitable(recorded):
+                    await recorded
             result = await direct_llm.generate_text(
                 api_key=self._material.reveal(),
                 context=context,
@@ -106,6 +115,8 @@ class DirectLlmCharacterResponseGenerator:
                 physical_attempt_count=max(1, tracker.call_order_in_run),
                 provider_diagnostic=getattr(exc, "provider_diagnostic", None),
             ) from exc
+        # Publication records the committed outcome on its owning transaction.
+        # A diagnostic write here must not discard an already paid AI response.
         activity_thought = None
         relationship_metrics = None
         situation_draft = None

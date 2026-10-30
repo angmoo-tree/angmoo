@@ -119,8 +119,10 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
         _thread_id: str,
         *,
         lock_thread: bool = False,
+        advance_admission: bool = False,
     ) -> object:
         observed["lock_thread"] = lock_thread
+        observed['advance_admission'] = advance_admission
         return thread
 
     monkeypatch.setattr(
@@ -130,7 +132,7 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
     )
     monkeypatch.setattr(
         world_generation.thread_service,
-        "_world_thread_read",
+        "_world_thread_participants",
         lambda *_args, **_kwargs: None,
     )
 
@@ -139,8 +141,9 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
         SimpleNamespace(id="owner"),
         "world-a",
         "thread-a",
+        admission=True,
     ) is thread
-    assert observed == {"environment_owner": "owner", "lock_thread": True}
+    assert observed == {"environment_owner": "owner", "lock_thread": True, 'advance_admission':True}
 
 
 def test_v6_to_v7_backfills_only_resolved_threads_to_default_binding() -> None:

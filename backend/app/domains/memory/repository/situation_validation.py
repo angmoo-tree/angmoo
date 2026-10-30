@@ -23,7 +23,7 @@ class RestoredSituationAdmission:
 
     @property
     def requires_result_binding(self):
-        return self.result["planned_output_digest"] != self.result["final_output_digest"]
+        return self.result.get("experience_state","action_succeeded")=="action_succeeded" and self.result["planned_output_digest"] != self.result["final_output_digest"]
 
 
 def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validation=None):
@@ -61,18 +61,21 @@ def restore_admission(session, receipt, *, revision=VALIDATION_REVISION, validat
         or language_only(receipt.description, snapshot.memory_search_locale)
     ):
         raise ValueError("situation_description_language_only")
+    failed=result.get("experience_state")=="observed_action_failed"
+    valid_failure=(failed and manifest.version>=3 and result.get("planned_effects") and result.get("effects") in ([], ())
+        and result.get("failure_reason") in {"feed_target_stale","activity_source_changed","activity_target_unavailable","feed_affordance_changed","feed_claim_changed"})
     if (result.get("logical_activity_id") != receipt.logical_activity_id or result.get("lane") != receipt.lane
             or result.get("target_key") != receipt.target_key
-            or not result.get("planned_effects") or not result.get("effects")
-            or sorted(result["planned_effects"]) != sorted(effect["kind"] for effect in result["effects"])
-            or any(effect["status"] != "succeeded" for effect in result["effects"])
+            or (not valid_failure and (failed or not result.get("planned_effects") or not result.get("effects")
+                or sorted(result["planned_effects"]) != sorted(effect["kind"] for effect in result["effects"])
+                or any(effect["status"] != "succeeded" for effect in result["effects"])))
             or parse_description(receipt.description, target_key=receipt.target_key).status != "valid"):
         raise ValueError("situation_success_binding_invalid")
     if len(result.get("result_sources", ())) > DELIVERED_SOURCE_LIMIT:
         raise ValueError("situation_source_binding_invalid")
     sources = tuple(DeliveredSourceEntry.from_dict(value) for value in result.get("result_sources", ()))
     entries = (*manifest.sources, *sources)
-    if manifest.version == 2:
+    if manifest.version >= 2:
         committed = {(source.source_type, source.source_id) for source in sources if source.role == "committed_result"}
         effects = {(effect["source_type"], effect["source_id"]) for effect in result["effects"]}
         if (not manifest.sources or committed != effects
@@ -98,6 +101,8 @@ def complete_context(session, admission, *, revision=VALIDATION_REVISION, valida
     context = SituationValidationContext(admission.manifest, receipt.sequence,
         admission.manifest_digest, admission.result_sources, receipt.target_key,
         receipt.logical_activity_id, receipt.lane, revision=revision)
+    if revision == "situation-validation.v7":
+        return context  # Preserve the actual input; never infer another parent later.
     from app.domains.memory.repository.situation_source_bindings import restore_bindings
     return restore_bindings(session, context, validation=validation)
 

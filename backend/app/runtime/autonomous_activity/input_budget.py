@@ -4,6 +4,7 @@ from dataclasses import replace
 from hashlib import sha256
 import json
 from time import monotonic
+from app.core.activity_transactions import activity_write
 
 from app.contracts.sns_generation import MODEL_BUDGET_REVISION, read_generation_policies
 from app.domains.world_characters.activity_models import ActivityGraphRun
@@ -27,6 +28,9 @@ class SnsInputBudget:
         return row
 
     def record(self, operation, receipt):
+        return activity_write(self.db, lambda: self._record_current(operation, receipt))
+
+    def _record_current(self, operation, receipt):
         row = self.row()
         metadata = dict(row.result or {})
         attempts = dict(metadata.get("input_budget_attempts", {}))
@@ -40,7 +44,6 @@ class SnsInputBudget:
             receipts[receipt["request_sha256"]] = receipt
             metadata["input_budget_receipts"] = dict(list(receipts.items())[-32:])
         row.result = metadata
-        self.db.commit()
 
     async def ensure_profile(self, request, guard):
         if self.profile is None:
@@ -65,9 +68,13 @@ class SnsInputBudget:
                     raise InputBudgetError("activity_model_profile_changed")
                 actual = frozen
             else:
-                row = self.row()
-                row.result = {**(row.result or {}), "model_token_profile": actual.to_dict()}
-                self.db.commit()
+                def save_profile():
+                    row = self.row()
+                    current = (row.result or {}).get("model_token_profile")
+                    if current is not None and current != actual.to_dict():
+                        raise InputBudgetError("activity_model_profile_changed")
+                    row.result = {**(row.result or {}), "model_token_profile": actual.to_dict()}
+                activity_write(self.db, save_profile)
             self.profile = actual
         if self.profile.model != request.model:
             raise InputBudgetError("activity_model_profile_changed")

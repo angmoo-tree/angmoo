@@ -44,6 +44,7 @@ class SingleBackendRuntimeComponents:
         scheduler_runner: SchedulerRunner = run_scheduler_component,
         projector_runner: ProjectorRunner = run_projector_component,
         startup_timeout_seconds: float | None = None,
+        scheduler_lease_wait_seconds: float = 0,
         shutdown_timeout_seconds: float | None = None,
         registry: ComponentObservationRegistry = component_observations,
     ) -> None:
@@ -62,6 +63,7 @@ class SingleBackendRuntimeComponents:
             else settings.LOCAL_RUNTIME_COMPONENT_SHUTDOWN_TIMEOUT_SECONDS,
         )
         self._registry = registry
+        self._scheduler_lease_wait_seconds = max(0, scheduler_lease_wait_seconds)
         self._scheduler_stop: asyncio.Event | None = None
         self._projector_stop: threading.Event | None = None
         self._scheduler_task: asyncio.Task[None] | None = None
@@ -74,6 +76,7 @@ class SingleBackendRuntimeComponents:
 
         loop = asyncio.get_running_loop()
         scheduler_started = asyncio.Event()
+        scheduler_waiting_lease = asyncio.Event()
         projector_started = asyncio.Event()
         self._scheduler_stop = asyncio.Event()
         self._projector_stop = threading.Event()
@@ -83,6 +86,8 @@ class SingleBackendRuntimeComponents:
 
         def scheduler_listener(state: str) -> None:
             self._observe_scheduler_state(state)
+            if state == "waiting_lease":
+                scheduler_waiting_lease.set()
             if state == "ready":
                 scheduler_started.set()
 
@@ -107,7 +112,8 @@ class SingleBackendRuntimeComponents:
         try:
             await asyncio.gather(
                 self._wait_started(
-                    "scheduler", scheduler_started, self._scheduler_task
+                    "scheduler", scheduler_started, self._scheduler_task,
+                    lease_waiting=scheduler_waiting_lease,
                 ),
                 self._wait_started(
                     "projector", projector_started, self._projector_task
@@ -186,14 +192,30 @@ class SingleBackendRuntimeComponents:
         name: str,
         started: asyncio.Event,
         task: asyncio.Task[None],
+        *,
+        lease_waiting: asyncio.Event | None = None,
     ) -> None:
         wait_task = asyncio.create_task(started.wait())
+        notice = (asyncio.create_task(lease_waiting.wait())
+            if lease_waiting is not None and self._scheduler_lease_wait_seconds > self._startup_timeout_seconds
+            else None)
+        entered = asyncio.get_running_loop().time()
+        deadline = entered + self._startup_timeout_seconds
         try:
-            done, _ = await asyncio.wait(
-                {wait_task, task},
-                timeout=self._startup_timeout_seconds,
-                return_when=asyncio.FIRST_COMPLETED,
-            )
+            waiting = {wait_task, task} | ({notice} if notice is not None else set())
+            while True:
+                done, _ = await asyncio.wait(waiting,
+                    timeout=max(0, deadline-asyncio.get_running_loop().time()),
+                    return_when=asyncio.FIRST_COMPLETED)
+                if task in done or wait_task in done or not done:
+                    break
+                # The resident runner holds the local process lock but found a
+                # still-valid durable lease (for example after SIGKILL). Allow
+                # its fixed expiry/recovery budget once; no generic degraded
+                # state or repeated notification extends the startup deadline.
+                if notice in done:
+                    deadline = entered + self._scheduler_lease_wait_seconds
+                    waiting.remove(notice)
             if not done:
                 raise SingleBackendRuntimeStartupError(
                     f"{name}_component_start_timeout"
@@ -209,7 +231,8 @@ class SingleBackendRuntimeComponents:
                 )
         finally:
             wait_task.cancel()
-            await asyncio.gather(wait_task, return_exceptions=True)
+            if notice is not None: notice.cancel()
+            await asyncio.gather(wait_task, *([notice] if notice is not None else []), return_exceptions=True)
 
     async def _run_scheduler(
         self,
@@ -309,6 +332,7 @@ def create_single_backend_runtime_components(
         return None
     if session_factory is None:
         return SingleBackendRuntimeComponents()
+    from app.runtime.resident.scheduler import RECOVERY_BACKOFF_MAX_SECONDS
     return SingleBackendRuntimeComponents(
         scheduler_runner=partial(
             run_scheduler_component,
@@ -323,6 +347,8 @@ def create_single_backend_runtime_components(
         startup_timeout_seconds=(
             config.LOCAL_RUNTIME_COMPONENT_STARTUP_TIMEOUT_SECONDS
         ),
+        scheduler_lease_wait_seconds=(config.RESIDENT_TICK_LEASE_TTL_SECONDS
+            + RECOVERY_BACKOFF_MAX_SECONDS + config.LOCAL_RUNTIME_COMPONENT_STARTUP_TIMEOUT_SECONDS),
         shutdown_timeout_seconds=(
             config.LOCAL_RUNTIME_COMPONENT_SHUTDOWN_TIMEOUT_SECONDS
         ),

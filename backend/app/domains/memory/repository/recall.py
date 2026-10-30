@@ -98,7 +98,12 @@ class SqlAlchemyMemoryRecallDocumentSource:
                 evidence_by_item.setdefault(evidence.memory_item_id, []).append(evidence)
             reader = self._source_reader_factory(session)
             from app.domains.memory.contracts.access_validation import MemoryAccessValidation
+            from app.domains.memory.repository.access_batch import prepare_access
             validation = MemoryAccessValidation(session, now)
+            # Index maintenance reads the same canonical lineage as hot briefs.
+            # Batch its source facts before validating each item; no cached
+            # authorization survives this read operation or a later commit.
+            prepare_access(session, items, now, reader=reader, validation=validation)
             result: dict[str, tuple[MemoryRecallDocument, ...]] = {}
             for item in items:
                 result[item.id] = self._documents_for_item(
@@ -178,8 +183,8 @@ class SqlAlchemyMemoryRecallDocumentSource:
             canonical = _current_evidence(reader, scope, item, row, session=session, now=now)
             if canonical is not None:
                 current.append((row, canonical))
-        if not current and not summary_only:
-            return ()
+        if not current:
+            summary_only = True  # Historical originals may be unavailable; keep the summary.
 
         occurred_at = _as_utc(max((value.source_created_at for _row, value in current), default=item.valid_from))
         evidence_ids = ",".join(row.id for row, _value in current)
@@ -331,6 +336,9 @@ class SqlAlchemyCanonicalRecallRepository:
                     continue
                 from app.domains.memory.repository.situation_reads import situation_origin, situation_accessible
                 info = situation_origin(session, item)
+                if candidate.kind is RecallDocumentKind.MEMORY_ITEM and candidate.metadata.get("item_version") != str(item.version):
+                    excluded["memory_version_changed"] += 1
+                    continue
                 if info is not None:
                     if (candidate.kind is not RecallDocumentKind.MEMORY_ITEM
                         or candidate.document_id != f"memory-item:{item.id}" or candidate.canonical_source_id != item.id
@@ -343,7 +351,7 @@ class SqlAlchemyCanonicalRecallRepository:
                         item.id, item.summary, _as_utc(item.valid_from), memory_item_id=item.id,
                         counterpart_world_character_id=item.counterpart_world_character_id, thread_id=item.thread_id,
                         metadata={"item_version": str(item.version), "memory_kind": item.memory_kind,
-                            "representation": "activity_situation_v1", "recorded_at": _as_utc(item.created_at).isoformat()}))
+                            "representation": "activity_situation_v1" if info else "legacy_summary", "recorded_at": _as_utc(item.created_at).isoformat()}))
                     seen.add(candidate.document_id)
                     continue
                 statement = select(MemoryItemEvidence).where(
@@ -360,6 +368,20 @@ class SqlAlchemyCanonicalRecallRepository:
                     is not None
                 ]
                 if not current:
+                    from app.domains.memory.repository.experience import accessible
+                    if (candidate.kind is RecallDocumentKind.MEMORY_ITEM
+                            and candidate.document_id == f"memory-item:{item.id}"
+                            and candidate.canonical_source_id == item.id
+                            and candidate.thread_id == item.thread_id
+                            and candidate.counterpart_world_character_id == item.counterpart_world_character_id
+                            and accessible(session,scope,item,now,reader=reader)):
+                        records.append(CanonicalRecallRecord(candidate.document_id,RecallDocumentKind.MEMORY_ITEM,
+                            item.id,item.summary,_as_utc(item.valid_from),memory_item_id=item.id,
+                            counterpart_world_character_id=item.counterpart_world_character_id,thread_id=item.thread_id,
+                            metadata={"item_version":str(item.version),"memory_kind":item.memory_kind,
+                                "representation":"legacy_summary","snapshot_status":"snapshot_unavailable"}))
+                        seen.add(candidate.document_id)
+                        continue
                     excluded["canonical_evidence_invalid"] += 1
                     continue
                 record = _candidate_record(candidate, item, current)

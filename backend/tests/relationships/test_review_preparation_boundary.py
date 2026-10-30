@@ -10,7 +10,7 @@ from memory.test_p8_l_o_memory_consolidation import _stack
 from memory.test_activity_situation_relationships import test_old_and_new_memory_union_uses_core_counterpart_and_keeps_deleted_new_summary as seed_memories
 from memory.test_activity_situation_contract import NOW
 from app.runtime.persistence.model_registration import register_models
-from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence
+from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
 from app.domains.memory.models.episode import MemoryEpisodeInfo
 from app.domains.memory.models.batch import MemoryBatchSetting
 from app.domains.memory.models.activity_configuration import MemorySubjectProfile
@@ -45,36 +45,41 @@ def test_complete_cutoff_read_does_not_hold_writer_and_rechecks_consent(tmp_path
         if batch is None:
             batch = MemoryBatchSetting(scope_setting_id=setting.id, timezone="Asia/Seoul")
             db.add(batch)
-        batch.ai_enabled, batch.consent_version, batch.schedule_enabled, batch.local_time = True, "synthetic", True, "00:00"
+        from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
+        batch.ai_enabled, batch.consent_version, batch.schedule_enabled, batch.local_time = True, MEMORY_CONSENT_VERSION, True, "00:00"
         db.add(MemorySubjectProfile(scope_setting_id=setting.id, model_id="gemini-3.1-flash-lite", thinking_level="high", version=1, updated_at=NOW))
         world_credentials.save(db, owner_id=scope.owner_id, world_id=scope.world_id,
             world_character_id=scope.subject_world_character_id, purpose="consolidation",
             data=WorldCredentialWrite(expected_revision=0, provider="google", model="gemini-3.1-flash-lite", thinking_level="high", api_key="synthetic-preparation-only"))
         db.commit()
         setting_id = setting.id
-    original_collect = preparation.collect_new_review_memories
+    from app.runtime.relationships.review_memories import collect_new_review_memories
+    from app.runtime.relationships.manual_review_worker import advance_manual_requests
     collections, writer_facts = [], []
-    def collect(db, **kwargs):
-        grouped = original_collect(db, **kwargs)
+    # The collector itself remains read-only and does not reserve SQLite's
+    # writer. Queue admission is now a separate, current-consent boundary.
+    with factory() as db:
+        setting = db.get(MemoryScopeSettingModel, setting_id)
+        grouped = collect_new_review_memories(db, setting=setting, now=NOW+timedelta(seconds=1))
         assert not db.new and not db.dirty
         assert db.scalar(select(func.count()).select_from(Work)) == 0
         with engine.connect() as writer:
             writer.exec_driver_sql("BEGIN IMMEDIATE")
             writer.exec_driver_sql("UPDATE users SET display_name=display_name")
             writer.commit()
-        if change:
-            with factory() as writer:
-                row = writer.get(MemoryBatchSetting, setting_id)
-                row.ai_enabled = False; row.version += 1; writer.commit()
         collections.append(sum(map(len, grouped.values())))
-        return grouped
-    monkeypatch.setattr(preparation, "collect_new_review_memories", collect)
-    original_writer = preparation.run_sqlite_session_immediate
+    if change:
+        with factory() as db:
+            row = db.get(MemoryBatchSetting, setting_id)
+            row.ai_enabled = False; row.version += 1; db.commit()
+    original_writer = preparation.database_write
     def write(db, operation, **kwargs):
         return original_writer(db, operation, observer=writer_facts.append, **kwargs)
-    monkeypatch.setattr(preparation, "run_sqlite_session_immediate", write)
+    monkeypatch.setattr(preparation, "database_write", write)
     preparation.prepare_due_reviews(factory, NOW+timedelta(seconds=1))
     assert collections == [152]
+    with factory() as db:
+        original_writer(db, lambda: advance_manual_requests(db, NOW+timedelta(seconds=1)), require_clean=True)
     with factory() as db:
         roots = list(db.scalars(select(Work).where(Work.parent_id.is_(None))))
         assert len(roots) == (0 if change else 1)

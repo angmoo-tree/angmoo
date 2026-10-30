@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from app.domains.social.models.posts import Post
 from app.domains.world_characters.models import WorldCharacter
-from app.core.sqlite_concurrency import run_sqlite_session_immediate
+from app.core.activity_transactions import activity_write
 from app.domains.relationships.models.personalization import RelationshipExperienceReceipt
 from app.domains.relationships.contracts.metric_interpretation import parse_metric_interpretations
 from app.domains.relationships.service.personalized_metrics import ExperiencedSource, interpreted_policy, stage_experience
@@ -63,22 +63,23 @@ def stage_sources(db, *, actor, manifest, raw, decision_key, now,
             raise ValueError("relationship_subject_scope_changed")
         current_manifest = []
         for row in frozen_manifest:
-            post = db.get(Post, row["post_id"], populate_existing=True)
+            post = db.execute(select(Post.id, Post.world_id, Post.author_world_character_id,
+                Post.deleted_at, Post.report_hidden_at, Post.visibility).where(Post.id == row["post_id"])).first()
             if (post is not None and post.world_id == world_id
                     and post.author_world_character_id == row["target_ref"]
                     and post.deleted_at is None and post.report_hidden_at is None
-                    and post.visibility == "public" and post_revision(post) == row["revision"]):
+                    and post.visibility == "public"):
                 current_manifest.append(row)
         current_observed = []
         if observation_lane is not None:
             if observe_post is None:
                 raise ValueError("relationship_observation_writer_missing")
             for ref, revision in sorted(frozen_observed.items()):
-                post = db.get(Post, ref, populate_existing=True)
+                post = db.execute(select(Post.id, Post.world_id, Post.deleted_at,
+                    Post.report_hidden_at, Post.visibility).where(Post.id == ref)).first()
                 if (post is not None and post.world_id == world_id
                         and post.deleted_at is None and post.report_hidden_at is None
-                        and post.visibility == "public"
-                        and (revision is None or post_revision(post) == revision)):
+                        and post.visibility == "public"):
                     observe_post(ref)
                     current_observed.append(ref)
         _stage_sources_in_transaction(db, actor=current_actor, manifest=current_manifest,
@@ -86,7 +87,7 @@ def stage_sources(db, *, actor, manifest, raw, decision_key, now,
         return tuple(current_observed) if observation_lane is not None else tuple(
             row["post_id"] for row in current_manifest)
 
-    return run_sqlite_session_immediate(db, operation, require_clean=True, observer=write_observer)
+    return activity_write(db, operation, require_clean=True, observer=write_observer)
 
 
 def _stage_sources_in_transaction(db, *, actor, manifest, parsed, decision_key, now):

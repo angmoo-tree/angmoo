@@ -18,6 +18,8 @@ def test_episode_correction_chain_retains_eligibility_without_rewriting_episode(
             summary='정정된 경험',confidence=1,salience=1)
         db.add(replacement)
         db.flush()
+        from app.domains.memory.repository.experience import copy_for_correction
+        copy_for_correction(db,previous,replacement,now=NOW)
         previous.status="superseded"
         previous.superseded_by_id=replacement.id
         previous=replacement

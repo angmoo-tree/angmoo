@@ -1,6 +1,6 @@
 """Durable trigger receipts; existing jobs retain their identity and retry budget."""
 from datetime import datetime
-from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models import Base
 
@@ -34,3 +34,14 @@ class MemoryConsolidationJob(Base):
     job_id: Mapped[str] = mapped_column(ForeignKey("memory_batch_runs.job_id", ondelete="CASCADE"), primary_key=True, index=True)
     phase: Mapped[str] = mapped_column(String(24), default="queued")
     phase_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class MemoryMaintenanceSlot(Base):
+    """One runtime-wide execution owner; never holds a DB connection during AI."""
+    __tablename__ = "memory_maintenance_slot"
+    key: Mapped[str] = mapped_column(String(32), primary_key=True)
+    owner: Mapped[dict | None] = mapped_column(JSON)
+    token: Mapped[str | None] = mapped_column(String(64))
+    kind: Mapped[str | None] = mapped_column(String(24))
+    acquired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_kind: Mapped[str | None] = mapped_column(String(24))

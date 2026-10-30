@@ -28,7 +28,8 @@ class FtsHybridAxis:
                 request.kinds, request.axis_limit, request.counterpart_world_character_id, request.thread_id,
                 korean_spacing_fallback=True, occurred_from=request.occurred_from,
                 occurred_to=request.occurred_to, lexical_policy=self._policy,
-                image_base_text=request.image_base_text, image_hint=request.image_hint), capture_details=bool(parent and parent.detailed)), deadline=deadline)
+                image_base_text=request.image_base_text, image_hint=request.image_hint,
+                allowed_thread_ids=request.allowed_thread_ids), capture_details=bool(parent and parent.detailed)), deadline=deadline)
             try:
                 for event in observation.get("events", ()):
                     observe(event["event"], **{key: value for key, value in event.items() if key != "event"})
@@ -80,7 +81,8 @@ class VectorHybridAxis:
             executed = True
             result = await self._workers.search(MemoryVectorQuery(request.scope, request.profile, response.vector,
                 request.axis_limit, request.occurred_from, request.occurred_to,
-                request.counterpart_world_character_id, request.thread_id), deadline=deadline)
+                request.counterpart_world_character_id, request.thread_id,
+                allowed_thread_ids=request.allowed_thread_ids), deadline=deadline)
             rows = tuple(RankedMemoryCandidate(MemoryRecallCandidate(hit.document_id, hit.memory_item_id,
                 RecallDocumentKind.MEMORY_ITEM, hit.memory_item_id, -hit.distance, ""), hit.version, hit.content_hash)
                 for hit in result.hits)

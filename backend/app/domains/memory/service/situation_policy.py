@@ -13,9 +13,12 @@ def capture(session, *, owner_id, world_id, actor_id, environment, policy):
         locale=environment.memory_search_locale, environment_revision=environment.environment_revision)
     if value is not None:
         from app.domains.memory.repository.situation_runs import get_or_create_settings
-        from app.domains.memory.repository.situation_transition import retire_admission
+        from app.domains.memory.repository.situation_transition import retire_admission, retired
+        # Missing transition/settings rows initialize under the same scope
+        # writer. Once both exist, ordinary capture is a consistent read.
+        get_or_create_settings(session, value.setting_id, timezone=environment.timezone,
+            now=datetime.now(UTC), initialize_only=retired(session, value.setting_id))
         retire_admission(session, value.setting_id, now=datetime.now(UTC))
-        get_or_create_settings(session, value.setting_id, timezone=environment.timezone, now=datetime.now(UTC))
     from app.domains.memory.policies.situation_generation import TARGET_OUTPUT_REVISION
     return {"policy": SITUATION_POLICY, "snapshot": asdict(value) if value else None,
             "output_revision": TARGET_OUTPUT_REVISION}

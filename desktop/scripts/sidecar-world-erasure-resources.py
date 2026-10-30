@@ -8,7 +8,7 @@ import re
 
 def resource_arguments(backend_root: Path) -> list[str]:
     root = backend_root.resolve()
-    inventory = root / "app/runtime/world_deletion/inventory.py"
+    inventory = root / "app/runtime/persistence/world_erasure_inventory.py"
     tree = ast.parse(inventory.read_text(encoding="utf-8"))
     owners = next(ast.literal_eval(node.value) for node in tree.body
                  if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)

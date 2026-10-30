@@ -699,15 +699,12 @@ mod tests {
     #[test]
     fn relationship_graph_provider_is_ladybug_only() {
         let route = "/characters/mango/worlds/arcana/relationship-graph";
-        for kind in [ProductWindowKind::Phone, ProductWindowKind::RelationshipGraph] {
+        for kind in [
+            ProductWindowKind::Phone,
+            ProductWindowKind::RelationshipGraph,
+        ] {
             assert!(validate_product_route(kind, route).is_ok());
-            assert!(
-                validate_product_route(
-                    kind,
-                    &format!("{route}?provider=ladybug")
-                )
-                .is_ok()
-            );
+            assert!(validate_product_route(kind, &format!("{route}?provider=ladybug")).is_ok());
             for query in ["provider=neo4j", "provider=remote", "debug=true"] {
                 assert_eq!(
                     validate_product_route(kind, &format!("{route}?{query}")),

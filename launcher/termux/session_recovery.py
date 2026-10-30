@@ -31,13 +31,13 @@ def _records(value, state):
         if key in value:
             records.append(value[key])
     children = value.get("children", {})
-    require(isinstance(children, dict) and set(children) <= {"backend", "frontend"}, "log_recovery_unverified")
+    require(isinstance(children, dict) and set(children) <= {"backend", "frontend", "postgres"}, "log_recovery_unverified")
     groups = list(children.values())
     if state.get("nonce") == value["launch_id"]:
         if "owner" in state:
             records.append(state["owner"])
         prior = state.get("children", {})
-        require(isinstance(prior, dict) and set(prior) <= {"backend", "frontend"}, "log_recovery_unverified")
+        require(isinstance(prior, dict) and set(prior) <= {"backend", "frontend", "postgres"}, "log_recovery_unverified")
         groups.extend(prior.values())
     records.extend(groups)
     require(all(valid_identity(r) for r in records), "log_recovery_unverified")

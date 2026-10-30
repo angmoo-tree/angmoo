@@ -36,6 +36,17 @@ def test_p8_l_d_generated_inventory_is_current() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
+def test_p8_l_d_refuses_regeneration_after_frozen_successor() -> None:
+    path = "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
+    before = _sha256(path)
+    result = subprocess.run(
+        [sys.executable, "scripts/ci/generate_p8_l_d_world_chat_inventory.py", "--write"],
+        cwd=ROOT, capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 1 and "inventory is frozen" in result.stderr
+    assert _sha256(path) == before
+
+
 def test_p8_l_d_chains_frozen_a_and_b_without_rewriting_history() -> None:
     inventory = _json(
         "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
@@ -97,7 +108,7 @@ def test_p8_l_d_freezes_world_chat_v4_migration_and_transport_contract() -> None
     ]
 
 
-def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
+def test_p8_l_d_preserves_v3_fixture_and_requires_official_013_hosted_upgrade() -> None:
     inventory = _json(
         "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
     )
@@ -120,5 +131,4 @@ def test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
-    assert result.stdout.strip().endswith(",".join(f"v{version}" for version in range(1, SQLITE_SCHEMA_VERSION)))
+    assert result.stdout.strip() == "windows_installer_supported_upgrade_matrix_contract_pass:v41"

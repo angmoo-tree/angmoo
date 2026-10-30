@@ -1,6 +1,7 @@
 """Execute a frozen V2 claim with inherited durable child checkpoints."""
 from datetime import UTC, datetime, timedelta
 from dataclasses import replace
+from app.core.activity_transactions import activity_write
 
 from app.domains.world_characters.activity_models import ActivityGraphRun
 from app.domains.world_characters.models import WorldCharacter, CharacterActiveWorld
@@ -131,8 +132,14 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             "thinking_level": identity["thinking_level"], "routine_output_contract": identity["routine_output_contract"],
             "routine_state_schema_version": identity["routine_state_schema_version"], "routine_thought_policy": identity["routine_thought_policy"]})
 
-    def validate_claim():
+    def validate_claim(local_ctx=None, local_actor=None):
         """Read-only claim fence; also runs inside each fresh writer boundary."""
+        return validate_context_claim(local_ctx or ctx, local_actor or actor)
+
+    # DB stages must validate with their own Session, never the parent closure.
+    validate_claim.bind_context = lambda local_ctx, local_actor: lambda: validate_context_claim(local_ctx, local_actor)
+
+    def validate_context_claim(ctx, actor):
         from app.runtime.autonomous_activity.llm_context import world_material
         world_material(ctx)
         active = ctx.db.get(CharacterActiveWorld, ctx.character.id, populate_existing=True)
@@ -145,7 +152,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             or world is None or world.status != "published" or world.readiness_status != "publish_ready"
             or membership is None or membership.status != "active" or membership.user_id != ctx.user_id):
             raise ActivityScopeChangedError("activity_scope_changed")
-        row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
+        row = ctx.db.get(ActivityGraphRun, identity["activity_id"], populate_existing=True)
         if row is not None and row.status in TERMINAL_STATUSES:
             raise ActivityScopeChangedError("activity_already_completed")
         if (row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]
@@ -198,13 +205,24 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("relationship_effect_policy_changed")
         if read_currentness_policy(stored_identity) != relationship_policy:
             raise ActivityScopeChangedError("relationship_validation_policy_changed")
+        from app.runtime.autonomous_activity.db_stage import run_context_db_stage
+        await run_context_db_stage(ctx, actor,
+            lambda local_ctx, local_actor: activity_write(local_ctx.db,
+                lambda: renew_claim(state, local_ctx, local_actor)))
+        return {}
+
+    def renew_claim(state, ctx, actor):
         ctx.db.expire_all()
-        row, slot, now = validate_claim()
+        row, slot, now = validate_claim(ctx, actor)
         if state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             from app.domains.world_characters.service.activity_state import read_state
             from app.runtime.autonomous_activity.revalidation import assert_memories_current
             from app.runtime.autonomous_activity.committed_resume import settlement, committed_executions
             adapter = adapters.get(state.get("_lane"))
+            if adapter is not None:
+                from copy import copy
+                adapter = copy(adapter)
+                adapter.ctx, adapter.actor = ctx, actor
             confirmed = settlement(adapter, state, state["_lane"]) if adapter is not None else None
             completed = (adapter is not None and confirmed is not None
                 and committed_executions(adapter, state, state["_lane"]) is not None)
@@ -214,12 +232,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             if not completed:
                 assert_memories_current(ctx.db, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id,
                     memories=state.get("memories", {}), validations=state.get("memory_validations", {}))
-            expected = state.get("shared_context", {}).get("current_state")
-            current_version = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)["version"]
-            own_change = confirmed is not None and confirmed.outcome in {"updated", "kept"}
-            if expected and not completed and current_version != expected["version"] and (
-                    not own_change or current_version != confirmed.resulting_version):
-                raise ActivityScopeChangedError("activity_state_changed")
+            # Current state is reference input. Settlement retains its CAS and
+            # cannot overwrite a concurrent state update with this old proposal.
         slot.lease_expires_at = now + timedelta(minutes=10)
         completed_paths = {path: state[f"{path}_result"] for path in ("inbox", "routine", "feed") if f"{path}_result" in state}
         if completed_paths:
@@ -227,13 +241,16 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row.status = "running"
         row.result = {**(row.result or {}), "contract_version": identity["contract_version"]}
         row.stage = state.get("stage", "LoadContext")
-        ctx.db.commit()
-        return {}
 
     preparation_status = {}
 
     async def load(state):
         await guard(state)
+        if state.get("shared_context"):
+            shared = state["shared_context"]
+            if shared.get("world_id") != actor.world_id or shared.get("actor_id") != actor.id:
+                raise ActivityScopeChangedError("activity_initial_input_scope_invalid")
+            return {"shared_context": shared}
         from app.config import settings
         if settings.DAILY_PREPARATION_ENABLED and not state.get("shared_context"):
             from types import SimpleNamespace
@@ -245,7 +262,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             if attempt:
                 attempt.emit("daily_preparation", details=preparation_status)
             ctx.db.expire_all()
-        initialize_from_last_success(ctx.db, actor=actor)
+        activity_write(ctx.db, lambda: initialize_from_last_success(ctx.db, actor=actor))
         search_settings = (False, False)
         if binding.prepare_search is not None:
             from app.runtime.memory.composition import search_preparation_settings
@@ -270,12 +287,16 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             "publish_result": {"public_action_count": count}, "paths": results,
             "llm_usage_summary": tracker.summary(), "llm_rate_limit_waits": tracker.rate_limit_waits,
             "daily_preparation": preparation_status}
-        row = ctx.db.get(ActivityGraphRun, run.activity_id)
-        result = {**(row.result or {}), **result}
-        row.status, row.stage, row.result, row.finished_at = result["status"], "Finalize", plain(result), datetime.now(UTC)
-        if row.status in TERMINAL_STATUSES:
-            completion(row)
-        ctx.db.commit()
+        def save_result():
+            row, _, _ = validate_claim()
+            previous = {key: value for key, value in (row.result or {}).items()
+                if key not in {"reason", "stage", "storage_sqlstate"}}
+            merged = {**previous, **result}
+            row.status, row.stage, row.result, row.finished_at = merged["status"], "Finalize", plain(merged), datetime.now(UTC)
+            if row.status in TERMINAL_STATUSES:
+                completion(row)
+            return merged
+        result = activity_write(ctx.db, save_result)
         if attempt:
             attempt.emit("activity_result", classification=result["status"], details={
                 "status": result["status"], "public_action_count": count,
@@ -297,7 +318,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         for path, cls in classes}
     lanes = {path: adapter.ports() for path, adapter in adapters.items()}
     for path, port in list(lanes.items()):
-        async def failed(exc, lane=path):
+        def failed_sync(exc, lane):
             from app.integrations.direct_llm import DirectLlmDeferred, DirectLlmError
             from app.domains.social.exceptions import WorldFeedError
             if attempt:
@@ -324,15 +345,32 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             if lane == "routine":
                 adapters[lane].release_failed(reason)
             row = ctx.db.get(ActivityGraphRun, run.activity_id)
-            stale = identity["contract_version"] == 2 and lane == "feed" and reason in {
-                "feed_target_stale", "activity_source_changed", "feed_affordance_changed", "feed_claim_changed"}
+            feed_stale = identity["contract_version"] == 2 and lane == "feed" and reason in {
+                "feed_target_stale", "activity_source_changed", "activity_target_unavailable", "feed_affordance_changed", "feed_claim_changed"}
+            from app.runtime.autonomous_activity.inputs import relationship_failure_details, stale_relationship_input
+            validation_details = relationship_failure_details(exc)
+            relationship_stale = identity["contract_version"] == 2 and stale_relationship_input(exc, lane=lane, stage=row.stage)
+            stale = feed_stale or relationship_stale
             return {"path": lane, "status": "no_action" if stale else "failed", "reason": reason,
                 "failed_stage": row.stage, "public_action_count": 0,
-                **({"feed_summary": adapters[lane].finalize_unavailable(reason)} if stale else {})}
+                **({"policy_outcome": "input_changed_before_publication"} if relationship_stale else {}),
+                **({"relationship_validation": validation_details} if validation_details is not None else {}),
+                **({"feed_summary": adapters[lane].finalize_unavailable(reason)} if stale and lane == "feed" else {})}
+        async def failed(exc, lane=path, operation=failed_sync):
+            from app.core.async_session import session_call
+            return await session_call(ctx.db, lambda: operation(exc, lane))
         def trace(event_type, name, *, path=path, **details):
             if attempt:
                 attempt.node(event_type, lane=path, node=name, **details)
-        lanes[path] = replace(port, on_error=failed, observe=trace)
+        async def record_observed_failure(state, exc, lane=path):
+            from app.runtime.autonomous_activity.experience_failures import record_failure
+            from app.runtime.autonomous_activity.db_stage import run_context_db_stage
+            if str(exc) not in {"feed_target_stale", "activity_source_changed", "activity_target_unavailable", "feed_affordance_changed", "feed_claim_changed"}:
+                return
+            def save(local_ctx, local_actor):
+                return activity_write(local_ctx.db, lambda: record_failure(local_ctx.db, lane, state, str(exc)))
+            await run_context_db_stage(ctx, actor, save)
+        lanes[path] = replace(port, on_error=failed, observe=trace, record_observed_failure=record_observed_failure)
     graph_options = {}
     if identity["contract_version"] == 2:
         from app.runtime.autonomous_activity.combined_selection import CombinedSelection
@@ -385,7 +423,6 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             stage = None
             persisted = False
             try:
-                from app.core.sqlite_concurrency import run_sqlite_session_immediate
                 def save_failure_status():
                     row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
                     if row is None:
@@ -398,9 +435,11 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                     row.status = status
                     if status == "aborted":
                         row.finished_at = datetime.now(UTC)
-                    row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
+                    from app.core.postgresql_concurrency import sqlstate
+                    row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage,
+                        "storage_sqlstate": sqlstate(exc)}
                     return row.stage, row.status
-                stage, status = run_sqlite_session_immediate(ctx.db, save_failure_status, require_clean=True)
+                stage, status = activity_write(ctx.db, save_failure_status, require_clean=True)
                 persisted = True
             except Exception as persist_exc:
                 ctx.db.rollback()
@@ -418,10 +457,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                     or not terminal_snapshot.values.get("result")
                     or business_result(terminal_snapshot.values["result"]) != business_result(final["result"])):
                 raise ValueError("activity_final_checkpoint_unconfirmed")
-            ctx.db.expire_all()
-            completed = ctx.db.get(ActivityGraphRun, run.activity_id)
-            confirm_graph(ctx.db, completed)
-            ctx.db.commit()
+            def confirm():
+                completed = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
+                confirm_graph(ctx.db, completed)
+            activity_write(ctx.db, confirm)
         except Exception:
             ctx.db.rollback()
             import logging

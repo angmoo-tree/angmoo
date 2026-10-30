@@ -205,6 +205,9 @@ def main() -> int:
         f'RMDir /r "$LOCALAPPDATA\\Angmoo\\{child}"'
         for child in (
             "canonical",
+            "postgresql",
+            "postgresql-appdata",
+            "postgresql-migration",
             "graph",
             "search",
             "media",
@@ -279,6 +282,18 @@ def main() -> int:
         all_targets_validated < confirmation < first_recursive_delete,
         "full-delete confirmation ordering drifted",
     )
+    for child, suffix in (
+        ("postgresql", "postgresql"),
+        ("postgresql-appdata", "postgresql_appdata"),
+        ("postgresql-migration", "postgresql_migration"),
+    ):
+        target = f'$LOCALAPPDATA\\Angmoo\\{child}'
+        before_confirmation = f'!insertmacro ANGMOO_VERIFY_NOT_REPARSE "{target}" angmoo_{suffix}'
+        before_delete = (f'!insertmacro ANGMOO_VERIFY_NOT_REPARSE "{target}" angmoo_delete_{suffix}\n'
+                         f'  RMDir /r "{target}"')
+        _require(before_confirmation in hooks and hooks.index(before_confirmation) < confirmation,
+                 f"PostgreSQL deletion target must be validated before consent: {child}")
+        _require(before_delete in hooks, f"PostgreSQL deletion target must be rechecked immediately: {child}")
     combined_desktop_sources = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ROOT / "desktop" / "src-tauri" / "src").glob("*.rs"))
@@ -326,6 +341,9 @@ def main() -> int:
                 f"LOCALAPPDATA/Angmoo/{child}"
                 for child in (
                     "canonical",
+                    "postgresql",
+                    "postgresql-appdata",
+                    "postgresql-migration",
                     "graph",
                     "search",
                     "media",

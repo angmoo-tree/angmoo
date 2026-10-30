@@ -118,7 +118,7 @@ def test_fallback_records_keep_event_interval_recording_unknown_and_memory_opt_o
     # clock so this test also exercises the real response-generation reserve.
     execution_deadline = datetime.now(UTC) + timedelta(seconds=60)
     execution = asyncio.run(HybridCanonicalService(search).plan_and_execute(SimpleNamespace(intent=result.intent,
-        resolved=result.resolved, call_id="tool-1", call_tracker=result.call_tracker), now=NOW, deadline_at=execution_deadline))
+        resolved=result.resolved, call_id="tool-1", call_tracker=result.call_tracker, initial_result=None,thread_id='thread-1'), now=NOW, deadline_at=execution_deadline))
     bundle = EvidenceBundleAssembler().canonical(request_scope_hash="c"*64, result=execution).with_temporal_evidence()
     interpretation = replace(result.interpretation.freeze(bundle), retrieval_executed=any(axis.executed for axis in execution.recall.axes))
     item = replace(response_request(raw=command.user_message, participants=IDENTITY, bundle=bundle),
@@ -176,7 +176,7 @@ def test_valid_date_empty_result_does_not_expand_or_retry_search():
     search = Search((CanonicalRecallRecord("old", RecallDocumentKind.POST, "old", "Yesterday", NOW-timedelta(days=1)),))
     execution_deadline = datetime.now(UTC) + timedelta(seconds=60)
     execution = asyncio.run(HybridCanonicalService(search).plan_and_execute(SimpleNamespace(intent=result.intent,
-        resolved=result.resolved, call_id="empty", call_tracker=result.call_tracker), now=NOW, deadline_at=execution_deadline))
+        resolved=result.resolved, call_id="empty", call_tracker=result.call_tracker, initial_result=None,thread_id='thread-1'), now=NOW, deadline_at=execution_deadline))
     assert execution.recall.records == ()
     assert len(router.requests) == len(search.requests) == 1
     assert search.requests[0].occurred_from is not None and search.requests[0].occurred_to is not None

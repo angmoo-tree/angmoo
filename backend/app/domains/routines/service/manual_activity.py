@@ -111,6 +111,17 @@ async def run_agent_now(
     *, workflows: ManualActivityWorkflows,
     scoped_world_id: str | None = None,
 ) -> schemas.OpenClawAgentRunRead:
+    try:
+        return await _run_agent_now(db, user, character_id,
+            workflows=workflows, scoped_world_id=scoped_world_id)
+    except BaseException:
+        # Release admission locks before asynchronous request teardown yields.
+        # Otherwise a concurrent synchronous lock wait can block that teardown.
+        db.rollback()
+        raise
+
+
+async def _run_agent_now(db, user, character_id, *, workflows, scoped_world_id):
     lock_environment_admission(db, user.id)
     character = workflows.get_owned_character(db, user, character_id)
     workflows.ensure_not_suspended(character)

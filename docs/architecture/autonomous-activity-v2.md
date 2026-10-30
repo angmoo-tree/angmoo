@@ -1,5 +1,7 @@
 # 개인화 SNS V2 실제 구현 구조와 검증 인계
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 > 2026-10-03 현행 코드 갱신: 아래 2026-09-23의 V1/current 진입과 Inbox → Routine → Feed는 당시 구현·관찰의 역사 기록이다. 현행 지원 실행은 V2/2의 CombinedTargetSelector → InboxDecisionDraft → FeedDecisionDraft → RoutineDecisionDraft이며 공유 gateway/executor/workflow로 이동했다. current/V1 미완료는 재개하지 않고 안전한 포기 절차를 사용한다. 새 wire/출력 정책과 실제 제거·복원·보존 검증은 [최신 구현 기록](../verification/sns-v2-routine-io-retirement-20261002.md)을 따른다. 이 갱신이 과거 실제 AI 관찰·품질 결과를 새 코드의 결과로 바꾸지 않는다.
 
 작성일: 2026-09-23. 대상: `feat/sns-relationship-context`. 구현 시작 HEAD: `737dab337a76fc12512970234632f17da9814235`.

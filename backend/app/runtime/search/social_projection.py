@@ -195,6 +195,9 @@ class EmbeddedSocialSearchProjection:
         # Serialize canonical reads and writes with erasure, so a previously
         # read document cannot reappear after the deletion acknowledgement.
         with self._work_lock:
+            if getattr(self.index, 'provider', None) == 'postgresql':
+                self.index.open()
+                return self.index.erase_world(world_id)
             # The current SNS pipeline does not start this retired projection.
             # Existing managed generations still contain private text and need
             # erasure; do not start/re-subscribe the retired search lane.

@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy import select
 from runtime.test_activity_relationship_validation import relation_case, _lane, _new_state
-from app.contracts.relationship_currentness import EFFECT_PROGRESS_KEY, EFFECT_PROGRESS_REVISION
+from app.contracts.relationship_currentness import EFFECT_PROGRESS_KEY, EFFECT_PROGRESS_REVISION, PREVIOUS_CURRENTNESS, CURRENTNESS_REVISION
 from app.runtime.social.planned_actions import _execute_planned_action
 from app.runtime.autonomous_activity.relationship_progress import PRIVATE_KEY, effects
 from app.domains.relationships.policies.effect_progress import RelationshipEffect, proves
@@ -12,8 +12,9 @@ from app.domains.relationships.contracts.social_context import RelationshipValid
 from model_fixture_support import models
 
 
-def state_for(case):
-    lane, state = _lane(case), _new_state(case)
+def state_for(case, policy=PREVIOUS_CURRENTNESS):
+    # Exact version chains remain meaningful for already saved older policies.
+    lane, state = _lane(case), _new_state(case, policy=policy)
     lane.lane = "inbox"
     state["identity"][EFFECT_PROGRESS_KEY] = EFFECT_PROGRESS_REVISION
     state["relationship_validation_receipts"]["post-target"]["binding"]["lane"] = "inbox"
@@ -29,7 +30,23 @@ def state_for(case):
     state["decision"] = {"decisions": [{"target_id":target, "action":"like", "brief":"Acknowledge"} for target in ("post-target", "post-next")]}
     state["drafts"] = []
     state["lane_data"] = {target:{"post_id":target} for target in ("post-target", "post-next")}
+    from app.runtime.autonomous_activity.initial_input import seal
+    state.update(seal(state, {}))
     return lane, state
+
+
+def test_initial_policy_keeps_content_and_reuses_effect_without_version_proof(relation_case):
+    case = relation_case
+    lane, state = state_for(case, CURRENTNESS_REVISION)
+    first = execute(lane, state, "post-target", 0)
+    assert first["status"] == "succeeded"
+    assert PRIVATE_KEY not in lane.completed_action(state, "post-target").result
+    case.rows[0].version += 1
+    case.rows[0].perception = "New perception for the next decision"
+    case.db.commit()
+    assert execute(lane, state, "post-next", 1)["status"] == "succeeded"
+    assert execute(lane, state, "post-target", 0)["status"] == "reused"
+    assert len(list(case.db.scalars(select(models.PostLike)))) == 2
 
 
 def execute(lane, state, target, index):

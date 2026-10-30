@@ -41,7 +41,7 @@ class RecoveryTests(unittest.TestCase):
             self.addCleanup(signal.signal, sig, handler)
         child = self.spawn(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.addCleanup(child.stderr.close)
-        config = {"manifest": {"source_sha": "a" * 40, "version": "0.1.0"}}
+        config = {"manifest": {"source_sha": "a" * 40, "version": "0.1.0"},"containers":{"backend":"fixture-backend","frontend":"fixture-frontend"}}
         with (
             patch.object(angmoo, "installation", return_value=config),
             patch.object(angmoo, "tools", return_value="proot-distro"),
@@ -260,7 +260,7 @@ class RecoveryTests(unittest.TestCase):
 
     def test_start_recovers_legacy_before_spawn_and_preserves_spawn_failure(self):
         path = self.session()
-        config = {"manifest": {"source_sha": "a" * 40, "version": "0.1.0"}}
+        config = {"manifest": {"source_sha": "a" * 40, "version": "0.1.0"},"containers":{"backend":"fixture-backend","frontend":"fixture-frontend"}}
         self.lock.close()
         with patch.object(angmoo, "tools"), patch.object(angmoo, "installation", return_value=config), \
              patch.object(angmoo, "free_port"), patch.object(angmoo.subprocess, "Popen", side_effect=OSError("synthetic spawn failure")) as spawn:

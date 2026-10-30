@@ -1,5 +1,7 @@
 # L3-ER0 inventory and ER7 residual audit
 
+> **Legacy scope:** this records the SQLite runtime through 0.1.3 and preserved migration input. For 0.1.4 use [PostgreSQL runtime](../public/postgresql-runtime.md), [migration](../public/postgresql-migration.md), and [backup](../public/postgresql-backup.md). Historical findings below remain unchanged.
+
 - Source baseline: `db1c32510f66cee20a3e64a01e85c5ea8753d77e`
 - Public tracking issue: [#97](https://github.com/angmoo-tree/angmoo/issues/97)
 - ER0 baseline behavior change: **zero**

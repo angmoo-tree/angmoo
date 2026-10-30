@@ -65,7 +65,9 @@ def episode_prompt_payload(bundle: EpisodeBundle) -> tuple[str, dict]:
             "context_refs": [ref for ref, unit in bundle.source_refs().items() if unit.unit_key in a.context_keys]}
             for i, a in enumerate(bundle.activities, 1)]} if modern else {}),
         "prior_episode_candidates": [
-            {"ref": f"P{i}", "summary": prior.summary}
+            {"ref": f"P{i}", "summary": prior.summary,
+                **({"historical_experience": prior.experience_snapshot} if prior.experience_snapshot is not None else
+                    {"snapshot_status": "snapshot_unavailable"})}
             for i, prior in enumerate(bundle.prior_episodes, 1)
         ],
     }, ensure_ascii=False, separators=(",", ":"))

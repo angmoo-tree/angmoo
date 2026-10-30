@@ -44,3 +44,8 @@ backend/.ci/
 /scripts/diagnostics/serve_comfy_partner_live.py
 /frontend/scripts/image-live-ui.mjs
 /frontend/scripts/image-live-static-ui.mjs
+
+# Rebuilt native resources; source/digests are tracked by release recipes.
+/backend/app/runtime/resources/vec1/
+/desktop/src-tauri/resources/postgresql/
+/.angmoo-pg-experiment.json

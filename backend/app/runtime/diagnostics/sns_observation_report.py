@@ -23,6 +23,8 @@ from app.runtime.diagnostics.sns_observation import (
 
 def database_path(data_root: Path, explicit: Path | None = None) -> Path:
     root = data_root.resolve(strict=True)
+    if (root/'runtime/postgresql-runtime.json').is_file():
+        raise ValueError('postgresql_diagnostics_use_pg_diagnostics_command')
     canonical = (root / "canonical").resolve(strict=True)
     if explicit is None:
         marker = canonical / "current-generation.json"

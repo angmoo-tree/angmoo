@@ -17,10 +17,10 @@ SPEC.loader.exec_module(checker)
 
 
 def test_current_release_readmes_keep_bilingual_scope_and_limitations() -> None:
-    release_url = "https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3"
+    release_url = "https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4"
     for relative, badge_alt in (
-        ("README.md", "Download Angmoo 0.1.3"),
-        ("README.ko.md", "Angmoo 0.1.3 다운로드"),
+        ("README.md", "Download Angmoo 0.1.4"),
+        ("README.ko.md", "Angmoo 0.1.4 다운로드"),
     ):
         text = (REPO_ROOT / relative).read_text(encoding="utf-8")
         normalized = re.sub(r"\s+", " ", text)
@@ -35,8 +35,8 @@ def test_current_release_readmes_keep_bilingual_scope_and_limitations() -> None:
             rf'<img\b[^>]*\balt="{re.escape(badge_alt)}"[^>]*>\s*</a>',
             text,
         ), (relative, "release badge must link to the published release")
-        assert "Angmoo_0.1.3_x64-setup.exe" in text
-        assert "release-v0.1.3/install-termux.py" in text
+        assert "Angmoo_0.1.4_x64-setup.exe" in text
+        assert "release-v0.1.4/install-termux.py" in text
 
 
 @pytest.mark.parametrize(
@@ -85,10 +85,10 @@ def test_document_checker_ignores_next_route_directories_named_markdown(
     [
         ("README.md", "## Limitations"),
         ("README.ko.md", "## 한계"),
-        ("README.md", 'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3"'),
-        ("README.ko.md", 'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.3"'),
-        ("README.md", 'alt="Download Angmoo 0.1.3"'),
-        ("README.ko.md", 'alt="Angmoo 0.1.3 다운로드"'),
+        ("README.md", 'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4"'),
+        ("README.ko.md", 'href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4"'),
+        ("README.md", 'alt="Download Angmoo 0.1.4"'),
+        ("README.ko.md", 'alt="Angmoo 0.1.4 다운로드"'),
     ],
 )
 def test_document_checker_rejects_missing_bilingual_required_marker(

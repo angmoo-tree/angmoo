@@ -1,208 +1,115 @@
-from datetime import UTC, datetime, timedelta
-from dataclasses import asdict, replace
+"""SNS keeps acquired packets and checks memory rights, not current originals."""
+from copy import deepcopy
+from dataclasses import asdict
+from datetime import datetime, timedelta
 import json
-
 import pytest
-
-from app.domains.memory.models.items import MemoryItem
+from sqlalchemy import event
+from app.domains.memory.models.items import MemoryItem, MemoryScopeSettingModel
 from app.domains.memory.models.episode import MemoryEpisodeLink
-from app.runtime.autonomous_activity import revalidation
-from app.runtime.autonomous_activity import recall
-from app.runtime.autonomous_activity.recall import bounded_records
-from memory.test_episode_hybrid_reader import fixture
-from memory.test_p8_l_g_memory_write_lifecycle import memory_session
+from app.domains.memory.repository.experience import tombstone
+from app.domains.memory.repository.situation_admission import admit
+from app.runtime.autonomous_activity import revalidation, recall
+from memory.test_experience_snapshots import captured, real_source, apply, stack, NOW
+from memory.test_activity_situation_recall import readers
 
 
-def _hydrated_sns_validation(db, monkeypatch, *, author_id="verified-author"):
-    reader, request, candidate, details = fixture(db)
-    read_sources = details.read_sources
-    monkeypatch.setattr(details, "read_sources", lambda **kwargs: {
-        key: replace(value, author_id=author_id) for key, value in read_sources(**kwargs).items()
-    })
+def acquired(stack, monkeypatch):
+    db, scope, setting, memory = stack
+    post = real_source(db, scope)
+    manifest, draft, result = captured(db, scope, post)
+    receipt = admit(db, manifest=manifest, draft=draft, result=result, now=NOW)
+    apply(db, setting, memory)
+    item = db.get(MemoryItem, receipt.applied_item_id)
+    reader, request, candidate, _ = readers(db, scope, item)
     hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
-    memory = {**bounded_records(hydration.records),
-        "ranked_memory_ids": [row.memory_item_id for row in hydration.records]}
-    assert memory["packets"][0]["units"][0]["sources"]
-    assert all("author_id" not in source for packet in memory["packets"]
-        for unit in packet["units"] for source in unit["sources"])
-    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
-    snapshot = json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))
-    args = dict(owner_id=request.scope.owner_id, world_id=request.scope.world_id,
-        actor_id=request.scope.subject_world_character_id, memories={"target": memory},
-        validations={"target": snapshot})
-    return details, memory, args
+    assert hydration.records
+    result = {**recall.bounded_records(hydration.records),
+        "ranked_memory_ids": [row.memory_item_id for row in hydration.records],
+        "validation_snapshot": json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))}
+    split = recall.split_validation({"target": result})
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None): return NOW
+    monkeypatch.setattr(revalidation, "datetime", Clock)
+    args = dict(owner_id=scope.owner_id, world_id=scope.world_id, actor_id=scope.subject_world_character_id,
+        memories=split["memories"], validations=split["memory_validations"])
+    return item, post, args, hydration
 
 
-@pytest.mark.parametrize("author_id", (None, "verified-author"))
-@pytest.mark.parametrize("with_snapshot", (False, True))
-def test_unchanged_hydrated_sns_sources_pass_with_private_author_metadata(
-    memory_session, monkeypatch, author_id, with_snapshot,
-):
-    _details, _memory, args = _hydrated_sns_validation(memory_session, monkeypatch, author_id=author_id)
-    if not with_snapshot:
-        args.pop("validations")
-    revalidation.assert_memories_current(memory_session, **args)
-
-
-@pytest.mark.parametrize("change", ("text", "digest", "blocked", "missing"))
-def test_sns_snapshot_still_rejects_changed_or_inaccessible_originals(memory_session, monkeypatch, change):
-    details, _memory, args = _hydrated_sns_validation(memory_session, monkeypatch)
-    revalidation.assert_memories_current(memory_session, **args)
-    if change == "text":
-        read_sources = details.read_sources
-        monkeypatch.setattr(details, "read_sources", lambda **kwargs: {
-            key: replace(value, text="변경") for key, value in read_sources(**kwargs).items()
-        })
-    elif change == "digest":
-        details.values = {key: replace(value, source_digest="f" * 64) for key, value in details.values.items()}
-    elif change == "blocked":
-        details.values = {key: replace(value, blocked=True) for key, value in details.values.items()}
-    else:
-        details.values = {}
-    with pytest.raises(ValueError, match="activity_memory_(source_changed|changed|followup_changed)"):
-        revalidation.assert_memories_current(memory_session, **args)
-
-
-@pytest.mark.parametrize("field,value", (
-    ("reference", "forged-source"), ("role", "untrusted-role"),
-    ("text", "변경"), ("status", "missing"), ("start_offset", 1),
-    ("end_offset", 1), ("author_id", "injected-private-identity"),
-))
-def test_sns_snapshot_rejects_altered_delivery_fields_and_extra_private_metadata(
-    memory_session, monkeypatch, field, value,
-):
-    _details, memory, args = _hydrated_sns_validation(memory_session, monkeypatch)
-    revalidation.assert_memories_current(memory_session, **args)
-    memory["packets"][0]["units"][0]["sources"][0][field] = value
-    with pytest.raises(ValueError, match="activity_memory_source_changed"):
-        revalidation.assert_memories_current(memory_session, **args)
-
-
-def test_existing_bounded_followups_are_not_concurrent_changes_but_new_edges_are(memory_session, monkeypatch):
-    db = memory_session
-    reader, request, candidate, details = fixture(db)
-    records = reader.hydrate(request, reader.revalidate(request, (candidate,))).records
-    original = db.get(MemoryItem, records[0].memory_item_id)
-    now = datetime.now(UTC)
-    extra = MemoryItem(**{column.name: getattr(original, column.name) for column in MemoryItem.__table__.columns})
-    extra.id = "omitted-old-followup"
-    extra.created_at = now - timedelta(days=1)
-    db.add(extra); db.flush()
-    link = MemoryEpisodeLink(prior_item_id=original.id, following_item_id=extra.id, created_at=now - timedelta(hours=1))
-    db.add(link); db.commit()
-    packet = json.loads(records[0].text)
-    packet["followup_truncated"] = True
-    memory = {"ranked_memory_ids": [original.id], "packets": [packet], "retrieved_after": now.isoformat()}
-    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
-    args = dict(owner_id=request.scope.owner_id, world_id=request.scope.world_id,
-        actor_id=request.scope.subject_world_character_id, memories={"target": memory})
+@pytest.mark.parametrize("change", ["none", "body", "source_deleted", "summary", "followup", "superseded",
+    "deleted", "disabled", "expired", "tombstone"])
+def test_current_rights_are_separate_from_reference_content(stack, monkeypatch, change):
+    db, _, setting, _ = stack
+    item, post, args, _ = acquired(stack, monkeypatch)
+    first = deepcopy(args["memories"])
     revalidation.assert_memories_current(db, **args)
-    link.created_at = now + timedelta(seconds=1); db.commit()
-    with pytest.raises(ValueError, match="activity_memory_followup_changed"):
-        revalidation.assert_memories_current(db, **args)
-    link.created_at = now - timedelta(hours=1)
-    original.summary = "The remembered situation was edited."
-    db.commit()
-    with pytest.raises(ValueError, match="activity_memory_changed"):
-        revalidation.assert_memories_current(db, **args)
+    if change == "body": post.body = "Later original text"
+    elif change == "source_deleted": post.deleted_at = NOW
+    elif change == "summary": item.summary, item.version = "Later summary", item.version + 1
+    elif change in {"followup", "superseded"}:
+        values = {column.key: getattr(item, column.key) for column in MemoryItem.__table__.columns}
+        values["id"] = "later-memory"
+        db.add(MemoryItem(**values)); db.flush()
+        if change == "followup":
+            db.add(MemoryEpisodeLink(prior_item_id=item.id, following_item_id="later-memory", created_at=NOW))
+        else: item.status, item.superseded_by_id = "superseded", "later-memory"
+    elif change == "deleted": item.status, item.deleted_at = "deleted", NOW
+    elif change == "disabled": db.get(MemoryScopeSettingModel, setting.id).enabled = False
+    elif change == "expired": item.valid_from, item.valid_until = NOW-timedelta(days=2), NOW-timedelta(seconds=1)
+    elif change == "tombstone": tombstone(db, item, setting.id, now=NOW)
+    db.commit(); db.expunge_all()
+    queries = []
+    def observe(_conn, _cursor, sql, *_): queries.append(sql.lower())
+    event.listen(db.bind, "before_cursor_execute", observe)
+    try:
+        if change in {"deleted", "disabled", "expired", "tombstone"}:
+            with pytest.raises(ValueError, match="activity_memory_changed"):
+                revalidation.assert_memories_current(db, **args)
+        else: revalidation.assert_memories_current(db, **args)
+    finally: event.remove(db.bind, "before_cursor_execute", observe)
+    assert args["memories"] == first
+    assert not any("from posts" in query or "from messages" in query or "memory_items.summary" in query for query in queries)
 
 
-def test_followup_seen_by_hydration_is_not_new_at_guard(memory_session, monkeypatch):
-    db = memory_session
-    reader, request, candidate, details = fixture(db)
-    original = db.get(MemoryItem, candidate.candidate.memory_item_id)
-    previous = original
-    now = datetime.now(UTC)
-    for index in range(5):
-        following = MemoryItem(**{column.name: getattr(original, column.name) for column in MemoryItem.__table__.columns})
-        following.id = f"older-linked-{index}"
-        following.summary = f"Earlier update {index}: " + "context " * 220
-        following.created_at = now - timedelta(days=1)
-        db.add(following)
-        db.flush()
-        db.add(MemoryEpisodeLink(prior_item_id=previous.id, following_item_id=following.id,
-            created_at=now + timedelta(seconds=1)))
-        previous = following
-    db.commit()
-
-    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
-    records = hydration.records
-    assert 1 <= len(records) < 6
-    packets = bounded_records(records)
-    assert packets["packets"]
-    assert packets["omitted_packets"] or len(records) < 6
-    memory = {**packets, "ranked_memory_ids": [record.memory_item_id for record in records],
-        "retrieved_after": now.isoformat()}
-    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
-    revalidation.assert_memories_current(db, owner_id=request.scope.owner_id,
-        world_id=request.scope.world_id, actor_id=request.scope.subject_world_character_id,
-        memories={"target": memory},
-        validations={"target": json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))})
-
-
-def test_snapshot_detects_new_edge_and_summary_but_ignores_unrelated_item(memory_session, monkeypatch):
-    db = memory_session
-    reader, request, candidate, details = fixture(db)
-    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
-    records = hydration.records
-    memory = {**bounded_records(records), "ranked_memory_ids": [r.memory_item_id for r in records]}
-    snapshot = json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))
-    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
-    args = dict(owner_id=request.scope.owner_id, world_id=request.scope.world_id,
-        actor_id=request.scope.subject_world_character_id,
-        memories={"target": memory}, validations={"target": snapshot})
+@pytest.mark.parametrize("field,value", [("reference", "foreign"), ("role", "foreign"), ("text", "changed"),
+    ("status", "missing"), ("start_offset", 1), ("end_offset", 1), ("author_id", "injected")])
+def test_delivered_packet_mutation_is_rejected(stack, monkeypatch, field, value):
+    db = stack[0]
+    _, _, args, _ = acquired(stack, monkeypatch)
     revalidation.assert_memories_current(db, **args)
-    original = db.get(MemoryItem, candidate.candidate.memory_item_id)
-    unrelated = MemoryItem(**{column.name: getattr(original, column.name) for column in MemoryItem.__table__.columns})
-    unrelated.id = "unrelated-new-memory"
-    db.add(unrelated); db.commit()
-    revalidation.assert_memories_current(db, **args)
-    db.add(MemoryEpisodeLink(prior_item_id=original.id, following_item_id=unrelated.id,
-        created_at=datetime.now(UTC)))
-    db.commit()
-    with pytest.raises(ValueError, match="activity_memory_followup_changed"):
-        revalidation.assert_memories_current(db, **args)
-    db.query(MemoryEpisodeLink).filter_by(following_item_id=unrelated.id).delete()
-    db.commit()
-    original.summary = "A changed remembered situation"
-    db.commit()
-    with pytest.raises(ValueError, match="activity_memory_changed"):
+    args["memories"]["target"]["packets"][0]["units"][0]["sources"][0][field] = value
+    with pytest.raises(ValueError, match="activity_memory_input_integrity_invalid"):
         revalidation.assert_memories_current(db, **args)
 
 
-def test_snapshot_rejects_wrong_scope_or_policy(memory_session):
-    db = memory_session
-    reader, request, candidate, _details = fixture(db)
-    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
-    memory = {**bounded_records(hydration.records),
-        "ranked_memory_ids": [r.memory_item_id for r in hydration.records]}
-    snapshot = json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))
-    args = dict(owner_id=request.scope.owner_id, world_id=request.scope.world_id,
-        actor_id=request.scope.subject_world_character_id, memories={"target": memory})
-    for changed in ({**snapshot, "policy_version": "future"},
-                    {**snapshot, "scope": {**snapshot["scope"], "world_id": "other"}},
-                    {**snapshot, "item_revisions": [["malformed"]]}):
-        with pytest.raises(ValueError, match="activity_memory_validation_unavailable"):
-            revalidation.assert_memories_current(db, **args, validations={"target": changed})
+@pytest.mark.parametrize("change", ["missing", "scope", "policy", "revisions", "digest"])
+def test_invalid_or_missing_proof_is_not_rebuilt_from_current_data(stack, monkeypatch, change):
+    db = stack[0]
+    _, _, args, _ = acquired(stack, monkeypatch)
+    proof = args["validations"]["target"]
+    if change == "missing": args.pop("validations")
+    elif change == "scope": proof["scope"]["world_id"] = "foreign"
+    elif change == "policy": proof["policy_version"] = "future"
+    elif change == "revisions": proof["item_revisions"] = [["malformed"]]
+    else: proof["memory_snapshot_digests"][0][1] = "f" * 64
+    with pytest.raises(ValueError, match="activity_memory_"):
+        revalidation.assert_memories_current(db, **args)
 
 
-def test_same_snapshot_validates_distinct_sns_packet_budgets(memory_session, monkeypatch):
-    reader, request, candidate, details = fixture(memory_session)
-    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
-    full = bounded_records(hydration.records)
-    assert full["packets"] and full["packets"][0]["units"]
+def test_each_packet_budget_has_its_own_bound_delivery_digest(stack, monkeypatch):
+    db = stack[0]
+    _, _, args, hydration = acquired(stack, monkeypatch)
+    full = recall.bounded_records(hydration.records)
     first = full["packets"][0]
-    minimum = {**first, "units": [],
+    minimum = {**first, "units": [], "partial": True,
         "omitted_units": len(first["units"]) + first.get("omitted_units", 0)}
     monkeypatch.setattr(recall, "MEMORY_CHARS", len(json.dumps([minimum], ensure_ascii=False)) + 20)
-    compact = bounded_records(hydration.records)
+    compact = recall.bounded_records(hydration.records)
     assert compact["packets"] and compact != full
-    snapshot = json.loads(json.dumps(asdict(hydration.validation_snapshot), default=str))
-    monkeypatch.setattr(revalidation, "RuntimeEpisodeDetailReader", lambda _: details)
-    for packet_group in (full, compact):
-        revalidation.assert_memories_current(memory_session, owner_id=request.scope.owner_id,
-            world_id=request.scope.world_id,
-            actor_id=request.scope.subject_world_character_id,
-            memories={"target": {**packet_group,
-                "ranked_memory_ids": [row.memory_item_id for row in hydration.records]}},
-            validations={"target": snapshot})
+    for group in (full, compact):
+        split = recall.split_validation({"target": {**group,
+            "ranked_memory_ids": args["memories"]["target"]["ranked_memory_ids"],
+            "validation_snapshot": args["validations"]["target"]}})
+        revalidation.assert_memories_current(db, **{**args, "memories": split["memories"],
+            "validations": split["memory_validations"]})

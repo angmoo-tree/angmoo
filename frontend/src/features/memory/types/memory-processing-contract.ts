@@ -5,7 +5,8 @@ export type MemoryProcessingSetting = {
   daily_enabled: boolean; local_time: string; timezone: string; shutdown_apply_enabled: boolean;
   next_due_at: string | null; last_applied_at: string | null;
   pending_count: number; blocked_count: number; applied_count: number;
-  status: "idle" | "accepted" | "applying" | "saved" | "partial_error";
+  status: "idle" | "accepted" | "applying" | "saved" | "partial_error" | "closed" | "cancelled";
+  revision?: number; actions?: import("./consolidation-contract").MaintenanceAction[]; error_code?: string | null;
   result: "accepted" | "empty" | null;
   resolved_request_key?: string | null;
   operation?: "pending_apply" | "blocked_recheck" | null;

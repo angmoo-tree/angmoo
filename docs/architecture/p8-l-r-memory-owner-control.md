@@ -1,5 +1,8 @@
 # P8-L-R Memory owner control UI
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+> Current memory/relationship requests share one maintenance slot, use character/request rounds, and preserve manual-only failed-item retry and close-without-retry history. The current [recovery contract](../architecture/maintenance-recovery-postgresql-experiment.md) supersedes old scheduling details.
+
 Status: implemented on `feat/p8-l-r-memory-owner-control-ui`; local, Hosted,
 user and merge Gates remain separately recorded.
 

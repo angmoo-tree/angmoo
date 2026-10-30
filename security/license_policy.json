@@ -210,6 +210,48 @@
         "Redistribution must include corresponding source for the shipped library and its compiled dependencies. See docs/operations/local-photo-codec.md."
       ],
       "source": "https://github.com/catdad-experiments/libheif-js/tree/d8ec4bc3bc5bf8055975577bccbbc7e1d7313c2d"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg",
+      "version": "3.3.6",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg-binary",
+      "version": "3.3.6",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
+    },
+    {
+      "ecosystem": "python",
+      "name": "psycopg-pool",
+      "version": "3.3.3",
+      "reported_expression": "LGPL-3.0-only",
+      "normalized_expression": "LGPL-3.0-only",
+      "distribution_boundary": "Unmodified locked library in the GPL-3.0-only application. Docker preserves installed package license metadata; Windows includes separate license/source material and a reproducible sidecar/host rebuild path.",
+      "obligations": [
+        "Preserve the LGPL-3.0 and accompanying GPL-3.0 texts and upstream attribution.",
+        "Provide the exact library source and build/replacement instructions; do not prevent debugging modified libraries.",
+        "Release packaging must include the pinned psycopg source bundle and locked pool source. See docs/operations/postgresql-dependencies.md."
+      ],
+      "source": "https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c"
     }
   ],
   "bundled_content": [
@@ -303,6 +345,62 @@
       "license_expression": "GPL-3.0-only",
       "source": "https://github.com/termux/proot-distro/blob/v5.10.0/LICENSE",
       "note": "Unmodified host tool installed separately; its license and corresponding source remain available upstream."
+    },
+    {
+      "name": "PostgreSQL Windows native server",
+      "source_path": "scripts/windows-postgresql.lock.json",
+      "reference": "\"postgresql\": \"17.11\"",
+      "license_expression": "PostgreSQL",
+      "source": "https://www.postgresql.org/about/licence/",
+      "distribution_boundary": "Private Windows runtime resources from the pinned EDB PostgreSQL 17.11 archive. Preserve server_license.txt and commandlinetools_3rd_party_licenses.txt; no global service is installed."
+    },
+    {
+      "name": "pgvector native extension",
+      "source_path": "scripts/windows-postgresql.lock.json",
+      "reference": "\"pgvector\": \"0.8.7\"",
+      "license_expression": "PostgreSQL",
+      "source": "https://github.com/pgvector/pgvector/blob/v0.8.7/LICENSE",
+      "distribution_boundary": "PostgreSQL server extension 0.8.7, distinct from the Python pgvector package. Linux uses the pinned image; Windows builds from hash-verified source and includes pgvector-LICENSE.txt."
+    },
+    {
+      "name": "PRoot Termux private host helper recipe",
+      "source_path": "launcher/termux/prepare_proot.py",
+      "reference": "VERSION='5.1.107.101'",
+      "license_expression": "GPL-2.0-or-later",
+      "source": "https://github.com/termux/proot/tree/v5.1.107.101",
+      "distribution_boundary": "Termux Play Store compatibility helper built privately from pinned upstream source with the published SysV and loader patch recipe. The source archive, patch and build receipt stay available in the installation home; packaged system PRoot is not replaced."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu in PostgreSQL OCI images",
+      "reference": "6456aaa0f3c854d199d0f037f068eb97515b7513",
+      "license_expression": "Apache-2.0",
+      "source": "https://github.com/tianon/gosu/blob/6456aaa0f3c854d199d0f037f068eb97515b7513/LICENSE",
+      "distribution_boundary": "Unmodified gosu 1.19 source rebuilt with Go 1.27.3; the image includes license and module/compiler build records in /usr/share/doc/angmoo/."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "Go standard library in gosu",
+      "reference": "golang:1.27.3-trixie",
+      "license_expression": "BSD-3-Clause",
+      "source": "https://github.com/golang/go/blob/go1.27.3/LICENSE",
+      "distribution_boundary": "Static standard-library code in gosu only; compiler/build toolchain is not shipped in the runtime image."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu moby user dependency",
+      "reference": "github.com/moby/sys/user@v0.1.0",
+      "license_expression": "Apache-2.0",
+      "source": "https://github.com/moby/sys/blob/user/v0.1.0/LICENSE",
+      "distribution_boundary": "Unmodified upstream dependency linked into gosu; its license is bundled in /usr/share/doc/angmoo/."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu system dependency",
+      "reference": "golang.org/x/sys@v0.1.0",
+      "license_expression": "BSD-3-Clause",
+      "source": "https://cs.opensource.google/go/x/sys/+/refs/tags/v0.1.0:LICENSE",
+      "distribution_boundary": "Unmodified upstream dependency linked into gosu; its license is bundled in /usr/share/doc/angmoo/."
     }
   ],
   "actions": [

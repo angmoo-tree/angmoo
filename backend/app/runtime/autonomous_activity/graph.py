@@ -38,6 +38,7 @@ class LanePorts:
     observe: Callable[..., None] | None = None
     prepare_recall: Node | None = None
     resume: Node | None = None
+    record_observed_failure: Callable[[dict, BaseException], Awaitable[None]] | None = None
 
 
 def build_lane(lane: str, ports: LanePorts, *, combined=False):
@@ -60,6 +61,8 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
             except BaseException as exc:
                 trace("node_failed", name, state=state, phase="guard", exc=exc,
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                if name == "Execute" and ports.record_observed_failure is not None:
+                    await ports.record_observed_failure(state, exc)
                 raise
             if name == "Execute" and state.get("failure"):
                 result = await ports.resume({**state, "stage": name}) if ports.resume is not None else None
@@ -79,6 +82,8 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
                     raise exc.original from exc
                 trace("node_failed", name, state=state, phase="callback", exc=exc,
                       stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                if name == "Execute" and ports.record_observed_failure is not None:
+                    await ports.record_observed_failure(state, exc)
                 from app.domains.relationships.contracts.social_context import SocialContextValidationError
                 if name == "Execute" and isinstance(exc, SocialContextValidationError) and ports.resume is not None:
                     failure = {"stage":name, "reason":exc.reason}
@@ -213,7 +218,10 @@ def build_autonomous_graph(*, lanes: dict[str, LanePorts], load_context: Node,
             try:
                 prepared = state.get("prepared_lanes", {}).get(path, {}) if combined else {}
                 extra_context = prepared.get("shared_context", {}).get("action_preferences")
-                shared = dict(state["shared_context"])
+                # Candidate preparation is the first read for this judgment.
+                # Inbox completion must not replace another lane's references.
+                shared = dict(prepared["shared_context"] if prepared.get("lane_data", {}).get("_initial_input_digest")
+                              else state["shared_context"])
                 if extra_context is not None:
                     shared["action_preferences"] = extra_context
                 result = await child.ainvoke({**prepared, "identity": state["identity"], "shared_context": shared}, config)

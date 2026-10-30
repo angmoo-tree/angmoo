@@ -9,13 +9,24 @@ from app.config import settings
 
 
 
-def create_database_engine(database_url: str):
+def create_database_engine(database_url: str, *, postgresql_pool=None):
     sqlite = database_url.startswith("sqlite")
+    postgres = database_url.startswith("postgresql")
+    options = {}
+    if postgres:
+        from app.core.postgresql_capacity import PostgresPoolSettings
+        pool = postgresql_pool or PostgresPoolSettings()
+        options = dict(pool_size=pool.size, max_overflow=pool.overflow,
+            pool_timeout=pool.timeout, hide_parameters=True, isolation_level="SERIALIZABLE")
     engine = create_engine(
         database_url,
         pool_pre_ping=True,
         connect_args={"check_same_thread": False} if sqlite else {},
+        **options,
     )
+    if postgres:
+        from app.core.postgresql_concurrency import track_writes
+        track_writes(engine)
     if sqlite:
 
         @event.listens_for(engine, "connect")

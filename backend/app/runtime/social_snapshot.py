@@ -31,7 +31,8 @@ def prepare_activity_social_context(ctx, *, active_actor, counterpart_id=None):
         current = active_actor(ctx.db, character_id=ctx.character.id)
         if (current.id, current.world_id) != (scope.subject_world_character_id, scope.world_id):
             raise SocialContextChangedError("social_context_scope_changed")
-        service.assert_current(snapshot)
+        from app.domains.relationships.service.social_context_validation import SocialContextValidationService
+        SocialContextValidationService(gateway._gateway).assert_snapshot_usable(snapshot)
     return replace(ctx, social_context=SocialContextUse(snapshot, validate))
 
 

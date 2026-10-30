@@ -2,6 +2,7 @@
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from hashlib import sha256
+from app.core.activity_transactions import activity_write
 
 from app.domains.social.contracts.world_feed import KeywordClaim, ObservationClaimResult
 from app.domains.social.models.feed import WorldCharacterFeedObservation
@@ -39,7 +40,14 @@ class FeedLane(SocialLane):
             for key in ("like", "comment", "repost", "follow")})
 
     async def load(self, state):
+        from app.runtime.autonomous_activity.db_stage import run_db_stage
+        return await run_db_stage(self, '_load_sync', state)
+
+    def _load_sync(self, state):
         self.reconcile_deliveries()
+        return self.load_candidates(state)
+
+    def load_candidates(self, state):
         from app.domains.social.exceptions import WorldFeedReadinessError
         try:
             preferences = self.profile(neutral_weights=False).action_profile
@@ -60,9 +68,12 @@ class FeedLane(SocialLane):
             cycle_key=cycle, run_id=self.ctx.run_id, now=datetime.now(UTC))
         self.save_preparation()
         candidates, data, receipts = [], {}, {}
+        from app.runtime.memory.captured_delivery import post_reference
+        source_metadata = {}
         from app.runtime.activity_proposals.composition import proposal_eligibility
         for candidate in claims.candidates:
             post = self.ctx.db.get(Post, candidate.post_id)
+            source_metadata[post.id] = post_reference(post)
             relationship, receipts[post.id] = self.relationship_preparation(post.id, post.author_world_character_id)
             candidates.append(Candidate(target_id=post.id, counterpart_id=post.author_world_character_id,
                 source_ids=[post.id], source_revisions={post.id: post_revision(post)},
@@ -73,6 +84,11 @@ class FeedLane(SocialLane):
             "candidates": [c.model_dump(mode="json") for c in claims.candidates],
             "observation_ids": [o.id for o in claims.observations], "claim_tokens": {o.id: o.claim_token for o in claims.observations},
             "raw_candidate_count": search.raw_candidate_count, "query_latency_ms": search.query_latency_ms}
+        data["_reference_sources"] = source_metadata
+        from app.runtime.memory.captured_delivery import bind_candidate_sources
+        bind_candidate_sources(candidates, source_metadata)
+        from app.runtime.relationships.social_metrics import prepare_sources
+        data["_metric_sources"] = plain(prepare_sources(self.ctx.db, actor=self.actor, post_ids=source_metadata))
         shared = dict(state["shared_context"])
         from app.runtime.media.social_context import snapshots, allocate
         for candidate in candidates:
@@ -80,7 +96,8 @@ class FeedLane(SocialLane):
         allocate(candidates)
         if profile.explicit_actions is None:
             shared["action_preferences"] = preferences
-        return {"candidates": candidates, "lane_data": data, "shared_context": shared, "relationship_validation_receipts": receipts}
+        from app.runtime.autonomous_activity.initial_input import seal
+        return seal(state, {"candidates": candidates, "lane_data": data, "shared_context": shared, "relationship_validation_receipts": receipts})
 
     def delivery(self, state):
         data = state["lane_data"].get("_feed")
@@ -95,16 +112,44 @@ class FeedLane(SocialLane):
             from app.domains.social.service.world_feed import renew_owned_feed_claims
             renew_owned_feed_claims(self.ctx.db, claim_tokens=data["claim_tokens"],
                 run_id=self.ctx.run_id, now=datetime.now(UTC))
-            self.ctx.db.commit()
         delivery = FeedDelivery(self.ctx.db, profile=self.profile(), cycle_key=data["cycle_key"], claims=claims,
             validate=validate_claims if version_two else None,
-            validate_completion=validate_claims if version_two else None, retain_until_observed=version_two)
+            validate_completion=validate_claims if version_two else None, retain_until_observed=version_two,
+            transaction=lambda operation: activity_write(self.ctx.db, operation))
         if delivery.row.state in {"uncertain", "dispatched"}:
-            raise ValueError("feed_delivery_requires_reconciliation")
+            if version_two and state.get("stage") == "TargetSelector" and not state.get("decision"):
+                delivery.allow_selection_recovery(lambda: self.validate_selection_recovery(state))
+            else:
+                raise ValueError("feed_delivery_requires_reconciliation")
+        elif delivery.row.state == "prepared" and delivery.attempt:
+            # Admission committed but its response did not. Do not issue a
+            # second recovery after a crash in the send boundary.
+            raise ValueError("feed_delivery_recovery_exhausted")
         return delivery
+
+    def validate_selection_recovery(self, state):
+        from sqlalchemy import select
+        from app.domains.world_characters.activity_models import ActivityGraphRun
+        from app.domains.routines.models import AgentPublicActionExecution
+        if self.claim_validator is None:
+            raise ValueError("activity_claim_validation_unavailable")
+        self.claim_validator()
+        run = self.ctx.db.get(ActivityGraphRun, self.ctx.run_id, populate_existing=True)
+        if (run is None or run.engine != "personalized_graph_v2" or run.contract_version != 2
+                or run.status != "running" or run.stage != "TargetSelector"
+                or (run.world_id, run.world_character_id) != (self.actor.world_id, self.actor.id)
+                or (run.result or {}).get("paths") or state.get("decision")
+                or self.ctx.db.scalar(select(AgentPublicActionExecution.id).where(
+                    AgentPublicActionExecution.run_id == self.ctx.run_id).limit(1)) is not None):
+            raise ValueError("feed_selection_recovery_not_pre_action")
+        self.validate_feed_claims(state)
 
     async def guard(self, state):
         await super().guard(state)
+        from app.core.async_session import session_call
+        return await session_call(self.ctx.db, lambda: self._guard_feed_sync(state))
+
+    def _guard_feed_sync(self, state):
         data = state.get("lane_data", {}).get("_feed")
         if data and state.get("stage") in {"TargetSelector", "DecisionDraft", "ActionPlanner", "ValidateDraft", "Writer", "Execute"}:
             self.validate_feed_claims(state)
@@ -147,6 +192,16 @@ class FeedLane(SocialLane):
         return validate
 
     async def execute(self, state):
+        from app.core.async_session import session_call
+        from app.runtime.social.delivery_recovery import DeliveryStorageWait
+        import asyncio
+        while True:
+            try:
+                return await session_call(self.ctx.db, lambda: self._execute_sync(state))
+            except DeliveryStorageWait as exc:
+                await asyncio.sleep(exc.seconds)
+
+    def _execute_sync(self, state):
         from app.runtime.autonomous_activity.feed_effects import execute
         return {"executions": execute(self, state)}
 
@@ -198,8 +253,12 @@ class FeedLane(SocialLane):
                 observer=self.observation_diagnostics(identifier, "ReconcileDeliveries"))
 
     async def finalize(self, state):
-        self.observe_delivered()
+        from app.core.async_session import session_call
+        await session_call(self.ctx.db, self.observe_delivered)
         result = await super().finalize(state)
+        return await session_call(self.ctx.db, lambda: self._finalize_feed_sync(state, result))
+
+    def _finalize_feed_sync(self, state, result):
         if state.get("lane_data", {}).get("deferred_reason"):
             result["result"].update(status="deferred", reason=state["lane_data"]["deferred_reason"])
             return result
@@ -214,14 +273,13 @@ class FeedLane(SocialLane):
                 "outcome": "FAILED" if state.get("failure") else "ACTION_SELECTED" if action else "NO_ACTION", "reason_code": reason,
                 "query_latency_ms": data["query_latency_ms"], "recall_count": len(state.get("memories", {})),
                 "public_action_count": result["result"]["public_action_count"]}
-            finalize_feed_cycle(self.ctx.db, profile=self.profile(), claim=KeywordClaim(**data["claim"]),
+            activity_write(self.ctx.db, lambda: finalize_feed_cycle(self.ctx.db, profile=self.profile(), claim=KeywordClaim(**data["claim"]),
                 observations=tuple(self.ctx.db.get(WorldCharacterFeedObservation, i) for i in data["observation_ids"]),
                 selected_index=state["lane_data"][action["target_id"]]["candidate_index"] if action else None,
                 selected_action=action["action"] if action else None,
                 interaction_intent=action["interaction_intent"] if action else None,
                 comment_purpose=action["comment_purpose"] if action else None,
                 reason_code=reason, public_action_execution_id=next((r.get("execution_id") for r in state.get("executions", []) if r.get("execution_id")), None),
-                summary=summary, now=datetime.now(UTC))
-            self.ctx.db.commit()
+                summary=summary, now=datetime.now(UTC)))
             result["result"]["feed_summary"] = summary
         return result

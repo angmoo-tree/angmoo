@@ -162,7 +162,11 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 153
+    assert len(session_mutations) == 155
+    assert {
+        "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run/{request_id}/cancel",
+        "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/processing-runs/{run_id}/command",
+    } <= session_mutations
     assert "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/memory-search/prepare" in session_mutations
     assert "PATCH /api/v1/auth/local/installation" in session_mutations
     assert {

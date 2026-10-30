@@ -97,12 +97,16 @@ def mark_all_read(db, scope: NotificationScope, profile_ids: set[str]):
     if through_id is None:
         return 0, None, None
     read_at = datetime.now(UTC)
-    db.execute(update(Notification).where(Notification.read_at.is_(None),
+    result = db.execute(update(Notification).where(Notification.read_at.is_(None),
         Notification.id.in_(unread.where(Notification.id <= through_id)))
         .values(read_at=read_at).execution_options(synchronize_session=False))
     # sqlite3 reports -1 for a WITH/CTE UPDATE. changes() on this same connection
     # counts only the direct update, excluding trigger side effects and old reads.
-    marked_count = db.scalar(select(func.changes()))
+    # PostgreSQL reports the direct UPDATE count through its command result.
+    marked_count = (result.rowcount if db.get_bind().dialect.name == 'postgresql'
+                    else db.scalar(select(func.changes())))
+    if marked_count < 0:
+        raise RuntimeError('notification_update_count_unavailable')
     return marked_count, read_at if marked_count else None, through_id
 
 

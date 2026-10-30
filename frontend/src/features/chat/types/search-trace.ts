@@ -6,6 +6,7 @@ export type SearchStage = {
 };
 export type SearchFailure = {
   failure_code: string; failure_stage: string | null; exception_kind: string; sqlite_error_code: number | null;
+  postgresql_sqlstate?: string | null;
 };
 export type SearchTerminal = {
   request_cleanup_complete?: boolean | null; worker_state_after?: "ready" | "retired" | "quarantined" | "preparing" | null;

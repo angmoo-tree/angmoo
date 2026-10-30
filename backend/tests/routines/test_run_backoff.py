@@ -12,6 +12,20 @@ from routine_posts.test_runtime import _seed
 from routines.test_activity_persistence import _file_engine
 
 
+def test_postgresql_storage_failures_are_not_provider_backoff():
+    from sqlalchemy.exc import OperationalError
+    from psycopg.errors import SerializationFailure
+    from app.core.postgresql_concurrency import (
+        PostgresRetryExhausted, PostgresPoolExhausted, PostgresDeadlineExceeded,
+        PostgresCommitOutcomeUnknown,
+    )
+    errors = [cls('postgresql timeout 503') for cls in (
+        PostgresRetryExhausted, PostgresPoolExhausted, PostgresDeadlineExceeded, PostgresCommitOutcomeUnknown)]
+    errors.append(OperationalError('update', {}, SerializationFailure('serialization failure')))
+    for error in errors:
+        assert agent_runs._runtime_error_backoff(error, now=datetime.now(UTC)) is None
+
+
 def test_runtime_backoff_model_overloaded_first_occurrence() -> None:
     now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
 

@@ -70,7 +70,7 @@ def timing(events):
         # Per-attempt intervals. Parent/child durations are never summed.
         attempts = defaultdict(dict)
         for row in rows:
-            if row["event"] == "sqlite":
+            if row["event"] in {"sqlite", "postgresql_attempt"}:
                 attempts[row.get("attempt", 1)][row.get("boundary")] = row["monotonic_ns"]
         entry["attempts"] = []
         for number, marks in attempts.items():

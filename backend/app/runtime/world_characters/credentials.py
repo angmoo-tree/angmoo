@@ -30,7 +30,7 @@ def read(service, *, world_id, world_character_id, user, purpose):
 def write(service, *, world_id, world_character_id, user, purpose, data, remove=False):
     try:
         from app.domains.identity.service.environment import lock_environment_admission
-        lock_environment_admission(service.db, user.id)
+        lock_environment_admission(service.db, user.id, exclusive=True)
         role, _ = service.authorize_credentials(world_id=world_id, world_character_id=world_character_id, user=user, mutation=True, basic=purpose in {"sns", "image"})
         if purpose == "sns" and not remove:
             service.require_credential_configuration(role, data.expected_configuration_revision)

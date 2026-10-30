@@ -91,7 +91,8 @@ def test_image_analysis_english_policy_original_text_and_auxiliary_hint(visible)
 
 @pytest.mark.parametrize("speech", ["한국어로 말한다", "Speak English.", "日本語を使う", "تحدث بالعربية"])
 def test_relationship_request_keeps_direction_subject_evidence_and_keep(monkeypatch, speech):
-    payload = {"subject": {"name": "Original A-17", "speech_style": speech}, "memories": [ORIGINAL],
+    payload = {"subject": {"name": "Original A-17", "speech_style": speech},
+        "memories": [{"memory_id":"memory-1","summary":ORIGINAL,"occurred_at":"2026-10-30T00:00:00Z"}],
         "existing_relationship": {"relationship_label": "約束", "perception": ORIGINAL},
         "actor_ref": "character-a", "target_ref": "character-b", "world_ref": "world-1"}
     requests = capture(monkeypatch, relationship_review, {"decision": "keep", "relationship_label": "約束", "perception": ORIGINAL, "memory_refs": []})
@@ -99,8 +100,9 @@ def test_relationship_request_keeps_direction_subject_evidence_and_keep(monkeypa
     result = asyncio.run(provider.review(payload, partial=False, timeout=5))
     assert result["decision"] == "keep" and result["perception"] == ORIGINAL
     sent = json.loads(requests[0].user_prompt)
-    assert sent["subject"] == payload["subject"] and sent["existing_relationship"] == payload["existing_relationship"]
-    assert (sent["actor_ref"], sent["target_ref"], sent["world_ref"]) == ("character-a", "character-b", "world-1")
+    assert sent["existing_relationship"] == payload["existing_relationship"]
+    assert sent['memories'] == payload['memories']
+    assert not {'subject','actor_ref','target_ref','world_ref'} & set(sent)
     assert "subject's explicitly directed language" in requests[0].system_prompt
     assert "unchanged" in requests[0].system_prompt and len(requests) == 1
 

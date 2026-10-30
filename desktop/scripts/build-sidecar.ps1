@@ -61,6 +61,10 @@ $vec1ResourceRoot = Join-Path $WorkRoot "vec1-resources"
 if ($LASTEXITCODE -ne 0) { throw "Pinned Vec1 resource build failed" }
 $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
 
+# Native DB resources are part of every installer, not a developer's global PG.
+& $Python (Join-Path $repoRoot 'scripts\build_windows_postgresql.py') --output (Join-Path $desktopRoot 'src-tauri\resources\postgresql') --cache (Join-Path $WorkRoot 'postgresql-source-cache')
+if ($LASTEXITCODE -ne 0) { throw 'Pinned PostgreSQL and pgvector resource build failed' }
+
 & $Python -m PyInstaller `
     --clean `
     --noconfirm `
@@ -81,8 +85,9 @@ $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
     --add-data $vectorMutationData `
     @worldErasureArguments `
     --hidden-import sqlalchemy.dialects.sqlite `
-    --exclude-module psycopg `
-    --exclude-module psycopg_binary `
+    --collect-all psycopg `
+    --collect-all psycopg_binary `
+    --hidden-import sqlalchemy.dialects.postgresql.psycopg `
     --exclude-module oci `
     --exclude-module pytest `
     --distpath $distRoot `

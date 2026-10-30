@@ -20,15 +20,19 @@ def episode_detail_view(db, scope, item_id, now):
 
 def public_episode_packet(packet):
     return {"representation": packet["representation"], "partial": packet["partial"],
+        "snapshot_status":packet.get("snapshot_status","snapshot_unavailable"),
+        "experience_state":(packet.get("experience_outcome") or {}).get("experience_state"),
         "omitted_units": packet["omitted_units"], "followup_count": len(packet["follows"]),
         "units": [{"sources": [{"role": source["role"], "text": source["text"],
-                     "status": source["status"]} for source in unit["sources"] if not source.get("already_in_context")],
+                     "status": source["status"],"author_label":source.get("author_label"),
+                     "author_role":source.get("author_role"),"occurred_at":source.get("occurred_at")}
+                     for source in unit["sources"] if not source.get("already_in_context")],
                    "thought": None if unit["thought"].get("already_in_context") else unit["thought"],
                    "legacy_declaration": unit.get("legacy_action_declaration")}
                   for unit in packet["units"]]}
 
 
-def episode_receipt_view(db, scope, item_id, now, text):
+def episode_receipt_view(db, scope, item_id, now, text, *, validation=None, reader=None):
     """Revalidate only material actually delivered to the completed response."""
     import json
     from dataclasses import asdict
@@ -37,8 +41,8 @@ def episode_receipt_view(db, scope, item_id, now, text):
         return None
     try:
         frozen = json.loads(text)
-        packets = SqlAlchemyEpisodePackets(db, detail_reader=RuntimeEpisodeDetailReader(db)).read(
-            scope=scope, item_ids=(item_id,), now=now, require_enabled=False)
+        packets = SqlAlchemyEpisodePackets(db, detail_reader=reader or RuntimeEpisodeDetailReader(db)).read(
+            scope=scope, item_ids=(item_id,), now=now, require_enabled=False, validation=validation)
         if not packets:
             return None
         current = episode_provider_view(packets)[0]

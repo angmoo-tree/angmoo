@@ -875,7 +875,13 @@ def test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable(
     failed = repository.get_request(record.request_id)
     assert failed.retryable is True
     assert failed.route is None
-    assert failed.node_state == {
+    from app.domains.chat.contracts.initial_input import INPUT_KEY
+    from app.domains.chat.contracts.input_receipt import ROUTING_STARTED
+    assert failed.node_state[INPUT_KEY]["payload"]["user_message"] == "오늘은 어땠어?"
+    assert failed.node_state[ROUTING_STARTED] is True
+    diagnostics = {key: value for key, value in failed.node_state.items()
+                   if key not in {INPUT_KEY, ROUTING_STARTED}}
+    assert diagnostics == {
         "failure_class": "router_schema_rejected",
         "router_diagnostic": {
             "version": "router-diagnostic.v1",
@@ -886,7 +892,7 @@ def test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable(
             "physical_attempts": 2,
         },
     }
-    serialized = str(failed.node_state)
+    serialized = str(diagnostics)
     for forbidden in (
         "오늘은 어땠어?",
         "prompt",
@@ -922,6 +928,8 @@ def test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable(
     assert retried.response_request.attempt_number == failed.attempt_number + 1
 
     retried_record = repository.get_request(retried.response_request.request_id)
+    assert retried_record.node_state[INPUT_KEY] == failed.node_state[INPUT_KEY]
+    assert retried_record.node_state[ROUTING_STARTED] is False
     successful_router = _Router(RetrievalRoute.CURRENT_CONTEXT)
     successful_generator = _Generator()
     retry_events = asyncio.run(

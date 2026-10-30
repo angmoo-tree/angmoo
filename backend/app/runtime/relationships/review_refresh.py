@@ -12,9 +12,14 @@ from app.domains.relationships.service.state import _relationship_state
 from app.domains.relationships.service.personalized_metrics import interpreted_policy
 from app.runtime.relationships.review_memories import resolve_memory_batch
 from app.runtime.relationships.review_identity import review_identity_context
+from app.domains.relationships.policies.daily_review import REVIEW_INPUT_POLICY, prompt_memory
 
 
 def refresh_review_inputs(db, root):
+    if root.manifest.get('input_policy') != REVIEW_INPUT_POLICY:
+        from app.runtime.relationships.review_policy_upgrade import retire_old_review
+        retire_old_review(db, root)
+        return
     base = root.manifest['base']
     from app.runtime.relationships.situation_ordering import require_application_complete
     require_application_complete(db, base['setting_id'])
@@ -46,7 +51,7 @@ def refresh_review_inputs(db, root):
                 changed.add(old['memory_id'])
             else:
                 retained.append(payload)
-                if payload["digest"] != old["digest"] or payload["source_refs"] != old["source_refs"]:
+                if payload["digest"] != old["digest"]:
                     changed.add(old['memory_id'])
     if changed:
         by_id = {m['memory_id']: m for m in retained}
@@ -70,8 +75,8 @@ def refresh_review_inputs(db, root):
             memories = part.manifest['payload']['memories']
             if not any(m['memory_id'] in changed for m in memories):
                 continue
-            updated = [by_id[m['memory_id']] for m in memories if m['memory_id'] in by_id]
-            part.manifest = {'payload': {**part.manifest['payload'], 'memories': updated}}
+            updated = [prompt_memory(by_id[m['memory_id']]) for m in memories if m['memory_id'] in by_id]
+            part.manifest = {**part.manifest, 'payload': {**part.manifest['payload'], 'memories': updated}}
             part.manifest_digest = manifest_digest(part.manifest)
             affected.add(part.id)
             if not updated:

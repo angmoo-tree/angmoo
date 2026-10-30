@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from app.core.async_session import session_call
 
 from app.core.ids import uuid7_string
 from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
@@ -235,189 +236,210 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
                              evaluation_reserve=None, topic_generator=None):
     fixed_clock = now is not None
     now = now or datetime.now(UTC)
-    scope = _scope(db, character_id, world_id, user)
-    from app.domains.identity.service.environment import lock_environment_admission
-    lock_environment_admission(db, user.id)
-    admitted = _admitted_preparation_job(db, scope.world_character.id)
-    if admitted is not None:
-        try:
-            scope = _preparation_snapshot_scope(scope, admitted)
-        except PreparationLanguageError:
-            store.reject_invalid_language(db, admitted.id)
-            return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
-    status = read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
-    manual = request_id is not None
-    if not manual:
-        if (status.plan_state in {"failed", "needs_user_action"}
-                or (status.plan_state == "ready" and status.topic_state != "pending")
-                or (admitted is None and not _automatic_eligible(db, scope, now))):
-            return status
-    target = admitted.local_date if admitted is not None else local_activity_date(now, scope.environment.timezone)
-    if manual:
-        prior_request = store.job_for(db, scope.world_character.id, target, request_id)
-        if prior_request and prior_request.state in {"ready", "failed", "needs_user_action", "cancelled"}:
-            return status  # Lost HTTP responses reuse the completed request before version checks.
-    prep, topic_state = _topics(db, scope)
-    request_id = request_id or (status.request_id if status.plan_state in {"waiting", "running"} else None) or f"automatic:{target.isoformat()}"
-    prior_job = store.job_for(db, scope.world_character.id, target, request_id)
-    generation_contract = prior_job.input_snapshot.get("generation_contract") if prior_job else GENERATION_CONTRACT
-    if generation_contract not in {None, GENERATION_CONTRACT}:
-        raise store.PreparationConflict("daily_generation_contract_unsupported")
-    initial = prior_job.mode == "initial" if prior_job else topic_state == "pending"
-    if topic_state == "needs_user_action" and status.plan_id is None and not prep:
-        # Historical unknown data needs an explicit request, never automatic enrollment.
+    from app.domains.routines.client import PreparationReservation
+
+    async def database_call(operation):
+        return await session_call(db, operation)
+
+    def admit(request_id=request_id):
+        scope = _scope(db, character_id, world_id, user)
+        from app.domains.identity.service.environment import lock_environment_admission
+        lock_environment_admission(db, user.id)
+        admitted = _admitted_preparation_job(db, scope.world_character.id)
+        if admitted is not None:
+            try:
+                scope = _preparation_snapshot_scope(scope, admitted)
+            except PreparationLanguageError:
+                store.reject_invalid_language(db, admitted.id)
+                return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+        status = read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+        manual = request_id is not None
         if not manual:
-            return status.model_copy(update={"plan_state": "needs_user_action", "reason_code": "preparation_history_unknown"})
-    admitted_at = datetime.fromisoformat(prior_job.input_snapshot["local_now"]) if prior_job else now
-    source, digest, before, allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
-    if expected_version is not None and before.get("version") != expected_version:
-        raise store.PreparationConflict("daily_plan_version_conflict")
-    if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and not initial:
-        return status  # All directions preserved, usable Topics: no credential or provider request.
-    binding = prior_job.input_snapshot.get("credential_binding") if prior_job else capture_key(db,
-        owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
-    material = resolve_key(db, binding, owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
-    from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
-    from app.domains.world_characters.service.name_binding import resolve_name_binding, validate_name_binding
-    from app.contracts.name_binding import read_name_binding, NameBindingError
-    from app.domains.characters.service.prompt_persona import render_persona
-    new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
-    source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict(),
-        "environment": scope.environment.to_dict(), "credential_binding": binding}
-    if prior_job is None:
-        source["preparation_language_policy"] = PREPARATION_LANGUAGE_POLICY
-    job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
-        timezone=scope.environment.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
-        request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
-    job_id, wc_id = job.id, scope.world_character.id
-    if token is None:
-        return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
-    # The claim keeps its accepted raw source and names across retries/restarts.
-    source = dict(job.input_snapshot)
-    try:
-        preparation_environment(source)
-        names = read_name_binding(source)
-        request_source = dict(source)
-        if names is not None:
-            validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
-            request_source["persona"] = render_persona(source["persona"], names)
-    except (NameBindingError, PreparationLanguageError) as exc:
-        db.rollback()
-        code = str(exc) if isinstance(exc, NameBindingError) else "preparation_generation_failed"
-        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, code))
-        return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
-    # Topic's own request generation also fences initial application. No Topic is
-    # written until both outputs pass validation and this claim still belongs to us.
-    initial_prep_request = prep.request_id if prep else None
-    initial_prep_digest = prep.applied_digest if prep else None
-    from app.runtime.social.topic_preparation import load_scope as topic_scope
-    topic_digest = topic_scope(db, world_id=world_id, owner_id=user.id, world_character_id=wc_id,
-                               allow_unapproved=True).digest
-    db.commit()
-
-    def reserve():
-        current_time = now if fixed_clock else datetime.now(UTC)
-        db.expire_all()
-        current_scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), job)
-        if not manual and not _automatic_eligible(db, current_scope, admitted_at):
-            raise store.PreparationConflict("preparation_scope_changed")
-        if _source(db, current_scope, admitted_at, generation_contract=generation_contract)[1] != digest:
-            raise store.PreparationConflict("preparation_source_changed")
-        if names is not None:
-            validate_name_binding(db, names, actor=current_scope.world_character, owner_id=user.id)
-        if evaluation_reserve:
-            evaluation_reserve()
-        store.reserve_attempt(db, job_id, token)
-
-    tracker = None
-    try:
-        if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"]:
-            from app.domains.routines.client import PreparationTracker
-            from app.runtime.social.topic_preparation import generate_topics
-            tracker = PreparationTracker(reserve)
-            topic_source = {key: request_source[key] for key in ("persona", "world")}
-            if "preparation_language_policy" in request_source:
-                topic_source.update(preparation_language_policy=request_source["preparation_language_policy"],
-                    environment=request_source["environment"])
-            topics = await (topic_generator or generate_topics)(material, character_id, topic_source, tracker=tracker)
-            output = InitialTopicsOnlyOutput(recommendation_topics=[row.model_dump() for row in topics.topics])
-        else:
-            output, tracker = await generator(material=material, character_id=character_id, source=request_source,
-                initial=initial, reserve=reserve,
-                reserve_json_retry=lambda: store.reserve_attempt(db, job_id, token, json_retry=True))
-            # Injection and provider paths use the same accepted contract.
-            output = preparation_output_type(source, initial=initial).model_validate(output.model_dump())
-        current_time = now if fixed_clock else datetime.now(UTC)
-        def apply():
-            from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
-            lock_preparation_actor(db, wc_id)
-            db.expire_all()
-            scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), db.get(ActivityPreparationJob, job_id))
-            if not manual and not _automatic_eligible(db, scope, admitted_at):
-                raise store.PreparationConflict("preparation_scope_changed")
-            current_material = resolve_key(db, source.get("credential_binding"), owner_id=user.id,
-                world_id=world_id, actor_id=wc_id, purpose="sns")
-            if (current_material.credential_id, current_material.fingerprint, current_material.model, current_material.thinking_level) != (material.credential_id, material.fingerprint, material.model, material.thinking_level):
-                raise store.PreparationConflict("preparation_credential_changed")
-            fresh, current_digest, _, current_allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
-            if current_digest != digest:
-                raise store.PreparationConflict("preparation_source_changed")
+            if (status.plan_state in {"failed", "needs_user_action"}
+                    or (status.plan_state == "ready" and status.topic_state != "pending")
+                    or (admitted is None and not _automatic_eligible(db, scope, now))):
+                return status
+        target = admitted.local_date if admitted is not None else local_activity_date(now, scope.environment.timezone)
+        if manual:
+            prior_request = store.job_for(db, scope.world_character.id, target, request_id)
+            if prior_request and prior_request.state in {"ready", "failed", "needs_user_action", "cancelled"}:
+                return status  # Lost HTTP responses reuse the completed request before version checks.
+        prep, topic_state = _topics(db, scope)
+        request_id = request_id or (status.request_id if status.plan_state in {"waiting", "running"} else None) or f"automatic:{target.isoformat()}"
+        prior_job = store.job_for(db, scope.world_character.id, target, request_id)
+        generation_contract = prior_job.input_snapshot.get("generation_contract") if prior_job else GENERATION_CONTRACT
+        if generation_contract not in {None, GENERATION_CONTRACT}:
+            raise store.PreparationConflict("daily_generation_contract_unsupported")
+        initial = prior_job.mode == "initial" if prior_job else topic_state == "pending"
+        if topic_state == "needs_user_action" and status.plan_id is None and not prep:
+            # Historical unknown data needs an explicit request, never automatic enrollment.
+            if not manual:
+                return status.model_copy(update={"plan_state": "needs_user_action", "reason_code": "preparation_history_unknown"})
+        admitted_at = datetime.fromisoformat(prior_job.input_snapshot["local_now"]) if prior_job else now
+        source, digest, before, allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
+        if expected_version is not None and before.get("version") != expected_version:
+            raise store.PreparationConflict("daily_plan_version_conflict")
+        if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and not initial:
+            return status  # All directions preserved, usable Topics: no credential or provider request.
+        binding = prior_job.input_snapshot.get("credential_binding") if prior_job else capture_key(db,
+            owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
+        material = resolve_key(db, binding, owner_id=user.id, world_id=world_id, actor_id=scope.world_character.id, purpose="sns")
+        from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
+        from app.domains.world_characters.service.name_binding import resolve_name_binding, validate_name_binding
+        from app.contracts.name_binding import read_name_binding, NameBindingError
+        from app.domains.characters.service.prompt_persona import render_persona
+        new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
+        source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict(),
+            "environment": scope.environment.to_dict(), "credential_binding": binding}
+        if prior_job is None:
+            source["preparation_language_policy"] = PREPARATION_LANGUAGE_POLICY
+        job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
+            timezone=scope.environment.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
+            request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
+        job_id, wc_id = job.id, scope.world_character.id
+        if token is None:
+            return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+        # The claim keeps its accepted raw source and names across retries/restarts.
+        source = dict(job.input_snapshot)
+        try:
+            preparation_environment(source)
+            names = read_name_binding(source)
+            request_source = dict(source)
             if names is not None:
                 validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
-            from app.runtime.preparation_names import authored_preparation
-            output_value = authored_preparation(output, names)
-            if generation_contract == GENERATION_CONTRACT:
-                full_plan = store.compose_generated_plan(getattr(output_value, "daily_plan", None),
-                    generated_dayparts=source["generated_dayparts"], fixed_items=source["fixed_items"],
-                    allowed_places=current_allowed)
-            else:
-                full_plan = output_value.daily_plan
-                store.validate_plan(full_plan, allowed_places=current_allowed, fixed_items=source["fixed_items"])
-            claimed = db.execute(update(ActivityPreparationJob).where(
-                ActivityPreparationJob.id == job_id, ActivityPreparationJob.claim_token == token,
-                ActivityPreparationJob.state == "running", ActivityPreparationJob.lease_expires_at > current_time,
-            ).values(state="ready", lease_expires_at=None).execution_options(synchronize_session=False)).rowcount
-            if claimed != 1:
-                raise store.PreparationConflict("preparation_claim_lost")
-            if initial:
-                prep, current_topic_state = _topics(db, scope)
-                if not prep or prep.request_id != initial_prep_request or prep.applied_digest != initial_prep_digest or prep.state == "running":
-                    raise store.PreparationConflict("preparation_topics_changed")
-                replace_source_topics(db, world_id=world_id, world_character_id=wc_id,
-                    topics=[(t.name, t.scope) for t in output_value.recommendation_topics])
-                prep.state, prep.applied_digest, prep.source_digest = "ready", topic_digest, topic_digest
-                prep.last_code = None
-            plan = store.current_plan(db, wc_id, target)
-            if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and plan:
-                if store.plan_snapshot(db, plan) != before:
-                    raise store.PreparationConflict("daily_plan_changed_during_generation")
-            else:
-                plan = store.apply_plan(db, scope=scope, output=full_plan, target_date=target,
-                    now=current_time, source_digest=digest, expected_snapshot=before,
-                    state_schema_version=routine_state_version(db, scope.world_character))
-            job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
-            job.plan_id, job.plan_version = plan.id, plan.version
-            job.applied_snapshot = store.plan_snapshot(db, plan)
-            job.usage_snapshot = {"calls": tracker.calls, "model": material.model, "thinking_level": material.thinking_level}
-        store.write_preparation(db, apply)
-    except Exception as exc:
-        db.rollback()
-        backoff = _runtime_error_backoff(exc, now=now, db=db, character_id=character_id, credential_id=material.credential_id)
-        code = str(exc) if isinstance(exc, (store.PreparationConflict, NameBindingError)) else backoff.kind if backoff else "preparation_generation_failed"
-        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, code,
-            retry_at=backoff.retry_at if backoff else None, usage=getattr(exc, "preparation_usage", None)
-            or ({"calls": tracker.calls, "model": material.model, "thinking_level": material.thinking_level} if tracker else None)))
-    return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+                request_source["persona"] = render_persona(source["persona"], names)
+        except (NameBindingError, PreparationLanguageError) as exc:
+            db.rollback()
+            code = str(exc) if isinstance(exc, NameBindingError) else "preparation_generation_failed"
+            store.finish_failure(db, job_id, token, code)
+            return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+        # Topic's own request generation also fences initial application. No Topic is
+        # written until both outputs pass validation and this claim still belongs to us.
+        initial_prep_request = prep.request_id if prep else None
+        initial_prep_digest = prep.applied_digest if prep else None
+        from app.runtime.social.topic_preparation import load_scope as topic_scope
+        topic_digest = topic_scope(db, world_id=world_id, owner_id=user.id, world_character_id=wc_id,
+                                   allow_unapproved=True).digest
+        db.commit()
+
+        def reserve():
+            current_time = now if fixed_clock else datetime.now(UTC)
+            db.expire_all()
+            current_scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), job)
+            if not manual and not _automatic_eligible(db, current_scope, admitted_at):
+                raise store.PreparationConflict("preparation_scope_changed")
+            if _source(db, current_scope, admitted_at, generation_contract=generation_contract)[1] != digest:
+                raise store.PreparationConflict("preparation_source_changed")
+            if names is not None:
+                validate_name_binding(db, names, actor=current_scope.world_character, owner_id=user.id)
+            if evaluation_reserve:
+                evaluation_reserve()
+            store.reserve_attempt(db, job_id, token)
+
+        reserve = PreparationReservation(reserve, execute_async=database_call)
+
+        async def execute_generation():
+            tracker = None
+            try:
+                if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"]:
+                    from app.domains.routines.client import PreparationTracker
+                    from app.runtime.social.topic_preparation import generate_topics
+                    tracker = PreparationTracker(reserve)
+                    topic_source = {key: request_source[key] for key in ("persona", "world")}
+                    if "preparation_language_policy" in request_source:
+                        topic_source.update(preparation_language_policy=request_source["preparation_language_policy"],
+                            environment=request_source["environment"])
+                    topics = await (topic_generator or generate_topics)(material, character_id, topic_source, tracker=tracker)
+                    output = InitialTopicsOnlyOutput(recommendation_topics=[row.model_dump() for row in topics.topics])
+                else:
+                    output, tracker = await generator(material=material, character_id=character_id, source=request_source,
+                        initial=initial, reserve=reserve,
+                        reserve_json_retry=PreparationReservation(
+                            lambda: store.reserve_attempt(db, job_id, token, json_retry=True),
+                            execute_async=database_call))
+                    # Injection and provider paths use the same accepted contract.
+                    output = preparation_output_type(source, initial=initial).model_validate(output.model_dump())
+                current_time = now if fixed_clock else datetime.now(UTC)
+                def apply():
+                    from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
+                    lock_preparation_actor(db, wc_id)
+                    db.expire_all()
+                    scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), db.get(ActivityPreparationJob, job_id))
+                    if not manual and not _automatic_eligible(db, scope, admitted_at):
+                        raise store.PreparationConflict("preparation_scope_changed")
+                    current_material = resolve_key(db, source.get("credential_binding"), owner_id=user.id,
+                        world_id=world_id, actor_id=wc_id, purpose="sns")
+                    if (current_material.credential_id, current_material.fingerprint, current_material.model, current_material.thinking_level) != (material.credential_id, material.fingerprint, material.model, material.thinking_level):
+                        raise store.PreparationConflict("preparation_credential_changed")
+                    fresh, current_digest, _, current_allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
+                    if current_digest != digest:
+                        raise store.PreparationConflict("preparation_source_changed")
+                    if names is not None:
+                        validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
+                    from app.runtime.preparation_names import authored_preparation
+                    output_value = authored_preparation(output, names)
+                    if generation_contract == GENERATION_CONTRACT:
+                        full_plan = store.compose_generated_plan(getattr(output_value, "daily_plan", None),
+                            generated_dayparts=source["generated_dayparts"], fixed_items=source["fixed_items"],
+                            allowed_places=current_allowed)
+                    else:
+                        full_plan = output_value.daily_plan
+                        store.validate_plan(full_plan, allowed_places=current_allowed, fixed_items=source["fixed_items"])
+                    claimed = db.execute(update(ActivityPreparationJob).where(
+                        ActivityPreparationJob.id == job_id, ActivityPreparationJob.claim_token == token,
+                        ActivityPreparationJob.state == "running", ActivityPreparationJob.lease_expires_at > current_time,
+                    ).values(state="ready", lease_expires_at=None).execution_options(synchronize_session=False)).rowcount
+                    if claimed != 1:
+                        raise store.PreparationConflict("preparation_claim_lost")
+                    if initial:
+                        prep, current_topic_state = _topics(db, scope)
+                        if not prep or prep.request_id != initial_prep_request or prep.applied_digest != initial_prep_digest or prep.state == "running":
+                            raise store.PreparationConflict("preparation_topics_changed")
+                        replace_source_topics(db, world_id=world_id, world_character_id=wc_id,
+                            topics=[(t.name, t.scope) for t in output_value.recommendation_topics])
+                        prep.state, prep.applied_digest, prep.source_digest = "ready", topic_digest, topic_digest
+                        prep.last_code = None
+                    plan = store.current_plan(db, wc_id, target)
+                    if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and plan:
+                        if store.plan_snapshot(db, plan) != before:
+                            raise store.PreparationConflict("daily_plan_changed_during_generation")
+                    else:
+                        plan = store.apply_plan(db, scope=scope, output=full_plan, target_date=target,
+                            now=current_time, source_digest=digest, expected_snapshot=before,
+                            state_schema_version=routine_state_version(db, scope.world_character))
+                    job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
+                    job.plan_id, job.plan_version = plan.id, plan.version
+                    job.applied_snapshot = store.plan_snapshot(db, plan)
+                    job.usage_snapshot = {"calls": tracker.calls, "model": material.model, "thinking_level": material.thinking_level}
+                await database_call(lambda: store.write_preparation(db, apply))
+            except Exception as exc:
+                def finish_failure():
+                    db.rollback()
+                    backoff = _runtime_error_backoff(exc, now=now, db=db, character_id=character_id, credential_id=material.credential_id)
+                    code = str(exc) if isinstance(exc, (store.PreparationConflict, NameBindingError)) else backoff.kind if backoff else "preparation_generation_failed"
+                    # The store method already owns its bounded transaction.
+                    store.finish_failure(db, job_id, token, code,
+                        retry_at=backoff.retry_at if backoff else None, usage=getattr(exc, "preparation_usage", None)
+                        or ({"calls": tracker.calls, "model": material.model, "thinking_level": material.thinking_level} if tracker else None))
+                await database_call(finish_failure)
+            return await database_call(lambda: read_preparation(db, character_id=character_id,
+                world_id=world_id, user=user, now=now))
+        return execute_generation
+
+    admitted = await database_call(admit)
+    return await admitted() if callable(admitted) else admitted
 
 
 async def ensure_preparation(db, **kwargs):
     """Preparation owns a separate Session; caller transactions are never rolled back."""
     from app.domains.identity.exceptions import CredentialResolutionError
-    with Session(db.get_bind(), expire_on_commit=False) as preparation_db:
-        try:
-            return await _ensure_preparation(preparation_db, **kwargs)
-        except CredentialResolutionError as exc:
-            raise store.PreparationConflict("preparation_credential_unavailable") from exc
+    preparation_db = Session(db.get_bind(), expire_on_commit=False)
+    try:
+        return await _ensure_preparation(preparation_db, **kwargs)
+    except CredentialResolutionError as exc:
+        raise store.PreparationConflict("preparation_credential_unavailable") from exc
+    finally:
+        await session_call(preparation_db, preparation_db.close)
 
 
 async def prepare_due_dates(db, *, limit=3):
@@ -426,30 +448,39 @@ async def prepare_due_dates(db, *, limit=3):
     import logging
     from app.domains.characters.models import Character
     from app.domains.world_characters.models import WorldCharacter, CharacterActiveWorld
-    subjects = db.execute(select(Character.id, Character.owner_id, WorldCharacter.world_id).join(
-        CharacterActiveWorld, CharacterActiveWorld.character_id == Character.id).join(
-        WorldCharacter, WorldCharacter.id == CharacterActiveWorld.world_character_id).join(
-        AgentActivitySetting, AgentActivitySetting.character_id == Character.id).where(
-        Character.deleted_at.is_(None), WorldCharacter.autonomous_enabled.is_(True),
-        WorldCharacter.status == "active", AgentActivitySetting.auto_enabled.is_(True)
-    ).order_by(Character.id)).all()
-    db.rollback()  # scheduler-owned lookup; caller committed lifecycle reconciliation
+    def read_subjects():
+        subjects = db.execute(select(Character.id, Character.owner_id, WorldCharacter.world_id).join(
+            CharacterActiveWorld, CharacterActiveWorld.character_id == Character.id).join(
+            WorldCharacter, WorldCharacter.id == CharacterActiveWorld.world_character_id).join(
+            AgentActivitySetting, AgentActivitySetting.character_id == Character.id).where(
+            Character.deleted_at.is_(None), WorldCharacter.autonomous_enabled.is_(True),
+            # World intent is authoritative; _automatic_eligible reads the same
+            # effective settings as SNS admission. Legacy character flags can be off.
+            WorldCharacter.status == "active"
+        ).order_by(Character.id)).all()
+        db.rollback()  # scheduler-owned lookup; caller committed lifecycle reconciliation
+        return subjects
+    subjects = await session_call(db, read_subjects)
     attempted = 0
     for character_id, owner_id, world_id in subjects:
         if attempted >= limit:
             break
         try:
-            with Session(db.get_bind(), expire_on_commit=False) as check:
-                user = SimpleNamespace(id=owner_id)
-                scope = _scope(check, character_id, world_id, user)
-                now = datetime.now(UTC)
-                if not _automatic_eligible(check, scope, now):
-                    continue
-                status = read_preparation(check, character_id=character_id, world_id=world_id, user=user, now=now)
-                if status.plan_state not in {"pending", "waiting"} and not (status.plan_state == "ready" and status.topic_state == "pending"):
-                    continue
-                if status.next_retry_at and datetime.fromisoformat(status.next_retry_at).replace(tzinfo=UTC) > now:
-                    continue
+            user = SimpleNamespace(id=owner_id)
+            def eligible():
+                with Session(db.get_bind(), expire_on_commit=False) as check:
+                    scope = _scope(check, character_id, world_id, user)
+                    now = datetime.now(UTC)
+                    if not _automatic_eligible(check, scope, now):
+                        return False
+                    status = read_preparation(check, character_id=character_id, world_id=world_id, user=user, now=now)
+                    if status.plan_state not in {"pending", "waiting"} and not (status.plan_state == "ready" and status.topic_state == "pending"):
+                        return False
+                    if status.next_retry_at and datetime.fromisoformat(status.next_retry_at).replace(tzinfo=UTC) > now:
+                        return False
+                return True
+            if not await session_call(db, eligible):
+                continue
             attempted += 1
             await ensure_preparation(db, character_id=character_id, world_id=world_id, user=user)
         except Exception as exc:

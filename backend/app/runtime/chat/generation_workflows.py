@@ -30,6 +30,7 @@ def resolve_credential(db, metadata, *, owner_id, world_id, actor_id):
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core.session_write_observation import finish_session, session_child
+from app.core.async_session import session_call
 from app.core.work_observation import scope as observation_scope
 
 from app.config import Settings
@@ -100,8 +101,85 @@ class SqlAlchemyResponseWorkflowUnitOfWork:
         self._session = session
         self._relationship_world_id = relationship_world_id
         self._diagnostic_snapshot = None
+        self._diagnostic_failure_reported = False
+
+    async def call(self, operation):
+        return await session_call(self._session, operation)
+
+    async def async_checkpoint(self):
+        await self.call(self.checkpoint)
+
+    async def async_database_unit(self, operation):
+        return await self.call(lambda: self.run_database_unit(operation))
+
+    def response_committed(self, request_id):
+        # A progress event creates no relationship receipt. Only finalization
+        # can stage one; unrelated pending work is recovered at workflow build.
+        self._apply_pending_metrics(decision_key=request_id)
 
     def checkpoint(self) -> None:
+        # Before a provider await, close prior read dependencies and persist
+        # optional diagnostics in their own replayable, short transaction.
+        if isinstance(self._session, Session) and self._session.get_bind().dialect.name == 'postgresql':
+            self.run_database_unit(lambda: None)
+            return
+        self._save_diagnostics()
+        finish_session(self._session)
+
+    def run_database_unit(self, operation):
+        """Replay one DB-only checkpoint, never the provider or event publication."""
+        return self._run_database_unit(operation, postgres_isolation="SERIALIZABLE")
+
+    def run_lifecycle_unit(self, operation):
+        """Only one existing request's conditional lifecycle updates.
+
+        Lease/state/sequence predicates are the concurrency fence. No predicate
+        spanning other requests, message publication or memory admission belongs
+        in this unit. Repeatable Read keeps a consistent snapshot and rejects a
+        concurrent write to the same row; retries re-read the entire CAS unit.
+        Final response/message/memory publication remains SERIALIZABLE.
+        """
+        return self._run_database_unit(operation, postgres_isolation="REPEATABLE READ")
+
+    def _run_database_unit(self, operation, *, postgres_isolation):
+        from app.core.database_transactions import database_write
+        if self._session.get_bind().dialect.name != 'postgresql':
+            result = operation()
+            self.checkpoint()
+            return result
+        def attempt():
+            result = operation()
+            finish_session(self._session)
+            return result
+        result = database_write(self._session, attempt, postgres_isolation=postgres_isolation)
+        # Disposal/retention is never part of the canonical SERIALIZABLE unit.
+        # Its failure cannot replay an already committed effect or provider call.
+        self._save_postgresql_diagnostics()
+        return result
+
+    def _save_postgresql_diagnostics(self):
+        observation = current.get()
+        snapshot = None if observation is None else observation.payload()
+        if observation is None or snapshot == self._diagnostic_snapshot:
+            return
+        reason, state = "writer_busy", None
+        try:
+            if retrieval_diagnostics.save_postgresql(self._session.get_bind(), observation):
+                self._diagnostic_snapshot = snapshot
+                self._diagnostic_failure_reported = False
+                return
+        except Exception as exc:
+            from app.core.postgresql_concurrency import sqlstate
+            reason, state = type(exc).__name__, sqlstate(exc)
+        from app.core.work_observation import emit
+        emit("diagnostic_loss", reason="chat_retrieval_capture_deferred", error_type=reason, sqlstate=state)
+        if not self._diagnostic_failure_reported:
+            import logging
+            logging.getLogger(__name__).warning(
+                "chat_retrieval_capture_deferred error_type=%s sqlstate=%s", reason, state)
+            self._diagnostic_failure_reported = True
+
+    def _save_diagnostics(self):
         observation = current.get()
         snapshot = None if observation is None else observation.payload()
         if observation is not None and snapshot != self._diagnostic_snapshot:
@@ -109,15 +187,20 @@ class SqlAlchemyResponseWorkflowUnitOfWork:
                 with session_child(self._session), self._session.begin_nested():
                     retrieval_diagnostics.save(self._session, observation)
                 self._diagnostic_snapshot = snapshot
-            except Exception:
+            except Exception as exc:
+                from app.core.postgresql_concurrency import retryable
+                if retryable(exc):
+                    raise
                 # SAVEPOINT rolled back. Do not log exception/query parameters.
                 pass
-        finish_session(self._session)
+
+    def _apply_pending_metrics(self, *, decision_key):
         if self._relationship_world_id:
             try:
                 from app.runtime.relationships.experience_metrics import apply_pending_metrics
                 with observation_scope(chat_stage="post_commit"):
-                    apply_pending_metrics(self._session, world_id=self._relationship_world_id, source_kind="chat_message")
+                    apply_pending_metrics(self._session, world_id=self._relationship_world_id,
+                        source_kind="chat_message", decision_key=decision_key)
             except Exception:
                 finish_session(self._session, rollback=True)  # Durable pending receipts retry at the next safe checkpoint.
 
@@ -215,7 +298,8 @@ def build(
                 RetrievalHardCaps(timeout_ms=CHAT_HYBRID_SEARCH_TIMEOUT_MS)
                 if recall_mode is ChatRecallMode.SOCIAL_HYBRID else None
             ),
-            before_named_provider=unit_of_work.checkpoint,
+            before_named_provider=unit_of_work.async_checkpoint,
+            database_call=unit_of_work.call,
         ),
         canonical=canonical,
         graph=graph,
@@ -223,7 +307,7 @@ def build(
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
             DirectLlmCharacterResponseGenerator(
-                material, before_named_provider=unit_of_work.checkpoint,
+                material, before_named_provider=unit_of_work.async_checkpoint,
                 **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
             )
         ),

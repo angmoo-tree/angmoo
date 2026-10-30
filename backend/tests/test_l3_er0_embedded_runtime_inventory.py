@@ -51,6 +51,7 @@ def _assert_current_postgres_inventory(inventory: dict, *, source_root: Path = R
     assert len({entry["path"] for entry in inventory["entries"]}) == inventory["entry_count"]
     assert "historical schema evidence" in inventory["purpose"]
     assert "reintroduction guards" in inventory["purpose"]
+    assert "Current PostgreSQL canonical storage" in inventory["purpose"]
     assert all(
         entry["markers"] and entry["owner"] and entry["transition_pr"] and entry["removal_condition"]
         for entry in inventory["entries"]

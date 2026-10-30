@@ -56,14 +56,18 @@ function Get-StableSha256Hex([string]$Path) {
 }
 
 function Get-IdentitySha256([object]$Manifest) {
-    $identitySource = @(
+    $identityParts = @(
         [string]$Manifest.product_version,
         [string]$Manifest.build_commit,
         [string]$Manifest.files.'angmoo-desktop.exe',
         [string]$Manifest.files.'angmoo-sidecar.exe',
         "sqlite:$($Manifest.embedded_data.sqlite.minimum_readable_version)-$($Manifest.embedded_data.sqlite.maximum_readable_version)->$($Manifest.embedded_data.sqlite.target_version)",
         "ladybug:$($Manifest.embedded_data.ladybug.minimum_readable_version)-$($Manifest.embedded_data.ladybug.maximum_readable_version)->$($Manifest.embedded_data.ladybug.target_version)"
-    ) -join "`n"
+    )
+    if ($Manifest.schema_version -eq 3) {
+        $identityParts += "postgresql:5:17:$($Manifest.postgresql.resources_manifest_sha256)"
+    }
+    $identitySource = $identityParts -join "`n"
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($identitySource)
     $hasher = [System.Security.Cryptography.SHA256]::Create()
     try {
@@ -99,12 +103,12 @@ if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
     exit 32
 }
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($manifest.schema_version -notin @(1, 2)) {
+if ($manifest.schema_version -notin @(1, 2, 3)) {
     [Console]::Error.WriteLine('installer_payload_manifest_invalid')
     exit 33
 }
 
-if ($manifest.schema_version -eq 2) {
+if ($manifest.schema_version -in @(2, 3)) {
     $sqlite = $manifest.embedded_data.sqlite
     $ladybug = $manifest.embedded_data.ladybug
     $identityValid = (
@@ -128,6 +132,28 @@ if ($manifest.schema_version -eq 2) {
         )) {
         [Console]::Error.WriteLine('installer_payload_manifest_invalid')
         exit 33
+    }
+}
+
+if ($manifest.schema_version -eq 3) {
+    $pg = $manifest.postgresql
+    $pgRoot = Join-Path $root 'postgresql'
+    $pgManifest = Join-Path $pgRoot 'angmoo-resources.json'
+    if ($pg.schema_version -ne 5 -or $pg.server_major -ne 17 -or $pg.source_version -ne '0.1.3' -or
+        $pg.resources_manifest_sha256 -notmatch '^[0-9a-f]{64}$' -or
+        (Get-StableSha256Hex $pgManifest) -ne $pg.resources_manifest_sha256) {
+        [Console]::Error.WriteLine('installer_postgresql_resources_invalid'); exit 33
+    }
+    $resources = Get-Content -LiteralPath $pgManifest -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($resources.schema -ne 'angmoo-postgresql-resources.v1' -or $resources.postgresql -ne '17.11' -or $resources.pgvector -ne '0.8.7') {
+        [Console]::Error.WriteLine('installer_postgresql_resources_invalid'); exit 33
+    }
+    foreach ($entry in $resources.files.PSObject.Properties) {
+        $path = [IO.Path]::GetFullPath((Join-Path $pgRoot $entry.Name))
+        if (-not $path.StartsWith($pgRoot + '\', [StringComparison]::OrdinalIgnoreCase) -or
+            (Get-StableSha256Hex $path) -ne $entry.Value) {
+            [Console]::Error.WriteLine('installer_postgresql_resource_digest_mismatch'); exit 35
+        }
     }
 }
 

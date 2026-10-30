@@ -1,5 +1,7 @@
 # Angmoo 통합 회귀 시나리오와 실행 근거
 
+> **0.1.4 scope:** This document retains the named implementation phase and its original schema, SQLite/FTS5/Vec1 measurements and validation outcomes. Current serving uses PostgreSQL schema 5, PostgreSQL keyword search and pgvector exact search; LadybugDB remains derived. Follow the [current runtime contract](../public/postgresql-runtime.md) and [migration guide](../public/postgresql-migration.md). Historical PASS or NOT VERIFIED results are not relabelled as current PostgreSQL evidence.
+
 Angmoo의 구조 전환은 기존 기능의 API·데이터·화면·실행 의미를 유지한다. 이 문서는 기능을 수정한 기여자가 어떤 회귀를 확인해야 하는지 설명한다. 코드 위치는 [기능 보존 지도](refactor-feature-preservation.md), 현재 파일·소비자·전체 관련 테스트는 [K01~K24·G01~G13 원장](../../security/refactor_feature_inventory.json), 실제 PR·병합·설치 결과는 [통합 검증 기록](refactor-integration-results.md)을 따른다.
 
 ## 세 종류의 근거를 함께 읽기

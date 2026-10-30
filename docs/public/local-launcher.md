@@ -1,7 +1,7 @@
 # Local launcher contract
 
 The Windows PowerShell launcher is an optional thin wrapper around the official
-two-service contributor Compose files. It validates the host, runs Compose,
+three-service contributor Compose files. It validates the host, runs Compose,
 and reports stable results. It does not supervise a second backend, read raw
 database rows, reveal secrets, or mount the Docker socket into an application
 service.
@@ -30,12 +30,12 @@ the launcher does not become a hidden daemon.
 
 `start`, `restart`, and `stop` are serialized by a checkout-scoped host lock.
 Repeated starts and stops are idempotent. Normal lifecycle commands preserve
-`angmoo_contributor_embedded_data`. Destructive options such as `--volumes`,
+PostgreSQL, application and bootstrap-credential volumes. Destructive options such as `--volumes`,
 `-v`, and `--purge` are rejected.
 
 The plain non-contributor image mode is retained only for explicit container
 artifact validation. It is not the installed-user product path and does not
-restore PostgreSQL/Neo4j server compatibility. User installation uses the Windows installer, released Docker Compose pair
+provide a second database implementation. User installation uses the Windows installer, released Docker Compose triple
 or experimental Termux adapter described in the root README. This PowerShell
 wrapper remains contributor tooling.
 
@@ -44,11 +44,11 @@ wrapper remains contributor tooling.
 `status` combines two separate safe sources in an
 `angmoo-launcher-result-v1` result:
 
-- the backend snapshot reports SQLite migration/integrity, local owner, World
+- the backend snapshot reports PostgreSQL identity/schema/connection health, local owner, World
   and WorldCharacter counts, scheduler lease, recent safe provider metadata,
   last successful activity identifiers, outbox/projector state, and LadybugDB
   health;
-- the host launcher reports the two Compose services, restart counts, short
+- the host launcher reports the three Compose services, restart counts, short
   image digests, loopback ports, disk pressure, Docker storage categories, the
   contributor named volume, and point-in-time container resource samples.
 

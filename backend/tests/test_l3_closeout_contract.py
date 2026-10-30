@@ -34,11 +34,14 @@ def test_l3_representative_suites_are_required_by_local_smoke() -> None:
 def test_container_gate_owns_embedded_restart_and_cleanup() -> None:
     smoke = CONTAINER_SMOKE.read_text(encoding="utf-8")
 
-    assert 'EMBEDDED_VOLUME = "angmoo_contributor_embedded_data"' in smoke
+    assert 'POSTGRES_VOLUME = "angmoo_postgresql_data"' in smoke
+    assert 'EXPECTED_SERVICES = {"backend", "frontend", "postgres"}' in smoke
+    assert "_write_postgresql_marker" in smoke
+    assert "_postgresql_marker_exists" in smoke
     assert "_runtime_health" in smoke
     assert "digest_after != digest_before" in smoke
     assert "harness.cleanup(volumes=True)" in smoke
-    assert "Embedded container smoke passed" in smoke
+    assert "PostgreSQL container smoke passed" in smoke
 
 
 def test_l3_docs_record_completed_closeout_and_separate_release_gate() -> None:

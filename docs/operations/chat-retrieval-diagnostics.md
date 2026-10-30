@@ -16,7 +16,7 @@ RT의 내보내기는 `angmoo-query-diagnostics.export.v1` 묶음에 요청 ID·
 
 1. `router`: 실제 선택한 경로. CURRENT_CONTEXT/CLARIFICATION은 검색 미선택이며 검색 실패와 다르다.
 2. `planner`와 `step`: 검증된 계획, repair 여부, 실제 실행/의존성 때문에 건너뜬 단계. step의 queries는 primitive 호출 수이며 내부 SQL 문 개수는 아니다.
-3. `search`: 실제 FTS5, SQLite fallback, canonical direct, graph projection/canonical fallback. FTS 후보 수와 최종 원본 재검증 결과는 다른 단계다.
+3. `search`: 실제 PostgreSQL 키워드·정확 의미 검색, canonical direct, graph projection/canonical fallback. 과거 기록의 FTS5·SQLite 명칭은 해당 버전의 관측이다. FTS 후보 수와 최종 원본 재검증 결과는 다른 단계다.
 4. `validated_result`/`revalidation`: 후보·검증 후 결과·관측 가능한 제외 사유. DB WHERE에서 이미 제외된 행 수는 별도 COUNT 조회를 하지 않으므로 기록하지 않는다. 없는 수치는 0으로 해석하지 않는다. Graph 결과는 관계·근거·노드 등 서로 다른 단위를 포함한다.
 5. `both_merge`: 실행 recipe, 병렬 여부, 의존성 중단, 중복·join 제외. 병렬 관측은 CANONICAL 다음 GRAPH 순서로 합쳐 표시한다. 전체 시간순 로그가 아니다.
 6. `evidence_deduplication`/`evidence_limit`/`today_selection`: 실제 조립·상한 적용·Today SNS 추가. `crg_input`과 `evidence_kind`가 최종 답변 생성 서비스에 전달한 근거다. 모델이 이를 정확히 활용했다는 보장은 아니다.
@@ -40,13 +40,13 @@ RT의 내보내기는 `angmoo-query-diagnostics.export.v1` 묶음에 요청 ID·
 
 `PUT .../diagnostics/capture` body `{"enabled":true}`로 해당 대화의 상세 수집을 켠다. `false` 또는 DELETE는 해당 scope의 상세 admission과 결과를 지운다.
 
-컨테이너의 실제 active generation DB 경로를 확인한 뒤, 기본 진단만 읽는 read-only 도구도 사용할 수 있다:
+0.1.4 컨테이너에서 기본 진단만 읽는 PostgreSQL 읽기 전용 도구도 사용할 수 있다:
 
 ```powershell
-docker compose -f compose.yml -f compose.dev.yml exec -T backend python /workspace/scripts/diagnostics/read_chat_retrieval_diagnostics.py --database <실제-active-generation-DB-경로> --request-id <request-id>
+docker compose -f compose.yml -f compose.dev.yml exec -T backend python /workspace/scripts/diagnostics/read_chat_retrieval_diagnostics.py --dsn-file /var/lib/angmoo/secrets/postgresql-runtime-dsn --request-id <request-id>
 ```
 
-도구는 `mode=ro`와 `query_only=ON`으로 열고 진단 테이블만 조회한다. 임의의 오래된 generation을 현재 DB로 간주하지 않는다. 설치형 Windows의 DB를 조사할 때에는 별도의 물리적 설치 식별 절차를 먼저 수행한다.
+도구는 PostgreSQL `default_transaction_read_only=on`으로 연결하고 해당 진단 테이블만 조회한다. DSN과 비밀번호를 출력하지 않는다. `--database`는 보존된 0.1.3 SQLite 원본 전용이며 `mode=ro`·`query_only=ON`을 사용한다. 이를 현재 PostgreSQL DB로 간주하지 않는다. 설치형 Windows의 DB를 조사할 때에는 별도의 물리적 설치 식별 절차를 먼저 수행한다.
 
 ## 구조와 검증 원칙
 
@@ -110,7 +110,7 @@ Graph 단독 실패·취소는 최신 tracker를 상위로 전달한다. BOTH는
 
 `korean_spacing_fallback`은 기존 두 검색이 모두 비었을 때 실행하는 Memory 전용
 보조 경로다. `scanned`는 검사 후보 행 수, `bytes_scanned`는 그 정규화 텍스트의
-UTF-8 바이트 수다. SQLite 내부 전체 검사 행 수와 혼동하지 않는다.
+UTF-8 바이트 수다. DB 내부 전체 검사 행 수와 혼동하지 않는다. 과거 SQLite 측정은 해당 저장소의 결과로 보존한다.
 `row_budget`, `text_budget`, `time_budget` 및 `truncated=true`는 전체 검색 완료
 0건이 아니며 `memory_recall_search_incomplete`로 전달한다.
 세부 적용 범위·보존한 초기 성능 실패·재측정 결과는

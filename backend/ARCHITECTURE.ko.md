@@ -20,7 +20,7 @@ Angmoo 백엔드는 **업무별 폴더 안에서 HTTP, 업무 흐름, 저장, �
 
 Angmoo는 이 업무별 구성에 로컬 데이터·자율활동·AI 처리에 필요한 역할을 더했습니다.
 `runtime`은 실제 서비스와 자원의 수명을 연결하고, `integrations`는 기술적 전송·변환,
-`credentials`는 기존 credential 계약의 연결을 담당합니다. 로컬 영속성은 embedded SQLite와
+`credentials`는 기존 credential 계약의 연결을 담당합니다. 로컬 영속성은 PostgreSQL과 버전이 있는 `runtime/persistence/postgresql_schema.py`의
 그 마이그레이션을 사용하며, 참고 문서의 Alembic 예제를 사용자 설치 절차로 옮기지 않습니다.
 
 ### 읽는 순서
@@ -435,23 +435,15 @@ tests/integrations/<external_service>/
 
 Session은 병렬 작업이 함께 쓰는 전역 객체가 아닙니다. 요청이 끝난 Session을 background 작업에 재사용하지 않습니다. 외부 AI 응답을 기다리는 동안 쓰기 transaction을 계속 열어 두지 않고, 결과 적용 시 현재 권한·version·lease를 다시 확인합니다.
 
-### 7.1 SQLite 대기·재시도와 완료 기록
+### 7.1 PostgreSQL 트랜잭션·제한된 재시도·완료 기록
 
-- 예상한 `SQLITE_BUSY`만 허용 정책 안에서 재시도합니다. `SQLITE_LOCKED`, 권한·경로·손상,
-  임의의 `TimeoutError`를 모두 잠금 경합으로 바꾸지 않습니다.
-- 재시도 사이에는 rollback과 연결 정리가 끝나야 합니다. 첫 시도부터 같은 monotonic
-  종료 시각을 공유하며 재시도마다 새 예산을 주지 않습니다.
+`40001` 직렬화 실패와 지원하는 일시 교착 오류는 쓰기를 결정한 조회·검사를 포함한 DB 트랜잭션 전체를 다시 실행합니다. 대기 전에 rollback과 연결 반환을 끝내며, 같은 monotonic 종료 시각과 작업별 시도 한도를 유지합니다. 다른 계층에서 재시도 루프를 중첩하지 않습니다.
 
-현재 실행권 작업은 전용 `LeaseOperation`을 사용합니다. heartbeat의 시도 예산은 최대 12회·총 2초,
-tick 완료의 시도 예산은 최대 4회·총 2초입니다. 실제 실행권 만료 시각과 작업 정리 여유에 따라
-더 일찍 중단될 수 있습니다.
+받은 AI 결과와 DB 반영의 수명은 다릅니다. 저장을 재시도할 때 유효한 결과를 재사용하고, 제공처 호출이나 완료한 공개 행동을 반복하지 않습니다. commit 결과가 불명확하면 같은 중복 방지 키·effect receipt로 대조합니다. 잘못된 응답·설정·권한 오류는 일시 경합으로 분류하지 않습니다.
 
-일반 쓰기의 최대 4회·총 0.25초 정책과 실행권 executor의 단일 worker, 수용량 4개,
-최대 큐 대기 시간 1초는 별도 계약입니다. 다른 계층에 BUSY 재시도 루프를 중첩하지 않습니다.
+주 풀은 최대 10개를 재사용하고 임시 연결 5개를 추가로 허용합니다. checkpoint 풀은 최대 2개, 별도 직접 연결은 2개로 제한합니다. 풀은 필요할 때 연결을 만듭니다. 실행 계정은 20개, 서버는 관리자 예약 3개와 운영 여유를 포함해 28개를 예산으로 둡니다. 예약은 상주 세션을 만들지 않습니다. 수치의 소유자는 `core/postgresql_capacity.py`입니다.
 
-tick 완료는 논리적 tick과 실제 완료 시각을 고정하고 owner·epoch·만료·tick CAS를 확인합니다.
-늦은 기록이 다음 tick을 완료시키거나 이미 성공한 활동을 재실행하지 않아야 합니다.
-DB 계측은 제한된 양의 측정 정보를 메모리에 모아 연결 정리 뒤 요약합니다. 단계마다 진단 정보를 DB에 쓰는 방식은 추가하지 않습니다.
+실행권 갱신·tick 완료는 소유권·epoch·만료·CAS 검사를 유지합니다. 대기열·연결 획득·SQL·commit·정리 시간을 제한된 계측으로 구분하고 매 단계 진단 DB 쓰기를 추가하지 않습니다. 기억·관계 정리는 공용 실행 슬롯 하나에서 선택한 캐릭터의 준비된 작업을 짧은 트랜잭션 경계로 연속 처리합니다. SNS·Chat·검색은 계속 사용할 수 있습니다.
 
 ## 8. HTTP·검증·비동기 처리
 
@@ -465,7 +457,7 @@ ORM과 응답 schema는 역할이 다릅니다. 암호문·credential·내부 �
 
 ## 9. 원본 데이터·검색·AI
 
-SQLite가 원본 데이터와 관리 상태를 저장합니다. FTS5·vector projection·LadybugDB의 관계 그래프는 원본과 구분되는 파생 데이터입니다. 검색 hit만으로 현재 읽기 권한이나 삭제 여부를 결정하지 않고 원본의 World·관찰 범위·공개 상태를 다시 확인합니다.
+PostgreSQL이 원본 데이터·관리 상태·checkpoint를 저장합니다. PostgreSQL 전문검색·trigram 인덱스, pgvector 정확 검색의 벡터와 LadybugDB 관계 그래프는 파생 데이터입니다. 검색 hit만으로 현재 읽기 권한이나 삭제 여부를 결정하지 않고 원본의 World·관찰 범위·공개 상태를 다시 확인합니다.
 
 LLM은 허용된 문맥을 해석하고 계획·요약·캐릭터 응답을 만듭니다. 코드가 실제 ID·권한·허용 연산·저장 자격·호출 상한을 결정합니다. LLM이 만든 SQL이나 Cypher를 그대로 실행하지 않고 검증한 계획을 허용된 executor로 수행합니다.
 
@@ -521,26 +513,13 @@ Feed에 반응할 후보가 있다는 사실만으로 새 원문 게시물을 �
 
 ## 12. 기억 검색과 결과 적용
 
-SQLite canonical 자료와 FTS5·vector·LadybugDB 결과를 구분합니다. 검색 hit는 현재 권한,
+PostgreSQL 원본 자료와 전문검색·pgvector·LadybugDB 결과를 구분합니다. 검색 hit는 현재 권한,
 삭제 여부, revision, 공개·관찰 범위의 증명이 아닙니다. hydration과 최종 전달·저장 전에
 canonical 상태를 확인합니다. 빈 결과, 검색 미선택, unavailable, timeout을 구별합니다.
 
-`MemoryHybridRuntime`은 FTS·vector reader pool을 공유합니다. Home/Feed 조회나 앱 시작만으로
-검색 process를 만들지 않습니다. 인증된 사용자가 보고 있는 Chat 화면이나 접수된 SNS 활동이 저장 설정을
-읽고 read transaction을 닫은 뒤 준비를 요청합니다. 준비 신호는 검색·embedding·키 검증·업무 쓰기가 아닙니다.
+정식 PostgreSQL 경로는 단일 backend 프로세스의 `PostgresMemoryHybridRuntime`을 사용하며 구형 SQLite 검색 프로세스를 시작하지 않습니다. AI 대기 전에 조회 연결을 반환하고 요청의 취소·시간 예산을 풀 용량과 구분합니다. 구형 SQLite의 프로세스·IPC 준비 규칙은 호환 코드와 과거 ADR에 남으며 PostgreSQL의 기본 동작이 아닙니다.
 
-축마다 process 최대 2개·FIFO waiter 8개이며 시작·실행·회수·격리 중 process도 capacity에
-포함됩니다. 공유 control executor는 4 thread·준비 slot 2개입니다. 준비 예산의 소유자는
-`runtime/memory/preparation_budget.py`이며 개별 30초·round 60초와 재요청 cooldown 30초를
-검색 예산과 구분합니다. 시험용 완화값은 정식 기본값으로 가져오지 않습니다.
-
-BOOT는 모듈 로드 전, READY는 process 준비 상태입니다. READY와 index 사용 가능은 다릅니다.
-결과를 재사용하려면 요청 정리 acknowledgement가 필요합니다. timeout·잘못된 IPC·불확실한
-정리는 process와 channel을 회수하며 실제 OS 종료 확인 전 capacity를 반환하지 않습니다.
-Generation 교체는 기존 reader를 drain한 뒤 새 reader를 연결합니다.
-
-재사용하는 것은 interpreter와 로드된 코드입니다. SQLite 연결·snapshot·취소 handler·요청
-문맥은 요청마다 끝납니다. 한 요청의 취소가 아직 배정되지 않은 공용 준비까지 취소하지 않습니다.
+Chat·SNS는 시작 입력을 고정하고 선택한 기억의 저장된 원문 스냅샷을 전달합니다. 현재 원문을 재조회해 스냅샷을 바꾸지 않습니다. 관계 검토는 상황기억 본문을 상대별로 묶어 기존 관계 인식과 함께 전달하며, 원문 스냅샷을 조회·재검증하지 않습니다. 소유권·삭제·실행권·중복·충돌 방지는 유지합니다.
 
 현재 social-hybrid Chat 검색은 최대 20초이며 부모 잔여 시간·답변 reserve로 제한됩니다.
 선택된 SNS 배치 검색은 큐 진입 전부터 30초의 공유 예산을 계산하며 최종 검증에 필요한 시간도 확보합니다.
@@ -616,8 +595,9 @@ desktop launch token 검증을 유지합니다. client ID는 조정 metadata이�
 `create_public_app`에 명시적 RuntimeConfig를 전달합니다. `app.main:public_app`의
 public profile과 일반 factory 기본값을 혼동하거나 별도 factory를 복제하지 않습니다.
 
-설치 사용자·Docker·개발·TEST 데이터 root는 분리합니다. Embedded SQLite upgrade는
-backup·staging·manifest/schema/FK/integrity 검증·승격·실패 복구를 거칩니다. 동결된
+설치 사용자·Docker·개발·TEST 데이터 root는 분리합니다. 지원하는 0.1.3 SQLite 이전은
+불변 백업·작업 사본·명시적인 타입/상태 변환·schema/FK/내용 검증 후 대상 선택을 거칩니다.
+PostgreSQL schema 변경은 owner 전용 초기화기가 담당하고 서비스는 제한된 실행 계정을 사용합니다. 동결된
 predecessor와 Alembic 이력은 수정하지 않습니다. 파일 이동만으로 schema를 올리지 않습니다.
 세대·사용 pin·maintenance lock과 비밀값·미디어 보존은 [보존 정책](../docs/operations/embedded-retention.md)을 따릅니다.
 
@@ -636,7 +616,7 @@ Chat/SNS 상세 관측은 다른 기능입니다. 표본 누락을 0ms나 정상
 
 ## 17. 검증과 상세 계약
 
-수정한 업무·호출자·실패 경계에 필요한 검증을 선택합니다. Fake provider, 격리 SQLite,
+수정한 업무·호출자·실패 경계에 필요한 검증을 선택합니다. Fake provider, 격리 PostgreSQL과 동결한 SQLite 입력 fixture,
 고정 시계와 취소·재개 시나리오를 사용합니다. 공유 DB·app factory·migration·packaging은
 그에 맞는 넓은 소비자 검증이 필요합니다. 원격 필수 범위는 [CI 정책](../docs/operations/ci-validation.md)을 따릅니다.
 
@@ -651,7 +631,9 @@ Inventory는 현재 구현 목록이고 policy는 허용 규칙입니다. 검사
 
 - [도메인 경계](../docs/architecture/backend-domains.md)
 - [지원되는 역사·확장 호환 경로](../docs/architecture/backend-compatibility.md)
-- [SQLite 복구와 받은 결과](../docs/operations/sqlite-recovery.md)
+- [PostgreSQL 이전](../docs/public/postgresql-migration.ko.md)
+- [PostgreSQL 백업·복구](../docs/public/postgresql-backup.ko.md)
+- [구형 SQLite 복구와 받은 결과](../docs/operations/sqlite-recovery.md)
 - [Local runtime](../docs/public/local-runtime.md)
 - [LangGraph 노드](../docs/public/adding-langgraph-node.md), [provider adapter](../docs/public/adding-provider.md)
 
@@ -663,3 +645,11 @@ Inventory는 현재 구현 목록이고 policy는 허용 규칙입니다. 검사
 - [FastAPI Best Practices — Project Structure](https://github.com/zhanymkanov/fastapi-best-practices#project-structure): 업무별 구성과 역할 분리의 참고.
 - [현재 경계 정책](../security/architecture_import_policy.json)과 [경계 검사](../scripts/ci/check_architecture_boundaries.py): Angmoo의 실제 허용 의존·역할 규칙.
 - [백엔드 전환 기록](../docs/architecture/refactor-backend-results.md): 이전 구조 전환의 증거가 필요할 때만 확인하는 역사 자료. 새 기능 구현 위치나 새 배포판의 성공 여부를 이 기록으로 대신 판단하지 않습니다.
+
+### PostgreSQL 구성과 경험 기억 접근 경계
+
+`runtime/configuration_contracts.py`는 profile 값과 검증을, `runtime/configuration.py`와 PostgreSQL 구성 진입점은 구체적인 서비스 생성을 담당한다. `runtime/composition_resources.py`는 구성 진입점에서 종료 콜백을 받아 저장소 생성기를 역으로 가져오지 않는다.
+
+기억 repository는 같은 Session에 연결된 runtime reader에서 `memory.contracts.experience_access.MemoryExperienceAccess`를 통해 현재 소유 범위·비공개 대화 권한을 받는다. 기억 repository가 Chat 모델이나 runtime 구성에 의존하지 않으면서 소유권·삭제·비공개 대화 검사를 유지한다. 원래 게시물이나 메시지 본문을 다시 조회하지 않으며 검증 캐시는 한 작업 안에서만 사용한다.
+
+공용 trigger 목록과 World 삭제 조건은 `runtime/persistence`에 두고 기억·삭제 worker는 기존 공개 이름을 사용한다. 오프라인 원문 스냅샷 변환기는 이전 구성 진입점에서 원문 조회 콜백을 받는다. 과거 원문 복구가 필요한데 콜백이 없으면 작업을 거절하며, 실행 중 기억 조회는 이 복구 경로를 호출하지 않는다.

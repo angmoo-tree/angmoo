@@ -5,7 +5,8 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import or_, select, delete
 
-from app.core.sqlite_concurrency import SqliteAsyncTaskQueue, is_sqlite_contention, run_sqlite_session_immediate
+from app.core.sqlite_concurrency import SqliteAsyncTaskQueue, is_sqlite_contention
+from app.core.database_transactions import database_write
 from app.domains.worlds.models_deletion import WorldDeletionRequest, WorldDeletionCleanupItem
 from app.runtime.world_deletion.cleanup_effects import ErasureLeaseLost, clean_step, require_lease
 
@@ -19,6 +20,7 @@ class WorldDeletionWorker:
         self.stopping = asyncio.Event()
         self._work = SqliteAsyncTaskQueue(capacity=1)
         self._fenced_results = set()
+        self._queue_wakeup = None
 
     async def start(self):
         if self.task is not None and not self.task.done():
@@ -26,10 +28,14 @@ class WorldDeletionWorker:
         if self._work.closed:
             self._work = SqliteAsyncTaskQueue(capacity=1)
         self.stopping.clear()
+        from app.core.committed_queue_wakeup import CommittedQueueWakeup
+        self._queue_wakeup = CommittedQueueWakeup(self.sessions, {WorldDeletionRequest.__tablename__})
         self.task = asyncio.create_task(self._run(), name="world-deletion")
 
     async def stop(self):
         self.stopping.set()
+        if self._queue_wakeup:
+            self._queue_wakeup.close()
         try:
             if self.task:
                 await asyncio.shield(self.task)
@@ -40,15 +46,22 @@ class WorldDeletionWorker:
 
     async def _run(self):
         while not self.stopping.is_set():
+            self._queue_wakeup.begin_poll()
+            failed = False
             try:
                 worked = await self._work.call(self.tick)
             except Exception as exc:
                 log.error("world_deletion_worker_tick_failed error_type=%s", type(exc).__name__)
-                worked = False
-            try:
-                await asyncio.wait_for(self.stopping.wait(), timeout=0.05 if worked else 1)
-            except TimeoutError:
-                pass
+                worked, failed = False, True
+            timeout = 0.05 if worked else (1 if failed or not self._queue_wakeup.enabled else 5)
+            if not self.stopping.is_set():
+                if worked:
+                    try:
+                        await asyncio.wait_for(self.stopping.wait(), timeout)
+                    except TimeoutError:
+                        pass
+                else:
+                    await self._queue_wakeup.wait(timeout)
 
     def tick(self):
         try:
@@ -68,7 +81,7 @@ class WorldDeletionWorker:
                 self._fenced_results.add(request_id)
             cleaned = clean_step(self.sessions, self.ports, request_id, epoch) if stage == "cleaning" else None
             with self.sessions() as db:
-                run_sqlite_session_immediate(db,
+                database_write(db,
                     lambda: self._advance(db, request_id, epoch, cleaned), require_clean=True)
         except ErasureLeaseLost:
             return False
@@ -88,20 +101,27 @@ class WorldDeletionWorker:
         return True
 
     def _claim(self):
+        def due(now):
+            return (WorldDeletionRequest.state.not_in(("failed", "completed")),
+                or_(WorldDeletionRequest.lease_until.is_(None), WorldDeletionRequest.lease_until < now),
+                or_(WorldDeletionRequest.next_attempt_at.is_(None), WorldDeletionRequest.next_attempt_at <= now))
+        # Empty queues need one read, not a configured writer transaction every
+        # second. A fresh write below rechecks all lease/due conditions.
+        with self.sessions() as db:
+            if db.get_bind().dialect.name == 'postgresql':
+                if db.scalar(select(WorldDeletionRequest.id).where(*due(datetime.now(UTC))).limit(1)) is None:
+                    return None
         with self.sessions() as db:
             def claim():
                 now = datetime.now(UTC)
-                row = db.scalar(select(WorldDeletionRequest).where(
-                    WorldDeletionRequest.state.not_in(("failed", "completed")),
-                    or_(WorldDeletionRequest.lease_until.is_(None), WorldDeletionRequest.lease_until < now),
-                    or_(WorldDeletionRequest.next_attempt_at.is_(None), WorldDeletionRequest.next_attempt_at <= now))
+                row = db.scalar(select(WorldDeletionRequest).where(*due(now))
                     .order_by(WorldDeletionRequest.updated_at, WorldDeletionRequest.accepted_at).limit(1))
                 if row is None:
                     return None
                 row.lease_epoch += 1
                 row.lease_until = now + timedelta(seconds=30)
                 return row.id, row.lease_epoch, row.stage
-            return run_sqlite_session_immediate(db, claim, require_clean=True)
+            return database_write(db, claim, require_clean=True)
 
     def _advance(self, db, request_id, epoch, cleaned):
         row = require_lease(db, request_id, epoch)
@@ -153,4 +173,4 @@ class WorldDeletionWorker:
                     row.failure_code = "cleanup_failed"
                     row.next_attempt_at = now + timedelta(seconds=(2, 5, 15)[min(row.failures - 1, 2)])
                 row.updated_at = now
-            run_sqlite_session_immediate(db, record, require_clean=True)
+            database_write(db, record, require_clean=True)

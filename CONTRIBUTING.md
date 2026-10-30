@@ -23,22 +23,22 @@ schema, styling or ownership changes.
 
 ## Run the contributor environment
 
-The contributor backend uses the `CONTRIBUTOR_EMBEDDED` profile. SQLite is the
-only canonical store; FTS5 and LadybugDB are rebuildable projections.
+The contributor backend uses the `CONTRIBUTOR_POSTGRESQL` profile. PostgreSQL is the only canonical store. PostgreSQL full-text search and pgvector exact search provide keyword and semantic retrieval; LadybugDB is a rebuildable projection.
 
-Install Git and Docker with a Linux engine and Compose 2.22.0 or newer. From the
+Install Git and Docker with a Linux engine and Compose 2.23.0 or newer. From the
 repository root:
 
 ```sh
 docker compose -f compose.yml -f compose.dev.yml up --watch
 ```
 
-The command starts the development frontend and embedded backend. Open
-http://127.0.0.1:3000 in your browser. SQLite, search and graph projection are
-local components of that backend; PostgreSQL and Neo4j servers are not required.
+The command starts frontend, backend and a private PostgreSQL service. Open
+http://127.0.0.1:3000 in your browser. PostgreSQL data, application media/secrets
+and DB bootstrap credentials use separate persistent volumes. Do not reuse an
+installed or released user volume for development. Neo4j is not required.
 
 ```sh
-docker compose -f compose.yml -f compose.dev.yml logs --tail 100 backend frontend
+docker compose -f compose.yml -f compose.dev.yml logs --tail 100 postgres backend frontend
 docker compose -f compose.yml -f compose.dev.yml down
 ```
 
@@ -50,23 +50,27 @@ Use [Windows Host Tauri dev](docs/public/windows-host-tauri-dev.md) only when
 native window behavior needs testing. It reuses contributor Docker services and
 has its own WebView profile; it does not start a second installed backend.
 
+Use a disposable PostgreSQL database for integration tests. Set the explicit test DSN only for an owned empty fixture; never point it at user data. Schema changes belong to the versioned PostgreSQL schema owner. Keep the frozen 0.1.3 SQLite input contract separate. See [migration](docs/public/postgresql-migration.md) and [runtime](docs/public/postgresql-runtime.md).
+
 ## Code ownership
 
 - Backend domains own HTTP, service, model, schema and persistence roles.
   Consume an explicitly supported entry from its actual owner. Runtime composes
   cross-domain collaboration; domain services do not import runtime or bypass
   another domain's storage rules.
-- Preserve the caller's Session and transaction ownership. Do not hold SQLite
-  writes across provider calls, waits or retries. Validate owner, scope, source
-  revision and lease again before applying delayed results.
+- Preserve the caller's Session and transaction ownership. Do not hold DB connections or transactions across provider calls or retry delays.
+  Retry the complete bounded DB transaction on a retryable conflict. Preserve
+  ownership, deletion, lease and idempotency checks at commit. Chat/SNS use their
+  accepted start snapshot; relationship review uses situation-memory bodies and
+  the existing perception, without reloading original source content.
 - Frontend features own their API, DTOs, components and lifecycle. Composition
   connects different features through props, callbacks and slots. Import actual
   role files; do not restore retired `public.ts` or `shared` facades.
 - Next and static/Tauri use the same feature components. Keep generic UI and
   transport independent of product authorization and business decisions.
 - User-visible web copy needs matching English and Korean catalog entries.
-  Fixed Termux terminal instructions are English; public Termux guides are
-  provided in both languages.
+  Termux migration guidance and public installation guides are provided in both
+  languages. Fixed AI instructions remain English; never translate user data during migration.
 - New assets and dependencies need a source, license and appropriate notices.
   Follow [BRANDING](BRANDING.md). Use existing semantic tokens and primitives;
   do not loosen a color or snapshot baseline to conceal a regression.

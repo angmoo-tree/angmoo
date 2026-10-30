@@ -5,6 +5,7 @@ from app.domains.memory.contracts.episode import EpisodeSelection, EpisodePropos
 from app.domains.memory.models.episode import MemoryEpisodeLink
 from app.domains.memory.models.items import MemoryItem
 from app.domains.memory.repository.episode_candidates import SqlAlchemyEpisodeCandidates
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from memory.test_episode_apply import preparation
 from memory.test_p8_l_g_memory_write_lifecycle import memory_session, NOW
 
@@ -23,13 +24,13 @@ def test_distant_next_day_change_links_prior_outside_overlap(memory_session):
     original = bundle.new_units[1]
     following = replace(bundle, bundle_ref="B120", new_units=(replace(original, unit_key="turn-120", occurred_at=later),),
         context_units=(), cutoff_sequence=120,
-        prior_episodes=SqlAlchemyEpisodeCandidates(db).priors(scope=setting.scope, now=later, ranked_fts_ids=(first,)))
+        prior_episodes=SqlAlchemyEpisodeCandidates(db,source_reader=RuntimeEpisodeDetailReader(db)).priors(scope=setting.scope, now=later, ranked_fts_ids=(first,)))
     assert following.prior_episodes[0].item_id == first
     second, = apply.apply(bundle=following,
         selection=EpisodeSelection((EpisodeProposal("다음 날 연습 취소 소식을 들었다.", ("S1",), ("P1",)),), ()),
         setting=setting, now=later, revalidate=lambda _: {("POST", "1"): values[("POST", "1")]}, job_fence=lambda: None)
     db.commit()
-    assert SqlAlchemyEpisodeCandidates(db).followups(scope=setting.scope, item_ids=(first,), now=later).item_ids == (first, second)
+    assert SqlAlchemyEpisodeCandidates(db,source_reader=RuntimeEpisodeDetailReader(db)).followups(scope=setting.scope, item_ids=(first,), now=later).item_ids == (first, second)
     assert db.get(MemoryItem, first).summary == "연습을 돕겠다고 제안했다."
 
 
@@ -45,7 +46,7 @@ def create(db, count=4):
 def test_prior_candidates_bounded_and_recheck_untrusted_hits(memory_session):
     db = memory_session
     setting, ids = create(db, 12)
-    repo = SqlAlchemyEpisodeCandidates(db)
+    repo = SqlAlchemyEpisodeCandidates(db,source_reader=RuntimeEpisodeDetailReader(db))
     # Exact links precede lexical or recent candidates; one source can belong
     # to several legitimate situations, without creating a new provider call.
     values = repo.priors(scope=setting.scope, now=NOW, source_identities=(("POST", "0"),), ranked_fts_ids=("foreign",))
@@ -68,7 +69,7 @@ def test_followup_chain_reads_cancel_without_replacing_history_and_stops_cycles(
         db.add(MemoryEpisodeLink(prior_item_id=old, following_item_id=new, created_at=NOW))
     db.add(MemoryEpisodeLink(prior_item_id=ids[-1], following_item_id=ids[0], created_at=NOW))
     db.flush()
-    repo = SqlAlchemyEpisodeCandidates(db)
+    repo = SqlAlchemyEpisodeCandidates(db,source_reader=RuntimeEpisodeDetailReader(db))
     result = repo.followups(scope=setting.scope, item_ids=(ids[0],), now=NOW)
     assert result.item_ids == ids
     assert not result.truncated
@@ -85,5 +86,5 @@ def test_deleted_following_episode_is_not_presented_as_current_update(memory_ses
     row = db.get(MemoryItem, ids[1])
     row.status, row.deleted_at = "deleted", NOW
     db.flush()
-    result = SqlAlchemyEpisodeCandidates(db).followups(scope=setting.scope, item_ids=(ids[0],), now=NOW)
+    result = SqlAlchemyEpisodeCandidates(db,source_reader=RuntimeEpisodeDetailReader(db)).followups(scope=setting.scope, item_ids=(ids[0],), now=NOW)
     assert result.item_ids == ids[:1]

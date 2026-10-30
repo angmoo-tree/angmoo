@@ -57,6 +57,7 @@ FORBIDDEN_TEXT = {
 # Core test jobs use synthetic fixtures and have no repository secrets. Allow
 # only these result files, never an entire workspace, log directory or DB.
 CORE_TEST_REPORT_PATHS = {
+    "postgresql": ("artifacts/postgresql-ci/junit.xml",),
     "backend": (".ci/backend-shard-reports/backend-shard-coverage.json",),
     "backend-preflight": ("backend/.ci/backend-test-identity.json",),
     "backend-tests": (
@@ -78,6 +79,7 @@ CORE_TEST_REPORT_PATHS = {
     ),
 }
 CORE_TEST_REPORT_NAMES = {
+    "postgresql": "postgresql-contracts-${{ github.sha }}-${{ github.run_attempt }}",
     "backend": "backend-coverage-${{ github.sha }}-${{ github.run_attempt }}",
     "backend-preflight": "backend-preflight-${{ github.sha }}-${{ github.run_attempt }}",
     "backend-tests": "backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-${{ matrix.shard }}",
@@ -269,8 +271,13 @@ def check_backend_partitions(jobs: dict) -> list[str]:
         return []  # Retain the older unpartitioned policy fixtures.
     backend, tests, preflight = (jobs.get(name, {}) for name in ("backend", "backend-tests", "backend-preflight"))
     errors = []
-    if backend.get("if") != "always()" or backend.get("needs") != ["impact", "backend-preflight", "backend-tests"]:
+    if backend.get("if") != "always()" or backend.get("needs") != ["impact", "backend-preflight", "backend-tests", "postgresql"]:
         errors.append("backend aggregate must always require preflight and all partitions")
+    pg=jobs.get('postgresql',{})
+    if (pg.get('if')!="needs.impact.outputs.backend == 'true'" or
+        'backend/tests/postgresql' not in str(pg.get('steps',[])) or
+        'pgvector/pgvector:0.8.7-pg17-trixie@sha256:' not in str(pg.get('services',{}))):
+        errors.append('backend gate must require real PostgreSQL storage/search/migration tests')
     if (tests.get("needs") != ["impact", "backend-preflight"] or tests.get("if") != "needs.impact.outputs.backend == 'true'"
             or tests.get("timeout-minutes") != 75
             or tests.get("strategy") != {"fail-fast": False, "matrix": {"shard": [0, 1, 2, 3]}}):
@@ -291,7 +298,7 @@ def check_backend_partitions(jobs: dict) -> list[str]:
 def valid_required_gate(name: str, value: dict, jobs: dict) -> bool:
     if name not in {"backend", "frontend", "embedded-data-migration", "local-core-smoke", "local-autonomy-smoke", "local-full-graph"}:
         return False
-    required = ["backend-preflight", "backend-tests"] if name == "backend" else [name + "-work"]
+    required = ["backend-preflight", "backend-tests", "postgresql"] if name == "backend" else [name + "-work"]
     if name == "frontend":
         required.append("tauri-windows")
     expected_env = {"CI_IMPACT_PLAN": "${{ needs.impact.outputs.plan }}", "CI_NEEDS": "${{ toJSON(needs) }}"}
@@ -335,7 +342,7 @@ def check_installer_selection(jobs: dict) -> list[str]:
     if not any(str(step.get("run", "")).strip() == expected and "if" not in step
                and "continue-on-error" not in step for step in gate.get("steps", [])):
         errors.append("installer required gate must verify actual producer results")
-    coverage = 'python scripts/ci/windows_installer_upgrade_coverage.py --directory .ci/windows-upgrade-reports --source-sha "$SOURCE_SHA" --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" --profile "${{ needs.impact.outputs.windows }}"'
+    coverage = 'python scripts/ci/windows_postgresql_coverage.py --directory .ci/windows-upgrade-reports --source-sha "$SOURCE_SHA" --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" --profile "${{ needs.impact.outputs.windows }}"'
     if not any(step.get("run") == coverage and step.get("if") == conditions["release-candidate"]
                and "continue-on-error" not in step for step in gate.get("steps", [])):
         errors.append("installer gate must verify exact selected upgrade coverage")

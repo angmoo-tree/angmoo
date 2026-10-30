@@ -27,6 +27,7 @@ from app.domains.runtime.contracts.status import RuntimeCapabilityStatus
 from app.domains.runtime.contracts.status import RuntimeComponentState
 from app.domains.runtime.contracts.status import RuntimeComponentStatus
 from app.domains.runtime.contracts.status import RuntimeDependencyStatus
+from app.domains.runtime.contracts.status import RuntimePersistenceProvider
 from app.domains.runtime.contracts.status import SchedulerRuntimeStatus
 
 
@@ -42,11 +43,13 @@ class RuntimeStatusService:
         queries: RuntimeStatusQueries,
         *,
         migration_head_revision: str,
+        persistence_provider: RuntimePersistenceProvider = "sqlite",
         config: Settings = settings,
         now: datetime | None = None,
     ) -> None:
         self._queries = queries
         self._migration_head_revision = migration_head_revision
+        self._persistence_provider = persistence_provider
         self._config = config
         self._now = _aware_utc(now or datetime.now(UTC))
 
@@ -57,7 +60,7 @@ class RuntimeStatusService:
         projector, graph_state = self._projector_status()
         activity, provider_usage = self._activity_status(owner.owner_user_id)
 
-        persistence_name = "sqlite"
+        persistence_name = self._persistence_provider
         graph_name = "ladybugdb"
 
         components = (
@@ -96,6 +99,7 @@ class RuntimeStatusService:
         )
         return ApplicationRuntimeStatus(
             installation_state=installation_state,
+            persistence_provider=self._persistence_provider,
             version=_runtime_version(),
             components=components,
             migration=migration,

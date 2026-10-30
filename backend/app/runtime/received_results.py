@@ -8,5 +8,5 @@ def result_journal(namespace, *, media_root=None):
 
 
 def close_world_results(world_id, *, media_root=None):
-    for namespace in ("relationship-review", "memory-embedding"):
+    for namespace in ("relationship-review", "relationship-review-rejected", "memory-embedding"):
         result_journal(namespace, media_root=media_root).close_world(world_id)

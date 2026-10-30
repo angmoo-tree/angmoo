@@ -16,7 +16,7 @@ export PATH
 exec "$HOME/.local/share/angmoo-tools/venv/bin/python" "$HOME/.local/share/angmoo-tools/angmoo.py" "$@"
 '''
 TOOL_FILES = ("angmoo.py", "payload.py", "processes.py", "service_logs.py",
-              "log_policy.py", "requirements.txt", "command_registration.py", "session_recovery.py")
+              "log_policy.py", "requirements.txt", "command_registration.py", "session_recovery.py", "migrate.py", "postgres_host.py", "prepare_proot.py")
 
 
 class RegistrationError(Exception):

@@ -23,7 +23,7 @@ import time
 import urllib.request
 import uuid
 
-from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, validate_manifest, validate_candidate_manifest, verify_archive
+from payload import REPOSITORY, VERSION, proot_archive, read_manifest, require, services_for, validate_manifest, validate_candidate_manifest, verify_archive
 from processes import alive, atomic_json, await_ready, free_port, identity, session_members, stop_child
 from service_logs import Capture, create_session, launcher_hash, open_private, read_session, redact, save_session, select_session, show_logs, utc
 from log_policy import ENVIRONMENT, PolicyClock, describe, duration, new_policy
@@ -32,16 +32,16 @@ from session_recovery import recover_sessions
 PROOT_VERSION = "5.10.0"
 BACKEND_READINESS_SECONDS = 180.0
 FRONTEND_READINESS_SECONDS = 180.0
-START_READINESS_SECONDS = 370.0
+START_READINESS_SECONDS = 550.0
 DEFAULT_HOME = Path.home() / ".local/share/angmoo"
 MESSAGES = {
     "log_options_invalid": "Use basic without a duration, or detailed with an integer duration of 1m..60m.",
     "tools_unavailable": "Run the documented one-time setup for PRoot-Distro 5.10.0.",
     "host_not_supported": "Use Termux on ARM64 or the documented Linux rehearsal.",
-    "port_in_use": "Port 3000 or 8080 is in use. Stop its owner before retrying.",
+    "port_in_use": "A configured service port is in use. Stop its owner before retrying.",
     "already_running": "Angmoo is already starting or running; use status.",
     "disk_space_low": "Free space without deleting Angmoo data, then retry install.",
-    "not_installed": "Run angmoo install --release 0.1.3 first.",
+    "not_installed": "Install Angmoo using the documented install command first.",
     "download_failed": "The official release is unavailable or the connection failed. Existing data is preserved.",
     "stale_processes": "An earlier session still owns processes. Do not start another backend; inspect diagnostics.",
     "logs_missing": "No saved log session was found.",
@@ -142,12 +142,19 @@ def install(home: Path, release: str | None, manifest_path: Path | None, candida
             validate_manifest(manifest)
             require(manifest["version"] == release, "manifest_version_mismatch")
         pair = [item for item in manifest["images"] if item["platform"] == "linux/arm64"]
-        require(len(pair) == 2, "arm64_pair_missing")
-        # Conservative allowance for two extracted filesystems and staging.
+        require(len(pair) == len(services_for(manifest['version'])), "arm64_pair_missing")
+        prior=home/'installation.json'
+        if prior.exists() and (home/'data/canonical/current-generation.json').exists() and 'postgres' in services_for(manifest['version']):
+            require('postgres' in json.loads(prior.read_text()).get('containers',{}),'sqlite_data_requires_migration')
+        # Conservative allowance for all extracted filesystems and staging.
         require(shutil.disk_usage(home).free >= max(4 * 1024**3, sum(p["archive_size"] for p in pair) * 4), "disk_space_low")
         for item in pair:
             if manifest_path:
                 verify_archive(manifest_path.parent / item["archive"], item)
+        wrapper=None
+        if 'postgres' in services_for(manifest['version']):
+            from postgres_host import prepare_tool
+            wrapper=prepare_tool(home)
         names = {}
         nonce = uuid.uuid4().hex[:12]
         for item in pair:
@@ -173,21 +180,37 @@ def install(home: Path, release: str | None, manifest_path: Path | None, candida
         require(not data_root.is_symlink(), "data_symlink_refused")
         data_root.mkdir(mode=0o700, exist_ok=True)
         require(os.access(data_root, os.W_OK) and data_root.stat().st_mode & 0o077 == 0, "data_permissions_invalid")
-        # Selection is atomic only after BOTH imports. Previous roots/data stay.
-        atomic_json(home / "installation.json", {"manifest": manifest, "containers": names, "data_root": str(data_root), "proot_version": PROOT_VERSION,
-                    "source_kind": "local_candidate" if local_candidate else "release", "host_architecture": platform.machine()})
+        # Select only after every service import. Previous roots/data stay.
+        value={"manifest": manifest, "containers": names, "data_root": str(data_root), "proot_version": PROOT_VERSION,
+                    "source_kind": "local_candidate" if local_candidate else "release", "host_architecture": platform.machine(),'home':str(home)}
+        if prior.exists():
+            previous=json.loads(prior.read_text())
+            for setting in ('ports','validation_mode'):
+                if setting in previous:value[setting]=previous[setting]
+        if 'postgres' in names:
+            if wrapper:value['proot_wrapper']=str(wrapper)
+        atomic_json(home / "installation.json",value)
         print("Installed; run angmoo start.")
 
 
 def command(executable: str, install: dict, service: str, nonce: str, *, log_policy=None) -> list[str]:
+    if service=='postgres':
+        from postgres_host import command as pg_command
+        return pg_command(executable,install)
     backend = service == "backend"
+    ports=install.get('ports',{'backend':8080,'frontend':3000})
     env = {"ANGMOO_LAUNCH_ID": nonce}
     if log_policy is not None:
         env[ENVIRONMENT] = log_policy
     if backend:
-        env.update(ANGMOO_BIND_HOST="127.0.0.1", ANGMOO_BACKEND_PORT="8080", ANGMOO_CONTRIBUTOR_DATA_ROOT="/var/lib/angmoo", ANGMOO_FRONTEND_ORIGIN="http://127.0.0.1:3000")
+        env.update(ANGMOO_BIND_HOST="127.0.0.1", ANGMOO_BACKEND_PORT=str(ports['backend']), ANGMOO_CONTRIBUTOR_DATA_ROOT="/var/lib/angmoo", ANGMOO_FRONTEND_ORIGIN="http://127.0.0.1:"+str(ports['frontend']))
     else:
-        env.update(HOSTNAME="127.0.0.1", PORT="3000", ANGMOO_API_BASE_URL="http://127.0.0.1:8080")
+        env.update(HOSTNAME="127.0.0.1", PORT=str(ports['frontend']), ANGMOO_API_BASE_URL="http://127.0.0.1:"+str(ports['backend']))
+    if install.get('proot_wrapper'):
+        env['ANGMOO_PROOT_SELF_EXE']=str(Path(install['proot_wrapper']).parent/'proot-playstore')
+        env['PROOT_DONT_SHARE_LIBANDROID_SHMEM']='1'
+        from postgres_host import temporary_directory
+        env['PROOT_TMP_DIR']=str(temporary_directory(install))
     result = [executable, "run", install["containers"][service], "--user", "10001:10001" if backend else "1000:1000", "--work-dir", "/app"]
     # This flag exists only on Termux; Linux already omits the Termux host
     # mounts. Use the pinned tool's host detection, not a guessed PREFIX.
@@ -197,6 +220,7 @@ def command(executable: str, install: dict, service: str, nonce: str, *, log_pol
         result += ["--bind", install["data_root"] + ":/var/lib/angmoo"]
     for key, value in env.items():
         result += ["--env", f"{key}={value}"]
+    if backend and install.get('validation_mode'):result+=['--','postgresql-api','--validation']
     return result
 
 
@@ -210,7 +234,8 @@ def installation(home: Path) -> dict:
     else:
         validate_manifest(value["manifest"])
     require(value["proot_version"] == PROOT_VERSION and Path(value["data_root"]) == home / "data", "installation_invalid")
-    require(set(value["containers"]) == {"backend", "frontend"} and all(re.fullmatch(r"angmoo-(?:backend|frontend)-[0-9a-f]{12}-[0-9a-f]{12}", v) for v in value["containers"].values()), "installation_invalid")
+    require(set(value["containers"]) == set(services_for(value['manifest']['version'])) and all(re.fullmatch(r"angmoo-(?:backend|frontend|postgres)-[0-9a-f]{12}-[0-9a-f]{12}", v) for v in value["containers"].values()), "installation_invalid")
+    value['home']=str(home)
     return value
 
 
@@ -285,12 +310,15 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
         state.update(source_sha=source, version=config["manifest"]["version"])
         atomic_json(home / "state.json", state)
         executable = tools()
-        free_port(8080)
-        free_port(3000)
-        for service, url in (("backend", "http://127.0.0.1:8080/health"), ("frontend", "http://127.0.0.1:3000/api/runtime-identity")):
+        ports=config.get('ports',{'backend':8080,'frontend':3000,'postgres':5432})
+        for key in config['containers']:free_port(ports[key])
+        services=([('postgres',None)] if 'postgres' in config['containers'] else [])+[
+            ('backend',f"http://127.0.0.1:{ports['backend']}/health"),('frontend',f"http://127.0.0.1:{ports['frontend']}/api/runtime-identity")]
+        import postgres_host
+        for service, url in services:
             require(not stopping, "start_cancelled")
             phase = "spawn"
-            process = subprocess.Popen(command(executable, config, service, nonce, log_policy=policy_clock.envelope(service)), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+            process = subprocess.Popen(command(executable, config, service, nonce, log_policy=policy_clock.envelope(service)), env=postgres_host.host_environment(config),stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
             children[service] = process
             capture.attach(service, process)
             state["children"][service] = identity(process.pid)
@@ -301,9 +329,13 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
             atomic_json(home / "state.json", state)
             def observe(probe):
                 detail.update(last_probe=probe, probe_count=detail["probe_count"] + 1)
-            await_ready(process, url, source, nonce, expected_version=config["manifest"]["version"], backend=service == "backend",
-                        timeout=BACKEND_READINESS_SECONDS if service == "backend" else FRONTEND_READINESS_SECONDS,
-                        cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
+            if service=='postgres':
+                postgres_host.wait_ready(executable,config,process,cancelled=lambda:stopping)
+                postgres_host.initialize(executable,config)
+            else:
+                await_ready(process, url, source, nonce, expected_version=config["manifest"]["version"], backend=service == "backend",
+                            timeout=BACKEND_READINESS_SECONDS if service == "backend" else FRONTEND_READINESS_SECONDS,
+                            cancelled=lambda: stopping or (home / f"stop-{nonce}").exists(), observe=observe)
             detail.update(phase="running", ready_at_utc=utc())
             capture.emit("supervisor", "event", json.dumps({"service": service, "event": "ready", "probe_count": detail["probe_count"]}))
         state["state"] = "running"
@@ -330,7 +362,7 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
                 if len(state["cleanup_failures"]) < 8:
                     state["cleanup_failures"].append(failure_record(exc, "supervisor", "logging", started))
         persist()
-        for service in ("frontend", "backend"):
+        for service in ("frontend", "backend", "postgres"):
             if service in children:
                 cleanup_complete = False
                 try:
@@ -343,7 +375,10 @@ def supervise(home: Path, fd: int, nonce: str, *, capture_self=False) -> None:
                         # process group has no descendants left.
                         raise ValueError("process_ownership_unknown")
                     else:
-                        stop_child(children[service], record, 20 if service == "frontend" else 200)
+                        try:
+                            if service=='postgres':postgres_host.stop(executable,config,record)
+                        finally:
+                            stop_child(children[service], record, 20 if service == "frontend" else 200)
                         cleanup_complete = True
                 except (OSError, ValueError, subprocess.TimeoutExpired):
                     state["cleanup_failures"].append({"service": service, "phase": "shutdown", "code": "owned_process_stop_failed", "observed_at_utc": utc()})
@@ -390,8 +425,8 @@ def start(home: Path, *, log_mode="basic", log_duration=None) -> None:
         if recovered["recovered"]:
             print("Recovered interrupted log sessions. Their logs may be incomplete.")
         reject_survivors(home)
-        free_port(8080)
-        free_port(3000)
+        ports=config.get('ports',{'backend':8080,'frontend':3000,'postgres':5432})
+        for key in config['containers']:free_port(ports[key])
         nonce = uuid.uuid4().hex
         policy = new_policy(nonce, log_mode, seconds)
         path = create_session(home, nonce, {**session_metadata(config), "log_policy": policy,
@@ -426,7 +461,8 @@ def await_start(home, path, nonce, process):
         if state.get("nonce") == nonce:
             if state["state"] == "running":
                 # The supervisor owns subsequent errors and service pipes.
-                print("Angmoo: http://127.0.0.1:3000")
+                port=installation(home).get('ports',{}).get('frontend',3000)
+                print(f"Angmoo: http://127.0.0.1:{port}")
                 print("Logs: angmoo logs --service all --follow")
                 return
             if state["state"] in ("stopped", "failed"):
@@ -497,16 +533,35 @@ def main() -> int:
     p.add_argument("--session")
     p = commands.add_parser("logs")
     p.add_argument("--session")
-    p.add_argument("--service", choices=("backend", "frontend", "supervisor", "all"), default="all")
+    p.add_argument("--service", choices=("backend", "frontend", "postgres", "supervisor", "all"), default="all")
     p.add_argument("--tail", type=int, choices=range(1, 2001), metavar="1..2000", default=200)
     p.add_argument("--follow", action="store_true")
     p = commands.add_parser("_supervise", help=argparse.SUPPRESS)
     p.add_argument("--fd", type=int, required=True)
     p.add_argument("--nonce", required=True)
+    p=commands.add_parser('migrate',help='Migrate 0.1.3 SQLite / 0.1.3 데이터 이전')
+    p.add_argument('--language',choices=('en','ko'),default='en')
+    choice=p.add_mutually_exclusive_group()
+    choice.add_argument('--release',default=None)
+    choice.add_argument('--manifest',type=Path)
+    choice.add_argument('--candidate-manifest',type=Path)
+    p.add_argument('--rollback',action='store_true')
+    p.add_argument('--postgres-port',type=int,default=5432)
+    p.add_argument('--backend-port',type=int,default=8080)
+    p.add_argument('--frontend-port',type=int,default=3000)
+    p.add_argument('--validation',action='store_true',help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
         if args.action in ("start", "restart"):
-            duration(args.log_mode, args.log_duration)  # Validate before stop or any filesystem mutation.
+            duration(args.log_mode, args.log_duration)  # Validate before selection, stop or filesystem mutation.
+        if args.action=='migrate':
+            from migrate import run
+            if not args.rollback and not any((args.release,args.manifest,args.candidate_manifest)):args.release='0.1.4'
+            run(private_home(args.home),args)
+            return 0
+        if args.action!='_supervise':
+            from migrate import selected
+            args.home=selected(args.home)
         if args.action == "logs":
             show_logs(args.home, args.service, args.session, args.tail, args.follow)
             return 0
