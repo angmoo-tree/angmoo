@@ -411,7 +411,8 @@ def test_manual_situation_fts_vector_and_downstream_guards(durable_stack, index,
         item.status, item.deleted_at = "deleted", NOW; db.commit()
         assert reader.hydrate(request, selected).records == ()
         assert source.documents_for_item_ids((item.id,))[item.id] == ()
-        assert SituationSources(db).validate(context, prior, now=NOW).state == "forbidden"
+        denied = SituationSources(db).validate(context, prior, now=NOW)
+        assert denied.state == "changed" and denied.reason == "situation_source_changed"
         assert item.id not in {value.id for value in hotbrief.hot_brief_source_items(setting=setting, now=NOW, limit=20)}
     finally:
         fts.close()
