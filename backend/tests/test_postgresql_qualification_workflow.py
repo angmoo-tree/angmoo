@@ -26,6 +26,20 @@ def test_native_qualification_contract_passes(tmp_path):
     assert check(tmp_path, document()) == []
 
 
+def test_shared_policy_accepts_existing_yaml11_contract_caller():
+    parsed = checker.yaml.safe_load((ROOT / ".github/workflows" / NAME).read_text(encoding="utf-8"))
+    assert True in parsed and "on" not in parsed
+    assert checker.workflow_policy.validate(parsed, NAME) == []
+
+
+def test_source_policy_rejects_actually_serialized_boolean_event_key(tmp_path):
+    source = (ROOT / ".github/workflows" / NAME).read_text(encoding="utf-8")
+    assert source.count("\non:\n") == 1
+    target = tmp_path / NAME
+    target.write_text(source.replace("\non:\n", "\ntrue:\n"), encoding="utf-8")
+    assert any("event key" in error for error in checker.check_workflow(target)[0])
+
+
 @pytest.mark.parametrize("change", [
     "trigger", "guard", "emulation", "write", "unbound-input", "unexpected-env",
     "publish-command", "extra-step", "raw-database", "directory-upload", "upload-condition",

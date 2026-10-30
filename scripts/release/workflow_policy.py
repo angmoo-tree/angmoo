@@ -94,7 +94,10 @@ def validate(document, name):
 def validate_qualification(document):
     """Read-only native check of immutable originals, never a publishing lane."""
     errors = []
-    events = document.get("on", {})
+    # Other contract callers use PyYAML's YAML 1.1 loader, whose parsed `on`
+    # key is True. The source-text policy uses its independent YAML 1.2 loader
+    # and rejects an actually serialized boolean event key before calling us.
+    events = document.get("on", document.get(True, {}))
     fields = ("source", "candidate_run", "candidate_artifact", "windows_run", "windows_attempt", "windows_artifact")
     dispatch = events.get("workflow_dispatch", {}) if isinstance(events, dict) else {}
     inputs = dispatch.get("inputs", {}) if isinstance(dispatch, dict) else {}
