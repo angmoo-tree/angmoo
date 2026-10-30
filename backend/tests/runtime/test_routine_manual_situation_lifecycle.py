@@ -68,7 +68,6 @@ def test_real_routine_publishes_applies_and_replays_consumed_comment(manual_rout
     item = case.db.get(MemoryItem, receipt.applied_item_id)
     from memory.test_activity_situation_recall import readers
     from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePackets
-    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
     reader, request, ranked, _ = readers(case.db, context.snapshot.scope, item)
     reader.clock = lambda: datetime.now(UTC)
     accepted = reader.revalidate(request, (ranked,))
@@ -117,7 +116,6 @@ def test_consumed_source_changes_do_not_rewrite_an_owned_experience(manual_routi
     access = SituationSources(case.db).validate(context, source, now=datetime.now(UTC))
     assert access.state != "available"
     from app.domains.memory.repository.episode_packets import SqlAlchemyEpisodePackets
-    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
     packets = SqlAlchemyEpisodePackets(case.db, detail_reader=RuntimeEpisodeDetailReader(case.db)).read(
         scope=context.snapshot.scope, item_ids=(item.id,), now=datetime.now(UTC))
     has_original = any(s.text == "Try a cooler temperature for the next experiment."

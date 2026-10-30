@@ -6,7 +6,7 @@ import shutil
 
 import pytest
 
-from app.runtime.world_deletion import inventory
+from app.runtime.persistence import world_erasure_inventory as inventory
 from app.runtime.persistence.model_registration import register_models
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -25,7 +25,7 @@ def test_both_sidecar_layouts_receive_every_runtime_owner_at_its_exact_bundle_pa
     arguments = builder().resource_arguments(BACKEND)
     assert arguments[::2] == ["--add-data"] * len(inventory.OWNERS)
     assert len(arguments) == 2 * len(inventory.OWNERS)
-    bundled_module = tmp_path / "app/runtime/world_deletion/inventory.py"
+    bundled_module = tmp_path / "app/runtime/persistence/world_erasure_inventory.py"
     bundled_module.parent.mkdir(parents=True)
     monkeypatch.setattr(inventory, "__file__", str(bundled_module))
     metadata = register_models()
@@ -50,7 +50,7 @@ def test_both_sidecar_layouts_receive_every_runtime_owner_at_its_exact_bundle_pa
 
 @pytest.mark.parametrize("mutation", ["missing", "wrong_owner", "wrong_version"])
 def test_missing_or_unreviewed_policy_cannot_silently_disappear_from_the_package(tmp_path, mutation):
-    module = tmp_path / "app/runtime/world_deletion/inventory.py"
+    module = tmp_path / "app/runtime/persistence/world_erasure_inventory.py"
     module.parent.mkdir(parents=True)
     module.write_text("OWNERS = ('worlds',)\n", encoding="utf-8")
     policy = tmp_path / "app/domains/worlds/repository/world_erasure.json"

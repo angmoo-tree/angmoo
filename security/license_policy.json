@@ -369,6 +369,38 @@
       "license_expression": "GPL-2.0-or-later",
       "source": "https://github.com/termux/proot/tree/v5.1.107.101",
       "distribution_boundary": "Termux Play Store compatibility helper built privately from pinned upstream source with the published SysV and loader patch recipe. The source archive, patch and build receipt stay available in the installation home; packaged system PRoot is not replaced."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu in PostgreSQL OCI images",
+      "reference": "6456aaa0f3c854d199d0f037f068eb97515b7513",
+      "license_expression": "Apache-2.0",
+      "source": "https://github.com/tianon/gosu/blob/6456aaa0f3c854d199d0f037f068eb97515b7513/LICENSE",
+      "distribution_boundary": "Unmodified gosu 1.19 source rebuilt with Go 1.27.3; the image includes license and module/compiler build records in /usr/share/doc/angmoo/."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "Go standard library in gosu",
+      "reference": "golang:1.27.3-trixie",
+      "license_expression": "BSD-3-Clause",
+      "source": "https://github.com/golang/go/blob/go1.27.3/LICENSE",
+      "distribution_boundary": "Static standard-library code in gosu only; compiler/build toolchain is not shipped in the runtime image."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu moby user dependency",
+      "reference": "github.com/moby/sys/user@v0.1.0",
+      "license_expression": "Apache-2.0",
+      "source": "https://github.com/moby/sys/blob/user/v0.1.0/LICENSE",
+      "distribution_boundary": "Unmodified upstream dependency linked into gosu; its license is bundled in /usr/share/doc/angmoo/."
+    },
+    {
+      "source_path": "Dockerfile.postgres",
+      "name": "gosu system dependency",
+      "reference": "golang.org/x/sys@v0.1.0",
+      "license_expression": "BSD-3-Clause",
+      "source": "https://cs.opensource.google/go/x/sys/+/refs/tags/v0.1.0:LICENSE",
+      "distribution_boundary": "Unmodified upstream dependency linked into gosu; its license is bundled in /usr/share/doc/angmoo/."
     }
   ],
   "actions": [

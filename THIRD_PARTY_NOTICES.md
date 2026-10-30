@@ -249,9 +249,11 @@ These services and CI tools are separate components and retain their own license
 - **PRoot-Distro** — `GPL-3.0-only`; reference `proot-distro==5.10.0`; source <https://github.com/termux/proot-distro/blob/v5.10.0/LICENSE>
 - **PostgreSQL Windows native server** — `PostgreSQL`; reference `"postgresql": "17.11"`; source <https://www.postgresql.org/about/licence/>
 - **pgvector native extension** — `PostgreSQL`; reference `"pgvector": "0.8.7"`; source <https://github.com/pgvector/pgvector/blob/v0.8.7/LICENSE>
-- **gosu in PostgreSQL OCI images** — `Apache-2.0`; upstream `1.19` at `6456aaa0f3c854d199d0f037f068eb97515b7513`, rebuilt without source changes using Go `1.27.3`; source <https://github.com/tianon/gosu/tree/6456aaa0f3c854d199d0f037f068eb97515b7513>. The image includes its license and compiler/module build record under `/usr/share/doc/angmoo/`.
-- **gosu build dependencies** — Go standard library `1.27.3` (`BSD-3-Clause`), `github.com/moby/sys/user v0.1.0` (`Apache-2.0`), and `golang.org/x/sys v0.1.0` (`BSD-3-Clause`). Their license texts are included in the PostgreSQL OCI image under `/usr/share/doc/angmoo/`.
 - **PRoot Termux private host helper recipe** — `GPL-2.0-or-later`; reference `VERSION='5.1.107.101'`; source <https://github.com/termux/proot/tree/v5.1.107.101>
+- **gosu in PostgreSQL OCI images** — `Apache-2.0`; reference `6456aaa0f3c854d199d0f037f068eb97515b7513`; source <https://github.com/tianon/gosu/blob/6456aaa0f3c854d199d0f037f068eb97515b7513/LICENSE>
+- **Go standard library in gosu** — `BSD-3-Clause`; reference `golang:1.27.3-trixie`; source <https://github.com/golang/go/blob/go1.27.3/LICENSE>
+- **gosu moby user dependency** — `Apache-2.0`; reference `github.com/moby/sys/user@v0.1.0`; source <https://github.com/moby/sys/blob/user/v0.1.0/LICENSE>
+- **gosu system dependency** — `BSD-3-Clause`; reference `golang.org/x/sys@v0.1.0`; source <https://cs.opensource.google/go/x/sys/+/refs/tags/v0.1.0:LICENSE>
 - **actions/checkout** — `MIT`; reference `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1`; source <https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/LICENSE>
 - **astral-sh/setup-uv** — `MIT`; reference `astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7`; source <https://github.com/astral-sh/setup-uv/blob/c18668ad3cf93ea998bef934396af7bb5c839dc7/LICENSE>
 - **actions/setup-node** — `MIT`; reference `actions/setup-node@820762786026740c76f36085b0efc47a31fe5020`; source <https://github.com/actions/setup-node/blob/820762786026740c76f36085b0efc47a31fe5020/LICENSE>

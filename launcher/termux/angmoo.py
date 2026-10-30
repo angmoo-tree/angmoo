@@ -552,6 +552,8 @@ def main() -> int:
     p.add_argument('--validation',action='store_true',help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
+        if args.action in ("start", "restart"):
+            duration(args.log_mode, args.log_duration)  # Validate before selection, stop or filesystem mutation.
         if args.action=='migrate':
             from migrate import run
             if not args.rollback and not any((args.release,args.manifest,args.candidate_manifest)):args.release='0.1.4'
@@ -560,8 +562,6 @@ def main() -> int:
         if args.action!='_supervise':
             from migrate import selected
             args.home=selected(args.home)
-        if args.action in ("start", "restart"):
-            duration(args.log_mode, args.log_duration)  # Validate before stop or any filesystem mutation.
         if args.action == "logs":
             show_logs(args.home, args.service, args.session, args.tail, args.follow)
             return 0

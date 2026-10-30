@@ -25,7 +25,6 @@ from app.domains.social.models.posts import Post
 from app.runtime.memory.composition import memory_repository
 from app.runtime.memory.situation_sources import SituationSources
 from app.runtime.memory.situation_application_sources import PreparedSituationSources
-from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 response_session = f.response_session
 
