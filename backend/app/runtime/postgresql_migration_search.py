@@ -3,7 +3,7 @@ import hashlib,json,struct,time
 from datetime import UTC,datetime
 from sqlalchemy import text
 from app.database import create_session_factory
-from app.runtime.postgresql_migration import source_db,add_digest,canonical_path
+from app.runtime.persistence.sqlite_migration_io import source_db,add_digest,canonical_path
 from app.runtime.memory.vector_resources import bundled_vector_index
 from app.runtime.memory.postgresql_vector import PostgresMemoryVectorIndex,encoded_vector
 from app.runtime.memory.postgresql_generations import initialize_state

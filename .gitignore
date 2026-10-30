@@ -48,3 +48,4 @@ backend/.ci/
 # Rebuilt native resources; source/digests are tracked by release recipes.
 /backend/app/runtime/resources/vec1/
 /desktop/src-tauri/resources/postgresql/
+/.angmoo-pg-experiment.json

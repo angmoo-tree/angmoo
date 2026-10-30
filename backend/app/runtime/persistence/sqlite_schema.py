@@ -99,7 +99,7 @@ WORLD_PACKAGE_REGISTRY_TABLES = (
 
 
 def _historical_table_names():
-    from app.runtime.persistence.experience_migration import TABLES
+    from app.runtime.persistence.experience_tables import TABLES
     return sorted(set(Base.metadata.tables) - TABLES - {"memory_maintenance_slot"})
 
 
@@ -122,7 +122,7 @@ def build_sqlite_baseline_metadata() -> MetaData:
     from app.runtime.persistence.model_registration import install_canonical_write_fences
     event.listen(metadata, "after_create", install_canonical_write_fences)
     # SQLite 41 is the frozen migration source, not the experimental PG schema.
-    from app.runtime.persistence.experience_migration import TABLES as experience_tables
+    from app.runtime.persistence.experience_tables import TABLES as experience_tables
     for table_name in _historical_table_names():
         if table_name in experience_tables:
             continue

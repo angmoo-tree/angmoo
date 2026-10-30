@@ -1,4 +1,5 @@
 """Migrated flat dependencies retain deletion rights without ancestor reads."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import json
 from collections import Counter
 
@@ -47,7 +48,7 @@ def lineage(stack, levels=12):
         previous = current
     db.commit()
     from app.runtime.persistence.experience_migration import migrate
-    migrate(db,now=NOW)
+    migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources)
     db.commit()
     db.add_all([post,*nodes])
     return db, scope, post, nodes, reader

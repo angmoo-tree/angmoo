@@ -645,3 +645,11 @@ Inventory는 현재 구현 목록이고 policy는 허용 규칙입니다. 검사
 - [FastAPI Best Practices — Project Structure](https://github.com/zhanymkanov/fastapi-best-practices#project-structure): 업무별 구성과 역할 분리의 참고.
 - [현재 경계 정책](../security/architecture_import_policy.json)과 [경계 검사](../scripts/ci/check_architecture_boundaries.py): Angmoo의 실제 허용 의존·역할 규칙.
 - [백엔드 전환 기록](../docs/architecture/refactor-backend-results.md): 이전 구조 전환의 증거가 필요할 때만 확인하는 역사 자료. 새 기능 구현 위치나 새 배포판의 성공 여부를 이 기록으로 대신 판단하지 않습니다.
+
+### PostgreSQL 구성과 경험 기억 접근 경계
+
+`runtime/configuration_contracts.py`는 profile 값과 검증을, `runtime/configuration.py`와 PostgreSQL 구성 진입점은 구체적인 서비스 생성을 담당한다. `runtime/composition_resources.py`는 구성 진입점에서 종료 콜백을 받아 저장소 생성기를 역으로 가져오지 않는다.
+
+기억 repository는 같은 Session에 연결된 runtime reader에서 `memory.contracts.experience_access.MemoryExperienceAccess`를 통해 현재 소유 범위·비공개 대화 권한을 받는다. 기억 repository가 Chat 모델이나 runtime 구성에 의존하지 않으면서 소유권·삭제·비공개 대화 검사를 유지한다. 원래 게시물이나 메시지 본문을 다시 조회하지 않으며 검증 캐시는 한 작업 안에서만 사용한다.
+
+공용 trigger 목록과 World 삭제 조건은 `runtime/persistence`에 두고 기억·삭제 worker는 기존 공개 이름을 사용한다. 오프라인 원문 스냅샷 변환기는 이전 구성 진입점에서 원문 조회 콜백을 받는다. 과거 원문 복구가 필요한데 콜백이 없으면 작업을 거절하며, 실행 중 기억 조회는 이 복구 경로를 호출하지 않는다.

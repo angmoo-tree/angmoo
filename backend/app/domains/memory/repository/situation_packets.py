@@ -30,6 +30,6 @@ def exact_source_entries(session, info, manifest, rows, *, validation=None):
 
 def read_situation_packet(session, reader, scope, item, info, now, *, validation=None):
     from app.domains.memory.repository.experience import accessible, packet
-    if not accessible(session,scope,item,now,validation=validation):
+    if not accessible(session,scope,item,now,validation=validation,reader=reader):
         return None
     return packet(session,item,validation=validation)

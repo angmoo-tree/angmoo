@@ -34,7 +34,7 @@ def scope_value(scope):
 def prepare(session, items, now, *, validation, include_snapshots=True):
     """One bounded batch; no prior-memory traversal or live-source lookup."""
     ids = tuple(dict.fromkeys(item.id for item in items))
-    from app.domains.memory.repository.access_batch import indexed
+    from app.domains.memory.repository.access_rows import indexed
     if include_snapshots:
         indexed(validation, MemoryExperienceSnapshot, MemoryExperienceSnapshot.memory_item_id, ids)
     blocked = set(session.scalars(select(MemoryExperienceDependency.memory_item_id).join(
@@ -73,7 +73,7 @@ def read_snapshot(session, item, *, validation=None):
     return row
 
 
-def accessible(session, scope, item, now, *, validation=None, require_enabled=True, check_snapshot=True, captured=False):
+def accessible(session, scope, item, now, *, validation=None, require_enabled=True, check_snapshot=True, captured=False, reader=None):
     # A correction/merge supersedes a search candidate, not an already captured
     # experience. Explicit deletion, expiry and tombstone dependencies still revoke it.
     eligible = item_retrievable(item, now)
@@ -85,9 +85,14 @@ def accessible(session, scope, item, now, *, validation=None, require_enabled=Tr
     if item_scope(item) != scope or not eligible:
         return False
     from app.domains.memory.contracts.access_validation import MemoryAccessValidation
-    from app.runtime.memory.scope_queries import read_scope_presence
     validation = validation or MemoryAccessValidation(session, now)
     validation.check_context(session, now)
+    access = validation.experience_access
+    if access is None:
+        access = getattr(reader, "experience_access", None)
+        if access is None:
+            raise ValueError("memory_experience_access_missing")
+        validation.experience_access = access
     key = ("experience", scope, require_enabled)
     if key not in validation.scopes:
         setting = session.scalar(select(MemoryScopeSettingModel).where(
@@ -95,15 +100,11 @@ def accessible(session, scope, item, now, *, validation=None, require_enabled=Tr
             MemoryScopeSettingModel.world_id == scope.world_id,
             MemoryScopeSettingModel.subject_world_character_id == scope.subject_world_character_id))
         validation.scopes[key] = (setting is not None and (setting.enabled or not require_enabled)
-            and all(value is not None for value in read_scope_presence(session, scope)))
+            and access.scope_present(scope))
     if not validation.scopes[key]:
         return False
     if item.thread_id:
-        from app.domains.chat.models import MessageThread
-        thread = validation.get(MessageThread,item.thread_id)
-        if (thread is None or thread.deleted_at is not None or (thread.requester_id,thread.world_id)!=(scope.owner_id,scope.world_id)
-                or scope.subject_world_character_id not in {
-                    thread.requester_world_character_id,thread.responding_world_character_id}):
+        if not access.thread_accessible(scope, item.thread_id, validation=validation):
             return False
     # Unknown representation policies remain closed; historical source revisions
     # no longer determine access to a memory owned by this scope.
@@ -130,17 +131,17 @@ def accessible(session, scope, item, now, *, validation=None, require_enabled=Tr
     return True
 
 
-def guard_metadata(session, scope, items, now, *, captured=False):
+def guard_metadata(session, scope, items, now, *, captured=False, reader=None):
     """Current rights and immutable digest columns; never reload original text."""
     from app.domains.memory.contracts.access_validation import MemoryAccessValidation
-    from app.domains.memory.repository.access_batch import prepare_representation
+    from app.domains.memory.repository.access_rows import prepare_representation
     validation=MemoryAccessValidation(session,now)
     prepare_representation(validation,items)
     prepare(session,items,now,validation=validation,include_snapshots=False)
     digests=dict(session.execute(select(MemoryExperienceSnapshot.memory_item_id,MemoryExperienceSnapshot.content_digest)
         .where(MemoryExperienceSnapshot.memory_item_id.in_(tuple(item.id for item in items)))).all())
     return {item.id:digests.get(item.id,"") for item in items
-        if accessible(session,scope,item,now,validation=validation,check_snapshot=False,captured=captured)}
+        if accessible(session,scope,item,now,validation=validation,check_snapshot=False,captured=captured,reader=reader)}
 
 
 def source_snapshot(entry):
@@ -173,7 +174,7 @@ def stored_evidence(session, item):
             MemoryItemEvidence.memory_item_id==item.id)))
 
 
-def validate_captured_sources(session, context, result_sources, receipt, *, now):
+def validate_captured_sources(session, context, result_sources, receipt, *, now, reader=None):
     """Receipt integrity was checked by restore_admission; check memory rights."""
     from app.domains.memory.contracts.situation_validation import SituationSourceAccess
     from app.domains.memory.contracts.provenance import MemorySourceTypeV1
@@ -187,7 +188,7 @@ def validate_captured_sources(session, context, result_sources, receipt, *, now)
             prior=session.scalar(select(MemoryItem).options(rights_columns()).where(
                 MemoryItem.id == entry.source_id).execution_options(populate_existing=True))
             if (prior is None or item_scope(prior)!=scope
-                    or not accessible(session,scope,prior,now,check_snapshot=False,captured=True)):
+                    or not accessible(session,scope,prior,now,check_snapshot=False,captured=True,reader=reader)):
                 raise ValueError("situation_prior_memory_deleted")
             # The immutable manifest proves the earlier text/version. A normal
             # correction must not substitute today's summary into that experience.

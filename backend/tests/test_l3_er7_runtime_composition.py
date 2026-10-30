@@ -52,12 +52,16 @@ def _embedded_config(
     )
 
 
-def test_runtime_profile_is_closed_to_the_three_sqlite_only_values() -> None:
+def test_runtime_profiles_name_postgresql_and_explicit_legacy_fixture_values() -> None:
     assert tuple(profile.value for profile in RuntimeProfile) == (
+        "EXPERIMENT_POSTGRESQL",
+        "CONTRIBUTOR_POSTGRESQL",
+        "LOCAL_POSTGRESQL",
         "LOCAL_EMBEDDED",
         "CONTRIBUTOR_EMBEDDED",
         "TEST",
     )
+    assert RuntimeProfile.parse("local_postgresql") is RuntimeProfile.LOCAL_POSTGRESQL
     assert RuntimeProfile.parse("contributor_embedded") is (
         RuntimeProfile.CONTRIBUTOR_EMBEDDED
     )
@@ -233,7 +237,7 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json() == {
-            "version": "0.1.3",
+            "version": "0.1.4",
             "source_sha": "a" * 40,
             "launch_id": "b" * 32,
             "status": "ok",
@@ -241,6 +245,8 @@ def test_contributor_entrypoint_uses_an_explicit_isolated_data_root(
             "persistence": "sqlite",
             "graph": "ladybug",
             "components": {"scheduler": "ready", "projector": "ready"},
+            "validation_mode": False,
+            "automatic_activity": "enabled",
         }
         assert config.profile is RuntimeProfile.CONTRIBUTOR_EMBEDDED
         assert config.data_paths.root == contributor_root.resolve()
@@ -361,20 +367,22 @@ def test_unknown_profile_does_not_create_database_or_secret(tmp_path: Path) -> N
     assert not data_root.exists()
 
 
-def test_product_dependencies_exclude_server_database_runtimes() -> None:
+def test_product_dependencies_include_postgresql_without_neo4j_runtime() -> None:
     project = tomllib.loads(
         (ROOT / "backend/pyproject.toml").read_text(encoding="utf-8")
     )
     dependencies = tuple(project["project"]["dependencies"])
     optional_dependencies = project["project"].get("optional-dependencies", {})
 
-    for forbidden in ("neo4j", "psycopg", "pgvector"):
+    for forbidden in ("neo4j",):
         assert not any(forbidden in dependency.lower() for dependency in dependencies)
         assert not any(
             forbidden in dependency.lower()
             for group in optional_dependencies.values()
             for dependency in group
         )
+    for required in ("psycopg", "psycopg-pool", "langgraph-checkpoint-postgres"):
+        assert any(dependency.lower().startswith(required) for dependency in dependencies)
     # Windows does not ship an IANA timezone database for Python's zoneinfo.
     # The packaged sidecar must therefore own tzdata explicitly rather than
     # inheriting it accidentally from a removed PostgreSQL dependency group.

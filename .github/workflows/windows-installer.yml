@@ -97,6 +97,11 @@ jobs:
         $PSNativeCommandUseErrorActionPreference = $true
         $env:PYTHONPATH = 'backend;scripts/ci'
         backend\.venv\Scripts\python.exe -m pytest -q backend/tests/test_installer_update.py backend/tests/test_windows_postgresql_qualification.py backend/tests/test_l3_er5_desktop_sidecar_security.py backend/tests/test_windows_installer_i18n.py
+        backend\.venv\Scripts\python.exe -m pytest -q `
+            backend\tests\test_l4_pr_f_closeout_contract.py `
+            backend\tests\world_packages\test_ui_contract.py `
+            backend\tests\world_packages\test_closeout_contract.py `
+            backend\tests\world_packages\test_import_commit.py
         backend\.venv\Scripts\python.exe scripts/ci/check_desktop_installer_contract.py
         .\desktop\scripts\test-installer-payload-verifier.ps1
         .\desktop\scripts\test-installer-payload-transaction.ps1

@@ -16,6 +16,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "ci-impact.v1"
+REFERENCE_SCHEMA = "ci-impact-reference.v1"
 JOBS = ("backend", "frontend", "local-core-smoke", "local-autonomy-smoke", "local-full-graph",
         "embedded-data-migration", "tauri-windows", "windows-installer", "windows-native",
         "tauri-windows-host-dev")
@@ -185,22 +186,40 @@ def build_plan(*, event: dict, event_name: str, mode: str, requested: str, root:
     return result
 
 
-def read_plan(path: Path) -> dict:
+def plan_reference(value: dict) -> dict:
+    """Keep cross-job environment values small; retain the full plan on disk."""
+    keys = ("mode", "requested_profile", "event", "source_sha", "base_sha", "checkout_sha",
+            "checkout_tree", "run_id", "run_attempt", "rules_sha256", "selection_sha256")
+    return {"schema": REFERENCE_SCHEMA, **{key: value[key] for key in keys}}
+
+
+def read_plan(path: Path, *, root: Path = ROOT) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
     if value.get("mode") not in {"observe", "active"} or value.get("requested_profile") not in {"auto", "full"}:
         raise ValueError("impact_plan_profile_invalid")
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    expected = None
+    if value.get("schema") == REFERENCE_SCHEMA:
+        if not event_path:
+            raise ValueError("impact_plan_reference_requires_event")
+        event = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        expected = build_plan(event=event, event_name=os.environ["GITHUB_EVENT_NAME"],
+                              mode=value["mode"], requested=value["requested_profile"], root=root)
+        if value != plan_reference(expected):
+            raise ValueError("impact_plan_does_not_match_actual_event")
+        value = expected
     if value.get("schema") != SCHEMA or value.get("selection_sha256") != digest(value.get("effective")):
         raise ValueError("impact_plan_digest_invalid")
-    if value["checkout_sha"] != git("rev-parse", "HEAD") or value["checkout_tree"] != git("rev-parse", "HEAD^{tree}"):
+    if value["checkout_sha"] != git("rev-parse", "HEAD", root=root) or value["checkout_tree"] != git("rev-parse", "HEAD^{tree}", root=root):
         raise ValueError("impact_plan_checkout_mismatch")
-    if value["rules_sha256"] != hashlib.sha256(Path(__file__).read_bytes()).hexdigest():
+    if value["rules_sha256"] != hashlib.sha256((root / "scripts/ci/impact.py").read_bytes()).hexdigest():
         raise ValueError("impact_plan_rules_mismatch")
     for name, env in (("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT")):
         if value[name] != os.environ.get(env, "0" if name == "run_id" else "1"):
             raise ValueError("impact_plan_run_mismatch")
-    if event_path := os.environ.get("GITHUB_EVENT_PATH"):
+    if event_path:
         event = json.loads(Path(event_path).read_text(encoding="utf-8"))
-        expected = build_plan(event=event, event_name=os.environ["GITHUB_EVENT_NAME"], mode=value["mode"], requested=value["requested_profile"])
+        expected = expected or build_plan(event=event, event_name=os.environ["GITHUB_EVENT_NAME"], mode=value["mode"], requested=value["requested_profile"], root=root)
         if expected != value:
             raise ValueError("impact_plan_does_not_match_actual_event")
     return value
@@ -220,7 +239,7 @@ def main() -> int:
     compact = json.dumps(result, separators=(",", ":"))
     if output := os.environ.get("GITHUB_OUTPUT"):
         with open(output, "a", encoding="utf-8") as stream:
-            stream.write(f"plan={compact}\n")
+            stream.write("plan=" + json.dumps(plan_reference(result), separators=(",", ":")) + "\n")
             stream.write(f"backend_profile={result['effective']['backend']}\n")
             stream.write(f"windows={result['effective']['windows']}\n")
             for key, value in result["effective"]["jobs"].items():

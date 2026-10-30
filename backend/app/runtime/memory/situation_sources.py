@@ -33,6 +33,10 @@ class SituationSources:
         self.result_basis = result_basis
         self.reader = reader if reader is not None else SqlAlchemyMemorySourceEvidenceReader(session, queries=source_queries)
 
+    @property
+    def experience_access(self):
+        return source_queries.experience_access(self.session)
+
     def prepare_manual_events(self, identifiers):
         from app.domains.memory.contracts.access_validation import MemoryAccessValidation
         validation = MemoryAccessValidation(self.session, datetime.now(UTC))

@@ -20,7 +20,7 @@ def currently_accessible(session, reader, scope, item, now, *, ancestors=frozens
     if key in validation.completed:
         validation.memo_hits += 1
         return validation.completed[key]
-    allowed = accessible(session, scope, item, now, validation=validation)
+    allowed = accessible(session, scope, item, now, validation=validation, reader=reader)
     validation.completed[key] = allowed
     return allowed
 

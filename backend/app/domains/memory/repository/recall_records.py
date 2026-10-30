@@ -126,7 +126,7 @@ def _current_evidence(
         return None
     from dataclasses import replace
     from app.domains.memory.repository.experience import accessible, read_snapshot, stored_evidence
-    if not accessible(session, scope, item, now):
+    if not accessible(session, scope, item, now, reader=reader):
         return None
     row = read_snapshot(session, item)
     if row is None:

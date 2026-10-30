@@ -1,4 +1,5 @@
 """Real source writers, Today capture, durable receipts and canonical access."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
 import json
@@ -100,7 +101,7 @@ def test_manual_event_survives_capture_apply_recall_and_generic_access_stays_den
     row = receipt(db, scope, post, manifest, lane)
     context = restore_context(db, row)
     from app.domains.memory.repository.experience import validate_captured_sources
-    direct = next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW)
+    direct = next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW, reader=RuntimeEpisodeDetailReader(db))
                   if source_entry == entry)
     assert direct.state == "available" and direct.proof_origin == "stored_experience"
     # Historical delivery grants no permission to read the original event.
@@ -166,7 +167,7 @@ def test_historical_input_survives_source_changes_without_promoting_event(durabl
     access = SituationSources(db).validate(context, entry, now=NOW)
     assert access.state in {"forbidden", "changed"}
     from app.domains.memory.repository.experience import validate_captured_sources
-    assert next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW)
+    assert next(access for source_entry, access in validate_captured_sources(db, context, (), row, now=NOW, reader=RuntimeEpisodeDetailReader(db))
                 if source_entry == entry).state == "available"
     assert source.retrieval_status == "audit_only"
 

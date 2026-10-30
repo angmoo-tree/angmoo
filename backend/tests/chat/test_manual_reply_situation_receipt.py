@@ -1,4 +1,5 @@
 """A real user reply locator survives Chat generation and atomic finalization."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 import json
 from dataclasses import replace
@@ -84,7 +85,7 @@ def test_chat_commits_real_manual_reply_evidence_and_rechecks_access(response_se
     assert db.scalars(select(f.models.MessageMessage).where(f.models.MessageMessage.role == "assistant")).one()
     from app.domains.memory.repository.experience import validate_captured_sources
     assert next(access for entry, access in validate_captured_sources(db, manifest, (), receipt,
-        now=datetime.now(UTC)) if entry == source).state == "available"
+        now=datetime.now(UTC), reader=RuntimeEpisodeDetailReader(db)) if entry == source).state == "available"
     reply.visibility = "private"
     db.commit(); db.expire_all()
     assert SituationSources(db).validate(manifest, source, now=datetime.now(UTC)).state != "available"

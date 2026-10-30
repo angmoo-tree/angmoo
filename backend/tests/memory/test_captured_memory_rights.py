@@ -1,4 +1,5 @@
 """A captured experience survives ordinary revision, but current use rights apply."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from datetime import timedelta
 import pytest
 from sqlalchemy import select, event
@@ -38,7 +39,7 @@ def test_metadata_guard_has_no_source_reads_and_keeps_revocation(stack, change):
     event.listen(db.bind, "before_cursor_execute", observe)
     try:
         current = db.scalar(select(MemoryItem).options(rights_columns()).where(MemoryItem.id == identifier))
-        allowed = guard_metadata(db, scope, (current,), NOW, captured=True)
+        allowed = guard_metadata(db, scope, (current,), NOW, captured=True, reader=RuntimeEpisodeDetailReader(db))
     finally:
         event.remove(db.bind, "before_cursor_execute", observe)
     assert (identifier in allowed) == (change in {"summary", "superseded"})

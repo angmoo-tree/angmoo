@@ -1,6 +1,31 @@
 # syntax=docker/dockerfile:1.7
 ARG POSTGRES_IMAGE=pgvector/pgvector:0.8.7-pg17-trixie@sha256:7a7e9f22015b67edb4bef5c59daeebcd7e74bfa570df6ce60ae01237c8648a84
+ARG GO_IMAGE=golang:1.27.3-trixie@sha256:c65ecfe613b539ac74c62a4c3b2c27e8f8a6076384c8f27e8a3c0f3be17cc385
+FROM --platform=$BUILDPLATFORM ${GO_IMAGE} AS gosu-build
+ARG TARGETARCH
+ENV GOTOOLCHAIN=local
+# Rebuild the unchanged upstream 1.19 source with the patched Go standard library.
+ADD --checksum=sha256:33d7537d588ea49458b9509bcf4554bdf5ceacc66da71e5caa1058ea3b689c3b https://codeload.github.com/tianon/gosu/tar.gz/6456aaa0f3c854d199d0f037f068eb97515b7513 /tmp/gosu.tar.gz
+RUN mkdir /source /out \
+    && tar -xzf /tmp/gosu.tar.gz -C /source --strip-components=1 \
+    && cd /source \
+    && CGO_ENABLED=0 GOOS=linux GOARCH="${TARGETARCH}" go build -mod=readonly -trimpath -buildvcs=false -ldflags='-d -w' -o /out/gosu . \
+    && go version -m /out/gosu | tee /out/gosu-build.txt \
+    && cp LICENSE /out/gosu-LICENSE \
+    && cp /usr/local/go/LICENSE /out/Go-LICENSE \
+    && cp /go/pkg/mod/github.com/moby/sys/user@v0.1.0/LICENSE /out/moby-user-LICENSE \
+    && cp /go/pkg/mod/golang.org/x/sys@v0.1.0/LICENSE /out/x-sys-LICENSE
+
 FROM ${POSTGRES_IMAGE} AS runtime
+ARG PCRE2_MIN_VERSION=10.46-1~deb13u3
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade libpcre2-8-0 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge "${PCRE2_MIN_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=gosu-build --chmod=0755 /out/gosu /usr/local/bin/gosu
+COPY --from=gosu-build /out/gosu-LICENSE /usr/share/doc/angmoo/gosu-LICENSE
+COPY --from=gosu-build /out/gosu-build.txt /usr/share/doc/angmoo/gosu-build.txt
+COPY --from=gosu-build /out/Go-LICENSE /out/moby-user-LICENSE /out/x-sys-LICENSE /usr/share/doc/angmoo/
 ARG VCS_REF=unknown
 ARG VERSION=0.1.4
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \

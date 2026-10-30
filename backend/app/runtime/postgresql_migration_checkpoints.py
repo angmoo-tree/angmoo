@@ -6,7 +6,7 @@ from psycopg.rows import dict_row
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.checkpoint.serde.event_hooks import register_serde_event_listener
-from app.runtime.postgresql_migration import source_db
+from app.runtime.persistence.sqlite_migration_io import source_db
 from app.runtime.autonomous_activity.postgresql_checkpoints import initialize
 from app.runtime.autonomous_activity.postgresql_serde import checkpoint_serde
 

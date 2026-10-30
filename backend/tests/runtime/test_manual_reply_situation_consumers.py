@@ -1,4 +1,5 @@
 """Owner replies through Inbox, then Routine; canonical Chat/SNS evidence reuse."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 import json
 from copy import deepcopy
@@ -138,7 +139,7 @@ def test_consumed_comment_memory_can_be_reused_by_chat_and_sns_with_lineage_chec
     receipt = SimpleNamespace(occurred_at=now, description="A captured delivery")
     def validate(manifest, selected):
         return next(access for source, access in validate_captured_sources(
-            case.db, manifest, (), receipt, now=now) if source == selected)
+            case.db, manifest, (), receipt, now=now, reader=RuntimeEpisodeDetailReader(case.db)) if source == selected)
     assert validate(chat_manifest, entry).state == "available"
     ref = episode_provider_reference("episode", f"memory-item:{item.id}")
     sns_payload = {"context": {"memories": {"target": {"packets": [{"ref": ref, "summary": item.summary}]}}}}

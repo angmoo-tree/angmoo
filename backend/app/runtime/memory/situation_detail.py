@@ -16,7 +16,10 @@ def situation_detail(db, scope, item_id, now, *, validation=None, reader=None):
     if item is None or (item.owner_id,item.world_id,item.subject_world_character_id)!=(
             scope.owner_id,scope.world_id,scope.subject_world_character_id):
         return SituationDetailMaterial((),None)
-    validation=prepare_access(db,(item,),now,validation=validation)
+    if reader is None:
+        from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
+        reader = RuntimeEpisodeDetailReader(db)
+    validation=prepare_access(db,(item,),now,validation=validation,reader=reader)
     if not accessible(db,scope,item,now,validation=validation,require_enabled=False):
         return SituationDetailMaterial((),None)
     snapshot=read_snapshot(db,item,validation=validation)

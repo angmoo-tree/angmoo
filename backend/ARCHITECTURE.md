@@ -650,3 +650,11 @@ defines current design rules; it is not evidence of functionality or performance
 - [FastAPI Best Practices — Project Structure](https://github.com/zhanymkanov/fastapi-best-practices#project-structure): reference for domain-oriented organization and role separation.
 - [Current boundary policy](../security/architecture_import_policy.json) and [boundary checker](../scripts/ci/check_architecture_boundaries.py): Angmoo's actual dependency and responsibility rules.
 - [Backend migration record](../docs/architecture/refactor-backend-results.md): historical evidence for earlier structural changes. It does not determine where to implement a new feature or prove a new release succeeded.
+
+### PostgreSQL composition and experience-access boundaries
+
+`runtime/configuration_contracts.py` holds profile values and validation; `runtime/configuration.py` and the PostgreSQL composition root create concrete services. `runtime/composition_resources.py` receives cleanup callbacks from those roots, so resource disposal does not import storage factories.
+
+Memory repositories receive current scope/private-thread rights through `memory.contracts.experience_access.MemoryExperienceAccess`, composed against the same Session by the runtime reader. This preserves ownership, deletion and private-thread checks without importing Chat models or runtime composition into Memory repositories. It does not reload original posts/messages. Validation caches remain local to one operation.
+
+Shared trigger catalogs and erasure predicates live in `runtime/persistence`; Memory and World deletion workers use their stable exports. The offline snapshot converter receives its source-reader callback from the migration composition root. Missing callbacks fail closed when historical source recovery is required; serving memory reads never invoke that recovery.

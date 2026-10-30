@@ -2,7 +2,7 @@
 from dataclasses import asdict
 import hashlib,json,uuid
 from sqlalchemy import text
-from app.runtime.memory.postgresql_vector import fence_world
+from app.core.postgresql_world_fence import fence_world
 
 
 def bound_filters(filters,parameters):

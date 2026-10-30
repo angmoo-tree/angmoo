@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess as experience_access
+
 from datetime import datetime
 from dataclasses import replace
 import hashlib

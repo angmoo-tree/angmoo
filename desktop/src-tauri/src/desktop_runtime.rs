@@ -41,7 +41,8 @@ fn endpoint_ready_attempts(data_root: &std::path::Path, migrate_sqlite: bool) ->
 
 fn postgresql_resource_argument(path: &std::path::Path) -> String {
     // Tauri can return a verbatim Windows resource path. initdb probes postgres
-    // through cmd.exe, which cannot execute its canonicalized //?/C:/... form.
+    // through the Windows command processor, which cannot execute its
+    // canonicalized //?/C:/... form.
     // Simplify only paths whose ordinary Windows spelling has identical meaning.
     dunce::simplified(path).to_string_lossy().into_owned()
 }

@@ -56,7 +56,7 @@ def install_json_functions(connection):
     """)
 
 
-def initialize(connection, *, fences=True):
+def initialize(connection, *, fences=True, experience_sources=None):
     if connection.dialect.name!="postgresql":
         raise ValueError("postgresql_required")
     tables=metadata()
@@ -75,7 +75,7 @@ def initialize(connection, *, fences=True):
         from sqlalchemy.orm import Session
         from app.runtime.persistence.experience_migration import migrate
         with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
-            migrate(session)
+            migrate(session, read_sources=experience_sources(session) if experience_sources is not None else None)
             session.commit()
     for name in ("relationship_review_work", "relationship_review_requests", "memory_situation_runs"):
         connection.exec_driver_sql(f"ALTER TABLE {name} ADD COLUMN IF NOT EXISTS maintenance jsonb NOT NULL DEFAULT '{{}}'::jsonb")

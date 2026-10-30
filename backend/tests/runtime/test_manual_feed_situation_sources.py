@@ -1,4 +1,5 @@
 """Feed keeps root candidates and canonical comment context separate."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 import json
 from dataclasses import asdict
@@ -75,7 +76,7 @@ def test_feed_owner_root_and_comment_context_use_post_reply_without_manual_claim
                 source = next(s for s in context.sources if s.source_type == "REPLY")
                 from app.domains.memory.repository.experience import validate_captured_sources
                 assert next(access for entry, access in validate_captured_sources(db, context, (), receipts[0],
-                    now=datetime.now(UTC)) if entry == source).state == "available"
+                    now=datetime.now(UTC), reader=RuntimeEpisodeDetailReader(db)) if entry == source).state == "available"
                 reply.report_hidden_at = datetime.now(UTC)
                 db.commit(); db.expire_all()
                 assert SituationSources(db).validate(context, source, now=datetime.now(UTC)).state != "available"

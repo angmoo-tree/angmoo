@@ -10,6 +10,8 @@ def main() -> int:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(os.environ["CI_IMPACT_PLAN"], encoding="utf-8")
     plan = read_plan(path)
+    # Downstream test/shard evidence uses the complete, verified selection.
+    path.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"source_sha": plan["source_sha"], "selection_sha256": plan["selection_sha256"], "profile": plan["effective"]["backend"]}))
     return 0
 

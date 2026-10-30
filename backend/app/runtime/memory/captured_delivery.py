@@ -33,7 +33,7 @@ def captured_entry(scope, *, kind, identifier, delivery, ordinal, role="backgrou
 
 def post_reference(post):
     """Small provenance captured in the same read as the candidate's text."""
-    from app.runtime.relationships.experience_metrics import post_revision
+    from app.domains.social.utils.post_revision import post_revision
     return {"kind": "REPLY" if post.reply_to_post_id else "POST", "id": post.id,
         "world_id": post.world_id, "actor": post.author_world_character_id,
         "revision": post_revision(post), "created_at": post.created_at.isoformat(),

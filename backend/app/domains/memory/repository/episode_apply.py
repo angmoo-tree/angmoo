@@ -92,7 +92,7 @@ class SqlAlchemyEpisodeApply:
             for candidate in access_bundle.prior_episodes:
                 prior = self.session.get(MemoryItem, candidate.item_id, populate_existing=True)
                 from app.domains.memory.repository.experience import accessible
-                current_privacy = prior is not None and accessible(self.session, bundle.scope, prior, now)
+                current_privacy = prior is not None and accessible(self.session, bundle.scope, prior, now, reader=self.source_reader)
                 if (prior is None or prior.owner_id != bundle.scope.owner_id or prior.world_id != bundle.scope.world_id
                     or prior.subject_world_character_id != bundle.scope.subject_world_character_id
                     or prior.version != candidate.item_version or prior.summary != candidate.summary

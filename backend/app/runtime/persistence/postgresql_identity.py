@@ -1,14 +1,10 @@
 """Installation-owned PostgreSQL identity, shared by platforms and migration."""
-import re
+from app.core.postgresql_identifiers import require_identifier
 from sqlalchemy import text
 
 IDENTITY_TABLE = "angmoo_postgresql_installation"
 
 
-def require_identifier(value):
-    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{15,79}", value):
-        raise ValueError("postgresql_installation_id_invalid")
-    return value
 
 
 def create(connection, installation_id):

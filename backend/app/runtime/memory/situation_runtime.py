@@ -24,7 +24,7 @@ class SituationRuntime:
     def __init__(self, session_factory, *, data_root=None):
         self.session_factory = session_factory
         from app.runtime.memory.situation_result_basis import CheckpointResultBasis
-        from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+        from app.runtime.checkpoint_registry import bound_store
         checkpoint_store=bound_store(data_root) if data_root is not None else None
         self.result_basis = CheckpointResultBasis(data_root / "runtime/activity/activity-checkpoints.sqlite" if data_root is not None and checkpoint_store is None else None,store=checkpoint_store)
         self.quit_identity = None

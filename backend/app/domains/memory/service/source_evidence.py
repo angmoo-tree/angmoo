@@ -22,6 +22,10 @@ class SqlAlchemyMemorySourceEvidenceReader:
         self._situation_validator = situation_validator
         self._situation_preparer = situation_preparer
 
+    @property
+    def experience_access(self):
+        return self._queries.experience_access(self._session)
+
     def prepare_situation_sources(self, contexts, *, validation):
         if self._situation_preparer is not None:
             self._situation_preparer(contexts, validation=validation)

@@ -23,7 +23,8 @@ def resolve_memory_batch(db, *, scope, items, activation, now):
     from app.domains.memory.contracts.access_validation import MemoryAccessValidation
     from app.domains.memory.repository.access_batch import prepare_representation, collection
     from app.domains.memory.repository.experience import prepare
-    validation = MemoryAccessValidation(db, now)
+    from app.runtime.memory.experience_access import SqlAlchemyMemoryExperienceAccess
+    validation = MemoryAccessValidation(db, now, experience_access=SqlAlchemyMemoryExperienceAccess(db))
     # Current memory rights and stored participant metadata only. In particular,
     # prepare_access would hydrate snapshots intended for SNS/Chat recall.
     with db.no_autoflush:

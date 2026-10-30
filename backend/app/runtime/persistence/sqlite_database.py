@@ -283,7 +283,7 @@ class SqliteCanonicalDatabase:
                     )
                 create_schema_version_table(connection)
                 build_sqlite_baseline_metadata().create_all(connection)
-                from app.runtime.world_deletion.fences import install_fences
+                from app.runtime.persistence.world_erasure_fences import install_fences
                 install_fences(connection)
                 digest = sqlite_schema_digest(connection)
                 connection.exec_driver_sql(

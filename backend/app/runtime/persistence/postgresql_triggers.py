@@ -1,9 +1,8 @@
 """Reviewed deletion fences and vector mutation producers for PostgreSQL."""
 import hashlib
 from sqlalchemy.dialects.postgresql import dialect
-from app.runtime.world_deletion.inventory import ErasureInventory
-from app.runtime.world_deletion.fences import SETTLEMENT_TABLES
-from app.runtime.memory.vector_mutations import statements as vector_statements
+from app.runtime.persistence.world_erasure_inventory import ErasureInventory, SETTLEMENT_TABLES
+from app.runtime.persistence.vector_mutations import statements as vector_statements
 
 
 def trigger(connection,name,table,event,body,*,timing="BEFORE"):
@@ -71,7 +70,7 @@ def vector_producers(connection):
     # Shared reviewed catalog/body prevents the PostgreSQL adapter omitting a
     # bulk-write or FK-cascade producer that the existing implementation owns.
     import re
-    from app.runtime.memory.postgresql_epochs import write_key
+    from app.runtime.persistence.postgresql_epochs import write_key
     for sql in vector_statements(epoch_key=write_key):
         match=re.fullmatch(r'CREATE TRIGGER IF NOT EXISTS "([^"]+)" (AFTER|BEFORE) (INSERT|UPDATE|DELETE) ON "([^"]+)"(.*?) BEGIN (.*) END',sql)
         if not match:raise RuntimeError("vector_trigger_contract_drift")

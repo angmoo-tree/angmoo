@@ -75,7 +75,7 @@ def list_unsaved(*, scope, db, workflows, cursor=None, limit=20):
             # Owner scope and persisted receipt integrity authorize the saved
             # description. Later SNS/Chat changes are not memory revocations.
             visible = context.snapshot.scope == scope and bool(validate_captured_sources(
-                db, context, context.result_sources, row, now=now))
+                db, context, context.result_sources, row, now=now, reader=workflows.situation_validator(db)))
         except (ValueError, TypeError, KeyError):
             pass
         epoch = db.get(MemoryActivationEpoch, row.activation_epoch)

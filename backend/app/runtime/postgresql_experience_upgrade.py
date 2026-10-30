@@ -9,6 +9,7 @@ from sqlalchemy import create_engine,select,text
 from sqlalchemy.orm import Session
 from app.runtime.persistence.postgresql_schema import initialize, metadata
 from app.runtime.persistence.experience_report import audit
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from app.domains.memory.models.items import MemoryItem
 
 
@@ -39,7 +40,7 @@ def upgrade(dsn, *, expected_database):
             connection.execute(text('SELECT pg_advisory_xact_lock(7402228)'))
             metadata()  # Register all ORM targets before reading an older schema.
             with Session(bind=connection,join_transaction_mode="create_savepoint") as db:before=summary_identity(db)
-            initialize(connection)
+            initialize(connection, experience_sources=lambda session: RuntimeEpisodeDetailReader(session).read_sources)
             with Session(bind=connection,join_transaction_mode="create_savepoint") as db:
                 after=summary_identity(db);report=audit(db)
             if before!=after or not report['valid']:

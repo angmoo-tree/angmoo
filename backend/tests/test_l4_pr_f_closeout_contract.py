@@ -92,7 +92,7 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
         "            tests\\world_packages\\test_import_commit.py `"
     )
     assert windows_import_fixture in windows_host
-    assert windows_import_fixture in windows_installer
+    assert "tests\\world_packages\\test_import_commit.py" in windows_installer
     host_workflow = yaml.safe_load(windows_host)
     host_checkout = next(
         step

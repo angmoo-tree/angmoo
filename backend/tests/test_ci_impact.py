@@ -1,6 +1,7 @@
 """Changed-path scope is conservative and required gates fail closed."""
 from copy import deepcopy
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -9,7 +10,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/ci"))
-from impact import classify, changed_paths, digest, select_nodes
+from impact import build_plan, classify, changed_paths, digest, plan_reference, read_plan, select_nodes
 from gate import verify
 from test_t2_ci_policy import checker as ci_policy
 
@@ -57,6 +58,36 @@ def test_rename_keeps_both_sides_and_deleted_paths(tmp_path):
     git("add", ".")
     git("-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "new")
     assert changed_paths(base, git("rev-parse", "HEAD"), pull_request=True, root=tmp_path) == ["danger.py", "notes.md"]
+
+
+def test_large_change_uses_small_reference_without_losing_paths_or_gate_checks(tmp_path,monkeypatch):
+    def git(*args):
+        return subprocess.check_output(["git", *args], cwd=tmp_path, text=True).strip()
+    git("init", "--quiet");git("config", "user.name", "Synthetic fixture")
+    git("config", "user.email", "fixture@example.test")
+    policy=tmp_path/'scripts/ci/impact.py';policy.parent.mkdir(parents=True)
+    policy.write_bytes((ROOT/'scripts/ci/impact.py').read_bytes())
+    git("add", ".");git("-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "base")
+    base=git("rev-parse", "HEAD")
+    for index in range(700):
+        path=tmp_path/('backend/app/domains/characters/service/fixture_'+str(index)+'x'*75+'.py')
+        path.parent.mkdir(parents=True,exist_ok=True);path.write_text('VALUE = 1\n')
+    git("add", ".");git("-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "large change")
+    source=git("rev-parse", "HEAD")
+    event={'pull_request':{'head':{'sha':source},'base':{'sha':base}}}
+    event_file=tmp_path/'event.json';event_file.write_text(json.dumps(event))
+    monkeypatch.setenv('GITHUB_EVENT_PATH',str(event_file));monkeypatch.setenv('GITHUB_EVENT_NAME','pull_request')
+    plan=build_plan(event=event,event_name='pull_request',mode='active',requested='auto',root=tmp_path)
+    assert len(json.dumps(plan).encode())>131072
+    reference=plan_reference(plan)
+    assert len(json.dumps(reference).encode())<2048
+    transmitted=tmp_path/'received.json';transmitted.write_text(json.dumps(reference))
+    actual=read_plan(transmitted,root=tmp_path)
+    assert actual==plan and len(actual['effective']['paths'])==700
+    assert actual['effective']['backend'] == 'full'
+    assert actual['effective']['jobs'] == plan['effective']['jobs']
+    reference['selection_sha256']='0'*64;transmitted.write_text(json.dumps(reference))
+    with pytest.raises(ValueError,match='actual_event'):read_plan(transmitted,root=tmp_path)
 
 
 def test_scoped_collection_includes_cross_suite_import_consumers(tmp_path):
@@ -109,7 +140,7 @@ def test_installer_policy_rejects_incomplete_profile_wiring(damage):
     elif damage == "weaken_full":
         jobs["windows-installer-failure-recovery"]["if"] = "false"
     else:
-        text = "gate.py" if damage == "fake_gate" else "windows_installer_upgrade_coverage.py"
+        text = "gate.py" if damage == "fake_gate" else "windows_postgresql_coverage.py"
         step = next(step for step in jobs["windows-installer"]["steps"] if text in str(step.get("run")))
         step["run"] = "echo success"
     assert ci_policy.check_installer_selection(jobs)

@@ -1,4 +1,5 @@
 """Historical input and current memory rights are independent contracts."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from dataclasses import replace
 from hashlib import sha256
 import pytest
@@ -44,7 +45,7 @@ def test_delivered_text_survives_change_before_apply_without_source_reads(stack,
         apply(db,setting,memory)
         assert receipt.state=="applied",receipt.error_code
         item=db.get(MemoryItem,receipt.applied_item_id)
-        assert accessible(db,scope,item,NOW)
+        assert accessible(db,scope,item,NOW, reader=RuntimeEpisodeDetailReader(db))
         result_packet=packet(db,item)
         assert [s.text for u in result_packet.units for s in u.sources]==[original,original]
         assert not any("from posts" in q or "from messages" in q for q in queries)
@@ -104,11 +105,11 @@ def test_corrupt_snapshot_and_other_scope_never_reach_provider(stack):
     receipt=admit(db,manifest=manifest,draft=draft,result=result,now=NOW)
     apply(db,setting,memory)
     item=db.get(MemoryItem,receipt.applied_item_id)
-    assert not accessible(db,replace(scope,owner_id="foreign"),item,NOW)
+    assert not accessible(db,replace(scope,owner_id="foreign"),item,NOW, reader=RuntimeEpisodeDetailReader(db))
     snapshot=read_snapshot(db,item)
     snapshot.payload={**snapshot.payload,"scope":{"owner_id":"foreign"}}
     db.flush()
-    assert not accessible(db,scope,item,NOW)
+    assert not accessible(db,scope,item,NOW, reader=RuntimeEpisodeDetailReader(db))
 
 
 def test_explicit_delete_revokes_flat_derived_snapshot(stack):
@@ -123,10 +124,10 @@ def test_explicit_delete_revokes_flat_derived_snapshot(stack):
     fields.update(id="derived-experience",idempotency_key="derived-experience") if "idempotency_key" in fields else fields.update(id="derived-experience")
     derived=MemoryItem(**fields);db.add(derived);db.flush()
     copy_for_correction(db,old,derived,now=NOW);db.commit()
-    assert accessible(db,scope,derived,NOW)
+    assert accessible(db,scope,derived,NOW, reader=RuntimeEpisodeDetailReader(db))
     tombstone(db,old,setting.id,now=NOW);db.commit()
-    assert not accessible(db,scope,old,NOW)
-    assert not accessible(db,scope,derived,NOW)
+    assert not accessible(db,scope,old,NOW, reader=RuntimeEpisodeDetailReader(db))
+    assert not accessible(db,scope,derived,NOW, reader=RuntimeEpisodeDetailReader(db))
 
 
 def test_large_original_does_not_expand_relationship_input():

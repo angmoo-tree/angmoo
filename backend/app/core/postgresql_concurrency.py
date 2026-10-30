@@ -10,7 +10,7 @@ import time
 from sqlalchemy import Engine, event
 from sqlalchemy.exc import DBAPIError, TimeoutError as PoolTimeout
 from app.core import work_observation as observation
-from app.core.sqlite_concurrency import SqliteRetryPolicy
+from app.core.transaction_retry_policy import SqliteRetryPolicy
 from app.exceptions import (SqliteBusyRetryExhausted, SqliteConcurrencyError,
     SqliteTaskQueueFull, SqliteWriteDeadlineExceeded)
 

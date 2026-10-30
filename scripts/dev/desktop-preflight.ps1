@@ -104,12 +104,13 @@ function Get-ActualProbe {
             if ($records.Count -gt 0) {
                 $runningHealthy = @(
                     $records | Where-Object {
-                        $_.Service -in @('backend', 'frontend') -and
+                        $_.Service -in @($contract.docker.services) -and
                         $_.State -eq 'running' -and
                         $_.Health -eq 'healthy'
                     }
                 )
-                $stackState = if ($runningHealthy.Count -eq 2) { 'healthy' } else { 'partial-or-unhealthy' }
+                $healthyServices = @($runningHealthy | ForEach-Object { $_.Service } | Sort-Object -Unique)
+                $stackState = if ($healthyServices.Count -eq @($contract.docker.services).Count) { 'healthy' } else { 'partial-or-unhealthy' }
             }
         }
     }

@@ -23,6 +23,14 @@ selection while running full validation. Manual full and scheduled full runs may
 widen the set, never narrow it. Verify actual run SHA, profile and attempt before
 reporting success; a workflow definition is not an execution result.
 
+Cross-job environment values carry a small reference containing the source,
+checkout, run, policy and selection hashes. Each consumer reconstructs the
+complete plan from its checked-out Git diff and the actual Actions event, then
+verifies those identities before materializing `.ci/impact.json`. The full path
+and reason lists remain available in the plan and reports without exceeding the
+operating system's environment-value limit on large changes. The selected tests
+and required gates are unchanged by this transport.
+
 ## What ongoing checks protect
 
 - Current import ownership, app factory and lifecycle behavior.

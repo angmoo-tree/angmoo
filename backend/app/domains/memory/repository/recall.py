@@ -374,7 +374,7 @@ class SqlAlchemyCanonicalRecallRepository:
                             and candidate.canonical_source_id == item.id
                             and candidate.thread_id == item.thread_id
                             and candidate.counterpart_world_character_id == item.counterpart_world_character_id
-                            and accessible(session,scope,item,now)):
+                            and accessible(session,scope,item,now,reader=reader)):
                         records.append(CanonicalRecallRecord(candidate.document_id,RecallDocumentKind.MEMORY_ITEM,
                             item.id,item.summary,_as_utc(item.valid_from),memory_item_id=item.id,
                             counterpart_world_character_id=item.counterpart_world_character_id,thread_id=item.thread_id,

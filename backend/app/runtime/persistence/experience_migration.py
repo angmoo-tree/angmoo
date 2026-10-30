@@ -15,19 +15,19 @@ from app.domains.memory.models.episode import MemoryEpisodeInfo
 from app.domains.memory.models.experience import MemoryExperienceSnapshot
 from app.domains.memory.repository.experience import store, item_scope, source_snapshot, tombstone
 
-TABLES=frozenset({'memory_experience_snapshots','memory_experience_dependencies',
-    'memory_experience_tombstones','memory_experience_inputs'})
+from app.runtime.persistence.experience_tables import TABLES
 
 
-def reconstruct_entry(db, scope, entry):
+def reconstruct_entry(db, scope, entry, *, read_sources=None):
     if entry.delivered_text is not None:
         return entry
     # Relationship versions and inferred parent identities are not original
     # text. Do not fabricate snapshots from those later representations.
     if entry.source_type not in {'POST','REPLY','CHAT_MESSAGE','OWNER_MEMORY_REQUEST'}:
         return entry
-    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
-    details=RuntimeEpisodeDetailReader(db).read_sources(scope=scope,
+    if read_sources is None:
+        raise ValueError("experience_migration_source_reader_required")
+    details=read_sources(scope=scope,
         identities=((entry.source_type,entry.source_id),))
     detail=details.get((entry.source_type,entry.source_id))
     if detail is None or detail.evidence.source_digest!=entry.source_digest:
@@ -49,7 +49,7 @@ def reconstruct_entry(db, scope, entry):
     return replace(entry,delivered_text=original,source_created_at=detail.evidence.source_created_at.isoformat())
 
 
-def migrate(db, *, now=None):
+def migrate(db, *, now=None, read_sources=None):
     """Flush on the owner's offline transaction; replay is idempotent."""
     now=now or datetime.now(UTC)
     settings={(s.owner_id,s.world_id,s.subject_world_character_id):s.id
@@ -95,7 +95,7 @@ def migrate(db, *, now=None):
                         reason='historical_receipt_integrity_unavailable'
                     else:
                         entries=(*admission.manifest.sources,*admission.result_sources)
-                        sources=[source_snapshot(reconstruct_entry(db,scope,e)) for e in entries
+                        sources=[source_snapshot(reconstruct_entry(db,scope,e,read_sources=read_sources)) for e in entries
                             if e.target_key in {None,receipt.target_key}]
                         if sources and admission.result.get('thought') is not None:
                             sources[-1].update(thought=admission.result['thought'],
@@ -105,7 +105,7 @@ def migrate(db, *, now=None):
                         reason=None if sources and all(s['text'] is not None for s in sources) else 'historical_text_digest_unavailable'
                 outcome.update(representation="activity_situation_v1", occurred_at=info.occurred_at.isoformat())
             elif episode is not None:
-                sources,reason=episode_sources(db,original,scope)
+                sources,reason=episode_sources(db,original,scope,read_sources=read_sources)
                 outcome.update(representation="episode_v1")
             from app.domains.memory.models.activity_configuration import MemoryEpisodeRestriction
             restriction=db.get(MemoryEpisodeRestriction,original.id)
@@ -120,18 +120,18 @@ def migrate(db, *, now=None):
     return counts
 
 
-def episode_sources(db,item,scope):
+def episode_sources(db,item,scope,*,read_sources=None):
     """Only persisted evidence ranges with a matching source digest qualify."""
     from app.domains.memory.models.episode import MemoryEpisodeUnit,MemoryEpisodeUnitEvidence
     from app.domains.memory.models.items import MemoryItemEvidence
-    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
     sources=[]
     rows=db.execute(select(MemoryEpisodeUnit,MemoryEpisodeUnitEvidence,MemoryItemEvidence).join(
         MemoryEpisodeUnitEvidence,MemoryEpisodeUnitEvidence.unit_id==MemoryEpisodeUnit.id).join(
         MemoryItemEvidence,MemoryItemEvidence.id==MemoryEpisodeUnitEvidence.evidence_id).where(
         MemoryEpisodeUnit.memory_item_id==item.id).order_by(MemoryEpisodeUnit.ordinal,MemoryEpisodeUnitEvidence.ordinal)).all()
-    reader=RuntimeEpisodeDetailReader(db)
-    details=reader.read_sources(scope=scope,identities=tuple(dict.fromkeys((e.source_type,e.source_id) for _,_,e in rows))) if rows else {}
+    if rows and read_sources is None:
+        raise ValueError("experience_migration_source_reader_required")
+    details=read_sources(scope=scope,identities=tuple(dict.fromkeys((e.source_type,e.source_id) for _,_,e in rows))) if rows else {}
     references={unit.id:('chat:'+str(unit.chat_thought_message_id) if unit.chat_thought_message_id is not None
         else 'social:'+unit.social_thought_id if unit.social_thought_id else None) for unit,_,_ in rows}
     thoughts=reader.read_thoughts(scope=scope,references=tuple(set(filter(None,references.values())))) if any(references.values()) else {}

@@ -1,4 +1,5 @@
 """One-time recovery may read originals; serving never does."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import pytest
 from sqlalchemy import delete,select
 from memory.test_activity_situation_contract import stack,NOW
@@ -20,7 +21,7 @@ def test_legacy_source_recovered_only_with_exact_original_digest_and_old_hashes_
     identity=(frozen.id,frozen.content_digest,row.content_digest,dict(frozen.payload),dict(row.result))
     db.execute(delete(MemoryExperienceSnapshot));db.commit()
     if changed:post.body='different later source';db.commit()
-    counts=migrate(db,now=NOW);db.commit()
+    counts=migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources);db.commit()
     item=db.get(MemoryItem,item_id);snapshot=read_snapshot(db,item)
     assert snapshot.status==('snapshot_unavailable' if changed else 'historical_snapshot'), (snapshot.payload['unavailable_reason'],len(snapshot.payload['sources']))
     assert snapshot.payload['sources'][0]['text']==(None if changed else original)
@@ -28,7 +29,7 @@ def test_legacy_source_recovered_only_with_exact_original_digest_and_old_hashes_
     frozen=db.get(MemorySituationManifest,row.manifest_id)
     assert (frozen.id,frozen.content_digest,row.content_digest,dict(frozen.payload),dict(row.result))==identity
     digest=snapshot.content_digest
-    repeated=migrate(db,now=NOW);db.commit()
+    repeated=migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources);db.commit()
     assert repeated['existing']==1
     assert db.get(MemoryExperienceSnapshot,item_id).content_digest==digest
     from app.runtime.persistence.experience_report import audit
@@ -43,7 +44,7 @@ def test_interrupted_migration_rolls_back_and_resumes(stack):
     post=real_source(db,scope);row=receipt(db,scope,post);apply(db,setting,memory)
     identifier=row.applied_item_id
     db.execute(delete(MemoryExperienceSnapshot));db.commit()
-    migrate(db,now=NOW);db.rollback()
+    migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources);db.rollback()
     assert db.get(MemoryExperienceSnapshot,identifier) is None
-    migrate(db,now=NOW);db.commit()
+    migrate(db,now=NOW, read_sources=RuntimeEpisodeDetailReader(db).read_sources);db.commit()
     assert db.get(MemoryExperienceSnapshot,identifier).status=='historical_snapshot'

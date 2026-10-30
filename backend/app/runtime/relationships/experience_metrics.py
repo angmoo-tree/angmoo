@@ -18,8 +18,7 @@ from app.domains.relationships.contracts.metric_interpretation import parse_metr
 from app.domains.relationships.service.personalized_metrics import ExperiencedSource, stage_experience, apply_staged_experience, interpreted_policy
 
 
-def post_revision(post):
-    return sha256(((post.title or "") + "\n" + (post.body or "")).encode()).hexdigest()
+from app.domains.social.utils.post_revision import post_revision
 
 
 class RuntimeExperienceReferences:

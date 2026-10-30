@@ -28,7 +28,7 @@ from app.domains.memory.repository.vector_eligibility import register_content
 
 def _validate_sources(session, validator, manifest, result_sources, now, receipt):
     from app.domains.memory.repository.experience import validate_captured_sources
-    return validate_captured_sources(session,manifest,result_sources,receipt,now=now)
+    return validate_captured_sources(session,manifest,result_sources,receipt,now=now,reader=validator)
 
 
 @dataclass(frozen=True)

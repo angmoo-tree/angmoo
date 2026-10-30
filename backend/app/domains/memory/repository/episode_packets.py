@@ -45,7 +45,7 @@ class SqlAlchemyEpisodePackets:
             MemoryItem.id.in_(item_ids), MemoryItem.owner_id == scope.owner_id,
             MemoryItem.world_id == scope.world_id,
             MemoryItem.subject_world_character_id == scope.subject_world_character_id)))
-        validation = prepare_access(self.session, rows, now, validation=validation)
+        validation = prepare_access(self.session, rows, now, validation=validation, reader=self.reader)
         by_id = {row.id:row for row in rows if accessible(self.session,scope,row,now,
             validation=validation,require_enabled=require_enabled)}
         return tuple(packet(self.session,by_id[identifier],validation=validation,

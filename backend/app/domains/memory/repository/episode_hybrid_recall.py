@@ -72,7 +72,7 @@ class SqlAlchemyEpisodeHybridReader:
         with self.factory() as db:
             from app.domains.memory.repository.experience import guard_metadata, rights_columns
             rows = {row.id:row for row in db.scalars(select(MemoryItem).options(rights_columns()).where(MemoryItem.id.in_(delivered_ids)))}
-            rights = guard_metadata(db,result.scope,tuple(rows.values()),now,captured=True)
+            rights = guard_metadata(db,result.scope,tuple(rows.values()),now,captured=True,reader=self.details(db))
             for identifier in delivered_ids:
                 item = rows.get(identifier)
                 if (item is None or identifier not in expected

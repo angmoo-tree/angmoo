@@ -1,4 +1,5 @@
 """Actual Chat receipt survives Session disposal, application and canonical recall."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 from dataclasses import replace
 from datetime import UTC, datetime
 from hashlib import sha256
@@ -45,7 +46,7 @@ def test_new_session_apply_recall_hydrate_and_currentness(response_session, monk
         assert len(manual) == len(transitions)
         from app.domains.memory.repository.experience import validate_captured_sources
         captured_access = dict((source.source_id, access) for source, access in
-            validate_captured_sources(db, context, (), receipt, now=now))
+            validate_captured_sources(db, context, (), receipt, now=now, reader=RuntimeEpisodeDetailReader(db)))
         for source in manual:
             access = captured_access[source.source_id]
             assert access.state == "available" and access.proof_origin == "stored_experience"

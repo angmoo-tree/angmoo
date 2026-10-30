@@ -29,7 +29,8 @@ def _assert_snapshot_current(db, *, scope, result, snapshot, now, validation=Non
     try:digests=dict(snapshot["memory_snapshot_digests"])
     except (KeyError,ValueError,TypeError):raise ValueError("activity_memory_validation_unavailable") from None
     items=list(db.scalars(select(MemoryItem).options(rights_columns()).where(MemoryItem.id.in_(ids)).execution_options(populate_existing=True)))
-    rights=guard_metadata(db,scope,items,now,captured=True)
+    from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
+    rights=guard_metadata(db,scope,items,now,captured=True,reader=RuntimeEpisodeDetailReader(db))
     if len(items)!=len(set(ids)) or set(ids)-rights.keys():
         raise ValueError("activity_memory_changed")
     allowed_threads=snapshot.get("allowed_thread_ids")

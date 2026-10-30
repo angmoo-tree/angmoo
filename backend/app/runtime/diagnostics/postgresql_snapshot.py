@@ -3,7 +3,7 @@ from datetime import datetime
 from time import monotonic
 from psycopg.rows import dict_row
 from app.core.postgresql_connections import serving_connection
-from app.runtime.autonomous_activity.postgresql_checkpoints import bound_store
+from app.runtime.checkpoint_registry import bound_store
 
 
 def scheduler_snapshot(root,manifest,*,dsn=None):
@@ -20,7 +20,7 @@ def scheduler_snapshot(root,manifest,*,dsn=None):
             db.execute("SET LOCAL statement_timeout='1500ms'")
             rows=db.execute('''SELECT s.agent_id,s.status,s.next_tick_at,s.locked_by_run_id FROM agent_slots s
                 JOIN world_characters c ON c.character_id=s.assigned_character_id WHERE c.world_id=%s AND c.id=ANY(%s)''',(manifest['world_id'],actors)).fetchall()
-            from app.runtime.diagnostics.sns_observation import identifier,code
+            from app.runtime.diagnostics.identifiers import identifier,code
             slots=[{'agent_id':identifier(r['agent_id']),'status':code(r['status']),
                 'next_tick_at':r['next_tick_at'].isoformat() if isinstance(r['next_tick_at'],datetime) else r['next_tick_at'],
                 'locked':r['locked_by_run_id'] is not None} for r in rows]

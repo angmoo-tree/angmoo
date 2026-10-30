@@ -16,7 +16,7 @@ def situation_origin(session, item, *, validation=None):
 def correction_evidence(session, reader, scope, item, now, *, validation=None):
     from app.domains.memory.repository.experience import accessible, stored_evidence
     from app.domains.memory.exceptions import MemoryConflictError
-    if not accessible(session, scope, item, now, validation=validation):
+    if not accessible(session, scope, item, now, validation=validation, reader=reader):
         raise MemoryConflictError("memory_correction_source_unavailable")
     return stored_evidence(session, item)
 
@@ -68,4 +68,4 @@ def read_manifest(session, info, *, validation=None):
 
 def situation_accessible(session, reader, scope, item, info, now, *, ancestors, validation=None):
     from app.domains.memory.repository.experience import accessible
-    return accessible(session, scope, item, now, validation=validation)
+    return accessible(session, scope, item, now, validation=validation, reader=reader)

@@ -1,4 +1,5 @@
 """Canonical publication, durable memory and replay for claimed owner replies."""
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -60,7 +61,7 @@ def test_real_routine_publishes_applies_and_replays_consumed_comment(manual_rout
     assert entry.source_type == "REPLY" and entry.source_id == case.reply.id
     from app.domains.memory.repository.experience import validate_captured_sources
     assert next(access for source, access in validate_captured_sources(
-        case.db, context, (), receipt, now=datetime.now(UTC)) if source == entry).state == "available"
+        case.db, context, (), receipt, now=datetime.now(UTC), reader=RuntimeEpisodeDetailReader(case.db)) if source == entry).state == "available"
     apply_situations(case)
     assert receipt.state == "applied", receipt.error_code
     assert case.db.scalar(select(func.count()).select_from(MemoryItem)) == 1

@@ -1,7 +1,7 @@
 """Provision the isolated runtime login; only the schema owner calls this."""
 import psycopg
 from psycopg import sql
-from app.runtime.postgresql_experiment import RUN_ID,SOURCE_SHA
+from app.runtime.postgresql_configuration import RUN_ID,SOURCE_SHA
 from app.core.postgresql_capacity import RUNTIME_CONNECTION_LIMIT
 
 RUNTIME_ROLE='angmoo_pg_run01_runtime'

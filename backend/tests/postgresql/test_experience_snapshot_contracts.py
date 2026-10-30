@@ -10,6 +10,7 @@ from memory.test_activity_situation_application import real_source,receipt,apply
 from app.domains.memory.models.experience import MemoryExperienceSnapshot
 from app.runtime.persistence.postgresql_schema import initialize, VERSION
 from app.runtime.memory.vector_proof import revisions
+from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
 
 
 def saved(engine):
@@ -48,13 +49,13 @@ def test_schema_upgrade_failure_rolls_back_marker_and_backfill_then_resumes(stor
         raise RuntimeError('injected_upgrade_interruption')
     monkeypatch.setattr(experience_migration,'migrate',interrupted)
     with pytest.raises(RuntimeError,match='injected_upgrade_interruption'):
-        with engine.begin() as c:initialize(c)
+        with engine.begin() as c:initialize(c, experience_sources=lambda db: RuntimeEpisodeDetailReader(db).read_sources)
     with engine.connect() as c:
         assert c.execute(text('SELECT version FROM angmoo_postgresql_schema_version')).scalar_one()==2
         assert c.execute(select(MemoryExperienceSnapshot.memory_item_id)).first() is None
     monkeypatch.setattr(experience_migration,'migrate',original)
-    with engine.begin() as c:initialize(c)
-    with engine.begin() as c:initialize(c)
+    with engine.begin() as c:initialize(c, experience_sources=lambda db: RuntimeEpisodeDetailReader(db).read_sources)
+    with engine.begin() as c:initialize(c, experience_sources=lambda db: RuntimeEpisodeDetailReader(db).read_sources)
     with Session(engine) as db:
         assert db.execute(text('SELECT version FROM angmoo_postgresql_schema_version')).scalar_one()==VERSION
         assert db.get(MemoryExperienceSnapshot,item_id).status=='historical_snapshot'
