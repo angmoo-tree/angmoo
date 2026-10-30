@@ -99,7 +99,8 @@ def check_pg(data,post_id):
     marker='ci-pg-write-'+uuid.uuid4().hex
     try:
         with create_session_factory(engine)() as session:
-            session.add(Post(id=marker,author_name='Synthetic fixture',body='PostgreSQL 저장 검증'));session.commit()
+            session.add(Post(id=marker,author_name='Synthetic fixture',
+                title='PostgreSQL persistence check',body='PostgreSQL 저장 검증'));session.commit()
     finally:engine.dispose()
     return marker
 

@@ -88,6 +88,16 @@ def test_postgresql_noncredential_exceptions_are_exact_and_keep_other_dsns_visib
     for row in entries:
         value = row["value"]
         assert list(scanner.scan_text(row["path"], value, allowlist=allowlist)) == []
+        if row["path"] == "backend/security/secret_scan_allowlist.json":
+            assert list(scanner.scan_text(
+                row["path"], json.dumps(value), allowlist=allowlist
+            )) == []
+            assert {item.rule for item in scanner.scan_text(
+                row["path"], json.dumps(value + "unreviewed"), allowlist=allowlist
+            )} == {"credentialed-database-url"}
+            assert {item.rule for item in scanner.scan_text(
+                "backend/private-database.json", json.dumps(value), allowlist=allowlist
+            )} == {"credentialed-database-url"}
         assert {item.rule for item in scanner.scan_text(
             row["path"], value + "unreviewed", allowlist=allowlist
         )} == {"credentialed-database-url"}

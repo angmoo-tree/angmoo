@@ -281,10 +281,21 @@ def _is_allowlisted(
 ) -> bool:
     value = _match_value(rule, match).strip().strip("\"'")
     path = normalize_path(source)
-    return any(
-        entry.path == path and entry.rule == rule.name and entry.value == value
-        for entry in allowlist
-    )
+    for entry in allowlist:
+        if entry.path != path or entry.rule != rule.name:
+            continue
+        if entry.value == value:
+            return True
+        # The metadata file contains JSON string representations of its exact
+        # reviewed values. Quotes inside substitution templates are escaped on
+        # disk. Recognize only that deterministic representation at this one
+        # path; never decode or exempt arbitrary source files or other values.
+        if path == "backend/security/secret_scan_allowlist.json":
+            encoded = json.dumps(entry.value, ensure_ascii=True)
+            if any(_match_value(rule, candidate).strip().strip("\"'") == value
+                   for candidate in rule.pattern.finditer(encoded)):
+                return True
+    return False
 
 
 def _is_safe_public_email(value: str) -> bool:

@@ -103,7 +103,7 @@ jobs:
       - name: Install locked dependencies
         shell: bash
         run: |
-          # Audit the complete SQLite-only product and contributor lock.
+          # Audit PostgreSQL runtime and SQLite migration-input dependencies.
           uv sync --frozen --directory backend
           pnpm --dir frontend install --frozen-lockfile
       - name: Audit vulnerabilities
