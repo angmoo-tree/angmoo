@@ -86,20 +86,33 @@ def main():
         except Exception:
             assert time.monotonic()<deadline,'legacy_native_source_not_ready';time.sleep(2)
     seed='''from pathlib import Path
-import json,sqlite3,urllib.request
+import http.cookiejar,json,sqlite3,urllib.request
 root=Path('/var/lib/angmoo')
 # The normal bootstrap is the only owner-creation path used by this fixture.
-with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8080/api/v1/auth/local/bootstrap',headers={'Origin':'http://127.0.0.1:3000','X-Angmoo-Frontend-Origin':'http://127.0.0.1:3000'}),timeout=10) as response:json.load(response)
+headers={'Origin':'http://127.0.0.1:3000','Host':'127.0.0.1:3000',
+ 'X-Angmoo-Frontend-Origin':'http://127.0.0.1:3000','Sec-Fetch-Site':'same-origin','Content-Type':'application/json'}
+client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+def request(method,suffix,body=None):
+ data=json.dumps(body).encode() if body is not None else b'' if method=='POST' else None
+ with client.open(urllib.request.Request('http://127.0.0.1:8080/api/v1/auth/local/bootstrap'+suffix,
+      method=method,headers=headers,data=data),timeout=10) as response:return json.load(response)
+status=request('GET','');assert status['state']=='unclaimed'
+request('POST','/challenge')
+claimed=request('POST','/prepare',{'protocol':2,'installation_id':status['installation_id'],
+ 'client_instance_id':'synthetic-native-qualification','expected_generation':0,'preferred_language':'en-US'})
+assert claimed['user']['id']
 databases=[]
 for path in [*root.rglob('*.sqlite'),*root.rglob('*.sqlite3')]:
  with sqlite3.connect(path.as_uri()+'?mode=ro',uri=True) as db:
   tables={row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
   if {'users','angmoo_schema_version','site_operation_settings'}<=tables and db.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()==(41,):databases.append(path)
 assert len(databases)==1
-with sqlite3.connect(databases[0]) as db:db.execute('INSERT INTO site_operation_settings(key,value) VALUES(?,?)',('native-migration-source-marker','한글 English 😀'))
+with sqlite3.connect(databases[0]) as db:
+ assert db.execute('SELECT count(*) FROM users').fetchone()==(1,)
+ db.execute('INSERT INTO site_operation_settings(key,value) VALUES(?,?)',('native-migration-source-marker','한글 English 😀'))
 uploads=root/'uploads';uploads.mkdir(exist_ok=True)
 (uploads/'native-qualification.txt').write_text('Synthetic native ARM64 migration fixture. 한글 English 😀')
-print(json.dumps({'schema':41,'marker_written':True,'synthetic_only':True}))
+print(json.dumps({'schema':41,'normal_owner_bootstrap':True,'users':1,'marker_written':True,'synthetic_only':True}))
 '''
     result=json.loads(docker('exec','--user','0:0',container,'python','-c',seed))
     docker('stop','--time','200',container)
