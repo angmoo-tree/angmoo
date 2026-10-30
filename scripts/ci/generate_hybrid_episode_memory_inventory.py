@@ -23,6 +23,7 @@ def build_inventory():
     from app.contracts.activity_thought import MAX_THOUGHT_CHARACTERS
     from app.domains.memory.contracts import embedding, episode, episode_packet
     from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+    from app.runtime.persistence.postgresql_schema import VERSION as POSTGRESQL_SCHEMA_VERSION
     from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 
     predecessor = record(ROOT / PREDECESSOR)
@@ -34,6 +35,7 @@ def build_inventory():
         "backend/app/contracts/activity*.py", "backend/app/domains/memory/**/*.py",
         "backend/app/domains/chat/**/*.py", "backend/app/domains/social/**/*.py",
         "backend/app/domains/routine_posts/**/*.py", "backend/app/runtime/memory/*.py",
+        "backend/app/runtime/postgresql*.py",
         "backend/app/runtime/memory/vector_mutations.json",
         "backend/app/runtime/chat/*.py", "backend/app/runtime/social/*.py",
         "backend/app/runtime/resident/*.py", "backend/app/runtime/social_snapshot.py",
@@ -57,7 +59,8 @@ def build_inventory():
     return {
         "schema_version": 1, "owner_stage": "HYBRID-EPISODE-CONSOLIDATION",
         "predecessor": predecessor,
-        "schema": {"embedded_schema_version": SQLITE_SCHEMA_VERSION,
+        "schema": {"postgresql_schema_version": POSTGRESQL_SCHEMA_VERSION,
+                   "sqlite_input_schema_version": SQLITE_SCHEMA_VERSION,
                    "schema_digest": manifest.schema_digest,
                    "canonical_table_count": manifest.canonical_table_count,
                    "source_revision": manifest.source_revision},
@@ -72,7 +75,7 @@ def build_inventory():
                    "sns_packet_count": episode_packet.SNS_PACKET_LIMIT,
                    "sns_packet_characters": episode_packet.SNS_PACKET_CHARACTERS},
         "embedding": {"model": embedding.EMBEDDING_MODEL, "dimensions": embedding.EMBEDDING_DIMENSIONS},
-        "contract": {"canonical_store": "sqlite", "retrieval": "fts5+vec1-flat+rrf",
+        "contract": {"canonical_store": "postgresql", "retrieval": "postgresql-gin+pgvector-exact+rrf",
                      "index_unit": "episode-or-legacy-summary", "legacy_originals_preserved": True,
                      "thought_extra_generation_calls": 0, "thought_when_memory_off": True,
                      "batch_triggers": ["manual", "scheduled", "shutdown"],

@@ -377,10 +377,10 @@ Summaries wait for **Save memories now** or configured automatic saving. Angmoo 
 
 SNS and Chat can search these saved memories in two ways:
 
-| Search method | Storage and search | How it finds memories |
-|---|---|---|
-| **Keyword search** | PostgreSQL full-text search with a **GIN index** | Matches words in memory text, with CJK text preparation and partial-match support. |
-| **Semantic search** | Embedding vectors stored in PostgreSQL with **pgvector exact search** | Compares cosine distance within the permitted World and character scope to find related meaning, even when the wording differs. |
+| Search method and storage | How it finds memories |
+|---|---|
+| **Keyword search**<br/>PostgreSQL full-text search with a **GIN index** | Matches words in memory text, with CJK text preparation and partial-match support. |
+| **Semantic search**<br/>Embedding vectors stored in PostgreSQL with **pgvector exact search** | Compares cosine distance within the permitted World and character scope to find related meaning, even when the wording differs. |
 
 **Memory storage and keyword search work without embeddings.**
 
@@ -418,7 +418,7 @@ flowchart TD
 **Relationship review** groups a character's situation memories by counterpart. Its AI input contains the memory text and the existing relationship perception. It keeps or updates that perception without receiving or re-reading original-text snapshots.
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Situation memory text<br/>Grouped by counterpart"]
     B["Relationship review AI<br/>Memory text + existing perception"]
     C["Keep or update<br/>Relationship perception"]

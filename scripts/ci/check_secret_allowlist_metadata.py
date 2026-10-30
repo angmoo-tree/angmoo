@@ -22,7 +22,7 @@ REQUIRED_FIELDS = {
     "review_due",
     "removal_condition",
 }
-EXPECTED_COUNT = 31
+EXPECTED_COUNT = 55
 PR365_CANARY_SHA256 = "aca32a5f456daa79bae5dfc7d0110a3bd19f8a9172bffe6f4d7d5365cad9d79c"
 PR365_CANARY_PATHS = frozenset({
     "backend/tests/test_t2_secret_allowlist.py",
@@ -37,6 +37,56 @@ PR365_CANARY_EVIDENCE = {
     "evidence_git_blob": "05f9d788ddaa1d35b6cf6647668121fc1eba1881",
     "value_sha256": PR365_CANARY_SHA256,
 }
+POSTGRESQL_ADOPTION_COMMIT = '6ff382a11f7db48278c83de9a9ce044954d7fced'
+POSTGRESQL_ADOPTION_ENTRIES = {('.github/workflows/ci.yml', '76ba459eb6527951dab037a25c648a083558e0a6bd4e4475ad3314f3ae5b6ac1'): {'source_git_blob': '6e95cec5646cd05863d866b5b0ff0b46d3515300',
+                                                                                                    'source_path': '.github/workflows/ci.yml'},
+ ('backend/security/secret_scan_allowlist.json', '1c429e44bf84430c4f6fb0ee312f28f82fb0cc273fcd83b44f98173892812d28'): {'source_git_blob': '374e93d25db33eee15743afb07845a898c1d3509',
+                                                                                                                       'source_path': 'launcher/migrate/docker_migrate.py'},
+ ('backend/security/secret_scan_allowlist.json', '1edc9310fee4f3227ec5cebac21768eaaf31f45e388812ae4b4e00615947560c'): {'source_git_blob': '74a6f983bb07f11450a34863e29889e2de9dbcd2',
+                                                                                                                       'source_path': 'scripts/release/postgresql_feature_smoke.py'},
+ ('backend/security/secret_scan_allowlist.json', '66a4a36faab996610a0dd73afdb82d065f9d71da4fed066cb80be35621f94d4d'): {'source_git_blob': 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',
+                                                                                                                       'source_path': 'scripts/docker/postgres-entrypoint.sh'},
+ ('backend/security/secret_scan_allowlist.json', '6f1524fe282ecb4c8e68092a6669e7dd42a78a26768c5985f8d179640708ac81'): {'source_git_blob': '374e93d25db33eee15743afb07845a898c1d3509',
+                                                                                                                       'source_path': 'launcher/migrate/docker_migrate.py'},
+ ('backend/security/secret_scan_allowlist.json', '765e1bc80df1a15957d6dd1288e3a962b622a25cab47bbec7024ae63a8bc5333'): {'source_git_blob': 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',
+                                                                                                                       'source_path': 'scripts/docker/postgres-entrypoint.sh'},
+ ('backend/security/secret_scan_allowlist.json', '76ba459eb6527951dab037a25c648a083558e0a6bd4e4475ad3314f3ae5b6ac1'): {'source_git_blob': '6e95cec5646cd05863d866b5b0ff0b46d3515300',
+                                                                                                                       'source_path': '.github/workflows/ci.yml'},
+ ('backend/security/secret_scan_allowlist.json', '8ae7c35eda7736b6375895954576bc625aa5b52ca0862a06e3be0929003fc77b'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                       'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/security/secret_scan_allowlist.json', 'aa82d37d6820ba9d40c4afb0ba7b4c83dca0e266d0924fb1debe7f4a31da393f'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                       'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/security/secret_scan_allowlist.json', 'b4be8cfdb7631ba340f88f32c54944867488eddf92af39391ca69131710ef9a2'): {'source_git_blob': '7558172380914f297432e4f9b254fb367c398007',
+                                                                                                                       'source_path': 'scripts/postgresql_experiment/prepare_phone_database.py'},
+ ('backend/security/secret_scan_allowlist.json', 'c0dae2779e0cce67bc5fa24497bb5e699e4371cec71d9e33d0b5eacf40821359'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                       'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/security/secret_scan_allowlist.json', 'ee8e07741e4b17eaceef5782c0dccbb2ae45f2591a7acd9f6f643557a8efe3c0'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                       'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/security/secret_scan_allowlist.json', 'ff475bc505011d4141d043fcadf77bc31e608f4133d03534e78af897c066c625'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                       'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/tests/postgresql/test_experience_upgrade_guard.py', '8ae7c35eda7736b6375895954576bc625aa5b52ca0862a06e3be0929003fc77b'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                                     'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/tests/postgresql/test_experience_upgrade_guard.py', 'aa82d37d6820ba9d40c4afb0ba7b4c83dca0e266d0924fb1debe7f4a31da393f'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                                     'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/tests/postgresql/test_experience_upgrade_guard.py', 'c0dae2779e0cce67bc5fa24497bb5e699e4371cec71d9e33d0b5eacf40821359'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                                     'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/tests/postgresql/test_experience_upgrade_guard.py', 'ee8e07741e4b17eaceef5782c0dccbb2ae45f2591a7acd9f6f643557a8efe3c0'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                                     'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('backend/tests/postgresql/test_experience_upgrade_guard.py', 'ff475bc505011d4141d043fcadf77bc31e608f4133d03534e78af897c066c625'): {'source_git_blob': 'd2f56a778710d612f447f6453d9dacfc30e4a128',
+                                                                                                                                     'source_path': 'backend/tests/postgresql/test_experience_upgrade_guard.py'},
+ ('launcher/migrate/docker_migrate.py', '1c429e44bf84430c4f6fb0ee312f28f82fb0cc273fcd83b44f98173892812d28'): {'source_git_blob': '374e93d25db33eee15743afb07845a898c1d3509',
+                                                                                                              'source_path': 'launcher/migrate/docker_migrate.py'},
+ ('launcher/migrate/docker_migrate.py', '6f1524fe282ecb4c8e68092a6669e7dd42a78a26768c5985f8d179640708ac81'): {'source_git_blob': '374e93d25db33eee15743afb07845a898c1d3509',
+                                                                                                              'source_path': 'launcher/migrate/docker_migrate.py'},
+ ('scripts/docker/postgres-entrypoint.sh', '66a4a36faab996610a0dd73afdb82d065f9d71da4fed066cb80be35621f94d4d'): {'source_git_blob': 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',
+                                                                                                                 'source_path': 'scripts/docker/postgres-entrypoint.sh'},
+ ('scripts/docker/postgres-entrypoint.sh', '765e1bc80df1a15957d6dd1288e3a962b622a25cab47bbec7024ae63a8bc5333'): {'source_git_blob': 'be33cf215e6eedb0dffc7dd30c66d6ce7a0fe112',
+                                                                                                                 'source_path': 'scripts/docker/postgres-entrypoint.sh'},
+ ('scripts/postgresql_experiment/prepare_phone_database.py', 'b4be8cfdb7631ba340f88f32c54944867488eddf92af39391ca69131710ef9a2'): {'source_git_blob': '7558172380914f297432e4f9b254fb367c398007',
+                                                                                                                                   'source_path': 'scripts/postgresql_experiment/prepare_phone_database.py'},
+ ('scripts/release/postgresql_feature_smoke.py', '1edc9310fee4f3227ec5cebac21768eaaf31f45e388812ae4b4e00615947560c'): {'source_git_blob': '74a6f983bb07f11450a34863e29889e2de9dbcd2',
+                                                                                                                       'source_path': 'scripts/release/postgresql_feature_smoke.py'}}
+
 EXPECTED_LAST_REVIEWED = "2026-08-14"
 EXPECTED_REVIEW_DUE = "2026-11-14"
 CHECKPOINT_PATH = "security/refactor_backend_checkpoint.json"
@@ -69,6 +119,7 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
     restored_history_entries = 0
     additions_entries = 0
     canary_paths = set()
+    postgresql_entries = set()
     for index, entry in enumerate(entries):
         label = f"entries[{index}]"
         if not isinstance(entry, dict):
@@ -129,6 +180,17 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
                           for assertion in record.get("test_assertions", {}).get(ADDITIONS_TEST_PATH, {}).get(CHECKPOINT_EVIDENCE["evidence_test"], [])]
             if not any(str(entry.get("value", "")) in assertion for assertion in assertions):
                 errors.append("additive fixture exception requires the existing exact assertion evidence")
+        if entry.get("review_kind") == "postgresql-adoption-noncredential.v1":
+            value_hash = hashlib.sha256(str(entry.get("value", "")).encode()).hexdigest()
+            key = (entry.get("path"), value_hash)
+            expected = POSTGRESQL_ADOPTION_ENTRIES.get(key)
+            postgresql_entries.add(key)
+            reviewed, due = "2026-10-30", "2027-01-30"
+            if (expected is None or entry.get("rule") != "credentialed-database-url"
+                    or entry.get("source_commit") != POSTGRESQL_ADOPTION_COMMIT
+                    or entry.get("value_sha256") != value_hash
+                    or any(entry.get(field) != value for field, value in (expected or {}).items())):
+                errors.append(f"{label} differs from reviewed PostgreSQL noncredential source evidence")
         if entry.get("last_reviewed") != reviewed:
             errors.append(f"{label}.last_reviewed differs from its recorded review date")
         if entry.get("review_due") != due:
@@ -146,6 +208,8 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
         errors.append("allowlist must contain exactly one reviewed additive fixture tuple")
     if canary_paths != PR365_CANARY_PATHS:
         errors.append("allowlist must retain exactly the four reviewed PR365 canary paths")
+    if postgresql_entries != set(POSTGRESQL_ADOPTION_ENTRIES):
+        errors.append("allowlist must retain exactly the reviewed PostgreSQL noncredential tuples")
     return errors
 
 

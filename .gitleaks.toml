@@ -5,6 +5,30 @@ useDefault = true
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
+description = "Exact public PostgreSQL admission idempotency fixture at 6ff382a1; not a credential; reviewed 2026-10-30"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)backend/tests/postgresql/test_chat_storage\.py$''']
+regexes = ['''^\s*data=WorldChatMessageCreate\(content='synthetic admission',idempotency_key='admission-same-key-001'\)\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public PostgreSQL correction idempotency fixture at 6ff382a1; not a credential; reviewed 2026-10-30"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)backend/tests/postgresql/test_memory_owner_transactions\.py$''']
+regexes = ['''^\s*idempotency_key='owner-correction-pg-001'\)\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public relationship received-lease fixture at 6ff382a1; not a credential; reviewed 2026-10-30"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)backend/tests/memory/test_manual_relationship_followup\.py$''']
+regexes = ['''^\s*child\.status,child\.lease_token,child\.attempts="running","received-token",1\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
 description = "Exact World/card creation credential-form Git blob verified at c62d3bbf; public source provenance, not a credential; reviewed 2026-09-28"
 condition = "AND"
 regexTarget = "line"

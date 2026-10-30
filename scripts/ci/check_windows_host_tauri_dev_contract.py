@@ -145,6 +145,8 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         errors.append("bridge configuration must never build a bundle")
     if tauri_config.get("bundle", {}).get("externalBin") != []:
         errors.append("bridge configuration must not package a sidecar")
+    if tauri_config.get("bundle", {}).get("resources") != []:
+        errors.append("bridge configuration must not package host PostgreSQL resources")
     capabilities = (
         tauri_config.get("app", {}).get("security", {}).get("capabilities", [])
     )
