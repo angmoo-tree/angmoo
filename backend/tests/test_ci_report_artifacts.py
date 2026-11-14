@@ -11,7 +11,7 @@ def report(job):
     return {
         "name": "Preserve test reports",
         "if": "success() && needs.impact.outputs.backend == 'true'" if job == "backend" else "always()",
-        "uses": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+        "uses": "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
         "with": {
             "name": checker.CORE_TEST_REPORT_NAMES[job],
             "path": "\n".join(checker.CORE_TEST_REPORT_PATHS[job]),
