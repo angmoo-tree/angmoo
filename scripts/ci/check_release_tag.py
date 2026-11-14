@@ -23,16 +23,20 @@ def expected_release_tag(root: Path = ROOT) -> str:
     )
     backend_version = str(backend.get("project", {}).get("version", ""))
     frontend_version = str(frontend.get("version", ""))
-    versions = {
-        "backend": backend_version, "frontend": frontend_version,
-        "desktop": json.loads((root / "desktop/package.json").read_text(encoding="utf-8"))["version"],
-        "tauri": json.loads((root / "desktop/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))["version"],
-        "cargo": tomllib.loads((root / "desktop/src-tauri/Cargo.toml").read_text(encoding="utf-8"))["package"]["version"],
-    }
-    desktop_lock = json.loads((root / "desktop/package-lock.json").read_text(encoding="utf-8"))
-    versions["desktop-lock"] = desktop_lock["version"]
-    versions["desktop-lock-root"] = desktop_lock["packages"][""]["version"]
-    for relative, name, key in (("backend/uv.lock", "backend", "uv"), ("desktop/src-tauri/Cargo.lock", "angmoo-desktop", "cargo-lock")):
+    current_support = bool(re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", backend_version)) and tuple(map(int, backend_version.split("."))) >= (0, 1, 5)
+    versions = {"backend": backend_version, "frontend": frontend_version}
+    locks = [("backend/uv.lock", "backend", "uv")]
+    if not current_support:
+        versions.update({
+            "desktop": json.loads((root / "desktop/package.json").read_text(encoding="utf-8"))["version"],
+            "tauri": json.loads((root / "desktop/src-tauri/tauri.conf.json").read_text(encoding="utf-8"))["version"],
+            "cargo": tomllib.loads((root / "desktop/src-tauri/Cargo.toml").read_text(encoding="utf-8"))["package"]["version"],
+        })
+        desktop_lock = json.loads((root / "desktop/package-lock.json").read_text(encoding="utf-8"))
+        versions["desktop-lock"] = desktop_lock["version"]
+        versions["desktop-lock-root"] = desktop_lock["packages"][""]["version"]
+        locks.append(("desktop/src-tauri/Cargo.lock", "angmoo-desktop", "cargo-lock"))
+    for relative, name, key in locks:
         packages = tomllib.loads((root / relative).read_text(encoding="utf-8"))["package"]
         matches = [p["version"] for p in packages if p["name"] == name]
         if len(matches) != 1:
@@ -40,8 +44,6 @@ def expected_release_tag(root: Path = ROOT) -> str:
         versions[key] = matches[0]
     tree = ast.parse((root / "backend/app/runtime/product_identity.py").read_text(encoding="utf-8"))
     versions["runtime"] = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "PRODUCT_VERSION" for t in n.targets))
-    if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", backend_version) and tuple(map(int, backend_version.split("."))) >= (0, 1, 5):
-        versions = {name: value for name, value in versions.items() if name in {"backend", "frontend", "uv", "runtime"}}
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", backend_version) or set(versions.values()) != {backend_version}:
         raise ValueError(f"product versions must be identical: {versions}")
     return f"release-v{backend_version}"

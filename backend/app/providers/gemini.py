@@ -525,7 +525,7 @@ class GeminiAdapter:
         from app.providers.embedding_observation import EmbeddingTransportObservation
         observation = EmbeddingTransportObservation(input_count=1, dimension=request.output_dimension)
         client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
-        api_version="v1beta",
+            api_version="v1beta",
             timeout=max(1, int(timeout_seconds*1000)), async_client_args=observation.client_args(),
             retry_options=types.HttpRetryOptions(attempts=1),
         ))
