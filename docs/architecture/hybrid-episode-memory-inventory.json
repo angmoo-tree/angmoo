@@ -3417,6 +3417,10 @@
       "sha256": "8cd8350490d6dee17ec40fe67f6f1a57d9ffee727430b966f88cc698443fd8ec"
     },
     {
+      "path": "backend/tests/chat/test_test_view_isolation.py",
+      "sha256": "c9aa88f9363bbb063d59c91c1e102d20a8e2e71a673994c7d04147e0e0aac319"
+    },
+    {
       "path": "backend/tests/chat/test_thread_repository.py",
       "sha256": "a97c54e07994b419b4135b16ccfe10e012cb2644080ff651cc32d1e6661da0e5"
     },

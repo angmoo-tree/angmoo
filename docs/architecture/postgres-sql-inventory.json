@@ -3541,7 +3541,7 @@
       "owner": "PostgreSQL 0.1.4",
       "path": "scripts/ci/check_local_runtime_contract.py",
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
-      "source_sha256": "8d762a34d58c9a0ec6d58d59ac7f4d9793211dada7cc6f579119065f17aedcf3",
+      "source_sha256": "e32c957175e6e5f4eb77f4bb109d437244a39e41a8ed0c7ea750155749dae073",
       "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
