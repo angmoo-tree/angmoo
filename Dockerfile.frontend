@@ -36,11 +36,14 @@ ARG VCS_REF=unknown
 ARG VERSION=0.1.5
 ARG PCRE2_MIN_VERSION=10.42-1+deb12u1
 ARG PERL_MIN_VERSION=5.36.0-7+deb12u4
+ARG APT_MIN_VERSION=2.6.2
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade libpcre2-8-0 perl-base \
+    && apt-get install -y --no-install-recommends --only-upgrade apt libapt-pkg6.0 libpcre2-8-0 perl-base \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge "${PCRE2_MIN_VERSION}" \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' perl-base)" ge "${PERL_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' apt)" ge "${APT_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libapt-pkg6.0)" ge "${APT_MIN_VERSION}" \
     && rm -rf /var/lib/apt/lists/*
 
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
