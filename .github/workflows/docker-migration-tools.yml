@@ -44,7 +44,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           uv run --frozen --project backend python -c "from scripts.ci.check_release_tag import expected_release_tag; from pathlib import Path; assert expected_release_tag(Path.cwd()) == 'release-v0.1.4'"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          uv run --frozen --project backend python scripts/build_docker_migrator.py --output ../artifacts/docker-tools --work "$env:RUNNER_TEMP/angmoo-docker-tools" --source $env:PRODUCT_SOURCE
+          uv run --frozen --project backend --with PyInstaller==6.16.0 python scripts/build_docker_migrator.py --output ../artifacts/docker-tools --work "$env:RUNNER_TEMP/angmoo-docker-tools" --source $env:PRODUCT_SOURCE
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Preserve source-bound Docker tools
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

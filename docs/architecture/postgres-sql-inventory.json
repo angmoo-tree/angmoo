@@ -4033,7 +4033,7 @@
       "owner": "PostgreSQL 0.1.4",
       "path": "scripts/release/workflow_policy.py",
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
-      "source_sha256": "adad6563d91e8c3f049f1023c45f65973b9a6eb088b75cbcf06359a4c0a5063a",
+      "source_sha256": "1d4dd776b7c9f4bf05489ccce74a3f1ad2d6c96870fa4b048d3dd16574e9247c",
       "transition_pr": "PostgreSQL adoption PR #418"
     }
   ],

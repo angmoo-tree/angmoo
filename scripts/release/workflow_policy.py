@@ -190,6 +190,7 @@ def validate_docker_tools(document):
     if (steps[4].get("working-directory") != "product" or
             "release-v0.1.4" not in command or "scripts/build_docker_migrator.py" not in command or
             "--source $env:PRODUCT_SOURCE" not in command or "uv sync --frozen" not in command or
+            "--with PyInstaller==6.16.0" not in command or
             any("if" in step or "continue-on-error" in step for step in steps)):
         errors.append("Docker tools must package the historical locked source without native installation")
     if document.get("concurrency") != {"group": "docker-migration-tools-${{ inputs.source }}", "cancel-in-progress": False}:

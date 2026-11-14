@@ -14,14 +14,19 @@ names the omitted scope and is not a full validation pass.
 
 Backend source edits select the full backend corpus because runtime and domain
 consumers make a path-only reduction unsafe. Isolated test edits may select their
-affected modules and consumers. Frontend source edits retain the frontend suite
-and Windows product build. Runtime lock changes additionally select installer
-smoke; installation, upgrade, recovery, data and CI policy changes select the
-full supported Windows matrix.
+affected modules and consumers. Frontend source edits retain the production Next
+suite. Runtime lock, installation, recovery, data and CI policy changes widen the
+supported shared checks, without enabling native Windows jobs.
 
-The frontend result also consumes the selected Windows build result. A passing
-browser suite cannot hide a missing, failed, cancelled or skipped required native
-build. Unselected work and unsuccessful selected work are different states.
+The frontend result consumes the selected browser/frontend job. Native static
+builds and static-only browser cases run only with the manual `native_windows`
+opt-in. Mixed image and visual suites always retain their Next cases and add their
+static cases only for that opt-in. Their test code and snapshots are preserved.
+Unselected work and unsuccessful selected work are different states.
+
+한국어: 일반 PR에서는 Next 웹 경로를 검증합니다. Windows 정적 빌드와 정적
+전용 검사는 수동 `native_windows` 선택 시에만 실행하며, 혼합 검사에서도
+웹 경로의 기능·화면 검증은 계속 수행합니다.
 
 Active classification is the normal mode. Observe mode evaluates a proposed
 selection while running full validation. Manual full and scheduled full runs may
@@ -42,8 +47,8 @@ and required gates are unchanged by this transport.
 - HTTP/schema, authorization, World scope and source-version contracts.
 - PostgreSQL initialization, bounded transaction retry, leases, cancellation and recovery; frozen SQLite 0.1.3 input conversion checks.
 - Canonical results, provider call limits and data/credential preservation.
-- Next and static consumers, locales, proxy limits and visual interactions.
-- The official 0.1.3 installer-to-PostgreSQL path, conversion interruption/restart, a clean native install and native module identity.
+- Next consumers, locales, proxy limits and visual interactions; static consumers remain available in the manual native profile.
+- PostgreSQL storage and preserved SQLite migration inputs. The historical 0.1.3 installer upgrade, native clean install and module identity remain in manual native checks.
 - Live security evidence consumers, dependency licenses and artifact identity.
 
 Do not routinely replay an obsolete refactor's exact source bodies or frozen
@@ -68,15 +73,15 @@ Target-native binaries must be built for their target.
 ## Candidate validation
 
 1. Select one main-history product SHA and retain its identity.
-2. Require the applicable full Core, Local Smoke, Security/Governance, full
-   Windows Installer and Container Candidate results from that source.
+2. Require the applicable full Core, Local Smoke, Security/Governance,
+   Container Candidate and independent Release Common Assets results from that source.
 3. Verify actual run/attempt, artifact ID/digest/expiry, checkout and complete
    selected coverage. Do not combine reports from incompatible attempts.
-4. Verify the exact bilingual NSIS EXE against checksums, SBOM, provenance and
-   its hosted workflow attestation. Record Authenticode separately.
+4. Verify the common source/license assets against their source-bound receipt and
+   hosted producer. 0.1.5+ does not produce or require a native Windows EXE.
 5. Validate backend/frontend/postgres for both native amd64 and ARM64. Emulator checks
    and real-phone checks have separate meanings.
-6. Retain actual installer GUI/user checks separately from silent fixtures.
+6. Retain Docker and Termux update evidence separately from synthetic fixtures.
 7. Publish only the validated bytes through the reviewed release process.
 
 An already completed full main run from the exact source can supply evidence;
@@ -94,7 +99,7 @@ Coverage belongs to one source/tree and attempt. A backend shard retry needs a
 fresh, complete partition report from the Core workflow, not one new partition
 combined with old successful reports. Independently successful smoke or installer
 workflows do not need to restart solely for that retry. Apply the same identity
-rule to selected installer qualification reports. Current 0.1.4 full coverage
+rule to selected historical installer qualification reports. Historical 0.1.4 full coverage
 requires clean-install, upgrade-013 and failure-recovery with a single native
 resource digest. Installer-smoke covers clean-install and upgrade-013 and cannot
 supply a full release receipt. Historical SQLite predecessor reports retain their
