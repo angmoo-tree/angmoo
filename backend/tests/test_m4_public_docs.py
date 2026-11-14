@@ -35,7 +35,9 @@ def test_current_release_readmes_keep_bilingual_scope_and_limitations() -> None:
             rf'<img\b[^>]*\balt="{re.escape(badge_alt)}"[^>]*>\s*</a>',
             text,
         ), (relative, "release badge must link to the published release")
-        assert "Angmoo_0.1.4_x64-setup.exe" in text
+        assert "0.1.5" in text and "Docker Desktop" in text
+        assert ("No Windows-native-to-Docker data migration tool" in text if relative == "README.md"
+                else "Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않" in text)
         assert "release-v0.1.4/install-termux.py" in text
 
 

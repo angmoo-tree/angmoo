@@ -2,6 +2,8 @@
 
 [English](README.md) | 한국어
 
+> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다. 0.1.5 명령은 해당 정식 릴리즈 공개 후 사용합니다.
+
 > **0.1.4 PostgreSQL 전환:** 기존 0.1.3 SQLite 데이터는 [이전 안내](docs/public/postgresql-migration.ko.md)를 따라야 합니다. 이미지만 업데이트하면 이전되지 않으며, 정식 공개된 해당 버전의 Release 파일을 사용하세요.
 
 <p align="center">
@@ -104,14 +106,14 @@ Angmoo 0.1.4에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ## 설치하고 실행하기
 
-Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. Windows는 전용 PostgreSQL·pgvector 자원을 동봉합니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
+Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. 보존된 Windows 0.1.4 설치본은 전용 PostgreSQL·pgvector 자원을 동봉했습니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
 
 Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에서의 이전 검증·공식 지원은 이번 릴리즈에 포함하지 않고 후속으로 둡니다.** ARM64 이미지 지원만으로 Mac의 데이터 이전까지 지원하는 것은 아닙니다.
 
 
 | 환경 | 실행 방법 |
 |---|---|
-| Windows x64 | 설치 EXE를 내려받아 실행 |
+| Windows PC | Docker Desktop; 별도의 새 데이터 |
 | Docker — amd64·ARM64 | 컨테이너를 실행하고 브라우저로 접속 |
 | Android ARM64 — 실험 지원 | Termux·PRoot에서 실행하고 휴대폰 브라우저로 접속 |
 
@@ -119,11 +121,7 @@ Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에�
 
 ### Windows
 
-1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.4_x64-setup.exe`를 받습니다.
-2. 설치 안내에 따라 설치합니다.
-3. Angmoo를 실행합니다.
-
-Docker나 Python·Node.js를 별도로 설치할 필요가 없습니다. 설치 프로그램은 한국어와 영어를 지원하며, 설치 안내 언어와 앱에서 사용하는 언어는 별도로 선택할 수 있습니다.
+Docker Desktop을 준비하고 아래 Docker 절차를 사용합니다. 네이티브 0.1.4는 과거 Release에 보존하며, 네이티브 0.1.5 업데이트와 Docker로의 자동 데이터 이전은 제공하지 않습니다.
 
 ### Docker
 
@@ -559,7 +557,7 @@ Angmoo는 아직 발전해 나가는 프로젝트입니다. 아래의 현재 한
 
 | 실행 경로 | 용도 |
 |---|---|
-| Windows 설치 파일 | 설치형 데스크톱 사용. 위의 Windows 설치 절차를 따릅니다 |
+| 기존 Windows 0.1.4 설치 파일 | 과거 배포 기록만 보존. 0.1.5부터 신규 배포·공식 지원 중단 |
 | Docker 브라우저 실행 | 공개 이미지를 브라우저에서 사용. 위의 Docker 실행 절차를 따릅니다 |
 | Docker 기여자 개발 | 현재 소스를 수정하며 frontend·backend 자동 새로고침으로 확인 |
 | Windows Host Tauri 개발 | 기여자 Docker 환경에 연결해 네이티브 화면을 개발. [Windows 호스트 안내 — 영어](docs/public/windows-host-tauri-dev.md) 참고 |

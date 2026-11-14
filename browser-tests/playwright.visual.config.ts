@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const nextBaseURL = "http://127.0.0.1:3300";
 const staticBaseURL = "http://127.0.0.1:3301";
 const fixtureBaseURL = "http://127.0.0.1:3302";
+const includeStatic = process.env.ANGMOO_NATIVE_STATIC_TESTS !== "0";
 
 export default defineConfig({
   testDir: ".",
@@ -45,10 +46,10 @@ export default defineConfig({
       name: "next-production",
       use: { baseURL: nextBaseURL },
     },
-    {
+    ...(includeStatic ? [{
       name: "static-export",
       use: { baseURL: staticBaseURL },
-    },
+    }] : []),
   ],
   webServer: [
     {
@@ -58,12 +59,12 @@ export default defineConfig({
       timeout: 120_000,
       url: nextBaseURL,
     },
-    {
+    ...(includeStatic ? [{
       command: "node ../frontend/scripts/serve-static.mjs --port 3301",
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
       url: staticBaseURL,
-    },
+    }] : []),
     {
       command: "node visual-fixture-server.mjs",
       env: { ANGMOO_VISUAL_FIXTURE_PORT: "3302" },

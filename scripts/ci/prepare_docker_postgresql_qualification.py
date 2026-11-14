@@ -21,13 +21,13 @@ from launcher.migrate.docker_migrate import private_directory
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    for field in ('source','candidate-run','candidate-artifact','windows-run','windows-attempt','windows-artifact'):
+    for field in ('source','candidate-run','candidate-artifact','tools-run','tools-attempt','tools-artifact'):
         parser.add_argument('--'+field,required=True)
     parser.add_argument('--work-root',type=Path,required=True)
     args=parser.parse_args()
     assert re.fullmatch('[0-9a-f]{40}',args.source)
     assert all(re.fullmatch('[1-9][0-9]*',getattr(args,key)) for key in
-        ('candidate_run','candidate_artifact','windows_run','windows_attempt','windows_artifact'))
+        ('candidate_run','candidate_artifact','tools_run','tools_attempt','tools_artifact'))
     assert platform.machine().lower() in {'aarch64','arm64'},'native_arm64_runner_required'
     root=args.work_root.resolve();private_directory(root)
     (root/'records').mkdir()
@@ -41,16 +41,9 @@ def main():
     for image in arm['images']:verify_archive(candidate/image['archive'],image)
     selected=candidate/'native-arm64.json';selected.write_text(json.dumps(arm))
     load(selected)
-    windows=github.run(args.windows_run,args.windows_attempt,workflow='windows-installer.yml',source=args.source)
-    original=github.artifact(args.windows_artifact,windows,
-        name=f'angmoo-windows-installer-{args.source}-{args.windows_attempt}')
-    directory=github.download(original,root/'artifacts/windows')
-    matches=list(directory.rglob('angmoo-migration-tools.json'));assert len(matches)==1
-    tools=json.loads(matches[0].read_text());assert tools['source_sha']==args.source
-    files={}
-    for name,digest in tools['files'].items():
-        paths=list(directory.rglob(name));assert len(paths)==1
-        assert digest_file(paths[0])=='sha256:'+digest;files[name]=paths[0]
+    from scripts.release.docker_tools import download
+    files = download(github, source=args.source, run=args.tools_run, attempt=args.tools_attempt,
+                     artifact=args.tools_artifact, directory=root/'artifacts/docker-tools')
     inputs={'source_sha':args.source,'migration_python':str(files['angmoo-migrate.py']),
         'migration_exe':str(files['angmoo-migrate.exe'])}
     (root/'inputs.json').write_text(json.dumps(inputs,indent=2))
@@ -118,7 +111,7 @@ print(json.dumps({'schema':41,'normal_owner_bootstrap':True,'users':1,'marker_wr
     docker('stop','--time','200',container)
     record={'source_sha':args.source,'legacy_source_sha':previous['source_sha'],
         'candidate_run':args.candidate_run,'candidate_artifact':args.candidate_artifact,
-        'windows_run':args.windows_run,'windows_attempt':args.windows_attempt,'windows_artifact':args.windows_artifact,
+        'tools_run':args.tools_run,'tools_attempt':args.tools_attempt,'tools_artifact':args.tools_artifact,
         'migration_python_sha256':digest_file(files['angmoo-migrate.py']),
         'native_architecture':platform.machine(),'synthetic_source':result,'source_stopped':True,
         'provider_transmissions':0}

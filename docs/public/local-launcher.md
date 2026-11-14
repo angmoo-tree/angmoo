@@ -1,5 +1,7 @@
 # Local launcher contract
 
+> **Preserved native development reference (unsupported from 0.1.5).** These commands do not produce an officially supported Windows release. Native workflows run only on explicit manual dispatch.
+
 The Windows PowerShell launcher is an optional thin wrapper around the official
 three-service contributor Compose files. It validates the host, runs Compose,
 and reports stable results. It does not supervise a second backend, read raw

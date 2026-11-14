@@ -186,6 +186,10 @@ def test_preservation_moves_stay_inside_repository(target):
 @pytest.mark.parametrize("missing", ["frontend/**", "browser-tests/**", "security/frontend*"])
 def test_frontend_only_change_reaches_each_host_event(event, missing):
     document = yaml.safe_load((ROOT / ".github/workflows/windows-host-tauri-dev.yml").read_text(encoding="utf-8"))
+    required = ["backend/**", "frontend/**", "browser-tests/**", "security/frontend*",
+                "scripts/ci/check_frontend_architecture_boundaries.py",
+                "scripts/ci/frontend_completed_boundaries.py", "scripts/ci/refactor_boundaries.py"]
+    document[True] = {name: {"paths": list(required)} for name in ("push", "pull_request")}
     document[True][event]["paths"].remove(missing)
     errors = check_workflow_triggers(yaml.safe_dump(document))
     assert f"Hosted Windows {event} paths must include {missing}" in errors

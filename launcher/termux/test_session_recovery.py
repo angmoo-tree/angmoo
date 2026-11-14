@@ -82,7 +82,9 @@ class RecoveryTests(unittest.TestCase):
         self.closed(paths[3])
         originals = [logs.read_session(p) for p in paths]
         result = recovery.recover_sessions(self.home, {"state": "stopped", "nonce": paths[3].name})
-        self.assertEqual(result["recovered"], [paths[0].name, paths[2].name])
+        # Recovery reports all eligible sessions; filesystem enumeration order
+        # is not the chronological retention order checked separately below.
+        self.assertCountEqual(result["recovered"], [paths[0].name, paths[2].name])
         for index in (0, 2):
             value = logs.read_session(paths[index])
             self.assertEqual(value["lifecycle_state"], "interrupted")

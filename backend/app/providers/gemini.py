@@ -11,6 +11,7 @@ from typing import Any
 from google import genai
 from google.genai import errors, types
 import httpx
+import httpx2
 from pydantic import BaseModel
 from app.providers.diagnostics import schema_evidence
 
@@ -412,6 +413,7 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
     prepared = prepare_generate_request(request)
     contents, config = prepared.contents, prepared.config
     client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+        api_version="v1beta",
         timeout=max(1, int(request.timeout_seconds * 1000)),
         retry_options=types.HttpRetryOptions(attempts=request.sdk_attempts) if request.sdk_attempts is not None else None))
     if request.diagnostic_callback is not None:
@@ -465,7 +467,7 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
 
 
 def _embed_sync(request: EmbeddingRequest) -> list[float]:
-    client = genai.Client(api_key=request.api_key)
+    client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(api_version="v1beta"))
     response = client.models.embed_content(
         model=request.model,
         contents=request.text,
@@ -523,6 +525,7 @@ class GeminiAdapter:
         from app.providers.embedding_observation import EmbeddingTransportObservation
         observation = EmbeddingTransportObservation(input_count=1, dimension=request.output_dimension)
         client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+            api_version="v1beta",
             timeout=max(1, int(timeout_seconds*1000)), async_client_args=observation.client_args(),
             retry_options=types.HttpRetryOptions(attempts=1),
         ))
@@ -591,9 +594,9 @@ def classify_generation_failure(exc: Exception) -> ProviderError:
         504: ("provider_unavailable", "DEADLINE_EXCEEDED", True),
     }
     failure, status, retryable = failures.get(code, ("failed", None, False))
-    if isinstance(exc, (TimeoutError, httpx.TimeoutException)):
+    if isinstance(exc, (TimeoutError, httpx.TimeoutException, httpx2.TimeoutException)):
         failure, retryable = "timeout", True
-    elif isinstance(exc, httpx.NetworkError):
+    elif isinstance(exc, (httpx.NetworkError, httpx2.NetworkError)):
         failure, retryable = "transport_failed", True
     return ProviderError(
         "Generation request failed", failure_class=failure,

@@ -17,6 +17,11 @@ from app.runtime.chat.message_composition import (
 
 
 class HistoricalChatTestView:
+    # This facade forwards writes to an owning service; it has no local state.
+    # pytest 9.2 consults __dict__ when restoring instance patches. Exposing
+    # either an empty facade dict or a service's unrelated dict loses old values.
+    __slots__ = ()
+
     def _owner(self, name):
         for owner in (
             message_service,
@@ -34,6 +39,8 @@ class HistoricalChatTestView:
         raise AttributeError(name)
 
     def __getattr__(self, name):
+        if name == "__dict__":
+            raise AttributeError(name)
         return getattr(self._owner(name), name)
 
     def __setattr__(self, name, value):

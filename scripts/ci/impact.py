@@ -29,7 +29,7 @@ def digest(value) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
-def classify(paths: list[str], *, force_full: bool = False, unknown_diff: bool = False) -> dict:
+def classify(paths: list[str], *, force_full: bool = False, unknown_diff: bool = False, native_windows: bool = False) -> dict:
     jobs = {name: False for name in JOBS}
     reasons = []
     backend, selected = "none", []
@@ -89,6 +89,12 @@ def classify(paths: list[str], *, force_full: bool = False, unknown_diff: bool =
     if backend == "full":
         selected = []
     jobs["windows-installer"] = windows in {"installer-smoke", "full"}
+    # Native Windows support ended in 0.1.5. Full/unknown/observe still selects
+    # all supported work; only an explicit manual native run opts in below.
+    if not native_windows:
+        windows = "none"
+        for name in ("tauri-windows", "windows-installer", "windows-native", "tauri-windows-host-dev"):
+            jobs[name] = False
     return {"backend": backend, "test_paths": sorted(set(selected)), "windows": windows,
             "jobs": jobs, "reasons": reasons, "paths": sorted(set(paths))}
 
@@ -175,8 +181,11 @@ def build_plan(*, event: dict, event_name: str, mode: str, requested: str, root:
         unavailable = True
     manual = (event.get("inputs") or {}).get("profile", "full")
     full = requested == "full" or event_name == "schedule" or event_name == "workflow_dispatch" and manual != "auto"
-    recommended = classify(paths, force_full=full, unknown_diff=unavailable)
-    effective = classify(paths, force_full=True) if mode == "observe" else recommended
+    native = event_name == "workflow_dispatch" and (
+        os.environ.get("GITHUB_WORKFLOW") in {"Windows Installer", "Windows Host Tauri Dev", "Native Runtime Spike"}
+        or str((event.get("inputs") or {}).get("native_windows", "false")).lower() == "true")
+    recommended = classify(paths, force_full=full, unknown_diff=unavailable, native_windows=native)
+    effective = classify(paths, force_full=True, native_windows=native) if mode == "observe" else recommended
     policy = (root / "scripts/ci/impact.py").read_bytes()
     result = {"schema": SCHEMA, "mode": mode, "requested_profile": requested, "event": event_name, "source_sha": source,
               "base_sha": base, "checkout_sha": checkout, "checkout_tree": git("rev-parse", "HEAD^{tree}", root=root),

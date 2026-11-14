@@ -2,6 +2,8 @@
 
 English | [한국어](README.ko.md)
 
+> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again. 0.1.5 commands require the corresponding official release to be published.
+
 > **0.1.4 PostgreSQL transition:** existing 0.1.3 SQLite data requires the [migration guide](docs/public/postgresql-migration.md). Pulling new images alone does not migrate data. Use the matching version's Release assets once published.
 
 <p align="center">
@@ -104,14 +106,14 @@ Image generation is optional. Image generation and recognition are configured se
 
 ## Install and run
 
-Docker and Termux use three services: frontend, backend and PostgreSQL. Windows bundles its own private PostgreSQL and pgvector resources. See [runtime](docs/public/postgresql-runtime.md), [migration](docs/public/postgresql-migration.md), and [backup and restore](docs/public/postgresql-backup.md).
+Docker and Termux use three services: frontend, backend and PostgreSQL. Historical Windows 0.1.4 bundled its own private PostgreSQL and pgvector resources. See [runtime](docs/public/postgresql-runtime.md), [migration](docs/public/postgresql-migration.md), and [backup and restore](docs/public/postgresql-backup.md).
 
 Docker images cover Linux amd64 and ARM64. **Migration on a macOS host is not verified or officially supported in this release; it is deferred.** ARM64 image support does not by itself establish Mac migration support.
 
 
 | Environment | How to run |
 |---|---|
-| Windows x64 | Download and run the installer EXE |
+| Windows PC | Docker Desktop; new Docker data |
 | Docker — amd64 and ARM64 | Start the containers and open your browser |
 | Android ARM64 — experimental | Run through Termux and PRoot, then open your phone's browser |
 
@@ -119,11 +121,7 @@ The web interface supports English and Korean.
 
 ### Windows
 
-1. Download `Angmoo_0.1.4_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
-2. Follow the installation steps.
-3. Open Angmoo.
-
-You do not need to install Docker, Python, or Node.js separately. The installer supports English and Korean; its language and the app's language are selected separately.
+Use Docker Desktop and follow the Docker steps below. Native 0.1.4 remains in historical Releases; there is no native 0.1.5 update or automatic data transfer to Docker.
 
 ### Docker
 
@@ -559,7 +557,7 @@ Choose the execution path that matches your work:
 
 | Path | Purpose |
 |---|---|
-| Windows installer | Installed desktop use; follow the Windows steps above |
+| Windows installer (historical) | 0.1.4 only; no new native releases or official support |
 | Docker Browser Run | Run published images in a browser; follow the Docker steps above |
 | Docker contributor development | Develop the checked-out source with frontend and backend reload |
 | Windows Host Tauri dev | Develop the native shell against the contributor Docker stack; see the [Windows host guide](docs/public/windows-host-tauri-dev.md) |

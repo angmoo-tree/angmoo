@@ -9,12 +9,7 @@ from impact import read_plan
 
 def expected_jobs(gate: str, selection: dict) -> list[str]:
     if gate == "frontend":
-        # A product change can require the Windows shell even when the full
-        # installer matrix is not selected. Its build must block this gate.
-        return [job for job, selected in (
-            ("frontend-work", selection["jobs"]["frontend"]),
-            ("tauri-windows", selection["jobs"]["tauri-windows"]),
-        ) if selected]
+        return ["frontend-work"] if selection["jobs"]["frontend"] else []
     if not selection["jobs"][gate]:
         return []
     if gate == "backend":

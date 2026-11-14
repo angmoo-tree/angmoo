@@ -1,4 +1,4 @@
-"""Public HTTPX hooks on the existing SDK client; payloads never leave it."""
+"""Public HTTPX2 hooks on the existing SDK client; payloads never leave it."""
 from importlib.util import find_spec
 from uuid import uuid4
 from app.core import work_observation as observation
@@ -22,10 +22,10 @@ class EmbeddingTransportObservation:
     def client_args(self):
         if not self.active:
             return None
-        # SDK 2.17 selects aiohttp when installed. Its internally constructed
+        # SDK 3.3 selects aiohttp when installed. Its internally constructed
         # session has no public trace-config hook. Do not switch transports or
         # change client ownership to manufacture an observation.
-        self.emit(boundary="logical_start", transport="httpx" if self.supported else "unsupported_aiohttp",
+        self.emit(boundary="logical_start", transport="httpx2" if self.supported else "unsupported_aiohttp",
                   transport_observable=self.supported)
         if not self.supported:
             return None
@@ -35,7 +35,7 @@ class EmbeddingTransportObservation:
         attempt = uuid4().hex
         self.attempts[id(request)] = attempt
         endpoint = "batchEmbedContents" if request.url.path.endswith(":batchEmbedContents") else "embedContent" if request.url.path.endswith(":embedContent") else "unknown"
-        self.emit(boundary="attempt_start", attempt_id=attempt, endpoint=endpoint, transport="httpx")
+        self.emit(boundary="attempt_start", attempt_id=attempt, endpoint=endpoint, transport="httpx2")
 
     async def response(self, response):
         attempt = self.attempts.pop(id(response.request), None)
