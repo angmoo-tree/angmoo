@@ -1,6 +1,6 @@
 {
   "edge_count": 7379,
-  "external_import_count": 5027,
+  "external_import_count": 5028,
   "module_count": 1682,
   "modules": [
     {
@@ -17963,6 +17963,7 @@
         "google.genai",
         "hashlib",
         "httpx",
+        "httpx2",
         "math",
         "pydantic",
         "time",

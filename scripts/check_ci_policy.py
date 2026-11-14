@@ -17,6 +17,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from scripts.release import workflow_policy
 WORKFLOW_DIR = Path(".github/workflows")
 EXPECTED_WORKFLOWS = {
+    "docker-migration-tools.yml",
+    "release-assets.yml",
     "ci.yml",
     "local-smoke.yml",
     "native-runtime-spike.yml",
@@ -116,7 +118,7 @@ def check_report_uploads(document: object, workflow_name: str, text: str) -> lis
             actual_sources = dict(step.get("with", {}))
             actual_sources["path"] = actual_sources.get("path", "").strip()
             if (actual_sources != expected_sources or set(step) != {"name", "uses", "with"}
-                    or step.get("uses") != "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"):
+                    or step.get("uses") != "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"):
                 errors.append("Vec1 sharing is limited to the two pinned source inputs")
             continue
         paths = CORE_TEST_REPORT_PATHS.get(job_name)
@@ -131,7 +133,7 @@ def check_report_uploads(document: object, workflow_name: str, text: str) -> lis
         if isinstance(actual.get("path"), str):
             actual["path"] = actual["path"].strip()
         if (workflow_name != "ci.yml" or paths is None or job_name in seen
-                or step.get("uses") != "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+                or step.get("uses") != "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
                 or step.get("if") != ("success() && needs.impact.outputs.backend == 'true'" if job_name == "backend" else "always()") or actual != expected
                 or set(step) != {"name", "if", "uses", "with"}):
             errors.append("raw artifact upload is limited to the installer or exact Core test reports")
@@ -300,8 +302,6 @@ def valid_required_gate(name: str, value: dict, jobs: dict) -> bool:
     if name not in {"backend", "frontend", "embedded-data-migration", "local-core-smoke", "local-autonomy-smoke", "local-full-graph"}:
         return False
     required = ["backend-preflight", "backend-tests", "postgresql"] if name == "backend" else [name + "-work"]
-    if name == "frontend":
-        required.append("tauri-windows")
     expected_env = {"CI_IMPACT_PLAN": "${{ needs.impact.outputs.plan }}", "CI_NEEDS": "${{ toJSON(needs) }}"}
     if (value.get("if") != "always()" or value.get("needs") != ["impact", *required]
             or value.get("env") != expected_env or "continue-on-error" in value):
@@ -363,6 +363,9 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
         if "on" not in document or any(not isinstance(key, str) for key in document):
             errors.append("workflow event key must be the string on, not a YAML boolean")
         errors.extend(workflow_policy.validate(document, path.name))
+    elif path.name in {"windows-installer.yml", "windows-host-tauri-dev.yml", "native-runtime-spike.yml", "windows-smoke.yml"}:
+        if not isinstance(document, dict) or set(document.get("on", {})) != {"workflow_dispatch"}:
+            errors.append("preserved Windows native workflows require a string event key and must be manual only")
     else:
         errors.extend(_check_triggers(document, release=False, weekly=path.name in {"ci.yml", "local-smoke.yml", "windows-installer.yml"}))
     errors.extend(

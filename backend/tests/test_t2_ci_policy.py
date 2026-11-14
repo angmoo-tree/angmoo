@@ -37,7 +37,7 @@ def test_actions_event_key_is_not_a_yaml_boolean(tmp_path):
     parsed = checker.yaml.load(text, Loader=checker._UniqueKeyLoader)
     assert "on" in parsed and True not in parsed
     broken = tmp_path / "windows-installer.yml"
-    broken.write_text(text.replace("'on':", "true:", 1), encoding="utf-8")
+    broken.write_text(text.replace("on:", "true:", 1), encoding="utf-8")
     assert any("event key" in error for error in checker.check_workflow(broken)[0])
 
 

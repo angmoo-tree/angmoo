@@ -16,7 +16,7 @@ Rebuild these resources with `scripts/build_windows_postgresql.py` and the
 Windows SDK manifest tool before packaging the sidecar/installer. See Microsoft's
 [process UTF-8 documentation](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page).
 
-Psycopg 3.3.6, psycopg-binary 3.3.6 and psycopg-pool 3.3.3 report LGPL-3.0-only.
+Psycopg 3.3.8, psycopg-binary 3.3.8 and psycopg-pool 3.3.3 report LGPL-3.0-only.
 They are unmodified locked libraries. Keep their package license files and the
 accompanying GPL text. The release includes `angmoo-postgresql-sources.zip`
 with the pinned Psycopg repository, exact locked pool source and notices. The

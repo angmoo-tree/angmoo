@@ -18,15 +18,15 @@ from test_t2_ci_policy import checker as ci_policy
 @pytest.mark.parametrize("path", [".github/workflows/ci.yml", "scripts/build_vec1.py", "security/license_policy.json", "backend/conftest.py", "backend/tests/conftest.py", "new/runtime/tool", "backend/app/runtime/migrations/upgrade.py", "desktop/src-tauri/installer-hooks.nsh"])
 def test_unknown_shared_security_and_migrations_select_full(path):
     selection = classify([path])
-    assert selection["backend"] == selection["windows"] == "full"
-    assert all(selection["jobs"].values())
+    assert selection["backend"] == "full" and selection["windows"] == "none"
+    assert_supported_full(selection)
 
 
 def test_documentation_is_explicitly_not_applicable_but_no_diff_is_full():
     result = classify(["docs/operations/example.md"])
     assert not any(result["jobs"].values()) and result["reasons"]
-    assert all(classify([])["jobs"].values())
-    assert all(classify(["README.md"], unknown_diff=True)["jobs"].values())
+    assert_supported_full(classify([]))
+    assert_supported_full(classify(["README.md"], unknown_diff=True))
 
 
 def test_backend_test_only_selects_owning_suite_without_installation():
@@ -37,11 +37,11 @@ def test_backend_test_only_selects_owning_suite_without_installation():
     assert result["jobs"]["backend"] and not result["jobs"]["windows-installer"]
 
 
-def test_product_and_runtime_lock_keep_windows_build_or_installation():
-    assert classify(["frontend/src/features/chat/example.tsx"])["windows"] == "build"
+def test_manual_native_opt_in_retains_original_matrix():
+    assert classify(["frontend/src/features/chat/example.tsx"], native_windows=True)["windows"] == "build"
     assert classify(["backend/app/domains/chat/service/messages.py"])["backend"] == "full"
-    assert classify(["backend/uv.lock", "frontend/src/features/chat/example.tsx"])["windows"] == "installer-smoke"
-    assert classify(["backend/uv.lock", "desktop/src-tauri/installer-hooks.nsh"])["windows"] == "full"
+    assert classify(["backend/uv.lock", "frontend/src/features/chat/example.tsx"], native_windows=True)["windows"] == "installer-smoke"
+    assert classify(["backend/uv.lock", "desktop/src-tauri/installer-hooks.nsh"], native_windows=True)["windows"] == "full"
 
 
 def test_rename_keeps_both_sides_and_deleted_paths(tmp_path):
@@ -164,18 +164,12 @@ def test_not_applicable_requires_successful_impact_and_skipped_or_successful_wor
         verify("frontend", plan, needs)
 
 
-@pytest.mark.parametrize("state", ["failure", "cancelled", "skipped", None])
-def test_selected_windows_build_blocks_frontend_gate_even_when_browser_passes(state):
+def test_automatic_frontend_gate_has_no_native_dependency():
     selection = classify(["frontend/src/page.tsx"])
-    assert selection["windows"] == "build" and not selection["jobs"]["windows-installer"]
+    assert selection["windows"] == "none"
     plan = {"effective": selection, "selection_sha256": digest(selection)}
     needs = {"impact": {"result": "success"}, "frontend-work": {"result": "success"}}
-    if state is not None:
-        needs["tauri-windows"] = {"result": state}
-    with pytest.raises(ValueError, match="required_work"):
-        verify("frontend", plan, needs)
-    needs["tauri-windows"] = {"result": "success"}
-    assert verify("frontend", plan, needs)["required_jobs"] == ["frontend-work", "tauri-windows"]
+    assert verify("frontend", plan, needs)["required_jobs"] == ["frontend-work"]
 
 
 def test_browser_only_changes_do_not_require_an_unselected_windows_build():
@@ -187,23 +181,39 @@ def test_browser_only_changes_do_not_require_an_unselected_windows_build():
 
 
 @pytest.mark.parametrize("damage", ["missing_dependency", "skip_build", "ignore_build_failure"])
-def test_frontend_policy_keeps_the_selected_windows_build_in_the_required_gate(damage):
+def test_frontend_policy_keeps_supported_work_in_the_required_gate(damage):
     jobs = ci_policy.yaml.load((ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"), Loader=ci_policy._UniqueKeyLoader)["jobs"]
     assert ci_policy.valid_required_gate("frontend", jobs["frontend"], jobs)
     if damage == "missing_dependency":
-        jobs["frontend"]["needs"].remove("tauri-windows")
+        jobs["frontend"]["needs"].remove("frontend-work")
     elif damage == "skip_build":
-        jobs["tauri-windows"]["if"] = "false"
+        jobs["frontend-work"]["if"] = "false"
     else:
-        jobs["tauri-windows"]["continue-on-error"] = True
+        jobs["frontend-work"]["continue-on-error"] = True
     assert not ci_policy.valid_required_gate("frontend", jobs["frontend"], jobs)
 
 
 def test_full_installer_requires_every_partition_and_recovery():
-    selection = classify([], force_full=True)
+    selection = classify([], force_full=True, native_windows=True)
     plan = {"effective": selection, "selection_sha256": digest(selection)}
     needs = {name: {"result": "success"} for name in ("impact", "release-candidate", "installed-runtime-smoke", "windows-installer-supported-upgrade", "windows-installer-failure-recovery")}
     assert verify("windows-installer", plan, needs)["status"] == "passed"
     del needs["windows-installer-failure-recovery"]
     with pytest.raises(ValueError, match="required_work"):
         verify("windows-installer", plan, needs)
+
+
+def assert_supported_full(selection):
+    native = {"windows-installer", "windows-native", "tauri-windows", "tauri-windows-host-dev"}
+    assert all(value is (name not in native) for name, value in selection["jobs"].items())
+
+
+@pytest.mark.parametrize("event", ["pull_request", "push", "schedule"])
+def test_automatic_events_cannot_opt_into_native(monkeypatch, event):
+    import impact
+    monkeypatch.setattr(impact, "git", lambda *a, **kw: "a" * 40)
+    monkeypatch.setattr(impact, "changed_paths", lambda *a, **kw: ["backend/uv.lock"])
+    monkeypatch.setattr(impact.subprocess, "run", lambda *a, **kw: None)
+    monkeypatch.setenv("GITHUB_WORKFLOW", "Windows Installer")
+    plan = build_plan(event={"inputs": {"native_windows": "true"}}, event_name=event, mode="observe", requested="full")
+    assert_supported_full(plan["effective"])

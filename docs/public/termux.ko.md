@@ -1,5 +1,7 @@
 # ARM64 Termux / PRoot로 Angmoo 실행하기
 
+> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다. 0.1.5 명령은 해당 정식 릴리즈 공개 후 사용합니다.
+
 [English](termux.md) | 한국어
 
 0.1.4는 검증된 ARM64 frontend·backend·PostgreSQL 세 이미지의 파일시스템을

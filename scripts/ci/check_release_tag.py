@@ -40,6 +40,8 @@ def expected_release_tag(root: Path = ROOT) -> str:
         versions[key] = matches[0]
     tree = ast.parse((root / "backend/app/runtime/product_identity.py").read_text(encoding="utf-8"))
     versions["runtime"] = next(ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "PRODUCT_VERSION" for t in n.targets))
+    if re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", backend_version) and tuple(map(int, backend_version.split("."))) >= (0, 1, 5):
+        versions = {name: value for name, value in versions.items() if name in {"backend", "frontend", "uv", "runtime"}}
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", backend_version) or set(versions.values()) != {backend_version}:
         raise ValueError(f"product versions must be identical: {versions}")
     return f"release-v{backend_version}"

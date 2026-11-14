@@ -1,5 +1,7 @@
 # Windows Host Tauri dev
 
+> **Preserved native development reference (unsupported from 0.1.5).** These commands do not produce an officially supported Windows release. Native workflows run only on explicit manual dispatch.
+
 Use this optional workflow only when changing Angmoo's native window behavior,
 resizing, Creator Studio or Memory workspaces, or Tauri window routing.
 For ordinary product development, use the Docker contributor environment in a

@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      native_windows:
+        description: "Opt into preserved, unsupported Windows native checks"
+        type: boolean
+        default: false
       profile:
         description: "Validation scope / 검증 범위 (full for release candidates)"
         type: choice
@@ -642,7 +646,6 @@ jobs:
     needs:
     - impact
     - frontend-work
-    - tauri-windows
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

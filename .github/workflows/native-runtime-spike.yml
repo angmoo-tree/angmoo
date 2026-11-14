@@ -1,19 +1,6 @@
 name: Native Runtime Spike
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/native-runtime-spike.yml"
-      - "spikes/l3-er1-native-runtime/**"
-      - "backend/tests/test_l3_er1_native_runtime_spike_contract.py"
-      - "docs/architecture/l3-er1-native-runtime-spike.md"
-  pull_request:
-    paths:
-      - ".github/workflows/native-runtime-spike.yml"
-      - "spikes/l3-er1-native-runtime/**"
-      - "backend/tests/test_l3_er1_native_runtime_spike_contract.py"
-      - "docs/architecture/l3-er1-native-runtime-spike.md"
   workflow_dispatch:
 
 permissions:

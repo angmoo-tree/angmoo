@@ -17,17 +17,29 @@ on:
         type: string
         required: true
       windows_run:
-        description: "Windows full validation run ID"
+        description: "Historical releases only: Windows full validation run ID"
         type: string
-        required: true
+        required: false
       windows_attempt:
         description: "Windows run attempt"
         type: string
-        required: true
+        required: false
       windows_artifact:
         description: "Windows installer artifact ID"
         type: string
-        required: true
+        required: false
+      assets_run:
+        description: "Common asset producer run ID (0.1.5+)"
+        type: string
+        required: false
+      assets_attempt:
+        description: "Common asset producer attempt (0.1.5+)"
+        type: string
+        required: false
+      assets_artifact:
+        description: "Common asset artifact ID (0.1.5+)"
+        type: string
+        required: false
       candidate_run:
         description: "Container Candidate run ID"
         type: string
@@ -59,6 +71,9 @@ env:
   RELEASE_WINDOWS_RUN: ${{ inputs.windows_run }}
   RELEASE_WINDOWS_ATTEMPT: ${{ inputs.windows_attempt }}
   RELEASE_WINDOWS_ARTIFACT: ${{ inputs.windows_artifact }}
+  RELEASE_ASSETS_RUN: ${{ inputs.assets_run }}
+  RELEASE_ASSETS_ATTEMPT: ${{ inputs.assets_attempt }}
+  RELEASE_ASSETS_ARTIFACT: ${{ inputs.assets_artifact }}
   RELEASE_CANDIDATE_RUN: ${{ inputs.candidate_run }}
   RELEASE_CANDIDATE_ATTEMPT: ${{ inputs.candidate_attempt }}
   RELEASE_CANDIDATE_ARTIFACT: ${{ inputs.candidate_artifact }}

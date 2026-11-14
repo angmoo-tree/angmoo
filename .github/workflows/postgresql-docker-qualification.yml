@@ -14,16 +14,16 @@ on:
         description: Complete Container Candidate artifact ID
         type: string
         required: true
-      windows_run:
-        description: Full Windows producer run containing the source-stamped Python tool
+      tools_run:
+        description: Independent Docker Migration Tools producer run
         type: string
         required: true
-      windows_attempt:
-        description: Windows producer attempt
+      tools_attempt:
+        description: Docker tool producer attempt
         type: string
         required: true
-      windows_artifact:
-        description: Original Windows and migration-tools artifact ID
+      tools_artifact:
+        description: Original Docker migration tools artifact ID
         type: string
         required: true
 permissions:
@@ -44,9 +44,9 @@ jobs:
       PRODUCT_SOURCE: ${{ inputs.source }}
       CANDIDATE_RUN: ${{ inputs.candidate_run }}
       CANDIDATE_ARTIFACT: ${{ inputs.candidate_artifact }}
-      WINDOWS_RUN: ${{ inputs.windows_run }}
-      WINDOWS_ATTEMPT: ${{ inputs.windows_attempt }}
-      WINDOWS_ARTIFACT: ${{ inputs.windows_artifact }}
+      TOOLS_RUN: ${{ inputs.tools_run }}
+      TOOLS_ATTEMPT: ${{ inputs.tools_attempt }}
+      TOOLS_ARTIFACT: ${{ inputs.tools_artifact }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -57,7 +57,7 @@ jobs:
         run: |
           python -m scripts.ci.prepare_docker_postgresql_qualification \
             --source "$PRODUCT_SOURCE" --candidate-run "$CANDIDATE_RUN" --candidate-artifact "$CANDIDATE_ARTIFACT" \
-            --windows-run "$WINDOWS_RUN" --windows-attempt "$WINDOWS_ATTEMPT" --windows-artifact "$WINDOWS_ARTIFACT" \
+            --tools-run "$TOOLS_RUN" --tools-attempt "$TOOLS_ATTEMPT" --tools-artifact "$TOOLS_ARTIFACT" \
             --work-root "$RUNNER_TEMP/angmoo-pg-qualification"
       - name: Qualify migration, interruption resume, restart, actual restore and rollback
         run: |

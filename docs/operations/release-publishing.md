@@ -1,4 +1,19 @@
-# Release publishing
+# Release publication
+
+## Current policy: 0.1.5 and later
+
+Publish backend, frontend and PostgreSQL for Linux amd64/ARM64 (six immutable OCI payloads, three indexes), plus the source-bound Termux tools. Do not build or publish a Windows NSIS installer. Preserve existing Releases unchanged.
+
+Run `Release Common Assets` at the same final main source as `Container Candidate`. It packages matching Psycopg source and licenses and project notices without the native installer. Supply `assets_run`, `assets_attempt` and `assets_artifact` to `Release Publish`; leave the three `windows_*` inputs empty. The verifier checks source, workflow, successful main run, attempt, archive digest and every bounded file hash. Legacy 0.1.3 → 0.1.4 migration tools remain at the 0.1.4 Release and their original source; do not rerun that migration for PostgreSQL → PostgreSQL updates. The historical native ARM64 SQLite migration qualification below remains a manual 0.1.4 check, not a Windows gate for new releases.
+
+P5 still binds exactly the final source, six image digests and three successful main CI runs. For 0.1.5 use `postgresql_update` with `source_version: 0.1.4`, `target_schema: 5`, and exactly `docker-amd64`, `docker-arm64`, `termux-arm64`; each records fresh install, update, backup/restore, recovery and current features with evidence. Keep 600-second Termux idle evidence and bounded real AI evidence. Omit `windows` and `windows_user_check`; foreign/native receipts are rejected, not accepted as a substitute. This PR's S0–S5 does not perform or claim those later release checks.
+
+Write matching English/Korean release notes: dependency and compatibility changes, supported artifacts, Windows native retirement/no migration, Docker/Termux update and backup commands, verified scope and limits. A green PR does not constitute release acceptance. Reuse tested original bytes; never rebuild only for publication. Tag/registry/Release publication remains separately authorized after review.
+
+## Historical publication contract: through 0.1.4
+
+The following describes frozen releases and the retained native manual tooling. Windows requirements here do not apply to 0.1.5+.
+
 
 The publisher verifies fixed candidate identities before creating a release, uploading its assets or
 publishing it. The public 0.1.0 release already exists; this document
@@ -129,3 +144,9 @@ Windows full receipts use the three actual PostgreSQL cases; old published
 SQLite receipts retain the legacy four-job verification path. The source-bound
 resource manifest, EXE, migration tools and OCI labels must agree before public
 staging. Actual GUI acceptance remains separate from silent hosted checks.
+
+### Preserved Docker migration host tools
+
+`docker-migration-tools.yml` independently packages the existing Windows Docker host EXE and portable Python adapter, without building the native Angmoo installer. Its explicit `source` must be an immutable main ancestor with product version 0.1.4. `postgresql-docker-qualification.yml` consumes its `tools_run`, `tools_attempt`, and `tools_artifact`; it verifies both the workflow tooling source and the historical product SHA, artifact digest, and individual tool hashes. This retained SQLite 0.1.3 → PostgreSQL 0.1.4 lane does not introduce another migration for 0.1.5. Existing PostgreSQL users use the normal image update path. Common 0.1.5 source/license assets come from `release-assets.yml`.
+
+Docker 호스트용 기존 `angmoo-migrate.exe`·Python 도구는 독립 수동 workflow에서 생산합니다. 이는 Windows 네이티브 설치본 또는 Windows 설치판 → Docker 이전 도구가 아닙니다. 역사적 0.1.3 → 0.1.4 검증은 도구의 별도 run·attempt·artifact를 사용하며, 0.1.4 → 0.1.5는 PostgreSQL 데이터 보존 업데이트입니다.

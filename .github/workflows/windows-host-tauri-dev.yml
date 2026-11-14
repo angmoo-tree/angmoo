@@ -1,60 +1,6 @@
 name: Windows Host Tauri Dev
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "frontend/**"
-      - "browser-tests/**"
-      - "security/frontend*"
-      - "scripts/ci/check_frontend_architecture_boundaries.py"
-      - "scripts/ci/frontend_completed_boundaries.py"
-      - "scripts/ci/refactor_boundaries.py"
-      - "desktop/**"
-      - "scripts/dev/desktop-preflight.ps1"
-      - "scripts/dev/desktop-dev.ps1"
-      - "scripts/dev/windows-host-tauri-utf8.ps1"
-      - "scripts/dev/windows-host-tauri-watch.ps1"
-      - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
-      - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
-      - "scripts/ci/windows_host_tauri_watch_smoke.ps1"
-      - "scripts/ci/check_windows_host_tauri_dev_contract.py"
-      - "backend/**"
-      - ".github/CODEOWNERS"
-      - ".github/workflows/windows-host-tauri-dev.yml"
-      - "README.md"
-      - "README.ko.md"
-      - "CONTRIBUTING.md"
-      - "CONTRIBUTING.ko.md"
-      - "docs/architecture/l3-er7-windows-host-tauri-dev.md"
-      - "docs/public/windows-host-tauri-dev.md"
-  pull_request:
-    paths:
-      - "frontend/**"
-      - "browser-tests/**"
-      - "security/frontend*"
-      - "scripts/ci/check_frontend_architecture_boundaries.py"
-      - "scripts/ci/frontend_completed_boundaries.py"
-      - "scripts/ci/refactor_boundaries.py"
-      - "desktop/**"
-      - "scripts/dev/desktop-preflight.ps1"
-      - "scripts/dev/desktop-dev.ps1"
-      - "scripts/dev/windows-host-tauri-utf8.ps1"
-      - "scripts/dev/windows-host-tauri-watch.ps1"
-      - "scripts/ci/windows_host_tauri_dev_smoke.ps1"
-      - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
-      - "scripts/ci/windows_host_tauri_watch_smoke.ps1"
-      - "scripts/ci/check_windows_host_tauri_dev_contract.py"
-      - "backend/**"
-      - ".github/CODEOWNERS"
-      - ".github/workflows/windows-host-tauri-dev.yml"
-      - "README.md"
-      - "README.ko.md"
-      - "CONTRIBUTING.md"
-      - "CONTRIBUTING.ko.md"
-      - "docs/architecture/l3-er7-windows-host-tauri-dev.md"
-      - "docs/public/windows-host-tauri-dev.md"
   workflow_dispatch:
 
 permissions:

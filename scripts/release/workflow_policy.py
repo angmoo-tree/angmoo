@@ -1,11 +1,15 @@
 """Specific permissions, dispatch and artifact boundaries for release workflows."""
 
-UPLOAD = "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+UPLOAD = "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9"
 GUARD = "github.repository == 'angmoo-tree/angmoo'"
 MAIN = GUARD + " && github.ref == 'refs/heads/main'"
+TOOLS = "docker-migration-tools.yml"
+COMMON = "release-assets.yml"
 QUALIFICATION = "postgresql-docker-qualification.yml"
-WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml", QUALIFICATION}
+WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml", QUALIFICATION, COMMON, TOOLS}
 ARTIFACTS = {
+    (TOOLS, "tools"): ("docker-migration-tools-${{ inputs.source }}-${{ github.run_attempt }}", "artifacts/docker-tools/angmoo-migrate.exe\nartifacts/docker-tools/angmoo-migrate.py\nartifacts/docker-tools/angmoo-migration-tools.json", 30, None),
+    (COMMON, "assets"): ("release-assets-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/release-assets/angmoo-postgresql-sources.zip\nartifacts/release-assets/THIRD_PARTY_NOTICES.md\nartifacts/release-assets/LICENSE\nartifacts/release-assets/release-assets.json", 30, None),
     ("container-candidate.yml", "build-validate"): ("candidate-${{ github.sha }}-${{ github.run_attempt }}-${{ matrix.architecture }}", "artifacts/release-candidate/*.oci.tar\nartifacts/release-candidate/candidate-*.json\nartifacts/release-candidate/validation-*/*.json", 14, 0),
     ("container-candidate.yml", "candidate"): ("release-candidate-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/release-candidate/*.oci.tar\nartifacts/release-candidate/candidate.json\nartifacts/release-candidate/validation-*/*.json", 14, 0),
     ("release-images.yml", "publish-ghcr"): ("image-publication-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/image-publication/image-publication.json", 30, None),
@@ -35,6 +39,10 @@ def uploads(document, name):
 
 
 def validate(document, name):
+    if name == TOOLS:
+        return validate_docker_tools(document)
+    if name == COMMON:
+        return validate_common_assets(document)
     if name == QUALIFICATION:
         return validate_qualification(document)
     errors = []
@@ -98,7 +106,7 @@ def validate_qualification(document):
     # key is True. The source-text policy uses its independent YAML 1.2 loader
     # and rejects an actually serialized boolean event key before calling us.
     events = document.get("on", document.get(True, {}))
-    fields = ("source", "candidate_run", "candidate_artifact", "windows_run", "windows_attempt", "windows_artifact")
+    fields = ("source", "candidate_run", "candidate_artifact", "tools_run", "tools_attempt", "tools_artifact")
     dispatch = events.get("workflow_dispatch", {}) if isinstance(events, dict) else {}
     inputs = dispatch.get("inputs", {}) if isinstance(dispatch, dict) else {}
     if (not isinstance(events, dict) or set(events) != {"workflow_dispatch"}
@@ -116,13 +124,13 @@ def validate_qualification(document):
         errors.append("native qualification must remain main-only, native ARM64 and read-only")
     expected_env = {"GH_TOKEN": "${{ github.token }}", **{
         key: "${{ inputs." + field + " }}" for key, field in zip(
-            ("PRODUCT_SOURCE", "CANDIDATE_RUN", "CANDIDATE_ARTIFACT", "WINDOWS_RUN", "WINDOWS_ATTEMPT", "WINDOWS_ARTIFACT"), fields)}}
+            ("PRODUCT_SOURCE", "CANDIDATE_RUN", "CANDIDATE_ARTIFACT", "TOOLS_RUN", "TOOLS_ATTEMPT", "TOOLS_ARTIFACT"), fields)}}
     if job.get("env") != expected_env:
         errors.append("native qualification environment must bind only the reviewed inputs")
     steps = job.get("steps", [])
     prepare = ('python -m scripts.ci.prepare_docker_postgresql_qualification \\\n'
         '  --source "$PRODUCT_SOURCE" --candidate-run "$CANDIDATE_RUN" --candidate-artifact "$CANDIDATE_ARTIFACT" \\\n'
-        '  --windows-run "$WINDOWS_RUN" --windows-attempt "$WINDOWS_ATTEMPT" --windows-artifact "$WINDOWS_ARTIFACT" \\\n'
+        '  --tools-run "$TOOLS_RUN" --tools-attempt "$TOOLS_ATTEMPT" --tools-artifact "$TOOLS_ARTIFACT" \\\n'
         '  --work-root "$RUNNER_TEMP/angmoo-pg-qualification"')
     qualify = ('python scripts/ci/qualify_docker_postgresql.py arm64 \\\n'
         '  --inputs "$RUNNER_TEMP/angmoo-pg-qualification/inputs.json" \\\n'
@@ -130,7 +138,7 @@ def validate_qualification(document):
     if (len(steps) != 5 or steps[0].get("uses") != "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
             or steps[0].get("with") != {"fetch-depth": 0, "persist-credentials": False}
             or set(steps[0]) != {"uses", "with"}
-            or steps[1] != {"uses": "docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"}
+            or steps[1] != {"uses": "docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069"}
             or str(steps[2].get("run", "")).strip() != prepare
             or str(steps[3].get("run", "")).strip() != qualify
             or any(set(steps[index]) != {"name", "run"} for index in (2, 3))
@@ -138,4 +146,52 @@ def validate_qualification(document):
         errors.append("native qualification must execute only the reviewed source-bound preparation and check")
     if document.get("concurrency") != {"group": "postgresql-docker-qualification-${{ inputs.source }}", "cancel-in-progress": False}:
         errors.append("native qualification must serialize the same source without cancellation")
+    return errors
+
+
+def validate_common_assets(document):
+    errors = []
+    events = document.get("on", document.get(True, {}))
+    jobs = document.get("jobs", {})
+    if events != {"workflow_dispatch": None} or set(jobs) != {"assets"}:
+        return ["common assets require explicit dispatch and one producer"]
+    job = jobs["assets"]
+    if job.get("if") != MAIN or job.get("runs-on") != "ubuntu-24.04" or "permissions" in job:
+        errors.append("common assets must be a read-only main producer")
+    expected = 'uv run --frozen --project backend python -m scripts.release.assets --output artifacts/release-assets --cache "$RUNNER_TEMP/angmoo-postgresql-sources"'
+    steps = job.get("steps", [])
+    if (len(steps) != 5 or steps[0].get("with") != {"persist-credentials": False}
+            or steps[2].get("run") != "uv sync --frozen --project backend"
+            or steps[3].get("run") != expected
+            or any("if" in step or "continue-on-error" in step for step in steps)
+            or document.get("concurrency") != {"group": "release-assets-${{ github.sha }}", "cancel-in-progress": False}):
+        errors.append("common assets must package exact locked sources without an installer")
+    return errors
+
+
+def validate_docker_tools(document):
+    events = document.get("on", document.get(True, {}))
+    jobs = document.get("jobs", {})
+    if (set(events) != {"workflow_dispatch"} or set(jobs) != {"tools"} or
+            events["workflow_dispatch"].get("inputs", {}).get("source", {}).get("required") is not True):
+        return ["Docker tools require explicit source and one independent producer"]
+    job = jobs["tools"]
+    steps = job.get("steps", [])
+    errors = []
+    if (job.get("if") != MAIN or job.get("runs-on") != "windows-2022" or
+            "permissions" in job or len(steps) != 6 or job.get("timeout-minutes") != 20):
+        return ["Docker tools require a bounded read-only Windows host builder"]
+    if (steps[0].get("with") != {"persist-credentials": False, "path": "tooling"} or
+            steps[1].get("run") != 'python -c "import os; from scripts.release.github import GitHub; GitHub().main_source(os.environ[\'PRODUCT_SOURCE\'])"' or
+            steps[1].get("working-directory") != "tooling" or
+            steps[2].get("with") != {"persist-credentials": False, "ref": "${{ inputs.source }}", "path": "product"}):
+        errors.append("Docker tool product checkout requires prior main ancestry verification")
+    command = steps[4].get("run", "")
+    if (steps[4].get("working-directory") != "product" or
+            "release-v0.1.4" not in command or "scripts/build_docker_migrator.py" not in command or
+            "--source $env:PRODUCT_SOURCE" not in command or "uv sync --frozen" not in command or
+            any("if" in step or "continue-on-error" in step for step in steps)):
+        errors.append("Docker tools must package the historical locked source without native installation")
+    if document.get("concurrency") != {"group": "docker-migration-tools-${{ inputs.source }}", "cancel-in-progress": False}:
+        errors.append("Docker tools must serialize each product source")
     return errors
