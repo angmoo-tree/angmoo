@@ -1,6 +1,11 @@
 # PostgreSQL dependencies and replacement
 
-The native PostgreSQL 17.11 server and pgvector 0.8.7 extension retain the
+Docker and Termux 0.1.5 use PostgreSQL 17.12 security fixes, with the server and
+client package version pinned in `Dockerfile.postgres`. The server major remains
+17 and pgvector remains 0.8.7. Runtime SBOMs record the installed distribution
+packages; these are separate from the preserved Windows resources below.
+
+The preserved Windows native PostgreSQL 17.11 server and pgvector 0.8.7 extension retain the
 PostgreSQL License. The Python `pgvector` package is a different component.
 Windows resource sources and hashes are in `scripts/windows-postgresql.lock.json`;
 the Linux image digest is in `Dockerfile.postgres`. Windows preserves the
@@ -21,7 +26,7 @@ They are unmodified locked libraries. Keep their package license files and the
 accompanying GPL text. The release includes `angmoo-postgresql-sources.zip`
 with the pinned Psycopg repository, exact locked pool source and notices. The
 Psycopg source pin is recorded in `security/psycopg-source-lock.json`.
-See the [upstream source](https://github.com/psycopg/psycopg/tree/a67654d1e7afbf9b3a619557838f62de1c790e7c)
+See the [upstream source](https://github.com/psycopg/psycopg/tree/b9e2f3535777cffb679ce3e6dc7f2b758dc9ac06)
 and its license files. Do not describe the native pgvector extension as MIT or
 assume the binary wheel's libpq version equals the server version.
 

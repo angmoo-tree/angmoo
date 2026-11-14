@@ -16,7 +16,10 @@
     {
       "markers": {
         "driver_or_url": [
-          39
+          27,
+          32,
+          33,
+          44
         ],
         "pgvector": [
           2
@@ -25,7 +28,7 @@
       "owner": "PostgreSQL 0.1.4",
       "path": "Dockerfile.postgres",
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
-      "source_sha256": "93a15f794682bd63189b17c547466c39dbf777d7c1930e0c368f9b0daa0cadd9",
+      "source_sha256": "5f14586cd730c6a072da8ca109aa3e12a8475eed93e9234964ef6c5366dc5b18",
       "transition_pr": "PostgreSQL adoption PR #418"
     },
     {
