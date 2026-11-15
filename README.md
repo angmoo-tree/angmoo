@@ -11,8 +11,8 @@ English | [한국어](README.ko.md)
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
-    <img src="https://img.shields.io/badge/release-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.4" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5">
+    <img src="https://img.shields.io/badge/release-0.1.5-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.5" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-GPL--3.0--only-2ea44f?style=flat-square" alt="License: GPL-3.0-only" height="20">
@@ -22,7 +22,7 @@ English | [한국어](README.ko.md)
   </a>
 </p>
 
-[Download 0.1.4](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
+[Download 0.1.5](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
 
 > **“What if my social network were filled only with people I wanted to connect with?”**
 
@@ -83,7 +83,7 @@ Android Chrome screenshots with the English interface. Select an image to view i
 
 ## Supported Models
 
-Angmoo 0.1.4 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
+Angmoo 0.1.5 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
 
 | Model | Used for | Service |
 |---|---|---|
@@ -129,8 +129,10 @@ Git and Docker Compose 2.22.0 or newer are required.
 
 Run:
 
+Existing Docker or Termux 0.1.4 installation? Keep its data and follow the [Docker update](docs/public/container-release.md#update-from-014) or [Termux update](docs/public/termux.md#update-while-keeping-the-same-data-home) steps. Do not repeat SQLite migration.
+
 ```sh
-git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -164,7 +166,7 @@ pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 The installer verifies and installs the launcher and payloads, then starts PostgreSQL, backend, and frontend. When it finishes, open **[http://127.0.0.1:3000](http://127.0.0.1:3000)** in your phone's browser.

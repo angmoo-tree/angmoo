@@ -146,7 +146,13 @@ def common(executable,install,action,*args):
 
 def initialize(executable,install):
     home=Path(install['home'])
-    if (Path(install['data_root'])/'runtime/postgresql-runtime.json').exists():return
+    if (Path(install['data_root'])/'runtime/postgresql-runtime.json').exists():
+        # A refreshed host tool may still be asked to start the retained 0.1.4
+        # images after an interrupted update. That backend predates this verb.
+        if tuple(map(int,install['manifest']['version'].split('.'))) >= (0,1,5):
+            common(executable,install,'prepare-search','--data-root','/var/lib/angmoo',
+                '--owner-dsn-file','/migration/credentials/owner-dsn')
+        return
     state=prepare(home)
     common(executable,install,'initialize','--data-root','/var/lib/angmoo','--installation-id',state['installation_id'],
         '--owner-dsn-file','/migration/credentials/owner-dsn','--runtime-dsn-file','/migration/credentials/runtime-dsn')

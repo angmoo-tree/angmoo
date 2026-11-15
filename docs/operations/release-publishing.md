@@ -1,5 +1,19 @@
 # Release publication
 
+
+## PostgreSQL 0.1.4 → 0.1.5 qualification
+
+`PostgreSQL Update Qualification` is a manual, read-only release check on native
+`ubuntu-24.04` and `ubuntu-24.04-arm`. It is not an every-PR required check. Supply
+the exact main source and Container Candidate run, attempt and artifact ID.
+The job verifies those originals, creates an isolated provider-free 0.1.4
+fixture, updates all three images on the same volumes, and checks retained
+Chat/memory/relationship data, new writes, restart, backend recovery and actual
+backup restoration. Only sanitized receipts are uploaded. No PC ARM64 emulation
+or Windows installer is used. Physical Termux and bounded real-AI observations
+remain separate release evidence; this fixture cannot establish AI relevance.
+
+
 ## Current policy: 0.1.5 and later
 
 Publish backend, frontend and PostgreSQL for Linux amd64/ARM64 (six immutable OCI payloads, three indexes), plus the source-bound Termux tools. Do not build or publish a Windows NSIS installer. Preserve existing Releases unchanged.

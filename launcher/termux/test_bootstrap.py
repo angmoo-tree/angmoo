@@ -3,6 +3,7 @@
 import contextlib
 import hashlib
 import io
+import json
 import os
 from pathlib import Path
 import shlex
@@ -97,6 +98,40 @@ class BootstrapTests(unittest.TestCase):
             with self.assertRaisesRegex(bootstrap.InstallError, "command_verification_invalid"):
                 bootstrap.install_and_start(Path("stage"), Path("private"))
             self.assertEqual(run.call_count, 2)
+
+    def test_unselected_sqlite_cannot_skip_the_014_migration(self):
+        with tempfile.TemporaryDirectory() as root, patch.object(bootstrap, "RELEASE", "0.1.5"), \
+                patch.object(bootstrap.subprocess, "run") as run:
+            home = Path(root)
+            prior = home / ".local/share/angmoo/installation.json"
+            prior.parent.mkdir(parents=True)
+            original = json.dumps({"manifest": {"version": "0.1.3"}})
+            prior.write_text(original, encoding="utf-8")
+            with self.assertRaisesRegex(bootstrap.InstallError, "sqlite_requires_014_migration"):
+                bootstrap.install_and_start(home / "stage", home)
+            run.assert_not_called()
+            self.assertEqual(prior.read_text(encoding="utf-8"), original)
+
+    def test_014_migrates_old_sqlite_but_selected_pg_uses_install(self):
+        for selected in (False, True):
+            with self.subTest(selected=selected), tempfile.TemporaryDirectory() as root, \
+                    patch.object(bootstrap, "RELEASE", "0.1.5" if selected else "0.1.4"), \
+                    patch.object(bootstrap.subprocess, "run") as run:
+                home = Path(root)
+                prior = home / ".local/share/angmoo/installation.json"
+                prior.parent.mkdir(parents=True)
+                prior.write_text(json.dumps({"manifest": {"version": "0.1.3"}}), encoding="utf-8")
+                selection = prior.with_name("selection.json")
+                if selected:
+                    selection.write_text('{"selected_home":"synthetic-pg"}', encoding="utf-8")
+                def completed(args, **kwargs):
+                    if "migrate" in args:
+                        selection.write_text('{"selected_home":"synthetic-pg"}', encoding="utf-8")
+                    return subprocess.CompletedProcess(args, 0, stdout="registered\n")
+                run.side_effect = completed
+                bootstrap.install_and_start(home / "stage", home)
+                self.assertEqual(run.call_args_list[2].args[0][1], "install" if selected else "migrate")
+                self.assertEqual(run.call_args_list[-1].args[0][-1], "start")
 
     def test_setup_or_image_install_failure_never_starts_services(self):
         for successful_steps in (0, 1, 2):

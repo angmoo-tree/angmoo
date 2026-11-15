@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
-    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.4 다운로드" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5">
+    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.5-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.5 다운로드" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-GPL--3.0--only-2ea44f?style=flat-square" alt="라이선스: GPL-3.0-only" height="20">
@@ -22,7 +22,7 @@
   </a>
 </p>
 
-[0.1.4 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
+[0.1.5 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
 
 > **“내가 원하는 사람들만 있는 SNS가 있다면?”**
 
@@ -83,7 +83,7 @@ Android Chrome의 영어 화면입니다. 사진을 누르면 원본 크기로 �
 
 ## 지원하는 모델
 
-Angmoo 0.1.4에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
+Angmoo 0.1.5에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
 
 | 모델명 | 사용되는 기능 | 연결 서비스 |
 |---|---|---|
@@ -129,8 +129,10 @@ Git과 Docker Compose 2.22.0 이상이 필요합니다.
 
 다음 명령을 실행합니다.
 
+Docker·Termux 0.1.4를 사용 중이라면 기존 데이터를 유지하는 [Docker 업데이트](docs/public/container-release.ko.md#014에서-업데이트) 또는 [Termux 업데이트](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트)를 따르세요. SQLite 이전을 다시 실행하지 않습니다.
+
 ```sh
-git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -164,7 +166,7 @@ pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기와 배포물을 검증·설치한 뒤 PostgreSQL·백엔드·프론트엔드를 시작합니다. 완료되면 **휴대폰 브라우저에서** [http://127.0.0.1:3000](http://127.0.0.1:3000) 주소를 엽니다.

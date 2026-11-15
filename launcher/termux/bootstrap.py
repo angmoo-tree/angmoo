@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 from pathlib import Path
 import platform
 import re
@@ -80,6 +81,16 @@ def extract_verified(raw: bytes, checksums: bytes, directory: Path) -> None:
 
 def install_and_start(directory: Path, home: Path) -> bool:
     launcher = home / ".local/bin/angmoo"
+    prior = home / ".local/share/angmoo/installation.json"
+    selection = home / ".local/share/angmoo/selection.json"
+    migrate_old = (not selection.exists() and prior.exists()
+                   and json.loads(prior.read_text(encoding="utf-8")).get("manifest", {}).get("version") == "0.1.3")
+    # The historical SQLite converter is bound to 0.1.4. Refuse before setup
+    # replaces host tools; later releases update an already selected PG home.
+    require(not migrate_old or RELEASE == "0.1.4", "sqlite_requires_014_migration",
+            "First use the official 0.1.4 installer to migrate SQLite data, then update to this release. "
+            "Existing data and tools were not changed. / 먼저 공식 0.1.4 설치기로 SQLite 데이터를 이전한 뒤 "
+            "이 버전으로 업데이트하세요. 기존 데이터와 실행 도구는 변경하지 않았습니다.")
     # Keep setup separate from the product: the existing launcher still owns
     # image verification, installation selection, locking, readiness and stop.
     subprocess.run(["sh", str(directory / "setup.sh")], check=True)
@@ -87,10 +98,6 @@ def install_and_start(directory: Path, home: Path) -> bool:
                                   check=True, stdout=subprocess.PIPE, text=True).stdout.strip()
     require(registration in {"registered", "not-termux"}, "command_verification_invalid",
             "Command registration could not be confirmed; later steps were not run.")
-    prior=home/'.local/share/angmoo/installation.json'
-    import json
-    selection=home/'.local/share/angmoo/selection.json'
-    migrate_old=not selection.exists() and prior.exists() and json.loads(prior.read_text(encoding='utf-8')).get('manifest',{}).get('version')=='0.1.3' and tuple(map(int,RELEASE.split('.'))) >= (0,1,4)
     subprocess.run([str(launcher), 'migrate' if migrate_old else 'install', "--release", RELEASE], check=True)
     if migrate_old and not selection.exists():
         raise InstallError('migration_cancelled','Migration was cancelled. The original installation is preserved. / 이전을 취소했습니다. 원래 설치는 보존됩니다.')

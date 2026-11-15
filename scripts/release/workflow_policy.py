@@ -6,8 +6,10 @@ MAIN = GUARD + " && github.ref == 'refs/heads/main'"
 TOOLS = "docker-migration-tools.yml"
 COMMON = "release-assets.yml"
 QUALIFICATION = "postgresql-docker-qualification.yml"
-WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml", QUALIFICATION, COMMON, TOOLS}
+UPDATE = "postgresql-update-qualification.yml"
+WORKFLOWS = {"container-candidate.yml", "release-images.yml", "release-publish.yml", QUALIFICATION, UPDATE, COMMON, TOOLS}
 ARTIFACTS = {
+    (UPDATE, "native-update"): ("postgresql-update-${{ matrix.architecture }}-${{ inputs.source }}-${{ github.run_id }}-${{ github.run_attempt }}", "${{ runner.temp }}/angmoo-pg-update/records/source.json\n${{ runner.temp }}/angmoo-pg-update/records/qualification.json", 30, None),
     (TOOLS, "tools"): ("docker-migration-tools-${{ inputs.source }}-${{ github.run_attempt }}", "artifacts/docker-tools/angmoo-migrate.exe\nartifacts/docker-tools/angmoo-migrate.py\nartifacts/docker-tools/angmoo-migration-tools.json", 30, None),
     (COMMON, "assets"): ("release-assets-${{ github.sha }}-${{ github.run_attempt }}", "artifacts/release-assets/angmoo-postgresql-sources.zip\nartifacts/release-assets/THIRD_PARTY_NOTICES.md\nartifacts/release-assets/LICENSE\nartifacts/release-assets/release-assets.json", 30, None),
     ("container-candidate.yml", "build-validate"): ("candidate-${{ github.sha }}-${{ github.run_attempt }}-${{ matrix.architecture }}", "artifacts/release-candidate/*.oci.tar\nartifacts/release-candidate/candidate-*.json\nartifacts/release-candidate/validation-*/*.json", 14, 0),
@@ -32,13 +34,16 @@ def uploads(document, name):
             expected["compression-level"] = compression
         options = dict(found[0].get("with", {}))
         options["path"] = str(options.get("path", "")).strip()
-        condition = "always()" if name in {"release-images.yml", QUALIFICATION} else None
+        condition = "always()" if name in {"release-images.yml", QUALIFICATION, UPDATE} else None
         if options != expected or found[0].get("uses") != UPLOAD or found[0].get("if") != condition:
             errors.append("release artifact export exceeds its reviewed paths or identity")
     return errors
 
 
 def validate(document, name):
+    if name == UPDATE:
+        from scripts.release.update_workflow_policy import validate as validate_update
+        return validate_update(document)
     if name == TOOLS:
         return validate_docker_tools(document)
     if name == COMMON:
