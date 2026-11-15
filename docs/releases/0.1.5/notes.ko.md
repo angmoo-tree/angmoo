@@ -21,6 +21,6 @@
 ## 안내 사항
 
 - 기존 SQLite 0.1.3 사용자는 먼저 [0.1.4의 이전 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.4/docs/public/postgresql-migration.ko.md)에 따라 이전해야 합니다.
-- [검증 범위와 알려진 제한](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md), [소스·배포 파일 확인 안내](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md#source-and-artifact-integrity)를 확인하세요.
+- [검증 범위와 알려진 제한](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md), [소스·배포 파일 확인 안내](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md#source-and-artifact-integrity)를 확인하세요.
 
 [전체 변경 내역](https://github.com/angmoo-tree/angmoo/compare/release-v0.1.4...release-v0.1.5)

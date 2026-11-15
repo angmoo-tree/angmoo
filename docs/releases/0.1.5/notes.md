@@ -21,6 +21,6 @@ This release updates dependencies, includes security and compatibility fixes, an
 ## Notes
 
 - Existing SQLite 0.1.3 installations must first follow the [historical 0.1.4 migration guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.4/docs/public/postgresql-migration.md).
-- See [verification scope and known limits](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md) and [source and release integrity information](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md#source-and-artifact-integrity).
+- See [verification scope and known limits](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md) and [source and release integrity information](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md#source-and-artifact-integrity).
 
 [Full changelog](https://github.com/angmoo-tree/angmoo/compare/release-v0.1.4...release-v0.1.5)
