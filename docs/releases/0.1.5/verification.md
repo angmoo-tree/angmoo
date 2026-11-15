@@ -15,7 +15,7 @@ The update baseline is official 0.1.4 (`7d0cfabca490261461d4f4b7426ad16e60e4e996
 - [Container Candidate](https://github.com/angmoo-tree/angmoo/actions/runs/43679128266), attempt 1, artifact `14147598737`: six OCI payloads, runtime/native checks and security reports passed.
 - Candidate ZIP digest: `sha256:6062bddda38e4c5aa762bdf6490ff50a0bd4babeac93396fee3fe5937e08563f`.
 - [Common assets](https://github.com/angmoo-tree/angmoo/actions/runs/43678693053), attempt 1, artifact `14146898906`; digest `sha256:347adb8ae964fa14a31e1ddee1f5d1d3b2e106c3e3e34642a33fc5b305606f75`.
-- Tested source-packaged Termux tools SHA-256: `694a2899511295e618a2c1fcdad79631091a25376da230876c7ec4f0e5f63d04`. Publication must reproduce these same tool bytes.
+- Final canonical-LF Termux tools SHA-256: `f5a1d27b0ac550967cc9e2e9f834e93ab4c8515bfb343e8c3475f43149192f1a` (53178 bytes). The Linux release verifier and the final phone launcher check use this exact archive. The preceding Windows-checkout archive is retained as described below.
 
 | Payload | Platform manifest digest |
 | --- | --- |
@@ -27,6 +27,16 @@ The update baseline is official 0.1.4 (`7d0cfabca490261461d4f4b7426ad16e60e4e996
 | postgres/linux/arm64 | `sha256:1a1f41b7e08f1abbe827f4b2d70c1fbde98a5e31116e6513270719937d7c0936` |
 
 The first candidate dispatch was rejected at startup by the repository's action allowlist. The signed upstream commits for the two already-reviewed Docker action pins were verified and those exact SHAs were added. The selected-action policy and full-SHA pin requirement remained enabled. The successful run above is the only candidate used here; no failed run is relabeled as passed.
+
+## Canonical Termux tool archive
+
+The first [read-only release verification](https://github.com/angmoo-tree/angmoo/actions/runs/43690830168) passed candidate/P5 checks, but a separate local comparison detected different ZIP bytes. The phone's initial test tools had been packaged from a Windows checkout with CRLF line endings; the official Linux publisher uses the canonical LF Git blobs. No tag or image had been published when this difference was found.
+
+All 13 archive members have identical content after CRLF-to-LF normalization, with the same executable permissions. Every Python module also has the same parsed syntax tree. No runtime, launcher logic, dependency, source commit or image changed. Packaging the exact Git blobs at product S reproduces the Linux publisher's archive byte-for-byte: `f5a1d27b0ac550967cc9e2e9f834e93ab4c8515bfb343e8c3475f43149192f1a`.
+
+That canonical archive was then extracted into a separate tools directory on the physical phone. Using the existing isolated 0.1.5 copy, its CLI passed startup, normal-mode health/runtime/home HTTP 200, scheduler/projector ready and clean stop. No additional AI scenario was initiated. The earlier CRLF ZIP (`694a2899511295e618a2c1fcdad79631091a25376da230876c7ec4f0e5f63d04`, 53544 bytes), comparison failure and original qualification receipts remain preserved. This targeted packaging check does not relabel the earlier ZIP as byte-identical and does not repeat completed image/data/AI qualification.
+
+Final tool qualification receipt SHA-256: `c1e46d5a0615eeb339f94adea894175e0972f082c2f58a667c51d84b62eb8c1c`. Existing selected 0.1.4 data and selection were not used or changed by this check.
 
 ## Native Docker qualification
 
