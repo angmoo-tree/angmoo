@@ -2,10 +2,6 @@
 
 [English](README.md) | 한국어
 
-> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다.
-
-> **0.1.4 PostgreSQL 전환:** 기존 0.1.3 SQLite 데이터는 [이전 안내](docs/public/postgresql-migration.ko.md)를 따라야 합니다. 이미지만 업데이트하면 이전되지 않으며, 정식 공개된 해당 버전의 Release 파일을 사용하세요.
-
 <p align="center">
   <img src="assets/angmoo-wordmark.png" alt="Angmoo" width="800">
 </p>
@@ -106,7 +102,9 @@ Angmoo 0.1.5에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ## 설치하고 실행하기
 
-Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. 보존된 Windows 0.1.4 설치본은 전용 PostgreSQL·pgvector 자원을 동봉했습니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
+Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. [실행 구조](docs/public/postgresql-runtime.ko.md)를 참고하세요.
+
+기존 사용자는 아래의 [Docker 업데이트](#docker-update) 또는 [Termux 업데이트](#termux-update) 안내를 따르세요. 지원하는 출발 버전과 주의사항은 [릴리즈 설명](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5)에서 확인하세요. **0.1.3 SQLite 사용자는 [별도 데이터 이전 안내](docs/public/postgresql-migration.ko.md)를 먼저 확인하세요.**
 
 Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에서의 이전 검증·공식 지원은 이번 릴리즈에 포함하지 않고 후속으로 둡니다.** ARM64 이미지 지원만으로 Mac의 데이터 이전까지 지원하는 것은 아닙니다.
 
@@ -121,7 +119,7 @@ Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에�
 
 ### Windows
 
-Docker Desktop을 준비하고 아래 Docker 절차를 사용합니다. 네이티브 0.1.4는 과거 Release에 보존하며, 네이티브 0.1.5 업데이트와 Docker로의 자동 데이터 이전은 제공하지 않습니다.
+Windows에서는 Docker Desktop을 사용합니다. 네이티브 설치판의 신규 배포·공식 지원은 중단됐으며, Docker로의 자동 데이터 이전은 제공하지 않습니다. 기존 설치와 백업을 보존하세요. [상세 지원 안내](docs/public/container-release.ko.md)
 
 ### Docker
 
@@ -129,7 +127,7 @@ Git과 Docker Compose 2.23.0 이상이 필요합니다.
 
 #### 새 설치
 
-기존 Angmoo가 없는 환경에서 실행합니다. 기존 0.1.4 사용자는 아래 **업데이트**를 따르세요.
+기존 Angmoo가 없는 환경에서 실행합니다. 기존 사용자는 아래 **기존 Docker 설치 업데이트**를 따르세요.
 
 ```sh
 git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
@@ -153,9 +151,11 @@ docker compose up -d --wait
 
 일반적인 `docker compose down`은 저장된 데이터를 보존합니다. 데이터를 유지하려면 `--volumes` 옵션을 추가하지 마세요.
 
-#### 기존 Docker 0.1.4 → 0.1.5 업데이트
+<a id="docker-update"></a>
 
-새 설치 명령을 반복하지 말고 **기존 설치 폴더**에서 진행합니다. 먼저 [전체 백업](docs/public/postgresql-backup.ko.md)을 준비하고 [Docker 업데이트 절차](docs/public/container-release.ko.md#014에서-업데이트)에 따라 기존 프로젝트·볼륨·설정을 유지하세요. 일반 Git 설치와 0.1.3 이전 도구가 만든 Compose의 명령은 다릅니다. SQLite 이전은 다시 실행하지 않습니다.
+#### 기존 Docker 설치 업데이트
+
+먼저 [전체 백업](docs/public/postgresql-backup.ko.md)을 준비한 뒤 **기존 설치 폴더**에서 [Docker 업데이트 안내](docs/public/container-release.ko.md#014에서-업데이트)를 따르세요. 기존 프로젝트·볼륨·설정을 유지해야 하므로 새 설치 명령을 그대로 반복하지 마세요.
 
 [Docker 실행·배포 안내](docs/public/container-release.ko.md)
 
@@ -165,7 +165,7 @@ ARM64 Android 기기의 Termux에서 실행하는 실험 경로입니다. 휴대
 
 #### 새 설치
 
-Termux를 설치하고 한 번 실행한 뒤, 아래 두 명령을 차례로 입력합니다. 기존 0.1.4 사용자는 아래 **업데이트**를 따르세요.
+Termux를 설치하고 한 번 실행한 뒤, 아래 두 명령을 차례로 입력합니다. 기존 사용자는 아래 **기존 Termux 설치 업데이트**를 따르세요.
 
 ```sh
 pkg update && pkg install -y python curl proot clang make libandroid-shmem
@@ -199,23 +199,11 @@ Android 기기와 Termux 환경에 따른 호환성 및 백그라운드 실행�
 
 설치기는 `angmoo` 단축 명령을 등록합니다. 기존 0.1.0 설치는 `~/.local/bin/angmoo start`와 `status`·`stop`을 계속 사용할 수 있습니다. 전체 경로와 단축 명령은 같은 데이터 폴더를 사용합니다.
 
-#### 기존 Termux 0.1.4 → 0.1.5 업데이트
+<a id="termux-update"></a>
 
-평소 `angmoo start`로 실행한다면 **새 설치와 같은 설치기**를 사용하며 기존 데이터 경로를 유지합니다. 먼저 [전체 백업](docs/public/postgresql-backup.ko.md)을 준비한 뒤 다음 명령을 차례로 실행합니다. `stop`이 실패하면 다음 단계로 넘어가지 마세요.
+#### 기존 Termux 설치 업데이트
 
-```sh
-angmoo stop
-```
-
-```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
-```
-
-설치기가 자동으로 시작합니다. `Installed; run angmoo start.`는 중간 단계 안내이므로 `Ready`와 접속 주소가 나올 때까지 기다리세요. 기존 주소에서 World·캐릭터·기억·대화를 확인합니다. SQLite 이전은 다시 실행하지 않습니다.
-
-매번 `--home`을 직접 지정한다면 [사용자 지정 경로 업데이트](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트)를 따르세요. 위 기본 명령으로 다른 경로를 시작하지 않도록 구분합니다.
-
-실행이 중단된 뒤에는 `angmoo start`가 미종료 로그 세션을 확인·복구하고 다시 시작합니다. 이전 프로세스가 살아 있거나 상태를 확인할 수 없으면 로그를 보존하며 중복 서버를 시작하지 않습니다. 파일 삭제나 재설치 전에 [보존 로그·진단 안내](docs/public/termux.ko.md)를 확인하세요.
+먼저 [전체 백업](docs/public/postgresql-backup.ko.md)을 준비하고 `angmoo stop`으로 종료한 뒤, [Termux 업데이트 안내](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트)에 따라 공식 설치기를 실행하세요. 기본 선택 경로에서는 새 설치와 같은 설치기를 사용하며 기존 데이터를 유지합니다. 사용자 지정 경로와 준비 완료·복구 방법도 해당 안내에서 확인하세요.
 
 [Termux 설치·실행·로그 안내](docs/public/termux.ko.md)
 
