@@ -188,6 +188,8 @@ def initialize(data_root, owner_dsn, runtime_dsn, installation_id):
         from app.runtime.memory.postgresql_generations import initialize_state
         PostgresMemoryVectorIndex(engine,generation='v1').open()
         initialize_state(engine,budget_state='fresh')
+        from app.runtime.postgresql_search_installation import initialize_search
+        initialize_search(engine)
     finally:
         engine.dispose()
     root.mkdir(parents=True,exist_ok=True)
@@ -199,9 +201,14 @@ def initialize(data_root, owner_dsn, runtime_dsn, installation_id):
     return {'state':'initialized','installation_id':installation_id}
 
 
+def prepare_search(data_root, owner_file):
+    from app.runtime.postgresql_search_installation import prepare_search as prepare
+    return prepare(data_root, owner_file, read_dsn=read_dsn, provision_runtime=provision_runtime)
+
+
 def main():
     parser=argparse.ArgumentParser(description='Angmoo PostgreSQL installation / PostgreSQL 설치·데이터 이전')
-    parser.add_argument('action',choices=('snapshot','migrate','initialize'))
+    parser.add_argument('action',choices=('snapshot','migrate','initialize','prepare-search'))
     parser.add_argument('--source-root',type=Path)
     parser.add_argument('--work',type=Path)
     parser.add_argument('--data-root',type=Path)
@@ -213,6 +220,9 @@ def main():
         if not all((args.source_root,args.work,args.installation_id)):parser.error('source-root, work and installation-id required')
         result=snapshot(args.source_root,args.work,args.installation_id)
         result={k:result[k] for k in ('schema','migration_id','snapshot_digest')}
+    elif args.action=='prepare-search':
+        if not all((args.data_root,args.owner_dsn_file)):parser.error('data-root and private owner DSN file required')
+        result=prepare_search(args.data_root,args.owner_dsn_file)
     else:
         if not all((args.data_root,args.owner_dsn_file,args.runtime_dsn_file)):parser.error('data-root and private DSN files required')
         if args.action=='migrate' and not args.work:parser.error('work required')

@@ -31,6 +31,11 @@ def _workflow_document():
     document = yaml.safe_load(workflow.read_text(encoding="utf-8"))
     if True in document:
         document["on"] = document.pop(True)
+    # Preserve historical path-coverage tests independently of current manual policy.
+    required = ["backend/**", "frontend/**", "browser-tests/**", "security/frontend*",
+                "scripts/ci/check_frontend_architecture_boundaries.py",
+                "scripts/ci/frontend_completed_boundaries.py", "scripts/ci/refactor_boundaries.py"]
+    document["on"] = {name: {"paths": list(required)} for name in ("push", "pull_request")}
     return document
 
 
@@ -44,7 +49,7 @@ def _errors_with_workflow(checker, monkeypatch, document):
         return original_read(root, relative)
 
     monkeypatch.setattr(checker, "_read", read)
-    return checker.check_repo(root=ROOT)
+    return checker.check_workflow_triggers(workflow)
 
 
 @pytest.mark.parametrize("event", ["push", "pull_request"])
@@ -92,3 +97,13 @@ def test_nonbackend_exclusions_keep_both_host_events_covered() -> None:
         document["on"][event]["paths"].append("!docs/**")
 
     assert checker.check_workflow_triggers(yaml.safe_dump(document, sort_keys=False)) == []
+
+
+@pytest.mark.parametrize("event", ["push", "pull_request", "schedule"])
+def test_current_native_host_rejects_automatic_events(event):
+    checker = _load_checker()
+    path = ROOT / ".github/workflows/windows-host-tauri-dev.yml"
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert checker.check_manual_workflow_triggers(yaml.safe_dump(document)) == []
+    document[True][event] = {}
+    assert checker.check_manual_workflow_triggers(yaml.safe_dump(document))

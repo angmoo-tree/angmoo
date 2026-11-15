@@ -2798,7 +2798,7 @@
     },
     {
       "path": "backend/app/runtime/postgresql_installation.py",
-      "sha256": "9d096bef36b1d7d441ada695761d6c867c87a0609f2117ea8b3acb5a351e5e77"
+      "sha256": "2cfd661bd372e2e11fdf7dec101417142d948c444799a7d3e9a03f6c6757b9e1"
     },
     {
       "path": "backend/app/runtime/postgresql_migration.py",
@@ -2815,6 +2815,10 @@
     {
       "path": "backend/app/runtime/postgresql_runtime.py",
       "sha256": "9a8277d755e7cafcdcb13614ab4c7625c9ed085110bbd21d6f44ba98a14fd7b3"
+    },
+    {
+      "path": "backend/app/runtime/postgresql_search_installation.py",
+      "sha256": "8de925a49aa3e4afacff1dc05221709d3bb2cebb5d8e09b50cd3089e80af8b3e"
     },
     {
       "path": "backend/app/runtime/postgresql_server.py",
@@ -3417,6 +3421,10 @@
       "sha256": "8cd8350490d6dee17ec40fe67f6f1a57d9ffee727430b966f88cc698443fd8ec"
     },
     {
+      "path": "backend/tests/chat/test_test_view_isolation.py",
+      "sha256": "c9aa88f9363bbb063d59c91c1e102d20a8e2e71a673994c7d04147e0e0aac319"
+    },
+    {
       "path": "backend/tests/chat/test_thread_repository.py",
       "sha256": "a97c54e07994b419b4135b16ccfe10e012cb2644080ff651cc32d1e6661da0e5"
     },
@@ -3562,7 +3570,7 @@
     },
     {
       "path": "backend/tests/memory/test_embedding_batch_transport.py",
-      "sha256": "5953bcd9dbc2a0629b32fc9f3c73833187b13c998aab5929f1a6ea442d59c34d"
+      "sha256": "014b67f32b104d4151a6d2a7a82be58d955b2419d55067ab014a640274ef182c"
     },
     {
       "path": "backend/tests/memory/test_embedding_keyword_preservation.py",
@@ -4234,7 +4242,7 @@
     },
     {
       "path": "scripts/ci/generate_hybrid_episode_memory_inventory.py",
-      "sha256": "026bf212507ca378e661d7d81e43515f0157cf20277c62a82ae97aadb1f297d6"
+      "sha256": "c2435290a59a82ecebca156dfe2d8dc6b55fefa8a7d0b93c05f4ffe3079396fc"
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
@@ -4259,7 +4267,7 @@
     "local_regression",
     "remote_ci",
     "main_merge",
-    "windows_installer_artifacts",
-    "installed_user_check"
+    "docker_termux_candidates",
+    "docker_termux_update_check"
   ]
 }

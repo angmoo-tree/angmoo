@@ -26,10 +26,11 @@ async def embed_batch(request, *, timeout_seconds, normalize_error):
     started = monotonic()
     observation = EmbeddingTransportObservation(input_count=len(request.texts), dimension=request.output_dimension)
     client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+        api_version="v1beta",
         timeout=max(1, int(timeout_seconds * 1000)), async_client_args=observation.client_args(), retry_options=types.HttpRetryOptions(attempts=1)))
     try:
         # Explicit Content boundaries matter: a list of strings is aggregated
-        # into ONE Content by SDK 2.17.0 for embedding-2.
+        # into ONE Content by the pinned SDK for embedding-2.
         contents = [types.Content(role="user", parts=[types.Part(text=text)]) for text in request.texts]
         async with client.aio as aio:
             async with asyncio.timeout(timeout_seconds):

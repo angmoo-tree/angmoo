@@ -4,17 +4,19 @@ These reviewed evidence references supplement CI; they are never synthesized
 from a green build. Frozen SQLite releases retain their original P5 contract.
 """
 from launcher.termux.payload import require
+from scripts.release.platforms import native_windows, platforms
 
 PLATFORMS={'docker-amd64','docker-arm64','termux-arm64','windows-x64'}
 
-def validate(value,source):
+def validate(value,source, *, version="0.1.4"):
+    legacy = native_windows(version)
     require(isinstance(value,dict) and value.get('source_sha')==source
-        and value.get('source_version')=='0.1.3' and value.get('target_schema')==5,'p5_postgresql_identity_missing')
+        and value.get('source_version')==('0.1.3' if legacy else '0.1.4') and value.get('target_schema')==5,'p5_postgresql_identity_missing')
     cases=value.get('platforms',{})
-    require(isinstance(cases,dict) and set(cases)==PLATFORMS,'p5_postgresql_platforms_missing')
+    require(isinstance(cases,dict) and set(cases)==platforms(version),'p5_postgresql_platforms_missing')
     for platform,row in cases.items():
         require(isinstance(row,dict) and row.get('result')=='PASS'
-            and all(row.get(key) is True for key in ('fresh_install','migration','backup_restore','recovery','current_features'))
+            and all(row.get(key) is True for key in ('fresh_install','migration' if legacy else 'update','backup_restore','recovery','current_features'))
             and isinstance(row.get('evidence'),str) and len(row['evidence'])>=20,'p5_postgresql_platform_incomplete:'+platform)
     idle=value.get('termux_idle',{})
     cpu=idle.get('cpu_one_core_percent')

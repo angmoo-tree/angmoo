@@ -83,7 +83,7 @@ def build_inventory():
                      "accepted_request_cutoff": True, "background_concurrency": 1},
         "files": [record(p) for p in sorted(files)],
         "separate_gates": ["user_acceptance", "local_regression", "remote_ci",
-                           "main_merge", "windows_installer_artifacts", "installed_user_check"],
+                           "main_merge", "docker_termux_candidates", "docker_termux_update_check"],
     }
 
 

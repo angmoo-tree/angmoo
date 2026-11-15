@@ -1,5 +1,7 @@
 # Contributing to Angmoo
 
+> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again. 0.1.5 commands require the corresponding official release to be published.
+
 English | [한국어](CONTRIBUTING.ko.md)
 
 Angmoo is a local AI character social network. Contributions should preserve

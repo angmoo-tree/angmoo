@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      native_windows:
+        description: "Opt into preserved, unsupported Windows native checks"
+        type: boolean
+        default: false
       profile:
         description: "Validation scope / 검증 범위 (full for release candidates)"
         type: choice
@@ -78,7 +82,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # Backend preservation tests read the immutable committed checkpoint.
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.12.5"
           python-version: "3.13"
@@ -149,7 +153,7 @@ jobs:
         working-directory: backend
       - name: Preserve backend preflight identity
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-preflight-${{ github.sha }}-${{ github.run_attempt }}
           path: |
@@ -158,7 +162,7 @@ jobs:
           if-no-files-found: error
 
       - name: Share verified pinned sources with partitions
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: vec1-sources-${{ github.sha }}-${{ github.run_attempt }}
           path: |
@@ -199,7 +203,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.12.5"
           python-version: "3.13"
@@ -209,7 +213,7 @@ jobs:
         working-directory: backend
       - name: Verify current checkout selection
         run: python scripts/ci/check_ci_selection.py
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
           name: vec1-sources-${{ github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/angmoo-vec1-sources
@@ -224,7 +228,7 @@ jobs:
         run: uv run python ../scripts/ci/run_backend_shard.py --index "${{ matrix.shard }}" --source-sha "$TEST_SOURCE_SHA" --impact-plan ../.ci/impact.json
       - name: Preserve every partition result and interruption progress
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-${{ matrix.shard }}
           path: |
@@ -261,7 +265,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
         with:
           version: '0.12.5'
           python-version: '3.13'
@@ -284,7 +288,7 @@ jobs:
           python -c "import xml.etree.ElementTree as E; suites=E.parse('artifacts/postgresql-ci/junit.xml').getroot().iter('testsuite'); values=list(suites); assert sum(int(s.get('tests','0')) for s in values)>0 and sum(int(s.get('skipped','0')) for s in values)==0"
       - name: Keep database and test evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: postgresql-contracts-${{ github.sha }}-${{ github.run_attempt }}
           path: artifacts/postgresql-ci/junit.xml
@@ -310,7 +314,7 @@ jobs:
         fetch-depth: 0
     - name: Verify required results or explicit N/A
       run: python scripts/ci/gate.py --gate backend
-    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
       if: needs.impact.outputs.backend == 'true'
       with:
         pattern: backend-tests-${{ github.sha }}-${{ github.run_attempt }}-shard-*
@@ -322,7 +326,7 @@ jobs:
       run: python scripts/ci/check_backend_shards.py --directory .ci/backend-shard-reports --source-sha "$TEST_SOURCE_SHA" --checkout-sha "$GITHUB_SHA" --impact-plan .ci/impact.json
     - name: Preserve verified aggregate coverage
       if: success() && needs.impact.outputs.backend == 'true'
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
       with:
         name: backend-coverage-${{ github.sha }}-${{ github.run_attempt }}
         path: .ci/backend-shard-reports/backend-shard-coverage.json
@@ -338,10 +342,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: "11.22.0"
           run_install: false
@@ -351,7 +355,7 @@ jobs:
       - name: Install pinned Tauri CLI
         run: npm ci --ignore-scripts
         working-directory: desktop
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.10.8"
           enable-cache: false
@@ -382,15 +386,17 @@ jobs:
     if: needs.impact.outputs.frontend == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    env:
+      ANGMOO_NATIVE_STATIC_TESTS: ${{ needs.impact.outputs.tauri_windows == 'true' && '1' || '0' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0 # Identity parity reads the pinned pre-extraction source.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "22"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: "11.22.0"
           run_install: false
@@ -400,7 +406,7 @@ jobs:
       - name: Install locked browser-test dependencies
         run: pnpm install --frozen-lockfile
         working-directory: browser-tests
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.12.5"
           python-version: "3.13"
@@ -553,11 +559,13 @@ jobs:
         run: pnpm exec playwright test --config playwright.card-upload.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Build Tauri static frontend profile
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build:static
         working-directory: frontend
       - name: Verify bounded Chat and Feed pages in static
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           ANGMOO_RUNTIME_PAGES_STATIC: "1"
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/runtime-pages-static.xml
@@ -574,23 +582,27 @@ jobs:
         run: pnpm exec playwright test --config playwright.daily.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify shared character creator flows in static
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           ANGMOO_CREATOR_STATIC: "1"
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/creator-static.xml
         run: pnpm exec playwright test --config playwright.creator.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify shared daily preparation in static
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           ANGMOO_DAILY_STATIC: "1"
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/daily-static.xml
         run: pnpm exec playwright test --config playwright.daily.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify Tauri static direct-open routes
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/static.xml
         run: pnpm exec playwright test --config playwright.continuity-static.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify shared Memory and native lifecycle boundaries
+        if: needs.impact.outputs.tauri_windows == 'true'
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/lifecycle.xml
         run: pnpm exec playwright test --config playwright.refactor-lifecycle.config.ts --reporter=github,junit
@@ -602,6 +614,7 @@ jobs:
             --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \
             --workdir /work/browser-tests \
             --env CI=true \
+            --env ANGMOO_NATIVE_STATIC_TESTS \
             --env PLAYWRIGHT_JUNIT_OUTPUT_FILE=/work/browser-tests/.ci/visual.xml \
             mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e \
             node ./node_modules/@playwright/test/cli.js test \
@@ -616,7 +629,7 @@ jobs:
           fi
       - name: Preserve browser test reports
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: browser-tests-${{ github.sha }}-${{ github.run_attempt }}
           path: |
@@ -642,7 +655,6 @@ jobs:
     needs:
     - impact
     - frontend-work
-    - tauri-windows
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -666,7 +678,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.12.5"
           python-version: "3.13"

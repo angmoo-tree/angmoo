@@ -20,6 +20,29 @@ def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
 
 
+def test_native_static_is_opt_in_while_web_browser_coverage_remains_required():
+    document = checker.yaml.load((REPO_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"), Loader=checker._UniqueKeyLoader)
+    frontend = document["jobs"]["frontend-work"]
+    steps = {step.get("name"): step for step in frontend["steps"]}
+    for name in (
+        "Build Tauri static frontend profile",
+        "Verify bounded Chat and Feed pages in static",
+        "Verify shared character creator flows in static",
+        "Verify shared daily preparation in static",
+        "Verify Tauri static direct-open routes",
+        "Verify shared Memory and native lifecycle boundaries",
+    ):
+        assert steps[name]["if"] == "needs.impact.outputs.tauri_windows == 'true'"
+    for name in (
+        "Run product-shell browser smoke",
+        "Verify shared SNS and Chat image flows in Next and static",
+        "Verify UI-F production and static product visual corpus",
+    ):
+        assert "if" not in steps[name]
+    assert frontend["env"]["ANGMOO_NATIVE_STATIC_TESTS"] == "${{ needs.impact.outputs.tauri_windows == 'true' && '1' || '0' }}"
+    assert "--env ANGMOO_NATIVE_STATIC_TESTS" in steps["Verify UI-F production and static product visual corpus"]["run"]
+
+
 def test_dependency_review_rejects_policy_drift_and_package_bypasses() -> None:
     document = checker.yaml.load((REPO_ROOT / ".github/workflows/security.yml").read_text(encoding="utf-8"), Loader=checker._UniqueKeyLoader)
     policy = json.loads((REPO_ROOT / "security/license_policy.json").read_text(encoding="utf-8"))
@@ -37,7 +60,7 @@ def test_actions_event_key_is_not_a_yaml_boolean(tmp_path):
     parsed = checker.yaml.load(text, Loader=checker._UniqueKeyLoader)
     assert "on" in parsed and True not in parsed
     broken = tmp_path / "windows-installer.yml"
-    broken.write_text(text.replace("'on':", "true:", 1), encoding="utf-8")
+    broken.write_text(text.replace("on:", "true:", 1), encoding="utf-8")
     assert any("event key" in error for error in checker.check_workflow(broken)[0])
 
 

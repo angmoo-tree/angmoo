@@ -14,6 +14,21 @@ from payload import services_for
 
 
 class PostgreSQLHostTests(unittest.TestCase):
+    def test_retained_014_backend_does_not_receive_the_new_search_prepare_verb(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            marker = home / 'data/runtime/postgresql-runtime.json'
+            marker.parent.mkdir(parents=True)
+            marker.write_text('{}')
+            for version in ('0.1.4', '0.1.5'):
+                with self.subTest(version=version), patch.object(postgres_host, 'common') as common:
+                    install = {'home': str(home), 'data_root': str(home / 'data'), 'manifest': {'version': version}}
+                    postgres_host.initialize('proot-distro', install)
+                    if version == '0.1.4':
+                        common.assert_not_called()
+                    else:
+                        self.assertEqual(common.call_args.args[2], 'prepare-search')
+
     def test_resume_refuses_changed_source_or_image_before_source_stop(self):
         from copy import deepcopy
         manifest={'version':'0.1.4','source_sha':'a'*40,'images':[

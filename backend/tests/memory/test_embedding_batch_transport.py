@@ -1,6 +1,6 @@
 import asyncio
 import json
-import httpx
+import httpx2 as httpx
 import pytest
 from google import genai
 from google.genai import types
@@ -46,6 +46,7 @@ def test_actual_pinned_sdk_sends_one_http_and_independent_contents(transport, co
     response = asyncio.run(GeminiAdapter().embed_batch_measured(
         EmbeddingBatchRequest("synthetic", "gemini-embedding-2", texts, 768), timeout_seconds=30))
     assert len(calls) == 1
+    assert calls[0].url.path.startswith("/v1beta/")
     assert calls[0].url.path.endswith(":batchEmbedContents")
     requests = json.loads(calls[0].content)["requests"]
     assert [entry["content"]["parts"][0]["text"] for entry in requests] == list(texts)

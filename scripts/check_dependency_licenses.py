@@ -23,6 +23,8 @@ PLATFORM_NODE_PREFIXES = (
 PLATFORM_PYTHON_LICENSE_FALLBACKS = {
     "colorama": "OSI Approved :: BSD License",
     "tzdata": "Apache-2.0",
+    # Pyodide-only transitive transport; locked 1.0 wheel metadata and LICENSE reviewed.
+    "httpx2-jsfetch": "BSD-3-Clause",
 }
 TOKEN = re.compile(r"\s*(\(|\)|AND|OR|WITH|[A-Za-z0-9][A-Za-z0-9.+:-]*)")
 

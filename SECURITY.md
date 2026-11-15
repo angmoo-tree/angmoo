@@ -1,5 +1,20 @@
 # Security policy
 
+## Supported delivery from 0.1.5
+
+Docker on Linux amd64/ARM64 (including Windows Docker Desktop) and experimental
+Termux ARM64 remain the supported delivery paths. New native Windows installers
+and official native Windows support end with 0.1.5. Historical binaries, source
+and manual checks are retained; their availability does not promise ongoing
+security updates. Keep existing data and backups. No Windows-native-to-Docker
+migration tool is provided; Docker starts with separate, empty data.
+
+0.1.5부터 Docker와 실험 지원 Termux를 배포 경로로 유지합니다. Windows 네이티브
+설치본의 신규 배포·공식 지원은 중단하며, 기존 파일·코드·수동 검사는 보존합니다.
+기존 설치본을 계속 내려받을 수 있다는 사실이 향후 보안 업데이트를 보장하지는
+않습니다. Windows 설치판에서 Docker로 옮기는 이전 도구는 제공하지 않으므로
+Docker에서는 새 환경으로 시작하며, 기존 데이터와 백업은 따로 보존하세요.
+
 ## Report a vulnerability privately
 
 Use [GitHub private vulnerability reporting](https://github.com/angmoo-tree/angmoo/security/advisories/new).
@@ -31,12 +46,13 @@ application backup. Review their content and license before sharing or importing
 
 ## Updates and recovery
 
-Use the versioned installer or three-service Compose configuration. PostgreSQL
+Use the versioned three-service Compose configuration or Termux launcher. PostgreSQL
 17, pgvector and protected DB credentials are part of the installation. The
 runtime DB role has no superuser, role-creation or schema-creation privileges.
-Docker DB ports are internal; native Windows and Termux DBs bind to loopback.
+Docker DB ports are internal; Termux and historical native Windows DBs bind to loopback.
 Preserve all DB, media, root-secret and credential volumes/files together.
-Official 0.1.3 SQLite input requires the explicit migration tool. Do not apply
+Docker/Termux 0.1.4 → 0.1.5 preserves PostgreSQL data through the normal update path.
+Official 0.1.3 SQLite input uses the historical 0.1.4 migration tool. Do not apply
 historical hosted Alembic revisions or start competing backends on one root.
 
 Before diagnosing an installed Windows payload or database, confirm the actual

@@ -1,17 +1,18 @@
 # Docker로 Angmoo 실행하기
 
+> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다. 0.1.5 명령은 해당 정식 릴리즈 공개 후 사용합니다.
+
 [English](container-release.md) | 한국어
 
-이 안내는 0.1.4 소스의 Linux amd64·ARM64 실행 구성입니다. 아래 파일과 태그는
-정식 공개 후 사용할 수 있습니다. 기존 0.1.3 데이터는 **이미지 교체 전에
-[이전 도구](postgresql-migration.ko.md)를 실행**하세요.
+이 안내는 0.1.5 소스의 Linux amd64·ARM64 실행 구성입니다. 아래 파일과 태그는
+정식 공개 후 사용할 수 있습니다. 기존 0.1.3 데이터는 먼저 [기존 이전 도구](postgresql-migration.ko.md)로 0.1.4에 이전한 뒤 아래 업데이트 절차를 따르세요.
 
 ## 새 설치
 
 Git과 Linux 엔진의 Docker, Compose 2.23.0 이상을 준비합니다.
 
 ```sh
-git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -20,6 +21,36 @@ http://127.0.0.1:3000 을 엽니다. frontend·backend·PostgreSQL 세 서비스
 세 이미지의 버전·소스가 일치해야 합니다. PostgreSQL의 포트는 호스트에 공개하지
 않습니다. DB 데이터·앱 미디어와 비밀값·초기 DB 인증은 각각 영속 볼륨에 보관합니다.
 상세 구조는 [실행 계약](postgresql-runtime.ko.md)을 참고하세요.
+
+## 0.1.4에서 업데이트
+
+0.1.4는 이미 PostgreSQL을 사용합니다. 먼저 [DB·미디어·비밀값 전체를 백업](postgresql-backup.ko.md)하세요. SQLite 이전 도구는 다시 실행하지 않습니다.
+
+`docker compose ls`로 현재 프로젝트와 Compose 파일을 확인합니다. 일반 설치는 `compose.yml`, 0.1.3에서 이전한 설치는 이전 도구가 출력한 `installation/compose.json`을 사용합니다. 기존 파일·프로젝트 이름·데이터 볼륨·포트·비밀값 연결을 유지하세요. 새 프로젝트를 만들면 별도의 빈 환경이 나타납니다.
+
+기존 Compose 파일 옆에 다음 내용을 `angmoo-0.1.5.yml`로 저장합니다.
+
+```yaml
+services:
+  postgres:
+    image: ghcr.io/angmoo-tree/angmoo-postgres:release-v0.1.5
+  backend:
+    image: ghcr.io/angmoo-tree/angmoo-backend:release-v0.1.5
+    environment:
+      ANGMOO_VERSION: 0.1.5
+  frontend:
+    image: ghcr.io/angmoo-tree/angmoo-frontend:release-v0.1.5
+```
+
+아래 `EXISTING_PROJECT`와 `EXISTING_COMPOSE`를 확인한 기존 값으로 바꾸세요. 공백이 있는 경로는 따옴표로 감쌉니다. 첫 명령에서 세 이미지를 모두 받은 뒤 기존 서비스를 종료합니다.
+
+```sh
+docker compose -p EXISTING_PROJECT -f EXISTING_COMPOSE -f angmoo-0.1.5.yml pull
+docker compose -p EXISTING_PROJECT -f EXISTING_COMPOSE stop
+docker compose -p EXISTING_PROJECT -f EXISTING_COMPOSE -f angmoo-0.1.5.yml up -d --wait
+```
+
+이후 시작·재시작에도 두 `-f` 파일을 함께 사용합니다. 기존 주소로 접속해 World·캐릭터·저장 데이터를 확인하고, 확인 전까지 백업과 이전 이미지를 유지하세요. 복귀할 때는 0.1.4 전체 백업과 그 버전의 이미지를 함께 복원합니다. 바뀐 데이터에 구형 이미지만 연결하거나 `down --volumes`·비밀값 삭제를 실행하지 마세요.
 
 ## 상태와 종료
 

@@ -2,6 +2,8 @@
 
 [English](README.md) | 한국어
 
+> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다. 0.1.5 명령은 해당 정식 릴리즈 공개 후 사용합니다.
+
 > **0.1.4 PostgreSQL 전환:** 기존 0.1.3 SQLite 데이터는 [이전 안내](docs/public/postgresql-migration.ko.md)를 따라야 합니다. 이미지만 업데이트하면 이전되지 않으며, 정식 공개된 해당 버전의 Release 파일을 사용하세요.
 
 <p align="center">
@@ -9,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
-    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.4 다운로드" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5">
+    <img src="https://img.shields.io/badge/%EB%A6%B4%EB%A6%AC%EC%8A%A4-0.1.5-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Angmoo 0.1.5 다운로드" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/%EB%9D%BC%EC%9D%B4%EC%84%A0%EC%8A%A4-GPL--3.0--only-2ea44f?style=flat-square" alt="라이선스: GPL-3.0-only" height="20">
@@ -20,7 +22,7 @@
   </a>
 </p>
 
-[0.1.4 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
+[0.1.5 다운로드](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5) · [화면 미리보기](#screenshots) · [지원하는 모델](#supported-models) · [설치 방법](#installation) · [주요 기능](#features) · [사용 가이드](#guide) · [문제 해결](#troubleshooting) · [기여 안내](CONTRIBUTING.ko.md)
 
 > **“내가 원하는 사람들만 있는 SNS가 있다면?”**
 
@@ -81,7 +83,7 @@ Android Chrome의 영어 화면입니다. 사진을 누르면 원본 크기로 �
 
 ## 지원하는 모델
 
-Angmoo 0.1.4에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
+Angmoo 0.1.5에서 연결해 사용할 수 있는 모델과 서비스입니다. 이용하려는 서비스의 API 키를 등록하거나, 지원되는 ComfyUI 서버를 연결해 사용하세요.
 
 | 모델명 | 사용되는 기능 | 연결 서비스 |
 |---|---|---|
@@ -104,14 +106,14 @@ Angmoo 0.1.4에서 연결해 사용할 수 있는 모델과 서비스입니다. 
 
 ## 설치하고 실행하기
 
-Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. Windows는 전용 PostgreSQL·pgvector 자원을 동봉합니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
+Docker·Termux는 frontend·backend·PostgreSQL 세 서비스를 실행합니다. 보존된 Windows 0.1.4 설치본은 전용 PostgreSQL·pgvector 자원을 동봉했습니다. [실행 구조](docs/public/postgresql-runtime.ko.md), [기존 데이터 이전](docs/public/postgresql-migration.ko.md), [백업·복원](docs/public/postgresql-backup.ko.md)을 참고하세요.
 
 Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에서의 이전 검증·공식 지원은 이번 릴리즈에 포함하지 않고 후속으로 둡니다.** ARM64 이미지 지원만으로 Mac의 데이터 이전까지 지원하는 것은 아닙니다.
 
 
 | 환경 | 실행 방법 |
 |---|---|
-| Windows x64 | 설치 EXE를 내려받아 실행 |
+| Windows PC | Docker Desktop; 별도의 새 데이터 |
 | Docker — amd64·ARM64 | 컨테이너를 실행하고 브라우저로 접속 |
 | Android ARM64 — 실험 지원 | Termux·PRoot에서 실행하고 휴대폰 브라우저로 접속 |
 
@@ -119,11 +121,7 @@ Docker 이미지는 Linux amd64·ARM64를 제공합니다. **macOS 호스트에�
 
 ### Windows
 
-1. [공식 Releases](https://github.com/angmoo-tree/angmoo/releases)에서 `Angmoo_0.1.4_x64-setup.exe`를 받습니다.
-2. 설치 안내에 따라 설치합니다.
-3. Angmoo를 실행합니다.
-
-Docker나 Python·Node.js를 별도로 설치할 필요가 없습니다. 설치 프로그램은 한국어와 영어를 지원하며, 설치 안내 언어와 앱에서 사용하는 언어는 별도로 선택할 수 있습니다.
+Docker Desktop을 준비하고 아래 Docker 절차를 사용합니다. 네이티브 0.1.4는 과거 Release에 보존하며, 네이티브 0.1.5 업데이트와 Docker로의 자동 데이터 이전은 제공하지 않습니다.
 
 ### Docker
 
@@ -131,8 +129,10 @@ Git과 Docker Compose 2.22.0 이상이 필요합니다.
 
 다음 명령을 실행합니다.
 
+Docker·Termux 0.1.4를 사용 중이라면 기존 데이터를 유지하는 [Docker 업데이트](docs/public/container-release.ko.md#014에서-업데이트) 또는 [Termux 업데이트](docs/public/termux.ko.md#같은-데이터-home을-유지하며-업데이트)를 따르세요. SQLite 이전을 다시 실행하지 않습니다.
+
 ```sh
-git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -166,7 +166,7 @@ pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 설치기는 실행기와 배포물을 검증·설치한 뒤 PostgreSQL·백엔드·프론트엔드를 시작합니다. 완료되면 **휴대폰 브라우저에서** [http://127.0.0.1:3000](http://127.0.0.1:3000) 주소를 엽니다.
@@ -559,7 +559,7 @@ Angmoo는 아직 발전해 나가는 프로젝트입니다. 아래의 현재 한
 
 | 실행 경로 | 용도 |
 |---|---|
-| Windows 설치 파일 | 설치형 데스크톱 사용. 위의 Windows 설치 절차를 따릅니다 |
+| 기존 Windows 0.1.4 설치 파일 | 과거 배포 기록만 보존. 0.1.5부터 신규 배포·공식 지원 중단 |
 | Docker 브라우저 실행 | 공개 이미지를 브라우저에서 사용. 위의 Docker 실행 절차를 따릅니다 |
 | Docker 기여자 개발 | 현재 소스를 수정하며 frontend·backend 자동 새로고침으로 확인 |
 | Windows Host Tauri 개발 | 기여자 Docker 환경에 연결해 네이티브 화면을 개발. [Windows 호스트 안내 — 영어](docs/public/windows-host-tauri-dev.md) 참고 |

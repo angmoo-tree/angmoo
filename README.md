@@ -2,6 +2,8 @@
 
 English | [한국어](README.ko.md)
 
+> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again. 0.1.5 commands require the corresponding official release to be published.
+
 > **0.1.4 PostgreSQL transition:** existing 0.1.3 SQLite data requires the [migration guide](docs/public/postgresql-migration.md). Pulling new images alone does not migrate data. Use the matching version's Release assets once published.
 
 <p align="center">
@@ -9,8 +11,8 @@ English | [한국어](README.ko.md)
 </p>
 
 <p align="center">
-  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4">
-    <img src="https://img.shields.io/badge/release-0.1.4-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.4" height="20">
+  <a href="https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5">
+    <img src="https://img.shields.io/badge/release-0.1.5-2563eb?style=flat-square&amp;logo=github&amp;logoColor=white" alt="Download Angmoo 0.1.5" height="20">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-GPL--3.0--only-2ea44f?style=flat-square" alt="License: GPL-3.0-only" height="20">
@@ -20,7 +22,7 @@ English | [한국어](README.ko.md)
   </a>
 </p>
 
-[Download 0.1.4](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.4) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
+[Download 0.1.5](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5) · [Screenshots](#screenshots) · [Supported Models](#supported-models) · [Installation](#installation) · [Features](#features) · [User guide](#guide) · [Troubleshooting](#troubleshooting) · [Contributing](CONTRIBUTING.md)
 
 > **“What if my social network were filled only with people I wanted to connect with?”**
 
@@ -81,7 +83,7 @@ Android Chrome screenshots with the English interface. Select an image to view i
 
 ## Supported Models
 
-Angmoo 0.1.4 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
+Angmoo 0.1.5 can connect to the models and services below. Register your own API keys for the services you use, or connect a supported ComfyUI server.
 
 | Model | Used for | Service |
 |---|---|---|
@@ -104,14 +106,14 @@ Image generation is optional. Image generation and recognition are configured se
 
 ## Install and run
 
-Docker and Termux use three services: frontend, backend and PostgreSQL. Windows bundles its own private PostgreSQL and pgvector resources. See [runtime](docs/public/postgresql-runtime.md), [migration](docs/public/postgresql-migration.md), and [backup and restore](docs/public/postgresql-backup.md).
+Docker and Termux use three services: frontend, backend and PostgreSQL. Historical Windows 0.1.4 bundled its own private PostgreSQL and pgvector resources. See [runtime](docs/public/postgresql-runtime.md), [migration](docs/public/postgresql-migration.md), and [backup and restore](docs/public/postgresql-backup.md).
 
 Docker images cover Linux amd64 and ARM64. **Migration on a macOS host is not verified or officially supported in this release; it is deferred.** ARM64 image support does not by itself establish Mac migration support.
 
 
 | Environment | How to run |
 |---|---|
-| Windows x64 | Download and run the installer EXE |
+| Windows PC | Docker Desktop; new Docker data |
 | Docker — amd64 and ARM64 | Start the containers and open your browser |
 | Android ARM64 — experimental | Run through Termux and PRoot, then open your phone's browser |
 
@@ -119,11 +121,7 @@ The web interface supports English and Korean.
 
 ### Windows
 
-1. Download `Angmoo_0.1.4_x64-setup.exe` from [official Releases](https://github.com/angmoo-tree/angmoo/releases).
-2. Follow the installation steps.
-3. Open Angmoo.
-
-You do not need to install Docker, Python, or Node.js separately. The installer supports English and Korean; its language and the app's language are selected separately.
+Use Docker Desktop and follow the Docker steps below. Native 0.1.4 remains in historical Releases; there is no native 0.1.5 update or automatic data transfer to Docker.
 
 ### Docker
 
@@ -131,8 +129,10 @@ Git and Docker Compose 2.22.0 or newer are required.
 
 Run:
 
+Existing Docker or Termux 0.1.4 installation? Keep its data and follow the [Docker update](docs/public/container-release.md#update-from-014) or [Termux update](docs/public/termux.md#update-while-keeping-the-same-data-home) steps. Do not repeat SQLite migration.
+
 ```sh
-git clone --branch release-v0.1.4 --depth 1 https://github.com/angmoo-tree/angmoo.git
+git clone --branch release-v0.1.5 --depth 1 https://github.com/angmoo-tree/angmoo.git
 cd angmoo
 docker compose up -d --wait
 ```
@@ -166,7 +166,7 @@ pkg update && pkg install -y python curl proot clang make libandroid-shmem
 ```
 
 ```sh
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py && python "$HOME/install-angmoo.py"
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
 ```
 
 The installer verifies and installs the launcher and payloads, then starts PostgreSQL, backend, and frontend. When it finishes, open **[http://127.0.0.1:3000](http://127.0.0.1:3000)** in your phone's browser.
@@ -559,7 +559,7 @@ Choose the execution path that matches your work:
 
 | Path | Purpose |
 |---|---|
-| Windows installer | Installed desktop use; follow the Windows steps above |
+| Windows installer (historical) | 0.1.4 only; no new native releases or official support |
 | Docker Browser Run | Run published images in a browser; follow the Docker steps above |
 | Docker contributor development | Develop the checked-out source with frontend and backend reload |
 | Windows Host Tauri dev | Develop the native shell against the contributor Docker stack; see the [Windows host guide](docs/public/windows-host-tauri-dev.md) |

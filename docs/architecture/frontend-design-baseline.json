@@ -325,7 +325,7 @@
       },
       {
         "path": "browser-tests/playwright.visual.config.ts",
-        "sha256": "b7afab914962312b68d300f0008f7c0672897236c9546aaa3e0b6b67e3f0d3cb"
+        "sha256": "abe7a0149e2d1cbd1dc74bea0bce28a67ea62018bd4dd5bc943fef907826c19a"
       }
     ],
     "lockfile_sha256": "63eec1e3d5bac29965e850bf751269c7a8b317929b570205a1e223544f80a470",
@@ -1499,7 +1499,7 @@
       "config": {
         "path": "browser-tests/playwright.visual.config.ts",
         "present": true,
-        "sha256": "b7afab914962312b68d300f0008f7c0672897236c9546aaa3e0b6b67e3f0d3cb"
+        "sha256": "abe7a0149e2d1cbd1dc74bea0bce28a67ea62018bd4dd5bc943fef907826c19a"
       },
       "diff_policy": {
         "max_diff_pixels": 25,

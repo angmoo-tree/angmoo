@@ -3,11 +3,11 @@
   "behavior_critical_file_hashes": [
     {
       "path": "compose.yml",
-      "sha256": "408b7409e7717dc49df5b037aa27ab6b7bf77612f29e46594cfa297b982e6de9"
+      "sha256": "90d18729cf77ecf4eecc478d77831bb9ebbea52093fb250ee404af7a105d7d7d"
     },
     {
       "path": "compose.dev.yml",
-      "sha256": "95e678c3f0db2d1219bb0a44b4030eb1b2bde3daea8adab41a2c6037ad29a149"
+      "sha256": "325c0ffc44249d6db774811db83d0255c2db6f025396620baa2d86a7f6fe247b"
     },
     {
       "path": "compose.ci.yml",
@@ -15,11 +15,11 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "82fa7e3d9881fa73e26d1883d64f61afa41de2f90d084f29729c5b9b045bdef4"
+      "sha256": "76e0038649400ebef1552cadbe67f67bf4abe2bbcd2be3edf091d770450c233e"
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "ea0ac54b150ed52ab4823e79ba6dbdfe7d7a02cdcfd47976e573d5641abd4820"
+      "sha256": "a390ba45cbccb0c9a0ab16e99cc328f613ef8a631603a70e4c31398674d6281c"
     },
     {
       "path": "frontend/next.config.ts",
@@ -41,33 +41,34 @@
   "dependencies": {
     "backend": {
       "dependencies": [
-        "alembic>=1.19.0",
-        "anyio>=4.14.2",
-        "cryptography>=50.0.0",
-        "fastapi>=0.141.1",
-        "google-auth[requests]>=2.40.0",
-        "google-genai>=2.17.0",
+        "alembic>=1.20.1",
+        "anyio>=4.16.0",
+        "cryptography>=50.0.2",
+        "fastapi>=0.162.0",
+        "google-auth[requests]>=2.62.1",
+        "google-genai>=3.3.0",
+        "httpx2>=2.6.0",
         "httpx>=0.28.1,<1",
-        "ladybug==0.19.1",
-        "langchain-core>=1.0.0",
+        "ladybug==0.22.1",
+        "langchain-core>=1.7.6",
         "langcodes>=3.5.1",
         "langgraph-checkpoint-postgres==3.2.0",
-        "langgraph-checkpoint-sqlite>=3.1.2,<4",
-        "langgraph-prebuilt>=1.0.4",
-        "langgraph>=1.0.4",
+        "langgraph-checkpoint-sqlite>=3.1.3,<4",
+        "langgraph-prebuilt>=1.1.1",
+        "langgraph>=1.2.20",
         "pgvector==0.5.1",
         "pillow>=13.0.0",
         "psycopg-pool==3.3.3",
-        "psycopg[binary]==3.3.6",
-        "pydantic-settings>=2.12.0",
-        "pypdf>=6.21.2",
+        "psycopg[binary]==3.3.8",
+        "pydantic-settings>=2.16.2",
+        "pypdf>=6.21.4",
         "python-docx>=1.2.0",
-        "python-multipart>=0.0.30",
-        "sentencepiece>=0.2.1",
-        "sqlalchemy>=2.0.51",
-        "tzdata>=2026.2",
-        "uvicorn>=0.52.1",
-        "websockets>=16.0"
+        "python-multipart>=0.0.33",
+        "sentencepiece>=0.2.3",
+        "sqlalchemy>=2.1.8",
+        "tzdata>=2026.6",
+        "uvicorn>=0.54.0",
+        "websockets>=17.4"
       ],
       "python": ">=3.13",
       "source": "backend/pyproject.toml"
@@ -96,13 +97,13 @@
     ],
     "frontend": {
       "dependencies": {
-        "i18next": "26.4.2",
+        "i18next": "26.7.2",
         "libheif-js": "1.23.5",
-        "lucide-react": "^1.29.0",
-        "next": "16.4.1",
-        "react": "19.2.8",
-        "react-dom": "19.2.8",
-        "react-i18next": "17.0.15"
+        "lucide-react": "^1.69.0",
+        "next": "16.4.5",
+        "react": "19.3.1",
+        "react-dom": "19.3.1",
+        "react-i18next": "17.1.13"
       },
       "dev_dependencies": {
         "@tailwindcss/postcss": "^4",
@@ -213,7 +214,7 @@
       "owner": "ER4",
       "path": "compose.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "408b7409e7717dc49df5b037aa27ab6b7bf77612f29e46594cfa297b982e6de9",
+      "source_sha256": "90d18729cf77ecf4eecc478d77831bb9ebbea52093fb250ee404af7a105d7d7d",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -226,7 +227,7 @@
       "owner": "ER4",
       "path": "compose.dev.yml",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "95e678c3f0db2d1219bb0a44b4030eb1b2bde3daea8adab41a2c6037ad29a149",
+      "source_sha256": "325c0ffc44249d6db774811db83d0255c2db6f025396620baa2d86a7f6fe247b",
       "transition_pr": "ER4 PR J"
     },
     {

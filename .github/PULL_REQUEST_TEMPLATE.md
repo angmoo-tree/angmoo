@@ -16,6 +16,8 @@ omit an Issue.
 
 ## Validation
 
+0.1.5+ supports Docker and experimental Termux. Windows native code/workflows are preserved for explicit manual checks, not required PR or release gates. No Windows → Docker migration tool is provided.
+
 List the exact checks and user scenarios run, their scope, and cases not measured.
 Do not describe checks that were not run as a full-suite pass.
 

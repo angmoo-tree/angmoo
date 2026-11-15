@@ -9,7 +9,9 @@ def package(output,cache):
     output,cache=Path(output),Path(cache);output.parent.mkdir(parents=True,exist_ok=True);cache.mkdir(parents=True,exist_ok=True)
     lock=json.loads((ROOT/'security/psycopg-source-lock.json').read_text())
     pool=next(p for p in tomllib.loads((ROOT/'backend/uv.lock').read_text())['package'] if p['name']=='psycopg-pool')
-    entries=[('psycopg-3.3.6-source.zip',lock['url'],lock['sha256']),
+    packages={p['name']:p['version'] for p in tomllib.loads((ROOT/'backend/uv.lock').read_text())['package']}
+    if any(packages[n]!=lock['version'] for n in ('psycopg','psycopg-binary')):raise ValueError('postgresql_source_version_mismatch')
+    entries=[('psycopg-'+lock['version']+'-source.zip',lock['url'],lock['sha256']),
         ('psycopg-pool-'+pool['version']+'-source.tar.gz',pool['sdist']['url'],pool['sdist']['hash'].removeprefix('sha256:'))]
     files={}
     for name,url,digest in entries:
@@ -18,7 +20,7 @@ def package(output,cache):
             with urllib.request.urlopen(url,timeout=90) as incoming,path.open('xb') as out:shutil.copyfileobj(incoming,out)
         if hashlib.file_digest(path.open('rb'),'sha256').hexdigest()!=digest:raise ValueError('postgresql_source_digest_mismatch')
         files[name]=path.read_bytes()
-    for name,version in (('psycopg','3.3.6'),('psycopg-binary','3.3.6'),('psycopg-pool','3.3.3')):
+    for name,version in (('psycopg',lock['version']),('psycopg-binary',lock['version']),('psycopg-pool',pool['version'])):
         dist=distribution(name)
         if dist.version!=version:raise ValueError('postgresql_license_version_mismatch')
         licenses=[f for f in dist.files if '/licenses/' in str(f)]

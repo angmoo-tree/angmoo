@@ -39,8 +39,8 @@ case "$mode" in
     fi
     python -m app.runtime.product_identity
     prepare_embedded_data_root
+    bootstrap="${ANGMOO_BOOTSTRAP_SECRETS:-/run/angmoo-bootstrap}"
     if [ ! -f "$embedded_data_root/runtime/postgresql-runtime.json" ]; then
-      bootstrap="${ANGMOO_BOOTSTRAP_SECRETS:-/run/angmoo-bootstrap}"
       test -f "$bootstrap/installation-id"
       python -m app.runtime.postgresql_installation initialize \
         --data-root "$embedded_data_root" \
@@ -48,6 +48,8 @@ case "$mode" in
         --owner-dsn-file "$bootstrap/owner-dsn" \
         --runtime-dsn-file "$bootstrap/runtime-dsn"
     fi
+    python -m app.runtime.postgresql_installation prepare-search \
+      --data-root "$embedded_data_root" --owner-dsn-file "$bootstrap/owner-dsn"
     if [ "$(id -u)" = "0" ]; then
       chown -R --no-dereference 10001:10001 "$embedded_data_root"
     fi

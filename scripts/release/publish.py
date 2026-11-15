@@ -98,21 +98,26 @@ def verify_product_checkout(root: Path, source: str) -> Path:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--operation", choices=("verify", "draft", "publish"), default="verify")
-    for field in ("source", "tag", "windows-run", "windows-attempt", "windows-artifact", "candidate-run", "candidate-attempt", "candidate-artifact"):
+    for field in ("source", "tag", "candidate-run", "candidate-attempt", "candidate-artifact"):
         parser.add_argument("--" + field, required=True)
+    for field in ("windows-run", "windows-attempt", "windows-artifact", "assets-run", "assets-attempt", "assets-artifact"):
+        parser.add_argument("--" + field, default="")
     parser.add_argument("--review-ref")
     parser.add_argument("--product-root", type=Path, default=ROOT)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     product_root = verify_product_checkout(args.product_root, args.source)
     output = args.output.resolve()
-    expected = prepare(source=args.source, tag=args.tag, windows_run=args.windows_run, windows_attempt=args.windows_attempt, windows_artifact=args.windows_artifact, candidate_run=args.candidate_run, candidate_attempt=args.candidate_attempt, candidate_artifact=args.candidate_artifact, review_ref=args.review_ref or None, output=output, product_root=product_root)
+    expected = prepare(source=args.source, tag=args.tag, windows_run=args.windows_run, windows_attempt=args.windows_attempt, windows_artifact=args.windows_artifact, candidate_run=args.candidate_run, candidate_attempt=args.candidate_attempt, candidate_artifact=args.candidate_artifact, review_ref=args.review_ref or None, output=output, product_root=product_root, assets_run=args.assets_run, assets_attempt=args.assets_attempt, assets_artifact=args.assets_artifact)
     manifest = read_json(output / "assets/release-manifest.json")
     def authorize():
         github = GitHub()
         github.main_source(args.source)
         require(github.read(f"commits/{args.tag}")["sha"] == args.source, "release_tag_changed")
-        github.run(args.windows_run, args.windows_attempt, workflow="windows-installer.yml", source=args.source)
+        if "windows_producer" in manifest:
+            github.run(args.windows_run, args.windows_attempt, workflow="windows-installer.yml", source=args.source)
+        else:
+            github.run(args.assets_run, args.assets_attempt, workflow="release-assets.yml", source=args.source)
         github.run(args.candidate_run, args.candidate_attempt, workflow="container-candidate.yml", source=args.source)
         for service, digest in manifest["indexes"].items():
             remote = registry_document(f"ghcr.io/{REPOSITORY}-{service}:{args.tag}")

@@ -1,8 +1,10 @@
 # Run Angmoo with ARM64 Termux / PRoot
 
+> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again. 0.1.5 commands require the corresponding official release to be published.
+
 English | [한국어](termux.ko.md)
 
-Version 0.1.4 reuses the validated ARM64 frontend, backend and PostgreSQL image
+Version 0.1.5 reuses the validated ARM64 frontend, backend and PostgreSQL image
 filesystems through PRoot. No Docker daemon is needed on Android. Assets below
 become available after formal publication. Android support remains experimental:
 Linux/QEMU success does not certify screen-off/background behavior. A prior
@@ -15,7 +17,7 @@ Use private Termux storage on an ARM64 device.
 
 ```sh
 pkg update && pkg install -y python curl proot clang make libandroid-shmem
-curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.4/install-termux.py
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py
 python "$HOME/install-angmoo.py"
 ```
 
@@ -37,9 +39,25 @@ Startup orders PostgreSQL readiness, backend, then frontend; shutdown reverses
 that order. App ports default to 8080/3000; DB uses loopback 5432. A foreign
 listener is not adopted or killed. Inspect logs on failure; do not delete data.
 
+## Update while keeping the same data home
+
+For an existing PostgreSQL 0.1.4 installation using the default selection (including the migrated sibling home), first make a [complete backup](postgresql-backup.md), run `angmoo stop`, then run the versioned 0.1.5 installer in **First installation** above. It refreshes the host tools, installs the three matching images and starts the already selected data home. A home selected by the 0.1.3 migration remains selected. Do not run `migrate` again.
+
+For a custom home, use the verified 0.1.5 tools from that installer with the same explicit home for every command:
+
+```sh
+angmoo --home /PRIVATE/EXISTING/HOME stop
+angmoo --home /PRIVATE/EXISTING/HOME install --release 0.1.5
+angmoo --home /PRIVATE/EXISTING/HOME start
+```
+
+Refresh tools without starting the default home by extracting the official `angmoo-termux-tools.zip`, checking its entry in `RELEASE-SHA256SUMS`, and running `sh setup.sh` in the extracted directory. The backup scope is described in the [backup guide](postgresql-backup.md). Keep the existing home, media, secrets and recovery journals; check the same browser address and your saved Worlds after startup.
+
+`Installed; run angmoo start.` means image installation has finished. The standalone `angmoo install` command returns at this point, so run `angmoo start`. The downloaded `install-termux.py` continues to startup automatically: PostgreSQL, backend and frontend readiness can take longer on the first start. Wait for `Ready: http://127.0.0.1:3000` or an explicit error. On failure use `angmoo status` and `angmoo diagnostics`; do not delete or repeatedly reinstall data.
+
 ## Existing 0.1.3 data
 
-Verify/extract the new tools ZIP and checksum, run `sh setup.sh` to update the
+Use the historical **0.1.4** tools ZIP and checksum, run `sh setup.sh` to update the
 launcher, then:
 
 ```sh

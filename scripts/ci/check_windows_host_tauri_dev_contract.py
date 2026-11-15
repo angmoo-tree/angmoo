@@ -17,7 +17,7 @@ def _read(root: Path, relative: str) -> str:
 
 
 def check_workflow_triggers(workflow: str) -> list[str]:
-    """Keep automatic native checks reachable for backend and frontend inputs."""
+    """Preserved pre-0.1.5 automatic trigger contract for historical fixtures."""
     try:
         document = yaml.safe_load(workflow)
     except yaml.YAMLError as exc:
@@ -69,6 +69,16 @@ def check_workflow_triggers(workflow: str) -> list[str]:
     return errors
 
 
+def check_manual_workflow_triggers(workflow: str) -> list[str]:
+    document = yaml.safe_load(workflow)
+    if not isinstance(document, dict):
+        return ["Hosted Windows workflow must be a YAML mapping"]
+    events = document.get("on", document.get(True))
+    if not isinstance(events, dict) or set(events) != {"workflow_dispatch"}:
+        return ["Hosted Windows 0.1.5+ checks must be manual-only"]
+    return []
+
+
 def check_repo(*, root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     try:
@@ -102,7 +112,7 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
     except (OSError, json.JSONDecodeError) as exc:
         return [f"windows host Tauri dev contract cannot be read: {exc}"]
 
-    errors.extend(check_workflow_triggers(workflow))
+    errors.extend(check_manual_workflow_triggers(workflow))
 
     if contract.get("contract_id") != "angmoo-windows-host-tauri-dev-v1":
         errors.append("host Tauri support contract id mismatch")

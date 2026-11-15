@@ -218,7 +218,7 @@ class MemoryPipelineObserver:
             health = {key: dict(value) if isinstance(value, Counter) else value for key, value in state.items()}
         health.update(schema=CAPABILITY, process_instance_id=self.process_id, session_id=manifest["session_id"],
             heartbeat_at=datetime.now(UTC).isoformat(), queued=self.queue.qsize(), source_digest=self.source_digest,
-            transport_support=["google-genai-2.17-httpx-public-hooks"], unsupported_transports=["aiohttp", "other_providers"],
+            transport_support=["google-genai-3.3-httpx2-public-hooks"], unsupported_transports=["aiohttp", "other_providers"],
             writer_support="bounded_sqlite_and_postgresql_helpers", writer_coverage="partial_plain_session_and_external_processes_unobserved")
         try:
             atomic_json(session_path(self.root, manifest["session_id"]) / "memory-pipeline" / f"health-{self.process_id}.json", health)
