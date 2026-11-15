@@ -1,6 +1,7 @@
 from copy import deepcopy
 import pytest
 from scripts.release.postgresql_acceptance import validate,PLATFORMS
+from scripts.release.postgresql_acceptance import accepted_idle, IDLE_CPU_EXCEPTION, IDLE_CPU_APPROVAL
 
 def acceptance():
     return {'source_sha':'a'*40,'source_version':'0.1.3','target_schema':5,
@@ -28,3 +29,26 @@ def test_adoption_failures_cannot_become_publication_ready(fault):
     elif fault=='provider_interval':value['provider_budget']['minimum_interval_seconds']=4
     elif fault=='no_real_ai':value['real_ai']['result']='NOT_RUN'
     with pytest.raises(ValueError,match='p5_postgresql_'):validate(value,'a'*40)
+
+
+def test_idle_exception_is_explicit_and_bound_to_one_reviewed_source():
+    version, source = IDLE_CPU_EXCEPTION
+    idle = {**acceptance()['termux_idle'], 'result': 'ACCEPTED_EXCEPTION',
+            'cpu_one_core_percent': 11, 'approval': IDLE_CPU_APPROVAL}
+    assert accepted_idle(idle, source, version)
+    assert not accepted_idle(idle, 'b' * 40, version)
+    assert not accepted_idle(idle, source, '0.1.4')
+    assert not accepted_idle(idle, source, '0.1.6')
+    for fields in ({'cpu_one_core_percent': 11.01}, {'cpu_one_core_percent': 17.47},
+                   {'cpu_one_core_percent': float('inf')}, {'cpu_one_core_percent': float('nan')},
+                   {'cpu_one_core_percent': True}, {'cpu_one_core_percent': -1},
+                   {'seconds': 599}, {'approval': 'unreviewed'}, {'result': 'PASS'}):
+        assert not accepted_idle({**idle, **fields}, source, version)
+    del idle['approval']
+    assert not accepted_idle(idle, source, version)
+
+
+def test_default_idle_gate_is_not_raised_for_other_candidates():
+    idle = acceptance()['termux_idle']
+    assert accepted_idle({**idle, 'cpu_one_core_percent': 10}, 'a' * 40, '0.1.5')
+    assert not accepted_idle({**idle, 'cpu_one_core_percent': 10.01}, 'a' * 40, '0.1.5')
