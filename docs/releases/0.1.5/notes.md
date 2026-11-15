@@ -1,26 +1,26 @@
 # Angmoo 0.1.5
 
-> Draft, not a published release. Final image identities and Docker/Termux update
-> verification must be completed before publication. No 0.1.5 installation command
-> is available from this draft.
-
-This update refreshes dependencies and focuses new releases on Docker and experimental Termux.
+This release updates dependencies, includes security and compatibility fixes, and focuses supported installation paths on Docker and experimental Termux.
 
 ## What's new
 
-- **Dependencies:** Integrates the five dependency updates, including fixes in pypdf, Next.js, cryptography and websockets, plus Google SDK 3, SQLAlchemy and Ladybug updates. Runtime images also receive Debian security fixes.
-- **Google compatibility:** Preserves the existing API behavior, embedding batches and retry policy while handling the SDK's new HTTP transport errors correctly.
-- **Supported platforms:** Ends new native Windows installers and official native Windows support. Existing code, manual checks and historical releases remain available.
-- **Documentation:** Updates English and Korean installation and contribution guidance to explain supported platforms and data continuity.
+- **Security fixes:** Update PDF handling, the Next.js web runtime, cryptography and WebSocket dependencies, and affected container packages.
+- **Compatibility:** Update Google GenAI 3, SQLAlchemy 2.1, Ladybug 0.22 and related dependencies. Preserve the existing Chat, SNS, memory and relationship workflows with the updated libraries.
+- **PostgreSQL setup:** Create missing search structures during installation or update while preserving existing memories and the restricted serving role.
+- **Documentation:** Clarify the English and Korean installation, update and support guidance, including when a Termux installation is ready to open.
 
 ## Download and update
 
-- **Docker — amd64 and ARM64:** Follow the [container guide](../../public/container-release.md).
-- **Android ARM64 — Termux:** Follow the [Termux guide](../../public/termux.md). Android support remains experimental.
-- **Windows:** Use Docker Desktop to start a fresh Docker installation. No Windows-native-to-Docker migration tool is provided; existing conversations, memories, relationships and settings do not transfer automatically. Keep your original installation and backups if you need those records.
+- **Docker — Linux amd64 and ARM64:** Follow the [installation and update guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/container-release.md). Windows users can use Docker Desktop.
+- **Android ARM64 — Termux:** Follow the [Termux guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/termux.md). Android support remains experimental.
 
-Existing Docker/Termux 0.1.4 installations use a PostgreSQL-to-PostgreSQL update. Back up first and retain the data directory or volume; do not repeat the SQLite migration.
+**Existing Docker and Termux 0.1.4 users:** Back up your installation and follow the PostgreSQL update steps. Keep the existing data directory or Docker volumes. Do not repeat the SQLite migration.
+
+**Native Windows installations:** New native Windows installers and official native support end with 0.1.5. Historical releases, source and manual development workflows remain available. No Windows-native-to-Docker migration tool is provided. Docker starts a separate empty environment; conversations, memories, relationships and settings do not transfer automatically. Preserve your original installation and backups if you need those records.
 
 ## Notes
 
-CI and synthetic provider tests do not establish successful real-device updates. Final candidate validation and versioned download links remain pending. No guarantee is made for every Android device or unlimited workloads.
+- Existing SQLite 0.1.3 installations must first follow the [historical 0.1.4 migration guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.4/docs/public/postgresql-migration.md).
+- See [verification scope and known limits](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md) and [source and release integrity information](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md#source-and-artifact-integrity).
+
+[Full changelog](https://github.com/angmoo-tree/angmoo/compare/release-v0.1.4...release-v0.1.5)

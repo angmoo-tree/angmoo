@@ -1,0 +1,80 @@
+{
+  "schema": "angmoo-p5.v1",
+  "source_sha": "bd932365266aa6d2e0b8813004ebb303b2ae90cc",
+  "images": {
+    "backend/linux/amd64": "sha256:fa824b80a8a4eef1ad5e313882a2871a94a886277e61ed1d48d85a729d8b47b2",
+    "frontend/linux/amd64": "sha256:eb26c3ff428a19190be9a98e2a92309936fbba6162dbe5a398f9263140fa8183",
+    "postgres/linux/amd64": "sha256:d60709e21f1ea7d38cc4130fe4e0418121c83f7075344ebdf2aa312be45364f1",
+    "backend/linux/arm64": "sha256:7b7f1832dc4f6080dea95b22b7db1560160dabc4113327eb660ca90b5db4176a",
+    "frontend/linux/arm64": "sha256:d833eb1ee273ed127caa02f7623261700470ccf72f7168adde98e7c8ee1a6bd8",
+    "postgres/linux/arm64": "sha256:1a1f41b7e08f1abbe827f4b2d70c1fbde98a5e31116e6513270719937d7c0936"
+  },
+  "checks": [
+    {
+      "workflow": "ci.yml",
+      "run_id": "43678625987",
+      "attempt": "1"
+    },
+    {
+      "workflow": "local-smoke.yml",
+      "run_id": "43678625968",
+      "attempt": "1"
+    },
+    {
+      "workflow": "security.yml",
+      "run_id": "43678625940",
+      "attempt": "1"
+    }
+  ],
+  "android_support": "experimental-not-certified",
+  "postgresql_update": {
+    "source_sha": "bd932365266aa6d2e0b8813004ebb303b2ae90cc",
+    "source_version": "0.1.4",
+    "target_schema": 5,
+    "platforms": {
+      "docker-amd64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "update": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Native docker-amd64 Actions: https://github.com/angmoo-tree/angmoo/actions/runs/43680480514; exact candidate artifact 14147598737. Official 0.1.4 synthetic fixture, preserved business data, Unicode write, restart, controlled backend exit and real cold restore; same-source candidate runtime/native feature checks passed. No external AI or PC ARM64 emulation."
+      },
+      "docker-arm64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "update": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Native docker-arm64 Actions: https://github.com/angmoo-tree/angmoo/actions/runs/43680480514; exact candidate artifact 14147598737. Official 0.1.4 synthetic fixture, preserved business data, Unicode write, restart, controlled backend exit and real cold restore; same-source candidate runtime/native feature checks passed. No external AI or PC ARM64 emulation."
+      },
+      "termux-arm64": {
+        "result": "PASS",
+        "fresh_install": true,
+        "update": true,
+        "backup_restore": true,
+        "recovery": true,
+        "current_features": true,
+        "evidence": "Physical ARM64 phone qualification of source bd932365266aa6d2e0b8813004ebb303b2ae90cc: independent 0.1.4 data copy and empty home, 201 unchanged table fingerprints, four derived search tables rebuilt, new write/restart, controlled backend recovery and exact cold restore. Real AI and browser scope in verification.md. Qualification receipt SHA256 4c6f7659fe1e5c6f8d010757c1604951f88e4a65069aad40ccae27d515245c6b."
+      }
+    },
+    "termux_idle": {
+      "result": "ACCEPTED_EXCEPTION",
+      "seconds": 600,
+      "cpu_one_core_percent": 10.746119326687836,
+      "evidence": "Unchanged normal worker topology and same launch after the retained first 600-second observation. Default gate remains 10%; maintainer explicitly accepted up to 11% for this source on 2026-11-15. Stable receipt SHA256 2d909317246a61e05f8f89e66d503a4c9b5b3db7eb404a09ce7d9e2386b76daf; initial receipt SHA256 34ec24a07bc0d91a2d3e8fd9f3bcde023c4e14f74f7b2e528605fe28471407b7.",
+      "approval": "maintainer-2026-11-15-termux-idle-11-percent"
+    },
+    "provider_budget": {
+      "transmissions": 20,
+      "maximum_rolling_60s": 9,
+      "minimum_interval_seconds": 5.201983213424683
+    },
+    "real_ai": {
+      "result": "PASS",
+      "evidence": "Final-source physical Termux copy: Chat, memory storage, embedding, retrieved Chat evidence, one SNS activity and relationship review through shipped owner APIs. Exact outcomes and limits in verification.md. Receipt SHA256 0cfa268e6017a0131fffa57a25d623368490ebf47092ece28a06e70d42e95ed0."
+    }
+  }
+}

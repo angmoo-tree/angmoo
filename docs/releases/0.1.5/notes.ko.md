@@ -1,26 +1,26 @@
 # Angmoo 0.1.5
 
-> 공개 전 초안입니다. 정식 공개 전에 최종 이미지 식별 정보와 Docker·Termux
-> 업데이트 검증을 완료해야 합니다. 이 초안으로 실행할 수 있는 공개 0.1.5
-> 설치 명령은 아직 없습니다.
-
-의존성을 갱신하고 앞으로의 배포 경로를 Docker와 실험 지원 Termux에 집중하는 업데이트입니다.
+의존성을 갱신하고 보안·호환성 수정을 포함하며, 지원 설치 경로를 Docker와 실험 지원 Termux에 집중하는 릴리즈입니다.
 
 ## 주요 변경 사항
 
-- **의존성:** pypdf·Next.js·cryptography·websockets의 수정과 Google SDK 3·SQLAlchemy·Ladybug 갱신을 포함한 의존성 PR 다섯 개를 통합합니다. 실행 이미지의 Debian 보안 패키지도 갱신합니다.
-- **Google 호환성:** 기존 API 동작·임베딩 묶음·재시도 정책을 유지하면서 SDK의 새 HTTP 전송 오류를 올바르게 처리합니다.
-- **지원 환경:** Windows 네이티브 설치본의 신규 배포와 공식 지원을 중단합니다. 기존 코드·수동 검사·과거 릴리즈는 보존합니다.
-- **문서 개선:** 지원 플랫폼과 데이터 연속성을 이해하기 쉽도록 한영 설치·기여 안내를 수정합니다.
+- **보안 수정:** PDF 처리, Next.js 웹 실행 기반, 암호화·WebSocket 의존성과 영향을 받는 컨테이너 패키지를 갱신했습니다.
+- **호환성:** Google GenAI 3, SQLAlchemy 2.1, Ladybug 0.22와 관련 의존성을 갱신했습니다. 갱신된 라이브러리에서 기존 Chat·SNS·기억·관계 처리 방식을 유지하도록 맞췄습니다.
+- **PostgreSQL 설치:** 설치·업데이트 시 누락된 검색 구조를 준비하면서, 기존 기억과 서비스 계정의 제한된 권한을 유지합니다.
+- **문서 개선:** 설치·업데이트·지원 범위와 Termux에서 화면을 열 수 있는 시점을 이해하기 쉽도록 영어·한국어 안내를 정리했습니다.
 
 ## 다운로드와 업데이트
 
-- **Docker — amd64·ARM64:** [컨테이너 안내](../../public/container-release.ko.md)를 따르세요.
-- **Android ARM64 — Termux:** [Termux 안내](../../public/termux.ko.md)를 따르세요. Android는 계속 실험 지원입니다.
-- **Windows:** Docker Desktop으로 새 Docker 환경을 설치하세요. Windows 설치판에서 Docker로 옮기는 데이터 이전 도구는 제공하지 않으며, 기존 대화·기억·관계·설정은 자동으로 이어지지 않습니다. 해당 기록이 필요하면 기존 설치와 백업을 보존하세요.
+- **Docker — Linux amd64·ARM64:** [설치·업데이트 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/container-release.ko.md)를 따르세요. Windows에서는 Docker Desktop을 사용할 수 있습니다.
+- **Android ARM64 — Termux:** [Termux 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/termux.ko.md)를 따르세요. Android는 계속 실험 지원입니다.
 
-기존 Docker·Termux 0.1.4 사용자는 PostgreSQL 데이터 보존 업데이트를 사용합니다. 먼저 백업하고 기존 데이터 디렉터리·볼륨을 유지하세요. SQLite 이전을 다시 수행하지 않습니다.
+**기존 Docker·Termux 0.1.4 사용자:** 먼저 전체 설치 데이터를 백업하고 PostgreSQL 업데이트 절차를 따르세요. 기존 데이터 디렉터리나 Docker 볼륨은 유지하세요. SQLite 이전을 다시 수행하지 않습니다.
+
+**Windows 네이티브 설치판 사용자:** 0.1.5부터 Windows 네이티브 설치본 신규 배포와 공식 지원을 중단합니다. 과거 릴리즈·소스·수동 개발 워크플로는 보존합니다. Windows 설치판에서 Docker로 옮기는 이전 도구는 제공하지 않습니다. Docker는 별도의 빈 환경으로 시작하며 기존 대화·기억·관계·설정은 자동으로 이어지지 않습니다. 해당 기록이 필요하면 원래 설치와 백업을 보존하세요.
 
 ## 안내 사항
 
-CI와 합성 제공처 검사만으로 실기기 업데이트의 성공을 판정하지 않습니다. 최종 후보 검증과 버전별 다운로드 링크 확정은 아직 남아 있습니다. 모든 Android 기기나 무제한 작업량에서의 동작을 보장하지 않습니다.
+- 기존 SQLite 0.1.3 사용자는 먼저 [0.1.4의 이전 안내](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.4/docs/public/postgresql-migration.ko.md)에 따라 이전해야 합니다.
+- [검증 범위와 알려진 제한](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md), [소스·배포 파일 확인 안내](https://github.com/angmoo-tree/angmoo/blob/aa5cbfe665eae47f8e219c86aabd28449bf6111a/docs/releases/0.1.5/verification.md#source-and-artifact-integrity)를 확인하세요.
+
+[전체 변경 내역](https://github.com/angmoo-tree/angmoo/compare/release-v0.1.4...release-v0.1.5)

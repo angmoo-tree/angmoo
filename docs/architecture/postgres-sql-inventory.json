@@ -3988,18 +3988,18 @@
       "markers": {
         "driver_or_url": [
           1,
-          14,
-          16,
-          20,
-          24,
-          28,
-          30
+          32,
+          34,
+          38,
+          41,
+          45,
+          47
         ]
       },
       "owner": "PostgreSQL 0.1.4",
       "path": "scripts/release/postgresql_acceptance.py",
       "removal_condition": "retain active canonical storage, transaction, migration and qualification contracts; remove only with an explicitly validated replacement",
-      "source_sha256": "fb20acc071aff709f1dc0571252b1a9517ee14a35fb76065c84f3714364cef3f",
+      "source_sha256": "d7bc8da8aac849d70dde753c5b5c1c44a32220d2918fbb433e9f4572a235409f",
       "transition_pr": "PostgreSQL adoption PR #418"
     },
     {

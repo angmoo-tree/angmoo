@@ -3810,7 +3810,7 @@
     },
     {
       "path": "backend/tests/memory/test_recall_projection_responsiveness.py",
-      "sha256": "86a41f4217238ccff8e20772bd7b67c2af03026528a7cadec82b8ccd1af67257"
+      "sha256": "c18275a64f97e735e942ab35d4b2f36f91e40d68cd0e242a3d5c1d7c3874d9c2"
     },
     {
       "path": "backend/tests/memory/test_recall_source_batch.py",
