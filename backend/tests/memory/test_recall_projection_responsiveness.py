@@ -92,30 +92,37 @@ def test_transient_checkout_retries_without_a_commit_and_retains_search_fence(ru
     scope, _, _, _, item_id = _accept_chat_memory(runtime_factory)
     projection = EmbeddedMemoryRecallProjection(index=SqliteMemoryRecallIndex(StaticRuntimeDataPath(tmp_path)),
         session_factory=runtime_factory)
-    failed, promoted = Event(), Event()
-    original_page, original_promote = projection._source.item_id_page, projection.index.promote_rebuild
+    failed, retry_allowed, ready = Event(), Event(), Event()
+    original_page, original_advance = projection._source.item_id_page, projection.advance_rebuild
     attempts = []
     def page(**kwargs):
         attempts.append(kwargs)
         if len(attempts) == 1:
             failed.set()
             raise PoolCheckoutTimeout("synthetic pool exhaustion")
+        assert retry_allowed.wait(5), "test did not release the retry after checking the search fence"
         return original_page(**kwargs)
-    def promote(writer):
-        original_promote(writer)
-        promoted.set()
+    def advance(**kwargs):
+        original_advance(**kwargs)
+        # File promotion precedes progress cleanup and the READY transition.
+        # Observe the completed page, rather than racing that transition.
+        if projection.state is MemoryRecallProjectionState.READY:
+            ready.set()
     monkeypatch.setattr(projection._source, "item_id_page", page)
-    monkeypatch.setattr(projection.index, "promote_rebuild", promote)
+    monkeypatch.setattr(projection, "advance_rebuild", advance)
     projection.start()
     try:
         assert failed.wait(2)
         with pytest.raises(MemoryRecallPreparing):
             projection.index.search(MemoryRecallSearchQuery(scope, "약속", (RecallDocumentKind.MEMORY_ITEM,), 10))
-        assert promoted.wait(5), "degraded worker waited forever for another commit"
+        retry_allowed.set()
+        assert ready.wait(5), "degraded worker waited forever for another commit"
+        assert len(attempts) >= 2
         assert all(request["limit"] == 32 for request in attempts)
         assert projection.index.doctor().healthy
         assert projection.state is MemoryRecallProjectionState.READY
     finally:
+        retry_allowed.set()
         projection.stop()
 
 
