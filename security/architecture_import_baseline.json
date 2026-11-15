@@ -1,7 +1,7 @@
 {
-  "edge_count": 7379,
-  "external_import_count": 5028,
-  "module_count": 1682,
+  "edge_count": 7384,
+  "external_import_count": 5032,
+  "module_count": 1683,
   "modules": [
     {
       "external_imports": [],
@@ -23634,6 +23634,7 @@
         "app.runtime.persistence.postgresql_identity",
         "app.runtime.persistence.postgresql_schema",
         "app.runtime.postgresql_migration",
+        "app.runtime.postgresql_search_installation",
         "app.runtime.product_identity"
       ],
       "module": "app.runtime.postgresql_installation",
@@ -23761,6 +23762,23 @@
       ],
       "module": "app.runtime.postgresql_runtime",
       "path": "backend/app/runtime/postgresql_runtime.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json",
+        "pathlib",
+        "sqlalchemy",
+        "sqlalchemy.engine"
+      ],
+      "imports": [
+        "app.database",
+        "app.runtime.memory.postgresql_recall",
+        "app.runtime.memory.sqlite_fts5_recall",
+        "app.runtime.persistence.postgresql_identity"
+      ],
+      "module": "app.runtime.postgresql_search_installation",
+      "path": "backend/app/runtime/postgresql_search_installation.py",
       "wildcard_imports": []
     },
     {

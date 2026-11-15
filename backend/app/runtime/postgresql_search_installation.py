@@ -26,8 +26,7 @@ def initialize_search(engine):
     PostgresMemoryRecallIndex(engine, settings=MemoryRecallIndexSettings.for_representation("episode_v1")).open()
 
 
-def prepare_search(data_root, owner_file):
-    from app.runtime.postgresql_installation import read_dsn, provision_runtime
+def prepare_search(data_root, owner_file, *, read_dsn, provision_runtime):
     root = Path(data_root)
     marker = json.loads((root / "runtime/postgresql-runtime.json").read_text(encoding="utf-8"))
     runtime_dsn = read_dsn(root / "secrets/postgresql-runtime-dsn")

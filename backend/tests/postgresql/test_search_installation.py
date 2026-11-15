@@ -10,8 +10,8 @@ from sqlalchemy import text
 from sqlalchemy.engine import make_url
 
 from app.database import create_database_engine
-from app.runtime.postgresql_installation import initialize, private_file
-from app.runtime.postgresql_search_installation import prepare_search, ready
+from app.runtime.postgresql_installation import initialize, private_file, prepare_search
+from app.runtime.postgresql_search_installation import ready
 from app.runtime.memory.postgresql_recall import PostgresMemoryRecallIndex
 from app.runtime.memory.sqlite_fts5_recall import MemoryRecallIndexSettings
 

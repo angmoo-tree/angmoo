@@ -201,6 +201,11 @@ def initialize(data_root, owner_dsn, runtime_dsn, installation_id):
     return {'state':'initialized','installation_id':installation_id}
 
 
+def prepare_search(data_root, owner_file):
+    from app.runtime.postgresql_search_installation import prepare_search as prepare
+    return prepare(data_root, owner_file, read_dsn=read_dsn, provision_runtime=provision_runtime)
+
+
 def main():
     parser=argparse.ArgumentParser(description='Angmoo PostgreSQL installation / PostgreSQL 설치·데이터 이전')
     parser.add_argument('action',choices=('snapshot','migrate','initialize','prepare-search'))
@@ -217,7 +222,6 @@ def main():
         result={k:result[k] for k in ('schema','migration_id','snapshot_digest')}
     elif args.action=='prepare-search':
         if not all((args.data_root,args.owner_dsn_file)):parser.error('data-root and private owner DSN file required')
-        from app.runtime.postgresql_search_installation import prepare_search
         result=prepare_search(args.data_root,args.owner_dsn_file)
     else:
         if not all((args.data_root,args.owner_dsn_file,args.runtime_dsn_file)):parser.error('data-root and private DSN files required')

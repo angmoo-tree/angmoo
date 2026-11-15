@@ -2798,7 +2798,7 @@
     },
     {
       "path": "backend/app/runtime/postgresql_installation.py",
-      "sha256": "9d096bef36b1d7d441ada695761d6c867c87a0609f2117ea8b3acb5a351e5e77"
+      "sha256": "2cfd661bd372e2e11fdf7dec101417142d948c444799a7d3e9a03f6c6757b9e1"
     },
     {
       "path": "backend/app/runtime/postgresql_migration.py",
@@ -2815,6 +2815,10 @@
     {
       "path": "backend/app/runtime/postgresql_runtime.py",
       "sha256": "9a8277d755e7cafcdcb13614ab4c7625c9ed085110bbd21d6f44ba98a14fd7b3"
+    },
+    {
+      "path": "backend/app/runtime/postgresql_search_installation.py",
+      "sha256": "8de925a49aa3e4afacff1dc05221709d3bb2cebb5d8e09b50cd3089e80af8b3e"
     },
     {
       "path": "backend/app/runtime/postgresql_server.py",
