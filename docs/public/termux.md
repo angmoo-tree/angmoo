@@ -1,19 +1,20 @@
 # Run Angmoo with ARM64 Termux / PRoot
 
-> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again. 0.1.5 commands require the corresponding official release to be published.
+> **0.1.5 support policy:** Docker (Linux amd64/ARM64, including Windows Docker Desktop) and experimental Termux ARM64 remain supported. New Windows native installers and official native support end with 0.1.5. Existing EXEs, source and manual workflows are retained. No Windows-native-to-Docker data migration tool is provided: Docker starts a separate empty environment. Keep your old installation and backup if you need its data. Existing Docker/Termux 0.1.4 users update with their data preserved; do not run the SQLite migration again.
 
 English | [한국어](termux.ko.md)
 
 Version 0.1.5 reuses the validated ARM64 frontend, backend and PostgreSQL image
-filesystems through PRoot. No Docker daemon is needed on Android. Assets below
-become available after formal publication. Android support remains experimental:
+filesystems through PRoot. No Docker daemon is needed on Android. The commands below use the published 0.1.5 release. Android support remains experimental:
 Linux/QEMU success does not certify screen-off/background behavior. A prior
 Samsung Android 14 observation included child-process termination despite a
 wake lock and battery-optimization exclusion.
 
 ## First installation
 
-Use private Termux storage on an ARM64 device.
+Use private Termux storage on an ARM64 device without an existing Angmoo installation.
+Existing 0.1.4 users should go to **Update while keeping the same data home** below.
+Continue to the next command only after the previous one succeeds.
 
 ```sh
 pkg update && pkg install -y python curl proot clang make libandroid-shmem
@@ -41,19 +42,42 @@ listener is not adopted or killed. Inspect logs on failure; do not delete data.
 
 ## Update while keeping the same data home
 
-For an existing PostgreSQL 0.1.4 installation using the default selection (including the migrated sibling home), first make a [complete backup](postgresql-backup.md), run `angmoo stop`, then run the versioned 0.1.5 installer in **First installation** above. It refreshes the host tools, installs the three matching images and starts the already selected data home. A home selected by the 0.1.3 migration remains selected. Do not run `migrate` again.
+### Update the 0.1.4 installation you normally run with `angmoo start`
 
-For a custom home, use the verified 0.1.5 tools from that installer with the same explicit home for every command:
+Use the **same 0.1.5 installer as a new installation**. It preserves the already selected data home and updates the launcher and three images. A PostgreSQL home selected by the 0.1.3 migration remains selected. Do not run `migrate` again.
+
+1. Make a [complete backup](postgresql-backup.md) first. Keep the existing home, media, secrets and recovery journals.
+2. Stop the current services in Termux. Do not continue if this fails.
 
 ```sh
-angmoo --home /PRIVATE/EXISTING/HOME stop
-angmoo --home /PRIVATE/EXISTING/HOME install --release 0.1.5
-angmoo --home /PRIVATE/EXISTING/HOME start
+angmoo stop
 ```
 
-Refresh tools without starting the default home by extracting the official `angmoo-termux-tools.zip`, checking its entry in `RELEASE-SHA256SUMS`, and running `sh setup.sh` in the extracted directory. The backup scope is described in the [backup guide](postgresql-backup.md). Keep the existing home, media, secrets and recovery journals; check the same browser address and your saved Worlds after startup.
+3. Copy and run this single line. The installer **starts Angmoo automatically** after installation.
 
-`Installed; run angmoo start.` means image installation has finished. The standalone `angmoo install` command returns at this point, so run `angmoo start`. The downloaded `install-termux.py` continues to startup automatically: PostgreSQL, backend and frontend readiness can take longer on the first start. Wait for `Ready: http://127.0.0.1:3000` or an explicit error. On failure use `angmoo status` and `angmoo diagnostics`; do not delete or repeatedly reinstall data.
+```sh
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
+```
+
+4. Wait for `Ready` and the address, then open the same address (default http://127.0.0.1:3000). Check your Worlds, characters, memories and conversations. Use `angmoo status` to check status. For later sessions, use `angmoo start` and `angmoo stop`.
+
+`Installed; run angmoo start.` means **image installation is complete**, not that all services are ready. The installer above continues to startup automatically; wait for `Ready` or an explicit error. Download, extraction and service preparation times vary by device and data. Do not run a second installer in parallel. On failure, use `angmoo status` and `angmoo diagnostics`; do not delete data.
+
+### If you explicitly pass `--home` on every command
+
+Do not run the default installer above unchanged. Back up your existing custom home, then follow these steps.
+
+1. Stop it with `angmoo --home /PRIVATE/EXISTING/HOME stop`. Replace `/PRIVATE/EXISTING/HOME` with your actual existing path and quote paths containing spaces.
+2. Download `angmoo-termux-tools.zip` from the [0.1.5 Release](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5) and compare its SHA-256 with its entry in `RELEASE-SHA256SUMS`. If it matches, extract it into a new folder and run `sh setup.sh` there to update only the tools.
+3. Pass the same existing home to every command. Check that each succeeds before continuing.
+
+```sh
+angmoo --home /PRIVATE/EXISTING/HOME install --release 0.1.5
+angmoo --home /PRIVATE/EXISTING/HOME start
+angmoo --home /PRIVATE/EXISTING/HOME status
+```
+
+The standalone `angmoo install` command ends at `Installed; run angmoo start.`, so the following `start` command is required. Once ready, check your data at the existing browser address.
 
 ## Existing 0.1.3 data
 
