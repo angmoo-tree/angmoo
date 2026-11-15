@@ -1,18 +1,19 @@
 # ARM64 Termux / PRoot로 Angmoo 실행하기
 
-> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다. 0.1.5 명령은 해당 정식 릴리즈 공개 후 사용합니다.
+> **0.1.5 지원 정책:** Docker(Linux amd64·ARM64, Windows Docker Desktop 포함)와 실험 지원 Termux ARM64를 유지합니다. 0.1.5부터 Windows 네이티브 설치본 신규 배포·공식 지원을 중단합니다. 기존 EXE·코드·수동 workflow는 보존합니다. Windows 설치판 → Docker 데이터 이전 도구는 제공하지 않으며 Docker는 별도의 빈 환경으로 시작합니다. 기존 데이터가 필요하면 원래 설치와 백업을 보존하세요. Docker·Termux 0.1.4 사용자는 데이터를 보존하여 업데이트하며 SQLite 이전을 다시 실행하지 않습니다.
 
 [English](termux.md) | 한국어
 
 0.1.5는 검증된 ARM64 frontend·backend·PostgreSQL 세 이미지의 파일시스템을
-PRoot로 실행합니다. 휴대폰에 Docker daemon은 필요하지 않습니다. 아래 배포물은
-정식 공개 후 사용할 수 있습니다. Android 지원은 실험적이며 Linux·QEMU 통과가
+PRoot로 실행합니다. 휴대폰에 Docker daemon은 필요하지 않습니다. 아래 명령은 공개된 0.1.5를 사용합니다. Android 지원은 실험적이며 Linux·QEMU 통과가
 화면 꺼짐·절전 중 실행을 보장하지 않습니다. 기존 Samsung Android 14 관측에서는
 wake lock과 배터리 최적화 제외 상태에서도 자식 프로세스가 종료됐습니다.
 
 ## 처음 설치
 
-ARM64 Termux의 비공개 저장소에서 실행합니다.
+기존 Angmoo가 없는 ARM64 Termux의 비공개 저장소에서 실행합니다.
+기존 0.1.4 사용자는 아래 **같은 데이터 home을 유지하며 업데이트**로 이동하세요.
+각 명령이 성공한 뒤 다음 명령을 실행합니다.
 
 ```sh
 pkg update && pkg install -y python curl proot clang make libandroid-shmem
@@ -39,19 +40,42 @@ angmoo restart
 
 ## 같은 데이터 home을 유지하며 업데이트
 
-기본 선택 경로(이전 도구가 선택한 형제 home 포함)를 쓰는 PostgreSQL 0.1.4 사용자는 먼저 [전체 백업](postgresql-backup.ko.md)을 만들고 `angmoo stop`으로 종료한 뒤 위 **처음 설치**의 버전이 고정된 0.1.5 설치기를 실행합니다. 실행 도구와 같은 소스의 세 이미지를 갱신하고 이미 선택된 데이터 home을 시작합니다. 0.1.3 이전 도구가 선택한 home도 유지합니다. `migrate`는 다시 실행하지 않습니다.
+### 평소 `angmoo start`로 실행하는 0.1.4 업데이트
 
-사용자 지정 home은 검증한 0.1.5 실행 도구에서 모든 명령에 같은 기존 경로를 지정합니다.
+새 설치와 **같은 0.1.5 설치기**를 사용합니다. 기존에 선택된 데이터 home을 유지하며 실행 도구와 세 이미지를 갱신합니다. 0.1.3 이전 도구가 선택한 PostgreSQL home도 유지합니다. `migrate`는 다시 실행하지 않습니다.
+
+1. 먼저 [전체 백업](postgresql-backup.ko.md)을 준비합니다. 기존 home·미디어·비밀값·복구 기록을 보존하세요.
+2. Termux에서 다음 명령으로 현재 서비스를 종료합니다. 실패하면 다음 단계로 넘어가지 마세요.
 
 ```sh
-angmoo --home /PRIVATE/EXISTING/HOME stop
-angmoo --home /PRIVATE/EXISTING/HOME install --release 0.1.5
-angmoo --home /PRIVATE/EXISTING/HOME start
+angmoo stop
 ```
 
-기본 home을 시작하지 않고 도구만 갱신하려면 공식 `angmoo-termux-tools.zip`의 해시를 `RELEASE-SHA256SUMS` 항목과 대조한 후 압축을 풀고 그 폴더에서 `sh setup.sh`를 실행합니다. 보존할 항목은 [백업 안내](postgresql-backup.ko.md)를 따르세요. 기존 home·미디어·비밀값·복구 기록을 보존하고, 시작 후 기존 브라우저 주소와 World 데이터를 확인합니다.
+3. 다음 한 줄을 복사해 실행합니다. 설치가 끝나면 **자동으로 시작**합니다.
 
-`Installed; run angmoo start.`는 **이미지 설치 완료**를 뜻합니다. `angmoo install`을 직접 실행했다면 명령이 끝난 것이므로 `angmoo start`를 실행하세요. 내려받은 `install-termux.py`는 이어서 자동 기동합니다. 첫 시작에는 PostgreSQL·backend·frontend 준비에 시간이 더 걸릴 수 있으므로 `Ready: http://127.0.0.1:3000` 또는 명확한 오류가 나올 때까지 기다립니다. 실패하면 `angmoo status`·`angmoo diagnostics`로 확인하며 데이터를 삭제하거나 반복 재설치하지 마세요.
+```sh
+curl --fail --location --proto '=https' --proto-redir '=https' --max-time 120 -o "$HOME/install-angmoo.py" https://github.com/angmoo-tree/angmoo/releases/download/release-v0.1.5/install-termux.py && python "$HOME/install-angmoo.py"
+```
+
+4. `Ready`와 접속 주소가 나오면 기존 주소(기본 http://127.0.0.1:3000)를 열어 World·캐릭터·기억·대화를 확인합니다. 상태는 `angmoo status`로 확인합니다. 이후에는 `angmoo start`로 실행하고 `angmoo stop`으로 종료합니다.
+
+`Installed; run angmoo start.`는 **이미지 설치 완료**이며 전체 준비 완료가 아닙니다. 위 설치기는 이어서 자동 기동하므로 `Ready` 또는 명확한 오류가 나올 때까지 기다리세요. 다운로드·이미지 추출·서비스 준비 시간은 기기와 데이터에 따라 다릅니다. 같은 설치기를 중복 실행하지 마세요. 실패하면 `angmoo status`·`angmoo diagnostics`로 확인하며 데이터를 삭제하지 않습니다.
+
+### 매번 `--home`으로 경로를 직접 지정하는 경우
+
+위 기본 설치기를 그대로 실행하지 말고 기존 사용자 지정 home의 전체 백업을 준비한 뒤 아래 순서로 진행합니다.
+
+1. `angmoo --home /PRIVATE/EXISTING/HOME stop`으로 종료합니다. `/PRIVATE/EXISTING/HOME`은 실제 기존 경로로 바꾸고, 공백이 있으면 따옴표로 감쌉니다.
+2. [0.1.5 Release](https://github.com/angmoo-tree/angmoo/releases/tag/release-v0.1.5)의 `angmoo-termux-tools.zip`을 받아 `RELEASE-SHA256SUMS`의 해당 SHA-256과 대조합니다. 일치하면 새 폴더에 압축을 풀고 그 폴더에서 `sh setup.sh`로 도구만 갱신합니다.
+3. 모든 명령에 같은 기존 경로를 지정합니다. 각 명령의 성공을 확인한 뒤 다음 명령을 실행하세요.
+
+```sh
+angmoo --home /PRIVATE/EXISTING/HOME install --release 0.1.5
+angmoo --home /PRIVATE/EXISTING/HOME start
+angmoo --home /PRIVATE/EXISTING/HOME status
+```
+
+독립 `angmoo install` 명령은 `Installed; run angmoo start.`에서 끝나므로 다음 `start` 명령이 필요합니다. 준비 완료 후 기존 브라우저 주소에서 데이터를 확인하세요.
 
 ## 기존 0.1.3 데이터 이전
 
