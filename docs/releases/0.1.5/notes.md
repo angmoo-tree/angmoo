@@ -11,15 +11,17 @@ This release updates dependencies, includes security and compatibility fixes, an
 
 ## Download and update
 
-- **Docker — Linux amd64 and ARM64:** Follow the [installation and update guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/container-release.md). Windows users can use Docker Desktop.
-- **Android ARM64 — Termux:** Follow the [Termux guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.5/docs/public/termux.md). Android support remains experimental.
+- **New installation:** Follow the [Docker setup](https://github.com/angmoo-tree/angmoo/blob/2f6555b9d52f28b3b723673d49d9f4d4b6ed2588/docs/public/container-release.md#new-installation) or [Termux setup](https://github.com/angmoo-tree/angmoo/blob/2f6555b9d52f28b3b723673d49d9f4d4b6ed2588/docs/public/termux.md#first-installation). Docker supports Linux amd64/ARM64 and Windows Docker Desktop; Android ARM64 support remains experimental.
+- **Update Docker 0.1.4 → 0.1.5:** Back up first, then follow the [update steps](https://github.com/angmoo-tree/angmoo/blob/2f6555b9d52f28b3b723673d49d9f4d4b6ed2588/docs/public/container-release.md#update-from-014) in the **existing installation folder**. Keep the same project, volumes and settings; do not repeat `git clone`. The guide separates standard Git installations from migration-generated Compose configurations.
+- **Update Termux 0.1.4 → 0.1.5:** Back up, run `angmoo stop`, then use the [same official installer as a new installation](https://github.com/angmoo-tree/angmoo/blob/2f6555b9d52f28b3b723673d49d9f4d4b6ed2588/docs/public/termux.md#update-while-keeping-the-same-data-home). It keeps the selected data home and starts automatically. Follow the separate instructions if you explicitly use `--home`. Preparation continues after `Installed; run angmoo start.`; wait for `Ready` and the address.
 
-**Existing Docker and Termux 0.1.4 users:** Back up your installation and follow the PostgreSQL update steps. Keep the existing data directory or Docker volumes. Do not repeat the SQLite migration.
+These PostgreSQL updates do not require SQLite migration. Open the existing address and check your Worlds, characters, memories and conversations.
 
 **Native Windows installations:** New native Windows installers and official native support end with 0.1.5. Historical releases, source and manual development workflows remain available. No Windows-native-to-Docker migration tool is provided. Docker starts a separate empty environment; conversations, memories, relationships and settings do not transfer automatically. Preserve your original installation and backups if you need those records.
 
 ## Notes
 
+- Installation and update instructions were clarified after publication. The links above point to the corrected documentation; the 0.1.5 product tag, images and downloads are unchanged. Attached notes retain their original publication text.
 - Existing SQLite 0.1.3 installations must first follow the [historical 0.1.4 migration guide](https://github.com/angmoo-tree/angmoo/blob/release-v0.1.4/docs/public/postgresql-migration.md).
 - See [verification scope and known limits](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md) and [source and release integrity information](https://github.com/angmoo-tree/angmoo/blob/a1bea4355af19e38b96dab25bc7d13981dd21430/docs/releases/0.1.5/verification.md#source-and-artifact-integrity).
 
