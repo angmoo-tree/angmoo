@@ -23,7 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "i18next": "26.7.2",
+    "i18next": "27.1.1",
     "libheif-js": "1.23.5",
     "lucide-react": "^1.69.0",
     "next": "16.4.5",
