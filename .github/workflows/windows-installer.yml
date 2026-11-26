@@ -69,7 +69,7 @@ jobs:
       with:
         version: 11.22.0
         run_install: false
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+    - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
       with:
         version: 0.12.5
         enable-cache: false
@@ -229,7 +229,7 @@ jobs:
         persist-credentials: false
         repository: ${{ env.SOURCE_REPOSITORY }}
         ref: ${{ env.SOURCE_SHA }}
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+    - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
       with:
         version: 0.12.5
         enable-cache: false
@@ -288,7 +288,7 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with: *id001
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+    - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
       with:
         version: 0.12.5
         enable-cache: false
@@ -347,7 +347,7 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with: *id001
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+    - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
       with:
         version: 0.12.5
         enable-cache: false
@@ -461,7 +461,7 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       with: *id001
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+    - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d
       with:
         version: 0.12.5
         enable-cache: false
